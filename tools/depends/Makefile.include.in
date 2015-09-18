@@ -17,6 +17,7 @@ NATIVEPREFIX=@prefix@/@tool_dir@
 ARCHIVE_TOOL_NATIVE=$(NATIVEPREFIX)/bin/tar
 OS=@platform_os@
 NATIVE_OS=@build_os@
+IOS_SIMULATOR=@use_ios_simulator@
 CROSS_COMPILING=@cross_compiling@
 ARCH_DEFINES=@ARCH_DEFINES@
 NATIVE_ARCH_DEFINES=@NATIVE_ARCH_DEFINES@
