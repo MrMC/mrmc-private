@@ -7,12 +7,18 @@ VERSION=8.33
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
 
+ifeq ($(CPU),arm64)
+  CONFIGURE_FLAGS+=--disable-jit
+else
+  CONFIGURE_FLAGS+=--enable-jit
+endif
+
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; ./configure --prefix=$(PREFIX) \
 	--disable-shared --disable-stack-for-recursion \
 	--enable-pcre8 --disable-pcre16 --disable-pcre32 \
-	--enable-jit --enable-utf --enable-unicode-properties \
-	--enable-newline-is-anycrlf
+	--enable-utf --enable-unicode-properties \
+	--enable-newline-is-anycrlf $(CONFIGURE_FLAGS)
 
 
 LIBDYLIB=$(PLATFORM)/.libs/lib$(LIBNAME).a

@@ -9,6 +9,19 @@ m4_include([../../m4/xbmc_arch.m4])
 m4_include([../../m4/ax_cxx_compile_stdcxx_11.m4])
 AX_CXX_COMPILE_STDCXX_11(,[optional])
 
+# check for not same cpu value
+AC_DEFUN([MC_CHECK_NOT_CPU],
+[
+  AC_MSG_CHECKING([for $2])
+  case $1 in
+    $2*)
+      AC_MSG_ERROR(error in configure of --with-arch=$1)
+      ;;
+    *)
+      AC_MSG_RESULT([$1 is not $2])
+  esac
+])
+
 AC_ARG_WITH([toolchain],
   [AS_HELP_STRING([--with-toolchain],
   [specify path to toolchain. Required for android. Defaults to xcode root for darwin, /usr for linux])],
@@ -210,10 +223,24 @@ case $host in
     esac
     case $host in
       *86*-apple-darwin)
-       # silly user :)
-        if test "$use_cpu" = "armv7"; then
-          AC_MSG_ERROR(error in configure of --with-arch=$use_cpu)
-        fi
+        MC_CHECK_NOT_CPU([$use_cpu], "arm")
+
+        # setup which cpu to use
+        case $host in
+          x86_64-apple-darwin*)
+            if test "x$use_cpu" = "xauto"; then
+              use_cpu=x86_64
+            fi
+          ;;
+          i*86-apple-darwin*)
+            if test "x$use_cpu" = "xauto"; then
+              use_cpu=i386
+            fi
+            platform_ldflags+=" -read_only_relocs suppress"
+         ;;
+          *)
+            AC_MSG_ERROR(error in configure of --with-arch=$use_cpu)
+        esac
 
        # setup which sdk to use
         if test "x$use_ios_simulator" = "xyes"; then
@@ -223,17 +250,7 @@ case $host in
         fi
         use_sdk="${use_sdk:-$found_sdk_version}"
 
-       # find the matching toolchain
-        case $use_xcode in
-          5.* | 5.*.* )
-            use_toolchain="${use_xcodepath}/Toolchains/XcodeDefault.xctoolchain"
-            ;;
-          *)
-            use_toolchain="${use_toolchain:-$use_xcodepath}"
-            ;;
-        esac
-
-       # now that we know which sdk, check for ios simulator again
+        # now that we know which sdk, error check dk_name and set the rests
         if test "x$use_ios_simulator" = "xyes"; then
           case $use_sdk in
             9.0);;
@@ -263,48 +280,28 @@ case $host in
         fi
         use_sdk_path=[`$use_xcodebuild -version -sdk $sdk_name Path`]
 
-        case $host in
-          x86_64-apple-darwin*)
-            if test "x$use_cpu" = "xauto"; then
-              use_cpu=x86_64
-            fi
-          ;;
-          i*86-apple-darwin*)
-            if test "x$use_cpu" = "xauto"; then
-              use_cpu=i386
-              platform_ldflags+=" -read_only_relocs suppress"
-            fi
-          ;;
+        # find the matching toolchain
+        case $use_xcode in
+          5.* | 5.*.* )
+            use_toolchain="${use_xcodepath}/Toolchains/XcodeDefault.xctoolchain"
+            ;;
           *)
-            AC_MSG_ERROR(error in configure of --with-arch=$use_cpu)
+            use_toolchain="${use_toolchain:-$use_xcodepath}"
+            ;;
         esac
       ;;
 
       arm-apple-darwin*)
+        MC_CHECK_NOT_CPU([$use_cpu], "*86")
+
+        # setup which cpu to use
         if test "x$use_cpu" = "xauto"; then
           use_cpu=armv7
         fi
-        if test "$use_cpu" != "armv7"; then
-          AC_MSG_ERROR(error in configure of --with-arch=$use_cpu)
-        fi
 
-        cpu_flags="-mcpu=cortex-a8 -mfpu=neon -ftree-vectorize -mfloat-abi=softfp"
-        cpu_flags+="-pipe -Wno-trigraphs -fpascal-strings -O3 -Wreturn-type"
-        cpu_flags+="-Wunused-variable -fmessage-length=0 -gdwarf-2"
-
+        # setup which sdk to use
         found_sdk_version=[`$use_xcodebuild -showsdks | grep iphoneos | sort | tail -n 1 | awk '{ print $2}'`]
         use_sdk="${use_sdk:-$found_sdk_version}"
-        sdk_name=iphoneos$use_sdk
-        platform_min_version="iphoneos-version-min=8.4"
-        case $use_xcode in
-          3.*.* | 4.* | 4.*.*)
-            use_toolchain="${use_toolchain:-`$use_xcodebuild -version -sdk $sdk_name PlatformPath`/Developer}"
-            ;;
-          *)
-            use_toolchain="${use_xcodepath}/Toolchains/XcodeDefault.xctoolchain"
-            ;;
-        esac
-        
 	case $use_sdk in
           4.*);;
           5.*);;
@@ -316,11 +313,29 @@ case $host in
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
             ;;
         esac
-        use_sdk_path=[`$use_xcodebuild -version -sdk $sdk_name | grep ^Path | awk '{ print $2}'`]
+        sdk_name=iphoneos$use_sdk
+
+        # find the matching toolchain
+        case $use_xcode in
+          3.*.* | 4.* | 4.*.*)
+            use_toolchain="${use_toolchain:-`$use_xcodebuild -version -sdk $sdk_name PlatformPath`/Developer}"
+            ;;
+          *)
+            use_toolchain="${use_xcodepath}/Toolchains/XcodeDefault.xctoolchain"
+            ;;
+        esac
+
         platform_os="ios"
-        platform_cflags+=" $cpu_flags"
+        if [ ! test "x$use_cpu" = "xarm64" ]; then
+          platform_cflags+=" -mcpu=cortex-a8 -mfpu=neon"
+        fi
+        platform_cflags+=" -ftree-vectorize -pipe -Wno-trigraphs -fpascal-strings -O3"
+        platform_cflags+=" -Wreturn-type -Wunused-variable -fmessage-length=0 -gdwarf-2"
+        platform_cflags+=" -Wno-error=implicit-function-declaration"
         platform_ldflags+=" -L$use_sdk_path/usr/lib/system"
         platform_cxxflags+=" $cpu_flags"
+        platform_min_version="iphoneos-version-min=8.4"
+        use_sdk_path=[`$use_xcodebuild -version -sdk $sdk_name | grep ^Path | awk '{ print $2}'`]
       ;;
     esac
     platform_cflags+=" -arch $use_cpu -m$platform_min_version"
