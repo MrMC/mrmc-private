@@ -62,7 +62,7 @@ ifeq ($(OS),ios)
 endif
 
 ifeq ($(OS),osx)
-  ifneq ($(NEVER_YOU_MIND),yes)
+  ifneq ($(IOS_SIMULATOR),yes)
     DEPENDS += libGLEW
   endif
   EXCLUDED_DEPENDS += libcec
