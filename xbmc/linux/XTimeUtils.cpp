@@ -46,7 +46,7 @@
 
 #ifdef TARGET_POSIX
 
-void __stdcall Sleep(uint32_t dwMilliSeconds)
+void Sleep(useconds_t dwMilliSeconds)
 {
 #if _POSIX_PRIORITY_SCHEDULING
   if(dwMilliSeconds == 0)
