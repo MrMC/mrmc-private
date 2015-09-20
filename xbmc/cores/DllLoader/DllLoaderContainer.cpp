@@ -19,10 +19,7 @@
  */
 
 #include "DllLoaderContainer.h"
-#ifdef TARGET_POSIX
 #include "SoLoader.h"
-#endif
-#include "DllLoader.h"
 #include "filesystem/File.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
@@ -136,10 +133,8 @@ LibraryLoader* DllLoaderContainer::FindModule(const char* sName, const char* sCu
   { //  Has a path, just try to load
     return LoadDll(sName, bLoadSymbols);
   }
-#ifdef TARGET_POSIX
   else if (strcmp(sName, "xbmc.so") == 0)
     return LoadDll(sName, bLoadSymbols);
-#endif
   else if (sCurrentDir)
   { // in the path of the parent dll?
     std::string strPath=sCurrentDir;
@@ -232,14 +227,15 @@ LibraryLoader* DllLoaderContainer::LoadDll(const char* sName, bool bLoadSymbols)
 #endif
 
   LibraryLoader* pLoader;
-#ifdef TARGET_POSIX
-  if (strstr(sName, ".so") != NULL || strstr(sName, ".vis") != NULL || strstr(sName, ".xbs") != NULL
-      || strstr(sName, ".mvis") != NULL || strstr(sName, ".dylib") != NULL || strstr(sName, ".framework") != NULL || strstr(sName, ".pvr") != NULL)
-    pLoader = new SoLoader(sName, bLoadSymbols);
-  else
-#endif
-    pLoader = new DllLoader(sName, m_bTrack, false, bLoadSymbols);
-
+  if (strstr(sName, ".so") != NULL ||
+      strstr(sName, ".vis") != NULL ||
+      strstr(sName, ".xbs") != NULL ||
+      strstr(sName, ".mvis") != NULL ||
+      strstr(sName, ".dylib") != NULL ||
+      strstr(sName, ".framework") != NULL ||
+      strstr(sName, ".pvr") != NULL
+      )
+  pLoader = new SoLoader(sName, bLoadSymbols);
   if (!pLoader)
   {
     CLog::Log(LOGERROR, "Unable to create dll %s", sName);
