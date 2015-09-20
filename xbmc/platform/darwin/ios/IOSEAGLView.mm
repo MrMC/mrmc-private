@@ -433,13 +433,14 @@ using namespace KODI::MESSAGING;
   // signal we are dead
   [myLock unlockWithCondition:TRUE];
 
-  // grrr, xbmc does not shutdown properly and leaves
-  // several classes in an indeterminant state, we must exit and
-  // reload Lowtide/AppleTV, boo.
   [g_xbmcController enableScreenSaver];
   [g_xbmcController enableSystemSleep];
-  //[g_xbmcController applicationDidExit];
   exit(0);
+  /*
+  // die the iOS way :)
+  UIApplication *app = [UIApplication sharedApplication];
+  [app performSelector:@selector(suspend)];
+  */
 }
 //--------------------------------------------------------------
 @end
