@@ -145,7 +145,6 @@
 		3802709A13D5A653009493DD /* SystemClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3802709813D5A653009493DD /* SystemClock.cpp */; };
 		384718D81325BA04000486D6 /* XBDateTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 384718D61325BA04000486D6 /* XBDateTime.cpp */; };
 		38F4E57013CCCB3B00664821 /* Implementation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38F4E56C13CCCB3B00664821 /* Implementation.cpp */; };
-		391416BF1B4A3EFA00BBF0AA /* guiinfo in Resources */ = {isa = PBXBuildFile; fileRef = 391416BE1B4A3EFA00BBF0AA /* guiinfo */; };
 		395897151AAD94F00033D27C /* KeyboardLayoutManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 395897131AAD94F00033D27C /* KeyboardLayoutManager.cpp */; };
 		395897161AAD94F00033D27C /* KeyboardLayoutManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 395897131AAD94F00033D27C /* KeyboardLayoutManager.cpp */; };
 		395C29BC1A94733100EBC7AD /* Key.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 395C29BA1A94733100EBC7AD /* Key.cpp */; };
@@ -357,31 +356,22 @@
 		7CCDA1AB192753E30074CF51 /* PltXbox360.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FCB192753E30074CF51 /* PltXbox360.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1AF192753E30074CF51 /* X_MS_MediaReceiverRegistrarSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FCE192753E30074CF51 /* X_MS_MediaReceiverRegistrarSCPD.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1B0192753E30074CF51 /* X_MS_MediaReceiverRegistrarSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FCE192753E30074CF51 /* X_MS_MediaReceiverRegistrarSCPD.cpp */; };
-		7CCDA1B8192753E30074CF51 /* X_MS_MediaReceiverRegistrarSCPD.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FD1192753E30074CF51 /* X_MS_MediaReceiverRegistrarSCPD.xml */; };
 		7CCDA1BA192753E30074CF51 /* AVTransportSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FD3192753E30074CF51 /* AVTransportSCPD.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1BB192753E30074CF51 /* AVTransportSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FD3192753E30074CF51 /* AVTransportSCPD.cpp */; };
-		7CCDA1C3192753E30074CF51 /* AVTransportSCPD.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FD6192753E30074CF51 /* AVTransportSCPD.xml */; };
-		7CCDA1C5192753E30074CF51 /* AVTransportSCPDFull.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FD7192753E30074CF51 /* AVTransportSCPDFull.xml */; };
 		7CCDA1C7192753E30074CF51 /* PltMediaController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FD8192753E30074CF51 /* PltMediaController.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1C8192753E30074CF51 /* PltMediaController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FD8192753E30074CF51 /* PltMediaController.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1D0192753E30074CF51 /* PltMediaRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FDC192753E30074CF51 /* PltMediaRenderer.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1D1192753E30074CF51 /* PltMediaRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FDC192753E30074CF51 /* PltMediaRenderer.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1DB192753E30074CF51 /* RdrConnectionManagerSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FE1192753E30074CF51 /* RdrConnectionManagerSCPD.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1DC192753E30074CF51 /* RdrConnectionManagerSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FE1192753E30074CF51 /* RdrConnectionManagerSCPD.cpp */; };
-		7CCDA1E4192753E30074CF51 /* RdrConnectionManagerSCPD.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FE4192753E30074CF51 /* RdrConnectionManagerSCPD.xml */; };
 		7CCDA1E6192753E30074CF51 /* RenderingControlSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FE5192753E30074CF51 /* RenderingControlSCPD.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1E7192753E30074CF51 /* RenderingControlSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FE5192753E30074CF51 /* RenderingControlSCPD.cpp */; };
-		7CCDA1EF192753E30074CF51 /* RenderingControlSCPD.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FE8192753E30074CF51 /* RenderingControlSCPD.xml */; };
-		7CCDA1F1192753E30074CF51 /* RenderingControlSCPD_Full.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FE9192753E30074CF51 /* RenderingControlSCPD_Full.xml */; };
 		7CCDA1F3192753E30074CF51 /* ConnectionManagerSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FEB192753E30074CF51 /* ConnectionManagerSCPD.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1F4192753E30074CF51 /* ConnectionManagerSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FEB192753E30074CF51 /* ConnectionManagerSCPD.cpp */; };
-		7CCDA1FC192753E30074CF51 /* ConnectionManagerSCPD.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FEE192753E30074CF51 /* ConnectionManagerSCPD.xml */; };
 		7CCDA1FE192753E30074CF51 /* ContentDirectorySCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FEF192753E30074CF51 /* ContentDirectorySCPD.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA1FF192753E30074CF51 /* ContentDirectorySCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FEF192753E30074CF51 /* ContentDirectorySCPD.cpp */; };
-		7CCDA207192753E30074CF51 /* ContentDirectorySCPD.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FF2192753E30074CF51 /* ContentDirectorySCPD.xml */; };
 		7CCDA209192753E30074CF51 /* ContentDirectorywSearchSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FF3192753E30074CF51 /* ContentDirectorywSearchSCPD.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA20A192753E30074CF51 /* ContentDirectorywSearchSCPD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FF3192753E30074CF51 /* ContentDirectorywSearchSCPD.cpp */; };
-		7CCDA212192753E30074CF51 /* ContentDirectorywSearchSCPD.xml in Resources */ = {isa = PBXBuildFile; fileRef = 7CCD9FF6192753E30074CF51 /* ContentDirectorywSearchSCPD.xml */; };
 		7CCDA214192753E30074CF51 /* PltDidl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FF7192753E30074CF51 /* PltDidl.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA215192753E30074CF51 /* PltDidl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FF7192753E30074CF51 /* PltDidl.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA21D192753E30074CF51 /* PltFileMediaServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCD9FFB192753E30074CF51 /* PltFileMediaServer.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
@@ -396,8 +386,6 @@
 		7CCDA242192753E30074CF51 /* PltMediaServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDA00B192753E30074CF51 /* PltMediaServer.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA24A192753E30074CF51 /* PltSyncMediaBrowser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDA00F192753E30074CF51 /* PltSyncMediaBrowser.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
 		7CCDA24B192753E30074CF51 /* PltSyncMediaBrowser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDA00F192753E30074CF51 /* PltSyncMediaBrowser.cpp */; settings = {COMPILER_FLAGS = "-I$SRCROOT/lib/libUPnP/Neptune/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Core -I$SRCROOT/lib/libUPnP/Platinum/Source/Platinum  -I$SRCROOT/lib/libUPnP/Platinum/Source/Extras -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaServer -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaConnect -I$SRCROOT/lib/libUPnP/Platinum/Source/Devices/MediaRenderer"; }; };
-		7CCDA756192756250074CF51 /* README.txt in Resources */ = {isa = PBXBuildFile; fileRef = 7CCDA414192756240074CF51 /* README.txt */; };
-		7CCDA758192756250074CF51 /* SConstruct in Resources */ = {isa = PBXBuildFile; fileRef = 7CCDA415192756240074CF51 /* SConstruct */; };
 		7CCDA779192756250074CF51 /* Neptune.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDA42E192756240074CF51 /* Neptune.cpp */; };
 		7CCDA77A192756250074CF51 /* Neptune.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDA42E192756240074CF51 /* Neptune.cpp */; };
 		7CCDA782192756250074CF51 /* NptAutomaticCleaner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7CCDA433192756240074CF51 /* NptAutomaticCleaner.cpp */; };
@@ -1019,10 +1007,8 @@
 		E46F7C2A0F77217400C25D29 /* Zeroconf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E46F7C280F77217400C25D29 /* Zeroconf.cpp */; };
 		E46F7C2D0F77219700C25D29 /* ZeroconfOSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E46F7C2C0F77219700C25D29 /* ZeroconfOSX.cpp */; };
 		E499108C174D0D2600741B6D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E499108B174D0D2600741B6D /* UIKit.framework */; };
-		E499108E174D0D2600741B6D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E499108D174D0D2600741B6D /* Foundation.framework */; };
 		E4991090174D0D2600741B6D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E499108F174D0D2600741B6D /* CoreGraphics.framework */; };
 		E49910E3174E549400741B6D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E2174E549400741B6D /* QuartzCore.framework */; };
-		E49910E5174E54A100741B6D /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E4174E54A100741B6D /* OpenGLES.framework */; };
 		E49910E7174E54B400741B6D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E6174E54B300741B6D /* CoreMedia.framework */; };
 		E49910E9174E54C300741B6D /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E8174E54C300741B6D /* CoreVideo.framework */; };
 		E49910ED174E54D200741B6D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910EC174E54D200741B6D /* AudioToolbox.framework */; };
@@ -1819,7 +1805,9 @@
 		F5D0E1161BA667650070EE9C /* MessagePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MessagePrinter.cpp */; };
 		F5D0E1181BA88FCC0070EE9C /* cocoa_monitor.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D0E1171BA88FCC0070EE9C /* cocoa_monitor.mm */; };
 		F5D13EBB1BAA178A0075A95C /* DictionaryUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */; };
-		F5D13EBC1BAA178A0075A95C /* DictionaryUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */; };
+		F5D13EBE1BAE388E0075A95C /* DictionaryUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */; };
+		F5D13EC11BAE3D7C0075A95C /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E4174E54A100741B6D /* OpenGLES.framework */; };
+		F5D13EC21BAE3D8F0075A95C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E499108D174D0D2600741B6D /* Foundation.framework */; };
 		F5D8D732102BB3B1004A11AB /* OverlayRendererGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D8D72F102BB3B1004A11AB /* OverlayRendererGL.cpp */; };
 		F5D8D733102BB3B1004A11AB /* OverlayRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D8D731102BB3B1004A11AB /* OverlayRenderer.cpp */; };
 		F5D8EF5B103912A4004A11AB /* DVDSubtitleParserVplayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D8EF59103912A4004A11AB /* DVDSubtitleParserVplayer.cpp */; };
@@ -2174,7 +2162,6 @@
 		38F4E56C13CCCB3B00664821 /* Implementation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Implementation.cpp; sourceTree = "<group>"; };
 		38F4E56D13CCCB3B00664821 /* README.platform */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.platform; sourceTree = "<group>"; };
 		38F4E56E13CCCB3B00664821 /* ThreadLocal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadLocal.h; sourceTree = "<group>"; };
-		391416BE1B4A3EFA00BBF0AA /* guiinfo */ = {isa = PBXFileReference; lastKnownFileType = folder; name = guiinfo; path = xbmc/guiinfo; sourceTree = SOURCE_ROOT; };
 		395897131AAD94F00033D27C /* KeyboardLayoutManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KeyboardLayoutManager.cpp; sourceTree = "<group>"; };
 		395897141AAD94F00033D27C /* KeyboardLayoutManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeyboardLayoutManager.h; sourceTree = "<group>"; };
 		395938731AC28F5A0053A590 /* EmbeddedArt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbeddedArt.h; sourceTree = "<group>"; };
@@ -3761,7 +3748,7 @@
 		E47252BF175115F9001C1AAA /* Codesign.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = Codesign.command; sourceTree = "<group>"; };
 		E4991089174D0D2600741B6D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E499108B174D0D2600741B6D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
-		E499108D174D0D2600741B6D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		E499108D174D0D2600741B6D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E499108F174D0D2600741B6D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-iOS.xcconfig"; sourceTree = "<group>"; };
 		E49910D1174E2E0000741B6D /* App-OSX.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-OSX.xcconfig"; sourceTree = "<group>"; };
@@ -4002,6 +3989,7 @@
 		F5D0E1171BA88FCC0070EE9C /* cocoa_monitor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cocoa_monitor.mm; sourceTree = "<group>"; };
 		F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DictionaryUtils.mm; sourceTree = "<group>"; };
 		F5D13EBA1BAA17890075A95C /* DictionaryUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DictionaryUtils.h; sourceTree = "<group>"; };
+		F5D13EC01BAE3C060075A95C /* GUIInfoLabels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GUIInfoLabels.h; sourceTree = "<group>"; };
 		F5D8D72E102BB3B1004A11AB /* OverlayRendererGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayRendererGL.h; sourceTree = "<group>"; };
 		F5D8D72F102BB3B1004A11AB /* OverlayRendererGL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OverlayRendererGL.cpp; sourceTree = "<group>"; };
 		F5D8D730102BB3B1004A11AB /* OverlayRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OverlayRenderer.h; sourceTree = "<group>"; };
@@ -4108,12 +4096,12 @@
 				E49910ED174E54D200741B6D /* AudioToolbox.framework in Frameworks */,
 				E49910E9174E54C300741B6D /* CoreVideo.framework in Frameworks */,
 				E49910E7174E54B400741B6D /* CoreMedia.framework in Frameworks */,
-				E49910E5174E54A100741B6D /* OpenGLES.framework in Frameworks */,
 				E49910E3174E549400741B6D /* QuartzCore.framework in Frameworks */,
+				F5D13EC21BAE3D8F0075A95C /* Foundation.framework in Frameworks */,
 				E499108C174D0D2600741B6D /* UIKit.framework in Frameworks */,
-				E499108E174D0D2600741B6D /* Foundation.framework in Frameworks */,
 				E4991090174D0D2600741B6D /* CoreGraphics.framework in Frameworks */,
 				DFF0EBB7175281E1002DA3A4 /* CoreAudio.framework in Frameworks */,
+				F5D13EC11BAE3D7C0075A95C /* OpenGLES.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4227,7 +4215,7 @@
 		18B7C3AA1294219F009E7A26 /* guilib */ = {
 			isa = PBXGroup;
 			children = (
-				391416BE1B4A3EFA00BBF0AA /* guiinfo */,
+				F5D13EBF1BAE3C060075A95C /* guiinfo */,
 				18B7C7571294222E009E7A26 /* DDSImage.cpp */,
 				18B7C6F91294222D009E7A26 /* DDSImage.h */,
 				18B7C7581294222E009E7A26 /* DirectXGraphics.cpp */,
@@ -7179,10 +7167,10 @@
 				E49910E6174E54B300741B6D /* CoreMedia.framework */,
 				E49910E8174E54C300741B6D /* CoreVideo.framework */,
 				E49910EE174E54E400741B6D /* ImageIO.framework */,
+				E499108D174D0D2600741B6D /* Foundation.framework */,
 				E49910F4174E550200741B6D /* MediaPlayer.framework */,
 				E49910E4174E54A100741B6D /* OpenGLES.framework */,
 				E499108B174D0D2600741B6D /* UIKit.framework */,
-				E499108D174D0D2600741B6D /* Foundation.framework */,
 				E499108F174D0D2600741B6D /* CoreGraphics.framework */,
 				E49910E2174E549400741B6D /* QuartzCore.framework */,
 			);
@@ -7460,6 +7448,15 @@
 			path = ActiveAE;
 			sourceTree = "<group>";
 		};
+		F5D13EBF1BAE3C060075A95C /* guiinfo */ = {
+			isa = PBXGroup;
+			children = (
+				F5D13EC01BAE3C060075A95C /* GUIInfoLabels.h */,
+			);
+			name = guiinfo;
+			path = xbmc/guiinfo;
+			sourceTree = SOURCE_ROOT;
+		};
 		F5E1050C140AA38000175026 /* peripherals */ = {
 			isa = PBXGroup;
 			children = (
@@ -7654,22 +7651,10 @@
 				DFFA440C19104C1300C3923B /* AppIcon72x72@2x.png in Resources */,
 				DFFA440D19104C1300C3923B /* AppIcon76x76.png in Resources */,
 				DFFA440E19104C1300C3923B /* AppIcon76x76@2x.png in Resources */,
-				7CCDA1B8192753E30074CF51 /* X_MS_MediaReceiverRegistrarSCPD.xml in Resources */,
-				7CCDA1C3192753E30074CF51 /* AVTransportSCPD.xml in Resources */,
 				F59045661BA372A600DB589A /* Default-Landscape-736h@3x.png in Resources */,
 				F59045641BA372A600DB589A /* Default-667h@2x.png in Resources */,
-				7CCDA1C5192753E30074CF51 /* AVTransportSCPDFull.xml in Resources */,
-				7CCDA1E4192753E30074CF51 /* RdrConnectionManagerSCPD.xml in Resources */,
 				F59045671BA372A600DB589A /* InfoPlist.strings in Resources */,
-				7CCDA1EF192753E30074CF51 /* RenderingControlSCPD.xml in Resources */,
-				7CCDA1F1192753E30074CF51 /* RenderingControlSCPD_Full.xml in Resources */,
-				391416BF1B4A3EFA00BBF0AA /* guiinfo in Resources */,
-				7CCDA1FC192753E30074CF51 /* ConnectionManagerSCPD.xml in Resources */,
 				F59045651BA372A600DB589A /* Default-736h@3x.png in Resources */,
-				7CCDA207192753E30074CF51 /* ContentDirectorySCPD.xml in Resources */,
-				7CCDA212192753E30074CF51 /* ContentDirectorywSearchSCPD.xml in Resources */,
-				7CCDA756192756250074CF51 /* README.txt in Resources */,
-				7CCDA758192756250074CF51 /* SConstruct in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -9140,7 +9125,7 @@
 				E4991356174E5EBE00741B6D /* JSONRPC.cpp in Sources */,
 				E4991357174E5EBE00741B6D /* JSONServiceDescription.cpp in Sources */,
 				E4991358174E5EBE00741B6D /* PlayerOperations.cpp in Sources */,
-				F5D13EBC1BAA178A0075A95C /* DictionaryUtils.mm in Sources */,
+				F5D13EBE1BAE388E0075A95C /* DictionaryUtils.mm in Sources */,
 				E4991359174E5EBE00741B6D /* PlaylistOperations.cpp in Sources */,
 				E499135A174E5EBE00741B6D /* PVROperations.cpp in Sources */,
 				E499135B174E5EBE00741B6D /* SystemOperations.cpp in Sources */,
