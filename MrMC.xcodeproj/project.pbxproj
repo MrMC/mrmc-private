@@ -995,8 +995,6 @@
 		E3E920020D8C622A002BF43D /* EventClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E3E920010D8C622A002BF43D /* EventClient.cpp */; };
 		E46F7C2A0F77217400C25D29 /* Zeroconf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E46F7C280F77217400C25D29 /* Zeroconf.cpp */; };
 		E46F7C2D0F77219700C25D29 /* ZeroconfOSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E46F7C2C0F77219700C25D29 /* ZeroconfOSX.cpp */; };
-		E499108C174D0D2600741B6D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E499108B174D0D2600741B6D /* UIKit.framework */; };
-		E4991090174D0D2600741B6D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E499108F174D0D2600741B6D /* CoreGraphics.framework */; };
 		E49910E3174E549400741B6D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E2174E549400741B6D /* QuartzCore.framework */; };
 		E49910E7174E54B400741B6D /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E6174E54B300741B6D /* CoreMedia.framework */; };
 		E49910E9174E54C300741B6D /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E8174E54C300741B6D /* CoreVideo.framework */; };
@@ -1004,7 +1002,6 @@
 		E49910EF174E54E400741B6D /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910EE174E54E400741B6D /* ImageIO.framework */; };
 		E49910F1174E54ED00741B6D /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910F0174E54EC00741B6D /* CFNetwork.framework */; };
 		E49910F3174E54FB00741B6D /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910F2174E54FB00741B6D /* AVFoundation.framework */; };
-		E49910F5174E550200741B6D /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910F4174E550200741B6D /* MediaPlayer.framework */; };
 		E4991179174E5CE000741B6D /* Addon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B49FF11152BFA5001AF8A6 /* Addon.cpp */; };
 		E499117A174E5CE000741B6D /* AddonCallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8482911156CFFE7005A996F /* AddonCallbacks.cpp */; };
 		E499117B174E5CE000741B6D /* AddonCallbacksAddon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8482913156CFFE7005A996F /* AddonCallbacksAddon.cpp */; };
@@ -1786,7 +1783,6 @@
 		F5D0E1181BA88FCC0070EE9C /* cocoa_monitor.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D0E1171BA88FCC0070EE9C /* cocoa_monitor.mm */; };
 		F5D13EBB1BAA178A0075A95C /* DictionaryUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */; };
 		F5D13EBE1BAE388E0075A95C /* DictionaryUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */; };
-		F5D13EC11BAE3D7C0075A95C /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E4174E54A100741B6D /* OpenGLES.framework */; };
 		F5D13EC21BAE3D8F0075A95C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E499108D174D0D2600741B6D /* Foundation.framework */; };
 		F5D13EC31BAF04180075A95C /* EmuFileWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E14E30D25F9F900618676 /* EmuFileWrapper.cpp */; };
 		F5D13EC41BAF04190075A95C /* EmuFileWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E14E30D25F9F900618676 /* EmuFileWrapper.cpp */; };
@@ -4597,9 +4593,7 @@
 		E46F7C2C0F77219700C25D29 /* ZeroconfOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZeroconfOSX.cpp; sourceTree = "<group>"; };
 		E47252BF175115F9001C1AAA /* Codesign.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = Codesign.command; sourceTree = "<group>"; };
 		E4991089174D0D2600741B6D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E499108B174D0D2600741B6D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = Library/Frameworks/UIKit.framework; sourceTree = DEVELOPER_DIR; };
 		E499108D174D0D2600741B6D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		E499108F174D0D2600741B6D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = Library/Frameworks/CoreGraphics.framework; sourceTree = DEVELOPER_DIR; };
 		E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-iOS.xcconfig"; sourceTree = "<group>"; };
 		E49910D1174E2E0000741B6D /* App-OSX.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-OSX.xcconfig"; sourceTree = "<group>"; };
 		E49910D2174E2E0000741B6D /* App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = App.xcconfig; sourceTree = "<group>"; };
@@ -4607,7 +4601,6 @@
 		E49910D4174E2E0000741B6D /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		E49910D5174E2E0000741B6D /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		E49910E2174E549400741B6D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		E49910E4174E54A100741B6D /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		E49910E6174E54B300741B6D /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		E49910E8174E54C300741B6D /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		E49910EA174E54C900741B6D /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
@@ -4615,7 +4608,6 @@
 		E49910EE174E54E400741B6D /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		E49910F0174E54EC00741B6D /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		E49910F2174E54FB00741B6D /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		E49910F4174E550200741B6D /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
 		E4991334174E5E5C00741B6D /* GenericTouchActionHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GenericTouchActionHandler.cpp; sourceTree = "<group>"; };
 		E4991335174E5E5C00741B6D /* GenericTouchActionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GenericTouchActionHandler.h; sourceTree = "<group>"; };
 		E4991340174E5E5C00741B6D /* ITouchActionHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ITouchActionHandler.h; sourceTree = "<group>"; };
@@ -4967,7 +4959,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E49910F5174E550200741B6D /* MediaPlayer.framework in Frameworks */,
 				E49910F3174E54FB00741B6D /* AVFoundation.framework in Frameworks */,
 				E49910F1174E54ED00741B6D /* CFNetwork.framework in Frameworks */,
 				E49910EF174E54E400741B6D /* ImageIO.framework in Frameworks */,
@@ -4976,10 +4967,7 @@
 				E49910E7174E54B400741B6D /* CoreMedia.framework in Frameworks */,
 				E49910E3174E549400741B6D /* QuartzCore.framework in Frameworks */,
 				F5D13EC21BAE3D8F0075A95C /* Foundation.framework in Frameworks */,
-				E499108C174D0D2600741B6D /* UIKit.framework in Frameworks */,
-				E4991090174D0D2600741B6D /* CoreGraphics.framework in Frameworks */,
 				DFF0EBB7175281E1002DA3A4 /* CoreAudio.framework in Frameworks */,
-				F5D13EC11BAE3D7C0075A95C /* OpenGLES.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5009,10 +4997,6 @@
 		08FB7794FE84155DC02AAC07 /* Kodi */ = {
 			isa = PBXGroup;
 			children = (
-				F5D142E31BAF88880075A95C /* MediaPlayer.framework */,
-				F5D142E11BAF88760075A95C /* CoreGraphics.framework */,
-				F5D142DF1BAF88630075A95C /* UIKit.framework */,
-				F5D142DD1BAF882F0075A95C /* OpenGLES.framework */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				08FB779DFE84155DC02AAC07 /* System Libs and Frameworks */,
 				E49910C2174E2CDE00741B6D /* Configurations */,
@@ -8021,6 +8005,10 @@
 		E49910F6174E55D400741B6D /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				F5D142E31BAF88880075A95C /* MediaPlayer.framework */,
+				F5D142E11BAF88760075A95C /* CoreGraphics.framework */,
+				F5D142DF1BAF88630075A95C /* UIKit.framework */,
+				F5D142DD1BAF882F0075A95C /* OpenGLES.framework */,
 				E49910EC174E54D200741B6D /* AudioToolbox.framework */,
 				E49910F2174E54FB00741B6D /* AVFoundation.framework */,
 				E49910F0174E54EC00741B6D /* CFNetwork.framework */,
@@ -8030,10 +8018,6 @@
 				E49910EE174E54E400741B6D /* ImageIO.framework */,
 				E499108D174D0D2600741B6D /* Foundation.framework */,
 				E49910E2174E549400741B6D /* QuartzCore.framework */,
-				E49910F4174E550200741B6D /* MediaPlayer.framework */,
-				E49910E4174E54A100741B6D /* OpenGLES.framework */,
-				E499108B174D0D2600741B6D /* UIKit.framework */,
-				E499108F174D0D2600741B6D /* CoreGraphics.framework */,
 			);
 			name = iOS;
 			sourceTree = "<group>";
