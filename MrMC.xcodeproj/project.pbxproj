@@ -1761,7 +1761,7 @@
 		F5BDB80C120202F400F0B710 /* DVDSubtitleTagSami.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB80B120202F400F0B710 /* DVDSubtitleTagSami.cpp */; };
 		F5BDB81A1202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB8191202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp */; };
 		F5CC228B1814F7E9006B5E91 /* AESinkDARWINOSX.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC22891814F7E9006B5E91 /* AESinkDARWINOSX.cpp */; };
-		F5CC228E1814F7F7006B5E91 /* AESinkDARWINIOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC228C1814F7F7006B5E91 /* AESinkDARWINIOS.cpp */; };
+		F5CC228E1814F7F7006B5E91 /* AESinkDARWINIOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5CC228C1814F7F7006B5E91 /* AESinkDARWINIOS.mm */; };
 		F5CC22DF1814FF3B006B5E91 /* ActiveAE.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC22D31814FF3B006B5E91 /* ActiveAE.cpp */; };
 		F5CC22E01814FF3B006B5E91 /* ActiveAEBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC22D51814FF3B006B5E91 /* ActiveAEBuffer.cpp */; };
 		F5CC22E21814FF3B006B5E91 /* ActiveAESink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC22D91814FF3B006B5E91 /* ActiveAESink.cpp */; };
@@ -2545,7 +2545,7 @@
 		F5D141BE1BAF0B6D0075A95C /* InfoExpression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C1409A7184015C6009F9411 /* InfoExpression.cpp */; };
 		F5D141BF1BAF0B6D0075A95C /* XSLTUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE4E87A517354C4A00D15206 /* XSLTUtils.cpp */; };
 		F5D141C01BAF0B6D0075A95C /* InfoBool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7C15DCBB1892481300FCE564 /* InfoBool.cpp */; };
-		F5D141C11BAF0B6D0075A95C /* AESinkDARWINIOS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC228C1814F7F7006B5E91 /* AESinkDARWINIOS.cpp */; };
+		F5D141C11BAF0B6D0075A95C /* AESinkDARWINIOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5CC228C1814F7F7006B5E91 /* AESinkDARWINIOS.mm */; };
 		F5D141C21BAF0B6D0075A95C /* ActiveAE.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC22D31814FF3B006B5E91 /* ActiveAE.cpp */; };
 		F5D141C31BAF0B6D0075A95C /* ActiveAEBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC22D51814FF3B006B5E91 /* ActiveAEBuffer.cpp */; };
 		F5D141C41BAF0B6D0075A95C /* ActiveAESink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC22D91814FF3B006B5E91 /* ActiveAESink.cpp */; };
@@ -4815,7 +4815,7 @@
 		F5BDB8191202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDSubtitleTagMicroDVD.cpp; sourceTree = "<group>"; };
 		F5CC22891814F7E9006B5E91 /* AESinkDARWINOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AESinkDARWINOSX.cpp; path = Sinks/AESinkDARWINOSX.cpp; sourceTree = "<group>"; };
 		F5CC228A1814F7E9006B5E91 /* AESinkDARWINOSX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AESinkDARWINOSX.h; path = Sinks/AESinkDARWINOSX.h; sourceTree = "<group>"; };
-		F5CC228C1814F7F7006B5E91 /* AESinkDARWINIOS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AESinkDARWINIOS.cpp; path = Sinks/AESinkDARWINIOS.cpp; sourceTree = "<group>"; };
+		F5CC228C1814F7F7006B5E91 /* AESinkDARWINIOS.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AESinkDARWINIOS.mm; path = Sinks/AESinkDARWINIOS.mm; sourceTree = "<group>"; };
 		F5CC228D1814F7F7006B5E91 /* AESinkDARWINIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AESinkDARWINIOS.h; path = Sinks/AESinkDARWINIOS.h; sourceTree = "<group>"; };
 		F5CC22D31814FF3B006B5E91 /* ActiveAE.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ActiveAE.cpp; sourceTree = "<group>"; };
 		F5CC22D41814FF3B006B5E91 /* ActiveAE.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActiveAE.h; sourceTree = "<group>"; };
@@ -8281,7 +8281,7 @@
 			isa = PBXGroup;
 			children = (
 				7C8AE7FE189DE3A700C33786 /* osx */,
-				F5CC228C1814F7F7006B5E91 /* AESinkDARWINIOS.cpp */,
+				F5CC228C1814F7F7006B5E91 /* AESinkDARWINIOS.mm */,
 				F5CC228D1814F7F7006B5E91 /* AESinkDARWINIOS.h */,
 				F5CC22891814F7E9006B5E91 /* AESinkDARWINOSX.cpp */,
 				F5CC228A1814F7E9006B5E91 /* AESinkDARWINOSX.h */,
@@ -10481,7 +10481,7 @@
 				7C1409AA184015C9009F9411 /* InfoExpression.cpp in Sources */,
 				AE4E87A717354C4A00D15206 /* XSLTUtils.cpp in Sources */,
 				7C15DCBD1892481400FCE564 /* InfoBool.cpp in Sources */,
-				F5CC228E1814F7F7006B5E91 /* AESinkDARWINIOS.cpp in Sources */,
+				F5CC228E1814F7F7006B5E91 /* AESinkDARWINIOS.mm in Sources */,
 				F5CC22DF1814FF3B006B5E91 /* ActiveAE.cpp in Sources */,
 				F5CC22E01814FF3B006B5E91 /* ActiveAEBuffer.cpp in Sources */,
 				F5CC22E21814FF3B006B5E91 /* ActiveAESink.cpp in Sources */,
@@ -11372,7 +11372,7 @@
 				F5D141BE1BAF0B6D0075A95C /* InfoExpression.cpp in Sources */,
 				F5D141BF1BAF0B6D0075A95C /* XSLTUtils.cpp in Sources */,
 				F5D141C01BAF0B6D0075A95C /* InfoBool.cpp in Sources */,
-				F5D141C11BAF0B6D0075A95C /* AESinkDARWINIOS.cpp in Sources */,
+				F5D141C11BAF0B6D0075A95C /* AESinkDARWINIOS.mm in Sources */,
 				F5D141C21BAF0B6D0075A95C /* ActiveAE.cpp in Sources */,
 				F5D141C31BAF0B6D0075A95C /* ActiveAEBuffer.cpp in Sources */,
 				F5D141C41BAF0B6D0075A95C /* ActiveAESink.cpp in Sources */,
