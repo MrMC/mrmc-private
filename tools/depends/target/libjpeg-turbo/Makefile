@@ -6,9 +6,16 @@ LIBNAME=libjpeg-turbo
 VERSION=1.2.0
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
+
+# disable asm if under the simulator, xcode linker gets angry
+ifeq ($(USE_SIMULATOR),yes)
+CONFIGURE_EXTRA = --without-simd
+endif
+
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
-          ./configure --prefix=$(PREFIX) --with-jpeg8 --disable-shared
+          ./configure --prefix=$(PREFIX) --disable-shared \
+          --with-jpeg8 $(CONFIGURE_EXTRA)
 
 export CFLAGS=-O3
 

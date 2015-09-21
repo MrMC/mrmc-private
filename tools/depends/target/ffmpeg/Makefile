@@ -46,6 +46,10 @@ ifeq ($(OS), ios)
   ffmpg_config += --target-os=darwin
 endif
 ifeq ($(OS), osx)
+  # disable asm if under the simulator, xcode linker gets angry
+  ifeq ($(USE_SIMULATOR),yes)
+    ffmpg_config += --disable-yasm
+  endif
   ffmpg_config += --disable-outdev=sdl
   ffmpg_config += --disable-decoder=mpeg_xvmc --enable-vda --disable-crystalhd --disable-videotoolbox
   ffmpg_config += --target-os=darwin
