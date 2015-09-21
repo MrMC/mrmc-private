@@ -314,6 +314,49 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     CGenericTouchActionHandler::GetInstance().OnSingleTouchStart(point.x, point.y);
   }
 }
+-(void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
+{
+  UIPress *anyPress = [presses anyObject];
+
+  XBMC_Event newEvent = {0};
+
+  switch(anyPress.type)
+  {
+    case UIPressTypeUpArrow:
+      newEvent.key.keysym.sym = XBMCK_UP;
+      newEvent.key.keysym.unicode = XBMCK_UP;
+      break;
+    case UIPressTypeDownArrow:
+      newEvent.key.keysym.sym = XBMCK_DOWN;
+      newEvent.key.keysym.unicode = XBMCK_DOWN;
+      break;
+    case UIPressTypeLeftArrow:
+      newEvent.key.keysym.sym = XBMCK_LEFT;
+      newEvent.key.keysym.unicode = XBMCK_LEFT;
+      break;
+    case UIPressTypeRightArrow:
+      newEvent.key.keysym.sym = XBMCK_RIGHT;
+      newEvent.key.keysym.unicode = XBMCK_RIGHT;
+      break;
+    case UIPressTypeSelect:
+      newEvent.key.keysym.sym = XBMCK_RETURN;
+      newEvent.key.keysym.unicode = XBMCK_RETURN;
+      break;
+    case UIPressTypeMenu:
+      newEvent.key.keysym.sym = XBMCK_ESCAPE;
+      newEvent.key.keysym.unicode = XBMCK_ESCAPE;
+      break;
+    case UIPressTypePlayPause:
+      newEvent.key.keysym.sym = XBMCK_MEDIA_PLAY_PAUSE;
+      newEvent.key.keysym.unicode = XBMCK_MEDIA_PLAY_PAUSE;
+      break;
+    default:
+      break;
+  }
+  // handle press event
+  if (newEvent.key.keysym.sym)
+    [self sendKeypressEvent:newEvent];
+}
 //--------------------------------------------------------------
 - (IBAction)handlePan:(UIPanGestureRecognizer *)sender 
 {
