@@ -62,12 +62,6 @@ AC_ARG_WITH([sdk],
   [spcify sdk platform version (optional for android). default is android-17])],
   [use_sdk=$withval])
 
-AC_ARG_ENABLE([ios_simulator],
-  [AS_HELP_STRING([--enable-ios_simulator],
-  [enable simulator components. default is no])],
-  [use_ios_simulator=$enableval],
-  [use_ios_simulator=no])
-
 AC_ARG_ENABLE([gplv3],
   [AS_HELP_STRING([--enable-gplv3],
   [enable gplv3 components. default is yes])],
@@ -111,6 +105,7 @@ passed_ldflags="$LDFLAGS"
 passed_cxxflags="$CXXFLAGS"
 platform_cc=gcc
 platform_cxx=g++
+use_simulator=no
 
 case $build in
   arm*-*-linux-gnu*|arm*-*-linux-uclibc*)
@@ -243,25 +238,38 @@ case $host in
         esac
 
        # setup which sdk to use
-        if test "x$use_ios_simulator" = "xyes"; then
+        if test "$use_platform" = "ios-simulator"; then
           found_sdk_version=[`$use_xcodebuild -showsdks | grep iphonesimulator | sort | tail -n 1 | awk '{ print $4}'`]
+        elif test "$use_platform" = "tvos-simulator"; then
+          found_sdk_version=[`$use_xcodebuild -showsdks | grep appletvsimulator | sort | tail -n 1 | awk '{ print $4}'`]
         else
           found_sdk_version=[`$use_xcodebuild -showsdks | sed -E -n 's/.*macosx([0-9]+)\.([0-9]+)/\1.\2/p' | sort  -n -t. -k1,1 -k2,2 | tail -n 1`]
         fi
         use_sdk="${use_sdk:-$found_sdk_version}"
 
         # now that we know which sdk, error check dk_name and set the rests
-        if test "x$use_ios_simulator" = "xyes"; then
+        if test "$use_platform" = "ios-simulator"; then
           case $use_sdk in
             9.0);;
             9.1);;
             *)
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
           esac
+          use_simulator=yes
           sdk_name=iphonesimulator$use_sdk
-          platform_os="osx"
           platform_cflags+=" -Wno-error=implicit-function-declaration"
-          platform_min_version="iphoneos-version-min=8.4"
+          platform_min_version="ios-simulator-version-min=8.4"
+        elif test "$use_platform" = "tvos-simulator"; then
+          case $use_sdk in
+            9.0);;
+            9.1);;
+            *)
+              AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
+          esac
+          use_simulator=yes
+          sdk_name=appletvsimulator$use_sdk
+          platform_cflags+=" -Wno-error=implicit-function-declaration"
+          platform_min_version="tvos-simulator-version-min=9.0"
         else
           case $use_sdk in
             10.5);;
@@ -275,10 +283,10 @@ case $host in
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
           esac
           sdk_name=macosx$use_sdk
-          platform_os="osx"
           platform_min_version="macosx-version-min=10.8"
         fi
         use_sdk_path=[`$use_xcodebuild -version -sdk $sdk_name Path`]
+        platform_os="osx"
 
         # find the matching toolchain
         case $use_xcode in
@@ -553,7 +561,7 @@ AC_SUBST(need_libiconv)
 AC_SUBST(use_gplv3)
 AC_SUBST(has_libcrystax)
 AC_SUBST(use_xcode)
-AC_SUBST(use_ios_simulator)
+AC_SUBST(use_simulator)
 
 AC_OUTPUT
 echo -e "toolchain:\t $use_toolchain"
@@ -567,7 +575,7 @@ if test "$platform_os" == "ios"; then
   simulator_sdk_path=[`$use_xcodebuild -version -sdk iphonesimulator$use_sdk | grep ^Path | awk '{ print $2}'`]
   cp -vf $simulator_sdk_path/usr/include/crt_externs.h $prefix/$deps_dir/include
 fi
-echo -e "ios simulator:\t $use_ios_simulator"
+echo -e "use simulator:\t $use_simulator"
 
 if test "x$has_localeconv" == "xno" && test "$platform_os" == "android"; then
   cp -vf target/android-libc-replacements/locale.h $prefix/$deps_dir/include/

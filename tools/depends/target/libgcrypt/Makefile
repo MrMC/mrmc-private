@@ -31,6 +31,9 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	#cd $(PLATFORM); patch -p0 < ../02-armasm.patch
 	cd $(PLATFORM); patch -p0 < ../03-gcrypt-android-select.patch
 	#cd $(PLATFORM); patch -p0 < ../04-oflagmunging.patch
+	# do not build the tests or docs
+	sed -ie "s|doc tests||" "$(PLATFORM)/Makefile.am";
+	cd $(PLATFORM); $(AUTORECONF) -vif
 	cd $(PLATFORM); $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)

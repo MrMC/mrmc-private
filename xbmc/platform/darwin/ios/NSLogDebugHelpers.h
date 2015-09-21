@@ -1,5 +1,5 @@
 /*
- *  XBMCDebugHelpers.h
+ *  NSLogDebugHelpers.h
  *  xbmclauncher
  *
  *      Created by Stephan Diederich on 21.09.08.

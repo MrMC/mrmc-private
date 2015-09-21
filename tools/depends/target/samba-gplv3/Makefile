@@ -57,6 +57,14 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 ifeq ($(OS),android)
 	cd $(PLATFORM); patch -p0 < ../samba_android.patch
 endif
+	# remove fork/execX/system, it is not used for client
+	sed -ie "s|fork()|(pid_t)-1|" "$(PLATFORM)/lib/util/system.c"
+	sed -ie "s|execv|//execv|" "$(PLATFORM)/source3/lib/system.c"
+	sed -ie "s|execl(|(|" "$(PLATFORM)/source3/lib/smbrun.c"
+	sed -ie "s|system(cmd)|-1|" "$(PLATFORM)/source3/lib/util.c"
+	sed -ie "s|fork()|-1|" "$(PLATFORM)/source3/lib/sock_exec.c"
+	sed -ie "s|system(prog)|-1|" "$(PLATFORM)/source3/lib/sock_exec.c"
+
 	cd $(PLATFORM)/source3; $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)

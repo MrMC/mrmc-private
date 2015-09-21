@@ -5,10 +5,6 @@ SRCS  = DllLoaderContainer.cpp
 SRCS += LibraryLoader.cpp
 SRCS += SoLoader.cpp
 
-ifneq ($(findstring freebsd,@ARCH@),freebsd)
-SRCS += ldt_keeper.c
-endif
-
 LIB   = dllloader.a
 
 include @abs_top_srcdir@/Makefile.include
