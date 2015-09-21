@@ -338,8 +338,6 @@ void CAAudioUnitSink::setCoreAudioPreferredSampleRate()
   NSError *audioSessionError = nil;
   AVAudioSession *mySession = [AVAudioSession sharedInstance];
   [mySession setPreferredSampleRate: preferredSampleRate error: &audioSessionError];
-  [mySession setCategory: AVAudioSessionCategoryPlayback error: &audioSessionError];
-  [mySession setActive: YES error: &audioSessionError];
   preferredSampleRate = [mySession sampleRate];
 }
 
