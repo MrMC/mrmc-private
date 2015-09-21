@@ -54,7 +54,6 @@ typedef enum
   IOSPlaybackState m_playbackState;
   NSDictionary *nowPlayingInfo;
 }
-@property (readonly, nonatomic, getter=isAnimating) BOOL animating;
 @property CGPoint lastGesturePoint;
 @property CGFloat screenScale;
 @property bool touchBeginSignaled;

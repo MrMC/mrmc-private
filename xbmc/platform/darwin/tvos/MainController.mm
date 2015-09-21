@@ -236,7 +236,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 @end
 
 @implementation MainController
-@synthesize animating;
 @synthesize lastGesturePoint;
 @synthesize screenScale;
 @synthesize touchBeginSignaled;
@@ -262,8 +261,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
 - (void)insertText:(NSString *)text
 {
-  XBMC_Event newEvent;
-  memset(&newEvent, 0, sizeof(newEvent));
+  XBMC_Event newEvent = {0};
   unichar currentKey = [text characterAtIndex:0];
 
   // handle upper case letters
@@ -288,6 +286,16 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self sendKey:XBMCK_BACKSPACE];
 }
 // END OF UIKeyInput protocol
+
+-(void)sendKey:(XBMCKey) key
+{
+  XBMC_Event newEvent = {0};
+
+  //newEvent.key.keysym.unicode = key;
+  newEvent.key.keysym.sym = key;
+  [self sendKeypressEvent:newEvent];
+
+}
 
 //--------------------------------------------------------------
 - (void) activateKeyboard:(UIView *)view
@@ -316,46 +324,54 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 -(void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
 {
-  UIPress *anyPress = [presses anyObject];
-
-  XBMC_Event newEvent = {0};
-
-  switch(anyPress.type)
+  if ([m_glView isXBMCAlive] && [m_glView isAnimating])
   {
-    case UIPressTypeUpArrow:
-      newEvent.key.keysym.sym = XBMCK_UP;
-      newEvent.key.keysym.unicode = XBMCK_UP;
-      break;
-    case UIPressTypeDownArrow:
-      newEvent.key.keysym.sym = XBMCK_DOWN;
-      newEvent.key.keysym.unicode = XBMCK_DOWN;
-      break;
-    case UIPressTypeLeftArrow:
-      newEvent.key.keysym.sym = XBMCK_LEFT;
-      newEvent.key.keysym.unicode = XBMCK_LEFT;
-      break;
-    case UIPressTypeRightArrow:
-      newEvent.key.keysym.sym = XBMCK_RIGHT;
-      newEvent.key.keysym.unicode = XBMCK_RIGHT;
-      break;
-    case UIPressTypeSelect:
-      newEvent.key.keysym.sym = XBMCK_RETURN;
-      newEvent.key.keysym.unicode = XBMCK_RETURN;
-      break;
-    case UIPressTypeMenu:
-      newEvent.key.keysym.sym = XBMCK_ESCAPE;
-      newEvent.key.keysym.unicode = XBMCK_ESCAPE;
-      break;
-    case UIPressTypePlayPause:
-      newEvent.key.keysym.sym = XBMCK_MEDIA_PLAY_PAUSE;
-      newEvent.key.keysym.unicode = XBMCK_MEDIA_PLAY_PAUSE;
-      break;
-    default:
-      break;
+    for (NSUInteger count = 0; count < [presses count]; ++count)
+    {
+      XBMC_Event newEvent = {0};
+      UIPress *press = (UIPress*)[[presses allObjects] objectAtIndex:count];
+      switch(press.type)
+      {
+        case UIPressTypeUpArrow:
+          newEvent.key.keysym.sym = XBMCK_UP;
+          newEvent.key.keysym.unicode = XBMCK_UP;
+          break;
+        case UIPressTypeDownArrow:
+          newEvent.key.keysym.sym = XBMCK_DOWN;
+          newEvent.key.keysym.unicode = XBMCK_DOWN;
+          break;
+        case UIPressTypeLeftArrow:
+          newEvent.key.keysym.sym = XBMCK_LEFT;
+          newEvent.key.keysym.unicode = XBMCK_LEFT;
+          break;
+        case UIPressTypeRightArrow:
+          newEvent.key.keysym.sym = XBMCK_RIGHT;
+          newEvent.key.keysym.unicode = XBMCK_RIGHT;
+          break;
+        case UIPressTypeSelect:
+          newEvent.key.keysym.sym = XBMCK_RETURN;
+          newEvent.key.keysym.unicode = XBMCK_RETURN;
+          break;
+        case UIPressTypeMenu:
+          newEvent.key.keysym.sym = XBMCK_ESCAPE;
+          newEvent.key.keysym.unicode = XBMCK_ESCAPE;
+          break;
+        case UIPressTypePlayPause:
+          newEvent.key.keysym.sym = XBMCK_MEDIA_PLAY_PAUSE;
+          newEvent.key.keysym.unicode = XBMCK_MEDIA_PLAY_PAUSE;
+          break;
+        default:
+          break;
+      }
+      // handle press event
+      if (newEvent.key.keysym.sym)
+        [self sendKeypressEvent:newEvent];
+    }
   }
-  // handle press event
-  if (newEvent.key.keysym.sym)
-    [self sendKeypressEvent:newEvent];
+  else
+  {
+    [super pressesEnded:presses withEvent:event];
+  }
 }
 //--------------------------------------------------------------
 - (IBAction)handlePan:(UIPanGestureRecognizer *)sender 
@@ -613,9 +629,9 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   
   // move this later into CocoaPowerSyscall
   [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
-  
+
   [self resumeAnimation];
-  
+
   [super viewWillAppear:animated];
 }
 //--------------------------------------------------------------
@@ -632,10 +648,10 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   PRINT_SIGNATURE();
   
   [self pauseAnimation];
-  
+
   // move this later into CocoaPowerSyscall
   [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
-	
+
   [super viewWillDisappear:animated];
 }
 //--------------------------------------------------------------
