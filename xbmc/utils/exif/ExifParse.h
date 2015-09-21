@@ -1,7 +1,10 @@
 #pragma once
 
-#include "libexif.h"
+#include "utils/exif/libexif.h"
 
+namespace XEXIF
+{
+  
 class CExifParse
 {
   public:
@@ -35,4 +38,5 @@ class CExifParse
                                  const int ComponentSize,
                                  char *latlongString);
 };
-
+  
+}

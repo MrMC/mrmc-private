@@ -29,18 +29,19 @@
 
 // Note: Jhead supports TAG_MAKER_NOTE exif field,
 //       but that is ommited for now - to make porting easier and addition smaller
-#ifndef _LINUX
-#include <windows.h>
-#else
 #include <memory.h>
 #include <cstring>
-#define min(a,b) (a)>(b)?(b):(a)
-#define max(a,b) (a)<(b)?(b):(a)
-#endif
 #include <math.h>
 #include <stdio.h>
-#include "ExifParse.h"
 
+#include "utils/exif/ExifParse.h"
+#include "utils/Log.h"
+
+namespace XEXIF
+{
+  
+#define min(a,b) (a)>(b)?(b):(a)
+#define max(a,b) (a)<(b)?(b):(a)
 
 // Prototypes for exif utility functions.
 static void ErrNonfatal(const char* const msg, int a1, int a2);
@@ -181,16 +182,13 @@ enum {
   ExifStrGpsAltitude,
 };
 
-
-
-
 //--------------------------------------------------------------------------
 // Report non fatal errors.  Now that microsoft.net modifies exif headers,
 // there's corrupted ones, and there could be more in the future.
 //--------------------------------------------------------------------------
 static void ErrNonfatal(const char* const msg, int a1, int a2)
 {
-  printf("ExifParse - Nonfatal Error : %s %d %d", msg, a1, a2);
+  CLog::Log(LOGWARNING, "ExifParse - Nonfatal Error : %s %d %d", msg, a1, a2);
 }
 
 //--------------------------------------------------------------------------
@@ -933,3 +931,4 @@ void CExifParse::ProcessGpsInfo(
   }
 }
 
+}

@@ -1,25 +1,12 @@
-#ifndef HAS_LIBEXIF_H
-#define HAS_LIBEXIF_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef _DLL
-#ifdef WIN32
-#define EXIF_EXPORT __declspec(dllexport)
-#else
-#define EXIF_EXPORT
-#endif
-#else
-#define EXIF_EXPORT
-#endif
-
+#pragma once
 //--------------------------------------------------------------------------
 // JPEG markers consist of one or more 0xFF bytes, followed by a marker
 // code byte (which is not an FF).  Here are the marker codes of interest
 // in this application.
 //--------------------------------------------------------------------------
+
+namespace XEXIF
+{
 
 #define M_SOF0  0xC0            // Start Of Frame N
 #define M_SOF1  0xC1            // N indicates which compression process
@@ -125,17 +112,12 @@ typedef struct {
     int  DateTimeOffsets[MAX_DATE_COPIES];
     int  numDateTimeTags;
 
-    int GpsInfoPresent;
+    int  GpsInfoPresent;
     char GpsLat[31];
     char GpsLong[31];
     char GpsAlt[20];
 } ExifInfo_t;
 
-EXIF_EXPORT bool process_jpeg(const char *filename, ExifInfo_t *exifInfo, IPTCInfo_t *iptcInfo);
+bool process_jpeg(const char *filename, ExifInfo_t *exifInfo, IPTCInfo_t *iptcInfo);
 
-#ifdef __cplusplus
 }
-#endif
-
-#endif
-

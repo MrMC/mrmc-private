@@ -1,7 +1,9 @@
-#ifndef __IPTC_PARSE_H
-#define __IPTC_PARSE_H
+#pragma once
 
-#include "libexif.h"
+#include "utils/exif/libexif.h"
+
+namespace XEXIF
+{
 
 class CIptcParse
 {
@@ -9,4 +11,4 @@ class CIptcParse
     static bool Process(const unsigned char* const Data, const unsigned short length, IPTCInfo_t *info);
 };
 
-#endif      // __IPTC_H
+}

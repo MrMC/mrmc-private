@@ -2008,7 +2008,6 @@ OUTPUT_FILES="$OUTPUT_FILES Makefile"
 OUTPUT_FILES="$OUTPUT_FILES Makefile.include"
 OUTPUT_FILES="$OUTPUT_FILES addons/skin.mrmc/media/Makefile"
 
-OUTPUT_FILES="$OUTPUT_FILES lib/libexif/Makefile"
 OUTPUT_FILES="$OUTPUT_FILES lib/libUPnP/Makefile"
 
 OUTPUT_FILES="$OUTPUT_FILES addons/xbmc.addon/addon.xml"

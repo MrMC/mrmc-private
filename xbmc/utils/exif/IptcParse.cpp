@@ -26,15 +26,15 @@
 //--------------------------------------------------------------------------
 //  Process IPTC data.
 //--------------------------------------------------------------------------
-#ifndef _LINUX
-#include <windows.h>
-#else
 #include <string.h>
+#include "utils/exif/IptcParse.h"
+#include "utils/exif/ExifParse.h"
+#include "utils/Log.h"
+
+namespace XEXIF
+{
+  
 #define min(a,b) (a)>(b)?(b):(a)
-#endif
-#include <stdio.h>
-#include "IptcParse.h"
-#include "ExifParse.h"
 
 // Supported IPTC entry types
 #define IPTC_RECORD_VERSION         0x00
@@ -83,7 +83,7 @@
 //            - entry data   'entry length' bytes
 //
 //--------------------------------------------------------------------------
-bool CIptcParse::Process (const unsigned char* const Data, const unsigned short itemlen, IPTCInfo_t *info)
+bool CIptcParse::Process(const unsigned char* const Data, const unsigned short itemlen, IPTCInfo_t *info)
 {
   if (!info) return false;
 
@@ -184,7 +184,7 @@ bool CIptcParse::Process (const unsigned char* const Data, const unsigned short 
         case IPTC_SUB_LOCATION:             tag = info->SubLocation;             break;
         case IPTC_IMAGE_TYPE:               tag = info->ImageType;               break;
         default:
-          printf("IptcParse: Unrecognised IPTC tag: 0x%02x", type);
+          CLog::Log(LOGWARNING, "IptcParse: Unrecognised IPTC tag: 0x%02x", type);
           break;
       }
     }
@@ -206,13 +206,17 @@ bool CIptcParse::Process (const unsigned char* const Data, const unsigned short 
           strncat(tag, pos, min(length, maxLen - 3));
         }
       }
-/*      if (id == SLIDE_IPTC_CAPTION)
+      /*
+      if (id == SLIDE_IPTC_CAPTION)
       {
         CExifParse::FixComment(m_IptcInfo[id]);     // Ensure comment is printable
       }*/
     }
     pos += length;
   }
+
   return true;
+}
+
 }
 
