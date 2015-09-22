@@ -99,7 +99,7 @@ int   SystemTimeToFileTime(const SYSTEMTIME* lpSystemTime,  LPFILETIME lpFileTim
 {
   static const int dayoffset[12] = {0, 31, 59, 90, 120, 151, 182, 212, 243, 273, 304, 334};
 #if defined(TARGET_DARWIN)
-  static long timegm_lock = 0;
+  static std::atomic<long> timegm_lock;
 #endif
 
   struct tm sysTime = {};
