@@ -82,7 +82,7 @@ using namespace KODI::MESSAGING;
 void CSelectionStreams::Clear(StreamType type, StreamSource source)
 {
   CSingleLock lock(m_section);
-  for(int i=m_Streams.size()-1;i>=0;i--)
+  for(int i = m_Streams.size() - 1; i >= 0; i--)
   {
     if(type && m_Streams[i].type != type)
       continue;

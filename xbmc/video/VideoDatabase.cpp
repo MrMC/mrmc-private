@@ -2444,7 +2444,7 @@ int CVideoDatabase::GetSeasonId(int showID, int season)
   std::string id = GetSingleValue("seasons", "idSeason", sql);
   if (id.empty())
     return -1;
-  return strtol(id.c_str(), NULL, 10);
+  return std::stoi(id.c_str(), NULL, 10);
 }
 
 int CVideoDatabase::AddSeason(int showID, int season)
@@ -3137,7 +3137,7 @@ int CVideoDatabase::GetDbId(const std::string &query)
   std::string result = GetSingleValue(query);
   if (!result.empty())
   {
-    int idDb = strtol(result.c_str(), NULL, 10);
+    int idDb = std::stoi(result.c_str(), NULL, 10);
     if (idDb > 0)
       return idDb;
   }

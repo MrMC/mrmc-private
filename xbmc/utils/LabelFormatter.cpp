@@ -408,10 +408,10 @@ void CLabelFormatter::FillMusicMaskContent(const char mask, const std::string &v
   switch (mask)
   {
   case 'N':
-    tag->SetTrackNumber(atol(value.c_str()));
+    tag->SetTrackNumber(atoi(value.c_str()));
     break;
   case 'S':
-    tag->SetDiscNumber(atol(value.c_str()));
+    tag->SetDiscNumber(atoi(value.c_str()));
     break;
   case 'A':
     tag->SetArtist(value);
@@ -426,7 +426,7 @@ void CLabelFormatter::FillMusicMaskContent(const char mask, const std::string &v
     tag->SetGenre(value);
     break;
   case 'Y':
-    tag->SetYear(atol(value.c_str()));
+    tag->SetYear(atoi(value.c_str()));
     break;
   case 'D':
     tag->SetDuration(StringUtils::TimeStringToSeconds(value));

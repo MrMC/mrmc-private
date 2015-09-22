@@ -1639,7 +1639,7 @@ bool CApplication::LoadUserWindows()
           {
             const TiXmlNode *pType = pRootElement->FirstChild("id");
             if (pType && pType->FirstChild())
-              id = atol(pType->FirstChild()->Value());
+              id = atoi(pType->FirstChild()->Value());
           }
           std::string visibleCondition;
           CGUIControlFactory::GetConditionalVisibility(pRootElement, visibleCondition);

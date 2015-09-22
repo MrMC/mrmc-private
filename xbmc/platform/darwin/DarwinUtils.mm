@@ -358,7 +358,7 @@ const char *CDarwinUtils::GetOSXVersionString(void)
 #endif
 }
 
-int  CDarwinUtils::GetFrameworkPath(char* path, uint32_t *pathsize)
+int  CDarwinUtils::GetFrameworkPath(char* path, size_t *pathsize)
 {
   CCocoaAutoPool pool;
   // see if we can figure out who we are
@@ -374,7 +374,7 @@ int  CDarwinUtils::GetFrameworkPath(char* path, uint32_t *pathsize)
   {
     strcpy(path, [pathname UTF8String]);
     // Move backwards to last "/"
-    for (int n=strlen(path)-1; path[n] != '/'; n--)
+    for (size_t n=strlen(path)-1; path[n] != '/'; n--)
       path[n] = '\0';
     strcat(path, "Frameworks");
     *pathsize = strlen(path);
@@ -412,7 +412,7 @@ int  CDarwinUtils::GetFrameworkPath(char* path, uint32_t *pathsize)
   return -1;
 }
 
-int  CDarwinUtils::GetExecutablePath(char* path, uint32_t *pathsize)
+int  CDarwinUtils::GetExecutablePath(char* path, size_t *pathsize)
 {
   CCocoaAutoPool pool;
   // see if we can figure out who we are
@@ -453,7 +453,7 @@ bool CDarwinUtils::IsIosSandboxed(void)
   static int ret = -1;
   if (ret == -1)
   {
-    uint32_t path_size = 2*MAXPATHLEN;
+    size_t   path_size = 2*MAXPATHLEN;
     char     given_path[2*MAXPATHLEN];
     int      result = -1; 
     ret = 0;
