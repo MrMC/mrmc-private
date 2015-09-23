@@ -239,21 +239,6 @@ static void setupWindowMenu(void)
   
   [[NSThread currentThread] setName:@"XBMC_Run"];
 
-  // set up some xbmc specific relationships
-  XBMC::Context context;
-  
-  bool renderGUI = true;
-  //this can't be set from CAdvancedSettings::Initialize() because it will overwrite
-  //the loglevel set with the --debug flag
-#ifdef _DEBUG
-  g_advancedSettings.m_logLevel     = LOG_LEVEL_DEBUG;
-  g_advancedSettings.m_logLevelHint = LOG_LEVEL_DEBUG;
-#else
-  g_advancedSettings.m_logLevel     = LOG_LEVEL_NORMAL;
-  g_advancedSettings.m_logLevelHint = LOG_LEVEL_NORMAL;
-#endif
-  CLog::SetLogLevel(g_advancedSettings.m_logLevel);
-  
 #if defined(DEBUG)
   struct rlimit rlim;
   rlim.rlim_cur = rlim.rlim_max = RLIM_INFINITY;
@@ -262,12 +247,15 @@ static void setupWindowMenu(void)
 #endif
   
   setlocale(LC_NUMERIC, "C");
-  g_advancedSettings.Initialize();
   
+  // set up some xbmc specific relationships
+  XBMC::Context context;
+
   CAppParamParser appParamParser;
   appParamParser.Parse((const char **)gArgv, (int)gArgc);
   
-  gStatus = XBMC_Run(renderGUI);
+  bool renderGUI = true;
+  gStatus = App_Run(renderGUI);
   g_application.SetRenderGUI(false);
   [pool release];
   [self performSelectorOnMainThread:@selector(stopRunLoop) withObject:nil waitUntilDone:false];

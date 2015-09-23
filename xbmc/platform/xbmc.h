@@ -19,5 +19,9 @@
  */
 
 #pragma once
-extern "C" int XBMC_Run(bool renderGUI);
+extern "C" void App_Preflight();
+extern "C" void App_Postflight();
+extern "C" void App_SetRenderGUI(bool renderGUI);
+extern "C" int  App_Run(bool renderGUI);
+extern "C" bool App_Running();
 

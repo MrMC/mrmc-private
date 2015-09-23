@@ -18,24 +18,17 @@
  *
  */
 
-//hack around problem with xbmc's typedef int BOOL
-// and obj-c's typedef unsigned char BOOL
 #include <sys/resource.h>
 #include <signal.h>
 #include <stdio.h>
 
 #include "system.h"
+
 #include "AdvancedSettings.h"
-#include "FileItem.h"
-#include "Application.h"
 #include "messaging/ApplicationMessenger.h"
-#include "WindowingFactory.h"
-#include "VideoReferenceClock.h"
+#include "platform/xbmc.h"
+#include "platform/XbmcContext.h"
 #include "utils/log.h"
-#include "utils/TimeUtils.h"
-#include "Util.h"
-#include "XbmcContext.h"
-#include "WindowingFactory.h"
 
 #import <QuartzCore/QuartzCore.h>
 
@@ -319,14 +312,14 @@ using namespace KODI::MESSAGING;
 {
   PRINT_SIGNATURE();
   pause = TRUE;
-  g_application.SetRenderGUI(false);
+  App_SetRenderGUI(false);
 }
 //--------------------------------------------------------------
 - (void) resumeAnimation
 {
   PRINT_SIGNATURE();
   pause = FALSE;
-  g_application.SetRenderGUI(true);
+  App_SetRenderGUI(true);
 }
 //--------------------------------------------------------------
 - (void) startAnimation
@@ -352,10 +345,8 @@ using namespace KODI::MESSAGING;
 	{
 		animating = FALSE;
     xbmcAlive = FALSE;
-    if (!g_application.m_bStop)
-    {
+    if (App_Running())
       CApplicationMessenger::GetInstance().PostMsg(TMSG_QUIT);
-    }
     // wait for animation thread to die
     if ([animationThread isFinished] == NO)
       [animationThreadLock lockWhenCondition:TRUE];
@@ -366,25 +357,14 @@ using namespace KODI::MESSAGING;
 {
   CCocoaAutoPool outerpool;
 
-  [[NSThread currentThread] setName:@"XBMC_Run"];
+  [[NSThread currentThread] setName:@"App_Run"];
   
-  // set up some xbmc specific relationships
-  XBMC::Context context;
-  readyToRun = true;
-
-  // signal we are alive
+  // signal the thread is alive
   NSConditionLock* myLock = arg;
   [myLock lock];
   
-  #ifdef _DEBUG
-    g_advancedSettings.m_logLevel     = LOG_LEVEL_DEBUG;
-    g_advancedSettings.m_logLevelHint = LOG_LEVEL_DEBUG;
-  #else
-    g_advancedSettings.m_logLevel     = LOG_LEVEL_NORMAL;
-    g_advancedSettings.m_logLevelHint = LOG_LEVEL_NORMAL;
-  #endif
-
-  // Prevent child processes from becoming zombies on exit if not waited upon. See also Util::Command
+  // Prevent child processes from becoming zombies on exit
+  // if not waited upon. See also Util::Command
   struct sigaction sa;
   memset(&sa, 0, sizeof(sa));
   sa.sa_flags = SA_NOCLDWAIT;
@@ -393,52 +373,32 @@ using namespace KODI::MESSAGING;
 
   setlocale(LC_NUMERIC, "C");
  
-  g_application.Preflight();
-  if (!g_application.Create())
-  {
-    readyToRun = false;
-    ELOG(@"%sUnable to create application", __PRETTY_FUNCTION__);
-  }
-
-  if (!g_application.CreateGUI())
-  {
-    readyToRun = false;
-    ELOG(@"%sUnable to create GUI", __PRETTY_FUNCTION__);
-  }
-
-  if (!g_application.Initialize())
-  {
-    readyToRun = false;
-    ELOG(@"%sUnable to initialize application", __PRETTY_FUNCTION__);
-  }
-  
+  readyToRun = true;
   if (readyToRun)
   {
-    g_advancedSettings.m_startFullScreen = true;
-    g_advancedSettings.m_canWindowed = false;
-    xbmcAlive = TRUE;
+    int status = 0;
     try
     {
-      CCocoaAutoPool innerpool;
-      g_application.Run();
+      // set up some xbmc specific relationships
+      XBMC::Context context;
+      xbmcAlive = TRUE;
+      // start up with gui enabled
+      status = App_Run(true);
+      // we exited or died.
+      App_SetRenderGUI(false);
     }
     catch(...)
     {
-      ELOG(@"%sException caught on main loop. Exiting", __PRETTY_FUNCTION__);
+      xbmcAlive = FALSE;
+      ELOG(@"%sException caught on main loop status=%d. Exiting", __PRETTY_FUNCTION__, status);
     }
   }
 
-  // signal we are dead
+  // signal the thread is dead
   [myLock unlockWithCondition:TRUE];
 
   [g_xbmcController enableScreenSaver];
   [g_xbmcController enableSystemSleep];
-  exit(0);
-  /*
-  // die the iOS way :)
-  UIApplication *app = [UIApplication sharedApplication];
-  [app performSelector:@selector(suspend)];
-  */
 }
 //--------------------------------------------------------------
 @end

@@ -20,6 +20,7 @@
 
 #include "Application.h"
 #include "settings/AdvancedSettings.h"
+#include "utils/log.h"
 
 #ifdef TARGET_RASPBERRY_PI
 #include "linux/RBP.h"
@@ -27,12 +28,30 @@
 
 #include "platform/MessagePrinter.h"
 
-extern "C" int XBMC_Run(bool renderGUI)
+extern "C" void App_Preflight()
+{
+}
+
+extern "C" void App_Postflight()
+{
+}
+
+extern "C" void App_SetRenderGUI(bool renderGUI)
+{
+  g_application.SetRenderGUI(renderGUI);
+}
+
+extern "C" bool App_Running()
+{
+  return !g_application.m_bStop;
+}
+
+extern "C" int App_Run(bool renderGUI)
 {
   int status = -1;
 
-  if (!g_advancedSettings.Initialized())
-  {
+  //this can't be set from CAdvancedSettings::Initialize()
+  //because it will overwrite the loglevel set with the --debug flag
 #ifdef _DEBUG
   g_advancedSettings.m_logLevel     = LOG_LEVEL_DEBUG;
   g_advancedSettings.m_logLevelHint = LOG_LEVEL_DEBUG;
@@ -40,8 +59,12 @@ extern "C" int XBMC_Run(bool renderGUI)
   g_advancedSettings.m_logLevel     = LOG_LEVEL_NORMAL;
   g_advancedSettings.m_logLevelHint = LOG_LEVEL_NORMAL;
 #endif
+  CLog::SetLogLevel(g_advancedSettings.m_logLevel);
+
+  // not a failure if returns false, just means someone
+  // did the init before us.
+  if (!g_advancedSettings.Initialized())
     g_advancedSettings.Initialize();
-  }
 
   if (!g_application.Create())
   {

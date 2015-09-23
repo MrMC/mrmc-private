@@ -379,11 +379,11 @@ void CXBMCApp::run()
   }
 
   m_firstrun=false;
-  android_printf(" => running XBMC_Run...");
+  android_printf(" => running App_Run...");
   try
   {
-    status = XBMC_Run(true);
-    android_printf(" => XBMC_Run finished with %d", status);
+    status = App_Run(true);
+    android_printf(" => App_Run finished with %d", status);
   }
   catch(...)
   {
