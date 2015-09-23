@@ -71,12 +71,12 @@ using namespace KODI::MESSAGING;
   CAEAGLLayer *eaglLayer = (CAEAGLLayer *)[self layer];  
   //allow a maximum framebuffer size of 1080p
   //needed for tvout on iPad3/4 and iphone4/5 and maybe AppleTV3
-  if(frame.size.width * frame.size.height > 2073600)
+  if (frame.size.width * frame.size.height > 2073600)
     return;
   //resize the layer - ios will delay this
   //and call layoutSubviews when its done with resizing
   //so the real framebuffer resize is done there then ...
-  if(framebufferWidth != frame.size.width ||
+  if (framebufferWidth != frame.size.width ||
      framebufferHeight != frame.size.height )
   {
     framebufferResizeRequested = TRUE;
@@ -86,7 +86,7 @@ using namespace KODI::MESSAGING;
 
 - (void)layoutSubviews
 {
-  if(framebufferResizeRequested)
+  if (framebufferResizeRequested)
   {
     framebufferResizeRequested = FALSE;
     [self deleteFramebuffer];
@@ -103,25 +103,19 @@ using namespace KODI::MESSAGING;
     // normal other iDevices report 1.0 here
     // retina devices report 2.0 here
     // this info is true as of 19.3.2012.
-    if([screen scale] > 1.0)
-    {
+    if ([screen scale] > 1.0)
       ret = [screen scale];
-    }
     
     //if no retina display scale detected yet -
     //ensure retina resolution on supported devices mainScreen
     //even on older iOS SDKs
     double screenScale = 1.0;
     if (ret == 1.0 && screen == [UIScreen mainScreen] && CDarwinUtils::DeviceHasRetina(screenScale))
-    {
       ret = screenScale;//set scale factor from our static list in case older SDKs report 1.0
-    }
 
     // fix for ip6 plus which seems to report 2.0 when not compiled with ios8 sdk
     if (CDarwinUtils::DeviceHasRetina(screenScale) && screenScale == 3.0)
-    {
       ret = screenScale;
-    }
   }
   return ret;
 }
@@ -137,10 +131,8 @@ using namespace KODI::MESSAGING;
   //this will activate retina on supported devices
   [eaglLayer setContentsScale:scaleFactor];
   [self setContentScaleFactor:scaleFactor];
-  if(resize)
-  {
+  if (resize)
     [self resizeFrameBuffer];
-  }
 }
 
 //--------------------------------------------------------------
@@ -152,8 +144,7 @@ using namespace KODI::MESSAGING;
   {
     // Get the layer
     CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
-    //set screen, handlescreenscale
-    //and set frame size
+    //set screen, handlescreenscale and set frame size
     [self setScreen:screen withFrameBufferResize:FALSE];
 
     eaglLayer.opaque = TRUE;
@@ -192,6 +183,13 @@ using namespace KODI::MESSAGING;
   [context release];
   
   [super dealloc];
+}
+
+//--------------------------------------------------------------
+- (BOOL)canBecomeFocused
+{
+  // need this or we do not get GestureRecognizers under tvos.
+  return YES;
 }
 
 //--------------------------------------------------------------
@@ -332,8 +330,7 @@ using namespace KODI::MESSAGING;
     // kick off an animation thread
     animationThreadLock = [[NSConditionLock alloc] initWithCondition: FALSE];
     animationThread = [[NSThread alloc] initWithTarget:self
-      selector:@selector(runAnimation:)
-      object:animationThreadLock];
+      selector:@selector(runAnimation:) object:animationThreadLock];
     [animationThread start];
 	}
 }

@@ -22,18 +22,21 @@
 #include <signal.h>
 
 #include "system.h"
-#include "settings/AdvancedSettings.h"
-#include "settings/Settings.h"
+
+#include "Application.h"
 #include "FileItem.h"
+#include "input/Key.h"
 #include "MusicInfoTag.h"
 #include "SpecialProtocol.h"
 #include "PlayList.h"
-#include "messaging/ApplicationMessenger.h"
-#include "Application.h"
-#include "interfaces/AnnouncementManager.h"
-#include "input/touch/generic/GenericTouchActionHandler.h"
 #include "guilib/GUIControl.h"
-#include "input/Key.h"
+#include "guilib/GUIWindowManager.h"
+#include "interfaces/AnnouncementManager.h"
+#include "settings/AdvancedSettings.h"
+#include "settings/Settings.h"
+#include "messaging/ApplicationMessenger.h"
+#include "platform/darwin/DarwinUtils.h"
+#include "input/touch/generic/GenericTouchActionHandler.h"
 #include "windowing/WindowingFactory.h"
 #include "video/VideoReferenceClock.h"
 #include "utils/log.h"
@@ -41,11 +44,12 @@
 #include "utils/Variant.h"
 #include "Util.h"
 #include "threads/Event.h"
+
 #define id _id
 #include "TextureCache.h"
 #undef id
+
 #include <math.h>
-#include "platform/darwin/DarwinUtils.h"
 
 using namespace KODI::MESSAGING;
 
@@ -243,6 +247,8 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 @synthesize screensize;
 @synthesize m_networkAutoSuspendTimer;
 @synthesize nowPlayingInfo;
+
+
 //--------------------------------------------------------------
 - (void) sendKeypressEvent: (XBMC_Event) event
 {
@@ -253,6 +259,8 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   CWinEvents::MessagePush(&event);
 }
 
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 // START OF UIKeyInput protocol
 - (BOOL)hasText
 {
@@ -296,24 +304,174 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self sendKeypressEvent:newEvent];
 
 }
+//--------------------------------------------------------------
+/*
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+  PRINT_SIGNATURE();
+  if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+    return YES;
+  }
 
+  return NO;
+}
+*/
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+  PRINT_SIGNATURE();
+  return YES;
+}
+
+//--------------------------------------------------------------
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
+{
+  PRINT_SIGNATURE();
+  BOOL handled = NO;
+  switch (press.type)
+  {
+    case UIPressTypeMenu:
+      // menu is special.
+      //  a) if at our home, should return to atv home screen.
+      //  b) if not, let it pass.
+      handled = (g_windowManager.GetActiveWindow() != WINDOW_HOME);
+      break;
+
+    case UIPressTypeSelect:
+    case UIPressTypePlayPause:
+    case UIPressTypeUpArrow:
+    case UIPressTypeDownArrow:
+    case UIPressTypeLeftArrow:
+    case UIPressTypeRightArrow:
+      handled = YES;
+      break;
+    default:
+      return NO;
+  }
+
+  return handled;
+}
+//--------------------------------------------------------------
+- (void)createTapGestureRecognizers
+{
+  PRINT_SIGNATURE();
+  //1 finger single tap
+  auto singleFingerSingleTap = [[UITapGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handleSingleFingerSingleTap:)];
+  singleFingerSingleTap.delegate = self;
+  [m_glView addGestureRecognizer:singleFingerSingleTap];
+  [singleFingerSingleTap release];
+/*
+  // 1 finger single long tap - right mouse - alernative
+  auto singleFingerSingleLongTap = [[UILongPressGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handleSingleFingerSingleLongTap:)];
+  [m_glView addGestureRecognizer:singleFingerSingleLongTap];
+  [singleFingerSingleLongTap release];
+*/
+}
+//--------------------------------------------------------------
+- (void)createPanGestureRecognizers
+{
+  PRINT_SIGNATURE();
+  // for pan gestures with one finger
+  auto pan = [[UIPanGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handlePan:)];
+  pan.delegate = self;
+  [m_glView addGestureRecognizer:pan];
+  [pan release];
+}
+//--------------------------------------------------------------
+- (void)createSwipeGestureRecognizers
+{
+  PRINT_SIGNATURE();
+  // single finger swipe left
+  UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handleSwipe:)];
+  swipeLeft.delaysTouchesBegan = NO;
+  swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
+  swipeLeft.delegate = self;
+  [m_glView addGestureRecognizer:swipeLeft];
+  [swipeLeft release];
+
+  // single finger swipe right
+  UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handleSwipe:)];
+  swipeRight.delaysTouchesBegan = NO;
+  swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
+  swipeRight.delegate = self;
+  [m_glView addGestureRecognizer:swipeRight];
+  [swipeRight release];
+
+  // single finger swipe up
+  UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handleSwipe:)];
+  swipeUp.delaysTouchesBegan = NO;
+  swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
+  swipeUp.delegate = self;
+  [m_glView addGestureRecognizer:swipeUp];
+  [swipeUp release];
+
+  // single finger swipe down
+  UISwipeGestureRecognizer *swipeDown = [[UISwipeGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handleSwipe:)];
+  swipeDown.delaysTouchesBegan = NO;
+  swipeDown.direction = UISwipeGestureRecognizerDirectionDown;
+  swipeDown.delegate = self;
+  [m_glView addGestureRecognizer:swipeDown];
+  [swipeDown release];
+}
+//--------------------------------------------------------------
+-(void) createGameControlGesturecognizers
+{
+  PRINT_SIGNATURE();
+  auto upRecognizer = [[UITapGestureRecognizer alloc]
+    initWithTarget: self action: @selector(gameControllerUpArrowPressed:)];
+  upRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
+  upRecognizer.delegate = self;
+  [self.view addGestureRecognizer: upRecognizer];
+  [upRecognizer release];
+
+  auto downRecognizer = [[UITapGestureRecognizer alloc]
+    initWithTarget: self action: @selector(gameControllerDownArrowPressed:)];
+  downRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
+  downRecognizer.delegate = self;
+  [self.view addGestureRecognizer: downRecognizer];
+  [downRecognizer release];
+
+  auto leftRecognizer = [[UITapGestureRecognizer alloc]
+    initWithTarget: self action: @selector(gameControllerLeftArrowPressed:)];
+  leftRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+  leftRecognizer.delegate = self;
+  [self.view addGestureRecognizer: leftRecognizer];
+  [leftRecognizer release];
+
+  auto rightRecognizer = [[UITapGestureRecognizer alloc]
+    initWithTarget: self action: @selector(gameControllerRightArrowPressed:)];
+  rightRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  rightRecognizer.delegate = self;
+  [self.view addGestureRecognizer: rightRecognizer];
+  [rightRecognizer release];
+}
 //--------------------------------------------------------------
 - (void) activateKeyboard:(UIView *)view
 {
+  PRINT_SIGNATURE();
   [self.view addSubview:view];
   m_glView.userInteractionEnabled = NO;
 }
 //--------------------------------------------------------------
 - (void) deactivateKeyboard:(UIView *)view
 {
+  PRINT_SIGNATURE();
   [view removeFromSuperview];
   m_glView.userInteractionEnabled = YES; 
   [self becomeFirstResponder];
 }
+/*
 //--------------------------------------------------------------
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  if( [m_glView isXBMCAlive] )//NO GESTURES BEFORE WE ARE UP AND RUNNING
+  PRINT_SIGNATURE();
+  if( [m_glView isXBMCAlive] ) //NO GESTURES BEFORE WE ARE UP AND RUNNING
   {
     UITouch *touch = (UITouch *)[[touches allObjects] objectAtIndex:0];
     CGPoint point = [touch locationInView:m_glView];
@@ -322,14 +480,26 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     CGenericTouchActionHandler::GetInstance().OnSingleTouchStart(point.x, point.y);
   }
 }
+*/
+
+/*
+-(void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
+{
+  PRINT_SIGNATURE();
+}
+-(void)pressesChanged:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
+{
+  PRINT_SIGNATURE();
+  // will be invoked for presses that provide an analog value (like thumbsticks or analog push buttons)
+}
 -(void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
 {
-  if ([m_glView isXBMCAlive] && [m_glView isAnimating])
+  PRINT_SIGNATURE();
+  if ([m_glView isXBMCAlive] && [m_glView isAnimating] && [m_glView isUserInteractionEnabled] == YES)
   {
-    for (NSUInteger count = 0; count < [presses count]; ++count)
+    for (UIPress *press in presses)
     {
       XBMC_Event newEvent = {0};
-      UIPress *press = (UIPress*)[[presses allObjects] objectAtIndex:count];
       switch(press.type)
       {
         case UIPressTypeUpArrow:
@@ -370,12 +540,128 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   }
   else
   {
-    [super pressesEnded:presses withEvent:event];
+    //[super pressesEnded:presses withEvent:event];
+  }
+}
+-(void)pressesCancelled:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
+{
+  PRINT_SIGNATURE();
+}
+ */
+
+- (void) menuPressed:(UITapGestureRecognizer *) sender
+{
+  PRINT_SIGNATURE();
+  if (sender.state == UIGestureRecognizerStateBegan) {
+    NSLog(@"button pressed  - menu");
+  } else if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"button released - menu");
+    XBMC_Event newEvent = {0};
+    newEvent.key.keysym.sym = XBMCK_ESCAPE;
+    newEvent.key.keysym.unicode = XBMCK_ESCAPE;
+    [self sendKeypressEvent:newEvent];
+  }
+}
+- (void) selectPressed:(UITapGestureRecognizer *) sender
+{
+  PRINT_SIGNATURE();
+  if (sender.state == UIGestureRecognizerStateBegan) {
+    NSLog(@"button pressed  - select");
+  } else if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"button released - select");
+    XBMC_Event newEvent = {0};
+    newEvent.key.keysym.sym = XBMCK_RETURN;
+    newEvent.key.keysym.unicode = XBMCK_RETURN;
+    [self sendKeypressEvent:newEvent];
+  }
+}
+- (void) playPausePressed:(UITapGestureRecognizer *) sender
+{
+  PRINT_SIGNATURE();
+  if (sender.state == UIGestureRecognizerStateBegan) {
+    NSLog(@"button pressed  - playPause");
+  } else if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"button released - playPause");
+  }
+}
+
+//--------------------------------------------------------------
+- (IBAction)gameControllerUpArrowPressed:(UIGestureRecognizer *) sender
+{
+  PRINT_SIGNATURE();
+  if (sender.state == UIGestureRecognizerStateBegan) {
+    NSLog(@"button pressed   - UpArrow");
+  } else if (sender.state == UIGestureRecognizerStateChanged) {
+      NSLog(@"button changed - UpArrow");
+  } else if (sender.state == UIGestureRecognizerStateCancelled) {
+    NSLog(@"button cancelled - UpArrow");
+  } else if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"button released  - UpArrow");
+    XBMC_Event newEvent = {0};
+    newEvent.key.keysym.sym = XBMCK_UP;
+    newEvent.key.keysym.unicode = XBMCK_UP;
+    [self sendKeypressEvent:newEvent];
   }
 }
 //--------------------------------------------------------------
+- (IBAction)gameControllerDownArrowPressed:(UIGestureRecognizer *) sender
+{
+  PRINT_SIGNATURE();
+  if (sender.state == UIGestureRecognizerStateBegan) {
+    NSLog(@"button pressed   - DownArrowP");
+  } else if (sender.state == UIGestureRecognizerStateChanged) {
+    NSLog(@"button changed   - DownArrowP");
+  } else if (sender.state == UIGestureRecognizerStateCancelled) {
+    NSLog(@"button cancelled - DownArrowP");
+  } else if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"button released  - DownArrowP");
+    XBMC_Event newEvent = {0};
+    newEvent.key.keysym.sym = XBMCK_DOWN;
+    newEvent.key.keysym.unicode = XBMCK_DOWN;
+    [self sendKeypressEvent:newEvent];
+  }
+}
+//--------------------------------------------------------------
+- (IBAction)gameControllerLeftArrowPressed:(UIGestureRecognizer *) sender
+{
+  PRINT_SIGNATURE();
+  if (sender.state == UIGestureRecognizerStateBegan) {
+    NSLog(@"button pressed   - LeftArrow");
+  } else if (sender.state == UIGestureRecognizerStateChanged) {
+    NSLog(@"button changed   - LeftArrow");
+  } else if (sender.state == UIGestureRecognizerStateCancelled) {
+    NSLog(@"button cancelled - LeftArrow");
+  } else if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"button released  - LeftArrow");
+    XBMC_Event newEvent = {0};
+    newEvent.key.keysym.sym = XBMCK_LEFT;
+    newEvent.key.keysym.unicode = XBMCK_LEFT;
+    [self sendKeypressEvent:newEvent];
+  }
+}
+//--------------------------------------------------------------
+- (IBAction)gameControllerRightArrowPressed:(UIGestureRecognizer *) sender
+{
+  PRINT_SIGNATURE();
+  if (sender.state == UIGestureRecognizerStateBegan) {
+    NSLog(@"button pressed   - RightArrow");
+  } else if (sender.state == UIGestureRecognizerStateChanged) {
+    NSLog(@"button changed   - RightArrow");
+  } else if (sender.state == UIGestureRecognizerStateCancelled) {
+    NSLog(@"button cancelled - RightArrow");
+  } else if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"button released  - RightArrow");
+    XBMC_Event newEvent = {0};
+    newEvent.key.keysym.sym = XBMCK_RIGHT;
+    newEvent.key.keysym.unicode = XBMCK_RIGHT;
+    [self sendKeypressEvent:newEvent];
+  }
+}
+
+//--------------------------------------------------------------
 - (IBAction)handlePan:(UIPanGestureRecognizer *)sender 
 {
+  PRINT_SIGNATURE();
   if( [m_glView isXBMCAlive] )//NO GESTURES BEFORE WE ARE UP AND RUNNING
   { 
     CGPoint velocity = [sender velocityInView:m_glView];
@@ -437,10 +723,9 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)handleSwipe:(UISwipeGestureRecognizer *)sender
 {
+  PRINT_SIGNATURE();
   if( [m_glView isXBMCAlive] )//NO GESTURES BEFORE WE ARE UP AND RUNNING
   {
-    
-    
     if (sender.state == UIGestureRecognizerStateRecognized)
     {
       CGPoint point = [sender locationOfTouch:0 inView:m_glView];
@@ -464,41 +749,44 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
           break;
       }
       CGenericTouchActionHandler::GetInstance().OnSwipe(direction,
-                                                0.0, 0.0,
-                                                point.x, point.y, 0, 0,
-                                                [sender numberOfTouches]);
+        0.0, 0.0, point.x, point.y, 0, 0, (int32_t)[sender numberOfTouches]);
     }
   }
 }
 //--------------------------------------------------------------
 - (IBAction)handleSingleFingerSingleTap:(UIGestureRecognizer *)sender 
 {
+  PRINT_SIGNATURE();
   //Allow the tap gesture during init
   //(for allowing the user to tap away any messagboxes during init)
-  if( [m_glView isReadyToRun] )
+  if( [m_glView isReadyToRun] && [sender numberOfTouches] > 0)
   {
     CGPoint point = [sender locationOfTouch:0 inView:m_glView];
     point.x *= screenScale;
     point.y *= screenScale;
     //NSLog(@"%s singleTap", __PRETTY_FUNCTION__);
-    CGenericTouchActionHandler::GetInstance().OnTap((float)point.x, (float)point.y, [sender numberOfTouches]);
+    CGenericTouchActionHandler::GetInstance().OnTap(
+      (float)point.x, (float)point.y, (int32_t)[sender numberOfTouches]);
   }
 }
 //--------------------------------------------------------------
 - (IBAction)handleDoubleFingerSingleTap:(UIGestureRecognizer *)sender
 {
+  PRINT_SIGNATURE();
   if( [m_glView isXBMCAlive] )//NO GESTURES BEFORE WE ARE UP AND RUNNING
   {
     CGPoint point = [sender locationOfTouch:0 inView:m_glView];
     point.x *= screenScale;
     point.y *= screenScale;
     //NSLog(@"%s toubleTap", __PRETTY_FUNCTION__);
-    CGenericTouchActionHandler::GetInstance().OnTap((float)point.x, (float)point.y, [sender numberOfTouches]);
+    CGenericTouchActionHandler::GetInstance().OnTap(
+      (float)point.x, (float)point.y, (int32_t)[sender numberOfTouches]);
   }
 }
 //--------------------------------------------------------------
 - (IBAction)handleSingleFingerSingleLongTap:(UIGestureRecognizer *)sender
 {
+  PRINT_SIGNATURE();
   if( [m_glView isXBMCAlive] )//NO GESTURES BEFORE WE ARE UP AND RUNNING
   {
     CGPoint point = [sender locationOfTouch:0 inView:m_glView];
@@ -514,7 +802,8 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
     if (sender.state == UIGestureRecognizerStateEnded)
     {
-      CGenericTouchActionHandler::GetInstance().OnSingleTouchMove((float)point.x, (float)point.y, point.x - lastGesturePoint.x, point.y - lastGesturePoint.y, 0, 0);
+      CGenericTouchActionHandler::GetInstance().OnSingleTouchMove(
+        (float)point.x, (float)point.y, point.x - lastGesturePoint.x, point.y - lastGesturePoint.y, 0, 0);
     }
     
     if (sender.state == UIGestureRecognizerStateEnded)
@@ -523,6 +812,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     }
   }
 }
+
 //--------------------------------------------------------------
 - (id)initWithFrame:(CGRect)frame withScreen:(UIScreen *)screen
 { 
@@ -550,27 +840,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
                  name: nil
                object: nil];
 
-#if __IPHONE_8_0
-  if (CDarwinUtils::GetIOSVersion() < 8.0)
-#endif
-  {
-    /* We start in landscape mode */
-    CGRect srect = frame;
-    // in ios sdks older then 8.0 the landscape mode is 90 degrees
-    // rotated
-    srect.size = CGSizeMake( frame.size.height, frame.size.width );
-  
-    m_glView = [[MainEAGLView alloc] initWithFrame: srect withScreen:screen];
-    [[MainScreenManager sharedInstance] setView:m_glView];
-  
-    /* Check if screen is Retina */
-    screenScale = [m_glView getScreenScale:screen];
-
-    [self.view addSubview: m_glView];
-  
-    [m_window addSubview: self.view];
-  }
-
   [m_window makeKeyAndVisible];
   g_xbmcController = self;  
   
@@ -579,29 +848,53 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   return self;
 }
 //--------------------------------------------------------------
-#if __IPHONE_8_0
 - (void)loadView
 {
   [super loadView];
-  if (CDarwinUtils::GetIOSVersion() >= 8.0)
-  {
-    self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+
+  self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.view.autoresizesSubviews = YES;
   
-    m_glView = [[MainEAGLView alloc] initWithFrame:self.view.bounds withScreen:[UIScreen mainScreen]];
-    [[MainScreenManager sharedInstance] setView:m_glView];
-  
-    /* Check if screen is Retina */
-    screenScale = [m_glView getScreenScale:[UIScreen mainScreen]];
-  
-    [self.view addSubview: m_glView];
-  }
+  m_glView = [[MainEAGLView alloc] initWithFrame:self.view.bounds withScreen:[UIScreen mainScreen]];
+  [[MainScreenManager sharedInstance] setView:m_glView];
+
+  /* Check if screen is Retina */
+  screenScale = [m_glView getScreenScale:[UIScreen mainScreen]];
+
+  [self.view addSubview: m_glView];
 }
-#endif
 //--------------------------------------------------------------
 -(void)viewDidLoad
 {
   [super viewDidLoad];
+
+  // we always have these under tvos
+  auto menuRecognizer = [[UITapGestureRecognizer alloc]
+    initWithTarget: self action: @selector(menuPressed:)];
+  menuRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeMenu]];
+  menuRecognizer.delegate  = self;
+  [m_glView addGestureRecognizer: menuRecognizer];
+  [menuRecognizer release];
+
+  auto selectRecognizer = [[UITapGestureRecognizer alloc]
+    initWithTarget: self action: @selector(selectPressed:)];
+  selectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
+  selectRecognizer.delegate  = self;
+  [m_glView addGestureRecognizer: selectRecognizer];
+  [selectRecognizer release];
+
+  auto playPauseRecognizer = [[UITapGestureRecognizer alloc]
+    initWithTarget: self action: @selector(playPausePressed:)];
+  playPauseRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypePlayPause]];
+  playPauseRecognizer.delegate  = self;
+  [m_glView addGestureRecognizer: playPauseRecognizer];
+  [playPauseRecognizer release];
+
+
+  //[self createTapGestureRecognizers];
+  [self createPanGestureRecognizers];
+  [self createSwipeGestureRecognizers];
+  [self createGameControlGesturecognizers];
 }
 //--------------------------------------------------------------
 - (void)dealloc
@@ -701,12 +994,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-- (BOOL) recreateOnReselect
-{ 
-  PRINT_SIGNATURE();
-  return YES;
-}
-//--------------------------------------------------------------
 - (void)didReceiveMemoryWarning
 {
   // Releases the view if it doesn't have a superview.
@@ -777,15 +1064,9 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   UIView *view = [m_window.subviews objectAtIndex:0];
   // reset the rotation of the view
   view.layer.transform = CATransform3DMakeRotation(angle, 0, 0.0, 1.0);
-#if __IPHONE_8_0
   view.layer.bounds = view.bounds;
-#else
-  [view setFrame:m_window.frame];
-#endif
   m_window.screen = screen;
-#if __IPHONE_8_0
   [view setFrame:m_window.frame];
-#endif
 }
 //--------------------------------------------------------------
 - (void) remoteControlReceivedWithEvent: (UIEvent*) receivedEvent {
