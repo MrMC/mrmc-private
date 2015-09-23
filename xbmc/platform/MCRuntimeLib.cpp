@@ -28,25 +28,25 @@
 
 #include "platform/MessagePrinter.h"
 
-extern "C" void App_Preflight()
+extern "C" void MCRuntimeLib_Preflight()
 {
 }
 
-extern "C" void App_Postflight()
+extern "C" void MCRuntimeLib_Postflight()
 {
 }
 
-extern "C" void App_SetRenderGUI(bool renderGUI)
+extern "C" void MCRuntimeLib_SetRenderGUI(bool renderGUI)
 {
   g_application.SetRenderGUI(renderGUI);
 }
 
-extern "C" bool App_Running()
+extern "C" bool MCRuntimeLib_Running()
 {
   return !g_application.m_bStop;
 }
 
-extern "C" int App_Run(bool renderGUI)
+extern "C" int MCRuntimeLib_Run(bool renderGUI)
 {
   int status = -1;
 

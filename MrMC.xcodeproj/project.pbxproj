@@ -1724,10 +1724,10 @@
 		F59045851BA372A600DB589A /* XBMCHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045531BA372A600DB589A /* XBMCHelper.cpp */; };
 		F59045871BA372A600DB589A /* OSXGNUReplacements.c in Sources */ = {isa = PBXBuildFile; fileRef = F59045551BA372A600DB589A /* OSXGNUReplacements.c */; };
 		F59045881BA372A600DB589A /* OSXGNUReplacements.c in Sources */ = {isa = PBXBuildFile; fileRef = F59045551BA372A600DB589A /* OSXGNUReplacements.c */; };
-		F590458E1BA372A600DB589A /* xbmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F590455C1BA372A600DB589A /* xbmc.cpp */; };
-		F590458F1BA372A600DB589A /* xbmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F590455C1BA372A600DB589A /* xbmc.cpp */; };
+		F590458E1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */; };
+		F590458F1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */; };
 		F59045921BA375B100DB589A /* MessagePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MessagePrinter.cpp */; };
-		F59045951BA3D75000DB589A /* XbmcContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* XbmcContext.cpp */; };
+		F59045951BA3D75000DB589A /* MCRuntimeLibContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */; };
 		F592568810FBF2E100D2C91D /* ConvolutionKernels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F592568710FBF2E100D2C91D /* ConvolutionKernels.cpp */; };
 		F597B05B18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */; };
 		F597B05C18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */; };
@@ -1790,7 +1790,7 @@
 		F5CC234718150277006B5E91 /* AESinkNULL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC234518150277006B5E91 /* AESinkNULL.cpp */; };
 		F5CC234918150277006B5E91 /* AESinkNULL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC234518150277006B5E91 /* AESinkNULL.cpp */; };
 		F5CEE60913D3C89700225F72 /* DVDOverlayCodecTX3G.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CEE60713D3C89700225F72 /* DVDOverlayCodecTX3G.cpp */; };
-		F5D0E1151BA667600070EE9C /* XbmcContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* XbmcContext.cpp */; };
+		F5D0E1151BA667600070EE9C /* MCRuntimeLibContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */; };
 		F5D0E1161BA667650070EE9C /* MessagePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MessagePrinter.cpp */; };
 		F5D0E1181BA88FCC0070EE9C /* cocoa_monitor.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D0E1171BA88FCC0070EE9C /* cocoa_monitor.mm */; };
 		F5D13EBB1BAA178A0075A95C /* DictionaryUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */; };
@@ -2054,7 +2054,7 @@
 		F5D13FC91BAF0B6D0075A95C /* DirectoryNodeMoviesOverview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E176A0D25F9FA00618676 /* DirectoryNodeMoviesOverview.cpp */; };
 		F5D13FCA1BAF0B6D0075A95C /* DirectoryNodeMusicVideosOverview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E176C0D25F9FA00618676 /* DirectoryNodeMusicVideosOverview.cpp */; };
 		F5D13FCB1BAF0B6D0075A95C /* DirectoryNodeOverview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E176E0D25F9FA00618676 /* DirectoryNodeOverview.cpp */; };
-		F5D13FCC1BAF0B6D0075A95C /* XbmcContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* XbmcContext.cpp */; };
+		F5D13FCC1BAF0B6D0075A95C /* MCRuntimeLibContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */; };
 		F5D13FCD1BAF0B6D0075A95C /* ReplayGain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5EF800FE1A97892A0035AA4D /* ReplayGain.cpp */; };
 		F5D13FCE1BAF0B6D0075A95C /* DirectoryNodeRecentlyAddedEpisodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E17700D25F9FA00618676 /* DirectoryNodeRecentlyAddedEpisodes.cpp */; };
 		F5D13FCF1BAF0B6D0075A95C /* DirectoryNodeRecentlyAddedMovies.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E17720D25F9FA00618676 /* DirectoryNodeRecentlyAddedMovies.cpp */; };
@@ -2299,7 +2299,7 @@
 		F5D140BF1BAF0B6D0075A95C /* PowerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5EA021A0F6DA7E8005C2EC5 /* PowerManager.cpp */; };
 		F5D140C01BAF0B6D0075A95C /* GUIDialogLockSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED94170E1A11005FA9D2 /* GUIDialogLockSettings.cpp */; };
 		F5D140C11BAF0B6D0075A95C /* GUIDialogProfileSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED96170E1A11005FA9D2 /* GUIDialogProfileSettings.cpp */; };
-		F5D140C21BAF0B6D0075A95C /* xbmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F590455C1BA372A600DB589A /* xbmc.cpp */; };
+		F5D140C21BAF0B6D0075A95C /* MCRuntimeLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */; };
 		F5D140C31BAF0B6D0075A95C /* GUIWindowSettingsProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED9F170E1A11005FA9D2 /* GUIWindowSettingsProfile.cpp */; };
 		F5D140C41BAF0B6D0075A95C /* Profile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED9A170E1A11005FA9D2 /* Profile.cpp */; };
 		F5D140C51BAF0B6D0075A95C /* ProfilesManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DF28ED9C170E1A11005FA9D2 /* ProfilesManager.cpp */; };
@@ -4753,12 +4753,12 @@
 		F59045541BA372A600DB589A /* XBMCHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBMCHelper.h; sourceTree = "<group>"; };
 		F59045551BA372A600DB589A /* OSXGNUReplacements.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = OSXGNUReplacements.c; sourceTree = "<group>"; };
 		F59045561BA372A600DB589A /* OSXGNUReplacements.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXGNUReplacements.h; sourceTree = "<group>"; };
-		F590455C1BA372A600DB589A /* xbmc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = xbmc.cpp; sourceTree = "<group>"; };
-		F590455D1BA372A600DB589A /* xbmc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xbmc.h; sourceTree = "<group>"; };
+		F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCRuntimeLib.cpp; sourceTree = "<group>"; };
+		F590455D1BA372A600DB589A /* MCRuntimeLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCRuntimeLib.h; sourceTree = "<group>"; };
 		F59045901BA375B100DB589A /* MessagePrinter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MessagePrinter.cpp; sourceTree = "<group>"; };
 		F59045911BA375B100DB589A /* MessagePrinter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessagePrinter.h; sourceTree = "<group>"; };
-		F59045931BA3D75000DB589A /* XbmcContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XbmcContext.cpp; sourceTree = "<group>"; };
-		F59045941BA3D75000DB589A /* XbmcContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XbmcContext.h; sourceTree = "<group>"; };
+		F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCRuntimeLibContext.cpp; sourceTree = "<group>"; };
+		F59045941BA3D75000DB589A /* MCRuntimeLibContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCRuntimeLibContext.h; sourceTree = "<group>"; };
 		F592568610FBF2E100D2C91D /* ConvolutionKernels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConvolutionKernels.h; sourceTree = "<group>"; };
 		F592568710FBF2E100D2C91D /* ConvolutionKernels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConvolutionKernels.cpp; sourceTree = "<group>"; };
 		F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDVideoCodec.cpp; sourceTree = "<group>"; };
@@ -8145,10 +8145,10 @@
 				F59045271BA372A600DB589A /* darwin */,
 				F59045901BA375B100DB589A /* MessagePrinter.cpp */,
 				F59045911BA375B100DB589A /* MessagePrinter.h */,
-				F590455C1BA372A600DB589A /* xbmc.cpp */,
-				F590455D1BA372A600DB589A /* xbmc.h */,
-				F59045931BA3D75000DB589A /* XbmcContext.cpp */,
-				F59045941BA3D75000DB589A /* XbmcContext.h */,
+				F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */,
+				F590455D1BA372A600DB589A /* MCRuntimeLib.h */,
+				F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */,
+				F59045941BA3D75000DB589A /* MCRuntimeLibContext.h */,
 			);
 			path = platform;
 			sourceTree = "<group>";
@@ -9215,7 +9215,7 @@
 				18B7C7B91294222E009E7A26 /* GUIControlGroup.cpp in Sources */,
 				18B7C7BA1294222E009E7A26 /* GUIControlGroupList.cpp in Sources */,
 				18B7C7BB1294222E009E7A26 /* GUIControlProfiler.cpp in Sources */,
-				F590458E1BA372A600DB589A /* xbmc.cpp in Sources */,
+				F590458E1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */,
 				18B7C7BC1294222E009E7A26 /* GUIDialog.cpp in Sources */,
 				18B7C7BD1294222E009E7A26 /* GUIEditControl.cpp in Sources */,
 				18B7C7BE1294222E009E7A26 /* GUIFadeLabelControl.cpp in Sources */,
@@ -9249,7 +9249,7 @@
 				18B7C7D81294222E009E7A26 /* GUIRSSControl.cpp in Sources */,
 				18B7C7D91294222E009E7A26 /* GUIScrollBarControl.cpp in Sources */,
 				18B7C7DA1294222E009E7A26 /* GUISelectButtonControl.cpp in Sources */,
-				F59045951BA3D75000DB589A /* XbmcContext.cpp in Sources */,
+				F59045951BA3D75000DB589A /* MCRuntimeLibContext.cpp in Sources */,
 				18B7C7DB1294222E009E7A26 /* GUISettingsSliderControl.cpp in Sources */,
 				18B7C7DC1294222E009E7A26 /* GUIShader.cpp in Sources */,
 				18B7C7DD1294222E009E7A26 /* GUISliderControl.cpp in Sources */,
@@ -9993,7 +9993,7 @@
 				E49912C4174E5DA000741B6D /* DirectoryNodeMoviesOverview.cpp in Sources */,
 				E49912C5174E5DA000741B6D /* DirectoryNodeMusicVideosOverview.cpp in Sources */,
 				E49912C6174E5DA000741B6D /* DirectoryNodeOverview.cpp in Sources */,
-				F5D0E1151BA667600070EE9C /* XbmcContext.cpp in Sources */,
+				F5D0E1151BA667600070EE9C /* MCRuntimeLibContext.cpp in Sources */,
 				DFED5AC71AB23388001F080D /* ReplayGain.cpp in Sources */,
 				F5A4F2A81BB086FE0083FC69 /* libexif.cpp in Sources */,
 				E49912C7174E5DA000741B6D /* DirectoryNodeRecentlyAddedEpisodes.cpp in Sources */,
@@ -10240,7 +10240,7 @@
 				E49913EA174E5F9900741B6D /* PowerManager.cpp in Sources */,
 				E49913EB174E5FB000741B6D /* GUIDialogLockSettings.cpp in Sources */,
 				E49913EC174E5FB000741B6D /* GUIDialogProfileSettings.cpp in Sources */,
-				F590458F1BA372A600DB589A /* xbmc.cpp in Sources */,
+				F590458F1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */,
 				E49913ED174E5FB000741B6D /* GUIWindowSettingsProfile.cpp in Sources */,
 				E49913EE174E5FB000741B6D /* Profile.cpp in Sources */,
 				E49913EF174E5FB000741B6D /* ProfilesManager.cpp in Sources */,
@@ -10886,7 +10886,7 @@
 				F5D13FC91BAF0B6D0075A95C /* DirectoryNodeMoviesOverview.cpp in Sources */,
 				F5D13FCA1BAF0B6D0075A95C /* DirectoryNodeMusicVideosOverview.cpp in Sources */,
 				F5D13FCB1BAF0B6D0075A95C /* DirectoryNodeOverview.cpp in Sources */,
-				F5D13FCC1BAF0B6D0075A95C /* XbmcContext.cpp in Sources */,
+				F5D13FCC1BAF0B6D0075A95C /* MCRuntimeLibContext.cpp in Sources */,
 				F5D13FCD1BAF0B6D0075A95C /* ReplayGain.cpp in Sources */,
 				F5D13FCE1BAF0B6D0075A95C /* DirectoryNodeRecentlyAddedEpisodes.cpp in Sources */,
 				F5D13FCF1BAF0B6D0075A95C /* DirectoryNodeRecentlyAddedMovies.cpp in Sources */,
@@ -11134,7 +11134,7 @@
 				F5D140BF1BAF0B6D0075A95C /* PowerManager.cpp in Sources */,
 				F5D140C01BAF0B6D0075A95C /* GUIDialogLockSettings.cpp in Sources */,
 				F5D140C11BAF0B6D0075A95C /* GUIDialogProfileSettings.cpp in Sources */,
-				F5D140C21BAF0B6D0075A95C /* xbmc.cpp in Sources */,
+				F5D140C21BAF0B6D0075A95C /* MCRuntimeLib.cpp in Sources */,
 				F5D140C31BAF0B6D0075A95C /* GUIWindowSettingsProfile.cpp in Sources */,
 				F5D140C41BAF0B6D0075A95C /* Profile.cpp in Sources */,
 				F5D140C51BAF0B6D0075A95C /* ProfilesManager.cpp in Sources */,

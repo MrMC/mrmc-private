@@ -39,7 +39,8 @@
 
 #include "Application.h"
 #include "settings/AdvancedSettings.h"
-#include "platform/xbmc.h"
+#include "platform/MCRuntimeLib.h"
+#include "platform/MCRuntimeLibContext.h"
 #include "windowing/WinEvents.h"
 #include "guilib/GUIWindowManager.h"
 #include "utils/log.h"
@@ -47,7 +48,6 @@
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "AppParamParser.h"
-#include "platform/XbmcContext.h"
 #include <android/bitmap.h>
 #include "platform/android/jni/JNIThreading.h"
 #include "platform/android/jni/BroadcastReceiver.h"
@@ -356,7 +356,7 @@ void CXBMCApp::run()
   int status = 0;
 
   SetupEnv();
-  XBMC::Context context;
+  MCRuntimeLib::Context context;
 
   CJNIIntent startIntent = getIntent();
 
@@ -379,10 +379,10 @@ void CXBMCApp::run()
   }
 
   m_firstrun=false;
-  android_printf(" => running App_Run...");
+  android_printf(" => running MCRuntimeLib...");
   try
   {
-    status = App_Run(true);
+    status = MCRuntimeLib_Run(true);
     android_printf(" => App_Run finished with %d", status);
   }
   catch(...)

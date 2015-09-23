@@ -113,6 +113,11 @@ MainController *m_xbmcController;
   err = nil;
   if (![[AVAudioSession sharedInstance] setActive: YES error: &err])
     ELOG(@"AVAudioSession setActive failed: %@", err);
+
+#if TARGET_OS_SIMULATOR
+  NSLog(@"Documents Directory: %@", [[[NSFileManager defaultManager]
+    URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
+#endif
 }
 
 - (void)dealloc
@@ -127,7 +132,6 @@ MainController *m_xbmcController;
 
 int main(int argc, char *argv[]) {
   NSAutoreleasePool * pool = [[NSAutoreleasePool alloc] init];	
-  int retVal = 0;
   
   // Block SIGPIPE
   // SIGPIPE repeatably kills us, turn it off
@@ -138,6 +142,7 @@ int main(int argc, char *argv[]) {
     sigprocmask(SIG_BLOCK, &set, NULL);
   }
   
+  int retVal = 0;
   @try
   {
     retVal = UIApplicationMain(argc,argv,@"UIApplication",@"MainApplicationDelegate");

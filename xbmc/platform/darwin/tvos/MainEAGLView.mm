@@ -26,8 +26,8 @@
 
 #include "AdvancedSettings.h"
 #include "messaging/ApplicationMessenger.h"
-#include "platform/xbmc.h"
-#include "platform/XbmcContext.h"
+#include "platform/MCRuntimeLib.h"
+#include "platform/MCRuntimeLibContext.h"
 #include "utils/log.h"
 
 #import <QuartzCore/QuartzCore.h>
@@ -310,14 +310,14 @@ using namespace KODI::MESSAGING;
 {
   PRINT_SIGNATURE();
   pause = TRUE;
-  App_SetRenderGUI(false);
+  MCRuntimeLib_SetRenderGUI(false);
 }
 //--------------------------------------------------------------
 - (void) resumeAnimation
 {
   PRINT_SIGNATURE();
   pause = FALSE;
-  App_SetRenderGUI(true);
+  MCRuntimeLib_SetRenderGUI(true);
 }
 //--------------------------------------------------------------
 - (void) startAnimation
@@ -342,7 +342,7 @@ using namespace KODI::MESSAGING;
 	{
 		animating = FALSE;
     xbmcAlive = FALSE;
-    if (App_Running())
+    if (MCRuntimeLib_Running())
       CApplicationMessenger::GetInstance().PostMsg(TMSG_QUIT);
     // wait for animation thread to die
     if ([animationThread isFinished] == NO)
@@ -354,7 +354,7 @@ using namespace KODI::MESSAGING;
 {
   CCocoaAutoPool outerpool;
 
-  [[NSThread currentThread] setName:@"App_Run"];
+  [[NSThread currentThread] setName:@"MCRuntimeLib"];
   
   // signal the thread is alive
   NSConditionLock* myLock = arg;
@@ -377,12 +377,12 @@ using namespace KODI::MESSAGING;
     try
     {
       // set up some xbmc specific relationships
-      XBMC::Context context;
+      MCRuntimeLib::Context context;
       xbmcAlive = TRUE;
       // start up with gui enabled
-      status = App_Run(true);
+      status = MCRuntimeLib_Run(true);
       // we exited or died.
-      App_SetRenderGUI(false);
+      MCRuntimeLib_SetRenderGUI(false);
     }
     catch(...)
     {

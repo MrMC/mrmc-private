@@ -25,14 +25,14 @@
 #include "FileItem.h"
 #include "PlayListPlayer.h"
 #include "utils/log.h"
-#include "platform/xbmc.h"
+#include "platform/MCRuntimeLib.h"
+#include "platform/MCRuntimeLibContext.h"
 #include <sys/resource.h>
 #include <signal.h>
 #include "Util.h"
 #ifdef HAS_LIRC
 #include "input/linux/LIRC.h"
 #endif
-#include "platform/XbmcContext.h"
 #include "windowing/WindowingFactory.h"
 #include "windowing/osx/WinEventsOSX.h"
 
@@ -237,7 +237,7 @@ static void setupWindowMenu(void)
   NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
   // empty
   
-  [[NSThread currentThread] setName:@"XBMC_Run"];
+  [[NSThread currentThread] setName:@"MCRuntimeLib"];
 
 #if defined(DEBUG)
   struct rlimit rlim;
@@ -255,8 +255,8 @@ static void setupWindowMenu(void)
   appParamParser.Parse((const char **)gArgv, (int)gArgc);
   
   bool renderGUI = true;
-  gStatus = App_Run(renderGUI);
-  g_application.SetRenderGUI(false);
+  gStatus = MCRuntimeLib_Run(renderGUI);
+  MCRuntimeLib_SetRenderGUI(false);
   [pool release];
   [self performSelectorOnMainThread:@selector(stopRunLoop) withObject:nil waitUntilDone:false];
 }

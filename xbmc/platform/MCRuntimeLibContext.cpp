@@ -18,10 +18,43 @@
  *
  */
 
-#pragma once
-extern "C" void App_Preflight();
-extern "C" void App_Postflight();
-extern "C" void App_SetRenderGUI(bool renderGUI);
-extern "C" int  App_Run(bool renderGUI);
-extern "C" bool App_Running();
+#include "platform/MCRuntimeLibContext.h"
+
+#include "threads/Thread.h"
+#include "commons/Exception.h"
+#include "utils/log.h"
+
+namespace MCRuntimeLib
+{
+
+  class ContextOpaque
+  {
+  public:
+    XbmcCommons::ILogger* loggerImpl;
+
+    ContextOpaque() : loggerImpl(NULL) {}
+  };
+
+  Context::Context()
+  {
+    impl = new ContextOpaque;
+
+    // instantiate
+    impl->loggerImpl = new XbmcUtils::LogImplementation;
+
+    // set
+    XbmcCommons::Exception::SetLogger(impl->loggerImpl);
+    CThread::SetLogger(impl->loggerImpl);
+  }
+
+  Context::~Context()
+  {
+    // cleanup
+    XbmcCommons::Exception::SetLogger(NULL);
+    CThread::SetLogger(NULL);
+    delete impl->loggerImpl;
+
+    delete impl;
+  }
+}
 

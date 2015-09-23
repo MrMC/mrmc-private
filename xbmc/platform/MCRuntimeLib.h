@@ -19,24 +19,9 @@
  */
 
 #pragma once
-
-namespace XBMC
-{
-  class ContextOpaque;
-
-  /**
-   * This class sets up a few instances and services. Currently it only
-   *  provides a logger to the CThread functionality. If it never does
-   *  more than this it can be removed.
-   */
-  class Context
-  {
-    ContextOpaque* impl;
-  public:
-    Context();
-    virtual ~Context();
-  };
-}
-
-
+extern "C" void MCRuntimeLib_Preflight();
+extern "C" void MCRuntimeLib_Postflight();
+extern "C" void MCRuntimeLib_SetRenderGUI(bool renderGUI);
+extern "C" int  MCRuntimeLib_Run(bool renderGUI);
+extern "C" bool MCRuntimeLib_Running();
 

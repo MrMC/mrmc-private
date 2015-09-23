@@ -1,3 +1,4 @@
+#pragma once
 /*
  *      Copyright (C) 2005-2013 Team XBMC
  *      http://xbmc.org
@@ -18,43 +19,23 @@
  *
  */
 
-#include "XbmcContext.h"
-
-#include "threads/Thread.h"
-#include "commons/Exception.h"
-#include "utils/log.h"
-
-namespace XBMC
+namespace MCRuntimeLib
 {
+  class ContextOpaque;
 
-  class ContextOpaque
+  /**
+   * This class sets up a few instances and services. Currently it only
+   *  provides a logger to the CThread functionality. If it never does
+   *  more than this it can be removed.
+   */
+  class Context
   {
+    ContextOpaque* impl;
   public:
-    XbmcCommons::ILogger* loggerImpl;
-
-    ContextOpaque() : loggerImpl(NULL) {}
+    Context();
+    virtual ~Context();
   };
-
-  Context::Context()
-  {
-    impl = new ContextOpaque;
-
-    // instantiate
-    impl->loggerImpl = new XbmcUtils::LogImplementation;
-
-    // set
-    XbmcCommons::Exception::SetLogger(impl->loggerImpl);
-    CThread::SetLogger(impl->loggerImpl);
-  }
-
-  Context::~Context()
-  {
-    // cleanup
-    XbmcCommons::Exception::SetLogger(NULL);
-    CThread::SetLogger(NULL);
-    delete impl->loggerImpl;
-
-    delete impl;
-  }
 }
+
+
 

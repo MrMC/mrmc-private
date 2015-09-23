@@ -368,7 +368,7 @@ using namespace KODI::MESSAGING;
 {
   CCocoaAutoPool outerpool;
 
-  [[NSThread currentThread] setName:@"XBMC_Run"];
+  [[NSThread currentThread] setName:@"MCRuntimeLib"];
   
   // set up some xbmc specific relationships
   XBMC::Context context;
