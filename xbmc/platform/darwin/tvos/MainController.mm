@@ -1120,7 +1120,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   int status = 0;
   try
   {
-    // set up some xbmc specific relationships
+    // set up some MCRuntimeLib specific relationships
     MCRuntimeLib::Context run_context;
     m_appAlive = TRUE;
     // start up with gui enabled
