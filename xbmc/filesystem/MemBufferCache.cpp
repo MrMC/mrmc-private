@@ -90,7 +90,7 @@ int MemBufferCache::WriteToCache(const char *pBuffer, size_t iSize)
 
   if (!m_buffer.WriteData((char*)pBuffer, nToWrite))
   {
-    CLog::Log(LOGWARNING,"%s, failed to write %d bytes to buffer. max buffer size: %d", __FUNCTION__, nToWrite, m_buffer.getMaxWriteSize());
+    CLog::Log(LOGWARNING,"%s, failed to write %d bytes to buffer. max buffer size: %zu", __FUNCTION__, nToWrite, m_buffer.getMaxWriteSize());
     nToWrite = 0;
   }
 
@@ -114,7 +114,7 @@ int MemBufferCache::ReadFromCache(char *pBuffer, size_t iMaxSize)
   {
     if (!m_buffer.ReadData(pBuffer, nRead))
     {
-      CLog::Log(LOGWARNING, "%s, failed to read %d bytes from buffer. max read size: %d", __FUNCTION__, nRead, m_buffer.getMaxReadSize());
+      CLog::Log(LOGWARNING, "%s, failed to read %d bytes from buffer. max read size: %zu", __FUNCTION__, nRead, m_buffer.getMaxReadSize());
       return 0;
     }
 
