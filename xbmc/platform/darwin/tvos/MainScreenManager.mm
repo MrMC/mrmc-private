@@ -18,8 +18,9 @@
  *
  */
 
-#include <sys/resource.h>
 #include <signal.h>
+#include <sys/resource.h>
+
 #include "utils/log.h"
 #include "settings/DisplaySettings.h"
 #include "threads/Event.h"
@@ -30,12 +31,11 @@
 #include "platform/darwin/DarwinUtils.h"
 
 #import <Foundation/Foundation.h>
-#include <objc/runtime.h>
+#import <objc/runtime.h>
 
 #import "platform/darwin/tvos/MainScreenManager.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainExternalTouchController.h"
-#import "platform/darwin/tvos/MainEAGLView.h"
 
 const CGFloat timeSwitchingToExternalSecs = 6.0;
 const CGFloat timeSwitchingToInternalSecs = 2.0;
