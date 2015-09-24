@@ -49,7 +49,7 @@ void CDarwinStorageProvider::GetLocalDrives(VECSOURCES &localDrives)
   share.m_ignore = true;
   localDrives.push_back(share);
 
-#if defined(TARGET_DARWIN_TVOS)
+#if defined(TARGET_DARWIN_IOS)
   // User Pictures folder
   share.strPath = "Users/davilla";
   share.strPath += "/Pictures";
