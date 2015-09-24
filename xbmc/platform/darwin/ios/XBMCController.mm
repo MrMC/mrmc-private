@@ -64,13 +64,13 @@ const NSString *MPNowPlayingInfoPropertyPlaybackRate = @"MPNowPlayingInfoPropert
 const NSString *MPNowPlayingInfoPropertyPlaybackQueueIndex = @"MPNowPlayingInfoPropertyPlaybackQueueIndex";
 const NSString *MPNowPlayingInfoPropertyPlaybackQueueCount = @"MPNowPlayingInfoPropertyPlaybackQueueCount";
 #endif
-#import "IOSEAGLView.h"
 
-#import "XBMCController.h"
-#import "IOSScreenManager.h"
-#import "XBMCApplication.h"
-#import "XBMCDebugHelpers.h"
-#import "AutoPool.h"
+#import "platform/darwin/AutoPool.h"
+#import "platform/darwin/ios/IOSEAGLView.h"
+#import "platform/darwin/ios/XBMCController.h"
+#import "platform/darwin/ios/IOSScreenManager.h"
+#import "platform/darwin/ios/XBMCApplication.h"
+#import "platform/darwin/ios/NSLogDebugHelpers.h"
 
 XBMCController *g_xbmcController;
 static CEvent screenChangeEvent;

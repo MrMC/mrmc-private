@@ -34,21 +34,20 @@
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
 #include "Util.h"
-#include "XbmcContext.h"
+#include "platform/MCRuntimeLibContext.h"
 #include "WindowingFactory.h"
 
 #import <QuartzCore/QuartzCore.h>
 
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
-#import "IOSEAGLView.h"
-#if defined(TARGET_DARWIN_IOS)
+
+#import "platform/darwin/AutoPool.h"
+#import "platform/darwin/DarwinUtils.h"
+#import "platform/darwin/ios/IOSEAGLView.h"
 #import "platform/darwin/ios/XBMCController.h"
-#endif
-#import "IOSScreenManager.h"
-#import "AutoPool.h"
-#import "DarwinUtils.h"
-#import "XBMCDebugHelpers.h"
+#import "platform/darwin/ios/IOSScreenManager.h"
+#import "platform/darwin/ios/NSLogDebugHelpers.h"
 
 using namespace KODI::MESSAGING;
 
@@ -370,8 +369,8 @@ using namespace KODI::MESSAGING;
 
   [[NSThread currentThread] setName:@"MCRuntimeLib"];
   
-  // set up some xbmc specific relationships
-  XBMC::Context context;
+  // set up some MCRuntimeLib specific relationships
+  MCRuntimeLib::Context run_context;
   readyToRun = true;
 
   // signal we are alive

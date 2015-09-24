@@ -328,7 +328,7 @@ void CAAudioUnitSink::setCoreAudioPreferredSampleRate()
 {
   Float64 preferredSampleRate = m_outputFormat.mSampleRate;
   CLog::Log(LOGNOTICE, "%s requesting hw samplerate %f", __PRETTY_FUNCTION__, preferredSampleRate);
-#if !defined(TARGET_DARWIN_TVOS)
+#if 0
   OSStatus status = AudioSessionSetProperty(kAudioSessionProperty_PreferredHardwareSampleRate,
                                    sizeof(preferredSampleRate), &preferredSampleRate);
   if (status != noErr)
@@ -343,7 +343,7 @@ void CAAudioUnitSink::setCoreAudioPreferredSampleRate()
 
 Float64 CAAudioUnitSink::getCoreAudioRealisedSampleRate()
 {
-#if !defined(TARGET_DARWIN_TVOS)
+#if 0
   Float64 outputSampleRate = 0.0;
   UInt32 ioDataSize = sizeof(outputSampleRate);
   if (AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareSampleRate,
@@ -362,7 +362,7 @@ bool CAAudioUnitSink::setupAudio()
   if (m_setup && m_audioUnit)
     return true;
 
-#if !defined(TARGET_DARWIN_TVOS)
+#if 0
   AudioSessionAddPropertyListener(kAudioSessionProperty_AudioRouteChange,
     sessionPropertyCallback, this);
 
@@ -437,7 +437,7 @@ bool CAAudioUnitSink::setupAudio()
 bool CAAudioUnitSink::checkAudioRoute()
 {
   // why do we need to know the audio route ?
-#if !defined(TARGET_DARWIN_TVOS)
+#if 0
   CFStringRef route;
   UInt32 propertySize = sizeof(CFStringRef);
   if (AudioSessionGetProperty(kAudioSessionProperty_AudioRoute, &propertySize, &route) != noErr)
@@ -450,7 +450,7 @@ bool CAAudioUnitSink::checkSessionProperties()
 {
   checkAudioRoute();
 
-#if !defined(TARGET_DARWIN_TVOS)
+#if 0
   UInt32 ioDataSize;
   ioDataSize = sizeof(m_outputVolume);
   if (AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareOutputVolume,
@@ -495,7 +495,7 @@ void CAAudioUnitSink::deactivateAudioSession()
     pause();
     AudioUnitUninitialize(m_audioUnit);
     AudioComponentInstanceDispose(m_audioUnit), m_audioUnit = NULL;
-#if !defined(TARGET_DARWIN_TVOS)
+#if 0
     AudioSessionRemovePropertyListenerWithUserData(kAudioSessionProperty_AudioRouteChange,
       sessionPropertyCallback, this);
     AudioSessionRemovePropertyListenerWithUserData(kAudioSessionProperty_CurrentHardwareOutputVolume,
@@ -506,7 +506,7 @@ void CAAudioUnitSink::deactivateAudioSession()
   }
 }
 
-#if !defined(TARGET_DARWIN_TVOS)
+#if 0
 void CAAudioUnitSink::sessionPropertyCallback(void *inClientData,
   AudioSessionPropertyID inID, UInt32 inDataSize, const void *inData)
 {
