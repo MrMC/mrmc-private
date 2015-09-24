@@ -248,12 +248,10 @@ void CExternalPlayer::Process()
   m_callback.OnPlayBackStarted();
 
   int ret = 1;
-#if !defined(TARGET_DARWIN_TVOS)
 #if defined(TARGET_ANDROID)
   ret = ExecuteAppAndroid(m_filename.c_str(), mainFile.c_str());
-#elif (defined(TARGET_POSIX) || defined(TARGET_DARWIN_OSX))
+#elif !defined(TARGET_DARWIN_IOS)
   ret = ExecuteAppLinux(strFArgs.c_str());
-#endif
 #endif
   int64_t elapsedMillis = XbmcThreads::SystemClockMillis() - m_playbackStartTime;
 
@@ -302,8 +300,7 @@ void CExternalPlayer::Process()
     m_callback.OnPlayBackEnded();
 }
 
-#if !defined(TARGET_DARWIN_TVOS)
-#if !defined(TARGET_ANDROID) && (defined(TARGET_POSIX) || defined(TARGET_DARWIN_OSX))
+#if !defined(TARGET_DARWIN_IOS) && !defined(TARGET_ANDROID)
 int CExternalPlayer::ExecuteAppLinux(const char* strSwitches)
 {
   CLog::Log(LOGNOTICE, "%s: %s", __FUNCTION__, strSwitches);
@@ -323,7 +320,6 @@ int CExternalPlayer::ExecuteAppLinux(const char* strSwitches)
 
   return ret == 0;
 }
-#endif
 #endif
 
 #if defined(TARGET_ANDROID)

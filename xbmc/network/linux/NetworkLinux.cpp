@@ -540,7 +540,7 @@ void CNetworkLinux::SetNameServers(const std::vector<std::string>& nameServers)
 
 bool CNetworkLinux::PingHost(in_addr_t remote_ip, unsigned int timeout_ms)
 {
-#if !defined(TARGET_DARWIN_TVOS)
+#if !defined(TARGET_DARWIN_IOS) && !defined(TARGET_ANDROID)
   char cmd_line [64];
 
   struct in_addr host_ip; 

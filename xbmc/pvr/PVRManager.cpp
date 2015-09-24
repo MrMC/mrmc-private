@@ -568,7 +568,7 @@ bool CPVRManager::SetWakeupCommand(void)
 
       std::string strExecCommand = StringUtils::Format("%s %ld", strWakeupCommand.c_str(), iWakeupTime);
 
-#if !defined(TARGET_DARWIN_TVOS)
+#if !defined(TARGET_DARWIN_IOS) && !defined(TARGET_ANDROID)
       const int iReturn = system(strExecCommand.c_str());
 #else
       const int iReturn = -1;

@@ -78,12 +78,10 @@ public:
   virtual std::string GetPlayerState();
   virtual bool SetPlayerState(const std::string& state);
   
-#if !defined(TARGET_DARWIN_TVOS)
 #if defined(TARGET_ANDROID)
   virtual int ExecuteAppAndroid(const char* strSwitches,const char* strPath);
-#elif defined(TARGET_POSIX)
+#elif !defined(TARGET_DARWIN_IOS)
   virtual int ExecuteAppLinux(const char* strSwitches);
-#endif
 #endif
 
 private:
