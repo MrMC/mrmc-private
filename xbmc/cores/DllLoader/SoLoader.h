@@ -33,18 +33,18 @@ public:
   SoLoader(const std::string &so, bool bGlobal = false);
   ~SoLoader();
 
-  virtual bool Load();
-  virtual void Unload();
+  virtual bool  Load();
+  virtual void  Unload();
 
-  virtual int ResolveExport(const char* symbol, void** ptr, bool logging = true);
-  virtual bool IsSystemDll();
+  virtual int   ResolveExport(const char* symbol, void** ptr, bool logging = true);
+  virtual bool  IsSystemDll();
   virtual void* GetHModule();
-  virtual bool HasSymbols();
+  virtual bool  HasSymbols();
 
 private:
-  void* m_soHandle;
-  bool m_bGlobal;
-  bool m_bLoaded;
+  void   *m_soHandle;
+  bool    m_bGlobal;
+  bool    m_bLoaded;
 };
 
 #endif
