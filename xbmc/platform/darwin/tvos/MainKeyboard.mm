@@ -30,8 +30,7 @@ KeyboardView *g_pIosKeyboard = nil;
 
 bool CMainKeyboard::ShowAndGetInput(char_callback_t pCallback, const std::string &initialString, std::string &typedString, const std::string &heading, bool bHiddenInput)
 {
-  // we are in xbmc main thread.
-
+  // we are in the MCRuntimeLib thread so we need a pool
   CCocoaAutoPool pool;
   
   @synchronized([KeyboardView class])
