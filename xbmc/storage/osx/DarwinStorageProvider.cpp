@@ -49,6 +49,29 @@ void CDarwinStorageProvider::GetLocalDrives(VECSOURCES &localDrives)
   share.m_ignore = true;
   localDrives.push_back(share);
 
+#if defined(TARGET_DARWIN_TVOS)
+  // User Pictures folder
+  share.strPath = "Users/davilla";
+  share.strPath += "/Pictures";
+  share.strName = "Pictures";
+  share.m_ignore = true;
+  localDrives.push_back(share);
+
+  // User Pictures folder
+  share.strPath = "Users/davilla";
+  share.strPath += "/Movies";
+  share.strName = "Movies";
+  share.m_ignore = true;
+  localDrives.push_back(share);
+
+  // User Pictures folder
+  share.strPath = "Users/davilla";
+  share.strPath += "/Music";
+  share.strName = "Music";
+  share.m_ignore = true;
+  localDrives.push_back(share);
+#endif
+  
 #if defined(TARGET_DARWIN_OSX)
   // User desktop folder
   share.strPath = getenv("HOME");
