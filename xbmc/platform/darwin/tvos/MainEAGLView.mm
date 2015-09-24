@@ -97,27 +97,42 @@ using namespace KODI::MESSAGING;
 
 - (CGFloat) getScreenScale:(UIScreen *)screen
 {
-  CGFloat ret = 1.0;
-  if ([screen respondsToSelector:@selector(scale)])
-  {    
-    // normal other iDevices report 1.0 here
-    // retina devices report 2.0 here
-    // this info is true as of 19.3.2012.
-    if ([screen scale] > 1.0)
-      ret = [screen scale];
-    
-    //if no retina display scale detected yet -
-    //ensure retina resolution on supported devices mainScreen
-    //even on older iOS SDKs
-    double screenScale = 1.0;
-    if (ret == 1.0 && screen == [UIScreen mainScreen] && CDarwinUtils::DeviceHasRetina(screenScale))
-      ret = screenScale;//set scale factor from our static list in case older SDKs report 1.0
+  CGFloat scale = 1.0;
+  // On iOS8 and later we use the native scale of the screen as our content scale factor.
+  // This allows us to render to the exact pixel resolution of the screen which avoids additional scaling and GPU rendering work.
+  // For example the iPhone 6 Plus appears to UIKit as a 736 x 414 pt screen with a 3x scale factor (2208 x 1242 virtual pixels).
+  // But the native pixel dimensions are actually 1920 x 1080.
+  // Since we are streaming 1080p buffers from the camera we can render to the iPhone 6 Plus screen at 1:1 with no additional scaling if we set everything up correctly.
+  // Using the native scale of the screen also allows us to render at full quality when using the display zoom feature on iPhone 6/6 Plus.
 
-    // fix for ip6 plus which seems to report 2.0 when not compiled with ios8 sdk
-    if (CDarwinUtils::DeviceHasRetina(screenScale) && screenScale == 3.0)
-      ret = screenScale;
+  // Only try to compile this code if we are using the 8.0 or later SDK.
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+  if ( [screen respondsToSelector:@selector(nativeScale)] )
+    scale = [screen nativeScale];
+  else
+#endif
+  {
+    if ([screen respondsToSelector:@selector(scale)])
+    {
+      // normal other iDevices report 1.0 here
+      // retina devices report 2.0 here
+      // this info is true as of 19.3.2012.
+      if ([screen scale] > 1.0)
+        scale = [screen scale];
+
+      //if no retina display scale detected yet -
+      //ensure retina resolution on supported devices mainScreen
+      //even on older iOS SDKs
+      double screenScale = 1.0;
+      if (scale == 1.0 && screen == [UIScreen mainScreen] && CDarwinUtils::DeviceHasRetina(screenScale))
+        scale = screenScale;//set scale factor from our static list in case older SDKs report 1.0
+
+      // fix for ip6 plus which seems to report 2.0 when not compiled with ios8 sdk
+      if (CDarwinUtils::DeviceHasRetina(screenScale) && screenScale == 3.0)
+        scale = screenScale;
+    }
   }
-  return ret;
+  return scale;
 }
 
 - (void) setScreen:(UIScreen *)screen withFrameBufferResize:(BOOL)resize;
@@ -153,7 +168,7 @@ using namespace KODI::MESSAGING;
       kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
       nil];
 		
-    EAGLContext *aContext = [[EAGLContext alloc] 
+    EAGLContext *aContext = [[EAGLContext alloc] q
       initWithAPI:kEAGLRenderingAPIOpenGLES2];
     
     if (!aContext)
