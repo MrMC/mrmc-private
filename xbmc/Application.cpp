@@ -328,9 +328,9 @@ bool CApplication::OnEvent(XBMC_Event& newEvent)
   return true;
 }
 
-extern "C" void __stdcall init_emu_environ();
-extern "C" void __stdcall update_emu_environ();
-extern "C" void __stdcall cleanup_emu_environ();
+extern "C" void init_emu_environ();
+extern "C" void update_emu_environ();
+extern "C" void cleanup_emu_environ();
 
 //
 // Utility function used to copy files from the application bundle

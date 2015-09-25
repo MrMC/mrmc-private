@@ -86,7 +86,7 @@ char **dll__environ = dll__environ_imp;
 
 CCriticalSection dll_cs_environ;
 
-extern "C" void __stdcall init_emu_environ()
+extern "C" void init_emu_environ()
 {
   memset(dll__environ, 0, EMU_MAX_ENVIRONMENT_ITEMS + 1);
 
@@ -106,7 +106,7 @@ extern "C" void __stdcall init_emu_environ()
   //dll_putenv("TEMP=special://temp/temp"); // for python tempdir
 }
 
-extern "C" void __stdcall update_emu_environ()
+extern "C" void update_emu_environ()
 {
   // Use a proxy, if the GUI was configured as such
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_NETWORK_USEHTTPPROXY)
@@ -138,7 +138,7 @@ extern "C" void __stdcall update_emu_environ()
   }
 }
 
-extern "C" void __stdcall cleanup_emu_environ()
+extern "C" void cleanup_emu_environ()
 {
   for (int i = 0; i < EMU_MAX_ENVIRONMENT_ITEMS; i++)
   {
