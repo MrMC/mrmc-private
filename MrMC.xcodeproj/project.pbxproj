@@ -1730,7 +1730,7 @@
 		F59045881BA372A600DB589A /* OSXGNUReplacements.c in Sources */ = {isa = PBXBuildFile; fileRef = F59045551BA372A600DB589A /* OSXGNUReplacements.c */; };
 		F590458E1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */; };
 		F590458F1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */; };
-		F59045921BA375B100DB589A /* MessagePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MessagePrinter.cpp */; };
+		F59045921BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp */; };
 		F59045951BA3D75000DB589A /* MCRuntimeLibContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */; };
 		F592568810FBF2E100D2C91D /* ConvolutionKernels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F592568710FBF2E100D2C91D /* ConvolutionKernels.cpp */; };
 		F597B05B18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */; };
@@ -1795,7 +1795,7 @@
 		F5CC234918150277006B5E91 /* AESinkNULL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC234518150277006B5E91 /* AESinkNULL.cpp */; };
 		F5CEE60913D3C89700225F72 /* DVDOverlayCodecTX3G.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CEE60713D3C89700225F72 /* DVDOverlayCodecTX3G.cpp */; };
 		F5D0E1151BA667600070EE9C /* MCRuntimeLibContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */; };
-		F5D0E1161BA667650070EE9C /* MessagePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MessagePrinter.cpp */; };
+		F5D0E1161BA667650070EE9C /* MCRuntimeLibStartupLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp */; };
 		F5D0E1181BA88FCC0070EE9C /* cocoa_monitor.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D0E1171BA88FCC0070EE9C /* cocoa_monitor.mm */; };
 		F5D13EBB1BAA178A0075A95C /* DictionaryUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */; };
 		F5D13EBE1BAE388E0075A95C /* DictionaryUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */; };
@@ -1862,7 +1862,7 @@
 		F5D13F031BAF0B6D0075A95C /* DVDDemuxPVRClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8482902156CFED9005A996F /* DVDDemuxPVRClient.cpp */; };
 		F5D13F041BAF0B6D0075A95C /* DVDDemuxShoutcast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E154D0D25F9F900618676 /* DVDDemuxShoutcast.cpp */; };
 		F5D13F051BAF0B6D0075A95C /* DVDDemuxUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E154F0D25F9F900618676 /* DVDDemuxUtils.cpp */; };
-		F5D13F061BAF0B6D0075A95C /* MessagePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MessagePrinter.cpp */; };
+		F5D13F061BAF0B6D0075A95C /* MCRuntimeLibStartupLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp */; };
 		F5D13F071BAF0B6D0075A95C /* DVDDemuxVobsub.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E33206370D5070AA00435CE3 /* DVDDemuxVobsub.cpp */; };
 		F5D13F081BAF0B6D0075A95C /* DVDFactoryDemuxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E25BF0D263DC100618676 /* DVDFactoryDemuxer.cpp */; };
 		F5D13F091BAF0B6D0075A95C /* DVDFactoryInputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E38E15590D25F9FA00618676 /* DVDFactoryInputStream.cpp */; };
@@ -4759,8 +4759,8 @@
 		F59045561BA372A600DB589A /* OSXGNUReplacements.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSXGNUReplacements.h; sourceTree = "<group>"; };
 		F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCRuntimeLib.cpp; sourceTree = "<group>"; };
 		F590455D1BA372A600DB589A /* MCRuntimeLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCRuntimeLib.h; sourceTree = "<group>"; };
-		F59045901BA375B100DB589A /* MessagePrinter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MessagePrinter.cpp; sourceTree = "<group>"; };
-		F59045911BA375B100DB589A /* MessagePrinter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessagePrinter.h; sourceTree = "<group>"; };
+		F59045901BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCRuntimeLibStartupLogger.cpp; sourceTree = "<group>"; };
+		F59045911BA375B100DB589A /* MCRuntimeLibStartupLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCRuntimeLibStartupLogger.h; sourceTree = "<group>"; };
 		F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MCRuntimeLibContext.cpp; sourceTree = "<group>"; };
 		F59045941BA3D75000DB589A /* MCRuntimeLibContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCRuntimeLibContext.h; sourceTree = "<group>"; };
 		F592568610FBF2E100D2C91D /* ConvolutionKernels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConvolutionKernels.h; sourceTree = "<group>"; };
@@ -8151,8 +8151,8 @@
 			isa = PBXGroup;
 			children = (
 				F59045271BA372A600DB589A /* darwin */,
-				F59045901BA375B100DB589A /* MessagePrinter.cpp */,
-				F59045911BA375B100DB589A /* MessagePrinter.h */,
+				F59045901BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp */,
+				F59045911BA375B100DB589A /* MCRuntimeLibStartupLogger.h */,
 				F590455C1BA372A600DB589A /* MCRuntimeLib.cpp */,
 				F590455D1BA372A600DB589A /* MCRuntimeLib.h */,
 				F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */,
@@ -8537,6 +8537,11 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0710;
+				TargetAttributes = {
+					E4991088174D0D2600741B6D = {
+						DevelopmentTeam = 5CY78AG2Q7;
+					};
+				};
 			};
 			buildConfigurationList = 1DEB924B08733DCA0010E9CD /* Build configuration list for PBXProject "MrMC" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -9024,7 +9029,7 @@
 				E38E22700D25F9FE00618676 /* LinuxResourceCounter.cpp in Sources */,
 				E38E22710D25F9FE00618676 /* LinuxTimezone.cpp in Sources */,
 				E38E22750D25F9FE00618676 /* XFileUtils.cpp in Sources */,
-				F59045921BA375B100DB589A /* MessagePrinter.cpp in Sources */,
+				F59045921BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp in Sources */,
 				E38E22760D25F9FE00618676 /* XHandle.cpp in Sources */,
 				E38E22770D25F9FE00618676 /* XMemUtils.cpp in Sources */,
 				E38E227A0D25F9FE00618676 /* XTimeUtils.cpp in Sources */,
@@ -9802,7 +9807,7 @@
 				E49911D7174E5D2E00741B6D /* DVDDemuxPVRClient.cpp in Sources */,
 				E49911D8174E5D2E00741B6D /* DVDDemuxShoutcast.cpp in Sources */,
 				E49911D9174E5D2E00741B6D /* DVDDemuxUtils.cpp in Sources */,
-				F5D0E1161BA667650070EE9C /* MessagePrinter.cpp in Sources */,
+				F5D0E1161BA667650070EE9C /* MCRuntimeLibStartupLogger.cpp in Sources */,
 				E49911DA174E5D2E00741B6D /* DVDDemuxVobsub.cpp in Sources */,
 				E49911DB174E5D2E00741B6D /* DVDFactoryDemuxer.cpp in Sources */,
 				E49911DC174E5D3700741B6D /* DVDFactoryInputStream.cpp in Sources */,
@@ -10696,7 +10701,7 @@
 				F5D13F031BAF0B6D0075A95C /* DVDDemuxPVRClient.cpp in Sources */,
 				F5D13F041BAF0B6D0075A95C /* DVDDemuxShoutcast.cpp in Sources */,
 				F5D13F051BAF0B6D0075A95C /* DVDDemuxUtils.cpp in Sources */,
-				F5D13F061BAF0B6D0075A95C /* MessagePrinter.cpp in Sources */,
+				F5D13F061BAF0B6D0075A95C /* MCRuntimeLibStartupLogger.cpp in Sources */,
 				F5D13F071BAF0B6D0075A95C /* DVDDemuxVobsub.cpp in Sources */,
 				F5D13F081BAF0B6D0075A95C /* DVDFactoryDemuxer.cpp in Sources */,
 				F5D13F091BAF0B6D0075A95C /* DVDFactoryInputStream.cpp in Sources */,
@@ -11685,8 +11690,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_BITCODE = NO;
@@ -11710,8 +11715,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_BITCODE = NO;
@@ -11735,8 +11740,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_BITCODE = NO;
@@ -11761,8 +11766,8 @@
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_BITCODE = NO;

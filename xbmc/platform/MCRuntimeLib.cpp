@@ -18,6 +18,8 @@
  *
  */
 
+#include "platform/MCRuntimeLibStartupLogger.h"
+
 #include "Application.h"
 #include "settings/AdvancedSettings.h"
 #include "utils/log.h"
@@ -26,7 +28,6 @@
 #include "linux/RBP.h"
 #endif
 
-#include "platform/MessagePrinter.h"
 
 extern "C" void MCRuntimeLib_Preflight()
 {
@@ -68,7 +69,7 @@ extern "C" int MCRuntimeLib_Run(bool renderGUI)
 
   if (!g_application.Create())
   {
-    CMessagePrinter::DisplayError("ERROR: Unable to create application. Exiting");
+    CMCRuntimeLibStartupLogger::DisplayError("ERROR: Unable to create application. Exiting");
     return status;
   }
 
@@ -80,12 +81,12 @@ extern "C" int MCRuntimeLib_Run(bool renderGUI)
 
   if (renderGUI && !g_application.CreateGUI())
   {
-    CMessagePrinter::DisplayError("ERROR: Unable to create GUI. Exiting");
+    CMCRuntimeLibStartupLogger::DisplayError("ERROR: Unable to create GUI. Exiting");
     return status;
   }
   if (!g_application.Initialize())
   {
-    CMessagePrinter::DisplayError("ERROR: Unable to Initialize. Exiting");
+    CMCRuntimeLibStartupLogger::DisplayError("ERROR: Unable to Initialize. Exiting");
     return status;
   }
 
@@ -95,7 +96,7 @@ extern "C" int MCRuntimeLib_Run(bool renderGUI)
   }
   catch(...)
   {
-    CMessagePrinter::DisplayError("ERROR: Exception caught on main loop. Exiting");
+    CMCRuntimeLibStartupLogger::DisplayError("ERROR: Exception caught on main loop. Exiting");
     status = -1;
   }
 
