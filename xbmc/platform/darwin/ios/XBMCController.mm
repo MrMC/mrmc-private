@@ -945,7 +945,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 //--------------------------------------------------------------
 - (void) remoteControlReceivedWithEvent: (UIEvent *) receivedEvent {
-  LOG(@"%s: type %d, subtype: %d", __PRETTY_FUNCTION__, receivedEvent.type, receivedEvent.subtype);
+  LOG(@"%s: type %ld, subtype: %ld", __PRETTY_FUNCTION__, (long)receivedEvent.type, (long)receivedEvent.subtype);
   if (receivedEvent.type == UIEventTypeRemoteControl)
   {
     [self disableNetworkAutoSuspend];
@@ -984,7 +984,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 		  CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, -1, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
         break;
       default:
-        LOG(@"unhandled subtype: %d", receivedEvent.subtype);
+        LOG(@"unhandled subtype: %ld", (long)receivedEvent.subtype);
         break;
     }
     [self rescheduleNetworkAutoSuspend];
