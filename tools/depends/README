@@ -8,19 +8,21 @@ OSX (i386):
 OSX (x86_64):
     ./configure --host=x86_64-apple-darwin
 
-IOS (arm32):
+IOS (armv7):
     ./configure --host=arm-apple-darwin
     ./configure --host=i386-apple-darwin --with-platform=ios-simulator
 
 IOS (arm64):
     ./configure --host=arm-apple-darwin --with-cpu=arm64
-    ./configure --host=i386-apple-darwin --with-platform=ios-simulator
+    ./configure --host=x86_64-apple-darwin --with-platform=ios-simulator
 
 TVOS:
     ./configure --host=arm-apple-darwin --with-cpu=arm64 --with-platform=tvos
     ./configure --host=x86_64-apple-darwin --with-platform=tvos-simulator
 
-
+  You can target the same --prefix path, each setup will be done in an isolated directory. The
+  last configure/make you do is the one used for MrMC/XCode.
+ 
 #- Android (the pathes are examples and have to match those of docs/READM.android)
 
   arm:
