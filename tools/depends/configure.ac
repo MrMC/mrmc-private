@@ -258,7 +258,7 @@ case $host in
           use_simulator=yes
           sdk_name=iphonesimulator$use_sdk
           platform_cflags+=" -Wno-error=implicit-function-declaration"
-          platform_min_version="ios-simulator-version-min=8.4"
+          platform_min_version="ios-simulator-version-min=8.0"
         elif test "$use_platform" = "tvos-simulator"; then
           case $use_sdk in
             9.0);;
@@ -342,7 +342,7 @@ case $host in
         platform_cflags+=" -Wno-error=implicit-function-declaration"
         platform_ldflags+=" -L$use_sdk_path/usr/lib/system"
         platform_cxxflags+=" $cpu_flags"
-        platform_min_version="iphoneos-version-min=8.4"
+        platform_min_version="iphoneos-version-min=8.0"
         use_sdk_path=[`$use_xcodebuild -version -sdk $sdk_name | grep ^Path | awk '{ print $2}'`]
       ;;
     esac
