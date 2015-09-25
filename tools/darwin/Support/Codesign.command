@@ -24,11 +24,11 @@ if [ "${PLATFORM_NAME}" == "iphoneos" ]; then
     ${LDID} -S ${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${APP_NAME}
   fi
 
-  ${GEN_ENTITLEMENTS} "org.xbmc.kodi-ios" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${PROJECT_NAME}.xcent";
-  codesign -v -f -s "iPhone Developer" --entitlements "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${PROJECT_NAME}.xcent" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/"
+  ${GEN_ENTITLEMENTS} "org.mrmc.mrmc-ios" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${PROJECT_NAME}.xcent";
+  codesign -v -f -s "${CODE_SIGN_IDENTITY}" --entitlements "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/${PROJECT_NAME}.xcent" "${BUILT_PRODUCTS_DIR}/${WRAPPER_NAME}/"
   
-  #if user has set a code_sign_identity different from iPhone Developer we do a real codesign (for deployment on non-jailbroken devices)
-  if ! [ -z "${CODE_SIGN_IDENTITY}" ] && [ "${CODE_SIGN_IDENTITY}" == "iPhone Developer" ] && [ "${CODE_SIGN_IDENTITY}" != "Don't Code Sign"  ]; then
+  #if user has set a code_sign_identity, we do a real codesign (for deployment on non-jailbroken devices)
+  if ! [ -z "${CODE_SIGN_IDENTITY}" ] && [ "${CODE_SIGN_IDENTITY}" != "Don't Code Sign"  ]; then
     echo Doing a full bundle sign using genuine identity "${CODE_SIGN_IDENTITY}"
     for binext in $LIST_BINARY_EXTENSIONS
     do
