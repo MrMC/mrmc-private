@@ -52,7 +52,7 @@ class CZeroconfDummy : public CZeroconf
 };
 #endif
 
-std::atomic<long> CZeroconf::sm_singleton_guard = {0};
+std::atomic<long> CZeroconf::sm_singleton_guard {0};
 CZeroconf* CZeroconf::smp_instance = 0;
 
 CZeroconf::CZeroconf():mp_crit_sec(new CCriticalSection),m_started(false)
