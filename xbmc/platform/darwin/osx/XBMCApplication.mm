@@ -249,7 +249,7 @@ static void setupWindowMenu(void)
   setlocale(LC_NUMERIC, "C");
   
   // set up some xbmc specific relationships
-  XBMC::Context context;
+  MCRuntimeLib::Context context;
 
   CAppParamParser appParamParser;
   appParamParser.Parse((const char **)gArgv, (int)gArgc);
