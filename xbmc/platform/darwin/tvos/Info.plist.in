@@ -40,7 +40,7 @@
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>org.xbmc.@APP_NAME_LC@-ios</string>
+	<string>org.mrmc.@APP_NAME_LC@-tvos</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
