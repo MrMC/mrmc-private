@@ -291,7 +291,7 @@ void CAAudioUnitSink::drain()
 
 void CAAudioUnitSink::setCoreAudioBuffersize()
 {
-#if !TARGET_IPHONE_SIMULATOR
+#if 0
   // set the buffer size, this affects the number of samples
   // that get rendered every time the audio callback is fired.
   Float32 preferredBufferSize = 512 * m_outputFormat.mChannelsPerFrame / m_outputFormat.mSampleRate;
