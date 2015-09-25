@@ -8173,6 +8173,7 @@
 				F590452C1BA372A600DB589A /* DarwinUtils.mm */,
 				F5D13EBA1BAA17890075A95C /* DictionaryUtils.h */,
 				F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */,
+				F59045431BA372A600DB589A /* NSLogDebugHelpers.h */,
 				F59045561BA372A600DB589A /* OSXGNUReplacements.h */,
 				F59045551BA372A600DB589A /* OSXGNUReplacements.c */,
 			);
@@ -8182,7 +8183,6 @@
 		F590452D1BA372A600DB589A /* ios */ = {
 			isa = PBXGroup;
 			children = (
-				F59045431BA372A600DB589A /* NSLogDebugHelpers.h */,
 				F590452E1BA372A600DB589A /* Default-568h@2x.png */,
 				F590452F1BA372A600DB589A /* Default-667h@2x.png */,
 				F59045301BA372A600DB589A /* Default-736h@3x.png */,

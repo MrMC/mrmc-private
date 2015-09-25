@@ -32,7 +32,7 @@
 
 #import "platform/darwin/AutoPool.h"
 #import "platform/darwin/DarwinUtils.h"
-#import "platform/darwin/ios/NSLogDebugHelpers.h"
+#import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainScreenManager.h"

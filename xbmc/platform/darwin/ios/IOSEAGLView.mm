@@ -20,22 +20,22 @@
 
 //hack around problem with xbmc's typedef int BOOL
 // and obj-c's typedef unsigned char BOOL
-#include <sys/resource.h>
-#include <signal.h>
-#include <stdio.h>
+#import <sys/resource.h>
+#import <signal.h>
+#import <stdio.h>
 
-#include "system.h"
-#include "AdvancedSettings.h"
-#include "FileItem.h"
-#include "Application.h"
-#include "messaging/ApplicationMessenger.h"
-#include "WindowingFactory.h"
-#include "VideoReferenceClock.h"
-#include "utils/log.h"
-#include "utils/TimeUtils.h"
-#include "Util.h"
-#include "platform/MCRuntimeLibContext.h"
-#include "WindowingFactory.h"
+#import "system.h"
+#import "AdvancedSettings.h"
+#import "FileItem.h"
+#import "Application.h"
+#import "messaging/ApplicationMessenger.h"
+#import "WindowingFactory.h"
+#import "VideoReferenceClock.h"
+#import "utils/log.h"
+#import "utils/TimeUtils.h"
+#import "Util.h"
+#import "platform/MCRuntimeLibContext.h"
+#import "WindowingFactory.h"
 
 #import <QuartzCore/QuartzCore.h>
 
@@ -44,10 +44,10 @@
 
 #import "platform/darwin/AutoPool.h"
 #import "platform/darwin/DarwinUtils.h"
+#import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/ios/IOSEAGLView.h"
 #import "platform/darwin/ios/XBMCController.h"
 #import "platform/darwin/ios/IOSScreenManager.h"
-#import "platform/darwin/ios/NSLogDebugHelpers.h"
 
 using namespace KODI::MESSAGING;
 

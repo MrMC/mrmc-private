@@ -60,17 +60,17 @@ using namespace KODI::MESSAGING;
 #import <MediaPlayer/MPNowPlayingInfoCenter.h>
 #else
 const NSString *MPNowPlayingInfoPropertyElapsedPlaybackTime = @"MPNowPlayingInfoPropertyElapsedPlaybackTime";
-const NSString *MPNowPlayingInfoPropertyPlaybackRate = @"MPNowPlayingInfoPropertyPlaybackRate";
-const NSString *MPNowPlayingInfoPropertyPlaybackQueueIndex = @"MPNowPlayingInfoPropertyPlaybackQueueIndex";
-const NSString *MPNowPlayingInfoPropertyPlaybackQueueCount = @"MPNowPlayingInfoPropertyPlaybackQueueCount";
+const NSString *MPNowPlayingInfoPropertyPlaybackRate        = @"MPNowPlayingInfoPropertyPlaybackRate";
+const NSString *MPNowPlayingInfoPropertyPlaybackQueueIndex  = @"MPNowPlayingInfoPropertyPlaybackQueueIndex";
+const NSString *MPNowPlayingInfoPropertyPlaybackQueueCount  = @"MPNowPlayingInfoPropertyPlaybackQueueCount";
 #endif
 
 #import "platform/darwin/AutoPool.h"
+#import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/ios/IOSEAGLView.h"
 #import "platform/darwin/ios/XBMCController.h"
 #import "platform/darwin/ios/IOSScreenManager.h"
 #import "platform/darwin/ios/XBMCApplication.h"
-#import "platform/darwin/ios/NSLogDebugHelpers.h"
 
 XBMCController *g_xbmcController;
 static CEvent screenChangeEvent;

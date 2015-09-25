@@ -18,12 +18,13 @@
  *
  */
 
+#import "platform/darwin/ios/IOSKeyboard.h"
+
 #import "platform/darwin/AutoPool.h"
 #import "platform/darwin/DarwinUtils.h"
+#import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/ios/XBMCController.h"
-#import "platform/darwin/ios/IOSKeyboard.h"
 #import "platform/darwin/ios/IOSKeyboardView.h"
-#import "platform/darwin/ios/NSLogDebugHelpers.h"
 
 
 KeyboardView *g_pIosKeyboard = nil;

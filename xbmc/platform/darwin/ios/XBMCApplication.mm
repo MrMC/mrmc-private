@@ -23,10 +23,10 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVAudioSession.h>
 
+#import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/ios/XBMCApplication.h"
 #import "platform/darwin/ios/XBMCController.h"
 #import "platform/darwin/ios/IOSScreenManager.h"
-#import "platform/darwin/ios/NSLogDebugHelpers.h"
 
 @implementation XBMCApplicationDelegate
 XBMCController *m_xbmcController;  

@@ -20,12 +20,13 @@
  
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVAudioSession.h>
+#import <objc/runtime.h>
 
 #import "platform/darwin/tvos/MainApplication.h"
+
+#import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainScreenManager.h"
-#import "platform/darwin/ios/NSLogDebugHelpers.h"
-#import <objc/runtime.h>
 
 @implementation MainApplicationDelegate
 MainController *m_xbmcController;

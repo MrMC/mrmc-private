@@ -37,11 +37,12 @@
 #import "input/touch/generic/GenericTouchActionHandler.h"
 #import "interfaces/AnnouncementManager.h"
 #import "messaging/ApplicationMessenger.h"
+
 #import "platform/MCRuntimeLib.h"
 #import "platform/MCRuntimeLibContext.h"
 #import "platform/darwin/AutoPool.h"
 #import "platform/darwin/DarwinUtils.h"
-#import "platform/darwin/ios/NSLogDebugHelpers.h"
+#import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainScreenManager.h"
@@ -304,10 +305,14 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 
 //--------------------------------------------------------------
+// called before pressesBegan:withEvent: is called on the gesture recognizer
+// for a new press. return NO to prevent the gesture recognizer from seeing this press
 -(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
 {
   PRINT_SIGNATURE();
   BOOL handled = NO;
+  bool phaseBegan = (press.phase == UIPressPhaseBegan);
+  NSTimeInterval phaseTimeStamp = timestamp;
   switch (press.type)
   {
     case UIPressTypeMenu:
