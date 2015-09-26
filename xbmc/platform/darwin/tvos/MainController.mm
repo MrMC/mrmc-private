@@ -357,9 +357,16 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
     // auto-repeat keys
     case UIPressTypeUpArrow:
+      [g_xbmcController sendKeyDownUp:XBMCK_UP];
+      break;
     case UIPressTypeDownArrow:
+      [g_xbmcController sendKeyDownUp:XBMCK_DOWN];
+      break;
     case UIPressTypeLeftArrow:
+      [g_xbmcController sendKeyDownUp:XBMCK_LEFT];
+      break;
     case UIPressTypeRightArrow:
+      [g_xbmcController sendKeyDownUp:XBMCK_RIGHT];
       break;
 
     default:
