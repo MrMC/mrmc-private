@@ -231,10 +231,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 - (void)rescheduleNetworkAutoSuspend;
 @end
 
-@interface UIApplication (extended)
--(void) terminateWithSuccess;
-@end
-
 @implementation XBMCController
 @synthesize animating;
 @synthesize lastGesturePoint;
