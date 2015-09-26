@@ -554,7 +554,7 @@ OSStatus CAAudioUnitSink::renderCallback(void *inRefCon, AudioUnitRenderActionFl
     unsigned int wanted = ioData->mBuffers[i].mDataByteSize;
     unsigned int bytes = std::min(sink->m_buffer->GetReadSize(), wanted);
     sink->m_buffer->Read((unsigned char*)ioData->mBuffers[i].mData, bytes);
-    LogLevel(bytes, wanted);
+    //LogLevel(bytes, wanted);
     
     if (bytes == 0)
       *ioActionFlags |= kAudioUnitRenderAction_OutputIsSilence;
