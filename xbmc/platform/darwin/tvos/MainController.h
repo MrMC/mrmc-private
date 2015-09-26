@@ -33,7 +33,7 @@ typedef enum
   IOS_PLAYBACK_PLAYING
 } IOSPlaybackState;
 
-@interface MainController : UIViewController <UIGestureRecognizerDelegate, UIKeyInput>
+@interface MainController : UIViewController <UIGestureRecognizerDelegate>
 {
 @private
   UIWindow                   *m_window;
@@ -77,7 +77,7 @@ typedef enum
 - (void) enterForeground;
 - (void) becomeInactive;
 - (void) setIOSNowPlayingInfo:(NSDictionary *)info;
-- (void) sendKey: (XBMCKey)key;
+- (void) sendKeyDownUp:(XBMCKey)key;
 - (void) observeDefaultCenterStuff: (NSNotification *)notification;
 - (void) setFramebuffer;
 - (bool) presentFramebuffer;

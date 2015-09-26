@@ -70,9 +70,8 @@ NSArray *arrayFromVariantArray(const CVariant &data)
     return nil;
   NSMutableArray *array = [[[NSMutableArray alloc] initWithCapacity:data.size()] autorelease];
   for (CVariant::const_iterator_array itr = data.begin_array(); itr != data.end_array(); ++itr)
-  {
     [array addObject:objectFromVariant(*itr)];
-  }
+
   return array;
 }
 
@@ -82,9 +81,8 @@ NSDictionary *dictionaryFromVariantMap(const CVariant &data)
     return nil;
   NSMutableDictionary *dict = [[[NSMutableDictionary alloc] initWithCapacity:data.size()] autorelease];
   for (CVariant::const_iterator_map itr = data.begin_map(); itr != data.end_map(); ++itr)
-  {
     [dict setValue:objectFromVariant(itr->second) forKey:[NSString stringWithUTF8String:itr->first.c_str()]];
-  }
+
   return dict;
 }
 
@@ -108,6 +106,7 @@ id objectFromVariant(const CVariant &data)
     return arrayFromVariantArray(data);
   if (data.isObject())
     return dictionaryFromVariantMap(data);
+
   return nil;
 }
 
@@ -209,15 +208,14 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 //
 
+#pragma mark - MainController interface
 @interface MainController ()
+@property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
+
 - (void)rescheduleNetworkAutoSuspend;
 @end
 
-@interface UIApplication (extended)
--(void) terminateWithSuccess;
-@end
-
-#pragma mark - MainController methods
+#pragma mark - MainController implementation
 @implementation MainController
 
 @synthesize m_lastGesturePoint;
@@ -228,62 +226,92 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 @synthesize m_networkAutoSuspendTimer;
 @synthesize m_nowPlayingInfo;
 
+#pragma mark - internal key press methods
 //--------------------------------------------------------------
-- (void) sendKeypressEvent: (XBMC_Event) event
-{
-  event.type = XBMC_KEYDOWN;
-  CWinEvents::MessagePush(&event);
-
-  event.type = XBMC_KEYUP;
-  CWinEvents::MessagePush(&event);
-}
-
-#pragma mark - UIKeyInput methods
 //--------------------------------------------------------------
-- (BOOL)hasText
-{
-  return NO;
-}
-
-- (void)insertText:(NSString *)text
+- (void)sendKeyDownUp:(XBMCKey)key
 {
   XBMC_Event newEvent = {0};
-  unichar currentKey = [text characterAtIndex:0];
-
-  // handle upper case letters
-  if (currentKey >= 'A' && currentKey <= 'Z')
-  {
-    newEvent.key.keysym.mod = XBMCKMOD_LSHIFT;
-    currentKey += 0x20;// convert to lower case
-  }
-
-  // handle return
-  if (currentKey == '\n' || currentKey == '\r')
-    currentKey = XBMCK_RETURN;
-
-  newEvent.key.keysym.sym = (XBMCKey)currentKey;
-  newEvent.key.keysym.unicode = currentKey;
-
-  [self sendKeypressEvent:newEvent];
-}
-
-- (void)deleteBackward
-{
-  [self sendKey:XBMCK_BACKSPACE];
-}
-// END OF UIKeyInput protocol
-
--(void)sendKey:(XBMCKey) key
-{
-  XBMC_Event newEvent = {0};
-
-  //newEvent.key.keysym.unicode = key;
   newEvent.key.keysym.sym = key;
-  [self sendKeypressEvent:newEvent];
 
+  newEvent.type = XBMC_KEYDOWN;
+  CWinEvents::MessagePush(&newEvent);
+
+  newEvent.type = XBMC_KEYUP;
+  CWinEvents::MessagePush(&newEvent);
+}
+- (void)sendKeyDown:(XBMCKey)key
+{
+  XBMC_Event newEvent = {0};
+  newEvent.type = XBMC_KEYDOWN;
+  newEvent.key.keysym.sym = key;
+  CWinEvents::MessagePush(&newEvent);
+}
+- (void)sendKeyUp:(XBMCKey)key
+{
+  XBMC_Event newEvent = {0};
+  newEvent.type = XBMC_KEYUP;
+  newEvent.key.keysym.sym = key;
+  CWinEvents::MessagePush(&newEvent);
 }
 
-#pragma mark - gesture routines
+#pragma mark - key press auto-repeat methods
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+// start repeating after 0.25s
+#define REPEATED_KEYPRESS_DELAY_S 0.25
+// pause 0.01s (10ms) between keypresses
+#define REPEATED_KEYPRESS_PAUSE_S 0.05
+//--------------------------------------------------------------
+- (void)startKeyPressTimer:(XBMCKey)keyId
+{
+  PRINT_SIGNATURE();
+  if (self.pressAutoRepeatTimer != nil)
+    [self stopKeyPressTimer];
+
+  [self sendKeyDown:keyId];
+
+  NSNumber *number = [NSNumber numberWithInt:keyId];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:REPEATED_KEYPRESS_DELAY_S];
+
+  // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
+  // and fires every REPEATED_KEYPRESS_PAUSE_S
+  NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
+    interval:REPEATED_KEYPRESS_PAUSE_S
+    target:self
+    selector:@selector(keyPressTimerCallback:)
+    userInfo:number
+    repeats:YES];
+
+  // schedule the timer to the runloop
+  [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+  self.pressAutoRepeatTimer = timer;
+}
+- (void)stopKeyPressTimer
+{
+  PRINT_SIGNATURE();
+  if (self.pressAutoRepeatTimer != nil)
+  {
+    [self.pressAutoRepeatTimer invalidate];
+    [self.pressAutoRepeatTimer release];
+    self.pressAutoRepeatTimer = nil;
+  }
+}
+- (void)keyPressTimerCallback:(NSTimer*)theTimer
+{
+  PRINT_SIGNATURE();
+  // if queue is empty - skip this timer event before letting it process
+  if (CWinEvents::GetQueueSize())
+    return;
+
+  NSNumber *keyId = [theTimer userInfo];
+  [self sendKeyDown:(XBMCKey)[keyId intValue]];
+}
+
+
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+#pragma mark - gesture methods
 //--------------------------------------------------------------
 /*
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
@@ -298,7 +326,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 */
 
 //--------------------------------------------------------------
--(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
   PRINT_SIGNATURE();
   return YES;
@@ -307,33 +335,40 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 // called before pressesBegan:withEvent: is called on the gesture recognizer
 // for a new press. return NO to prevent the gesture recognizer from seeing this press
--(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
 {
   PRINT_SIGNATURE();
-  BOOL handled = NO;
+  BOOL handled = YES;
   switch (press.type)
   {
+    // single press key, but also detect hold and back to tvos.
     case UIPressTypeMenu:
       // menu is special.
-      //  a) if at our home, should return to atv home screen.
-      //  b) if not, let it pass.
-      handled = (g_windowManager.GetActiveWindow() != WINDOW_HOME);
+      //  a) if at our home view, should return to atv home screen.
+      //  b) if not, let it pass to us.
+      if (g_windowManager.GetActiveWindow() == WINDOW_HOME)
+        handled = NO;
       break;
 
+    // single press keys
     case UIPressTypeSelect:
     case UIPressTypePlayPause:
+      break;
+
+    // auto-repeat keys
     case UIPressTypeUpArrow:
     case UIPressTypeDownArrow:
     case UIPressTypeLeftArrow:
     case UIPressTypeRightArrow:
-      handled = YES;
       break;
+
     default:
       return NO;
   }
 
   return handled;
 }
+
 //--------------------------------------------------------------
 - (void)createTapGestureRecognizers
 {
@@ -404,37 +439,46 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [swipeDown release];
 }
 //--------------------------------------------------------------
--(void) createGameControlGesturecognizers
+- (void)createPressGesturecognizers
 {
   PRINT_SIGNATURE();
-  auto upRecognizer = [[UITapGestureRecognizer alloc]
+  // we need UILongPressGestureRecognizer here because it will give
+  // UIGestureRecognizerStateBegan AND UIGestureRecognizerStateEnded
+  // even if we hold down for a long time. UITapGestureRecognizer
+  // will eat the ending on long holds and we never see it.
+  auto upRecognizer = [[UILongPressGestureRecognizer alloc]
     initWithTarget: self action: @selector(gameControllerUpArrowPressed:)];
   upRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
+  upRecognizer.minimumPressDuration = 0.01;
   upRecognizer.delegate = self;
   [self.view addGestureRecognizer: upRecognizer];
   [upRecognizer release];
 
-  auto downRecognizer = [[UITapGestureRecognizer alloc]
+  auto downRecognizer = [[UILongPressGestureRecognizer alloc]
     initWithTarget: self action: @selector(gameControllerDownArrowPressed:)];
   downRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
+  downRecognizer.minimumPressDuration = 0.01;
   downRecognizer.delegate = self;
   [self.view addGestureRecognizer: downRecognizer];
   [downRecognizer release];
 
-  auto leftRecognizer = [[UITapGestureRecognizer alloc]
+  auto leftRecognizer = [[UILongPressGestureRecognizer alloc]
     initWithTarget: self action: @selector(gameControllerLeftArrowPressed:)];
   leftRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+  leftRecognizer.minimumPressDuration = 0.01;
   leftRecognizer.delegate = self;
   [self.view addGestureRecognizer: leftRecognizer];
   [leftRecognizer release];
 
-  auto rightRecognizer = [[UITapGestureRecognizer alloc]
+  auto rightRecognizer = [[UILongPressGestureRecognizer alloc]
     initWithTarget: self action: @selector(gameControllerRightArrowPressed:)];
   rightRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  rightRecognizer.minimumPressDuration = 0.01;
   rightRecognizer.delegate = self;
   [self.view addGestureRecognizer: rightRecognizer];
   [rightRecognizer release];
 }
+
 //--------------------------------------------------------------
 - (void) activateKeyboard:(UIView *)view
 {
@@ -466,179 +510,103 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 */
 
-/*
--(void)pressesBegan:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
-{
-  PRINT_SIGNATURE();
-}
--(void)pressesChanged:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
-{
-  PRINT_SIGNATURE();
-  // will be invoked for presses that provide an analog value (like thumbsticks or analog push buttons)
-}
--(void)pressesEnded:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
-{
-  PRINT_SIGNATURE();
-  if ([m_glView isXBMCAlive] && [m_glView isAnimating] && [m_glView isUserInteractionEnabled] == YES)
-  {
-    for (UIPress *press in presses)
-    {
-      XBMC_Event newEvent = {0};
-      switch(press.type)
-      {
-        case UIPressTypeUpArrow:
-          newEvent.key.keysym.sym = XBMCK_UP;
-          newEvent.key.keysym.unicode = XBMCK_UP;
-          break;
-        case UIPressTypeDownArrow:
-          newEvent.key.keysym.sym = XBMCK_DOWN;
-          newEvent.key.keysym.unicode = XBMCK_DOWN;
-          break;
-        case UIPressTypeLeftArrow:
-          newEvent.key.keysym.sym = XBMCK_LEFT;
-          newEvent.key.keysym.unicode = XBMCK_LEFT;
-          break;
-        case UIPressTypeRightArrow:
-          newEvent.key.keysym.sym = XBMCK_RIGHT;
-          newEvent.key.keysym.unicode = XBMCK_RIGHT;
-          break;
-        case UIPressTypeSelect:
-          newEvent.key.keysym.sym = XBMCK_RETURN;
-          newEvent.key.keysym.unicode = XBMCK_RETURN;
-          break;
-        case UIPressTypeMenu:
-          newEvent.key.keysym.sym = XBMCK_ESCAPE;
-          newEvent.key.keysym.unicode = XBMCK_ESCAPE;
-          break;
-        case UIPressTypePlayPause:
-          newEvent.key.keysym.sym = XBMCK_MEDIA_PLAY_PAUSE;
-          newEvent.key.keysym.unicode = XBMCK_MEDIA_PLAY_PAUSE;
-          break;
-        default:
-          break;
-      }
-      // handle press event
-      if (newEvent.key.keysym.sym)
-        [self sendKeypressEvent:newEvent];
-    }
-  }
-  else
-  {
-    //[super pressesEnded:presses withEvent:event];
-  }
-}
--(void)pressesCancelled:(NSSet<UIPress *> *)presses withEvent:(nullable UIPressesEvent *)event
-{
-  PRINT_SIGNATURE();
-}
- */
-
-- (void) menuPressed:(UITapGestureRecognizer *) sender
+- (void)menuPressed:(UITapGestureRecognizer *)sender
 {
   PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
     NSLog(@"button pressed  - menu");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
     NSLog(@"button released - menu");
-    XBMC_Event newEvent = {0};
-    newEvent.key.keysym.sym = XBMCK_ESCAPE;
-    newEvent.key.keysym.unicode = XBMCK_ESCAPE;
-    [self sendKeypressEvent:newEvent];
+    [self sendKeyDownUp:XBMCK_ESCAPE];
   }
 }
-- (void) selectPressed:(UITapGestureRecognizer *) sender
+- (void)selectPressed:(UITapGestureRecognizer *)sender
 {
   PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
     NSLog(@"button pressed  - select");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
     NSLog(@"button released - select");
-    XBMC_Event newEvent = {0};
-    newEvent.key.keysym.sym = XBMCK_RETURN;
-    newEvent.key.keysym.unicode = XBMCK_RETURN;
-    [self sendKeypressEvent:newEvent];
+    [self sendKeyDownUp:XBMCK_RETURN];
   }
 }
-- (void) playPausePressed:(UITapGestureRecognizer *) sender
+- (void)playPausePressed:(UITapGestureRecognizer *) sender
 {
   PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
     NSLog(@"button pressed  - playPause");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
     NSLog(@"button released - playPause");
+    [self sendKeyDownUp:XBMCK_SPACE];
   }
 }
 
 //--------------------------------------------------------------
-- (IBAction)gameControllerUpArrowPressed:(UIGestureRecognizer *) sender
+- (IBAction)gameControllerUpArrowPressed:(UIGestureRecognizer *)sender
 {
   PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
     NSLog(@"button pressed   - UpArrow");
+    [self startKeyPressTimer:XBMCK_UP];
   } else if (sender.state == UIGestureRecognizerStateChanged) {
       NSLog(@"button changed - UpArrow");
   } else if (sender.state == UIGestureRecognizerStateCancelled) {
     NSLog(@"button cancelled - UpArrow");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
     NSLog(@"button released  - UpArrow");
-    XBMC_Event newEvent = {0};
-    newEvent.key.keysym.sym = XBMCK_UP;
-    newEvent.key.keysym.unicode = XBMCK_UP;
-    [self sendKeypressEvent:newEvent];
+    [self stopKeyPressTimer];
+    [self sendKeyUp:XBMCK_UP];
   }
 }
 //--------------------------------------------------------------
-- (IBAction)gameControllerDownArrowPressed:(UIGestureRecognizer *) sender
+- (IBAction)gameControllerDownArrowPressed:(UIGestureRecognizer *)sender
 {
   PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed   - DownArrowP");
+    NSLog(@"button pressed   - DownArrow");
+    [self startKeyPressTimer:XBMCK_DOWN];
   } else if (sender.state == UIGestureRecognizerStateChanged) {
-    NSLog(@"button changed   - DownArrowP");
+    NSLog(@"button changed   - DownArrow");
   } else if (sender.state == UIGestureRecognizerStateCancelled) {
-    NSLog(@"button cancelled - DownArrowP");
+    NSLog(@"button cancelled - DownArrow");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released  - DownArrowP");
-    XBMC_Event newEvent = {0};
-    newEvent.key.keysym.sym = XBMCK_DOWN;
-    newEvent.key.keysym.unicode = XBMCK_DOWN;
-    [self sendKeypressEvent:newEvent];
+    NSLog(@"button released  - DownArrow");
+    [self stopKeyPressTimer];
+    [self sendKeyUp:XBMCK_DOWN];
   }
 }
 //--------------------------------------------------------------
-- (IBAction)gameControllerLeftArrowPressed:(UIGestureRecognizer *) sender
+- (IBAction)gameControllerLeftArrowPressed:(UIGestureRecognizer *)sender
 {
   PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
     NSLog(@"button pressed   - LeftArrow");
+    [self startKeyPressTimer:XBMCK_LEFT];
   } else if (sender.state == UIGestureRecognizerStateChanged) {
     NSLog(@"button changed   - LeftArrow");
   } else if (sender.state == UIGestureRecognizerStateCancelled) {
     NSLog(@"button cancelled - LeftArrow");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
     NSLog(@"button released  - LeftArrow");
-    XBMC_Event newEvent = {0};
-    newEvent.key.keysym.sym = XBMCK_LEFT;
-    newEvent.key.keysym.unicode = XBMCK_LEFT;
-    [self sendKeypressEvent:newEvent];
+    [self stopKeyPressTimer];
+    [self sendKeyUp:XBMCK_LEFT];
   }
 }
 //--------------------------------------------------------------
-- (IBAction)gameControllerRightArrowPressed:(UIGestureRecognizer *) sender
+- (IBAction)gameControllerRightArrowPressed:(UIGestureRecognizer *)sender
 {
   PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
     NSLog(@"button pressed   - RightArrow");
+    [self startKeyPressTimer:XBMCK_RIGHT];
   } else if (sender.state == UIGestureRecognizerStateChanged) {
     NSLog(@"button changed   - RightArrow");
   } else if (sender.state == UIGestureRecognizerStateCancelled) {
     NSLog(@"button cancelled - RightArrow");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
     NSLog(@"button released  - RightArrow");
-    XBMC_Event newEvent = {0};
-    newEvent.key.keysym.sym = XBMCK_RIGHT;
-    newEvent.key.keysym.unicode = XBMCK_RIGHT;
-    [self sendKeypressEvent:newEvent];
+    [self stopKeyPressTimer];
+    [self sendKeyUp:XBMCK_RIGHT];
   }
 }
 
@@ -865,7 +833,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self.view addSubview: m_glView];
 }
 //--------------------------------------------------------------
--(void)viewDidLoad
+- (void)viewDidLoad
 {
   [super viewDidLoad];
 
@@ -893,9 +861,9 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
 
   //[self createTapGestureRecognizers];
-  [self createPanGestureRecognizers];
-  [self createSwipeGestureRecognizers];
-  [self createGameControlGesturecognizers];
+  //[self createPanGestureRecognizers];
+  //[self createSwipeGestureRecognizers];
+  [self createPressGesturecognizers];
 }
 //--------------------------------------------------------------
 - (void)viewWillAppear:(BOOL)animated
@@ -908,7 +876,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [super viewWillAppear:animated];
 }
 //--------------------------------------------------------------
--(void) viewDidAppear:(BOOL)animated
+- (void)viewDidAppear:(BOOL)animated
 {
   [super viewDidAppear:animated];
   [self becomeFirstResponder];
@@ -932,7 +900,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [super viewDidUnload];
 }
 //--------------------------------------------------------------
--(UIView *)inputView
+- (UIView *)inputView
 {
   // override our input view to an empty view
   // this prevents the on screen keyboard
@@ -942,18 +910,18 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   return [[[UIView alloc] initWithFrame:CGRectZero] autorelease];
 }
 //--------------------------------------------------------------
-- (BOOL) canBecomeFirstResponder
+- (BOOL)canBecomeFirstResponder
 {
   return YES;
 }
 //--------------------------------------------------------------
-- (void) setFramebuffer
+- (void)setFramebuffer
 {
   if (!m_pause)
     [m_glView setFramebuffer];
 }
 //--------------------------------------------------------------
-- (bool) presentFramebuffer
+- (bool)presentFramebuffer
 {
   if (!m_pause)
     return [m_glView presentFramebuffer];
@@ -961,14 +929,14 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     return FALSE;
 }
 //--------------------------------------------------------------
-- (CGSize) getScreenSize
+- (CGSize)getScreenSize
 {
   m_screensize.width  = m_glView.bounds.size.width  * m_screenScale;
   m_screensize.height = m_glView.bounds.size.height * m_screenScale;
   return m_screensize;
 }
 //--------------------------------------------------------------
-- (CGFloat) getScreenScale:(UIScreen *)screen;
+- (CGFloat)getScreenScale:(UIScreen *)screen;
 {
   return [m_glView getScreenScale:screen];
 }
@@ -980,30 +948,30 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   // Release any cached data, images, etc. that aren't in use.
 }
 //--------------------------------------------------------------
-- (void) disableSystemSleep
+- (void)disableSystemSleep
 {
 }
 //--------------------------------------------------------------
-- (void) enableSystemSleep
+- (void)enableSystemSleep
 {
 }
 //--------------------------------------------------------------
-- (void) disableScreenSaver
+- (void)disableScreenSaver
 {
 }
 //--------------------------------------------------------------
-- (void) enableScreenSaver
+- (void)enableScreenSaver
 {
 }
 //--------------------------------------------------------------
-- (bool) changeScreen: (unsigned int)screenIdx withMode:(UIScreenMode *)mode
+- (bool)changeScreen:(unsigned int)screenIdx withMode:(UIScreenMode *)mode
 {
   bool ret = [[MainScreenManager sharedInstance] changeScreen:screenIdx withMode:mode];
 
   return ret;
 }
 //--------------------------------------------------------------
-- (void) activateScreen: (UIScreen *)screen
+- (void)activateScreen:(UIScreen *)screen
 {
   // Since ios7 we have to handle the orientation manually
   // it differs by 90 degree between internal and external screen
@@ -1100,7 +1068,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 
 //--------------------------------------------------------------
-- (void) runAnimation:(id) arg
+- (void)runAnimation:(id)arg
 {
   CCocoaAutoPool outerpool;
   [[NSThread currentThread] setName:@"MCRuntimeLib"];
@@ -1175,7 +1143,8 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   }
 }
 //--------------------------------------------------------------
-- (void) remoteControlReceivedWithEvent: (UIEvent*) receivedEvent {
+- (void)remoteControlReceivedWithEvent:(UIEvent*)receivedEvent
+{
   LOG(@"%s: type %ld, subtype: %d", __PRETTY_FUNCTION__, (long)receivedEvent.type, (int)receivedEvent.subtype);
   if (receivedEvent.type == UIEventTypeRemoteControl)
   {
@@ -1356,7 +1325,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 
 #pragma mark - private helper methods
-- (void)observeDefaultCenterStuff: (NSNotification *) notification
+- (void)observeDefaultCenterStuff:(NSNotification *)notification
 {
 //  LOG(@"default: %@", [notification name]);
 //  LOG(@"userInfo: %@", [notification userInfo]);

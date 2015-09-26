@@ -178,49 +178,37 @@ const CGFloat timeFadeSecs                    = 2.0;
 - (IBAction)handleDoubleSwipeLeft:(UISwipeGestureRecognizer *)sender 
 {
   if([self wakeUpFromSleep])
-  {
-    [g_xbmcController sendKey:XBMCK_BACKSPACE];
-  }
+    [g_xbmcController sendKeyDownUp:XBMCK_BACKSPACE];
 }
 //--------------------------------------------------------------
 - (IBAction)handleSwipeLeft:(UISwipeGestureRecognizer *)sender 
 {
   if([self wakeUpFromSleep])
-  {
-    [g_xbmcController sendKey:XBMCK_LEFT];
-  }
+    [g_xbmcController sendKeyDownUp:XBMCK_LEFT];
 }
 //--------------------------------------------------------------
 - (IBAction)handleSwipeRight:(UISwipeGestureRecognizer *)sender 
 {
   if([self wakeUpFromSleep])
-  {
-    [g_xbmcController sendKey:XBMCK_RIGHT];
-  }
+    [g_xbmcController sendKeyDownUp:XBMCK_RIGHT];
 }
 //--------------------------------------------------------------
 - (IBAction)handleSwipeUp:(UISwipeGestureRecognizer *)sender 
 {
   if([self wakeUpFromSleep])
-  {
-    [g_xbmcController sendKey:XBMCK_UP];
-  }
+    [g_xbmcController sendKeyDownUp:XBMCK_UP];
 }
 //--------------------------------------------------------------
 - (IBAction)handleSwipeDown:(UISwipeGestureRecognizer *)sender 
 {
   if([self wakeUpFromSleep])
-  {
-    [g_xbmcController sendKey:XBMCK_DOWN];
-  }
+    [g_xbmcController sendKeyDownUp:XBMCK_DOWN];
 }
 //--------------------------------------------------------------
 - (IBAction)handleDoubleFingerSingleTap:(UIGestureRecognizer *)sender 
 {
   if([self wakeUpFromSleep])
-  {
-    [g_xbmcController sendKey:XBMCK_c];
-  }
+    [g_xbmcController sendKeyDownUp:XBMCK_c];
 }
 //--------------------------------------------------------------
 - (IBAction)handleSingleFingerSingleLongTap:(UIGestureRecognizer *)sender
@@ -237,9 +225,7 @@ const CGFloat timeFadeSecs                    = 2.0;
 - (IBAction)handleSingleFingerSingleTap:(UIGestureRecognizer *)sender 
 {
   if([self wakeUpFromSleep])
-  {
-    [g_xbmcController sendKey:XBMCK_RETURN];
-  }
+    [g_xbmcController sendKeyDownUp:XBMCK_RETURN];
 }
 //--------------------------------------------------------------
 - (void)viewWillAppear:(BOOL)animated
