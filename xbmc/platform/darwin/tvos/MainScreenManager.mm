@@ -35,6 +35,7 @@
 
 #import "platform/darwin/tvos/MainScreenManager.h"
 #import "platform/darwin/tvos/MainController.h"
+#import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/MainExternalTouchController.h"
 
 const CGFloat timeSwitchingToExternalSecs = 6.0;

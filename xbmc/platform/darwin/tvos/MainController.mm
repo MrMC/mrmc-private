@@ -311,8 +311,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 {
   PRINT_SIGNATURE();
   BOOL handled = NO;
-  bool phaseBegan = (press.phase == UIPressPhaseBegan);
-  NSTimeInterval phaseTimeStamp = timestamp;
   switch (press.type)
   {
     case UIPressTypeMenu:
