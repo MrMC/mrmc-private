@@ -357,16 +357,9 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
     // auto-repeat keys
     case UIPressTypeUpArrow:
-      [g_xbmcController sendKeyDownUp:XBMCK_UP];
-      break;
     case UIPressTypeDownArrow:
-      [g_xbmcController sendKeyDownUp:XBMCK_DOWN];
-      break;
     case UIPressTypeLeftArrow:
-      [g_xbmcController sendKeyDownUp:XBMCK_LEFT];
-      break;
     case UIPressTypeRightArrow:
-      [g_xbmcController sendKeyDownUp:XBMCK_RIGHT];
       break;
 
     default:
@@ -683,28 +676,21 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   {
     if (sender.state == UIGestureRecognizerStateRecognized)
     {
-      CGPoint point = [sender locationOfTouch:0 inView:m_glView];
-      point.x *= m_screenScale;
-      point.y *= m_screenScale;
-
-      TouchMoveDirection direction = TouchMoveDirectionNone;
       switch ([sender direction])
       {
         case UISwipeGestureRecognizerDirectionRight:
-          direction = TouchMoveDirectionRight;
+          [g_xbmcController sendKeyDownUp:XBMCK_RIGHT];
           break;
         case UISwipeGestureRecognizerDirectionLeft:
-          direction = TouchMoveDirectionLeft;
+          [g_xbmcController sendKeyDownUp:XBMCK_LEFT];
           break;
         case UISwipeGestureRecognizerDirectionUp:
-          direction = TouchMoveDirectionUp;
+          [g_xbmcController sendKeyDownUp:XBMCK_UP];
           break;
         case UISwipeGestureRecognizerDirectionDown:
-          direction = TouchMoveDirectionDown;
+          [g_xbmcController sendKeyDownUp:XBMCK_DOWN];
           break;
       }
-      CGenericTouchActionHandler::GetInstance().OnSwipe(direction,
-        0.0, 0.0, point.x, point.y, 0, 0, (int32_t)[sender numberOfTouches]);
     }
   }
 }
@@ -869,7 +855,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
   //[self createTapGestureRecognizers];
   //[self createPanGestureRecognizers];
-  //[self createSwipeGestureRecognizers];
+  [self createSwipeGestureRecognizers];
   [self createPressGesturecognizers];
 }
 //--------------------------------------------------------------
