@@ -157,8 +157,8 @@ int64_t MemBufferCache::Seek(int64_t iFilePosition)
 
   // if seek is a bit over what we have, try to wait a few seconds for the data to be available.
   // we try to avoid a (heavy) seek on the source
-  if (iFilePosition > m_nStartPosition + m_buffer.getMaxReadSize() &&
-      iFilePosition < m_nStartPosition + m_buffer.getMaxReadSize() + 100000)
+  if (iFilePosition > m_nStartPosition + int64_t(m_buffer.getMaxReadSize()) &&
+      iFilePosition < m_nStartPosition + int64_t(m_buffer.getMaxReadSize() + 100000))
   {
     int nRequired = (int)(iFilePosition - (m_nStartPosition + m_buffer.getMaxReadSize()));
     lock.Leave();
@@ -167,7 +167,7 @@ int64_t MemBufferCache::Seek(int64_t iFilePosition)
   }
 
   // check if seek is inside the current buffer
-  if (iFilePosition >= m_nStartPosition && iFilePosition < m_nStartPosition + m_buffer.getMaxReadSize())
+  if (iFilePosition >= m_nStartPosition && iFilePosition < m_nStartPosition + int64_t(m_buffer.getMaxReadSize()))
   {
     unsigned int nOffset = (unsigned int)(iFilePosition - m_nStartPosition);
     // copy to history so we can seek back
