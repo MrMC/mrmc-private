@@ -32,6 +32,7 @@
 #include "utils/log.h"
 #include "utils/TimeUtils.h"
 #include "platform/darwin/DarwinUtils.h"
+#include "platform/darwin/DictionaryUtils.h"
 
 extern "C" {
 #include "libswscale/swscale.h"
@@ -138,7 +139,7 @@ extern CMSampleBufferRef FigSampleBufferRetain(CMSampleBufferRef buf);
 }
 #endif
 
-int CheckNP2( unsigned x )
+static int CheckNP2( unsigned x )
 {
     --x;
     x |= x >> 1;
@@ -245,26 +246,6 @@ error:
 #endif
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
-// helper function that inserts an int32_t into a dictionary
-static void
-CFDictionarySetSInt32(CFMutableDictionaryRef dictionary, CFStringRef key, SInt32 numberSInt32)
-{
-  CFNumberRef number;
-
-  number = CFNumberCreate(NULL, kCFNumberSInt32Type, &numberSInt32);
-  CFDictionarySetValue(dictionary, key, number);
-  CFRelease(number);
-}
-// helper function that inserts an double into a dictionary
-static void
-CFDictionarySetDouble(CFMutableDictionaryRef dictionary, CFStringRef key, double numberDouble)
-{
-    CFNumberRef number;
-    
-    number = CFNumberCreate(NULL, kCFNumberDoubleType, &numberDouble);
-    CFDictionaryAddValue(dictionary, key, number);
-    CFRelease(number);
-}
 // helper function that wraps dts/pts into a dictionary
 static CFDictionaryRef
 CreateDictionaryWithDisplayTime(double time, double dts, double pts)

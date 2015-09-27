@@ -31,8 +31,8 @@
 #include "Video/DVDVideoCodecVDA.h"
 #endif
 #if defined(HAVE_VIDEOTOOLBOXDECODER)
-#include "Video/DVDVideoCodecVideoToolBox.h"
-#include "utils/SystemInfo.h"
+#include "Video/DVDVideoCodecVTB.h"
+//#include "utils/SystemInfo.h"
 #endif
 #include "Video/DVDVideoCodecFFmpeg.h"
 #include "Video/DVDVideoCodecOpenMax.h"
@@ -241,7 +241,7 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
         case AV_CODEC_ID_H264:
           if (hint.codec == AV_CODEC_ID_H264 && hint.ptsinvalid)
             break;
-          if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
+          if ( (pCodec = OpenCodec(new CDVDVideoCodecVTB(), hint, options)) ) return pCodec;
           break;
         default:
           break;

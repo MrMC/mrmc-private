@@ -435,7 +435,7 @@ const char* CDarwinUtils::GetAppRootFolder(void)
   {
     if (IsIosSandboxed())
     {
-      // when we are sandbox make documents our root
+      // when we are sandbox, make documents our root
       // so that user can access everything he needs 
       // via itunes sharing
       rootFolder = "Documents";
@@ -462,7 +462,7 @@ bool CDarwinUtils::IsIosSandboxed(void)
     result = GetExecutablePath(given_path, &path_size);
     if (result == 0)
     {
-      // we re sandboxed if we are installed in /var/mobile/Applications
+      // we are sandboxed if we are installed in /var/mobile/Applications
       if (strlen("/var/mobile/Applications/") < path_size &&
         strncmp(given_path, "/var/mobile/Applications/", strlen("/var/mobile/Applications/")) == 0)
       {

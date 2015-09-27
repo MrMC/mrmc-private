@@ -1770,6 +1770,10 @@
 		F5AE40A613415D9E0004BD79 /* SystemOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE409613415D9E0004BD79 /* SystemOperations.cpp */; };
 		F5AE40A713415D9E0004BD79 /* VideoLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE409813415D9E0004BD79 /* VideoLibrary.cpp */; };
 		F5AE40A813415D9E0004BD79 /* XBMCOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE409A13415D9E0004BD79 /* XBMCOperations.cpp */; };
+		F5BBDE081BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
+		F5BBDE091BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
+		F5BBDE0A1BB796AC00FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
+		F5BBDE0C1BB79F6A00FB1ACF /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5BBDE0B1BB79F6A00FB1ACF /* VideoToolbox.framework */; };
 		F5BD02F6148D3A7E001B5583 /* CryptThreading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BD02F4148D3A7E001B5583 /* CryptThreading.cpp */; };
 		F5BDB80C120202F400F0B710 /* DVDSubtitleTagSami.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB80B120202F400F0B710 /* DVDSubtitleTagSami.cpp */; };
 		F5BDB81A1202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB8191202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp */; };
@@ -4821,6 +4825,9 @@
 		F5AE409A13415D9E0004BD79 /* XBMCOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XBMCOperations.cpp; sourceTree = "<group>"; };
 		F5AE409B13415D9E0004BD79 /* XBMCOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBMCOperations.h; sourceTree = "<group>"; };
 		F5B413131065900C0035D105 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDVideoCodecVTB.cpp; sourceTree = "<group>"; };
+		F5BBDE071BB7346700FB1ACF /* DVDVideoCodecVTB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDVideoCodecVTB.h; sourceTree = "<group>"; };
+		F5BBDE0B1BB79F6A00FB1ACF /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS9.1.sdk/System/Library/Frameworks/VideoToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		F5BD02F4148D3A7E001B5583 /* CryptThreading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CryptThreading.cpp; sourceTree = "<group>"; };
 		F5BD02F5148D3A7E001B5583 /* CryptThreading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CryptThreading.h; sourceTree = "<group>"; };
 		F5BDB80A120202F400F0B710 /* DVDSubtitleTagSami.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDSubtitleTagSami.h; sourceTree = "<group>"; };
@@ -4981,6 +4988,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5BBDE0C1BB79F6A00FB1ACF /* VideoToolbox.framework in Frameworks */,
 				E49910F3174E54FB00741B6D /* AVFoundation.framework in Frameworks */,
 				F5024C0D1BB433F400134B16 /* UIKit.framework in Frameworks */,
 				E49910F1174E54ED00741B6D /* CFNetwork.framework in Frameworks */,
@@ -7323,6 +7331,8 @@
 				E38E153E0D25F9F900618676 /* DVDVideoCodecFFmpeg.h */,
 				F52B06B81187CE18004B1D66 /* DVDVideoCodecVDA.cpp */,
 				F52B06B91187CE18004B1D66 /* DVDVideoCodecVDA.h */,
+				F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */,
+				F5BBDE071BB7346700FB1ACF /* DVDVideoCodecVTB.h */,
 				E499158F174E6ABD00741B6D /* DVDVideoCodecVideoToolBox.cpp */,
 				E4991590174E6ABE00741B6D /* DVDVideoCodecVideoToolBox.h */,
 				E38E15410D25F9F900618676 /* DVDVideoPPFFmpeg.cpp */,
@@ -8022,6 +8032,7 @@
 		E49910F6174E55D400741B6D /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				F5BBDE0B1BB79F6A00FB1ACF /* VideoToolbox.framework */,
 				F5D142E31BAF88880075A95C /* MediaPlayer.framework */,
 				F5D142E11BAF88760075A95C /* CoreGraphics.framework */,
 				F5D142DF1BAF88630075A95C /* UIKit.framework */,
@@ -9308,6 +9319,7 @@
 				18B7C8F31294261F009E7A26 /* StringUtils.cpp in Sources */,
 				5EB3113C1A978B9B00551907 /* CueInfoLoader.cpp in Sources */,
 				18B7C8FB12942718009E7A26 /* GUIDialogAddonSettings.cpp in Sources */,
+				F5BBDE081BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */,
 				18B7C90012942761009E7A26 /* GUIDialogAudioSubtitleSettings.cpp in Sources */,
 				18B7C911129427A6009E7A26 /* GUIDialogVideoSettings.cpp in Sources */,
 				18B7C930129428CA009E7A26 /* PlayList.cpp in Sources */,
@@ -9951,6 +9963,7 @@
 				E4991283174E5D9900741B6D /* DirectoryNodeAlbumRecentlyPlayedSong.cpp in Sources */,
 				E4991284174E5D9900741B6D /* DirectoryNodeAlbumTop100.cpp in Sources */,
 				E4991285174E5D9900741B6D /* DirectoryNodeAlbumTop100Song.cpp in Sources */,
+				F5BBDE091BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */,
 				E4991286174E5D9900741B6D /* DirectoryNodeArtist.cpp in Sources */,
 				DF29BCEF1B5D911800904347 /* BaseEvent.cpp in Sources */,
 				E4991287174E5D9900741B6D /* DirectoryNodeGrouped.cpp in Sources */,
@@ -10846,6 +10859,7 @@
 				F5D13F941BAF0B6D0075A95C /* DirectoryNodeAlbumTop100Song.cpp in Sources */,
 				F5D13F951BAF0B6D0075A95C /* DirectoryNodeArtist.cpp in Sources */,
 				F5D13F961BAF0B6D0075A95C /* BaseEvent.cpp in Sources */,
+				F5BBDE0A1BB796AC00FB1ACF /* DVDVideoCodecVTB.cpp in Sources */,
 				F5D13F971BAF0B6D0075A95C /* DirectoryNodeGrouped.cpp in Sources */,
 				F5D13F981BAF0B6D0075A95C /* DirectoryNodeOverview.cpp in Sources */,
 				F5D13F991BAF0B6D0075A95C /* DirectoryNodeRoot.cpp in Sources */,
