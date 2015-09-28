@@ -22,11 +22,10 @@
   #include "config.h"
 #endif
 
-#if defined(HAVE_VIDEOTOOLBOXDECODER)
+#if defined(HAVE_VIDEOTOOLBOXDECODER) && !defined(TARGET_DARWIN_TVOS)
 #include "DVDClock.h"
 #include "DVDStreamInfo.h"
 #include "DVDVideoCodecVTB.h"
-
 #include "platform/darwin/DarwinUtils.h"
 #include "platform/darwin/DictionaryUtils.h"
 #include "settings/Settings.h"
