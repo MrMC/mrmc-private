@@ -477,6 +477,14 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   rightRecognizer.delegate = self;
   [self.view addGestureRecognizer: rightRecognizer];
   [rightRecognizer release];
+  
+  auto longSelectRecognizer = [[UILongPressGestureRecognizer alloc]
+                          initWithTarget: self action: @selector(longSelectPressed:)];
+  longSelectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
+  longSelectRecognizer.minimumPressDuration = 1.0;
+  longSelectRecognizer.delegate = self;
+  [self.view addGestureRecognizer: longSelectRecognizer];
+  [longSelectRecognizer release];
 }
 
 //--------------------------------------------------------------
@@ -530,6 +538,19 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     [self sendKeyDownUp:XBMCK_RETURN];
   }
 }
+
+- (void)longSelectPressed:(UITapGestureRecognizer *)sender
+{
+  PRINT_SIGNATURE();
+  if (sender.state == UIGestureRecognizerStateBegan) {
+    NSLog(@"button pressed  - select");
+    [self sendKeyDownUp:XBMCK_c];
+  } else if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"button released - select");
+    
+  }
+}
+
 - (void)playPausePressed:(UITapGestureRecognizer *) sender
 {
   PRINT_SIGNATURE();
