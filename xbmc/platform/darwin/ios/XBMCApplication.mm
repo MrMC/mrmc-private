@@ -21,7 +21,6 @@
 #import <objc/runtime.h>
 
 #import <UIKit/UIKit.h>
-#import <AVFoundation/AVAudioSession.h>
 
 #import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/ios/XBMCApplication.h"
@@ -121,17 +120,6 @@ XBMCController *m_xbmcController;
   m_xbmcController.wantsFullScreenLayout = YES;  
   [m_xbmcController startAnimation];
   [self registerScreenNotifications:YES];
-
-  NSError *err = nil;
-  if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&err])
-  {
-    ELOG(@"AVAudioSession setCategory failed: %@", err);
-  }
-  err = nil;
-  if (![[AVAudioSession sharedInstance] setActive: YES error: &err])
-  {
-    ELOG(@"AVAudioSession setActive failed: %@", err);
-  }
 }
 
 - (void)dealloc

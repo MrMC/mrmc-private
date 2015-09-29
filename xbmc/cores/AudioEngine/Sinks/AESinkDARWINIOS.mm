@@ -153,11 +153,26 @@ CAAudioUnitSink::CAAudioUnitSink()
 , m_render_timestamp(0)
 , m_render_frames(0)
 {
+  NSError *err = nullptr;
+  if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&err])
+  {
+    CLog::Log(LOGERROR, "AVAudioSession setCategory failed: %d", err.code);
+  }
+  err = nil;
+  if (![[AVAudioSession sharedInstance] setActive: YES error: &err])
+  {
+    CLog::Log(LOGERROR, "AVAudioSession setActive YES failed: %d", err.code);
+  }
 }
 
 CAAudioUnitSink::~CAAudioUnitSink()
 {
   close();
+  NSError *err = nullptr;
+  if (![[AVAudioSession sharedInstance] setActive: NO error: &err])
+  {
+    CLog::Log(LOGERROR, "AVAudioSession setActive NO failed: %d", err.code);
+  }
 }
 
 bool CAAudioUnitSink::open(AudioStreamBasicDescription outputFormat)
@@ -215,7 +230,7 @@ bool CAAudioUnitSink::pause()
 {	
   if (m_playing)
     m_playing = AudioOutputUnitStop(m_audioUnit);
-
+ 
   return m_playing;
 }
 

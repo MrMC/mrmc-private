@@ -19,7 +19,6 @@
  */
  
 #import <UIKit/UIKit.h>
-#import <AVFoundation/AVAudioSession.h>
 #import <objc/runtime.h>
 
 #import "platform/darwin/tvos/MainApplication.h"
@@ -108,16 +107,18 @@ MainController *m_xbmcController;
   [m_xbmcController startAnimation];
   [self registerScreenNotifications:YES];
 
-  NSError *err = nil;
-  if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&err])
-    ELOG(@"AVAudioSession setCategory failed: %@", err);
-  err = nil;
-  if (![[AVAudioSession sharedInstance] setActive: YES error: &err])
-    ELOG(@"AVAudioSession setActive failed: %@", err);
-
 #if TARGET_OS_SIMULATOR
   NSLog(@"Documents Directory: %@", [[[NSFileManager defaultManager]
     URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
+
+  NSDictionaryRef *dict = CFBundleGetInfoDictionary(CFBundleGetMainBundle());
+  NSString *bundleId = [dict objectForKey: @"CFBundleIdentifier"];
+  NSString *tempPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSSstring stringWithFormat:@"%d", bundleId];
+  NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+
+  NSLog(@"NSTemporaryDirectory: %@", tempPath);
+  NSLog(@"NSCachesDirectory   : %@", cachesPath);
+
 #endif
 }
 

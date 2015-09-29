@@ -54,7 +54,6 @@ using namespace KODI::MESSAGING;
 #endif
 #define RADIANS_TO_DEGREES(radians) ((radians) * (180.0 / M_PI))
 
-#import <AVFoundation/AVAudioSession.h>
 #import <MediaPlayer/MPMediaItem.h>
 #ifdef __IPHONE_5_0
 #import <MediaPlayer/MPNowPlayingInfoCenter.h>
