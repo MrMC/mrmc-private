@@ -651,6 +651,24 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     }
   }
 }
+
+- (void) insertVideoView:(UIView*)view
+{
+  // must be on main thread or updates are not hooks
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [self.view insertSubview:view belowSubview:m_glView];
+    [self.view setNeedsDisplay];
+  });
+}
+
+- (void) removeVideoView:(UIView*)view
+{
+  // must be on main thread or updates are not hooks
+  dispatch_async(dispatch_get_main_queue(), ^{
+    [view removeFromSuperview];
+  });
+}
+
 //--------------------------------------------------------------
 - (id)initWithFrame:(CGRect)frame withScreen:(UIScreen *)screen
 { 
@@ -680,29 +698,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
   orientation = UIInterfaceOrientationLandscapeLeft;
 
-#if __IPHONE_8_0
-  if (CDarwinUtils::GetIOSVersion() < 8.0)
-#endif
-  {
-    /* We start in landscape mode */
-    CGRect srect = frame;
-    // in ios sdks older then 8.0 the landscape mode is 90 degrees
-    // rotated
-    srect.size = CGSizeMake( frame.size.height, frame.size.width );
-  
-    m_glView = [[IOSEAGLView alloc] initWithFrame: srect withScreen:screen];
-    [[IOSScreenManager sharedInstance] setView:m_glView];
-    [m_glView setMultipleTouchEnabled:YES];
-  
-    /* Check if screen is Retina */
-    screenScale = [m_glView getScreenScale:screen];
-
-    [self.view addSubview: m_glView];
-  
-    [self createGestureRecognizers];
-    [m_window addSubview: self.view];
-  }
-
   [m_window makeKeyAndVisible];
   g_xbmcController = self;  
   
@@ -711,7 +706,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   return self;
 }
 //--------------------------------------------------------------
-#if __IPHONE_8_0
 - (void)loadView
 {
   [super loadView];
@@ -727,12 +721,18 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     /* Check if screen is Retina */
     screenScale = [m_glView getScreenScale:[UIScreen mainScreen]];
   
+    m_glView.opaque = NO;
+    m_glView.backgroundColor = [UIColor clearColor];
     [self.view addSubview: m_glView];
-  
+
+    //MCPlayerView *mcview = [[MCPlayerView alloc] initWithFrame:self.view.bounds];
+    //[self.view insertSubview:mcview belowSubview:m_glView];
+
+    [self.view setNeedsDisplay];
+
     [self createGestureRecognizers];
   }
 }
-#endif
 //--------------------------------------------------------------
 -(void)viewDidLoad
 {

@@ -38,6 +38,7 @@
 #import "WindowingFactory.h"
 
 #import <QuartzCore/QuartzCore.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 #import <OpenGLES/ES2/gl.h>
 #import <OpenGLES/ES2/glext.h>
@@ -164,7 +165,7 @@ using namespace KODI::MESSAGING;
     //and set frame size
     [self setScreen:screen withFrameBufferResize:FALSE];
 
-    eaglLayer.opaque = TRUE;
+    eaglLayer.opaque = NO;
     eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
       [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
       kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
