@@ -34,6 +34,20 @@
 #include "utils/TimeUtils.h"
 #include "utils/BitstreamConverter.h"
 
+//-----------------------------------------------------------------------------------
+// tracks a frame in and output queue in display order
+typedef struct frame_queue {
+  double              dts;
+  double              pts;
+  size_t              width;
+  size_t              height;
+  double              sort_time;
+  FourCharCode        pixel_buffer_format;
+  CVPixelBufferRef    pixel_buffer_ref;
+  struct frame_queue  *nextframe;
+} frame_queue;
+
+//-----------------------------------------------------------------------------------
 static int
 CheckNP2( unsigned x )
 {
@@ -260,7 +274,8 @@ bool CDVDVideoCodecVTB::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
     // pointer to sequence parameter set data
     uint8_t *sps_ptr = spc; spc += sps_size;
     // number of picture parameter sets
-    uint32_t pps_cnt = *spc++;
+    //uint32_t pps_cnt = *spc++;
+    spc++;
     // length of picture parameter set data
     uint32_t pps_size = BS_RB16(spc); spc += 2;
     // pointer to picture parameter set data
@@ -277,7 +292,7 @@ bool CDVDVideoCodecVTB::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
       sps_size,
       pps_size
     };
-    OSStatus err = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
+    CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
      parameterSetCount, parameterSetPointers, parameterSetSizes, NALUnitHeaderLength, &m_fmt_desc);
 
     CreateVTSession(width, height, m_fmt_desc);
@@ -343,6 +358,8 @@ int CDVDVideoCodecVTB::Decode(uint8_t* pData, int iSize, double dts, double pts)
   if (pData)
   {
     m_bitstream->Convert(pData, iSize);
+    iSize = m_bitstream->GetConvertSize();
+    pData = m_bitstream->GetConvertBuffer();
 
     VTDecompressionSessionRef vt_session = (VTDecompressionSessionRef)m_vt_session;
 

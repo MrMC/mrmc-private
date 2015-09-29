@@ -24,24 +24,12 @@
 #include <queue>
 
 #include "DVDVideoCodec.h"
-#include <CoreVideo/CoreVideo.h>
 #include <CoreMedia/CoreMedia.h>
 #include <CoreMedia/CMTime.h>
 #include <VideoToolbox/VideoToolbox.h>
 
+struct frame_queue;
 class CBitstreamConverter;
-
-// tracks a frame in and output queue in display order
-typedef struct frame_queue {
-  double              dts;
-  double              pts;
-  size_t              width;
-  size_t              height;
-  double              sort_time;
-  FourCharCode        pixel_buffer_format;
-  CVPixelBufferRef    pixel_buffer_ref;
-  struct frame_queue  *nextframe;
-} frame_queue;
 
 class CDVDVideoCodecVTB : public CDVDVideoCodec
 {
