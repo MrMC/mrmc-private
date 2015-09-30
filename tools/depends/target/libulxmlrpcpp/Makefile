@@ -6,7 +6,6 @@ LIBNAME=ulxmlrpcpp
 VERSION=1.7.5
 SOURCE=$(LIBNAME)-$(VERSION)-src
 ARCHIVE=$(SOURCE).tar.bz2
-BASE_URL=https://downloads.sourceforge.net/project/ulxmlrpcpp/$(VERSION)
  
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) build-aux/; \
