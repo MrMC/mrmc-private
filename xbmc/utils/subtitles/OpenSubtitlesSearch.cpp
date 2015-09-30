@@ -17,6 +17,12 @@
  *
  */
 
+// stupid libs that include their config.h
+#define PACKAGE _PACKAGE
+#undef PACKAGE
+#define VERSION _VERSION
+#undef VERSION
+#define __unix__
 #include <ulxmlrpcpp/ulxr_tcpip_connection.h>
 #include <ulxmlrpcpp/ulxr_ssl_connection.h>
 #include <ulxmlrpcpp/ulxr_http_protocol.h>
@@ -24,6 +30,11 @@
 #include <ulxmlrpcpp/ulxr_value.h>
 #include <ulxmlrpcpp/ulxr_except.h>
 #include <ulxmlrpcpp/ulxr_log4j.h>
+#undef VERSION
+#define _VERSION VERSION
+#undef PACKAGE
+#define _PACKAGE PACKAGE
+#undef __unix__
 
 #include "OpenSubtitlesSearch.h"
 

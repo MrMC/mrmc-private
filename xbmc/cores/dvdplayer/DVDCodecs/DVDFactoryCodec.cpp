@@ -28,30 +28,30 @@
 #include "cores/dvdplayer/DVDCodecs/DVDCodecs.h"
 
 #if defined(TARGET_DARWIN_OSX)
-#include "Video/DVDVideoCodecVDA.h"
+  #include "Video/DVDVideoCodecVDA.h"
 #endif
 #if defined(HAVE_VIDEOTOOLBOXDECODER)
-#if defined(TARGET_DARWIN_TVOS)
-#include "Video/DVDVideoCodecVideoToolBox.h"
-#include "utils/SystemInfo.h"
-#else
-#include "Video/DVDVideoCodecVTB.h"
-#endif
+  #if defined(TARGET_DARWIN_TVOS)
+    #include "Video/DVDVideoCodecVideoToolBox.h"
+  #else
+    #include "Video/DVDVideoCodecVTB.h"
+  #endif
+  #include "utils/SystemInfo.h"
 #endif
 #include "Video/DVDVideoCodecFFmpeg.h"
 #include "Video/DVDVideoCodecOpenMax.h"
 #if defined(HAS_IMXVPU)
-#include "Video/DVDVideoCodecIMX.h"
+  #include "Video/DVDVideoCodecIMX.h"
 #endif
 #include "Video/MMALCodec.h"
 #include "Video/DVDVideoCodecStageFright.h"
 #if defined(HAS_LIBAMCODEC)
-#include "utils/AMLUtils.h"
-#include "Video/DVDVideoCodecAmlogic.h"
+  #include "utils/AMLUtils.h"
+  #include "Video/DVDVideoCodecAmlogic.h"
 #endif
 #if defined(TARGET_ANDROID)
-#include "Video/DVDVideoCodecAndroidMediaCodec.h"
-#include "platform/android/activity/AndroidFeatures.h"
+  #include "Video/DVDVideoCodecAndroidMediaCodec.h"
+  #include "platform/android/activity/AndroidFeatures.h"
 #endif
 #include "Audio/DVDAudioCodecFFmpeg.h"
 #include "Audio/DVDAudioCodecPassthrough.h"
