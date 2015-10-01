@@ -107,7 +107,7 @@ MainController *m_xbmcController;
   [m_xbmcController startAnimation];
   [self registerScreenNotifications:YES];
 
-#if TARGET_OS_SIMULATOR
+#if TARGET_OS_SIMULATOR && !defined(TARGET_OS_IOS)
   NSLog(@"Documents Directory: %@", [[[NSFileManager defaultManager]
     URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
 

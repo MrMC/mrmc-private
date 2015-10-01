@@ -1,3 +1,4 @@
+#if !defined(TARGET_DARWIN_TVOS)
 
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
@@ -10,3 +11,4 @@
                     delay:(NSTimeInterval)delay
                  duration:(NSTimeInterval)duration;
 @end
+#endif
