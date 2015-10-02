@@ -654,19 +654,13 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
 - (void) insertVideoView:(UIView*)view
 {
-  // must be on main thread or updates are not hooks
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [self.view insertSubview:view belowSubview:m_glView];
-    [self.view setNeedsDisplay];
-  });
+  [self.view insertSubview:view belowSubview:m_glView];
+  [self.view setNeedsDisplay];
 }
 
 - (void) removeVideoView:(UIView*)view
 {
-  // must be on main thread or updates are not hooks
-  dispatch_async(dispatch_get_main_queue(), ^{
-    [view removeFromSuperview];
-  });
+  [view removeFromSuperview];
 }
 
 //--------------------------------------------------------------

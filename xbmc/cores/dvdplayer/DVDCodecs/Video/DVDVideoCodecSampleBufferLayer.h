@@ -19,18 +19,23 @@
  *
  */
 
-#include "DVDVideoCodec.h"
-#include "threads/Thread.h"
 
+#include <list>
+#include <queue>
 #include <CoreMedia/CoreMedia.h>
 
+#include "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
+#include "threads/Thread.h"
+
+struct pktTracker;
+class CAVFCodecMessage;
 class CBitstreamConverter;
 
-class CDVDVideoCodecAVSampleBufferLayer : public CDVDVideoCodec, CThread
+class CDVDVideoCodecSampleBufferLayer : public CDVDVideoCodec, CThread
 {
 public:
-  CDVDVideoCodecAVSampleBufferLayer();
-  virtual ~CDVDVideoCodecAVSampleBufferLayer();
+  CDVDVideoCodecSampleBufferLayer();
+  virtual ~CDVDVideoCodecSampleBufferLayer();
 
   // Required overrides
   virtual bool  Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
@@ -38,26 +43,44 @@ public:
   virtual int   Decode(uint8_t *pData, int iSize, double dts, double pts);
   virtual void  Reset(void);
   virtual bool  GetPicture(DVDVideoPicture *pDvdVideoPicture);
-  virtual bool  ClearPicture(DVDVideoPicture* pDvdVideoPicture);
   virtual void  SetDropState(bool bDrop);
+  virtual void  SetSpeed(int iSpeed);
+  virtual int   GetDataSize(void);
+  virtual double GetTimeSize(void);
   virtual const char* GetName(void) { return (const char*)m_pFormatName; }
 
 protected:
   virtual void  Process();
 
-  double        GetPlayerPtsSeconds();
+  void          DrainQueues();
+  void          StartSampleProviderWithBlock();
+  void          StopSampleProvider();
 
-  void                   *m_decoder;   // opaque decoder reference
+  double        GetPlayerPtsSeconds();
+  void          UpdateFrameRateTracking(double pts);
+
+  void                   *m_decoder;        // opaque decoder reference
+	dispatch_queue_t        m_providerQueue;
   CMFormatDescriptionRef  m_fmt_desc;
+  pthread_mutex_t         m_sampleBuffersMutex;    // mutex protecting queue manipulation
+  std::queue<CMSampleBufferRef> m_sampleBuffers;
+
+  size_t                  m_max_ref_frames;
+  pthread_mutex_t         m_trackerQueueMutex;       // mutex protecting queue manipulation
+  std::list<pktTracker*>  m_trackerQueue;
+
   int32_t                 m_format;
   const char             *m_pFormatName;
-  bool                    m_DropPictures;
-  bool                    m_decode_async;
+  double                  m_dts;
+  double                  m_pts;
+  int                     m_speed;
+  int                     m_width;
+  int                     m_height;
   DVDVideoPicture         m_videobuffer;
   CBitstreamConverter    *m_bitstream;
+  bool                    m_withBlockRunning;
 
-  int m_width;
-  int m_height;
-  double m_dts;
-  double m_pts;
+  CAVFCodecMessage       *m_messages;
+  uint64_t                m_framecount;
+  double                  m_framerate_ms;
 };
