@@ -48,12 +48,6 @@
 #include "utils/LangCodeExpander.h"
 #include "video/VideoInfoTag.h"
 
-
-
-
-
-using namespace ulxr;
-
 static const std::string base64_chars =
 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 "abcdefghijklmnopqrstuvwxyz"
@@ -111,10 +105,10 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
     SubtitleFileSizeAndHash(path, strSize, strHash);
     CLog::Log(LOGDEBUG, "%s - HASH - %s and Size - %s", __FUNCTION__, strHash.c_str(), strSize.c_str());
 
-    Array searchList;
-    searchList.addItem(RpcString(m_strToken));
+    ulxr::Array searchList;
+    searchList.addItem(ulxr::RpcString(m_strToken));
 //    std::vector<std::map<std::string, std::string>> searchParams;
-    Array searchParams;
+    ulxr::Array searchParams;
     
     std::string lg;
     std::vector<std::string> languages3;
@@ -127,11 +121,11 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
     }
     
 //    hash search
-    Struct searchHashParam;
+    ulxr::Struct searchHashParam;
     std::string strLang = StringUtils::Join(languages3, ",");
-    searchHashParam.addMember(ULXR_PCHAR("sublanguageid"), RpcString(strLang));
-    searchHashParam.addMember(ULXR_PCHAR("moviehash"), RpcString(strHash));
-    searchHashParam.addMember(ULXR_PCHAR("moviebytesize"), RpcString(strSize));
+    searchHashParam.addMember(ULXR_PCHAR("sublanguageid"), ulxr::RpcString(strLang));
+    searchHashParam.addMember(ULXR_PCHAR("moviehash"),     ulxr::RpcString(strHash));
+    searchHashParam.addMember(ULXR_PCHAR("moviebytesize"), ulxr::RpcString(strSize));
     searchParams.addItem(searchHashParam);
     
     CVideoInfoTag* tag = g_application.CurrentFileItem().GetVideoInfoTag();
@@ -166,31 +160,26 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
     }
 
     StringUtils::Replace(searchString, " ", "+");
-    Struct searchStringParam;
+    ulxr::Struct searchStringParam;
     
 //    title search
-    searchStringParam.addMember(ULXR_PCHAR("sublanguageid"), RpcString(StringUtils::Join(languages3, ",")));
-    searchStringParam.addMember(ULXR_PCHAR("query"), RpcString(searchString));
+    searchStringParam.addMember(ULXR_PCHAR("sublanguageid"), ulxr::RpcString(StringUtils::Join(languages3, ",")));
+    searchStringParam.addMember(ULXR_PCHAR("query"),         ulxr::RpcString(searchString));
     searchParams.addItem(searchStringParam);
     searchList.addItem(searchParams);
     
     
-    std::string const serverUrl("http://api.opensubtitles.org/xml-rpc");
-    std::string const methodName("SearchSubtitles");
-    
-    TcpIpConnection conn (false, ULXR_PCHAR(serverUrl), 80);
-    HttpProtocol prot(&conn);
-    Requester client(&prot);
-    MethodResponse resp;
-    
-//    xmlrpc_c::clientSimple myClient;
-//    xmlrpc_c::value result;
-    
-//    myClient.call(serverUrl, methodName, searchList, &result);
-    
-    MethodCall method (ULXR_PCHAR(methodName));
-    method.addParam(searchList);
-    resp = client.call(method,"");
+    try
+    {
+      const ulxr::CppString serverUrl("http://api.opensubtitles.org/xml-rpc");
+
+      std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, serverUrl, 80));
+      ulxr::HttpProtocol    protocol(connection.get());
+      ulxr::Requester       client(&protocol);
+      ulxr::MethodCall      methodcall(ULXR_PCHAR("SearchSubtitles"));
+
+      methodcall.addParam(searchList);
+      ulxr::MethodResponse response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
     
 //    std::map<std::string, xmlrpc_c::value> const resultStruct = xmlrpc_c::value_struct(result);
 //    std::map<std::string, xmlrpc_c::value>::const_iterator iterStatus = resultStruct.find("data");
@@ -211,6 +200,12 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
 //      }
 //      subtitlesList.push_back(subtitle);
 //    }
+    }
+    catch(...)
+    {
+      CLog::Log(LOGDEBUG, "%s - opps1", __PRETTY_FUNCTION__);
+    }
+
     return true;
   }
   return false;
@@ -238,19 +233,25 @@ bool COpenSubtitlesSearch::LogIn()
 //    return true;
 //  }
   
-  std::string const serverUrl("api.opensubtitles.org/xml-rpc");
-  std::string const methodName("LogIn");
-  
-//  std::auto_ptr<ulxr::TcpIpConnection> conn;
-//  conn.reset(new ulxr::TcpIpConnection (false, serverUrl));
-  TcpIpConnection conn (false, ULXR_PCHAR(serverUrl));
-  HttpProtocol prot(&conn);
-  Requester client(&prot);
-  MethodResponse resp;
-  
-  MethodCall method (ULXR_PCHAR(methodName));
-//  method.addParam(searchList);
-  resp = client.call(method,ULXR_PCHAR("engXBMC_Subtitles"));
+  ulxr::MethodResponse response;
+  try
+  {
+    const ulxr::CppString serverUrl("api.opensubtitles.org");
+
+    std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, serverUrl, 80));
+    ulxr::HttpProtocol    protocol(connection.get());
+    ulxr::Requester       client(&protocol);
+    ulxr::MethodCall      methodcall(ULXR_PCHAR("LogIn"));
+
+    methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("engXBMC_Subtitles")));
+    response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
+
+    ulxr::CppString ret_str = response.getXml(0);
+  }
+  catch(...)
+  {
+    CLog::Log(LOGDEBUG, "%s - opps2", __PRETTY_FUNCTION__);
+  }
   
   return false;
 }
