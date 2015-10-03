@@ -233,7 +233,6 @@ bool COpenSubtitlesSearch::LogIn()
 //    return true;
 //  }
   
-  ulxr::MethodResponse response;
   try
   {
     const ulxr::CppString serverUrl("api.opensubtitles.org");
@@ -244,9 +243,10 @@ bool COpenSubtitlesSearch::LogIn()
     ulxr::MethodCall      methodcall(ULXR_PCHAR("LogIn"));
 
     methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("engXBMC_Subtitles")));
-    response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
-
-    ulxr::CppString ret_str = response.getXml(0);
+    ulxr::MethodResponse response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
+    if (response.isOK())
+    {
+    }
   }
   catch(...)
   {
