@@ -30,6 +30,8 @@
 #include <ulxmlrpcpp/ulxr_value.h>
 #include <ulxmlrpcpp/ulxr_except.h>
 #include <ulxmlrpcpp/ulxr_log4j.h>
+#include "zlib.h"
+#include "zconf.h"
 #undef VERSION
 #define _VERSION VERSION
 #undef PACKAGE
@@ -107,9 +109,6 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
     CLog::Log(LOGDEBUG, "%s - HASH - %s and Size - %s", __FUNCTION__, strHash.c_str(), strSize.c_str());
 
     ulxr::Array searchList;
-    searchList.addItem(ulxr::RpcString(m_strToken));
-//    std::vector<std::map<std::string, std::string>> searchParams;
-    ulxr::Array searchParams;
     
     std::string lg;
     std::vector<std::string> languages3;
@@ -121,13 +120,13 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
       languages3.push_back(lg);
     }
     
-//    hash search
+//  hash search
     ulxr::Struct searchHashParam;
     std::string strLang = StringUtils::Join(languages3, ",");
     searchHashParam.addMember(ULXR_PCHAR("sublanguageid"), ulxr::RpcString(strLang));
     searchHashParam.addMember(ULXR_PCHAR("moviehash"),     ulxr::RpcString(strHash));
     searchHashParam.addMember(ULXR_PCHAR("moviebytesize"), ulxr::RpcString(strSize));
-    searchParams.addItem(searchHashParam);
+    searchList.addItem(searchHashParam);
     
     CVideoInfoTag* tag = g_application.CurrentFileItem().GetVideoInfoTag();
     
@@ -163,51 +162,62 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
     StringUtils::Replace(searchString, " ", "+");
     ulxr::Struct searchStringParam;
     
-//    title search
+//  title search
     searchStringParam.addMember(ULXR_PCHAR("sublanguageid"), ulxr::RpcString(StringUtils::Join(languages3, ",")));
     searchStringParam.addMember(ULXR_PCHAR("query"),         ulxr::RpcString(searchString));
-    searchParams.addItem(searchStringParam);
-    searchList.addItem(searchParams);
-    
+    searchList.addItem(searchStringParam);
     
     try
     {
-      const ulxr::CppString serverUrl("http://api.opensubtitles.org/xml-rpc");
-
-      std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, serverUrl, 80));
+      std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, ULXR_PCHAR(m_strServerUrl), 80));
       ulxr::HttpProtocol    protocol(connection.get());
       ulxr::Requester       client(&protocol);
       ulxr::MethodCall      methodcall(ULXR_PCHAR("SearchSubtitles"));
 
+      ulxr::RpcString token = m_strToken;
+      methodcall.addParam(token);
       methodcall.addParam(searchList);
       ulxr::MethodResponse response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
     
-//    std::map<std::string, xmlrpc_c::value> const resultStruct = xmlrpc_c::value_struct(result);
-//    std::map<std::string, xmlrpc_c::value>::const_iterator iterStatus = resultStruct.find("data");
-//    std::vector<xmlrpc_c::value> retStatus = xmlrpc_c::value_array(iterStatus->second).cvalue();
-//    
-//    std::vector<std::string> itemsNeeded = {"ZipDownloadLink", "IDSubtitleFile", "SubFileName", "SubFormat",
-//                                 "LanguageName", "SubRating", "ISO639", "MatchedBy", "SubHearingImpaired"
-//    };
-//    
-//    for (std::vector<xmlrpc_c::value>::iterator it = retStatus.begin() ; it != retStatus.end(); ++it)
-//    {
-//      std::map<std::string, std::string> subtitle;
-//      std::map<std::string, xmlrpc_c::value> const subtitleStruct = xmlrpc_c::value_struct(*it);
-//      for (std::vector<std::string>::iterator is = itemsNeeded.begin() ; is != itemsNeeded.end(); ++is)
-//      {
-//        std::map<std::string, xmlrpc_c::value>::const_iterator subItem = subtitleStruct.find(*is);
-//        subtitle[*is] = (std::string)xmlrpc_c::value_string(subItem->second);
-//      }
-//      subtitlesList.push_back(subtitle);
-//    }
+      ulxr::Struct cap = response.getResult();
+      if (response.isOK() && cap.hasMember(ULXR_PCHAR("status")))
+      {
+        ulxr::RpcString status = cap.getMember(ULXR_PCHAR("status"));
+        CLog::Log(LOGDEBUG, "%s - response - %s", __PRETTY_FUNCTION__, status.getString().c_str());
+        if (status.getString() == "200 OK")
+        {
+          if (cap.hasMember(ULXR_PCHAR("data")))
+          {
+            ulxr::Array subs = cap.getMember(ULXR_PCHAR("data"));
+            std::vector<std::string> itemsNeeded = {"ZipDownloadLink", "IDSubtitleFile", "SubFileName", "SubFormat",
+                                         "LanguageName", "SubRating", "ISO639", "MatchedBy", "SubHearingImpaired"
+            };
+        
+            for (unsigned i = 0; i < subs.size(); ++i)
+            {
+              ulxr::Struct entry = subs.getItem(i);
+              std::map<std::string, std::string> subtitle;
+              for (std::vector<std::string>::iterator is = itemsNeeded.begin() ; is != itemsNeeded.end(); ++is)
+              {
+                std::string strIs = *is;
+                if (entry.hasMember(ULXR_PCHAR(strIs)))
+                {
+                  ulxr::RpcString value = entry.getMember(ULXR_PCHAR(strIs));
+                  subtitle[strIs] = value.getString();
+                }
+              }
+              subtitlesList.push_back(subtitle);
+            }
+          }
+          CLog::Log(LOGDEBUG, "%s - hold", __PRETTY_FUNCTION__);
+          return true;
+        }
+      }
     }
     catch(...)
     {
       CLog::Log(LOGDEBUG, "%s - opps1", __PRETTY_FUNCTION__);
     }
-
-    return true;
   }
   return false;
 }
@@ -250,111 +260,122 @@ bool COpenSubtitlesSearch::LogIn()
 
 bool COpenSubtitlesSearch::Download(const std::string subID,const std::string format,std::vector<std::string> &items)
 {
-//  std::string const serverUrl("http://api.opensubtitles.org/xml-rpc");
-//  std::string const methodName("DownloadSubtitles");
-//  
-//  xmlrpc_c::clientSimple myClient;
-//  xmlrpc_c::value result;
-//  xmlrpc_c::paramList searchList;
-//  searchList.addc(m_strToken);
-//  std::vector<std::string> IDs;
-//  IDs.push_back(subID);
-//  searchList.addc(IDs);
-//  myClient.call(serverUrl, methodName, searchList, &result);
-//  
-//  std::map<std::string, xmlrpc_c::value> const resultStruct = xmlrpc_c::value_struct(result);
-//  std::map<std::string, xmlrpc_c::value>::const_iterator iterStatus = resultStruct.find("status");
-//  
-//  std::string retStatus = (std::string)xmlrpc_c::value_string(iterStatus->second);
-//  
-//  if (retStatus == "200 OK")
-//  {
-//    std::map<std::string, xmlrpc_c::value>::const_iterator iterStatus = resultStruct.find("data");
-//    std::vector<xmlrpc_c::value> retStatus = xmlrpc_c::value_array(iterStatus->second).cvalue();
-//    for (std::vector<xmlrpc_c::value>::iterator it = retStatus.begin() ; it != retStatus.end(); ++it)
-//    {
-//      std::map<std::string, xmlrpc_c::value> const subtitleStruct = xmlrpc_c::value_struct(*it);
-//      std::map<std::string, xmlrpc_c::value>::const_iterator iterStatus = subtitleStruct.find("data");
-//      std::string zipdata = (std::string)xmlrpc_c::value_string(iterStatus->second);
-//      std::string zipdata64Decoded = base64_decode(zipdata);
-//      std::string zipdata64DecodedInflated;
-//      gzipInflate(zipdata64Decoded,zipdata64DecodedInflated);
-//      XFILE::CFile file;
-//      std::string destination = StringUtils::Format("special://temp/%s.%s",
-//                                                    StringUtils::CreateUUID().c_str(),
-//                                                    format.c_str()
-//                                                    );
-//      file.OpenForWrite(destination);
-//      file.Write(zipdata64DecodedInflated.c_str(), zipdata64DecodedInflated.size());
-//      items.push_back(destination);
-//    }
-//    CLog::Log(LOGDEBUG, "%s - OpenSubitles subfile downloaded", __FUNCTION__);
-//    return true;
-//  }
+  try
+  {
+    std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, ULXR_PCHAR(m_strServerUrl), 80));
+    ulxr::HttpProtocol    protocol(connection.get());
+    ulxr::Requester       client(&protocol);
+    ulxr::MethodCall      methodcall(ULXR_PCHAR("DownloadSubtitles"));
+
+    ulxr::Array subtitleIDlist;
+    ulxr::RpcString ID = subID;
+    subtitleIDlist.addItem(ID);
+    ulxr::RpcString token = m_strToken;
+    methodcall.addParam(token);
+    methodcall.addParam(subtitleIDlist);
+    ulxr::MethodResponse response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
+    
+    ulxr::Struct cap = response.getResult();
+    if (response.isOK() && cap.hasMember(ULXR_PCHAR("status")))
+    {
+      ulxr::RpcString status = cap.getMember(ULXR_PCHAR("status"));
+      CLog::Log(LOGDEBUG, "%s - response - %s", __PRETTY_FUNCTION__, status.getString().c_str());
+      if (status.getString() == "200 OK")
+      {
+        if (cap.hasMember(ULXR_PCHAR("data")))
+        {
+          ulxr::Array subs = cap.getMember(ULXR_PCHAR("data"));
+          for (unsigned i = 0; i < subs.size(); ++i)
+          {
+            ulxr::Struct entry = subs.getItem(i);
+            ulxr::RpcString data = entry.getMember(ULXR_PCHAR("data"));
+            std::string zipdata = data.getString();
+            std::string zipdata64Decoded = base64_decode(zipdata);
+            std::string zipdata64DecodedInflated;
+            gzipInflate(zipdata64Decoded,zipdata64DecodedInflated);
+            XFILE::CFile file;
+            std::string destination = StringUtils::Format("special://temp/%s.%s",
+                                                          StringUtils::CreateUUID().c_str(),
+                                                          format.c_str()
+                                                          );
+            file.OpenForWrite(destination);
+            file.Write(zipdata64DecodedInflated.c_str(), zipdata64DecodedInflated.size());
+            items.push_back(destination);
+          }
+          CLog::Log(LOGDEBUG, "%s - OpenSubitles subfile downloaded", __PRETTY_FUNCTION__);
+          return true;
+        }
+      }
+    }
+  }
+  catch(...)
+  {
+    CLog::Log(LOGDEBUG, "%s - opps2", __PRETTY_FUNCTION__);
+  }
   return false;
 }
 
 // below from http://windrealm.org/tutorials/decompress-gzip-stream.php
 bool COpenSubtitlesSearch::gzipInflate( const std::string& compressedBytes, std::string& uncompressedBytes )
 {
-//  if ( compressedBytes.size() == 0 ) {
-//    uncompressedBytes = compressedBytes ;
-//    return true ;
-//  }
-//  
-//  uncompressedBytes.clear() ;
-//  
-//  unsigned full_length = compressedBytes.size() ;
-//  unsigned half_length = compressedBytes.size() / 2;
-//  
-//  unsigned uncompLength = full_length ;
-//  char* uncomp = (char*) calloc( sizeof(char), uncompLength );
-//  
-//  z_stream strm;
-//  strm.next_in = (Bytef *) compressedBytes.c_str();
-//  strm.avail_in = compressedBytes.size() ;
-//  strm.total_out = 0;
-//  strm.zalloc = Z_NULL;
-//  strm.zfree = Z_NULL;
-//  
-//  bool done = false ;
-//  
-//  if (inflateInit2(&strm, (16+MAX_WBITS)) != Z_OK) {
-//    free( uncomp );
-//    return false;
-//  }
-//  
-//  while (!done) {
-//    // If our output buffer is too small
-//    if (strm.total_out >= uncompLength ) {
-//      // Increase size of output buffer
-//      char* uncomp2 = (char*) calloc( sizeof(char), uncompLength + half_length );
-//      memcpy( uncomp2, uncomp, uncompLength );
-//      uncompLength += half_length ;
-//      free( uncomp );
-//      uncomp = uncomp2 ;
-//    }
-//    
-//    strm.next_out = (Bytef *) (uncomp + strm.total_out);
-//    strm.avail_out = uncompLength - strm.total_out;
-//    
-//    // Inflate another chunk.
-//    int err = inflate (&strm, Z_SYNC_FLUSH);
-//    if (err == Z_STREAM_END) done = true;
-//    else if (err != Z_OK)  {
-//      break;
-//    }
-//  }
-//  
-//  if (inflateEnd (&strm) != Z_OK) {
-//    free( uncomp );
-//    return false;
-//  }
-//  
-//  for ( size_t i=0; i<strm.total_out; ++i ) {
-//    uncompressedBytes += uncomp[ i ];
-//  }
-//  free( uncomp );
+  if ( compressedBytes.size() == 0 ) {
+    uncompressedBytes = compressedBytes ;
+    return true ;
+  }
+  
+  uncompressedBytes.clear() ;
+  
+  unsigned full_length = compressedBytes.size() ;
+  unsigned half_length = compressedBytes.size() / 2;
+  
+  unsigned uncompLength = full_length ;
+  char* uncomp = (char*) calloc( sizeof(char), uncompLength );
+  
+  z_stream strm;
+  strm.next_in = (Bytef *) compressedBytes.c_str();
+  strm.avail_in = compressedBytes.size() ;
+  strm.total_out = 0;
+  strm.zalloc = Z_NULL;
+  strm.zfree = Z_NULL;
+  
+  bool done = false ;
+  
+  if (inflateInit2(&strm, (16+MAX_WBITS)) != Z_OK) {
+    free( uncomp );
+    return false;
+  }
+  
+  while (!done) {
+    // If our output buffer is too small
+    if (strm.total_out >= uncompLength ) {
+      // Increase size of output buffer
+      char* uncomp2 = (char*) calloc( sizeof(char), uncompLength + half_length );
+      memcpy( uncomp2, uncomp, uncompLength );
+      uncompLength += half_length ;
+      free( uncomp );
+      uncomp = uncomp2 ;
+    }
+    
+    strm.next_out = (Bytef *) (uncomp + strm.total_out);
+    strm.avail_out = uncompLength - strm.total_out;
+    
+    // Inflate another chunk.
+    int err = inflate (&strm, Z_SYNC_FLUSH);
+    if (err == Z_STREAM_END) done = true;
+    else if (err != Z_OK)  {
+      break;
+    }
+  }
+  
+  if (inflateEnd (&strm) != Z_OK) {
+    free( uncomp );
+    return false;
+  }
+  
+  for ( size_t i=0; i<strm.total_out; ++i ) {
+    uncompressedBytes += uncomp[ i ];
+  }
+  free( uncomp );
   return true ;
 }
 
