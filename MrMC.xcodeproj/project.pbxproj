@@ -1702,6 +1702,7 @@
 		F56353BF16E9BB3500D21BAD /* BitstreamConverter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56353BD16E9BB3500D21BAD /* BitstreamConverter.cpp */; };
 		F56579AF13060D1E0085ED7F /* RenderCapture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56579AD13060D1E0085ED7F /* RenderCapture.cpp */; };
 		F57B6F801071B8B500079ACB /* JobManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B6F7E1071B8B500079ACB /* JobManager.cpp */; };
+		F57F6C791BC1BB7A001AF22D /* AVFPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D91C6C1BC01BA600C7C1C4 /* AVFPlayer.mm */; };
 		F584E12E0F257C5100DB26A5 /* HTTPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F584E12D0F257C5100DB26A5 /* HTTPDirectory.cpp */; };
 		F590455E1BA372A600DB589A /* AutoPool.mm in Sources */ = {isa = PBXBuildFile; fileRef = F59045291BA372A600DB589A /* AutoPool.mm */; };
 		F590455F1BA372A600DB589A /* AutoPool.mm in Sources */ = {isa = PBXBuildFile; fileRef = F59045291BA372A600DB589A /* AutoPool.mm */; };
@@ -2720,6 +2721,7 @@
 		F5D915B01B9A367F004BB28A /* PngIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D915AD1B9A367F004BB28A /* PngIO.cpp */; };
 		F5D915B41B9CF191004BB28A /* GifIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D915B21B9CF191004BB28A /* GifIO.cpp */; };
 		F5D915B51B9CF191004BB28A /* GifIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5D915B21B9CF191004BB28A /* GifIO.cpp */; };
+		F5D91C6F1BC01BA600C7C1C4 /* AVFPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D91C6C1BC01BA600C7C1C4 /* AVFPlayer.mm */; };
 		F5DB700217322DBB00D4DF21 /* FavouritesOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5DB700017322DBB00D4DF21 /* FavouritesOperations.cpp */; };
 		F5DC87E2110A287400EE1B15 /* RingBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5DC87E1110A287400EE1B15 /* RingBuffer.cpp */; };
 		F5E10537140AA38100175026 /* PeripheralBusUSB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E10513140AA38000175026 /* PeripheralBusUSB.cpp */; };
@@ -4907,6 +4909,8 @@
 		F5D915AE1B9A367F004BB28A /* PngIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PngIO.h; sourceTree = "<group>"; };
 		F5D915B21B9CF191004BB28A /* GifIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GifIO.cpp; sourceTree = "<group>"; };
 		F5D915B31B9CF191004BB28A /* GifIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GifIO.h; sourceTree = "<group>"; };
+		F5D91C6B1BC01BA600C7C1C4 /* AVFPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVFPlayer.h; sourceTree = "<group>"; };
+		F5D91C6C1BC01BA600C7C1C4 /* AVFPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AVFPlayer.mm; sourceTree = "<group>"; };
 		F5DB700017322DBB00D4DF21 /* FavouritesOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FavouritesOperations.cpp; sourceTree = "<group>"; };
 		F5DB700117322DBB00D4DF21 /* FavouritesOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FavouritesOperations.h; sourceTree = "<group>"; };
 		F5DC87E0110A287400EE1B15 /* RingBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RingBuffer.h; sourceTree = "<group>"; };
@@ -7182,6 +7186,7 @@
 			isa = PBXGroup;
 			children = (
 				DFB65F6315373AE7006B8FF1 /* AudioEngine */,
+				F5D91C6A1BC01BA600C7C1C4 /* avfplayer */,
 				E38E149D0D25F9F900618676 /* DllLoader */,
 				E38E14F80D25F9F900618676 /* dvdplayer */,
 				7C5608C30F1754930056433A /* ExternalPlayer */,
@@ -8385,6 +8390,15 @@
 				F5D142A91BAF31FB0075A95C /* MainScreenManager.mm */,
 			);
 			path = tvos;
+			sourceTree = "<group>";
+		};
+		F5D91C6A1BC01BA600C7C1C4 /* avfplayer */ = {
+			isa = PBXGroup;
+			children = (
+				F5D91C6C1BC01BA600C7C1C4 /* AVFPlayer.mm */,
+				F5D91C6B1BC01BA600C7C1C4 /* AVFPlayer.h */,
+			);
+			path = avfplayer;
 			sourceTree = "<group>";
 		};
 		F5E1050C140AA38000175026 /* peripherals */ = {
@@ -10112,6 +10126,7 @@
 				E4991310174E5DAD00741B6D /* GUIShader.cpp in Sources */,
 				E4991311174E5DAD00741B6D /* GUISliderControl.cpp in Sources */,
 				3994426F1A8DD920006C39E9 /* VideoLibraryCleaningJob.cpp in Sources */,
+				F5D91C6F1BC01BA600C7C1C4 /* AVFPlayer.mm in Sources */,
 				E4991312174E5DAD00741B6D /* GUISpinControl.cpp in Sources */,
 				E4991313174E5DAD00741B6D /* GUISpinControlEx.cpp in Sources */,
 				E4991314174E5DAD00741B6D /* GUIStaticItem.cpp in Sources */,
@@ -11068,6 +11083,7 @@
 				F5D140521BAF0B6D0075A95C /* LinuxResourceCounter.cpp in Sources */,
 				F5D140531BAF0B6D0075A95C /* LinuxTimezone.cpp in Sources */,
 				F5D140541BAF0B6D0075A95C /* PosixMountProvider.cpp in Sources */,
+				F57F6C791BC1BB7A001AF22D /* AVFPlayer.mm in Sources */,
 				F5D140551BAF0B6D0075A95C /* XFileUtils.cpp in Sources */,
 				F5D140561BAF0B6D0075A95C /* XHandle.cpp in Sources */,
 				F5D140571BAF0B6D0075A95C /* OverrideFile.cpp in Sources */,

@@ -63,7 +63,7 @@ using namespace KODI::MESSAGING;
     //set screen, handlescreenscale and set frame size
     [self setScreen:screen withFrameBufferResize:FALSE];
     
-    eaglLayer.opaque = TRUE;
+    eaglLayer.opaque = NO;
     eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
       [NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking,
       kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];

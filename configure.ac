@@ -442,7 +442,7 @@ AC_ARG_ENABLE([libcap],
 
 AC_ARG_ENABLE([player],
   [AS_HELP_STRING([--enable-player],
-  [enable additional players from a list of comma separated names, (default is none, choices are omxplayer)])],
+  [enable additional players from a list of comma separated names, (default is none, choices are avfplayer, omxplayer)])],
   [add_players=$enableval],
   [add_players=no])
 
@@ -1619,6 +1619,9 @@ fi
 
 # additional internal players
 case $add_players in
+  *avfplayer*)
+      XB_ADD_PLAYER([AVFPLAYER], [avfplayer])
+      ;;
   *omxplayer*)
       XB_ADD_PLAYER([OMXPLAYER], [omxplayer])
       ;;
@@ -2035,6 +2038,7 @@ OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/dvdplayer/DVDDemuxers/Makefile"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/dvdplayer/DVDSubtitles/Makefile"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/AudioEngine/Makefile"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/paplayer/Makefile"
+OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/avfplayer/Makefile"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/omxplayer/Makefile"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/cores/playercorefactory/Makefile"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/filesystem/Makefile"

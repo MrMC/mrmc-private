@@ -16,7 +16,7 @@ ifeq ($(OS),android)
 CONFIGURE += --enable-codec=libstagefright,amcodec
 endif
 ifeq ($(OS),ios)
-CONFIGURE += --disable-airplay --disable-airtunes
+CONFIGURE += --disable-airplay --disable-airtunes --enable-player=avfplayer
 endif
 ifeq ($(OS),osx)
 CONFIGURE += --disable-airplay --disable-airtunes

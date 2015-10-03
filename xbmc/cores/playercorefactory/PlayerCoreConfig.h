@@ -24,6 +24,9 @@
 #include "PlayerCoreFactory.h"
 #include "cores/dvdplayer/DVDPlayer.h"
 #include "cores/paplayer/PAPlayer.h"
+#if defined(HAS_AVFPLAYER)
+  #include "cores/avfplayer/AVFPlayer.h"
+#endif
 #include "cores/ExternalPlayer/ExternalPlayer.h"
 #ifdef HAS_UPNP
 #include "network/upnp/UPnPPlayer.h"
@@ -94,9 +97,12 @@ public:
     switch(m_eCore)
     {
       case EPC_MPLAYER:
-      case EPC_DVDPLAYER: pPlayer = new CDVDPlayer(callback); break;
-      case EPC_PAPLAYER: pPlayer = new PAPlayer(callback); break;
-      case EPC_EXTPLAYER: pPlayer = new CExternalPlayer(callback); break;
+      case EPC_DVDPLAYER:  pPlayer = new CDVDPlayer(callback); break;
+      case EPC_PAPLAYER:   pPlayer = new PAPlayer(callback); break;
+      case EPC_EXTPLAYER:  pPlayer = new CExternalPlayer(callback); break;
+#if defined(HAS_AVFPLAYER)
+      case EPC_AVFPLAYER:  pPlayer = new CAVFPlayer(callback); break;
+#endif
 #if defined(HAS_UPNP)
       case EPC_UPNPPLAYER: pPlayer = new UPNP::CUPnPPlayer(callback, m_id.c_str()); break;
 #endif

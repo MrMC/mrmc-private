@@ -777,6 +777,17 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 
 #pragma mark -
+- (void) insertVideoView:(UIView*)view
+{
+  [self.view insertSubview:view belowSubview:m_glView];
+  [self.view setNeedsDisplay];
+}
+
+- (void) removeVideoView:(UIView*)view
+{
+  [view removeFromSuperview];
+}
+
 - (id)initWithFrame:(CGRect)frame withScreen:(UIScreen *)screen
 { 
   PRINT_SIGNATURE();
@@ -797,6 +808,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   m_window = [[UIWindow alloc] initWithFrame:frame];
   [m_window setRootViewController:self];  
   m_window.screen = screen;
+  m_window.backgroundColor = [UIColor blackColor];
   // Turn off autoresizing
   m_window.autoresizingMask = 0;
   m_window.autoresizesSubviews = NO;
