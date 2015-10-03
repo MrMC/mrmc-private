@@ -115,7 +115,8 @@ GetFrameDisplayTimeFromDictionary(
 
 // helper function to create a CMSampleBufferRef from demuxer data
 static CMSampleBufferRef
-CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc, void *demux_buff, size_t demux_size)
+CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc,
+  CMSampleTimingInfo *timingInfo, void *demux_buff, size_t demux_size)
 {
   OSStatus status;
   CMBlockBufferRef newBBufOut = NULL;
@@ -142,8 +143,8 @@ CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc, void *demux_buff, size_t
       0,              // void *makeDataReadyRefcon
       fmt_desc,       // CMFormatDescriptionRef formatDescription
       1,              // CMItemCount numSamples
-      0,              // CMItemCount numSampleTimingEntries
-      NULL,           // const CMSampleTimingInfo *sampleTimingArray
+      1,              // CMItemCount numSampleTimingEntries
+      timingInfo,     // const CMSampleTimingInfo *sampleTimingArray
       0,              // CMItemCount numSampleSizeEntries
       NULL,           // const size_t *sampleSizeArray
       &sBufOut);      // CMSampleBufferRef *sBufOut
@@ -166,6 +167,10 @@ CDVDVideoCodecVTB::CDVDVideoCodecVTB() : CDVDVideoCodec()
   m_fmt_desc    = NULL;
   m_vt_session  = NULL;
   m_pFormatName = "vtbn";
+
+  m_last_pts    = DVD_NOPTS_VALUE;
+  m_framerate   = 0.0;
+  m_framecount  = 0;
 
   m_queue_depth = 0;
   m_display_queue = NULL;
@@ -224,76 +229,74 @@ bool CDVDVideoCodecVTB::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
           CLog::Log(LOGNOTICE, "%s - avcC atom too data small or missing", __FUNCTION__);
           return false;
         }
-        // use a bitstream converter for all flavors, that way
-        // even avcC with silly 3-byte nals are covered.
-        m_bitstream = new CBitstreamConverter;
-        if (!m_bitstream->Open(hints.codec, (uint8_t*)hints.extradata, hints.extrasize, false))
-          return false;
-        
-        m_pFormatName = "vtbn-h264";
+        else
+        {
+          // use a bitstream converter for all flavors, that way
+          // even avcC with silly 3-byte nals are covered.
+          m_bitstream = new CBitstreamConverter;
+          if (!m_bitstream->Open(hints.codec, (uint8_t*)hints.extradata, hints.extrasize, false))
+            return false;
+
+          if (m_bitstream->GetExtraSize() < 8)
+          {
+            delete m_bitstream, m_bitstream = NULL;
+            return false;
+          }
+          else
+          {
+            // check the avcC atom's sps for number of reference frames and
+            // bail if interlaced, VTB does not handle interlaced h264.
+            bool interlaced = true;
+            uint8_t *spc = m_bitstream->GetExtraData() + 6;
+            uint32_t sps_size = BS_RB16(spc);
+            if (sps_size)
+              m_bitstream->parseh264_sps(spc+3, sps_size-1, &interlaced, &m_max_ref_frames);
+            if (interlaced)
+            {
+              CLog::Log(LOGNOTICE, "%s - possible interlaced content.", __FUNCTION__);
+              return false;
+            }
+          }
+
+          if (profile == FF_PROFILE_H264_MAIN && level == 32 && m_max_ref_frames > 4)
+          {
+            // Main@L3.2, VTB cannot handle greater than 4 reference frames
+            CLog::Log(LOGNOTICE, "%s - Main@L3.2 detected, VTB cannot decode.", __FUNCTION__);
+            return false;
+          }
+
+          // create a CMVideoFormatDescription from avcC extradata.
+          // skip over avcC header (six bytes)
+          uint8_t *spc = m_bitstream->GetExtraData() + 6;
+          // length of sequence parameter set data
+          uint32_t sps_size = BS_RB16(spc); spc += 2;
+          // pointer to sequence parameter set data
+          uint8_t *sps_ptr = spc; spc += sps_size;
+          // number of picture parameter sets
+          //uint32_t pps_cnt = *spc++;
+          spc++;
+          // length of picture parameter set data
+          uint32_t pps_size = BS_RB16(spc); spc += 2;
+          // pointer to picture parameter set data
+          uint8_t *pps_ptr = spc;
+
+          // bitstream converter avcC's always have 4 byte NALs.
+          int NALUnitHeaderLength  = 4;
+          size_t parameterSetCount = 2;
+          const uint8_t* const parameterSetPointers[2] = {
+            (const uint8_t*)sps_ptr,
+            (const uint8_t*)pps_ptr
+          };
+          const size_t parameterSetSizes[2] = { sps_size, pps_size };
+          CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
+           parameterSetCount, parameterSetPointers, parameterSetSizes, NALUnitHeaderLength, &m_fmt_desc);
+        }
       break;
 
       default:
         return false;
       break;
     }
-
-    if (m_bitstream->GetExtraSize() < 8)
-    {
-      delete m_bitstream, m_bitstream = NULL;
-      return false;
-    }
-    else
-    {
-      // check the avcC atom's sps for number of reference frames and
-      // bail if interlaced, VTB does not handle interlaced h264.
-      bool interlaced = true;
-      uint8_t *spc = m_bitstream->GetExtraData() + 6;
-      uint32_t sps_size = BS_RB16(spc);
-      if (sps_size)
-        m_bitstream->parseh264_sps(spc+3, sps_size-1, &interlaced, &m_max_ref_frames);
-      if (interlaced)
-      {
-        CLog::Log(LOGNOTICE, "%s - possible interlaced content.", __FUNCTION__);
-        return false;
-      }
-    }
-    
-    if (profile == FF_PROFILE_H264_MAIN && level == 32 && m_max_ref_frames > 4)
-    {
-      // Main@L3.2, VTB cannot handle greater than 4 reference frames
-      CLog::Log(LOGNOTICE, "%s - Main@L3.2 detected, VTB cannot decode.", __FUNCTION__);
-      return false;
-    }
-
-    // create a CMVideoFormatDescription from avcC extradata.
-    // skip over avcC header (six bytes)
-    uint8_t *spc = m_bitstream->GetExtraData() + 6;
-    // length of sequence parameter set data
-    uint32_t sps_size = BS_RB16(spc); spc += 2;
-    // pointer to sequence parameter set data
-    uint8_t *sps_ptr = spc; spc += sps_size;
-    // number of picture parameter sets
-    //uint32_t pps_cnt = *spc++;
-    spc++;
-    // length of picture parameter set data
-    uint32_t pps_size = BS_RB16(spc); spc += 2;
-    // pointer to picture parameter set data
-    uint8_t *pps_ptr = spc;
-
-    // bitstream converter avcC's always have 4 byte NALs.
-    int NALUnitHeaderLength  = 4;
-    size_t parameterSetCount = 2;
-    const uint8_t* const parameterSetPointers[2] = {
-      (const uint8_t*)sps_ptr,
-      (const uint8_t*)pps_ptr
-    };
-    const size_t parameterSetSizes[2] = {
-      sps_size,
-      pps_size
-    };
-    CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
-     parameterSetCount, parameterSetPointers, parameterSetSizes, NALUnitHeaderLength, &m_fmt_desc);
 
     CreateVTSession(width, height, m_fmt_desc);
     if (m_vt_session == NULL)
@@ -361,13 +364,22 @@ int CDVDVideoCodecVTB::Decode(uint8_t* pData, int iSize, double dts, double pts)
     iSize = m_bitstream->GetConvertSize();
     pData = m_bitstream->GetConvertBuffer();
 
+    FrameRateTracking(pts);
+
     VTDecompressionSessionRef vt_session = (VTDecompressionSessionRef)m_vt_session;
 
-    CMSampleBufferRef sampleBuff = CreateSampleBufferFrom(m_fmt_desc, pData, iSize);
+    CMSampleTimingInfo sampleTimingInfo = kCMTimingInfoInvalid;
+    if (dts != DVD_NOPTS_VALUE)
+      sampleTimingInfo.decodeTimeStamp = CMTimeMake(dts, DVD_TIME_BASE);
+    if (pts != DVD_NOPTS_VALUE)
+      sampleTimingInfo.presentationTimeStamp = CMTimeMake(pts, DVD_TIME_BASE);
+
+    CMSampleBufferRef sampleBuff = CreateSampleBufferFrom(m_fmt_desc, &sampleTimingInfo, pData, iSize);
 
     VTDecodeFrameFlags decoderFlags = 0;
     if (m_DropPictures)
       decoderFlags = kVTDecodeFrame_DoNotOutputFrame;
+    decoderFlags |= kVTDecodeFrame_EnableTemporalProcessing;
 
     double sort_time = (CurrentHostCounter() * 1000.0) / CurrentHostFrequency();
     CFDictionaryRef frameInfo = CreateDictionaryWithDisplayTime(sort_time - m_sort_time_offset, dts, pts);
@@ -639,6 +651,9 @@ CDVDVideoCodecVTB::VTDecoderCallback(
   CFDictionaryRef frameInfo = (CFDictionaryRef)sourceFrameRefCon;
   GetFrameDisplayTimeFromDictionary(frameInfo, newFrame);
 
+  //CLog::Log(LOGERROR, "%s - presentationDuration(%f), presentationTimeStamp(%f), pts(%f)", __FUNCTION__,
+  //CMTimeGetSeconds(presentationDuration), CMTimeGetSeconds(presentationTimeStamp), newFrame->pts/1000);
+
   // if both dts or pts are good we use those, else use decoder insert time for frame sort
   if ((newFrame->pts != DVD_NOPTS_VALUE) || (newFrame->dts != DVD_NOPTS_VALUE))
   {
@@ -683,6 +698,86 @@ CDVDVideoCodecVTB::VTDecoderCallback(
   ctx->m_queue_depth++;
   //
   pthread_mutex_unlock(&ctx->m_queue_mutex);	
+}
+
+void CDVDVideoCodecVTB::FrameRateTracking(double pts)
+{
+  m_framecount++;
+
+  if (pts == DVD_NOPTS_VALUE)
+    return;
+
+  float duration = pts - m_last_pts;
+  // if pts is re-ordered, the diff might be negative,
+  // flip it and try.
+  if (duration < 0.0)
+    duration = -duration;
+  m_last_pts = pts;
+
+  // clamp duration to sensible range,
+  // 66 fsp to 20 fsp
+  if (duration >= 15000.0 && duration <= 50000.0)
+  {
+    double framerate;
+    switch((int)(0.5 + duration))
+    {
+      // 59.940 (16683.333333)
+      case 16000 ... 17000:
+        framerate = 60000.0 / 1001.0;
+        break;
+
+      // 50.000 (20000.000000)
+      case 20000:
+        framerate = 50000.0 / 1000.0;
+        break;
+
+      // 49.950 (20020.000000)
+      case 20020:
+        framerate = 50000.0 / 1001.0;
+        break;
+
+      // 29.970 (33366.666656)
+      case 32000 ... 35000:
+        framerate = 30000.0 / 1001.0;
+        break;
+
+      // 25.000 (40000.000000)
+      case 40000:
+        framerate = 25000.0 / 1000.0;
+        break;
+
+      // 24.975 (40040.000000)
+      case 40040:
+        framerate = 25000.0 / 1001.0;
+        break;
+
+      /*
+      // 24.000 (41666.666666)
+      case 41667:
+        framerate = 24000.0 / 1000.0;
+        break;
+      */
+
+      // 23.976 (41708.33333)
+      case 40200 ... 43200:
+        // 23.976 seems to have the crappiest encodings :)
+        framerate = 24000.0 / 1001.0;
+        break;
+
+      default:
+        framerate = 0.0;
+        //CLog::Log(LOGDEBUG, "%s: unknown duration(%f), cur_pts(%f)",
+        //  __MODULE_NAME__, duration, cur_pts);
+        break;
+    }
+
+    if (framerate > 0.0 && (int)m_framerate != (int)framerate)
+    {
+      m_framerate = framerate;
+      CLog::Log(LOGDEBUG, "%s: detected new framerate(%f) at frame(%llu)",
+        __FUNCTION__, m_framerate, m_framecount);
+    }
+  }
 }
 
 #endif

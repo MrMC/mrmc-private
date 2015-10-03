@@ -59,11 +59,16 @@ protected:
                   CVImageBufferRef   imageBuffer,
                   CMTime             presentationTimeStamp,
                   CMTime             presentationDuration);
+  void          FrameRateTracking(double pts);
 
   CMFormatDescriptionRef  m_fmt_desc;
   const char             *m_pFormatName;
   bool                    m_DropPictures;
   DVDVideoPicture         m_videobuffer;
+
+  double                  m_last_pts;
+  double                  m_framerate;
+  uint64_t                m_framecount;
 
   CBitstreamConverter    *m_bitstream;
   void                   *m_vt_session;     // opaque videotoolbox session
