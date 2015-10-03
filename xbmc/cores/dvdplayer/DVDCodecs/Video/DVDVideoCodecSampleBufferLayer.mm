@@ -1,6 +1,6 @@
 /*
  *      Copyright (C) 2015 Team MrMC
- *      http://xbmc.org
+ *      https://github.com/MrMC
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -336,11 +336,13 @@ int CDVDVideoCodecSampleBufferLayer::Decode(uint8_t* pData, int iSize, double dt
 
     m_dts = dts;
     m_pts = pts;
+
     pktTracker *tracker = new pktTracker;
     tracker->dts = dts;
     tracker->pts = pts;
     // want size as passed by player.
     tracker->size = iSize;
+
     pthread_mutex_lock(&m_trackerQueueMutex);
     m_trackerQueue.push_back(tracker);
     m_trackerQueue.sort(pktTrackerSortPredicate);
