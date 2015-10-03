@@ -36,4 +36,5 @@ private:
   bool gzipInflate( const std::string& compressedBytes, std::string& uncompressedBytes );
   std::string base64_decode(std::string const& encoded_string);
   std::string m_strToken;
+  std::string m_strServerUrl;
 };

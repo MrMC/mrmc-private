@@ -60,6 +60,7 @@ static inline bool is_base64(unsigned char c) {
 
 
 COpenSubtitlesSearch::COpenSubtitlesSearch()
+ : m_strServerUrl("api.opensubtitles.org")
 {
 }
 
@@ -213,39 +214,30 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
 
 
 bool COpenSubtitlesSearch::LogIn()
-{
-//
-//  xmlrpc_c::clientSimple myClient;
-//  xmlrpc_c::value result;
-//  
-//  myClient.call(serverUrl, methodName, "ssss", &result, "","","eng","XBMC_Subtitles");
-//  
-//  std::map<std::string, xmlrpc_c::value> const resultStruct = xmlrpc_c::value_struct(result);
-//  std::map<std::string, xmlrpc_c::value>::const_iterator iterStatus = resultStruct.find("status");
-//  
-//  std::string retStatus = (std::string)xmlrpc_c::value_string(iterStatus->second);
-//  
-//  if (retStatus == "200 OK")
-//  {
-//    std::map<std::string, xmlrpc_c::value>::const_iterator iterToken = resultStruct.find("token");
-//    m_strToken = (std::string)xmlrpc_c::value_string(iterToken->second);
-//    CLog::Log(LOGDEBUG, "%s - OpenSubitles returned %s", __FUNCTION__, m_strToken.c_str());
-//    return true;
-//  }
-  
+{  
   try
   {
-    const ulxr::CppString serverUrl("api.opensubtitles.org");
-
-    std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, serverUrl, 80));
+    std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, ULXR_PCHAR(m_strServerUrl), 80));
     ulxr::HttpProtocol    protocol(connection.get());
     ulxr::Requester       client(&protocol);
     ulxr::MethodCall      methodcall(ULXR_PCHAR("LogIn"));
 
-    methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("engXBMC_Subtitles")));
+    methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("")));                // username
+    methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("")));                // password
+    methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("eng")));             // language
+    methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("XBMC_Subtitles")));  // useragent string
     ulxr::MethodResponse response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
-    if (response.isOK())
+    ulxr::Struct cap = response.getResult();
+    if (response.isOK() && cap.hasMember(ULXR_PCHAR("status")))
     {
+      ulxr::RpcString status = cap.getMember(ULXR_PCHAR("status"));
+      CLog::Log(LOGDEBUG, "%s - response - %s", __PRETTY_FUNCTION__, status.getString().c_str());
+      if (status.getString() == "200 OK")
+      {
+        ulxr::RpcString token = cap.getMember(ULXR_PCHAR("token"));
+        m_strToken = token.getString();
+        return true;
+      }
     }
   }
   catch(...)
