@@ -40,11 +40,8 @@
 
 #include "OpenSubtitlesSearch.h"
 
-#include "GUIInfoManager.h"
-#include "URL.h"
 #include "Util.h"
 #include "filesystem/File.h"
-#include "filesystem/CurlFile.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 #include "utils/LangCodeExpander.h"
