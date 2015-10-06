@@ -59,6 +59,28 @@ static inline bool is_base64(unsigned char c) {
 }
 
 
+static ulxr::MethodResponse ServerChat(ulxr::MethodCall methodcall)
+{
+  ulxr::MethodResponse response;
+  std::string strServerUrl = "api.opensubtitles.org";
+  std::string method = methodcall.getMethodName();
+  try
+  {
+    std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, ULXR_PCHAR(strServerUrl), 80));
+    ulxr::HttpProtocol    protocol(connection.get());
+    ulxr::Requester       client(&protocol);
+    response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
+    CLog::Log(LOGDEBUG, "%s - finished -  %s", __PRETTY_FUNCTION__, method.c_str());
+  }
+  catch(...)
+  {
+    std::string method = methodcall.getMethodName();
+    CLog::Log(LOGDEBUG, "%s - crashed with %s", __PRETTY_FUNCTION__, method.c_str());
+  }
+  
+  return response;
+}
+
 COpenSubtitlesSearch::COpenSubtitlesSearch()
 {
 }
@@ -246,29 +268,6 @@ bool COpenSubtitlesSearch::Download(const std::string subID,const std::string fo
   }
   return false;
 }
-
-ulxr::MethodResponse COpenSubtitlesSearch::ServerChat(ulxr::MethodCall methodcall)
-{
-  ulxr::MethodResponse response;
-  std::string strServerUrl = "api.opensubtitles.org";
-  std::string method = methodcall.getMethodName();
-  try
-  {
-    std::unique_ptr<ulxr::TcpIpConnection> connection(new ulxr::TcpIpConnection(false, ULXR_PCHAR(strServerUrl), 80));
-    ulxr::HttpProtocol    protocol(connection.get());
-    ulxr::Requester       client(&protocol);
-    response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
-    CLog::Log(LOGDEBUG, "%s - finished -  %s", __PRETTY_FUNCTION__, method.c_str());
-  }
-  catch(...)
-  {
-    std::string method = methodcall.getMethodName();
-    CLog::Log(LOGDEBUG, "%s - crashed with %s", __PRETTY_FUNCTION__, method.c_str());
-  }
-  
-  return response;
-}
-
 
 bool COpenSubtitlesSearch::SubtitleFileSizeAndHash(const std::string &path, std::string &strSize, std::string &strHash)
 {
