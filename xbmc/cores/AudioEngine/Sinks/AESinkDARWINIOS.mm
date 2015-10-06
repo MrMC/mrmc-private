@@ -156,12 +156,12 @@ CAAudioUnitSink::CAAudioUnitSink()
   NSError *err = nullptr;
   if (![[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategoryPlayback error:&err])
   {
-    CLog::Log(LOGERROR, "AVAudioSession setCategory failed: %d", err.code);
+    CLog::Log(LOGERROR, "AVAudioSession setCategory failed: %ld", (long)err.code);
   }
   err = nil;
   if (![[AVAudioSession sharedInstance] setActive: YES error: &err])
   {
-    CLog::Log(LOGERROR, "AVAudioSession setActive YES failed: %d", err.code);
+    CLog::Log(LOGERROR, "AVAudioSession setActive YES failed: %ld", (long)err.code);
   }
 }
 
@@ -171,7 +171,7 @@ CAAudioUnitSink::~CAAudioUnitSink()
   NSError *err = nullptr;
   if (![[AVAudioSession sharedInstance] setActive: NO error: &err])
   {
-    CLog::Log(LOGERROR, "AVAudioSession setActive NO failed: %d", err.code);
+    CLog::Log(LOGERROR, "AVAudioSession setActive NO failed: %ld", (long)err.code);
   }
 }
 
