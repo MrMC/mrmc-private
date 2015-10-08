@@ -584,9 +584,9 @@ bool CApplication::Create()
     CLog::Log(LOGFATAL, "CApplication::Create: Unable to start CAddonMgr");
     return false;
   }
-
+#if !defined(TARGET_DARWIN_TVOS) && !defined(TARGET_DARWIN_IOS)
   g_peripherals.Initialise();
-
+#endif
   // Create the Mouse, Keyboard, Remote, and Joystick devices
   // Initialize after loading settings to get joystick deadzone setting
   CInputManager::GetInstance().InitializeInputs();
