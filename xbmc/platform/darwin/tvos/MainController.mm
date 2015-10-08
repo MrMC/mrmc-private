@@ -347,7 +347,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
       // menu is special.
       //  a) if at our home view, should return to atv home screen.
       //  b) if not, let it pass to us.
-      if (g_windowManager.GetActiveWindow() == WINDOW_HOME)
+      if (g_windowManager.GetActiveWindow() == WINDOW_HOME && g_windowManager.GetFocusedWindow() != WINDOW_DIALOG_FAVOURITES)
         handled = NO;
       break;
 
