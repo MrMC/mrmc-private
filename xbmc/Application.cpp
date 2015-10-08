@@ -949,8 +949,10 @@ bool CApplication::InitDirectoriesOSX()
 void CApplication::CreateUserDirs()
 {
   CDirectory::Create("special://home/");
+#if !defined(TARGET_DARWIN_TVOS)
   CDirectory::Create("special://home/addons");
   CDirectory::Create("special://home/addons/packages");
+#endif
   CDirectory::Create("special://home/media");
   CDirectory::Create("special://home/system");
   CDirectory::Create("special://masterprofile/");
