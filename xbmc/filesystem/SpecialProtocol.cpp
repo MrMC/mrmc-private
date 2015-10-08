@@ -136,8 +136,10 @@ std::string CSpecialProtocol::TranslatePath(const CURL &url)
     translatedPath = URIUtils::AddFileToFolder(CProfilesManager::GetInstance().GetUserDataFolder(), FileName);
   else if (RootDir == "database")
     translatedPath = URIUtils::AddFileToFolder(CProfilesManager::GetInstance().GetDatabaseFolder(), FileName);
+#if !defined(TARGET_DARWIN_TVOS)
   else if (RootDir == "thumbnails")
     translatedPath = URIUtils::AddFileToFolder(CProfilesManager::GetInstance().GetThumbnailsFolder(), FileName);
+#endif
   else if (RootDir == "recordings" || RootDir == "cdrips")
     translatedPath = URIUtils::AddFileToFolder(CSettings::GetInstance().GetString(CSettings::SETTING_AUDIOCDS_RECORDINGPATH), FileName);
   else if (RootDir == "screenshots")

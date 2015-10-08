@@ -329,7 +329,7 @@ void CProfilesManager::CreateProfileFolders()
   CDirectory::Create(GetDatabaseFolder());
   CDirectory::Create(GetCDDBFolder());
   CDirectory::Create(GetLibraryFolder());
-
+#if !defined(TARGET_DARWIN_TVOS)
   // create Thumbnails/*
   CDirectory::Create(GetThumbnailsFolder());
   CDirectory::Create(GetVideoThumbFolder());
@@ -337,8 +337,9 @@ void CProfilesManager::CreateProfileFolders()
   for (size_t hex = 0; hex < 16; hex++)
     CDirectory::Create(URIUtils::AddFileToFolder(GetThumbnailsFolder(), StringUtils::Format("%lx", hex)));
 
-  CDirectory::Create("special://profile/addon_data");
   CDirectory::Create("special://profile/keymaps");
+#endif
+  CDirectory::Create("special://profile/addon_data");
 }
 
 const CProfile& CProfilesManager::GetMasterProfile() const
