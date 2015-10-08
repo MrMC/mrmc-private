@@ -78,7 +78,8 @@ COpenSubtitlesSearch::COpenSubtitlesSearch()
 
 bool COpenSubtitlesSearch::LogIn()
 {
-  std::string strUA = StringUtils::Format("%s_v%i" , CCompileInfo::GetAppName(),CCompileInfo::GetMajor());
+  std::string strUA = StringUtils::Format("%s_v%i.%i" , CCompileInfo::GetAppName(),
+                                          CCompileInfo::GetMajor(),CCompileInfo::GetMinor());
   StringUtils::ToLower(strUA);
   ulxr::MethodCall      methodcall(ULXR_PCHAR("LogIn"));
   methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("")));                // username
