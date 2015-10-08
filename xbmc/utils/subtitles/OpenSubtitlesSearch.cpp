@@ -41,6 +41,7 @@
 
 #include "OpenSubtitlesSearch.h"
 
+#include "CompileInfo.h"
 #include "Util.h"
 #include "filesystem/File.h"
 #include "utils/Base64.h"
@@ -77,11 +78,13 @@ COpenSubtitlesSearch::COpenSubtitlesSearch()
 
 bool COpenSubtitlesSearch::LogIn()
 {
+  std::string strUA = StringUtils::Format("%s_v%i" , CCompileInfo::GetAppName(),CCompileInfo::GetMajor());
+  StringUtils::ToLower(strUA);
   ulxr::MethodCall      methodcall(ULXR_PCHAR("LogIn"));
   methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("")));                // username
   methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("")));                // password
   methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("eng")));             // language
-  methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("XBMC_Subtitles")));  // useragent string
+  methodcall.addParam(ulxr::RpcString(ULXR_PCHAR(strUA)));             // useragent string
   ulxr::MethodResponse response = ServerChat(methodcall);
   ulxr::Struct cap = response.getResult();
   if (response.isOK() && cap.hasMember(ULXR_PCHAR("status")))
