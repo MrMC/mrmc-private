@@ -222,10 +222,12 @@ void CGUIDialogLockSettings::SetupView()
   
   // set the title
   if (m_getUser)
+  {
+    int string = 20152;
     if (m_getModule)
-      SetHeading(StringUtils::Format("Set User and Password for %s", CURL::Decode(m_url).c_str()));
-    else
-      SetHeading(StringUtils::Format(g_localizeStrings.Get(20152).c_str(), CURL::Decode(m_url).c_str()));
+      string = 24149;
+    SetHeading(StringUtils::Format(g_localizeStrings.Get(string).c_str(), CURL::Decode(m_url).c_str()));
+  }
   else
   {
     SetHeading(20066);
