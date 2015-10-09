@@ -27,7 +27,7 @@
 
 #import "AutoPool.h"
 
-KeyboardView *g_pIosKeyboard = nil;
+KeyboardView *g_pTvosKeyboard = nil;
 
 bool CMainKeyboard::ShowAndGetInput(char_callback_t pCallback, const std::string &initialString, std::string &typedString, const std::string &heading, bool bHiddenInput)
 {
@@ -37,7 +37,7 @@ bool CMainKeyboard::ShowAndGetInput(char_callback_t pCallback, const std::string
   @synchronized([KeyboardView class])
   {
     // in case twice open keyboard.
-    if (g_pIosKeyboard)
+    if (g_pTvosKeyboard)
       return false;
     
     // assume we are only drawn on the mainscreen ever!
@@ -50,32 +50,32 @@ bool CMainKeyboard::ShowAndGetInput(char_callback_t pCallback, const std::string
 //    LOG(@"kb: kb frame: %@", NSStringFromCGRect(keyboardFrame));
     
     //create the keyboardview
-    g_pIosKeyboard = [[KeyboardView alloc] initWithFrame:keyboardFrame];
-    if (!g_pIosKeyboard)
+    g_pTvosKeyboard = [[KeyboardView alloc] initWithFrame:keyboardFrame];
+    if (!g_pTvosKeyboard)
       return false;
   }
 
   m_pCharCallback = pCallback;
 
   // init keyboard stuff
-  [g_pIosKeyboard setDefault:[NSString stringWithUTF8String:initialString.c_str()]];
-  [g_pIosKeyboard setHidden:bHiddenInput];
-  [g_pIosKeyboard setHeading:[NSString stringWithUTF8String:heading.c_str()]];
-  [g_pIosKeyboard registerKeyboard:this]; // for calling back
+  [g_pTvosKeyboard setDefault:[NSString stringWithUTF8String:initialString.c_str()]];
+  [g_pTvosKeyboard setHidden:bHiddenInput];
+  [g_pTvosKeyboard setHeading:[NSString stringWithUTF8String:heading.c_str()]];
+  [g_pTvosKeyboard registerKeyboard:this]; // for calling back
   bool confirmed = false;
   if (!m_bCanceled)
   {
-    [g_pIosKeyboard setCancelFlag:&m_bCanceled];
-    [g_pIosKeyboard activate]; // blocks and loops our application loop (like a modal dialog)
+    [g_pTvosKeyboard setCancelFlag:&m_bCanceled];
+    [g_pTvosKeyboard activate]; // blocks and loops our application loop (like a modal dialog)
     // user is done - get resulted text and confirmation
-    confirmed = g_pIosKeyboard.isConfirmed;
+    confirmed = g_pTvosKeyboard.isConfirmed;
     if (confirmed)
-      typedString = [g_pIosKeyboard.text UTF8String];
+      typedString = [g_pTvosKeyboard.text UTF8String];
   }
-  [g_pIosKeyboard release]; // bye bye native keyboard
+  [g_pTvosKeyboard release]; // bye bye native keyboard
   @synchronized([KeyboardView class])
   {
-    g_pIosKeyboard = nil;
+    g_pTvosKeyboard = nil;
   }
   return confirmed;
 }
@@ -87,9 +87,9 @@ void CMainKeyboard::Cancel()
 
 bool CMainKeyboard::SetTextToKeyboard(const std::string &text, bool closeKeyboard /* = false */)
 {
-  if (!g_pIosKeyboard)
+  if (!g_pTvosKeyboard)
     return false;
-  [g_pIosKeyboard setKeyboardText:[NSString stringWithUTF8String:text.c_str()] closeKeyboard:closeKeyboard?YES:NO];
+  [g_pTvosKeyboard setKeyboardText:[NSString stringWithUTF8String:text.c_str()] closeKeyboard:closeKeyboard?YES:NO];
   return true;
 }
 

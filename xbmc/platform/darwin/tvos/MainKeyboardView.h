@@ -25,7 +25,7 @@
 {
   NSMutableString *text;
   BOOL _confirmed;
-  CMainKeyboard *_iosKeyboard;
+  CMainKeyboard *_tvosKeyboard;
   bool *_canceled;
   BOOL _deactivated;
   UITextField *_textField;
@@ -36,7 +36,7 @@
 
 @property (nonatomic, retain) NSMutableString *text;
 @property (getter = isConfirmed) BOOL _confirmed;
-@property (assign, setter = registerKeyboard:) CMainKeyboard *_iosKeyboard;
+@property (assign, setter = registerKeyboard:) CMainKeyboard *_tvosKeyboard;
 
 - (void) setDefault:(NSString *)defaultText;
 - (void) setHeading:(NSString *)heading;
