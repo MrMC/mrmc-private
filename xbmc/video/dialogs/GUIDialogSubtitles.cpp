@@ -440,6 +440,7 @@ void CGUIDialogSubtitles::ClearSubtitles()
   OnMessage(msg);
   CSingleLock lock(m_critsection);
   m_subtitles->Clear();
+  m_subtitlesList.clear();
 }
 
 void CGUIDialogSubtitles::SetSubtitles(const std::string &subtitle)
