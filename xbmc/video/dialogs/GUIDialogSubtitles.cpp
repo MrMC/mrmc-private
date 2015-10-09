@@ -39,6 +39,7 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
+#include "utils/subtitles/OpenSubtitlesSearch.h"
 #include "URL.h"
 #include "Util.h"
 #include "video/VideoDatabase.h"
@@ -55,23 +56,24 @@ using namespace XFILE;
 #define CONTROL_SUBSTATUS            140
 #define CONTROL_SERVICELIST          150
 #define CONTROL_MANUALSEARCH         160
+#define CONTROL_CHANGECREDENTIALS    170
 
 CGUIDialogSubtitles::CGUIDialogSubtitles(void)
     : CGUIDialog(WINDOW_DIALOG_SUBTITLES, "DialogSubtitles.xml")
-    , m_subtitles_searcher (new COpenSubtitlesSearch)
     , m_subtitles(new CFileItemList)
-    , m_serviceItems(new CFileItemList)
+//    , m_serviceItems.clear()
     , m_pausedOnRun(false)
     , m_updateSubsList(false)
 {
   m_loadType = KEEP_IN_MEMORY;
+  m_serviceItems.push_back(new COpenSubtitlesSearch);
 }
 
 CGUIDialogSubtitles::~CGUIDialogSubtitles(void)
 {
   delete m_subtitles;
-  delete m_serviceItems;
-  delete m_subtitles_searcher;
+//  delete m_currentService;
+  m_serviceItems.clear();
 }
 
 bool CGUIDialogSubtitles::OnMessage(CGUIMessage& message)
@@ -92,6 +94,19 @@ bool CGUIDialogSubtitles::OnMessage(CGUIMessage& message)
         Download(item);
       return true;
     }
+    else if (selectAction && iControl == CONTROL_SERVICELIST)
+    {
+      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_SERVICELIST);
+      OnMessage(msg);
+      
+      int item = msg.GetParam1();
+      if (item >= 0 && item < m_serviceItems.size())
+      {
+        SetService(m_serviceItems[item]->ModuleName());
+        Search();
+      }
+      return true;
+    }
     else if (iControl == CONTROL_MANUALSEARCH)
     {
       //manual search
@@ -100,6 +115,12 @@ bool CGUIDialogSubtitles::OnMessage(CGUIMessage& message)
         Search(m_strManualSearch);
         return true;
       }
+    }
+    else if (iControl == CONTROL_CHANGECREDENTIALS)
+    {
+      //change credentials
+      ChangeCredentials();
+      return true;
     }
   }
   else if (message.GetMessage() == GUI_MSG_WINDOW_DEINIT)
@@ -111,7 +132,6 @@ bool CGUIDialogSubtitles::OnMessage(CGUIMessage& message)
     CGUIDialog::OnMessage(message);
 
     ClearSubtitles();
-    ClearServices();
     return true;
   }
   return CGUIDialog::OnMessage(message);
@@ -128,6 +148,7 @@ void CGUIDialogSubtitles::OnInitWindow()
   }
 
   CGUIWindow::OnInitWindow();
+  FillServices();
   Search();
 }
 
@@ -179,6 +200,9 @@ void CGUIDialogSubtitles::Process(unsigned int currentTime, CDirtyRegionList &di
 void CGUIDialogSubtitles::Search(const std::string &search/*=""*/)
 {
   
+  UpdateStatus(SEARCHING);
+  ClearSubtitles();
+  
   const CSetting *setting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SUBTITLES_LANGUAGES);
   std::string strLanguages;
   if (setting)
@@ -203,7 +227,7 @@ void CGUIDialogSubtitles::Search(const std::string &search/*=""*/)
   
   std::string strPlayingFile = g_application.CurrentFileItem().GetPath();
   
-  m_subtitles_searcher->SubtitleSearch(strPlayingFile,strLanguages,preferredLanguage,m_subtitlesList);
+  m_serviceItems[0]->SubtitleSearch(strPlayingFile,strLanguages,preferredLanguage,m_subtitlesList);
   
   for (std::vector<std::map<std::string, std::string>>::iterator is = m_subtitlesList.begin() ; is != m_subtitlesList.end(); ++is)
   {
@@ -273,7 +297,7 @@ void CGUIDialogSubtitles::Download(const int index)
   SUBTITLE_STORAGEMODE storageMode = (SUBTITLE_STORAGEMODE) CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_STORAGEMODE);
 
   std::vector<std::string> items;
-  m_subtitles_searcher->Download(sub["IDSubtitleFile"],sub["SubFormat"],items);
+  m_currentService->Download(sub["IDSubtitleFile"],sub["SubFormat"],items);
   
   // Get (unstacked) path
   std::string strCurrentFile = g_application.CurrentUnstackedItem().GetPath();
@@ -418,14 +442,6 @@ void CGUIDialogSubtitles::ClearSubtitles()
   m_subtitles->Clear();
 }
 
-void CGUIDialogSubtitles::ClearServices()
-{
-  CGUIMessage msg(GUI_MSG_LABEL_RESET, GetID(), CONTROL_SERVICELIST);
-  OnMessage(msg);
-  m_serviceItems->Clear();
-  m_currentService.clear();
-}
-
 void CGUIDialogSubtitles::SetSubtitles(const std::string &subtitle)
 {
   if (g_application.m_pPlayer)
@@ -437,12 +453,7 @@ void CGUIDialogSubtitles::SetSubtitles(const std::string &subtitle)
 /// below for future use, if we add more search services
 void CGUIDialogSubtitles::FillServices()
 {
-  ClearServices();
-  
-  VECADDONS addons;
-  //  ADDON::CAddonMgr::GetInstance().GetAddons(ADDON_SUBTITLE_MODULE, addons, true);
-  
-  if (addons.empty())
+  if (m_serviceItems.empty())
   {
     UpdateStatus(NO_SERVICES);
     return;
@@ -458,17 +469,18 @@ void CGUIDialogSubtitles::FillServices()
     // Set default service for filemode and movies
     defaultService = CSettings::GetInstance().GetString(CSettings::SETTING_SUBTITLES_MOVIE);
   
-  std::string service = addons.front()->ID();
-  for (VECADDONS::const_iterator addonIt = addons.begin(); addonIt != addons.end(); ++addonIt)
+  CFileItemList vecItems;
+  
+  std::string service = m_serviceItems.front()->ModuleName();
+  for (int i = 0; i < m_serviceItems.size(); i++)
   {
-    CFileItemPtr item(CAddonsDirectory::FileItemFromAddon(*addonIt, "plugin://" + (*addonIt)->ID(), false));
-    m_serviceItems->Add(item);
-    if ((*addonIt)->ID() == defaultService)
-      service = (*addonIt)->ID();
+    std::string serviceLabel = m_serviceItems[i]->ModuleName();
+    CFileItemPtr item(new CFileItem(serviceLabel));
+    vecItems.Add(item);
   }
   
-  // Bind our services to the UI
-  CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), CONTROL_SERVICELIST, 0, 0, m_serviceItems);
+//   Bind our services to the UI
+  CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), CONTROL_SERVICELIST, 0, 0, &vecItems);
   OnMessage(msg);
   
   SetService(service);
@@ -476,40 +488,31 @@ void CGUIDialogSubtitles::FillServices()
 
 bool CGUIDialogSubtitles::SetService(const std::string &service)
 {
-  if (service != m_currentService)
+  for (int i = 0; i < m_serviceItems.size(); i++)
   {
-    m_currentService = service;
-    CLog::Log(LOGDEBUG, "New Service [%s] ", m_currentService.c_str());
-    
-    CFileItemPtr currentService = GetService();
-    // highlight this item in the skin
-    for (int i = 0; i < m_serviceItems->Size(); i++)
+    if (m_serviceItems[i]->ModuleName() == service)
     {
-      CFileItemPtr pItem = m_serviceItems->Get(i);
-      pItem->Select(pItem == currentService);
+      m_currentService = m_serviceItems[i];
     }
-    
-    SET_CONTROL_LABEL(CONTROL_NAMELABEL, currentService->GetLabel());
-    
-    std::string icon = URIUtils::AddFileToFolder(currentService->GetProperty("Addon.Path").asString(), "logo.png");
-    SET_CONTROL_FILENAME(CONTROL_NAMELOGO, icon);
-    
-    if (g_application.m_pPlayer->GetSubtitleCount() == 0)
-      SET_CONTROL_HIDDEN(CONTROL_SUBSEXIST);
-    else
-      SET_CONTROL_VISIBLE(CONTROL_SUBSEXIST);
-    
-    return true;
   }
-  return false;
+  CLog::Log(LOGDEBUG, "New Service [%s] ", m_currentService->ModuleName().c_str());
+
+  
+  std::string icon = StringUtils::Format("Subtitles/%s.png", m_currentService->ModuleName().c_str());
+  SET_CONTROL_FILENAME(CONTROL_NAMELOGO, icon);
+
+  
+  SET_CONTROL_LABEL(CONTROL_NAMELABEL, m_currentService->ModuleName());
+  
+  if (g_application.m_pPlayer->GetSubtitleCount() == 0)
+    SET_CONTROL_HIDDEN(CONTROL_SUBSEXIST);
+  else
+    SET_CONTROL_VISIBLE(CONTROL_SUBSEXIST);
+  
+  return true;
 }
 
-const CFileItemPtr CGUIDialogSubtitles::GetService() const
+void CGUIDialogSubtitles::ChangeCredentials()
 {
-  for (int i = 0; i < m_serviceItems->Size(); i++)
-  {
-    if (m_serviceItems->Get(i)->GetProperty("Addon.ID") == m_currentService)
-      return m_serviceItems->Get(i);
-  }
-  return CFileItemPtr();
+  m_currentService->ChangeUserPass();
 }

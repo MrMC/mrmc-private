@@ -42,6 +42,7 @@
 #include "OpenSubtitlesSearch.h"
 
 #include "CompileInfo.h"
+#include "PasswordManager.h"
 #include "Util.h"
 #include "filesystem/File.h"
 #include "utils/Base64.h"
@@ -73,17 +74,40 @@ static ulxr::MethodResponse ServerChat(ulxr::MethodCall methodcall)
 }
 
 COpenSubtitlesSearch::COpenSubtitlesSearch()
+  : m_strUser("")
+  , m_strPass("")
+  , m_authenticated(false)
 {
+  m_authenticated = CPasswordManager::GetInstance().GetUserPass(ModuleName(), m_strUser, m_strPass);
+}
+
+COpenSubtitlesSearch::~COpenSubtitlesSearch()
+{
+}
+
+std::string COpenSubtitlesSearch::ModuleName()
+{
+  return "OpenSubtitles";
+}
+
+void COpenSubtitlesSearch::ChangeUserPass()
+{
+  m_authenticated = CPasswordManager::GetInstance().SetUserPass(ModuleName(), m_strUser, m_strPass);
 }
 
 bool COpenSubtitlesSearch::LogIn()
 {
+  if (!m_authenticated)
+  {
+    m_authenticated = CPasswordManager::GetInstance().SetUserPass(ModuleName(), m_strUser, m_strPass);
+  }
+  
   std::string strUA = StringUtils::Format("%s_v%i.%i" , CCompileInfo::GetAppName(),
                                           CCompileInfo::GetMajor(),CCompileInfo::GetMinor());
   StringUtils::ToLower(strUA);
   ulxr::MethodCall      methodcall(ULXR_PCHAR("LogIn"));
-  methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("")));                // username
-  methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("")));                // password
+  methodcall.addParam(ulxr::RpcString(ULXR_PCHAR(m_strUser)));         // username
+  methodcall.addParam(ulxr::RpcString(ULXR_PCHAR(m_strPass)));         // password
   methodcall.addParam(ulxr::RpcString(ULXR_PCHAR("eng")));             // language
   methodcall.addParam(ulxr::RpcString(ULXR_PCHAR(strUA)));             // useragent string
   ulxr::MethodResponse response = ServerChat(methodcall);

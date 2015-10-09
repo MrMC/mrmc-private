@@ -3029,6 +3029,7 @@
 		18C1D22C13033F6A00CFFE59 /* GLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLUtils.h; sourceTree = "<group>"; };
 		18ECC96013CF178D00A9ED6C /* StreamUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamUtils.cpp; sourceTree = "<group>"; };
 		18ECC96113CF178D00A9ED6C /* StreamUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamUtils.h; sourceTree = "<group>"; };
+		18FD1CA31BC7DC2900027005 /* SubtitleSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleSearch.h; sourceTree = "<group>"; };
 		1D638126161E211E003603ED /* PeripheralImon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PeripheralImon.cpp; sourceTree = "<group>"; };
 		1D638127161E211E003603ED /* PeripheralImon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeripheralImon.h; sourceTree = "<group>"; };
 		1DAFDB7A16DFDCA7007F8C68 /* PeripheralBusCEC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PeripheralBusCEC.cpp; sourceTree = "<group>"; };
@@ -5077,6 +5078,7 @@
 		18690DCB1B94DA6200E762C1 /* subtitles */ = {
 			isa = PBXGroup;
 			children = (
+				18FD1CA31BC7DC2900027005 /* SubtitleSearch.h */,
 				18690DCC1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp */,
 				18690DCD1B94DA6200E762C1 /* OpenSubtitlesSearch.h */,
 			);

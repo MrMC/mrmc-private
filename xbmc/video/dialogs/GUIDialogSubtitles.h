@@ -23,7 +23,7 @@
 #include <string>
 #include "guilib/GUIDialog.h"
 #include "threads/CriticalSection.h"
-#include "utils/subtitles/OpenSubtitlesSearch.h"
+#include "utils/subtitles/SubtitleSearch.h"
 
 enum SUBTITLE_STORAGEMODE
 {
@@ -33,7 +33,6 @@ enum SUBTITLE_STORAGEMODE
 
 class CFileItem;
 class CFileItemList;
-class COpenSubtitlesSearch;
 
 class CGUIDialogSubtitles : public CGUIDialog
 {
@@ -46,10 +45,8 @@ public:
 protected:
   virtual void Process(unsigned int currentTime, CDirtyRegionList &dirtyregions);
 
-  const CFileItemPtr GetService() const;
   void FillServices();
   bool SetService(const std::string &service);
-  void ClearServices();
   void ClearSubtitles();
 
   enum STATUS { NO_SERVICES = 0, SEARCHING, SEARCH_COMPLETE, DOWNLOADING };
@@ -60,16 +57,17 @@ protected:
   void Download(const int index);
 
   void SetSubtitles(const std::string &subtitle);
+  
+  void ChangeCredentials();
 
   std::vector<std::map<std::string, std::string>> m_subtitlesList;
-  COpenSubtitlesSearch* m_subtitles_searcher;
-  CCriticalSection m_critsection;
-  CFileItemList* m_subtitles;
-  CFileItemList* m_serviceItems;
-  std::string    m_currentService;
-  std::string    m_status;
-  std::string     m_strManualSearch;
-  bool           m_pausedOnRun;
-  bool           m_updateSubsList; ///< true if we need to update our subs list
-  std::string     m_LastAutoDownloaded; ///< Last video file path which automatically downloaded subtitle
+  CCriticalSection             m_critsection;
+  CFileItemList*               m_subtitles;
+  std::vector<CSubtitleSearch*> m_serviceItems;
+  CSubtitleSearch*             m_currentService;
+  std::string                  m_status;
+  std::string                  m_strManualSearch;
+  bool                         m_pausedOnRun;
+  bool                         m_updateSubsList; ///< true if we need to update our subs list
+  std::string                  m_LastAutoDownloaded; ///< Last video file path which automatically downloaded subtitle
 };
