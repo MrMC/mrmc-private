@@ -28,6 +28,8 @@
 /target/*/iphonesimulator*.*_i386*-target/*
 /target/*/iphonesimulator*.*_x86_64*-target/
 /target/*/iphonesimulator*.*_x86_64*-target/*
+/target/*/appletvos*.*_arm64*-target/
+/target/*/appletvos*.*_arm64*-target/*
 /target/*/appletvsimulator*.*_x86_64*-target/
 /target/*/appletvsimulator*.*_x86_64*-target/*
 
