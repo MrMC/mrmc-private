@@ -460,15 +460,17 @@ void CGUIDialogSubtitles::FillServices()
     return;
   }
   
-  std::string defaultService;
+  int defaultService;
+  //  OpenSubtitles --> 0
+  //  Podnapisi -->     1
   const CFileItem &item = g_application.CurrentUnstackedItem();
   if (item.GetVideoContentType() == VIDEODB_CONTENT_TVSHOWS ||
       item.GetVideoContentType() == VIDEODB_CONTENT_EPISODES)
     // Set default service for tv shows
-    defaultService = CSettings::GetInstance().GetString(CSettings::SETTING_SUBTITLES_TV);
+    defaultService = CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_TV);
   else
     // Set default service for filemode and movies
-    defaultService = CSettings::GetInstance().GetString(CSettings::SETTING_SUBTITLES_MOVIE);
+    defaultService = CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_MOVIE);
   
   CFileItemList vecItems;
   
@@ -478,6 +480,8 @@ void CGUIDialogSubtitles::FillServices()
     std::string serviceLabel = m_serviceItems[i]->ModuleName();
     CFileItemPtr item(new CFileItem(serviceLabel));
     vecItems.Add(item);
+    if (i == defaultService)
+      service = serviceLabel;
   }
   
 //   Bind our services to the UI

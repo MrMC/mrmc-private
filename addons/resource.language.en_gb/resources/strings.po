@@ -13860,6 +13860,15 @@ msgctxt "#24149"
 msgid "Set User and Password for %s"
 msgstr ""
 
+#: settings.xml
+msgctxt "#24150"
+msgid "OpenSubtitles.org"
+msgstr ""
+
+#: settings.xml
+msgctxt "#24151"
+msgid "Podnapisi.net"
+msgstr ""
 
 #empty strings from id 24150 to 24991
 
