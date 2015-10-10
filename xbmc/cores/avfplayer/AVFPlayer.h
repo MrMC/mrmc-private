@@ -29,6 +29,10 @@ typedef struct player_info player_info_t;
 typedef struct AVFChapterInfo AFVChapterInfo;
 typedef struct AVFPlayerStreamInfo AVFPlayerStreamInfo;
 
+namespace XFILE
+{
+  class CFile;
+}
 class CAVFState;
 class CDVDPlayerSubtitle;
 class CDVDOverlayContainer;
@@ -195,6 +199,7 @@ private:
   CCriticalSection        m_avf_csection;
   CAVFState              *m_avf_state;
 
+  XFILE::CFile                     *m_cfile;
   std::vector<AVFPlayerStreamInfo*> m_video_streams;
   std::vector<AVFPlayerStreamInfo*> m_audio_streams;
   std::vector<AVFPlayerStreamInfo*> m_subtitle_streams;

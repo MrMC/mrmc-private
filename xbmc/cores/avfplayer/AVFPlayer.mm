@@ -29,7 +29,7 @@
 #include "video/VideoThumbLoader.h"
 #include "Util.h"
 #include "cores/AudioEngine/AEFactory.h"
-#include "cores/AudioEngine/Utils/AEUtil.h"
+//#include "cores/AudioEngine/Utils/AEUtil.h"
 #include "cores/VideoRenderers/RenderFlags.h"
 #include "cores/VideoRenderers/RenderFormats.h"
 #include "cores/VideoRenderers/RenderManager.h"
@@ -62,6 +62,7 @@
 #import <AVFoundation/AVAsset.h>
 #import <AVFoundation/AVPlayerItem.h>
 #import <AVFoundation/AVPlayerLayer.h>
+#import <AVFoundation/AVAssetResourceLoader.h>
 
 #import "platform/darwin/DarwinUtils.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
@@ -71,11 +72,132 @@
 #import "platform/darwin/ios/XBMCController.h"
 #endif
 
+NSString * const MrMCScheme = @"mrmc";
+static const NSString *ItemStatusContext;
+
+#pragma mark - AVAssetResourceLoaderDelegate
+@interface CFileResourceLoader : NSObject <AVAssetResourceLoaderDelegate>
+
+@end
+
+@implementation CFileResourceLoader
+  XFILE::CFile   *m_cfile = nullptr;
+  uint8_t        *buffer  = nullptr;
+
+- (id)init
+{
+	self = [super init];
+	return self;
+}
+
+- (void)dealloc
+{
+  if (m_cfile)
+    SAFE_DELETE(m_cfile);
+  if (buffer)
+    SAFE_DELETE_ARRAY(buffer);
+
+  [super dealloc];
+}
+
+- (void)fillInContentInformation:(AVAssetResourceLoadingRequest *)loadingRequest
+{
+  CLog::Log(LOGNOTICE, "resourceLoader contentRequest");
+  AVAssetResourceLoadingContentInformationRequest *contentInformationRequest;
+  contentInformationRequest = loadingRequest.contentInformationRequest;
+
+  unsigned int flags = 0;//READ_TRUNCATED | READ_CHUNKED;
+  //flags |= READ_AUDIO_VIDEO;
+  //flags |= READ_NO_CACHE; // Make sure CFile honors our no-cache hint
+  if (m_cfile)
+    SAFE_DELETE(m_cfile);
+  if (buffer)
+   SAFE_DELETE_ARRAY(buffer);
+
+  m_cfile = new XFILE::CFile();
+  NSURL *resourceURL = [loadingRequest.request URL];
+  if (m_cfile->Open([resourceURL.path UTF8String], flags))
+  {
+    //m_isSeekPossible = m_pFile->IoControl(XFILE::IOCTRL_SEEK_POSSIBLE, NULL) != 0;
+    buffer = new uint8_t[2048*1024];
+    //provide information about the content
+    // https://developer.apple.com/library/ios/documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
+    NSString *mimeType = @"com.apple.quicktime-movie";
+    contentInformationRequest.contentType = mimeType;
+    contentInformationRequest.contentLength = m_cfile->GetLength();
+    contentInformationRequest.byteRangeAccessSupported = YES;
+  }
+}
+
+- (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader
+  shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest
+{
+  CLog::Log(LOGNOTICE, "resourceLoader shouldWaitForLoadingOfRequestedResource");
+  BOOL canHandle = NO;
+
+  NSURL *resourceURL = [loadingRequest.request URL];
+  if ([resourceURL.scheme isEqualToString:MrMCScheme])
+  {
+    canHandle = YES;
+    if (loadingRequest.contentInformationRequest != nil)
+      [self fillInContentInformation:loadingRequest];
+
+    if (loadingRequest.dataRequest != nil)
+    {
+      CLog::Log(LOGNOTICE, "resourceLoader dataRequest");
+
+      AVAssetResourceLoadingDataRequest *dataRequest = loadingRequest.dataRequest;
+
+      NSURLResponse* response = [[NSURLResponse alloc] initWithURL:resourceURL MIMEType:@"video/quicktime" expectedContentLength:[dataRequest requestedLength] textEncodingName:nil];
+      [loadingRequest setResponse:response];
+      [response release];
+
+      CLog::Log(LOGNOTICE, "resourceLoader1 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
+        dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
+
+      NSUInteger remainingLength =
+        [dataRequest requestedLength] - static_cast<NSUInteger>([dataRequest currentOffset] - [dataRequest requestedOffset]);
+
+      m_cfile->Seek(dataRequest.currentOffset, SEEK_SET);
+      do {
+        NSUInteger receivedLength = dataRequest.requestedLength > 1024*1024 ? 1024 *1024 : dataRequest.requestedLength;
+        receivedLength = m_cfile->Read(buffer, receivedLength);
+
+        CLog::Log(LOGNOTICE, "resourceLoader2 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
+          dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
+        NSUInteger length = MIN(receivedLength, remainingLength);
+        NSData* decodedData = [[NSData alloc] initWithBytes:buffer length:length];
+        CLog::Log(LOGNOTICE, "resourceLoader [dataRequest respondWithData] length(%ld)", length);
+
+        [dataRequest respondWithData:decodedData];
+        [decodedData release];
+
+        remainingLength -= length;
+      } while (remainingLength);
+
+      if ([dataRequest currentOffset] + [dataRequest requestedLength] >= [dataRequest requestedOffset])
+        [loadingRequest finishLoading];
+    }
+  }
+
+  return canHandle;
+}
+
+- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
+didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
+{
+  CLog::Log(LOGNOTICE, "resourceLoader didCancelLoadingRequest");
+}
+
+@end
+
 #pragma mark - AVPlayerLayerViewNew
 @interface AVPlayerLayerViewNew : UIView
 
-@property (nonatomic, strong) AVPlayer *player;
-@property (nonatomic, strong) AVPlayerLayer *videoLayer;
+@property (nonatomic, retain, strong) AVPlayer *player;
+@property (nonatomic, retain, strong) AVPlayerLayer *videoLayer;
+@property (nonatomic, retain, strong) CFileResourceLoader *cfileloader;
+
 
 - (id)initWithFrameAndUrl:(CGRect)frame withURL:(NSURL *)URL;
 
@@ -96,16 +218,24 @@
 
     self.hidden = YES;
 
-    AVAsset *asset = [AVAsset assetWithURL:URL];
-    AVPlayerItem *item = [[AVPlayerItem alloc] initWithAsset:asset];
+    //NSDictionary *options = @{ AVURLAssetPreferPreciseDurationAndTimingKey : @YES };
 
-    self.player = [[AVPlayer alloc] initWithPlayerItem:item];
+    AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:URL options:nil];
+    self.cfileloader = [[[CFileResourceLoader alloc] init] autorelease];
+    [asset.resourceLoader setDelegate:self.cfileloader queue:dispatch_get_main_queue()];
+
+    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
+
+    self.player = [[AVPlayer alloc] initWithPlayerItem:playerItem];
     self.videoLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
 		self.videoLayer.frame = self.frame;
 		self.videoLayer.videoGravity = AVLayerVideoGravityResizeAspect;
 		self.videoLayer.backgroundColor = [[UIColor blackColor] CGColor];
 
     [[self layer] addSublayer:self.videoLayer];
+
+    [playerItem release];
+    [asset release];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEndTime:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
 
@@ -128,7 +258,20 @@
   [self.videoLayer removeFromSuperlayer];
   [self.videoLayer release];
   [self.player release];
+  [self.cfileloader release];
   [super dealloc];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
+  change:(NSDictionary *)change context:(void *)context
+{
+  if (context == &ItemStatusContext)
+  {
+    CLog::Log(LOGNOTICE, "resourceLoader observeValueForKeyPath");
+    return;
+  }
+  [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+  return;
 }
 
 - (void)didPlayToEndTime:(NSNotification *)note
@@ -152,7 +295,6 @@
       self.hidden = hide;
   }];
 }
-
 @end
 
 #pragma mark - CAVFState
@@ -1054,6 +1196,12 @@ void CAVFPlayer::Process()
     }
     CLog::Log(LOGDEBUG, "CAVFPlayer::Process: URL=%s", url.c_str());
 */
+
+    //for (NSString *mime in [AVURLAsset audiovisualMIMETypes])
+    //{
+    //  NSLog(@"AVURLAsset audiovisualMIMETypes:%@", mime);
+    //}
+
     m_avf_state->set(AVFSTATE::SETUP);
 
     int speed = m_speed;
@@ -1070,22 +1218,26 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::SETUP:
         {
-          //NSString *filename = [NSString stringWithUTF8String:m_item.GetFileName()];
-          //NSString *filePath = [[NSBundle mainBundle] pathForResource:filename ofType:@"mov"];
-          NSString *filePath = [NSString stringWithUTF8String:m_item.GetPath().c_str()];
-          NSURL *fileUrl = [NSURL fileURLWithPath:filePath];
 
           // AVPlayerLayerViewNew create MUST be done on main thread or
           // it will not get updates when a new video frame is decoded and presented.
-          __block AVPlayerLayerViewNew *avf_avplayer = nullptr;
           dispatch_sync(dispatch_get_main_queue(),^{
+            // <scheme>://<net_loc>/<path>;<params>?<query>#<fragment>
+            std::string path = "/" + m_item.GetPath();
+            NSString *filePath = [NSString stringWithUTF8String: path.c_str()];
+            NSURLComponents *components = [NSURLComponents new];
+            components.scheme = MrMCScheme;
+            components.host   = nullptr;
+            components.path   = filePath;
+
             CGRect frame = CGRectMake(0, 0,
               g_xbmcController.view.frame.size.width,
               g_xbmcController.view.frame.size.height);
-            avf_avplayer = [[AVPlayerLayerViewNew alloc] initWithFrameAndUrl:frame withURL:fileUrl];
+            AVPlayerLayerViewNew *avf_avplayer = [[AVPlayerLayerViewNew alloc] initWithFrameAndUrl:frame withURL:[components URL]];
+            [components release];
             [g_xbmcController insertVideoView:avf_avplayer];
-          });
-          m_avf_avplayer = avf_avplayer;
+            m_avf_avplayer = avf_avplayer;
+         });
 
           // wait for playback to start with 20 second timeout
           if (WaitForPlaying(20000))
@@ -1332,6 +1484,7 @@ bool CAVFPlayer::WaitForPlaying(int timeout_ms)
 
     if (avf_avplayer.videoLayer.isReadyForDisplay == YES)
     {
+      CLog::Log(LOGDEBUG, "CAVFPlayer::Process avf_avplayer.videoLayer.isReadyForDisplay");
       CGRect video_bounds = avf_avplayer.videoLayer.videoRect;
       m_video_width = video_bounds.size.width;
       m_video_height = video_bounds.size.height;
@@ -1458,7 +1611,7 @@ int CAVFPlayer::AddSubtitleFile(const std::string &filename, const std::string &
   info->frame_rate_den = m_video_fps_denominator;
   m_subtitle_streams.push_back(info);
 
-  return m_subtitle_streams.size();
+  return (int)m_subtitle_streams.size();
 }
 
 bool CAVFPlayer::OpenSubtitleStream(int index)
