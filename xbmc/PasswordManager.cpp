@@ -232,8 +232,12 @@ bool CPasswordManager::SetUserPass(std::string module, std::string &user, std::s
     if (root->ValueStr() != "passwords")
       return false;
     TiXmlElement *mod = root->FirstChildElement(module);
-    XMLUtils::SetString(mod, "user", user);
-    XMLUtils::SetString(mod, "pass", pass64Encoded);
+    if (mod)
+      root->RemoveChild(mod);
+    TiXmlElement pathElement(module);
+    TiXmlNode *newMod = root->InsertEndChild(pathElement);
+    XMLUtils::SetString(newMod, "user", user);
+    XMLUtils::SetString(newMod, "pass", pass64Encoded);
   }
   else
   {
