@@ -49,6 +49,7 @@
 #include "utils/Base64.h"
 #include "utils/md5.h"
 #include "utils/StringUtils.h"
+#include "utils/Variant.h"
 #include "utils/log.h"
 #include "utils/LangCodeExpander.h"
 #include "video/VideoInfoTag.h"
@@ -147,7 +148,7 @@ bool CPodnapisiSearch::LogIn()
 
 bool CPodnapisiSearch::SubtitleSearch(const std::string &path,const std::string strLanguages,
                                           const std::string preferredLanguage,
-                                          std::vector<std::map<std::string, std::string>> &subtitlesList)
+                                          CFileItemList &subtitlesList)
 {
   std::string strSize;
   std::string strHash;
@@ -246,7 +247,7 @@ bool CPodnapisiSearch::SubtitleSearch(const std::string &path,const std::string 
               subtitle[strIs] = value.getString();
             }
           }
-          subtitlesList.push_back(subtitle);
+//          subtitlesList.push_back(subtitle);
         }
       }
       CLog::Log(LOGDEBUG, "%s - hold", __PRETTY_FUNCTION__);
@@ -256,14 +257,14 @@ bool CPodnapisiSearch::SubtitleSearch(const std::string &path,const std::string 
   return false;
 }
 
-bool CPodnapisiSearch::Download(const std::string subID,const std::string format,std::vector<std::string> &items)
+bool CPodnapisiSearch::Download(const CFileItem *subItem,std::vector<std::string> &items)
 {
   if (!LogIn())
     return false;
   
   ulxr::MethodCall      methodcall(ULXR_PCHAR("DownloadSubtitles"));
   ulxr::Array subtitleIDlist;
-  ulxr::RpcString ID = subID;
+  ulxr::RpcString ID = subItem->GetProperty("IDSubtitleFile").asString();
   subtitleIDlist.addItem(ID);
   ulxr::RpcString token = m_strToken;
   methodcall.addParam(token);
@@ -292,7 +293,7 @@ bool CPodnapisiSearch::Download(const std::string subID,const std::string format
           XFILE::CFile file;
           std::string destination = StringUtils::Format("special://temp/%s.%s",
                                                         StringUtils::CreateUUID().c_str(),
-                                                        format.c_str()
+                                                        subItem->GetProperty("IDSubtitleFile").asString().c_str()
                                                         );
           file.OpenForWrite(destination);
           file.Write(zipdata64DecodedInflated.c_str(), zipdata64DecodedInflated.size());

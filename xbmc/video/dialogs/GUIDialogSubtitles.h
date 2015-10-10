@@ -60,7 +60,6 @@ protected:
   
   void ChangeCredentials();
 
-  std::vector<std::map<std::string, std::string>> m_subtitlesList;
   CCriticalSection             m_critsection;
   CFileItemList*               m_subtitles;
   std::vector<CSubtitleSearch*> m_serviceItems;

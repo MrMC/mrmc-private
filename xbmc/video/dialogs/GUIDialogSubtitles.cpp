@@ -229,20 +229,8 @@ void CGUIDialogSubtitles::Search(const std::string &search/*=""*/)
   
   std::string strPlayingFile = g_application.CurrentFileItem().GetPath();
   
-  m_currentService->SubtitleSearch(strPlayingFile,strLanguages,preferredLanguage,m_subtitlesList);
+  m_currentService->SubtitleSearch(strPlayingFile,strLanguages,preferredLanguage,*m_subtitles);
   
-  for (std::vector<std::map<std::string, std::string>>::iterator is = m_subtitlesList.begin() ; is != m_subtitlesList.end(); ++is)
-  {
-    CFileItemPtr item(new CFileItem());
-    std::map<std::string, std::string> sub = *is;
-    item->SetLabel(sub["LanguageName"]);
-    item->SetLabel2(sub["SubFileName"]);
-    item->SetIconImage(sub["SubRating"]);
-    item->SetArt("thumb",sub["ISO639"]);
-    item->SetProperty("sync", sub["MatchedBy"] == "moviehash" ? "true":"false");
-    item->SetProperty("hearing_imp", sub["SubHearingImpaired"] == "1" ? "true":"false");
-    m_subtitles->Add(item);
-  }
   
   UpdateStatus(SEARCH_COMPLETE);
   m_updateSubsList = true;
@@ -251,7 +239,7 @@ void CGUIDialogSubtitles::Search(const std::string &search/*=""*/)
       m_LastAutoDownloaded != g_application.CurrentFile() && CSettings::GetInstance().GetBool(CSettings::SETTING_SUBTITLES_DOWNLOADFIRST))
   {
     CLog::Log(LOGDEBUG, "%s - Automatically download first subtitle: %s", __FUNCTION__,
-              m_subtitlesList[0]["SubFileName"].c_str());
+              m_subtitles[0].GetLabel2().c_str());
     m_LastAutoDownloaded = g_application.CurrentFile();
     Download(0);
   }
@@ -294,12 +282,12 @@ void CGUIDialogSubtitles::UpdateStatus(STATUS status)
 void CGUIDialogSubtitles::Download(const int index)
 {
   UpdateStatus(DOWNLOADING);
-  std::map<std::string, std::string> sub = m_subtitlesList[index];
+  CFileItem *subItem = new CFileItem(*(*m_subtitles)[index]);;
 
   SUBTITLE_STORAGEMODE storageMode = (SUBTITLE_STORAGEMODE) CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_STORAGEMODE);
 
   std::vector<std::string> items;
-  m_currentService->Download(sub["IDSubtitleFile"],sub["SubFormat"],items);
+  m_currentService->Download(subItem,items);
   
   // Get (unstacked) path
   std::string strCurrentFile = g_application.CurrentUnstackedItem().GetPath();
@@ -358,7 +346,7 @@ void CGUIDialogSubtitles::Download(const int index)
 
   // Extract the language and appropriate extension
   std::string strSubLang;
-  g_LangCodeExpander.ConvertToISO6391(sub["LanguageName"], strSubLang);
+  g_LangCodeExpander.ConvertToISO6391(subItem->GetLabel(), strSubLang);
   
   
   // Iterate over all items to transfer
@@ -442,7 +430,6 @@ void CGUIDialogSubtitles::ClearSubtitles()
   OnMessage(msg);
   CSingleLock lock(m_critsection);
   m_subtitles->Clear();
-  m_subtitlesList.clear();
 }
 
 void CGUIDialogSubtitles::SetSubtitles(const std::string &subtitle)
