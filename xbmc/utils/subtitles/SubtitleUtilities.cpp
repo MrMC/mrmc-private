@@ -35,6 +35,7 @@
 //#include "utils/LangCodeExpander.h"
 //#include "video/VideoInfoTag.h"
 
+#include <openssl/sha.h>
 
 bool CSubtitleUtilities::SubtitleFileSizeAndHash(const std::string &path, std::string &strSize, std::string &strHash)
 {
@@ -130,3 +131,22 @@ bool CSubtitleUtilities::gzipInflate( const std::string& compressedBytes, std::s
   free( uncomp );
   return true ;
 }
+
+
+std::string CSubtitleUtilities::sha256(const std::string *string)
+{
+  char outputBuffer[65];
+  unsigned char hash[SHA256_DIGEST_LENGTH];
+  SHA256_CTX sha256;
+  SHA256_Init(&sha256);
+  SHA256_Update(&sha256, string, string->size());
+  SHA256_Final(hash, &sha256);
+  int i = 0;
+  for(i = 0; i < SHA256_DIGEST_LENGTH; i++)
+  {
+    sprintf(outputBuffer + (i * 2), "%02x", hash[i]);
+  }
+  outputBuffer[64] = 0;
+  return outputBuffer;
+}
+

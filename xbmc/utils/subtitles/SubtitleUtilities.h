@@ -31,4 +31,5 @@ class CSubtitleUtilities
 public:
   static bool SubtitleFileSizeAndHash(const std::string &path, std::string &strSize, std::string &strHash);
   static bool gzipInflate( const std::string& compressedBytes, std::string& uncompressedBytes );
+  static std::string sha256(const std::string *string);
 };
