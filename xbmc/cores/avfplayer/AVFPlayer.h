@@ -29,6 +29,14 @@ typedef struct player_info player_info_t;
 typedef struct AVFChapterInfo AFVChapterInfo;
 typedef struct AVFPlayerStreamInfo AVFPlayerStreamInfo;
 
+// this header is included in both c++ and objc code
+// so we need to handle both defs so ARC works.
+#ifdef __OBJC__
+@class AVPlayerLayerViewNew;
+#else
+class AVPlayerLayerViewNew;
+#endif
+
 class CAVFState;
 class CDVDPlayerSubtitle;
 class CDVDOverlayContainer;
@@ -191,7 +199,7 @@ private:
   int                     m_contrast;
   int                     m_brightness;
 
-  void                   *m_avf_avplayer;
+  AVPlayerLayerViewNew   *m_avf_avplayer;
   CCriticalSection        m_avf_csection;
   CAVFState              *m_avf_state;
 

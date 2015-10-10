@@ -105,7 +105,6 @@ static const NSString *ItemStatusContext;
   AVAssetResourceLoadingContentInformationRequest *contentInformationRequest;
   contentInformationRequest = loadingRequest.contentInformationRequest;
 
-  //m_isSeekPossible = m_pFile->IoControl(XFILE::IOCTRL_SEEK_POSSIBLE, NULL) != 0;
   self.buffer = new uint8_t[2048*1024];
   //provide information about the content
   // https://developer.apple.com/library/ios/documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
@@ -213,6 +212,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
     flags |= READ_AUDIO_VIDEO;
     self.cfile = new XFILE::CFile();
     self.cfile->Open([URL.path UTF8String], flags);
+  //m_isSeekPossible = m_pFile->IoControl(XFILE::IOCTRL_SEEK_POSSIBLE, NULL) != 0;
 
     self.cfileloader = [[CFileResourceLoader alloc] initWithCFile:self.cfile];
     [asset.resourceLoader setDelegate:self.cfileloader queue:dispatch_get_main_queue()];
@@ -927,9 +927,8 @@ void CAVFPlayer::SeekTime(int64_t seek_ms)
     seek_ms = 100;
 
   // seek here
-  AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
   CMTime seekTime = CMTimeMake(seek_ms , 1000);
-  [avf_avplayer.player seekToTime:seekTime];
+  [m_avf_avplayer.player seekToTime:seekTime];
 }
 
 int64_t CAVFPlayer::GetTime()
@@ -1220,9 +1219,8 @@ void CAVFPlayer::Process()
             CGRect frame = CGRectMake(0, 0,
               g_xbmcController.view.frame.size.width,
               g_xbmcController.view.frame.size.height);
-            AVPlayerLayerViewNew *avf_avplayer = [[AVPlayerLayerViewNew alloc] initWithFrameAndUrl:frame withURL:[components URL]];
-            [g_xbmcController insertVideoView:avf_avplayer];
-            m_avf_avplayer = (__bridge void*)avf_avplayer;
+            m_avf_avplayer = [[AVPlayerLayerViewNew alloc] initWithFrameAndUrl:frame withURL:[components URL]];
+            [g_xbmcController insertVideoView:m_avf_avplayer];
          });
 
           // wait for playback to start with 20 second timeout
@@ -1279,9 +1277,8 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::PLAY:
         {
-          AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
           dispatch_sync(dispatch_get_main_queue(),^{
-            [[avf_avplayer player] play];
+            [[m_avf_avplayer player] play];
           });
           m_avf_state->set(AVFSTATE::PLAYING);
         }
@@ -1289,9 +1286,8 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::PAUSE:
         {
-          AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
           dispatch_sync(dispatch_get_main_queue(),^{
-            [[avf_avplayer player] pause];
+            [[m_avf_avplayer player] pause];
           });
           m_avf_state->set(AVFSTATE::IDLE);
         }
@@ -1299,15 +1295,13 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::PLAYING:
         {
-          AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
-
-          CMTime currentTime = avf_avplayer.player.currentTime;
+          CMTime currentTime = m_avf_avplayer.player.currentTime;
           Float64 timeBase_s = CMTimeGetSeconds(currentTime);
           m_elapsed_ms = timeBase_s * 1000;
 
           if (m_duration_ms <= 0)
           {
-            AVPlayerItem *thePlayerItem = avf_avplayer.player.currentItem;
+            AVPlayerItem *thePlayerItem = m_avf_avplayer.player.currentItem;
             if (thePlayerItem.status == AVPlayerItemStatusReadyToPlay)
             {
               /*
@@ -1337,7 +1331,7 @@ void CAVFPlayer::Process()
 
           if (speed != m_speed)
           {
-            avf_avplayer.player.rate = m_speed;
+            m_avf_avplayer.player.rate = m_speed;
             speed = m_speed;
           }
 
@@ -1361,14 +1355,14 @@ void CAVFPlayer::Process()
                 CGPoint offset = frame.origin;
                 // transform to zero x/y origin
                 frame = CGRectOffset(frame, -frame.origin.x, -frame.origin.y);
-                avf_avplayer.frame = frame;
-                avf_avplayer.center= CGPointMake(avf_avplayer.center.x + offset.x, avf_avplayer.center.y + offset.y);
+                m_avf_avplayer.frame = frame;
+                m_avf_avplayer.center= CGPointMake(m_avf_avplayer.center.x + offset.x, m_avf_avplayer.center.y + offset.y);
                 // video layer needs to get resized too,
                 // not sure why, it should track the view.
-                avf_avplayer.videoLayer.frame = frame;
+                m_avf_avplayer.videoLayer.frame = frame;
                 // we start up hidden, kick off an animated fade in.
-                if (avf_avplayer.hidden == YES)
-                  [avf_avplayer setHiddenAnimated:NO delay:NSTimeInterval(0.1) duration:NSTimeInterval(2.0)];
+                if (m_avf_avplayer.hidden == YES)
+                  [m_avf_avplayer setHiddenAnimated:NO delay:NSTimeInterval(0.1) duration:NSTimeInterval(2.0)];
               });
               oldSrcRect  = SrcRect;
               oldDestRect = DestRect;
@@ -1380,12 +1374,11 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::STOP:
         {
-          AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
           dispatch_sync(dispatch_get_main_queue(),^{
-            [g_xbmcController removeVideoView:avf_avplayer];
-            [avf_avplayer.player pause];
+            [g_xbmcController removeVideoView:m_avf_avplayer];
+            [m_avf_avplayer.player pause];
+            m_avf_avplayer = nullptr;
           });
-          m_avf_avplayer = nullptr;
           stopPlaying = true;
         }
         break;
@@ -1465,12 +1458,10 @@ bool CAVFPlayer::WaitForPlaying(int timeout_ms)
 {
   while (!m_bAbortRequest && (timeout_ms > 0))
   {
-    AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
-
-    if (avf_avplayer.videoLayer.isReadyForDisplay == YES)
+    if (m_avf_avplayer.videoLayer.isReadyForDisplay == YES)
     {
       CLog::Log(LOGDEBUG, "CAVFPlayer::Process avf_avplayer.videoLayer.isReadyForDisplay");
-      CGRect video_bounds = avf_avplayer.videoLayer.videoRect;
+      CGRect video_bounds = m_avf_avplayer.videoLayer.videoRect;
       m_video_width = video_bounds.size.width;
       m_video_height = video_bounds.size.height;
       return true;
