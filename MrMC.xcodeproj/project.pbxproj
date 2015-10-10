@@ -1702,7 +1702,7 @@
 		F56353BF16E9BB3500D21BAD /* BitstreamConverter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56353BD16E9BB3500D21BAD /* BitstreamConverter.cpp */; };
 		F56579AF13060D1E0085ED7F /* RenderCapture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56579AD13060D1E0085ED7F /* RenderCapture.cpp */; };
 		F57B6F801071B8B500079ACB /* JobManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B6F7E1071B8B500079ACB /* JobManager.cpp */; };
-		F57F6C791BC1BB7A001AF22D /* AVFPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D91C6C1BC01BA600C7C1C4 /* AVFPlayer.mm */; };
+		F57F6C791BC1BB7A001AF22D /* AVFPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D91C6C1BC01BA600C7C1C4 /* AVFPlayer.mm */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		F584E12E0F257C5100DB26A5 /* HTTPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F584E12D0F257C5100DB26A5 /* HTTPDirectory.cpp */; };
 		F590455E1BA372A600DB589A /* AutoPool.mm in Sources */ = {isa = PBXBuildFile; fileRef = F59045291BA372A600DB589A /* AutoPool.mm */; };
 		F590455F1BA372A600DB589A /* AutoPool.mm in Sources */ = {isa = PBXBuildFile; fileRef = F59045291BA372A600DB589A /* AutoPool.mm */; };

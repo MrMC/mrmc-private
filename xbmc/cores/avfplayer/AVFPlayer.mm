@@ -96,8 +96,6 @@ static const NSString *ItemStatusContext;
     SAFE_DELETE(m_cfile);
   if (buffer)
     SAFE_DELETE_ARRAY(buffer);
-
-  [super dealloc];
 }
 
 - (void)fillInContentInformation:(AVAssetResourceLoadingRequest *)loadingRequest
@@ -150,7 +148,6 @@ static const NSString *ItemStatusContext;
 
       NSURLResponse* response = [[NSURLResponse alloc] initWithURL:resourceURL MIMEType:@"video/quicktime" expectedContentLength:[dataRequest requestedLength] textEncodingName:nil];
       [loadingRequest setResponse:response];
-      [response release];
 
       CLog::Log(LOGNOTICE, "resourceLoader1 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
         dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
@@ -166,11 +163,10 @@ static const NSString *ItemStatusContext;
         CLog::Log(LOGNOTICE, "resourceLoader2 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
           dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
         NSUInteger length = MIN(receivedLength, remainingLength);
-        NSData* decodedData = [[NSData alloc] initWithBytes:buffer length:length];
+        NSData* decodedData = [NSData dataWithBytes:buffer length:length];
         CLog::Log(LOGNOTICE, "resourceLoader [dataRequest respondWithData] length(%ld)", length);
 
         [dataRequest respondWithData:decodedData];
-        [decodedData release];
 
         remainingLength -= length;
       } while (remainingLength);
@@ -194,9 +190,9 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 #pragma mark - AVPlayerLayerViewNew
 @interface AVPlayerLayerViewNew : UIView
 
-@property (nonatomic, retain, strong) AVPlayer *player;
-@property (nonatomic, retain, strong) AVPlayerLayer *videoLayer;
-@property (nonatomic, retain, strong) CFileResourceLoader *cfileloader;
+@property (nonatomic, strong) AVPlayer *player;
+@property (nonatomic, strong) AVPlayerLayer *videoLayer;
+@property (nonatomic, strong) CFileResourceLoader *cfileloader;
 
 
 - (id)initWithFrameAndUrl:(CGRect)frame withURL:(NSURL *)URL;
@@ -221,7 +217,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
     //NSDictionary *options = @{ AVURLAssetPreferPreciseDurationAndTimingKey : @YES };
 
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:URL options:nil];
-    self.cfileloader = [[[CFileResourceLoader alloc] init] autorelease];
+    self.cfileloader = [[CFileResourceLoader alloc] init];
     [asset.resourceLoader setDelegate:self.cfileloader queue:dispatch_get_main_queue()];
 
     AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
@@ -233,9 +229,6 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 		self.videoLayer.backgroundColor = [[UIColor blackColor] CGColor];
 
     [[self layer] addSublayer:self.videoLayer];
-
-    [playerItem release];
-    [asset release];
 
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEndTime:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
 
@@ -254,12 +247,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
   [self.videoLayer removeObserver:self forKeyPath:@"error"];
   [self.videoLayer removeObserver:self forKeyPath:@"outputObscuredDueToInsufficientExternalProtection"];
 #endif
-  // humm, why do I need to do these releases ?
   [self.videoLayer removeFromSuperlayer];
-  [self.videoLayer release];
-  [self.player release];
-  [self.cfileloader release];
-  [super dealloc];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
@@ -940,7 +928,7 @@ void CAVFPlayer::SeekTime(int64_t seek_ms)
     seek_ms = 100;
 
   // seek here
-  AVPlayerLayerViewNew *avf_avplayer = (AVPlayerLayerViewNew*)m_avf_avplayer;
+  AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
   CMTime seekTime = CMTimeMake(seek_ms , 1000);
   [avf_avplayer.player seekToTime:seekTime];
 }
@@ -1234,9 +1222,8 @@ void CAVFPlayer::Process()
               g_xbmcController.view.frame.size.width,
               g_xbmcController.view.frame.size.height);
             AVPlayerLayerViewNew *avf_avplayer = [[AVPlayerLayerViewNew alloc] initWithFrameAndUrl:frame withURL:[components URL]];
-            [components release];
             [g_xbmcController insertVideoView:avf_avplayer];
-            m_avf_avplayer = avf_avplayer;
+            m_avf_avplayer = (__bridge void*)avf_avplayer;
          });
 
           // wait for playback to start with 20 second timeout
@@ -1293,7 +1280,7 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::PLAY:
         {
-          AVPlayerLayerViewNew *avf_avplayer = (AVPlayerLayerViewNew*)m_avf_avplayer;
+          AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
           dispatch_sync(dispatch_get_main_queue(),^{
             [[avf_avplayer player] play];
           });
@@ -1303,7 +1290,7 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::PAUSE:
         {
-          AVPlayerLayerViewNew *avf_avplayer = (AVPlayerLayerViewNew*)m_avf_avplayer;
+          AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
           dispatch_sync(dispatch_get_main_queue(),^{
             [[avf_avplayer player] pause];
           });
@@ -1313,7 +1300,7 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::PLAYING:
         {
-          AVPlayerLayerViewNew *avf_avplayer = (AVPlayerLayerViewNew*)m_avf_avplayer;
+          AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
 
           CMTime currentTime = avf_avplayer.player.currentTime;
           Float64 timeBase_s = CMTimeGetSeconds(currentTime);
@@ -1394,11 +1381,10 @@ void CAVFPlayer::Process()
 
         case AVFSTATE::STOP:
         {
-          AVPlayerLayerViewNew *avf_avplayer = (AVPlayerLayerViewNew*)m_avf_avplayer;
+          AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
           dispatch_sync(dispatch_get_main_queue(),^{
             [g_xbmcController removeVideoView:avf_avplayer];
             [avf_avplayer.player pause];
-            [avf_avplayer release];
           });
           m_avf_avplayer = nullptr;
           stopPlaying = true;
@@ -1480,7 +1466,7 @@ bool CAVFPlayer::WaitForPlaying(int timeout_ms)
 {
   while (!m_bAbortRequest && (timeout_ms > 0))
   {
-    AVPlayerLayerViewNew *avf_avplayer = (AVPlayerLayerViewNew*)m_avf_avplayer;
+    AVPlayerLayerViewNew *avf_avplayer = (__bridge AVPlayerLayerViewNew*)m_avf_avplayer;
 
     if (avf_avplayer.videoLayer.isReadyForDisplay == YES)
     {
