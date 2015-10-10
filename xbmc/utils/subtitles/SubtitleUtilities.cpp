@@ -22,18 +22,10 @@
 #include "zlib.h"
 #include "zconf.h"
 
-
 #include "SubtitleUtilities.h"
-
-//#include "CompileInfo.h"
-//#include "PasswordManager.h"
-//#include "Util.h"
 #include "filesystem/File.h"
 #include "utils/Base64.h"
 #include "utils/StringUtils.h"
-//#include "utils/log.h"
-//#include "utils/LangCodeExpander.h"
-//#include "video/VideoInfoTag.h"
 
 #include <openssl/sha.h>
 
