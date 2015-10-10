@@ -198,7 +198,7 @@ bool CPasswordManager::GetUserPass(std::string module, std::string &user, std::s
     // read in our passwords
     const TiXmlElement *mod = root->FirstChildElement(module);
     std::string pass64Decoded;
-    if (XMLUtils::GetString(mod, "user", user) && XMLUtils::GetString(mod, "pass", pass64Decoded))
+    if (mod && XMLUtils::GetString(mod, "user", user) && XMLUtils::GetString(mod, "pass", pass64Decoded))
     {
       Base64::Decode(pass64Decoded, pass);
       return true;
