@@ -40,6 +40,7 @@
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
 #include "utils/subtitles/OpenSubtitlesSearch.h"
+#include "utils/subtitles/PodnapisiSearch.h"
 #include "URL.h"
 #include "Util.h"
 #include "video/VideoDatabase.h"
@@ -67,6 +68,7 @@ CGUIDialogSubtitles::CGUIDialogSubtitles(void)
 {
   m_loadType = KEEP_IN_MEMORY;
   m_serviceItems.push_back(new COpenSubtitlesSearch);
+  m_serviceItems.push_back(new CPodnapisiSearch);
 }
 
 CGUIDialogSubtitles::~CGUIDialogSubtitles(void)

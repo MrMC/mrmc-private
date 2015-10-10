@@ -129,6 +129,9 @@
 		18B7C9831294385F009E7A26 /* XMLUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C9811294385F009E7A26 /* XMLUtils.cpp */; };
 		18C1D22D13033F6A00CFFE59 /* GLUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C1D22B13033F6A00CFFE59 /* GLUtils.cpp */; };
 		18ECC96213CF178D00A9ED6C /* StreamUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18ECC96013CF178D00A9ED6C /* StreamUtils.cpp */; };
+		18FD1CA91BC8E62600027005 /* PodnapisiSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */; };
+		18FD1CAA1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */; };
+		18FD1CAB1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */; };
 		18FD1CAE1BC8E63000027005 /* SubtitleUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CAC1BC8E63000027005 /* SubtitleUtilities.cpp */; };
 		18FD1CAF1BC8E63000027005 /* SubtitleUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CAC1BC8E63000027005 /* SubtitleUtilities.cpp */; };
 		18FD1CB01BC8E63000027005 /* SubtitleUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CAC1BC8E63000027005 /* SubtitleUtilities.cpp */; };
@@ -3033,6 +3036,8 @@
 		18ECC96013CF178D00A9ED6C /* StreamUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamUtils.cpp; sourceTree = "<group>"; };
 		18ECC96113CF178D00A9ED6C /* StreamUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamUtils.h; sourceTree = "<group>"; };
 		18FD1CA31BC7DC2900027005 /* SubtitleSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleSearch.h; sourceTree = "<group>"; };
+		18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PodnapisiSearch.cpp; sourceTree = "<group>"; };
+		18FD1CA81BC8E62600027005 /* PodnapisiSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PodnapisiSearch.h; sourceTree = "<group>"; };
 		18FD1CAC1BC8E63000027005 /* SubtitleUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SubtitleUtilities.cpp; sourceTree = "<group>"; };
 		18FD1CAD1BC8E63000027005 /* SubtitleUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleUtilities.h; sourceTree = "<group>"; };
 		1D638126161E211E003603ED /* PeripheralImon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PeripheralImon.cpp; sourceTree = "<group>"; };
@@ -5085,6 +5090,8 @@
 			children = (
 				18690DCC1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp */,
 				18690DCD1B94DA6200E762C1 /* OpenSubtitlesSearch.h */,
+				18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */,
+				18FD1CA81BC8E62600027005 /* PodnapisiSearch.h */,
 				18FD1CA31BC7DC2900027005 /* SubtitleSearch.h */,
 				18FD1CAC1BC8E63000027005 /* SubtitleUtilities.cpp */,
 				18FD1CAD1BC8E63000027005 /* SubtitleUtilities.h */,
@@ -9667,6 +9674,7 @@
 				7C8AE84E189DE3CD00C33786 /* CoreAudioChannelLayout.cpp in Sources */,
 				7C8AE84F189DE3CD00C33786 /* CoreAudioDevice.cpp in Sources */,
 				7C8AE850189DE3CD00C33786 /* CoreAudioHardware.cpp in Sources */,
+				18FD1CA91BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
 				DF5E699A1B28121E009A88C3 /* PVRTimerType.cpp in Sources */,
 				7C8AE851189DE3CD00C33786 /* CoreAudioStream.cpp in Sources */,
 				7C8AE854189DE47F00C33786 /* CoreAudioHelpers.cpp in Sources */,
@@ -10361,6 +10369,7 @@
 				E499142F174E603C00741B6D /* SkinSettings.cpp in Sources */,
 				E4991430174E603C00741B6D /* VideoSettings.cpp in Sources */,
 				395C2A0A1A9F06EB00EBC7AD /* LanguageResource.cpp in Sources */,
+				18FD1CAA1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
 				E4991431174E604300741B6D /* DarwinStorageProvider.cpp in Sources */,
 				E4991432174E604300741B6D /* AutorunMediaJob.cpp in Sources */,
 				399442721A8DD920006C39E9 /* VideoLibraryJob.cpp in Sources */,
@@ -11315,6 +11324,7 @@
 				F5D1412C1BAF0B6D0075A95C /* RssReader.cpp in Sources */,
 				F5D1412D1BAF0B6D0075A95C /* ScraperParser.cpp in Sources */,
 				F5D1412E1BAF0B6D0075A95C /* ScraperUrl.cpp in Sources */,
+				18FD1CAB1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
 				F5D1412F1BAF0B6D0075A95C /* Screenshot.cpp in Sources */,
 				F5D141301BAF0B6D0075A95C /* SeekHandler.cpp in Sources */,
 				F5D141311BAF0B6D0075A95C /* OSXGNUReplacements.c in Sources */,
