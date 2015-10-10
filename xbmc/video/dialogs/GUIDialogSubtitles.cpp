@@ -227,7 +227,7 @@ void CGUIDialogSubtitles::Search(const std::string &search/*=""*/)
   
   std::string strPlayingFile = g_application.CurrentFileItem().GetPath();
   
-  m_serviceItems[0]->SubtitleSearch(strPlayingFile,strLanguages,preferredLanguage,m_subtitlesList);
+  m_currentService->SubtitleSearch(strPlayingFile,strLanguages,preferredLanguage,m_subtitlesList);
   
   for (std::vector<std::map<std::string, std::string>>::iterator is = m_subtitlesList.begin() ; is != m_subtitlesList.end(); ++is)
   {
