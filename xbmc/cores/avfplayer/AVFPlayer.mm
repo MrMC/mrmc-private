@@ -77,25 +77,26 @@ static const NSString *ItemStatusContext;
 
 #pragma mark - AVAssetResourceLoaderDelegate
 @interface CFileResourceLoader : NSObject <AVAssetResourceLoaderDelegate>
+@property (nonatomic) XFILE::CFile *cfile;
+@property (nonatomic) uint8_t *buffer;
 
 @end
 
 @implementation CFileResourceLoader
-  XFILE::CFile   *m_cfile = nullptr;
-  uint8_t        *buffer  = nullptr;
-
-- (id)init
+- (id)initWithCFile:(XFILE::CFile *) cfile
 {
 	self = [super init];
+	if (self)
+	{
+    self.cfile = cfile;
+  }
 	return self;
 }
 
 - (void)dealloc
 {
-  if (m_cfile)
-    SAFE_DELETE(m_cfile);
-  if (buffer)
-    SAFE_DELETE_ARRAY(buffer);
+  if (self.buffer)
+    SAFE_DELETE_ARRAY(self.buffer);
 }
 
 - (void)fillInContentInformation:(AVAssetResourceLoadingRequest *)loadingRequest
@@ -104,27 +105,14 @@ static const NSString *ItemStatusContext;
   AVAssetResourceLoadingContentInformationRequest *contentInformationRequest;
   contentInformationRequest = loadingRequest.contentInformationRequest;
 
-  unsigned int flags = 0;//READ_TRUNCATED | READ_CHUNKED;
-  //flags |= READ_AUDIO_VIDEO;
-  //flags |= READ_NO_CACHE; // Make sure CFile honors our no-cache hint
-  if (m_cfile)
-    SAFE_DELETE(m_cfile);
-  if (buffer)
-   SAFE_DELETE_ARRAY(buffer);
-
-  m_cfile = new XFILE::CFile();
-  NSURL *resourceURL = [loadingRequest.request URL];
-  if (m_cfile->Open([resourceURL.path UTF8String], flags))
-  {
-    //m_isSeekPossible = m_pFile->IoControl(XFILE::IOCTRL_SEEK_POSSIBLE, NULL) != 0;
-    buffer = new uint8_t[2048*1024];
-    //provide information about the content
-    // https://developer.apple.com/library/ios/documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
-    NSString *mimeType = @"com.apple.quicktime-movie";
-    contentInformationRequest.contentType = mimeType;
-    contentInformationRequest.contentLength = m_cfile->GetLength();
-    contentInformationRequest.byteRangeAccessSupported = YES;
-  }
+  //m_isSeekPossible = m_pFile->IoControl(XFILE::IOCTRL_SEEK_POSSIBLE, NULL) != 0;
+  self.buffer = new uint8_t[2048*1024];
+  //provide information about the content
+  // https://developer.apple.com/library/ios/documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
+  NSString *mimeType = @"com.apple.quicktime-movie";
+  contentInformationRequest.contentType = mimeType;
+  contentInformationRequest.contentLength = self.cfile->GetLength();
+  contentInformationRequest.byteRangeAccessSupported = YES;
 }
 
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader
@@ -155,15 +143,15 @@ static const NSString *ItemStatusContext;
       NSUInteger remainingLength =
         [dataRequest requestedLength] - static_cast<NSUInteger>([dataRequest currentOffset] - [dataRequest requestedOffset]);
 
-      m_cfile->Seek(dataRequest.currentOffset, SEEK_SET);
+      self.cfile->Seek(dataRequest.currentOffset, SEEK_SET);
       do {
         NSUInteger receivedLength = dataRequest.requestedLength > 1024*1024 ? 1024 *1024 : dataRequest.requestedLength;
-        receivedLength = m_cfile->Read(buffer, receivedLength);
+        receivedLength = self.cfile->Read(self.buffer, receivedLength);
 
         CLog::Log(LOGNOTICE, "resourceLoader2 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
           dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
         NSUInteger length = MIN(receivedLength, remainingLength);
-        NSData* decodedData = [NSData dataWithBytes:buffer length:length];
+        NSData* decodedData = [NSData dataWithBytes:self.buffer length:length];
         CLog::Log(LOGNOTICE, "resourceLoader [dataRequest respondWithData] length(%ld)", length);
 
         [dataRequest respondWithData:decodedData];
@@ -190,6 +178,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 #pragma mark - AVPlayerLayerViewNew
 @interface AVPlayerLayerViewNew : UIView
 
+@property (nonatomic) XFILE::CFile *cfile;
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) AVPlayerLayer *videoLayer;
 @property (nonatomic, strong) CFileResourceLoader *cfileloader;
@@ -203,7 +192,6 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 @end
 
 @implementation AVPlayerLayerViewNew
-
 - (id)initWithFrameAndUrl:(CGRect)frame withURL:(NSURL *)URL;
 {
 	self = [super initWithFrame:frame];
@@ -217,7 +205,16 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
     //NSDictionary *options = @{ AVURLAssetPreferPreciseDurationAndTimingKey : @YES };
 
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:URL options:nil];
-    self.cfileloader = [[CFileResourceLoader alloc] init];
+
+    unsigned int flags = 0;
+    flags |= READ_CHUNKED;
+    flags |= READ_NO_CACHE;
+    flags |= READ_TRUNCATED;
+    flags |= READ_AUDIO_VIDEO;
+    self.cfile = new XFILE::CFile();
+    self.cfile->Open([URL.path UTF8String], flags);
+
+    self.cfileloader = [[CFileResourceLoader alloc] initWithCFile:self.cfile];
     [asset.resourceLoader setDelegate:self.cfileloader queue:dispatch_get_main_queue()];
 
     AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
@@ -248,6 +245,8 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
   [self.videoLayer removeObserver:self forKeyPath:@"outputObscuredDueToInsufficientExternalProtection"];
 #endif
   [self.videoLayer removeFromSuperlayer];
+  if (self.cfile)
+    SAFE_DELETE(self.cfile);
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
