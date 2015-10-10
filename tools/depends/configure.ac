@@ -258,7 +258,7 @@ case $host in
           use_simulator=yes
           sdk_name=iphonesimulator$use_sdk
           platform_cflags+=" -Wno-error=implicit-function-declaration"
-          platform_min_version="ios-simulator-version-min=8.0"
+          platform_min_version="ios-simulator-version-min=8.4"
         elif test "$use_platform" = "tvos-simulator"; then
           case $use_sdk in
             9.0);;
@@ -308,8 +308,17 @@ case $host in
         fi
 
         # setup which sdk to use
-        found_sdk_version=[`$use_xcodebuild -showsdks | grep iphoneos | sort | tail -n 1 | awk '{ print $2}'`]
-        use_sdk="${use_sdk:-$found_sdk_version}"
+        if test "$use_platform" = "tvos"; then
+          found_sdk_version=[`$use_xcodebuild -showsdks | grep appletvos | sort | tail -n 1 | awk '{ print $2}'`]
+          use_sdk="${use_sdk:-$found_sdk_version}"
+          sdk_name=appletvos$use_sdk
+          platform_min_version="appletvos-version-min=9.0"
+        else
+          found_sdk_version=[`$use_xcodebuild -showsdks | grep iphoneos | sort | tail -n 1 | awk '{ print $2}'`]
+          use_sdk="${use_sdk:-$found_sdk_version}"
+          sdk_name=iphoneos$use_sdk
+          platform_min_version="iphoneos-version-min=8.4"
+         fi
 	case $use_sdk in
           4.*);;
           5.*);;
@@ -321,7 +330,6 @@ case $host in
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
             ;;
         esac
-        sdk_name=iphoneos$use_sdk
 
         # find the matching toolchain
         case $use_xcode in
@@ -342,7 +350,6 @@ case $host in
         platform_cflags+=" -Wno-error=implicit-function-declaration"
         platform_ldflags+=" -L$use_sdk_path/usr/lib/system"
         platform_cxxflags+=" $cpu_flags"
-        platform_min_version="iphoneos-version-min=8.0"
         use_sdk_path=[`$use_xcodebuild -version -sdk $sdk_name | grep ^Path | awk '{ print $2}'`]
       ;;
     esac
