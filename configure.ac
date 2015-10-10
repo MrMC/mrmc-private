@@ -952,8 +952,7 @@ PKG_CHECK_MODULES([GNUTLS], [gnutls], [have_gnutls=yes];AC_DEFINE([HAVE_GNUTLS],
 AC_CHECK_LIB([bz2],         [main],, AC_MSG_ERROR($missing_library))
 AC_CHECK_LIB([gif],         [main],, AC_MSG_ERROR($missing_library))
 AC_CHECK_LIB([jpeg],        [main],, AC_MSG_ERROR($missing_library))
-AC_CHECK_LIB([xmlrpc++],    [main],, AC_MSG_ERROR($missing_library))
-AC_CHECK_LIB([xmlrpc_client++],[main],, AC_MSG_ERROR($missing_library))
+AC_CHECK_LIB([ulxmlrpcpp],  [main],, AC_MSG_ERROR($missing_library))
 
 AC_CHECK_LIB([cpluff],      [main],, AC_MSG_ERROR($missing_library))
 XB_FIND_SONAME([CPLUFF], [cpluff])
