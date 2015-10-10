@@ -100,7 +100,7 @@ bool CGUIDialogSubtitles::OnMessage(CGUIMessage& message)
       OnMessage(msg);
       
       int item = msg.GetParam1();
-      if (item >= 0 && item < m_serviceItems.size())
+      if (item >= 0 && item < (int)m_serviceItems.size())
       {
         SetService(m_serviceItems[item]->ModuleName());
         Search();
@@ -473,7 +473,7 @@ void CGUIDialogSubtitles::FillServices()
   CFileItemList vecItems;
   
   std::string service = m_serviceItems.front()->ModuleName();
-  for (int i = 0; i < m_serviceItems.size(); i++)
+  for (size_t i = 0; i < m_serviceItems.size(); i++)
   {
     std::string serviceLabel = m_serviceItems[i]->ModuleName();
     CFileItemPtr item(new CFileItem(serviceLabel));
@@ -489,7 +489,7 @@ void CGUIDialogSubtitles::FillServices()
 
 bool CGUIDialogSubtitles::SetService(const std::string &service)
 {
-  for (int i = 0; i < m_serviceItems.size(); i++)
+  for (size_t i = 0; i < m_serviceItems.size(); i++)
   {
     if (m_serviceItems[i]->ModuleName() == service)
     {
