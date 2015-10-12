@@ -149,7 +149,7 @@ private:
   int           GetVideoStreamCount();
 
   bool          CheckPlaying();
-  bool          WaitForPlaying(int timeout_ms);
+  bool          WaitForReadyToPlay(int timeout_ms);
   void          ClearStreamInfos();
 
   void          FindSubtitleFiles();

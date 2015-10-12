@@ -58,11 +58,8 @@
 #include "settings/VideoSettings.h"
 
 #import <UIKit/UIKit.h>
-#import <AVFoundation/AVPlayer.h>
-#import <AVFoundation/AVAsset.h>
-#import <AVFoundation/AVPlayerItem.h>
-#import <AVFoundation/AVPlayerLayer.h>
-#import <AVFoundation/AVAssetResourceLoader.h>
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
 
 #import "platform/darwin/DarwinUtils.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
@@ -74,6 +71,111 @@
 
 NSString * const MrMCScheme = @"mrmc";
 static const NSString *ItemStatusContext;
+NSString * const kTracksKey        = @"tracks";
+NSString * const kStatusKey        = @"status";
+NSString * const kRateKey          = @"rate";
+NSString * const kPlayableKey      = @"playable";
+NSString * const kCurrentItemKey   = @"currentItem";
+NSString * const kTimedMetadataKey = @"currentItem.timedMetadata";
+#define CFILERESOURCELOADER_DEBUG 1
+#define CFILERESOURCELOADER_BUFFERSIZE (2048*1024)
+
+#define CAVPLAYERLAYERVIEW_DEBUG 1
+
+
+#pragma mark - CCustomURLProtocol
+@interface CCustomURLProtocol : NSURLProtocol <NSURLConnectionDelegate>
+@property (nonatomic, strong) NSURLConnection *connection;
+@end
+
+@implementation CCustomURLProtocol
+// decide whether or not the call should be intercepted
++ (BOOL)canInitWithRequest:(NSURLRequest *)request
+{
+  static NSUInteger requestCount = 0;
+
+  if ([NSURLProtocol propertyForKey:@"CCustomURLProtocolHandledKey" inRequest:request])
+  {
+    NSLog(@"CCustomURLProtocol canInitWithRequest2 #%lu: URL = %@", (unsigned long)requestCount++, request.URL.absoluteString);
+    return NO;
+  }
+  return YES;
+}
+
++ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
+{
+  NSLog(@"CCustomURLProtocol canonicalRequestForRequest");
+  return request;
+}
+
++ (BOOL)requestIsCacheEquivalent:(NSURLRequest *)a toRequest:(NSURLRequest *)b
+{
+  NSLog(@"CCustomURLProtocol requestIsCacheEquivalent");
+  return [super requestIsCacheEquivalent:a toRequest:b];
+}
+
+// intercept the request and handle it yourself
+- (id)initWithRequest:(NSURLRequest *)request
+  cachedResponse:(NSCachedURLResponse *)cachedResponse client:(id<NSURLProtocolClient>)client
+{
+  NSLog(@"CCustomURLProtocol initWithRequest");
+  return [super initWithRequest:request cachedResponse:cachedResponse client:client];
+}
+
+// load the request
+- (void)startLoading
+{
+  NSLog(@"CCustomURLProtocol startLoading");
+
+  NSMutableURLRequest *newRequest = [self.request mutableCopy];
+  [NSURLProtocol setProperty:@YES forKey:@"CCustomURLProtocolHandledKey" inRequest:newRequest];
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations" ///< 'NSURLConnection' is deprecated
+  self.connection = [NSURLConnection connectionWithRequest:newRequest delegate:self];
+#pragma clang diagnostic pop
+}
+
+// overload didReceive data
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+{
+  NSLog(@"CCustomURLProtocol didReceiveData");
+
+  [[self client] URLProtocol:self didLoadData:data];
+}
+
+// overload didReceiveResponse
+- (void)connection:(NSURLConnection*)connection didReceiveResponse:(NSURLResponse *)response
+{
+  NSLog(@"CCustomURLProtocol didReceiveResponse");
+  [[self client] URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
+}
+
+// overload didFinishLoading
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+{
+  NSLog(@"CCustomURLProtocol connectionDidFinishLoading");
+  [[self client] URLProtocolDidFinishLoading:self];
+  self.connection = nil;
+}
+
+// overload didFail
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
+{
+  NSLog(@"CCustomURLProtocol didFailWithError");
+  [[self client] URLProtocol:self didFailWithError:error];
+  self.connection = nil;
+}
+
+// handle load cancelation
+- (void)stopLoading
+{
+  NSLog(@"CCustomURLProtocol stopLoading");
+  [self.connection cancel];
+}
+
+@end
+
 
 #pragma mark - AVAssetResourceLoaderDelegate
 @interface CFileResourceLoader : NSObject <AVAssetResourceLoaderDelegate>
@@ -87,72 +189,93 @@ static const NSString *ItemStatusContext;
 {
 	self = [super init];
 	if (self)
-	{
     self.cfile = cfile;
-  }
 	return self;
 }
 
 - (void)dealloc
 {
+#if CFILERESOURCELOADER_DEBUG
+  CLog::Log(LOGNOTICE, "CFileResourceLoader dealloc");
+#endif
   if (self.buffer)
     SAFE_DELETE_ARRAY(self.buffer);
 }
 
 - (void)fillInContentInformation:(AVAssetResourceLoadingRequest *)loadingRequest
 {
+#if CFILERESOURCELOADER_DEBUG
   CLog::Log(LOGNOTICE, "resourceLoader contentRequest");
+#endif
   AVAssetResourceLoadingContentInformationRequest *contentInformationRequest;
   contentInformationRequest = loadingRequest.contentInformationRequest;
 
-  self.buffer = new uint8_t[2048*1024];
+  self.buffer = new uint8_t[CFILERESOURCELOADER_BUFFERSIZE];
   //provide information about the content
   // https://developer.apple.com/library/ios/documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
-  NSString *mimeType = @"com.apple.quicktime-movie";
+  //NSString *mimeType = @"public.mpeg-4";                    // xxx.mp4
+  NSString *mimeType = @"com.apple.quicktime-movie";        // xxx.mov
+  //NSString *mimeType = @"video/mp2t";                       // xxx.ts
+  //NSString *mimeType = @"public.mpeg-2-transport-stream";
+  //NSString *mimeType = @"application/x-mpegurl";            // xxx.m3u8
+
   contentInformationRequest.contentType = mimeType;
   contentInformationRequest.contentLength = self.cfile->GetLength();
-  contentInformationRequest.byteRangeAccessSupported = YES;
+  //contentInformationRequest.byteRangeAccessSupported = YES;
 }
 
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader
   shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest
 {
+#if CFILERESOURCELOADER_DEBUG
   CLog::Log(LOGNOTICE, "resourceLoader shouldWaitForLoadingOfRequestedResource");
+#endif
   BOOL canHandle = NO;
 
   NSURL *resourceURL = [loadingRequest.request URL];
   if ([resourceURL.scheme isEqualToString:MrMCScheme])
   {
     canHandle = YES;
+
+    std::string path = [resourceURL.path UTF8String];
+#if CFILERESOURCELOADER_DEBUG
+    CLog::Log(LOGNOTICE, "resourceLoader resourceURL.path(%s)", path.c_str());
+#endif
     if (loadingRequest.contentInformationRequest != nil)
       [self fillInContentInformation:loadingRequest];
 
     if (loadingRequest.dataRequest != nil)
     {
+#if CFILERESOURCELOADER_DEBUG
       CLog::Log(LOGNOTICE, "resourceLoader dataRequest");
-
+#endif
       AVAssetResourceLoadingDataRequest *dataRequest = loadingRequest.dataRequest;
 
       NSURLResponse* response = [[NSURLResponse alloc] initWithURL:resourceURL MIMEType:@"video/quicktime" expectedContentLength:[dataRequest requestedLength] textEncodingName:nil];
       [loadingRequest setResponse:response];
 
+#if CFILERESOURCELOADER_DEBUG
       CLog::Log(LOGNOTICE, "resourceLoader1 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
         dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
-
+#endif
       NSUInteger remainingLength =
         [dataRequest requestedLength] - static_cast<NSUInteger>([dataRequest currentOffset] - [dataRequest requestedOffset]);
 
       self.cfile->Seek(dataRequest.currentOffset, SEEK_SET);
       do {
-        NSUInteger receivedLength = dataRequest.requestedLength > 1024*1024 ? 1024 *1024 : dataRequest.requestedLength;
+        NSUInteger receivedLength = dataRequest.requestedLength > CFILERESOURCELOADER_BUFFERSIZE ? CFILERESOURCELOADER_BUFFERSIZE : dataRequest.requestedLength;
         receivedLength = self.cfile->Read(self.buffer, receivedLength);
 
+#if CFILERESOURCELOADER_DEBUG
         CLog::Log(LOGNOTICE, "resourceLoader2 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
           dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
+#endif
         NSUInteger length = MIN(receivedLength, remainingLength);
         NSData* decodedData = [NSData dataWithBytes:self.buffer length:length];
+#if CFILERESOURCELOADER_DEBUG
         CLog::Log(LOGNOTICE, "resourceLoader [dataRequest respondWithData] length(%ld)", length);
-
+#endif
+        //NSURLResponse *response = [[NSURLResponse alloc] initWithURL:loadingRequest.request.URL MIMETYPE:@"video/mp4" expetedContentLength:length textEncodingName:nil]
         [dataRequest respondWithData:decodedData];
 
         remainingLength -= length;
@@ -169,7 +292,9 @@ static const NSString *ItemStatusContext;
 - (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
 didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 {
+#if CFILERESOURCELOADER_DEBUG
   CLog::Log(LOGNOTICE, "resourceLoader didCancelLoadingRequest");
+#endif
 }
 
 @end
@@ -201,9 +326,8 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 
     self.hidden = YES;
 
-    //NSDictionary *options = @{ AVURLAssetPreferPreciseDurationAndTimingKey : @YES };
-
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:URL options:nil];
+    //XCTAssertTrue([AVURLAsset isPlayableExtendedMIMEType:@"video/mp4; codecs=\"avc1.64001F, mp4a.40.2\""], @"");
 
     unsigned int flags = 0;
     flags |= READ_CHUNKED;
@@ -211,28 +335,23 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
     flags |= READ_TRUNCATED;
     flags |= READ_AUDIO_VIDEO;
     self.cfile = new XFILE::CFile();
-    self.cfile->Open([URL.path UTF8String], flags);
+    std::string path = [URL.path UTF8String];
+    if (path[0] == '/')
+      path = path.substr(1);
+    self.cfile->Open(path, flags);
   //m_isSeekPossible = m_pFile->IoControl(XFILE::IOCTRL_SEEK_POSSIBLE, NULL) != 0;
 
     self.cfileloader = [[CFileResourceLoader alloc] initWithCFile:self.cfile];
     [asset.resourceLoader setDelegate:self.cfileloader queue:dispatch_get_main_queue()];
 
-    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
-
-    self.player = [[AVPlayer alloc] initWithPlayerItem:playerItem];
-    self.videoLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
-		self.videoLayer.frame = self.frame;
-		self.videoLayer.videoGravity = AVLayerVideoGravityResizeAspect;
-		self.videoLayer.backgroundColor = [[UIColor blackColor] CGColor];
-
-    [[self layer] addSublayer:self.videoLayer];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEndTime:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
-
-#if AVPLAYERLAYER_DEBUG_MESSAGES
-    [self.videoLayer addObserver:self forKeyPath:@"error" options:NSKeyValueObservingOptionNew context:nullptr];
-    [self.videoLayer addObserver:self forKeyPath:@"outputObscuredDueToInsufficientExternalProtection" options:NSKeyValueObservingOptionNew context:nullptr];
-#endif
+    // Requesting tracks and playable key
+    NSArray *requestedKeys = [NSArray arrayWithObjects:kTracksKey, kPlayableKey, nil];
+    [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
+      dispatch_async(dispatch_get_main_queue(),^{
+        // If requested key present , then play else error
+        [self playAsset:asset withKeys:requestedKeys];
+      });
+    }];
   }
 
 	return self;
@@ -240,10 +359,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 
 - (void)dealloc
 {
-#if AVPLAYERLAYER_DEBUG_MESSAGES
-  [self.videoLayer removeObserver:self forKeyPath:@"error"];
-  [self.videoLayer removeObserver:self forKeyPath:@"outputObscuredDueToInsufficientExternalProtection"];
-#endif
+  CLog::Log(LOGNOTICE, "AVPlayerLayerViewNew dealloc");
   [self.videoLayer removeFromSuperlayer];
   if (self.cfile)
     SAFE_DELETE(self.cfile);
@@ -254,16 +370,108 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 {
   if (context == &ItemStatusContext)
   {
+#if CAVPLAYERLAYERVIEW_DEBUG
     CLog::Log(LOGNOTICE, "resourceLoader observeValueForKeyPath");
+#endif
     return;
   }
   [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   return;
 }
 
+- (void) playAsset:(AVURLAsset *)asset withKeys:(NSArray *)requestedKeys
+{
+#if CAVPLAYERLAYERVIEW_DEBUG
+  CLog::Log(LOGNOTICE, "AVPlayerLayerViewNew playAsset");
+#endif
+  for (NSString *thisKey in requestedKeys)
+  {  NSError *error = nil;
+    AVKeyValueStatus keyStatus = [asset statusOfValueForKey:thisKey error:&error];
+    // If there is error in fetching tracks
+    if (keyStatus == AVKeyValueStatusFailed)
+    {
+      //[self assetFailedToPrepareForPlayback:error];
+      return;
+    }
+	}
+
+  if (!asset.playable)
+  {
+#if CAVPLAYERLAYERVIEW_DEBUG
+    CLog::Log(LOGNOTICE, "AVPlayerLayerViewNew playAsset, asset is not playable");
+#endif
+    return;
+  }
+
+// [audioSelectionGroup options] // Array of the options in the group above.
+
+  dispatch_async(dispatch_get_main_queue(),^{
+    // To create and prepare an HTTP live stream for playback.
+    // Initialize an instance of AVPlayerItem using the URL.
+    // (You cannot directly create an AVAsset instance to represent the media in an HTTP Live Stream.)
+    // Create AVPlayer Item
+/*
+    NSURL *url = [NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8"];
+    // You may find a test stream at <http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8>.
+    AVPlayerItem *playerItem = [AVPlayerItem playerItemWithURL:url];
+*/
+    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:asset];
+
+    // Create AVPlayer Item from AVPlayerItem
+    self.player = [[AVPlayer alloc] initWithPlayerItem:playerItem];
+    //self.player.allowsAirPlayVideo = YES; // BY default YES
+    self.videoLayer = [AVPlayerLayer playerLayerWithPlayer:self.player];
+    CGRect video_bounds = self.videoLayer.videoRect;
+    self.videoLayer.frame = video_bounds;
+    self.videoLayer.videoGravity = AVLayerVideoGravityResizeAspect;
+    self.videoLayer.backgroundColor = [[UIColor blackColor] CGColor];
+
+    [[self layer] addSublayer:self.videoLayer];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didPlayToEndTime:) name:AVPlayerItemDidPlayToEndTimeNotification object:nil];
+    /*
+      // Adding status key to observe the status change of player
+      [[player currentItem] addObserver:self
+       forKeyPath:@”status ”
+       options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew
+       context:MyStreamingMovieViewControllerPlayerItemStatusObserverContext];
+
+      // Update the scrubber during normal playback.
+      timeObserver = [[player
+      addPeriodicTimeObserverForInterval:CMTimeMakeWithSeconds(1, NSEC_PER_SEC)
+       queue:NULL
+       usingBlock:
+       ^(CMTime time)
+       {
+       [self updateSeekbar]; // Here you can update seekbar , or find out the buffer level
+       }] retain];
+
+      // Notification when player reaches end
+      [NSNotifi cationCenter defaultCenter] addObserver:self
+       selector:@selector(realPlayerItemDidReachEnd:)
+       name:AVPlayerItemDidPlayToEndTimeNotification
+       object:[self.player currentItem]];
+    */
+  });
+}
+
+- (CMTime)availableDuration
+{
+    NSValue *value = self.player.currentItem.loadedTimeRanges.firstObject;
+    if (value != nil)
+    {
+      CMTimeRange range;
+      [value getValue:&range];
+      return CMTimeRangeGetEnd(range);
+    }
+    return kCMTimeZero;
+}
+
 - (void)didPlayToEndTime:(NSNotification *)note
 {
+#if CAVPLAYERLAYERVIEW_DEBUG
   NSLog(@"didPlayToEndTime");
+#endif
 }
 
 - (void)setHiddenAnimated:(BOOL)hide
@@ -330,10 +538,7 @@ public:
     {
       // serialized state is the front element.
       playerstate = m_stateQueue.front();
-      // pop the front element if there are
-      // more present.
-      if (dequeue_size > 1)
-        m_stateQueue.pop_front();
+      m_stateQueue.pop_front();
     }
 
     pthread_mutex_unlock(&m_mutex);
@@ -442,10 +647,11 @@ CAVFPlayer::CAVFPlayer(IPlayerCallback &callback)
 
   // Suspend AE temporarily so exclusive or hog-mode sinks
   // don't block external player's access to audio device
-  if (!CAEFactory::Suspend())
-  {
-    CLog::Log(LOGNOTICE,"%s: Failed to suspend AudioEngine before launching external player", __FUNCTION__);
-  }
+  //if (!CAEFactory::Suspend())
+  //{
+  //  CLog::Log(LOGNOTICE,"%s: Failed to suspend AudioEngine before launching external player", __FUNCTION__);
+  //}
+  [NSURLProtocol registerClass:[CCustomURLProtocol class]];
 }
 
 CAVFPlayer::~CAVFPlayer()
@@ -457,10 +663,11 @@ CAVFPlayer::~CAVFPlayer()
   delete m_dvdOverlayContainer;
 
   // Resume AE processing of XBMC native audio
-  if (!CAEFactory::Resume())
-  {
-    CLog::Log(LOGFATAL, "%s: Failed to restart AudioEngine after return from external player",__FUNCTION__);
-  }
+  //if (!CAEFactory::Resume())
+  //{
+  //  CLog::Log(LOGFATAL, "%s: Failed to restart AudioEngine after return from external player",__FUNCTION__);
+  //}
+  [NSURLProtocol unregisterClass:[CCustomURLProtocol class]];
 }
 
 bool CAVFPlayer::OpenFile(const CFileItem &file, const CPlayerOptions &options)
@@ -1213,18 +1420,17 @@ void CAVFPlayer::Process()
             NSString *filePath = [NSString stringWithUTF8String: path.c_str()];
             NSURLComponents *components = [NSURLComponents new];
             components.scheme = MrMCScheme;
-            components.host   = nullptr;
+            components.host   = @"mrmc-tvos.com";
             components.path   = filePath;
 
             CGRect frame = CGRectMake(0, 0,
               g_xbmcController.view.frame.size.width,
               g_xbmcController.view.frame.size.height);
             m_avf_avplayer = [[AVPlayerLayerViewNew alloc] initWithFrameAndUrl:frame withURL:[components URL]];
-            [g_xbmcController insertVideoView:m_avf_avplayer];
-         });
+          });
 
           // wait for playback to start with 20 second timeout
-          if (WaitForPlaying(20000))
+          if (WaitForReadyToPlay(20000))
           {
             m_speed = 1;
             m_callback.OnPlayBackSpeedChanged(m_speed);
@@ -1278,6 +1484,7 @@ void CAVFPlayer::Process()
         case AVFSTATE::PLAY:
         {
           dispatch_sync(dispatch_get_main_queue(),^{
+            [g_xbmcController insertVideoView:m_avf_avplayer];
             [[m_avf_avplayer player] play];
           });
           m_avf_state->set(AVFSTATE::PLAYING);
@@ -1376,6 +1583,8 @@ void CAVFPlayer::Process()
         {
           dispatch_sync(dispatch_get_main_queue(),^{
             [g_xbmcController removeVideoView:m_avf_avplayer];
+            //[m_avf_avplayer.player.currentItem cancelPendingSeeks];
+            //[m_avf_avplayer.player.currentItem.asset cancelLoading];
             [m_avf_avplayer.player pause];
             m_avf_avplayer = nullptr;
           });
@@ -1454,17 +1663,27 @@ bool CAVFPlayer::CheckPlaying()
   return true;
 }
 
-bool CAVFPlayer::WaitForPlaying(int timeout_ms)
+bool CAVFPlayer::WaitForReadyToPlay(int timeout_ms)
 {
   while (!m_bAbortRequest && (timeout_ms > 0))
   {
-    if (m_avf_avplayer.videoLayer.isReadyForDisplay == YES)
+    AVPlayerItem *thePlayerItem = m_avf_avplayer.player.currentItem;
+    if (thePlayerItem && thePlayerItem.status == AVPlayerItemStatusReadyToPlay)
     {
-      CLog::Log(LOGDEBUG, "CAVFPlayer::Process avf_avplayer.videoLayer.isReadyForDisplay");
-      CGRect video_bounds = m_avf_avplayer.videoLayer.videoRect;
-      m_video_width = video_bounds.size.width;
-      m_video_height = video_bounds.size.height;
-      return true;
+      AVMediaSelectionGroup *audioSelectionGroup = [[thePlayerItem asset] mediaSelectionGroupForMediaCharacteristic: AVMediaCharacteristicAudible];
+      NSLog(@"audioSelectionGroup: %@", audioSelectionGroup);
+
+      //[thePlayerItem selectMediaOption:avMediaSelectionOptionInstance] inMediaSelectionGroup: audioSelectionGroup];
+
+      if (m_avf_avplayer.videoLayer.isReadyForDisplay == YES)
+      {
+        CLog::Log(LOGDEBUG, "CAVFPlayer::Process avf_avplayer.videoLayer.isReadyForDisplay");
+        CGSize video_bounds = thePlayerItem.presentationSize;
+        m_video_width = video_bounds.width;
+        m_video_height = video_bounds.height;
+        if (m_video_width != 0 && m_video_height != 0)
+          return true;
+      }
     }
 
     usleep(20 * 1000);
