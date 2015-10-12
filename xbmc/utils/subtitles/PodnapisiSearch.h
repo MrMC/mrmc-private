@@ -37,10 +37,5 @@ public:
   virtual void ChangeUserPass();
   virtual bool Download(const CFileItem *subItem,std::vector<std::string> &items);
 private:
-  bool LogIn();
-  std::string m_strToken;
-  std::string m_strUser;
-  std::string m_strPass;
-  bool m_authenticated;
-  
+  bool LogIn();  
 };
