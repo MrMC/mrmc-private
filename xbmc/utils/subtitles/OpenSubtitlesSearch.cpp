@@ -231,7 +231,7 @@ bool COpenSubtitlesSearch::SubtitleSearch(const std::string &path,const std::str
             if (entry.hasMember(ULXR_PCHAR("SubRating")))
             {
               ulxr::RpcString value = entry.getMember(ULXR_PCHAR("SubRating"));
-              item->SetIconImage(value.getString());
+              item->SetIconImage(StringUtils::Format("%i", atoi(value.getString().c_str())/2));
             }
             if (entry.hasMember(ULXR_PCHAR("ISO639")))
             {
