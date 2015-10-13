@@ -174,7 +174,7 @@ bool CPodnapisiSearch::SubtitleSearch(const std::string &path,const std::string 
               std::string lng;
               g_LangCodeExpander.ConvertToISO6391(key, lng);
               item->SetArt("thumb",lng);
-              item->SetLabel((char *)XML_GET_CONTENT(cur_node->xmlChildrenNode));
+              item->SetLabel(key);
             }
           }
           if ((!xmlStrcmp(cur_node->name, (const xmlChar *)"rating")))
