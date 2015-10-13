@@ -23,6 +23,7 @@
 #include <string>
 #include "guilib/GUIDialog.h"
 #include "threads/CriticalSection.h"
+#include "utils/JobManager.h"
 #include "utils/subtitles/SubtitleSearch.h"
 
 enum SUBTITLE_STORAGEMODE
@@ -34,7 +35,7 @@ enum SUBTITLE_STORAGEMODE
 class CFileItem;
 class CFileItemList;
 
-class CGUIDialogSubtitles : public CGUIDialog
+class CGUIDialogSubtitles : public CGUIDialog, CJobQueue
 {
 public:
   CGUIDialogSubtitles(void);
@@ -44,17 +45,20 @@ public:
 
 protected:
   virtual void Process(unsigned int currentTime, CDirtyRegionList &dirtyregions);
+  virtual void OnJobComplete(unsigned int jobID, bool success, CJob *job);
 
   void FillServices();
-  bool SetService(const std::string &service);
+  bool SetService(const int service);
   void ClearSubtitles();
 
   enum STATUS { NO_SERVICES = 0, SEARCHING, SEARCH_COMPLETE, DOWNLOADING };
   void UpdateStatus(STATUS status);
 
   void Search(const std::string &search="");
+  void OnSearchComplete();
 
   void Download(const int index);
+  void OnDownloadComplete(std::vector<std::string> items, CFileItem *subItem);
 
   void SetSubtitles(const std::string &subtitle);
   
