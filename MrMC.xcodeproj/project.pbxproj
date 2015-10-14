@@ -1681,6 +1681,12 @@
 		F5024C0E1BB433F700134B16 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5D142DD1BAF882F0075A95C /* OpenGLES.framework */; };
 		F506297A0E57B9680066625A /* MultiPathFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50629780E57B9680066625A /* MultiPathFile.cpp */; };
 		F5071906175A26AD004C87D1 /* VideoDecodeAcceleration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5071905175A26AD004C87D1 /* VideoDecodeAcceleration.framework */; };
+		F508E7941BCEA28000FEB3DC /* FileResourceLoader.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E7931BCEA28000FEB3DC /* FileResourceLoader.mm */; };
+		F508E7951BCEA28C00FEB3DC /* FileResourceLoader.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E7931BCEA28000FEB3DC /* FileResourceLoader.mm */; };
+		F508E7981BCEA52900FEB3DC /* CustomURLProtocol.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */; };
+		F508E7991BCEA52900FEB3DC /* CustomURLProtocol.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */; };
+		F508E79C1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */; };
+		F508E79D1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */; };
 		F50FDC5A119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */; };
 		F52A733D1560BC34005B1A0B /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F52A733C1560BC34005B1A0B /* CoreFoundation.framework */; };
 		F52B063B11869862004B1D66 /* Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B063A11869862004B1D66 /* Skin.cpp */; };
@@ -4685,6 +4691,12 @@
 		F50629780E57B9680066625A /* MultiPathFile.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = MultiPathFile.cpp; sourceTree = "<group>"; };
 		F50629790E57B9680066625A /* MultiPathFile.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MultiPathFile.h; sourceTree = "<group>"; };
 		F5071905175A26AD004C87D1 /* VideoDecodeAcceleration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoDecodeAcceleration.framework; path = System/Library/Frameworks/VideoDecodeAcceleration.framework; sourceTree = SDKROOT; };
+		F508E7921BCEA28000FEB3DC /* FileResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileResourceLoader.h; sourceTree = "<group>"; };
+		F508E7931BCEA28000FEB3DC /* FileResourceLoader.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FileResourceLoader.mm; sourceTree = "<group>"; };
+		F508E7961BCEA51300FEB3DC /* CustomURLProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomURLProtocol.h; sourceTree = "<group>"; };
+		F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CustomURLProtocol.mm; sourceTree = "<group>"; };
+		F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MrMCCustomURLDelegate.mm; sourceTree = "<group>"; };
+		F508E79B1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MrMCCustomURLDelegate.h; sourceTree = "<group>"; };
 		F50FDC58119B4B2C00C8B8CD /* GUIDialogTextViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogTextViewer.h; sourceTree = "<group>"; };
 		F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogTextViewer.cpp; sourceTree = "<group>"; };
 		F52A733C1560BC34005B1A0B /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -8411,8 +8423,14 @@
 		F5D91C6A1BC01BA600C7C1C4 /* avfplayer */ = {
 			isa = PBXGroup;
 			children = (
-				F5D91C6C1BC01BA600C7C1C4 /* AVFPlayer.mm */,
 				F5D91C6B1BC01BA600C7C1C4 /* AVFPlayer.h */,
+				F5D91C6C1BC01BA600C7C1C4 /* AVFPlayer.mm */,
+				F508E7961BCEA51300FEB3DC /* CustomURLProtocol.h */,
+				F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */,
+				F508E7921BCEA28000FEB3DC /* FileResourceLoader.h */,
+				F508E7931BCEA28000FEB3DC /* FileResourceLoader.mm */,
+				F508E79B1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.h */,
+				F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */,
 			);
 			path = avfplayer;
 			sourceTree = "<group>";
@@ -10072,6 +10090,7 @@
 				E49912C8174E5DA000741B6D /* DirectoryNodeRecentlyAddedMovies.cpp in Sources */,
 				E49912C9174E5DA000741B6D /* DirectoryNodeRecentlyAddedMusicVideos.cpp in Sources */,
 				E49912CA174E5DA000741B6D /* DirectoryNodeRoot.cpp in Sources */,
+				F508E79C1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm in Sources */,
 				E49912CB174E5DA000741B6D /* DirectoryNodeSeasons.cpp in Sources */,
 				DF1D2DEE1B6E85EE002BB9DB /* XbtDirectory.cpp in Sources */,
 				E49912CC174E5DA000741B6D /* DirectoryNodeTitleMovies.cpp in Sources */,
@@ -10381,6 +10400,7 @@
 				E499143C174E604700741B6D /* Thread.cpp in Sources */,
 				E499143D174E604700741B6D /* Timer.cpp in Sources */,
 				E499143E174E605900741B6D /* AlarmClock.cpp in Sources */,
+				F508E7951BCEA28C00FEB3DC /* FileResourceLoader.mm in Sources */,
 				399442781A8DD920006C39E9 /* VideoLibraryProgressJob.cpp in Sources */,
 				DF4BF01E1A4EF3410053AC56 /* DVDDemuxCC.cpp in Sources */,
 				F5A4F2A21BB086FE0083FC69 /* IptcParse.cpp in Sources */,
@@ -10533,6 +10553,7 @@
 				E499158B174E68EE00741B6D /* DVDCodecUtils.cpp in Sources */,
 				E499158C174E68EE00741B6D /* DVDFactoryCodec.cpp in Sources */,
 				E4991591174E6ABE00741B6D /* DVDVideoCodecVideoToolBox.cpp in Sources */,
+				F508E7981BCEA52900FEB3DC /* CustomURLProtocol.mm in Sources */,
 				E4991592174E6B5C00741B6D /* fstrcmp.c in Sources */,
 				E4991596174E70BF00741B6D /* yuv2rgb.neon.S in Sources */,
 				0E3036ED1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */,
@@ -10743,6 +10764,7 @@
 				F5D13EEC1BAF0B6D0075A95C /* emu_msvcrt.cpp in Sources */,
 				F5D13EED1BAF0B6D0075A95C /* Temperature.cpp in Sources */,
 				F5D13EEE1BAF0B6D0075A95C /* cc_decoder.c in Sources */,
+				F508E7941BCEA28000FEB3DC /* FileResourceLoader.mm in Sources */,
 				F5D13EEF1BAF0B6D0075A95C /* ImageResource.cpp in Sources */,
 				F5D13EF01BAF0B6D0075A95C /* DllLoaderContainer.cpp in Sources */,
 				F5D13EF11BAF0B6D0075A95C /* LibraryLoader.cpp in Sources */,
@@ -10822,6 +10844,7 @@
 				F5D13F3D1BAF0B6D0075A95C /* OverlayRenderer.cpp in Sources */,
 				F5D13F3E1BAF0B6D0075A95C /* OverlayRendererGL.cpp in Sources */,
 				F5D13F3F1BAF0B6D0075A95C /* OverlayRendererUtil.cpp in Sources */,
+				F508E79D1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm in Sources */,
 				F5D142B51BAF31FB0075A95C /* MainEAGLView.mm in Sources */,
 				F5D13F401BAF0B6D0075A95C /* RenderCapture.cpp in Sources */,
 				F5D13F411BAF0B6D0075A95C /* RenderManager.cpp in Sources */,
@@ -11561,6 +11584,7 @@
 				F5D142171BAF0B6D0075A95C /* NptRingBuffer.cpp in Sources */,
 				F5D142181BAF0B6D0075A95C /* NptSimpleMessageQueue.cpp in Sources */,
 				F5D142191BAF0B6D0075A95C /* NptSockets.cpp in Sources */,
+				F508E7991BCEA52900FEB3DC /* CustomURLProtocol.mm in Sources */,
 				F5D1421A1BAF0B6D0075A95C /* NptStreams.cpp in Sources */,
 				F5D1421B1BAF0B6D0075A95C /* NptStrings.cpp in Sources */,
 				F5D1421C1BAF0B6D0075A95C /* NptSystem.cpp in Sources */,

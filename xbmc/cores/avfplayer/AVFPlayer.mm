@@ -68,8 +68,9 @@
 #else
 #import "platform/darwin/ios/XBMCController.h"
 #endif
+#import "cores/avfplayer/CustomURLProtocol.h"
+#import "cores/avfplayer/FileResourceLoader.h"
 
-NSString * const MrMCScheme = @"mrmc";
 static const NSString *ItemStatusContext;
 NSString * const kTracksKey        = @"tracks";
 NSString * const kStatusKey        = @"status";
@@ -77,239 +78,20 @@ NSString * const kRateKey          = @"rate";
 NSString * const kPlayableKey      = @"playable";
 NSString * const kCurrentItemKey   = @"currentItem";
 NSString * const kTimedMetadataKey = @"currentItem.timedMetadata";
-#define CFILERESOURCELOADER_DEBUG 1
-#define CFILERESOURCELOADER_BUFFERSIZE (2048*1024)
 
 #define CAVPLAYERLAYERVIEW_DEBUG 1
 
-
-#pragma mark - CCustomURLProtocol
-@interface CCustomURLProtocol : NSURLProtocol <NSURLConnectionDelegate>
-@property (nonatomic, strong) NSURLConnection *connection;
-@end
-
-@implementation CCustomURLProtocol
-// decide whether or not the call should be intercepted
-+ (BOOL)canInitWithRequest:(NSURLRequest *)request
-{
-  static NSUInteger requestCount = 0;
-
-  if ([NSURLProtocol propertyForKey:@"CCustomURLProtocolHandledKey" inRequest:request])
-  {
-    NSLog(@"CCustomURLProtocol canInitWithRequest2 #%lu: URL = %@", (unsigned long)requestCount++, request.URL.absoluteString);
-    return NO;
-  }
-  return YES;
-}
-
-+ (NSURLRequest *)canonicalRequestForRequest:(NSURLRequest *)request
-{
-  NSLog(@"CCustomURLProtocol canonicalRequestForRequest");
-  return request;
-}
-
-+ (BOOL)requestIsCacheEquivalent:(NSURLRequest *)a toRequest:(NSURLRequest *)b
-{
-  NSLog(@"CCustomURLProtocol requestIsCacheEquivalent");
-  return [super requestIsCacheEquivalent:a toRequest:b];
-}
-
-// intercept the request and handle it yourself
-- (id)initWithRequest:(NSURLRequest *)request
-  cachedResponse:(NSCachedURLResponse *)cachedResponse client:(id<NSURLProtocolClient>)client
-{
-  NSLog(@"CCustomURLProtocol initWithRequest");
-  return [super initWithRequest:request cachedResponse:cachedResponse client:client];
-}
-
-// load the request
-- (void)startLoading
-{
-  NSLog(@"CCustomURLProtocol startLoading");
-
-  NSMutableURLRequest *newRequest = [self.request mutableCopy];
-  [NSURLProtocol setProperty:@YES forKey:@"CCustomURLProtocolHandledKey" inRequest:newRequest];
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations" ///< 'NSURLConnection' is deprecated
-  self.connection = [NSURLConnection connectionWithRequest:newRequest delegate:self];
-#pragma clang diagnostic pop
-}
-
-// overload didReceive data
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
-{
-  NSLog(@"CCustomURLProtocol didReceiveData");
-
-  [[self client] URLProtocol:self didLoadData:data];
-}
-
-// overload didReceiveResponse
-- (void)connection:(NSURLConnection*)connection didReceiveResponse:(NSURLResponse *)response
-{
-  NSLog(@"CCustomURLProtocol didReceiveResponse");
-  [[self client] URLProtocol:self didReceiveResponse:response cacheStoragePolicy:NSURLCacheStorageNotAllowed];
-}
-
-// overload didFinishLoading
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
-{
-  NSLog(@"CCustomURLProtocol connectionDidFinishLoading");
-  [[self client] URLProtocolDidFinishLoading:self];
-  self.connection = nil;
-}
-
-// overload didFail
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
-{
-  NSLog(@"CCustomURLProtocol didFailWithError");
-  [[self client] URLProtocol:self didFailWithError:error];
-  self.connection = nil;
-}
-
-// handle load cancelation
-- (void)stopLoading
-{
-  NSLog(@"CCustomURLProtocol stopLoading");
-  [self.connection cancel];
-}
-
-@end
-
-
-#pragma mark - AVAssetResourceLoaderDelegate
-@interface CFileResourceLoader : NSObject <AVAssetResourceLoaderDelegate>
-@property (nonatomic) XFILE::CFile *cfile;
-@property (nonatomic) uint8_t *buffer;
-
-@end
-
-@implementation CFileResourceLoader
-- (id)initWithCFile:(XFILE::CFile *) cfile
-{
-	self = [super init];
-	if (self)
-    self.cfile = cfile;
-	return self;
-}
-
-- (void)dealloc
-{
-#if CFILERESOURCELOADER_DEBUG
-  CLog::Log(LOGNOTICE, "CFileResourceLoader dealloc");
-#endif
-  if (self.buffer)
-    SAFE_DELETE_ARRAY(self.buffer);
-}
-
-- (void)fillInContentInformation:(AVAssetResourceLoadingRequest *)loadingRequest
-{
-#if CFILERESOURCELOADER_DEBUG
-  CLog::Log(LOGNOTICE, "resourceLoader contentRequest");
-#endif
-  AVAssetResourceLoadingContentInformationRequest *contentInformationRequest;
-  contentInformationRequest = loadingRequest.contentInformationRequest;
-
-  self.buffer = new uint8_t[CFILERESOURCELOADER_BUFFERSIZE];
-  //provide information about the content
-  // https://developer.apple.com/library/ios/documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
-  //NSString *mimeType = @"public.mpeg-4";                    // xxx.mp4
-  NSString *mimeType = @"com.apple.quicktime-movie";        // xxx.mov
-  //NSString *mimeType = @"video/mp2t";                       // xxx.ts
-  //NSString *mimeType = @"public.mpeg-2-transport-stream";
-  //NSString *mimeType = @"application/x-mpegurl";            // xxx.m3u8
-
-  contentInformationRequest.contentType = mimeType;
-  contentInformationRequest.contentLength = self.cfile->GetLength();
-  //contentInformationRequest.byteRangeAccessSupported = YES;
-}
-
-- (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader
-  shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest
-{
-#if CFILERESOURCELOADER_DEBUG
-  CLog::Log(LOGNOTICE, "resourceLoader shouldWaitForLoadingOfRequestedResource");
-#endif
-  BOOL canHandle = NO;
-
-  NSURL *resourceURL = [loadingRequest.request URL];
-  if ([resourceURL.scheme isEqualToString:MrMCScheme])
-  {
-    canHandle = YES;
-
-    std::string path = [resourceURL.path UTF8String];
-#if CFILERESOURCELOADER_DEBUG
-    CLog::Log(LOGNOTICE, "resourceLoader resourceURL.path(%s)", path.c_str());
-#endif
-    if (loadingRequest.contentInformationRequest != nil)
-      [self fillInContentInformation:loadingRequest];
-
-    if (loadingRequest.dataRequest != nil)
-    {
-#if CFILERESOURCELOADER_DEBUG
-      CLog::Log(LOGNOTICE, "resourceLoader dataRequest");
-#endif
-      AVAssetResourceLoadingDataRequest *dataRequest = loadingRequest.dataRequest;
-
-      NSURLResponse* response = [[NSURLResponse alloc] initWithURL:resourceURL MIMEType:@"video/quicktime" expectedContentLength:[dataRequest requestedLength] textEncodingName:nil];
-      [loadingRequest setResponse:response];
-
-#if CFILERESOURCELOADER_DEBUG
-      CLog::Log(LOGNOTICE, "resourceLoader1 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
-        dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
-#endif
-      NSUInteger remainingLength =
-        [dataRequest requestedLength] - static_cast<NSUInteger>([dataRequest currentOffset] - [dataRequest requestedOffset]);
-
-      self.cfile->Seek(dataRequest.currentOffset, SEEK_SET);
-      do {
-        NSUInteger receivedLength = dataRequest.requestedLength > CFILERESOURCELOADER_BUFFERSIZE ? CFILERESOURCELOADER_BUFFERSIZE : dataRequest.requestedLength;
-        receivedLength = self.cfile->Read(self.buffer, receivedLength);
-
-#if CFILERESOURCELOADER_DEBUG
-        CLog::Log(LOGNOTICE, "resourceLoader2 currentOffset(%lld), requestedOffset(%lld), requestedLength(%ld)",
-          dataRequest.currentOffset, dataRequest.requestedOffset, dataRequest.requestedLength);
-#endif
-        NSUInteger length = MIN(receivedLength, remainingLength);
-        NSData* decodedData = [NSData dataWithBytes:self.buffer length:length];
-#if CFILERESOURCELOADER_DEBUG
-        CLog::Log(LOGNOTICE, "resourceLoader [dataRequest respondWithData] length(%ld)", length);
-#endif
-        //NSURLResponse *response = [[NSURLResponse alloc] initWithURL:loadingRequest.request.URL MIMETYPE:@"video/mp4" expetedContentLength:length textEncodingName:nil]
-        [dataRequest respondWithData:decodedData];
-
-        remainingLength -= length;
-      } while (remainingLength);
-
-      if ([dataRequest currentOffset] + [dataRequest requestedLength] >= [dataRequest requestedOffset])
-        [loadingRequest finishLoading];
-    }
-  }
-
-  return canHandle;
-}
-
-- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
-didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
-{
-#if CFILERESOURCELOADER_DEBUG
-  CLog::Log(LOGNOTICE, "resourceLoader didCancelLoadingRequest");
-#endif
-}
-
-@end
-
 #pragma mark - AVPlayerLayerViewNew
 @interface AVPlayerLayerViewNew : UIView
+{
+  CFileResourceLoader *cfileloader;
+}
 
-@property (nonatomic) XFILE::CFile *cfile;
 @property (nonatomic, strong) AVPlayer *player;
 @property (nonatomic, strong) AVPlayerLayer *videoLayer;
-@property (nonatomic, strong) CFileResourceLoader *cfileloader;
-
 
 - (id)initWithFrameAndUrl:(CGRect)frame withURL:(NSURL *)URL;
-
+- (void)configDelegates:(AVURLAsset *)asset;
 - (void)setHiddenAnimated:(BOOL)hide
                     delay:(NSTimeInterval)delay
                  duration:(NSTimeInterval)duration;
@@ -327,22 +109,7 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
     self.hidden = YES;
 
     AVURLAsset *asset = [[AVURLAsset alloc] initWithURL:URL options:nil];
-    //XCTAssertTrue([AVURLAsset isPlayableExtendedMIMEType:@"video/mp4; codecs=\"avc1.64001F, mp4a.40.2\""], @"");
-
-    unsigned int flags = 0;
-    flags |= READ_CHUNKED;
-    flags |= READ_NO_CACHE;
-    flags |= READ_TRUNCATED;
-    flags |= READ_AUDIO_VIDEO;
-    self.cfile = new XFILE::CFile();
-    std::string path = [URL.path UTF8String];
-    if (path[0] == '/')
-      path = path.substr(1);
-    self.cfile->Open(path, flags);
-  //m_isSeekPossible = m_pFile->IoControl(XFILE::IOCTRL_SEEK_POSSIBLE, NULL) != 0;
-
-    self.cfileloader = [[CFileResourceLoader alloc] initWithCFile:self.cfile];
-    [asset.resourceLoader setDelegate:self.cfileloader queue:dispatch_get_main_queue()];
+    [self configDelegates:asset];
 
     // Requesting tracks and playable key
     NSArray *requestedKeys = [NSArray arrayWithObjects:kTracksKey, kPlayableKey, nil];
@@ -360,9 +127,32 @@ didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 - (void)dealloc
 {
   CLog::Log(LOGNOTICE, "AVPlayerLayerViewNew dealloc");
+  [self->cfileloader cancel];
   [self.videoLayer removeFromSuperlayer];
-  if (self.cfile)
-    SAFE_DELETE(self.cfile);
+}
+
+- (void) configDelegates:(AVURLAsset*)asset
+{
+  unsigned int flags = 0;
+  flags |= READ_CHUNKED;
+  flags |= READ_NO_CACHE;
+  flags |= READ_TRUNCATED;
+  flags |= READ_AUDIO_VIDEO;
+  XFILE::CFile *cfile = new XFILE::CFile();
+  std::string path = [asset.URL.path UTF8String];
+  if (path[0] == '/')
+    path = path.substr(1);
+  cfile->Open(path, flags);
+//m_isSeekPossible = m_pFile->IoControl(XFILE::IOCTRL_SEEK_POSSIBLE, NULL) != 0;
+
+  AVAssetResourceLoader *resourceLoader = asset.resourceLoader;
+  if ([asset.URL.path.pathExtension  isEqual: @"mov"] ||
+      [asset.URL.path.pathExtension  isEqual: @"mp4"])
+  {
+    self->cfileloader = [[CFileResourceLoader alloc] initWithCFile:cfile];
+    [resourceLoader setDelegate:self->cfileloader
+      queue:dispatch_queue_create("CFileResourceLoader loader", nil)];
+  }
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
