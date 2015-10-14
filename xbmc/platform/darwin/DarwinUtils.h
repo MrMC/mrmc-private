@@ -45,6 +45,8 @@ public:
   static int         GetFrameworkPath(char* path, size_t *pathsize);
   static int         GetExecutablePath(char* path, size_t *pathsize);
   static const char *GetAppRootFolder(void);
+  static const char *GetCachesDirectory();
+  static const char *GetTemporaryDirectory();
   static bool        IsIosSandboxed(void);
   static bool        HasVideoToolboxDecoder(void);
   static int         BatteryLevel(void);

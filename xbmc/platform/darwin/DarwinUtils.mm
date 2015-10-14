@@ -448,6 +448,26 @@ const char* CDarwinUtils::GetAppRootFolder(void)
   return rootFolder.c_str();
 }
 
+const char* CDarwinUtils::GetCachesDirectory()
+{
+  static std::string cacheFolder = "";
+  if (cacheFolder.length() == 0)
+  {
+    NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    cacheFolder = [cachePath UTF8String];
+  }
+  return cacheFolder.c_str();
+}
+
+const char* CDarwinUtils::GetTemporaryDirectory()
+{
+  static std::string tmpFolder = "";
+  if (tmpFolder.length() == 0)
+    tmpFolder = [NSTemporaryDirectory() UTF8String];
+
+  return tmpFolder.c_str();
+}
+
 bool CDarwinUtils::IsIosSandboxed(void)
 {
   static int ret = -1;

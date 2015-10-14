@@ -106,20 +106,6 @@ MainController *m_xbmcController;
   m_xbmcController = [[MainController alloc] initWithFrame: [currentScreen bounds] withScreen:currentScreen];
   [m_xbmcController startAnimation];
   [self registerScreenNotifications:YES];
-
-#if TARGET_OS_SIMULATOR && !defined(TARGET_OS_IOS)
-  NSLog(@"Documents Directory: %@", [[[NSFileManager defaultManager]
-    URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
-
-  NSDictionaryRef *dict = CFBundleGetInfoDictionary(CFBundleGetMainBundle());
-  NSString *bundleId = [dict objectForKey: @"CFBundleIdentifier"];
-  NSString *tempPath = [NSTemporaryDirectory() stringByAppendingPathComponent:[NSSstring stringWithFormat:@"%d", bundleId];
-  NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
-
-  NSLog(@"NSTemporaryDirectory: %@", tempPath);
-  NSLog(@"NSCachesDirectory   : %@", cachesPath);
-
-#endif
 }
 
 - (void)dealloc

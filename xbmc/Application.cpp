@@ -888,14 +888,18 @@ bool CApplication::InitDirectoriesOSX()
   if (m_bPlatformDirectories)
   {
     // map our special drives
-    CSpecialProtocol::SetXBMCBinPath(appPath);
     CSpecialProtocol::SetXBMCPath(appPath);
-    #if defined(TARGET_DARWIN_IOS)
-      std::string appName = CCompileInfo::GetAppName();
+    CSpecialProtocol::SetXBMCBinPath(appPath);
+
+    std::string appName = CCompileInfo::GetAppName();
+    #if defined(TARGET_DARWIN_TVOS)
+      std::string strHomePath = CDarwinUtils::GetCachesDirectory();
+      CSpecialProtocol::SetHomePath(strHomePath);
+      CSpecialProtocol::SetMasterProfilePath(strHomePath + "/userdata");
+    #elif defined(TARGET_DARWIN_IOS)
       CSpecialProtocol::SetHomePath(userHome + "/" + CDarwinUtils::GetAppRootFolder() + "/" + appName);
       CSpecialProtocol::SetMasterProfilePath(userHome + "/" + CDarwinUtils::GetAppRootFolder() + "/" + appName + "/userdata");
     #else
-      std::string appName = CCompileInfo::GetAppName();
       CSpecialProtocol::SetHomePath(userHome + "/Library/Application Support/" + appName);
       CSpecialProtocol::SetMasterProfilePath(userHome + "/Library/Application Support/" + appName + "/userdata");
     #endif
@@ -903,7 +907,10 @@ bool CApplication::InitDirectoriesOSX()
     std::string dotLowerAppName = "." + appName;
     StringUtils::ToLower(dotLowerAppName);
     // location for temp files
-    #if defined(TARGET_DARWIN_IOS)
+    #if defined(TARGET_DARWIN_TVOS)
+      std::string strTempPath = CDarwinUtils::GetTemporaryDirectory();
+      strTempPath += "temp";
+    #elif defined(TARGET_DARWIN_IOS)
       std::string strTempPath = URIUtils::AddFileToFolder(userHome,  std::string(CDarwinUtils::GetAppRootFolder()) + "/" + appName + "/temp");
     #else
       std::string strTempPath = URIUtils::AddFileToFolder(userHome, dotLowerAppName + "/");
