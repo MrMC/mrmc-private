@@ -2246,6 +2246,25 @@
       "additionalProperties": { "type": "string" }
     }
   },
+  "RED.SendClick": {
+    "type": "method",
+    "description": "Send RED Click",
+    "transport": "Response",
+    "permission": "ControlPlayback",
+    // "params": [{ "name": "click", "type": "string"}],
+    "params": [ { "name": "click", "type": "string", "required": true }
+    ],
+    "returns": "string"
+  },
+  "RED.SaveXML": {
+    "type": "method",
+    "description": "Save Player XML",
+    "transport": "Response",
+    "permission": "ControlPlayback",
+    "params": [ { "name": "xml", "type": "string", "required": true }
+    ],
+    "returns": "string"
+  },
   "Favourites.GetFavourites": {
     "type": "method",
     "description": "Retrieve all favourites",

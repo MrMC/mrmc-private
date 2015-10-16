@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window>
+  <defaultcontrol always="false">101</defaultcontrol>
+	<coordinates>
+		<system>1</system>
+		<posx>0</posx>
+		<posy>0</posy>
+	</coordinates>
+	<controls>
+		<control type="image">
+			<description>red-background</description>
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>1280</width>
+			<height>720</height>
+			<texture>script/background_new.png</texture>
+		</control>		
+		<control type="image">
+			<description>play-bubble</description>
+		  	<posx>222</posx>
+		  	<posy>35</posy>
+			<width>878</width>
+			<height>650</height>
+			<texture>script/Rounded_Rectangle.png</texture>
+		</control>
+		<control type="image">
+			<description>play-bubble</description>
+		  	<posx>260</posx>
+		  	<posy>65</posy>
+			<width>116</width>
+			<height>35</height>
+			<texture>script/RED_Logo_red.png</texture>
+		</control>
+		<control type="label">
+			<posx>1030</posx>
+			<posy>65</posy>
+			<width>200</width>
+			<height>40</height>
+			<font>red_avenir35</font>
+			<align>right</align>
+			<aligny>center</aligny>
+			<wrapmultiline>true</wrapmultiline>
+			<label>About</label>
+		</control>
+		<control type="group">
+			<posx>-120</posx>
+			<posy>0</posy>
+			<!-- player_id -->
+			<control type="label">
+				<description>player_id</description>
+				<posx>380</posx>
+				<posy>120</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Player ID:</label>
+			</control>
+			<control type="label" id="101">
+				<description>player_id_value</description>
+				<posx>700</posx>
+				<posy>120</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- player_name -->
+			<control type="label">
+				<description>player_name</description>
+				<posx>380</posx>
+				<posy>160</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Player Name:</label>
+			</control>
+			<control type="label" id="102">
+				<description>player_name_value</description>
+				<posx>700</posx>
+				<posy>160</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- player_program_id -->
+			<control type="label">
+				<description>player_program_id</description>
+				<posx>380</posx>
+				<posy>200</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Player Program ID:</label>
+			</control>
+			<control type="label" id="103">
+				<description>player_program_id_value</description>
+				<posx>700</posx>
+				<posy>200</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- player_status -->
+			<control type="label">
+				<description>player_status</description>
+				<posx>380</posx>
+				<posy>240</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Player Status:</label>
+			</control>
+			<control type="label" id="104">
+				<description>player_status_value</description>
+				<posx>700</posx>
+				<posy>240</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- player_update_interval -->
+			<control type="label">
+				<description>player_update_interval</description>
+				<posx>380</posx>
+				<posy>280</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Player Update Interval:</label>
+			</control>
+			<control type="label" id="105">
+				<description>player_update_interval_value</description>
+				<posx>700</posx>
+				<posy>280</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- network_ip_address -->
+			<control type="label">
+				<description>network_ip_address</description>
+				<posx>380</posx>
+				<posy>320</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Network IP:</label>
+			</control>
+			<control type="label" id="106">
+				<description>network_ip_address_value</description>
+				<posx>700</posx>
+				<posy>320</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- network_default_gateway -->
+			<control type="label">
+				<description>network_default_gateway</description>
+				<posx>380</posx>
+				<posy>360</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Network Default Gateway:</label>
+			</control>
+			<control type="label" id="107">
+				<description>network_default_gateway_value</description>
+				<posx>700</posx>
+				<posy>360</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- network_dns_server_1 -->
+			<control type="label">
+				<description>network_dns_server_1</description>
+				<posx>380</posx>
+				<posy>400</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Network DNS 1:</label>
+			</control>
+			<control type="label" id="108">
+				<description>network_dns_server_1_value</description>
+				<posx>700</posx>
+				<posy>400</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- network_dns_server_2 -->
+			<control type="label">
+				<description>network_dns_server_2</description>
+				<posx>380</posx>
+				<posy>440</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Network DNS 1:</label>
+			</control>
+			<control type="label" id="109">
+				<description>network_dns_server_2_value</description>
+				<posx>700</posx>
+				<posy>440</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- network_subnet_mask -->
+			<control type="label">
+				<description>network_subnet_mask</description>
+				<posx>380</posx>
+				<posy>480</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Network Subnet Mask:</label>
+			</control>
+			<control type="label" id="110">
+				<description>network_subnet_mask_value</description>
+				<posx>700</posx>
+				<posy>480</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- network_dhcp -->
+			<control type="label">
+				<description>network_dhcp</description>
+				<posx>380</posx>
+				<posy>520</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Network DHCP:</label>
+			</control>
+			<control type="label" id="111">
+				<description>network_dhcp_value</description>
+				<posx>700</posx>
+				<posy>520</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+			<!-- software_version_number -->
+			<control type="label">
+				<description>software_version_number</description>
+				<posx>380</posx>
+				<posy>560</posy>
+				<width>400</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+				<label>Software Version:</label>
+			</control>
+			<control type="label" id="112">
+				<description>software_version_number_value</description>
+				<posx>700</posx>
+				<posy>560</posy>
+				<width>500</width>
+				<height>40</height>
+				<font>red_sans25</font>
+				<textcolor>red-grey</textcolor>
+				<align>left</align>
+				<aligny>center</aligny>
+				<wrapmultiline>true</wrapmultiline>
+			</control>
+		</control>			
+	</controls>
+</window>

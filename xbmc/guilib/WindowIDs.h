@@ -106,6 +106,9 @@
 #define WINDOW_DIALOG_AUDIO_DSP_MANAGER   10154
 #define WINDOW_DIALOG_AUDIO_DSP_OSD_SETTINGS 10155
 
+#define WINDOW_DIALOG_RED                 10400
+#define WINDOW_DIALOG_RED_ABOUT           10401
+
 #define WINDOW_MUSIC_PLAYLIST             10500
 #define WINDOW_MUSIC_FILES                10501
 #define WINDOW_MUSIC_NAV                  10502

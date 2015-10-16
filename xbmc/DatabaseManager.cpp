@@ -29,6 +29,7 @@
 #include "epg/EpgDatabase.h"
 #include "settings/AdvancedSettings.h"
 #include "cores/AudioEngine/DSPAddons/ActiveAEDSP.h"
+#include "red/DBManagerRed.h"
 
 using namespace EPG;
 using namespace PVR;
@@ -65,6 +66,7 @@ void CDatabaseManager::Initialize(bool addonsOnly)
   { CPVRDatabase db; UpdateDatabase(db, &g_advancedSettings.m_databaseTV); }
   { CEpgDatabase db; UpdateDatabase(db, &g_advancedSettings.m_databaseEpg); }
   { CActiveAEDSPDatabase db; UpdateDatabase(db, &g_advancedSettings.m_databaseADSP); }
+  { CDBManagerRed db; UpdateDatabase(db, &g_advancedSettings.m_databaseRed); }
   CLog::Log(LOGDEBUG, "%s, updating databases... DONE", __FUNCTION__);
 }
 

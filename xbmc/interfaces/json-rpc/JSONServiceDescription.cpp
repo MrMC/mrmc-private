@@ -40,7 +40,9 @@
 #include "FavouritesOperations.h"
 #include "TextureOperations.h"
 #include "SettingsOperations.h"
+#include "red/RedJSONOperations.h"
 
+using namespace std;
 using namespace JSONRPC;
 
 std::map<std::string, CVariant> CJSONServiceDescription::m_notifications = std::map<std::string, CVariant>();
@@ -233,7 +235,11 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
 
 // XBMC operations
   { "XBMC.GetInfoLabels",                           CXBMCOperations::GetInfoLabels },
-  { "XBMC.GetInfoBooleans",                         CXBMCOperations::GetInfoBooleans }
+  { "XBMC.GetInfoBooleans",                         CXBMCOperations::GetInfoBooleans },
+  
+  // RED operations
+  { "RED.SendClick",                                CRedJSONOperations::SendClick },
+  { "RED.SaveXML",                                  CRedJSONOperations::SaveXML }
 };
 
 JSONSchemaTypeDefinition::JSONSchemaTypeDefinition()
@@ -1472,6 +1478,7 @@ bool CJSONServiceDescription::addMethod(const std::string &jsonMethod, MethodCal
     unsigned int size = sizeof(m_methodMaps) / sizeof(JsonRpcMethodMap);
     for (unsigned int index = 0; index < size; index++)
     {
+      CLog::Log(LOGERROR, "JSONRPC: test shit - %s", methodName.c_str());
       if (methodName.compare(m_methodMaps[index].name) == 0)
       {
         method = m_methodMaps[index].method;
@@ -1511,7 +1518,7 @@ bool CJSONServiceDescription::addMethod(const std::string &jsonMethod, MethodCal
     
     return false;
   }
-
+  CLog::Log(LOGERROR, "JSONRPC: test shit1 - %s", newMethod.name.c_str());
   m_actionMap.add(newMethod);
 
   return true;
