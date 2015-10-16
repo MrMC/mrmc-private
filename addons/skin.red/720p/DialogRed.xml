@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<window>
+  <defaultcontrol always="false">101</defaultcontrol>
+	<coordinates>
+		<system>1</system>
+		<posx>0</posx>
+		<posy>0</posy>
+	</coordinates>
+	<controls>
+		<control type="image">
+			<description>red-background</description>
+			<posx>0</posx>
+			<posy>0</posy>
+			<width>1280</width>
+			<height>720</height>
+			<texture>script/background_new.png</texture>
+		</control>		
+		<control type="label">
+			<description>time</description>
+			<posx>110</posx>
+			<posy>30</posy>
+			<width>200</width>
+			<height>40</height>
+			<font>red_sans25</font>
+			<textcolor>red-grey</textcolor>
+			<align>left</align>
+			<aligny>center</aligny>
+			<wrapmultiline>true</wrapmultiline>
+			<label>$INFO[System.Time(hh:mm)] $INFO[System.Time(xx)]</label>
+		</control>
+		<control type="label">
+			<description>day</description>
+			<posx>110</posx>
+			<posy>70</posy>
+			<width>300</width>
+			<height>40</height>
+			<font>red_sans25</font>
+			<textcolor>red-grey</textcolor>
+			<align>left</align>
+			<aligny>center</aligny>
+			<wrapmultiline>true</wrapmultiline>
+			<label>$INFO[System.Date(DDD)] $INFO[System.Date(dd)],$INFO[System.Date(MMM)]</label>
+		</control>
+<!-- 		<control type="videowindow">
+			<posx>67</posx>
+			<posy>140</posy>
+			<width>450</width>
+			<height>200</height>
+			<visible>Player.HasVideo</visible>
+		</control> -->
+		<control type="image">
+			<description>play-bubble</description>
+		  	<posx>542</posx>
+		  	<posy>35</posy>
+			<width>678</width>
+			<height>650</height>
+			<texture>script/Rounded_Rectangle.png</texture>
+		</control>
+		<control type="image">
+			<description>play-bubble</description>
+		  	<posx>580</posx>
+		  	<posy>65</posy>
+			<width>116</width>
+			<height>35</height>
+			<texture>script/RED_Logo_red.png</texture>
+		</control>
+		<control type="label">
+			<posx>1150</posx>
+			<posy>65</posy>
+			<width>200</width>
+			<height>40</height>
+			<font>red_avenir35</font>
+			<align>right</align>
+			<aligny>center</aligny>
+			<wrapmultiline>true</wrapmultiline>
+			<label>Blackbird</label>
+		</control>
+		<control type="image">
+			<description>play-bubble</description>
+		  	<posx>955</posx>
+		  	<posy>427</posy>
+			<width>250</width>
+			<height>250</height>
+			<texture>script/BlackBird_trans.png</texture>
+		</control>
+		<!-- PLAY -->
+		<control type="button" id="101">
+			<description>play</description>
+			<posx>110</posx>
+			<posy>390</posy>
+			<width>320</width>
+			<height>44</height>
+			<ondown>104</ondown>
+			<onup>104</onup>
+			<onright>1010</onright>
+			<label>PLAYER</label>
+			<font>red_sans35</font>
+			<textoffsetx>55</textoffsetx>
+			<texturenofocus>script/arrow_white.png</texturenofocus>
+			<texturefocus>script/arrow_red.png</texturefocus>
+		</control>
+		<control type="button" id="104">
+			<description>settings</description>
+			<posx>110</posx>
+			<posy>575</posy>
+			<width>320</width>
+			<height>44</height>
+			<ondown>101</ondown>
+			<onup>101</onup>
+			<onleft>104</onleft>
+			<onright>140</onright>	
+			<label>SETTINGS</label>
+			<font>red_sans35</font>
+			<textoffsetx>55</textoffsetx>
+			<texturenofocus>script/wrench_white.png</texturenofocus>
+			<texturefocus>script/wrench_red.png</texturefocus>
+		</control>
+		<control type="group">
+		  	<visible>Control.HasFocus(101)</visible>
+			<posx>480</posx>
+			<posy>48</posy>
+			<control type="group">
+				<posx>180</posx>
+				<posy>200</posy>
+				<control type="image">
+					<left>320</left>
+					<top>-70</top>
+					<width>200</width>
+					<height>154</height>
+					<texture fallback="DefaultAlbumCover.png">$INFO[Player.Art(thumb)]</texture>
+					<aspectratio aligny="bottom">keep</aspectratio>
+					<bordertexture border="8">ThumbShadow.png</bordertexture>
+					<bordersize>8</bordersize>
+				</control>
+				<control type="label">
+					<posx>-70</posx>
+					<posy>-70</posy>
+					<width>150</width>
+					<height>40</height>
+					<font>red_sans25</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<label>$LOCALIZE[32008]</label>
+				</control>    		
+				<control type="label">
+					<posx>-70</posx>
+					<posy>-30</posy>
+					<width>350</width>
+					<height>40</height>
+					<font>red_sans30</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<label>$INFO[Player.Title]</label>
+					<scroll>true</scroll>
+				</control> 
+				<control type="label">
+					<posx>-70</posx>
+					<posy>70</posy>
+					<width>150</width>
+					<height>40</height>
+					<font>red_sans25</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<label>$LOCALIZE[32010]</label>
+				</control>
+				<control type="label">
+					<posx>-70</posx>
+					<posy>110</posy>
+					<width>300</width>
+					<height>40</height>
+					<font>red_sans30</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<visible>videoplayer.content(musicvideos)</visible>
+					<label>$INFO[VideoPlayer.Artist]</label>
+				</control>   		
+				<control type="label">
+					<posx>-70</posx>
+					<posy>110</posy>
+					<width>300</width>
+					<height>40</height>
+					<font>red_sans30</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<visible>!videoplayer.content(musicvideos)</visible>
+					<label>$INFO[MusicPlayer.Artist]</label>
+				</control>
+				<control type="label">
+					<posx>-70</posx>
+					<posy>210</posy>
+					<width>150</width>
+					<height>40</height>
+					<font>red_sans25</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<label>$LOCALIZE[32009]</label>
+				</control>    		
+				<control type="label" id="1020">
+					<posx>-70</posx>
+					<posy>210</posy>
+					<width>400</width>
+					<height>120</height>
+					<font>red_sans30</font>
+					<textcolor>red-grey</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<label>$INFO[Player.Time] | $INFO[Player.Duration]</label>
+				</control>
+			</control>
+		</control>
+		<!-- END PLAY -->
+		<!-- SETTINGS -->
+		<control type="group">
+			<visible>[Control.HasFocus(104) | Control.HasFocus(140) | Control.HasFocus(141) | Control.HasFocus(142) | Control.HasFocus(143) | Control.HasFocus(144)| Control.HasFocus(8997) ] + !SubString(Window(10400).Property(about_visible),true)</visible>
+	  		<posx>431</posx>
+	  		<posy>8</posy>		
+	   		<control type="button" id="140">
+	  			<description>shutdown</description>
+	  			<posx>160</posx>
+	  			<posy>155</posy>
+	  			<width>175</width>
+	  			<height>100</height>
+	  			<ondown>143</ondown>
+				<onleft>104</onleft>
+	        	<onright>141</onright> 			
+	  			<onup>104</onup>
+	  			<label>$LOCALIZE[32006]</label>
+	  			<font>red_sans25</font>
+	   			<align>center</align>
+	  			<aligny>center</aligny> 			
+	  			<texturenofocus>script/button.png</texturenofocus>
+	  			<texturefocus>script/button-select.png</texturefocus>
+	  			<visible>true</visible>
+	  		</control>
+	  		<control type="button" id="141">
+	  			<description>refresh</description>
+	  			<posx>350</posx>
+	  			<posy>155</posy>
+	  			<width>175</width>
+	  			<height>100</height>
+	  			<ondown>143</ondown>
+	 			<onleft>140</onleft>
+	        	<onright>142</onright>   			
+	  			<onup>143</onup>
+	  			<label>$LOCALIZE[32007]</label>
+	  			<font>red_sans25</font>
+	   			<align>center</align>
+	  			<aligny>center</aligny>   			
+	  			<texturenofocus>script/button.png</texturenofocus>
+	  			<texturefocus>script/button-select.png</texturefocus>
+	  			<visible allowhiddenfocus="true">true</visible>
+	  		</control> 		  		
+	  		<control type="button" id="142">
+	  			<description>System settings</description>
+	  			<posx>540</posx>
+	  			<posy>155</posy>
+	  			<width>175</width>
+	  			<height>100</height>
+	  			<ondown>144</ondown>
+	 			<onleft>141</onleft>
+	        	<onright>140</onright>   			
+	  			<onup>104</onup>
+	  			<label>$LOCALIZE[32012]</label>
+	  			<font>red_sans25</font>
+	   			<align>center</align>
+	  			<aligny>center</aligny>   			
+	  			<texturenofocus>script/button.png</texturenofocus>
+	  			<texturefocus>script/button-select.png</texturefocus>
+	  			<visible>true</visible>
+	  		</control>	
+	  		<control type="button" id="143">
+	  			<description>Send Report</description>
+	  			<posx>255</posx>
+	  			<posy>285</posy>
+	  			<width>175</width>
+	  			<height>100</height>
+	  			<ondown>141</ondown>
+	 			<onleft>104</onleft>
+	        	<onright>144</onright>   			
+	  			<onup>141</onup>
+	  			<label>$LOCALIZE[32014]</label>
+	  			<font>red_sans25</font>
+	   			<align>center</align>
+	  			<aligny>center</aligny>   			
+	  			<texturenofocus>script/button.png</texturenofocus>
+	  			<texturefocus>script/button-select.png</texturefocus>
+	  			<visible>true</visible>
+	  		</control>
+	  		<control type="button" id="144">
+	  			<description>About</description>
+	  			<posx>445</posx>
+	  			<posy>285</posy>
+	  			<width>175</width>
+	  			<height>100</height>
+	  			<ondown>141</ondown>
+	 			<onleft>143</onleft>
+	        	<onright>104</onright>   			
+	  			<onup>141</onup>
+	  			<label>$LOCALIZE[32015]</label>
+	  			<font>red_sans25</font>
+	   			<align>center</align>
+	  			<aligny>center</aligny>   			
+	  			<texturenofocus>script/button.png</texturenofocus>
+	  			<texturefocus>script/button-select.png</texturefocus>
+	  			<visible>true</visible>
+	  		</control>
+	  		<control type="group" id="1200">
+				<control type="label">
+					<posx>160</posx>
+					<posy>500</posy>
+					<width>800</width>
+					<height>40</height>
+					<font>red_sans25</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<label>$INFO[Window(10400).Property(line1)]</label>
+				</control>
+				<control type="label">
+					<posx>160</posx>
+					<posy>550</posy>
+					<width>800</width>
+					<height>40</height>
+					<font>red_sans25</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<label>$INFO[Window(10400).Property(line2)]</label>
+				</control>
+				<control type="label">
+					<posx>160</posx>
+					<posy>600</posy>
+					<width>800</width>
+					<height>40</height>
+					<font>red_sans25</font>
+					<align>left</align>
+					<aligny>center</aligny>
+					<wrapmultiline>true</wrapmultiline>
+					<label>$INFO[Window(10400).Property(line3)]</label>
+				</control>
+			</control>	
+		</control>
+		<control type="group">
+		<visible>Player.HasVideo</visible>
+			<control type="image">
+				<description>red-background</description>
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>1280</width>
+				<height>720</height>
+				<texture>script/background.png</texture>
+			</control>
+			<control type="videowindow">
+				<posx>0</posx>
+				<posy>0</posy>
+				<width>1280</width>
+				<height>720</height>
+			</control>
+		</control>	
+	</controls>
+</window>

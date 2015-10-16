@@ -9,6 +9,36 @@
 /* Begin PBXBuildFile section */
 		0E3036EC1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
 		0E3036ED1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
+		1814935B1BD0CCBC00586683 /* DBManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493451BD0CCBC00586683 /* DBManagerRed.cpp */; };
+		1814935C1BD0CCBC00586683 /* DBManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493451BD0CCBC00586683 /* DBManagerRed.cpp */; };
+		1814935D1BD0CCBC00586683 /* DBManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493451BD0CCBC00586683 /* DBManagerRed.cpp */; };
+		1814935E1BD0CCBC00586683 /* GUIDialogRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493471BD0CCBC00586683 /* GUIDialogRed.cpp */; };
+		1814935F1BD0CCBC00586683 /* GUIDialogRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493471BD0CCBC00586683 /* GUIDialogRed.cpp */; };
+		181493601BD0CCBC00586683 /* GUIDialogRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493471BD0CCBC00586683 /* GUIDialogRed.cpp */; };
+		181493611BD0CCBC00586683 /* GUIDialogRedAbout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493491BD0CCBC00586683 /* GUIDialogRedAbout.cpp */; };
+		181493621BD0CCBC00586683 /* GUIDialogRedAbout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493491BD0CCBC00586683 /* GUIDialogRedAbout.cpp */; };
+		181493631BD0CCBC00586683 /* GUIDialogRedAbout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493491BD0CCBC00586683 /* GUIDialogRedAbout.cpp */; };
+		181493671BD0CCBC00586683 /* MediaManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814934C1BD0CCBC00586683 /* MediaManagerRed.cpp */; };
+		181493681BD0CCBC00586683 /* MediaManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814934C1BD0CCBC00586683 /* MediaManagerRed.cpp */; };
+		181493691BD0CCBC00586683 /* MediaManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814934C1BD0CCBC00586683 /* MediaManagerRed.cpp */; };
+		1814936A1BD0CCBC00586683 /* PlayBackManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814934E1BD0CCBC00586683 /* PlayBackManagerRed.cpp */; };
+		1814936B1BD0CCBC00586683 /* PlayBackManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814934E1BD0CCBC00586683 /* PlayBackManagerRed.cpp */; };
+		1814936C1BD0CCBC00586683 /* PlayBackManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814934E1BD0CCBC00586683 /* PlayBackManagerRed.cpp */; };
+		1814936D1BD0CCBC00586683 /* PlayerManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493501BD0CCBC00586683 /* PlayerManagerRed.cpp */; };
+		1814936E1BD0CCBC00586683 /* PlayerManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493501BD0CCBC00586683 /* PlayerManagerRed.cpp */; };
+		1814936F1BD0CCBC00586683 /* PlayerManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493501BD0CCBC00586683 /* PlayerManagerRed.cpp */; };
+		181493731BD0CCBC00586683 /* ReportManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493551BD0CCBC00586683 /* ReportManagerRed.cpp */; };
+		181493741BD0CCBC00586683 /* ReportManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493551BD0CCBC00586683 /* ReportManagerRed.cpp */; };
+		181493751BD0CCBC00586683 /* ReportManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493551BD0CCBC00586683 /* ReportManagerRed.cpp */; };
+		181493761BD0CCBC00586683 /* UpdateManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493571BD0CCBC00586683 /* UpdateManagerRed.cpp */; };
+		181493771BD0CCBC00586683 /* UpdateManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493571BD0CCBC00586683 /* UpdateManagerRed.cpp */; };
+		181493781BD0CCBC00586683 /* UpdateManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493571BD0CCBC00586683 /* UpdateManagerRed.cpp */; };
+		181493791BD0CCBC00586683 /* UtilitiesRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493591BD0CCBC00586683 /* UtilitiesRed.cpp */; };
+		1814937A1BD0CCBC00586683 /* UtilitiesRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493591BD0CCBC00586683 /* UtilitiesRed.cpp */; };
+		1814937B1BD0CCBC00586683 /* UtilitiesRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493591BD0CCBC00586683 /* UtilitiesRed.cpp */; };
+		1814937E1BD0F62800586683 /* RedJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814937C1BD0F62800586683 /* RedJSONOperations.cpp */; };
+		1814937F1BD0F62800586683 /* RedJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814937C1BD0F62800586683 /* RedJSONOperations.cpp */; };
+		181493801BD0F62800586683 /* RedJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814937C1BD0F62800586683 /* RedJSONOperations.cpp */; };
 		1840B74D13993D8A007C848B /* JSONVariantParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B74B13993D8A007C848B /* JSONVariantParser.cpp */; };
 		1840B75313993DA0007C848B /* JSONVariantWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B75113993DA0007C848B /* JSONVariantWriter.cpp */; };
 		184C472F1296BC6E0006DB3E /* Service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 184C472D1296BC6E0006DB3E /* Service.cpp */; };
@@ -2781,6 +2811,27 @@
 /* Begin PBXFileReference section */
 		0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FavouritesDirectory.cpp; sourceTree = "<group>"; };
 		0E3036EB1760F68A00D93596 /* FavouritesDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FavouritesDirectory.h; sourceTree = "<group>"; };
+		181493451BD0CCBC00586683 /* DBManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DBManagerRed.cpp; path = red/DBManagerRed.cpp; sourceTree = "<group>"; };
+		181493461BD0CCBC00586683 /* DBManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DBManagerRed.h; path = red/DBManagerRed.h; sourceTree = "<group>"; };
+		181493471BD0CCBC00586683 /* GUIDialogRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GUIDialogRed.cpp; path = red/GUIDialogRed.cpp; sourceTree = "<group>"; };
+		181493481BD0CCBC00586683 /* GUIDialogRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GUIDialogRed.h; path = red/GUIDialogRed.h; sourceTree = "<group>"; };
+		181493491BD0CCBC00586683 /* GUIDialogRedAbout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GUIDialogRedAbout.cpp; path = red/GUIDialogRedAbout.cpp; sourceTree = "<group>"; };
+		1814934A1BD0CCBC00586683 /* GUIDialogRedAbout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GUIDialogRedAbout.h; path = red/GUIDialogRedAbout.h; sourceTree = "<group>"; };
+		1814934C1BD0CCBC00586683 /* MediaManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MediaManagerRed.cpp; path = red/MediaManagerRed.cpp; sourceTree = "<group>"; };
+		1814934D1BD0CCBC00586683 /* MediaManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MediaManagerRed.h; path = red/MediaManagerRed.h; sourceTree = "<group>"; };
+		1814934E1BD0CCBC00586683 /* PlayBackManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlayBackManagerRed.cpp; path = red/PlayBackManagerRed.cpp; sourceTree = "<group>"; };
+		1814934F1BD0CCBC00586683 /* PlayBackManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlayBackManagerRed.h; path = red/PlayBackManagerRed.h; sourceTree = "<group>"; };
+		181493501BD0CCBC00586683 /* PlayerManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlayerManagerRed.cpp; path = red/PlayerManagerRed.cpp; sourceTree = "<group>"; };
+		181493511BD0CCBC00586683 /* PlayerManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlayerManagerRed.h; path = red/PlayerManagerRed.h; sourceTree = "<group>"; };
+		181493541BD0CCBC00586683 /* RedMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RedMedia.h; path = red/RedMedia.h; sourceTree = "<group>"; };
+		181493551BD0CCBC00586683 /* ReportManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ReportManagerRed.cpp; path = red/ReportManagerRed.cpp; sourceTree = "<group>"; };
+		181493561BD0CCBC00586683 /* ReportManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReportManagerRed.h; path = red/ReportManagerRed.h; sourceTree = "<group>"; };
+		181493571BD0CCBC00586683 /* UpdateManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateManagerRed.cpp; path = red/UpdateManagerRed.cpp; sourceTree = "<group>"; };
+		181493581BD0CCBC00586683 /* UpdateManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UpdateManagerRed.h; path = red/UpdateManagerRed.h; sourceTree = "<group>"; };
+		181493591BD0CCBC00586683 /* UtilitiesRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UtilitiesRed.cpp; path = red/UtilitiesRed.cpp; sourceTree = "<group>"; };
+		1814935A1BD0CCBC00586683 /* UtilitiesRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UtilitiesRed.h; path = red/UtilitiesRed.h; sourceTree = "<group>"; };
+		1814937C1BD0F62800586683 /* RedJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RedJSONOperations.cpp; path = red/RedJSONOperations.cpp; sourceTree = "<group>"; };
+		1814937D1BD0F62800586683 /* RedJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RedJSONOperations.h; path = red/RedJSONOperations.h; sourceTree = "<group>"; };
 		18308CB41303370800AA309E /* stat_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stat_utf8.h; sourceTree = "<group>"; };
 		18308CB51303370800AA309E /* stdio_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdio_utf8.h; sourceTree = "<group>"; };
 		1840B74B13993D8A007C848B /* JSONVariantParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSONVariantParser.cpp; sourceTree = "<group>"; };
@@ -5097,6 +5148,34 @@
 			name = "System Libs and Frameworks";
 			sourceTree = "<group>";
 		};
+		181493441BD0CCA900586683 /* red */ = {
+			isa = PBXGroup;
+			children = (
+				181493451BD0CCBC00586683 /* DBManagerRed.cpp */,
+				181493461BD0CCBC00586683 /* DBManagerRed.h */,
+				181493471BD0CCBC00586683 /* GUIDialogRed.cpp */,
+				181493481BD0CCBC00586683 /* GUIDialogRed.h */,
+				181493491BD0CCBC00586683 /* GUIDialogRedAbout.cpp */,
+				1814934A1BD0CCBC00586683 /* GUIDialogRedAbout.h */,
+				1814934C1BD0CCBC00586683 /* MediaManagerRed.cpp */,
+				1814934D1BD0CCBC00586683 /* MediaManagerRed.h */,
+				1814934E1BD0CCBC00586683 /* PlayBackManagerRed.cpp */,
+				1814934F1BD0CCBC00586683 /* PlayBackManagerRed.h */,
+				181493501BD0CCBC00586683 /* PlayerManagerRed.cpp */,
+				181493511BD0CCBC00586683 /* PlayerManagerRed.h */,
+				1814937C1BD0F62800586683 /* RedJSONOperations.cpp */,
+				1814937D1BD0F62800586683 /* RedJSONOperations.h */,
+				181493541BD0CCBC00586683 /* RedMedia.h */,
+				181493551BD0CCBC00586683 /* ReportManagerRed.cpp */,
+				181493561BD0CCBC00586683 /* ReportManagerRed.h */,
+				181493571BD0CCBC00586683 /* UpdateManagerRed.cpp */,
+				181493581BD0CCBC00586683 /* UpdateManagerRed.h */,
+				181493591BD0CCBC00586683 /* UtilitiesRed.cpp */,
+				1814935A1BD0CCBC00586683 /* UtilitiesRed.h */,
+			);
+			name = red;
+			sourceTree = "<group>";
+		};
 		18690DCB1B94DA6200E762C1 /* subtitles */ = {
 			isa = PBXGroup;
 			children = (
@@ -7129,6 +7208,7 @@
 				DF28ED92170E1A11005FA9D2 /* profiles */,
 				4313769112D63F9E00680C15 /* programs */,
 				C8482871156CFCD8005A996F /* pvr */,
+				181493441BD0CCA900586683 /* red */,
 				43FAC8BF12D63B7400F67914 /* rendering */,
 				E38E1E000D25F9FD00618676 /* settings */,
 				43FAC84E12D62CAE00F67914 /* storage */,
@@ -8916,6 +8996,7 @@
 			files = (
 				E38E1F370D25F9FD00618676 /* Application.cpp in Sources */,
 				399442771A8DD920006C39E9 /* VideoLibraryProgressJob.cpp in Sources */,
+				181493791BD0CCBC00586683 /* UtilitiesRed.cpp in Sources */,
 				E38E1F3D0D25F9FD00618676 /* AutoSwitch.cpp in Sources */,
 				E38E1F3E0D25F9FD00618676 /* BackgroundInfoLoader.cpp in Sources */,
 				DF4BF0151A4EF30F0053AC56 /* cc_decoder.c in Sources */,
@@ -9053,6 +9134,7 @@
 				E38E20910D25F9FD00618676 /* GUIDialogPlayerControls.cpp in Sources */,
 				E38E20940D25F9FD00618676 /* GUIDialogProgress.cpp in Sources */,
 				E38E20950D25F9FD00618676 /* GUIDialogSeekBar.cpp in Sources */,
+				181493611BD0CCBC00586683 /* GUIDialogRedAbout.cpp in Sources */,
 				E38E20980D25F9FD00618676 /* GUIDialogSmartPlaylistEditor.cpp in Sources */,
 				E38E20990D25F9FD00618676 /* GUIDialogSmartPlaylistRule.cpp in Sources */,
 				E38E209A0D25F9FD00618676 /* GUIDialogSongInfo.cpp in Sources */,
@@ -9183,6 +9265,7 @@
 				8883CEA80DD81807004E8B72 /* DVDSubtitlesLibass.cpp in Sources */,
 				5EF801001A97892A0035AA4D /* ReplayGain.cpp in Sources */,
 				8863281D0E07B37200BB3DAB /* GUIDialogFullScreenInfo.cpp in Sources */,
+				1814936A1BD0CCBC00586683 /* PlayBackManagerRed.cpp in Sources */,
 				8863281E0E07B37200BB3DAB /* GUIViewStatePictures.cpp in Sources */,
 				8863281F0E07B37200BB3DAB /* GUIViewStatePrograms.cpp in Sources */,
 				889B4D8E0E0EF86C00FAD25E /* RSSDirectory.cpp in Sources */,
@@ -9471,6 +9554,7 @@
 				188F7602152217DF009870CE /* GUIOperations.cpp in Sources */,
 				DFCA6AC7152245CD000BFAAE /* HTTPJsonRpcHandler.cpp in Sources */,
 				DFCA6AC8152245CD000BFAAE /* HTTPVfsHandler.cpp in Sources */,
+				181493761BD0CCBC00586683 /* UpdateManagerRed.cpp in Sources */,
 				DFCA6AC9152245CD000BFAAE /* HTTPWebinterfaceAddonsHandler.cpp in Sources */,
 				DFCA6ACA152245CD000BFAAE /* HTTPWebinterfaceHandler.cpp in Sources */,
 				42E2E1C91B53F74D005C7E4E /* VideoLibraryRefreshingJob.cpp in Sources */,
@@ -9479,6 +9563,7 @@
 				DF93D69B1444A8B1007C6459 /* FileCache.cpp in Sources */,
 				3994427A1A8DD920006C39E9 /* VideoLibraryScanningJob.cpp in Sources */,
 				DF93D69D1444A8B1007C6459 /* CurlFile.cpp in Sources */,
+				1814935B1BD0CCBC00586683 /* DBManagerRed.cpp in Sources */,
 				DF93D69F1444A8B1007C6459 /* DirectoryFactory.cpp in Sources */,
 				DF93D6A01444A8B1007C6459 /* FileDirectoryFactory.cpp in Sources */,
 				DF2401261B41A26F001E02DA /* ImageResource.cpp in Sources */,
@@ -9558,6 +9643,7 @@
 				C848291A156CFFE7005A996F /* AddonCallbacksAddon.cpp in Sources */,
 				C848291B156CFFE7005A996F /* AddonCallbacksGUI.cpp in Sources */,
 				C848291C156CFFE7005A996F /* AddonCallbacksPVR.cpp in Sources */,
+				1814935E1BD0CCBC00586683 /* GUIDialogRed.cpp in Sources */,
 				C848291F156D003E005A996F /* TextSearch.cpp in Sources */,
 				36A9443D15821E2800727135 /* DatabaseUtils.cpp in Sources */,
 				36A9444115821E7C00727135 /* SortUtils.cpp in Sources */,
@@ -9608,9 +9694,11 @@
 				F563529616E53FAB00D21BAD /* UPnPSettings.cpp in Sources */,
 				F56352AA16E5402100D21BAD /* GUIDialogContentSettings.cpp in Sources */,
 				F56352BB16E5403400D21BAD /* GUIWindowSettings.cpp in Sources */,
+				181493671BD0CCBC00586683 /* MediaManagerRed.cpp in Sources */,
 				F56352BC16E5403400D21BAD /* GUIWindowSettingsCategory.cpp in Sources */,
 				F56352BE16E5403400D21BAD /* GUIWindowSettingsScreenCalibration.cpp in Sources */,
 				F56352BF16E5403400D21BAD /* GUIWindowTestPattern.cpp in Sources */,
+				181493731BD0CCBC00586683 /* ReportManagerRed.cpp in Sources */,
 				F56352C816E5436900D21BAD /* AppParamParser.cpp in Sources */,
 				F56353BF16E9BB3500D21BAD /* BitstreamConverter.cpp in Sources */,
 				DFAF6A4F16EBAE3800D6AE12 /* RssManager.cpp in Sources */,
@@ -9629,6 +9717,7 @@
 				7C87B2CE162CE39600EF897D /* PlayerController.cpp in Sources */,
 				F52CC5F01713AAA200113454 /* DirectoryNodeGrouped.cpp in Sources */,
 				F52CC6AA1713BD2B00113454 /* DirectoryNodeGrouped.cpp in Sources */,
+				1814937E1BD0F62800586683 /* RedJSONOperations.cpp in Sources */,
 				DFECFADF172D9C5100A43CF7 /* GUIControlSettings.cpp in Sources */,
 				DFECFB09172D9CAB00A43CF7 /* SettingAddon.cpp in Sources */,
 				DFECFB0C172D9CAB00A43CF7 /* SettingControl.cpp in Sources */,
@@ -9650,6 +9739,7 @@
 				55611BA31766672F00754072 /* RenderFlags.cpp in Sources */,
 				5558ED10176396CD00118C35 /* StereoscopicsManager.cpp in Sources */,
 				F59EED7E17AD5174005BB7C6 /* ApplicationPlayer.cpp in Sources */,
+				1814936D1BD0CCBC00586683 /* PlayerManagerRed.cpp in Sources */,
 				F590457B1BA372A600DB589A /* OSXGLView.mm in Sources */,
 				DF28DF4D17B8379E0077F41A /* ProfilesOperations.cpp in Sources */,
 				DFD882E917DD189E001516FE /* StringValidation.cpp in Sources */,
@@ -9843,6 +9933,7 @@
 				E4991189174E5CE000741B6D /* Scraper.cpp in Sources */,
 				E499118A174E5CE000741B6D /* ScreenSaver.cpp in Sources */,
 				E499118B174E5CE000741B6D /* Service.cpp in Sources */,
+				1814935F1BD0CCBC00586683 /* GUIDialogRed.cpp in Sources */,
 				E499118C174E5CE000741B6D /* Skin.cpp in Sources */,
 				E4991196174E5CEB00741B6D /* Exception.cpp in Sources */,
 				E4991197174E5CEB00741B6D /* ilog.cpp in Sources */,
@@ -9962,6 +10053,7 @@
 				E4991235174E5D7E00741B6D /* GUIDialogButtonMenu.cpp in Sources */,
 				E4991236174E5D7E00741B6D /* GUIDialogCache.cpp in Sources */,
 				E4991237174E5D7E00741B6D /* GUIDialogContextMenu.cpp in Sources */,
+				1814936E1BD0CCBC00586683 /* PlayerManagerRed.cpp in Sources */,
 				E4991238174E5D7E00741B6D /* GUIDialogExtendedProgressBar.cpp in Sources */,
 				E4991239174E5D7E00741B6D /* GUIDialogFavourites.cpp in Sources */,
 				E499123A174E5D7E00741B6D /* GUIDialogFileBrowser.cpp in Sources */,
@@ -9986,6 +10078,7 @@
 				E499124C174E5D7E00741B6D /* GUIDialogTextViewer.cpp in Sources */,
 				E499124D174E5D7E00741B6D /* GUIDialogVolumeBar.cpp in Sources */,
 				E499124E174E5D7E00741B6D /* GUIDialogYesNo.cpp in Sources */,
+				181493741BD0CCBC00586683 /* ReportManagerRed.cpp in Sources */,
 				E499124F174E5D8F00741B6D /* AddonsDirectory.cpp in Sources */,
 				E4991254174E5D8F00741B6D /* CacheStrategy.cpp in Sources */,
 				E4991257174E5D8F00741B6D /* CircularCache.cpp in Sources */,
@@ -10293,6 +10386,7 @@
 				E49913C3174E5F3C00741B6D /* UdpClient.cpp in Sources */,
 				DFEB902919E9337200728978 /* AEResampleFactory.cpp in Sources */,
 				E49913C4174E5F3C00741B6D /* WakeOnAccess.cpp in Sources */,
+				181493771BD0CCBC00586683 /* UpdateManagerRed.cpp in Sources */,
 				E49913C5174E5F3C00741B6D /* WebServer.cpp in Sources */,
 				E49913C6174E5F3C00741B6D /* Zeroconf.cpp in Sources */,
 				E49913C7174E5F3C00741B6D /* ZeroconfBrowser.cpp in Sources */,
@@ -10364,6 +10458,7 @@
 				E4991409174E5FB900741B6D /* GUIWindowPVRChannels.cpp in Sources */,
 				E499140B174E5FB900741B6D /* GUIWindowPVRGuide.cpp in Sources */,
 				E499140C174E5FB900741B6D /* GUIWindowPVRRecordings.cpp in Sources */,
+				1814936B1BD0CCBC00586683 /* PlayBackManagerRed.cpp in Sources */,
 				E499140D174E5FB900741B6D /* GUIWindowPVRSearch.cpp in Sources */,
 				E499140E174E5FB900741B6D /* GUIWindowPVRTimers.cpp in Sources */,
 				E499140F174E5FB900741B6D /* PVRDatabase.cpp in Sources */,
@@ -10430,6 +10525,7 @@
 				E499145C174E605900741B6D /* JobManager.cpp in Sources */,
 				E499145D174E605900741B6D /* JSONVariantParser.cpp in Sources */,
 				E499145E174E605900741B6D /* JSONVariantWriter.cpp in Sources */,
+				1814937A1BD0CCBC00586683 /* UtilitiesRed.cpp in Sources */,
 				E499145F174E605900741B6D /* LabelFormatter.cpp in Sources */,
 				E4991460174E605900741B6D /* LangCodeExpander.cpp in Sources */,
 				E4991461174E605900741B6D /* LegacyPathTranslation.cpp in Sources */,
@@ -10541,6 +10637,7 @@
 				E499154F174E64F200741B6D /* MouseStat.cpp in Sources */,
 				E499156A174E65AB00741B6D /* ButtonTranslator.cpp in Sources */,
 				E499156B174E65AB00741B6D /* InertialScrollingHandler.cpp in Sources */,
+				1814937F1BD0F62800586683 /* RedJSONOperations.cpp in Sources */,
 				E499156D174E65AB00741B6D /* KeyboardStat.cpp in Sources */,
 				4260D5C81B67BB8F003F6F2D /* GUIWindowSplash.cpp in Sources */,
 				E499156E174E65AB00741B6D /* SDLJoystick.cpp in Sources */,
@@ -10616,6 +10713,7 @@
 				42E2E1CA1B53F74D005C7E4E /* VideoLibraryRefreshingJob.cpp in Sources */,
 				DF5E699B1B28121E009A88C3 /* PVRTimerType.cpp in Sources */,
 				7CCDA0DC192753E30074CF51 /* PltAction.cpp in Sources */,
+				181493621BD0CCBC00586683 /* GUIDialogRedAbout.cpp in Sources */,
 				7CCDA0E5192753E30074CF51 /* PltArgument.cpp in Sources */,
 				7CCDA0EE192753E30074CF51 /* PltConstants.cpp in Sources */,
 				7CCDA0F7192753E30074CF51 /* PltCtrlPoint.cpp in Sources */,
@@ -10657,9 +10755,11 @@
 				7CCDA230192753E30074CF51 /* PltMediaCache.cpp in Sources */,
 				7CCDA239192753E30074CF51 /* PltMediaItem.cpp in Sources */,
 				7CCDA242192753E30074CF51 /* PltMediaServer.cpp in Sources */,
+				1814935C1BD0CCBC00586683 /* DBManagerRed.cpp in Sources */,
 				7CCDA24B192753E30074CF51 /* PltSyncMediaBrowser.cpp in Sources */,
 				7CCDA77A192756250074CF51 /* Neptune.cpp in Sources */,
 				7CCDA783192756250074CF51 /* NptAutomaticCleaner.cpp in Sources */,
+				181493681BD0CCBC00586683 /* MediaManagerRed.cpp in Sources */,
 				7CCDA786192756250074CF51 /* NptBase64.cpp in Sources */,
 				7CCDA78F192756250074CF51 /* NptBufferedStreams.cpp in Sources */,
 				7CCDA798192756250074CF51 /* NptCommon.cpp in Sources */,
@@ -10921,6 +11021,7 @@
 				F5D13F881BAF0B6D0075A95C /* MultiPathDirectory.cpp in Sources */,
 				F5D13F891BAF0B6D0075A95C /* MultiPathFile.cpp in Sources */,
 				F5D13F8A1BAF0B6D0075A95C /* DirectoryNode.cpp in Sources */,
+				181493631BD0CCBC00586683 /* GUIDialogRedAbout.cpp in Sources */,
 				F5D13F8B1BAF0B6D0075A95C /* DirectoryNodeAlbum.cpp in Sources */,
 				F5D13F8C1BAF0B6D0075A95C /* DirectoryNodeAlbumCompilations.cpp in Sources */,
 				F5D13F8D1BAF0B6D0075A95C /* DirectoryNodeAlbumCompilationsSongs.cpp in Sources */,
@@ -10976,6 +11077,7 @@
 				F5D13FBE1BAF0B6D0075A95C /* SpecialProtocolFile.cpp in Sources */,
 				F5D13FBF1BAF0B6D0075A95C /* StackDirectory.cpp in Sources */,
 				F5D13FC01BAF0B6D0075A95C /* udf25.cpp in Sources */,
+				1814936C1BD0CCBC00586683 /* PlayBackManagerRed.cpp in Sources */,
 				F5D13FC11BAF0B6D0075A95C /* UDFDirectory.cpp in Sources */,
 				F5D13FC21BAF0B6D0075A95C /* UDFFile.cpp in Sources */,
 				F5D13FC31BAF0B6D0075A95C /* UPnPDirectory.cpp in Sources */,
@@ -11025,6 +11127,7 @@
 				F5D13FEE1BAF0B6D0075A95C /* GUIControlFactory.cpp in Sources */,
 				F5D13FEF1BAF0B6D0075A95C /* GUIControlGroup.cpp in Sources */,
 				F5D13FF01BAF0B6D0075A95C /* ILanguageInvoker.cpp in Sources */,
+				181493691BD0CCBC00586683 /* MediaManagerRed.cpp in Sources */,
 				F5D13FF11BAF0B6D0075A95C /* GUIControlGroupList.cpp in Sources */,
 				F5D13FF21BAF0B6D0075A95C /* GUIControlProfiler.cpp in Sources */,
 				F5D13FF31BAF0B6D0075A95C /* GUIDialog.cpp in Sources */,
@@ -11082,6 +11185,7 @@
 				F5D140261BAF0B6D0075A95C /* GUIWindowManager.cpp in Sources */,
 				F5D140271BAF0B6D0075A95C /* GUIFontCache.cpp in Sources */,
 				F5D140281BAF0B6D0075A95C /* GUIWrappingListContainer.cpp in Sources */,
+				181493751BD0CCBC00586683 /* ReportManagerRed.cpp in Sources */,
 				F5D140291BAF0B6D0075A95C /* imagefactory.cpp in Sources */,
 				F5D1402A1BAF0B6D0075A95C /* IWindowManagerCallback.cpp in Sources */,
 				F5D1402B1BAF0B6D0075A95C /* JpegIO.cpp in Sources */,
@@ -11255,6 +11359,7 @@
 				F5D140D21BAF0B6D0075A95C /* GUIDialogPVRGuideInfo.cpp in Sources */,
 				F5D140D31BAF0B6D0075A95C /* GUIDialogPVRGuideOSD.cpp in Sources */,
 				F5D140D41BAF0B6D0075A95C /* GUIDialogPVRGuideSearch.cpp in Sources */,
+				181493801BD0F62800586683 /* RedJSONOperations.cpp in Sources */,
 				F5D140D51BAF0B6D0075A95C /* GUIDialogPVRRecordingInfo.cpp in Sources */,
 				F5D140D61BAF0B6D0075A95C /* GUIDialogPVRTimerSettings.cpp in Sources */,
 				F5D140D71BAF0B6D0075A95C /* PVRRecording.cpp in Sources */,
@@ -11322,6 +11427,7 @@
 				F5D141131BAF0B6D0075A95C /* FileOperationJob.cpp in Sources */,
 				F5D141141BAF0B6D0075A95C /* FileUtils.cpp in Sources */,
 				F5D141151BAF0B6D0075A95C /* GLUtils.cpp in Sources */,
+				1814935D1BD0CCBC00586683 /* DBManagerRed.cpp in Sources */,
 				F5D141161BAF0B6D0075A95C /* GroupUtils.cpp in Sources */,
 				F5D141171BAF0B6D0075A95C /* HTMLUtil.cpp in Sources */,
 				F5D141181BAF0B6D0075A95C /* HttpHeader.cpp in Sources */,
@@ -11409,6 +11515,7 @@
 				F5D141661BAF0B6D0075A95C /* GUIWindowLoginScreen.cpp in Sources */,
 				F5D141671BAF0B6D0075A95C /* GUIWindowPointer.cpp in Sources */,
 				F5D141681BAF0B6D0075A95C /* GUIWindowScreensaver.cpp in Sources */,
+				181493781BD0CCBC00586683 /* UpdateManagerRed.cpp in Sources */,
 				F5D141691BAF0B6D0075A95C /* GUIWindowScreensaverDim.cpp in Sources */,
 				F5D1416A1BAF0B6D0075A95C /* GUIWindowStartup.cpp in Sources */,
 				F5D1416B1BAF0B6D0075A95C /* GUIWindowSystemInfo.cpp in Sources */,
@@ -11442,6 +11549,7 @@
 				F5D141881BAF0B6D0075A95C /* XBApplicationEx.cpp in Sources */,
 				F5D141891BAF0B6D0075A95C /* XBDateTime.cpp in Sources */,
 				F5D1418A1BAF0B6D0075A95C /* MouseStat.cpp in Sources */,
+				181493601BD0CCBC00586683 /* GUIDialogRed.cpp in Sources */,
 				F5D1418B1BAF0B6D0075A95C /* ButtonTranslator.cpp in Sources */,
 				F5D1418C1BAF0B6D0075A95C /* InertialScrollingHandler.cpp in Sources */,
 				F5D1418D1BAF0B6D0075A95C /* KeyboardStat.cpp in Sources */,
@@ -11507,6 +11615,7 @@
 				F5D141C91BAF0B6D0075A95C /* AESinkFactory.cpp in Sources */,
 				F5D141CA1BAF0B6D0075A95C /* AESinkNULL.cpp in Sources */,
 				F5D141CB1BAF0B6D0075A95C /* CoreAudioHelpers.cpp in Sources */,
+				1814937B1BD0CCBC00586683 /* UtilitiesRed.cpp in Sources */,
 				F5D141CC1BAF0B6D0075A95C /* FFmpeg.cpp in Sources */,
 				F5D141CD1BAF0B6D0075A95C /* MediaType.cpp in Sources */,
 				F5D141CE1BAF0B6D0075A95C /* GUIDialogSettingsBase.cpp in Sources */,
@@ -11571,6 +11680,7 @@
 				F5D1420A1BAF0B6D0075A95C /* NptDigest.cpp in Sources */,
 				F5D1420B1BAF0B6D0075A95C /* NptDynamicLibraries.cpp in Sources */,
 				F5D1420C1BAF0B6D0075A95C /* NptFile.cpp in Sources */,
+				1814936F1BD0CCBC00586683 /* PlayerManagerRed.cpp in Sources */,
 				F5D1420D1BAF0B6D0075A95C /* NptHash.cpp in Sources */,
 				F5D1420E1BAF0B6D0075A95C /* NptHttp.cpp in Sources */,
 				F5D1420F1BAF0B6D0075A95C /* NptJson.cpp in Sources */,
