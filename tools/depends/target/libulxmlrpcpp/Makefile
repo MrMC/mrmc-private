@@ -10,7 +10,7 @@ ARCHIVE=$(SOURCE).tar.bz2
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) build-aux/; \
     ./configure --prefix=$(PREFIX) \
-    CFLAGS="-D__unix__" CXXFLAGS="-D__unix__ -Wno-error=c++11-narrowing"
+    CFLAGS="-D__unix__" LDFLAGS="-lc++" CXXFLAGS="-D__unix__ -Wno-error=c++11-narrowing"
 
 LIBDYLIB=$(PLATFORM)/ulxmlrpcpp/.libs/libulxmlrpcpp.a
 
