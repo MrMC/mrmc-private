@@ -1,0 +1,362 @@
+<window id="28">
+	<defaultcontrol always="true">50</defaultcontrol>
+	<allowoverlay>no</allowoverlay>
+	<views>50</views>
+	<controls>
+    <control type="image">
+      <visible>!Skin.HasSetting(NW_Vertical)</visible>
+      <description>Background</description>
+      <posx>0</posx>
+      <posy>0</posy>
+      <width>1280</width>
+      <height>720</height>
+      <texture>MNTVSkin.jpg</texture>
+    </control>
+    <control type="image">
+      <visible>Skin.HasSetting(NW_Vertical)</visible>
+      <posx>0</posx>
+      <posy>0</posy>
+      <width>1280</width>
+      <height>720</height>
+      <texture>MNTV-Plus-Vertical.png</texture>
+    </control>	
+    <control type="group">
+	   <animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+          <effect type="slide" start="0,0" end="-250,190" time="0" />
+          <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
+          <effect type="zoom" end="90" center="640,360" time="200" />
+        </animation>
+        <visible>Control.IsVisible(50)</visible>
+        <include>VisibleFadeEffect</include>
+        <include>ContentPanelBackgrounds</include>
+        <control type="list" id="50">
+            <posx>70</posx>
+            <posy>78</posy>
+            <width>690</width>
+            <height>561</height>
+            <onleft>2</onleft>
+            <onright>60</onright>
+            <onup>50</onup>
+            <ondown>50</ondown>
+            <viewtype label="535">list</viewtype>
+            <pagecontrol>60</pagecontrol>
+            <scrolltime>200</scrolltime>
+            <visible>![Window.IsVisible(VideoLibrary) + Container.Content(TVShows) + !Skin.HasSetting(TVShowsUsePosters)]</visible>
+            <itemlayout height="40" width="580">
+                <control type="image">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>690</width>
+                    <height>41</height>
+                    <texture border="0,2,0,2">MenuItemNF.png</texture>
+                </control>
+                <control type="label">
+                    <posx>10</posx>
+                    <posy>0</posy>
+                    <width>660</width>
+                    <height>40</height>
+                    <font>font13</font>
+                    <textcolor>grey2</textcolor>
+                    <selectedcolor>selected</selectedcolor>
+                    <align>left</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                </control>
+                <control type="label">
+                    <posx>680</posx>
+                    <posy>0</posy>
+                    <width>400</width>
+                    <height>40</height>
+                    <font>font12</font>
+                    <textcolor>grey2</textcolor>
+                    <selectedcolor>selected</selectedcolor>
+                    <align>right</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <visible>!Window.IsVisible(Videos)</visible>
+                </control>
+                <control type="label">
+                    <posx>620</posx>
+                    <posy>0</posy>
+                    <width>400</width>
+                    <height>40</height>
+                    <font>font12</font>
+                    <textcolor>grey2</textcolor>
+                    <selectedcolor>selected</selectedcolor>
+                    <align>right</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <visible>Window.IsVisible(Videos)</visible>
+                    <animation effect="slide" start="0,0" end="40,0" delay="0" time="0" condition="![Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]">conditional</animation>
+                </control>
+                <control type="image">
+                    <posx>625</posx>
+                    <posy>8</posy>
+                    <width>40</width>
+                    <height>26</height>
+                    <texture>$INFO[ListItem.VideoResolution,flagging/lists/,.png]</texture>
+                    <visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
+                </control>
+                <control type="image">
+                    <posx>665</posx>
+                    <posy>14</posy>
+                    <width>20</width>
+                    <height>16</height>
+                    <texture>$INFO[ListItem.Overlay]</texture>
+                    <visible>Window.IsVisible(Videos) + !ListItem.IsResumable</visible>
+                </control>
+                <control type="image">
+                    <posx>665</posx>
+                    <posy>14</posy>
+                    <width>16</width>
+                    <height>16</height>
+                    <texture>OverlayWatching.png</texture>
+                    <visible>Window.IsVisible(Videos) + ListItem.IsResumable</visible>
+                </control>
+            </itemlayout>
+            <focusedlayout height="40" width="580">
+                <control type="image">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>690</width>
+                    <height>41</height>
+                    <texture border="0,2,0,2">MenuItemNF.png</texture>
+                    <visible>!Control.HasFocus(50)</visible>
+                    <include>VisibleFadeEffect</include>
+                </control>
+                <control type="image">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>690</width>
+                    <height>41</height>
+                    <texture border="0,2,0,2">MenuItemFO.png</texture>
+                    <visible>Control.HasFocus(50)</visible>
+                    <include>VisibleFadeEffect</include>
+                </control>
+                <control type="image">
+                    <posx>490</posx>
+                    <posy>4</posy>
+                    <width>200</width>
+                    <height>33</height>
+                    <texture border="0,0,14,0">MediaItemDetailBG.png</texture>
+                    <visible>Control.HasFocus(50) + !IsEmpty(ListItem.Label2)</visible>
+                </control>
+                <control type="label">
+                    <posx>10</posx>
+                    <posy>0</posy>
+                    <width>660</width>
+                    <height>40</height>
+                    <font>font13</font>
+                    <textcolor>white</textcolor>
+                    <selectedcolor>selected</selectedcolor>
+                    <align>left</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label]</label>
+                </control>
+                <control type="label">
+                    <posx>680</posx>
+                    <posy>0</posy>
+                    <width>400</width>
+                    <height>40</height>
+                    <font>font12</font>
+                    <textcolor>grey2</textcolor>
+                    <selectedcolor>selected</selectedcolor>
+                    <align>right</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <visible>!Window.IsVisible(Videos)</visible>
+                </control>
+                <control type="label">
+                    <posx>620</posx>
+                    <posy>0</posy>
+                    <width>400</width>
+                    <height>40</height>
+                    <font>font12</font>
+                    <textcolor>grey2</textcolor>
+                    <selectedcolor>selected</selectedcolor>
+                    <align>right</align>
+                    <aligny>center</aligny>
+                    <label>$INFO[ListItem.Label2]</label>
+                    <visible>Window.IsVisible(Videos)</visible>
+                    <animation effect="slide" start="0,0" end="40,0" delay="0" time="0" condition="![Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]">conditional</animation>
+                </control>
+                <control type="image">
+                    <posx>625</posx>
+                    <posy>8</posy>
+                    <width>40</width>
+                    <height>26</height>
+                    <texture>$INFO[ListItem.VideoResolution,flagging/lists/,.png]</texture>
+                    <visible>Window.IsVisible(Videos) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
+                </control>
+                <control type="image">
+                    <posx>665</posx>
+                    <posy>14</posy>
+                    <width>20</width>
+                    <height>16</height>
+                    <texture>$INFO[ListItem.Overlay]</texture>
+                    <visible>Window.IsVisible(Videos) + !ListItem.IsResumable</visible>
+                </control>
+                <control type="image">
+                    <posx>665</posx>
+                    <posy>14</posy>
+                    <width>16</width>
+                    <height>16</height>
+                    <texture>OverlayWatching.png</texture>
+                    <visible>Window.IsVisible(Videos) + ListItem.IsResumable</visible>
+                </control>
+            </focusedlayout>
+        </control>
+        <control type="scrollbar" id="60">
+            <posx>760</posx>
+            <posy>85</posy>
+            <width>25</width>
+            <height>550</height>
+            <texturesliderbackground border="0,14,0,14">ScrollBarV.png</texturesliderbackground>
+            <texturesliderbar border="0,14,0,14">ScrollBarV_bar.png</texturesliderbar>
+            <texturesliderbarfocus border="0,14,0,14">ScrollBarV_bar_focus.png</texturesliderbarfocus>
+            <textureslidernib>ScrollBarNib.png</textureslidernib>
+            <textureslidernibfocus>ScrollBarNib.png</textureslidernibfocus>
+            <onleft>50</onleft>
+            <onright>2</onright>
+            <showonepage>false</showonepage>
+            <orientation>vertical</orientation>
+            <visible>Control.IsVisible(50)</visible>
+        </control>
+        <control type="group">
+            <posx>850</posx>
+            <posy>100</posy>
+            <visible>Control.IsVisible(50)</visible>
+            <control type="image">
+                <posx>0</posx>
+                <posy>0</posy>
+                <width>360</width>
+                <height>540</height>
+                <aspectratio aligny="bottom">keep</aspectratio>
+                <fadetime>IconCrossfadeTime</fadetime>
+                <texture background="true">$INFO[Container(50).ListItem.Icon]</texture>
+                <bordertexture border="8">ThumbShadow.png</bordertexture>
+                <bordersize>8</bordersize>
+            </control>
+            <control type="image">
+                <posx>8</posx>
+                <posy>532</posy>
+                <width>344</width>
+                <height>524</height>
+                <aspectratio aligny="top">keep</aspectratio>
+                <fadetime>IconCrossfadeTime</fadetime>
+                <texture diffuse="diffuse_mirror3.png" flipy="true" background="true">$INFO[Container(50).ListItem.Icon]</texture>
+            </control>
+        </control>
+    </control>
+    <control type="group">
+        <posx>60</posx>
+        <posy>0</posy>
+        <animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+          <effect type="slide" start="0,0" end="250,210" time="0" />
+          <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
+        </animation>
+        <control type="image">
+            <posx>0</posx>
+            <posy>0</posy>
+            <width>220</width>
+            <height>50</height>
+            <texture border="0,0,32,0">header.png</texture>
+        </control>
+        <control type="image">
+            <posx>-265</posx>
+            <posy>0</posy>
+            <width>300</width>
+            <height>50</height>
+            <texture border="0,0,32,0">header.png</texture>
+        </control>
+        <control type="image">
+            <posx>-33</posx>
+            <posy>0</posy>
+            <width>35</width>
+            <height>35</height>
+            <aspectratio>keep</aspectratio>
+            <texture>icon_video.png</texture>
+        </control>
+        <control type="label">
+            <posy>5</posy>
+            <posx>150</posx>
+            <width>1060</width>
+            <height>28</height>
+            <font>font13</font>
+            <textcolor>white</textcolor>
+            <scroll>false</scroll>
+            <align>right</align>
+            <aligny>center</aligny>
+            <label>On Demand</label>
+        </control>
+    </control>
+    <control type="group">
+      <posx>260r</posx>
+      <posy>0</posy>
+      <animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+        <effect type="slide" start="0,0" end="-230,240" time="0" />
+        <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
+      </animation>
+      <control type="image">
+          <posx>0</posx>
+          <posy>0</posy>
+          <width>440</width>
+          <height>35</height>
+          <texture flipx="true" border="32,0,0,0">header.png</texture>
+      </control>
+      <control type="label">
+          <posx>30</posx>
+          <posy>0</posy>
+          <width>400</width>
+          <height>28</height>
+          <align>left</align>
+          <aligny>center</aligny>
+          <font>font12</font>
+          <textcolor>white</textcolor>
+          <shadowcolor>black</shadowcolor>
+          <label>[COLOR=grey]$INFO[System.Date][/COLOR] | $INFO[System.Time]</label>
+      </control>
+    </control>
+    <control type="group">
+        <animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+          <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
+          <effect type="slide" start="0,0" end="0,0" time="0" />
+        </animation>
+        <control type="label">
+            <description>Page Count Label</description>
+            <posx>40r</posx>
+            <posy>53r</posy>
+            <width>500</width>
+            <height>20</height>
+            <font>font12</font>
+            <textcolor>grey</textcolor>
+            <scroll>false</scroll>
+            <align>right</align>
+            <aligny>center</aligny>
+            <label>$INFO[Window.Property(filter),$LOCALIZE[587] ([COLOR=blue],[/COLOR]) - ]$INFO[Container.NumItems,([COLOR=blue],[/COLOR]) $LOCALIZE[31025]]$INFO[Container.CurrentPage, - $LOCALIZE[31024] ([COLOR=blue]]$INFO[Container.NumPages,/,[/COLOR])]</label>
+            <include>Window_OpenClose_Animation</include>
+        </control>
+        <control type="label">
+            <description>Container Duration Label</description>
+            <posx>40r</posx>
+            <posy>32r</posy>
+            <width>500</width>
+            <height>20</height>
+            <font>font12</font>
+            <textcolor>grey</textcolor>
+            <scroll>false</scroll>
+            <align>right</align>
+            <aligny>center</aligny>
+            <label>$INFO[Container.TotalTime,$LOCALIZE[31009] ([COLOR=blue],[/COLOR])]</label>
+            <include>Window_OpenClose_Animation</include>
+        </control>
+    </control>
+    <control type="videowindow">
+        <posx>0</posx>
+        <posy>0</posy>
+        <width>1280</width>
+        <height>720</height>
+        <visible>Player.HasVideo</visible>
+    </control> 
+	</controls>
+</window>
