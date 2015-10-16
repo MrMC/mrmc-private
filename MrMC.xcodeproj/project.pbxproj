@@ -9,6 +9,24 @@
 /* Begin PBXBuildFile section */
 		0E3036EC1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
 		0E3036ED1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
+		181493901BD1769600586683 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493831BD1769600586683 /* GUIDialogMN.cpp */; };
+		181493911BD1769600586683 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493831BD1769600586683 /* GUIDialogMN.cpp */; };
+		181493921BD1769600586683 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493831BD1769600586683 /* GUIDialogMN.cpp */; };
+		181493931BD1769600586683 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493851BD1769600586683 /* GUIDialogMNDemand.cpp */; };
+		181493941BD1769600586683 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493851BD1769600586683 /* GUIDialogMNDemand.cpp */; };
+		181493951BD1769600586683 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493851BD1769600586683 /* GUIDialogMNDemand.cpp */; };
+		181493961BD1769600586683 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493881BD1769600586683 /* PlayerManagerMN.cpp */; };
+		181493971BD1769600586683 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493881BD1769600586683 /* PlayerManagerMN.cpp */; };
+		181493981BD1769600586683 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493881BD1769600586683 /* PlayerManagerMN.cpp */; };
+		181493991BD1769600586683 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938A1BD1769600586683 /* PythonBindingsMN.cpp */; };
+		1814939A1BD1769600586683 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938A1BD1769600586683 /* PythonBindingsMN.cpp */; };
+		1814939B1BD1769600586683 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938A1BD1769600586683 /* PythonBindingsMN.cpp */; };
+		1814939C1BD1769600586683 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938C1BD1769600586683 /* UpdateManagerMN.cpp */; };
+		1814939D1BD1769600586683 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938C1BD1769600586683 /* UpdateManagerMN.cpp */; };
+		1814939E1BD1769600586683 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938C1BD1769600586683 /* UpdateManagerMN.cpp */; };
+		1814939F1BD1769600586683 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938E1BD1769600586683 /* UtilitiesMN.cpp */; };
+		181493A01BD1769600586683 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938E1BD1769600586683 /* UtilitiesMN.cpp */; };
+		181493A11BD1769600586683 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938E1BD1769600586683 /* UtilitiesMN.cpp */; };
 		1840B74D13993D8A007C848B /* JSONVariantParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B74B13993D8A007C848B /* JSONVariantParser.cpp */; };
 		1840B75313993DA0007C848B /* JSONVariantWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B75113993DA0007C848B /* JSONVariantWriter.cpp */; };
 		184C472F1296BC6E0006DB3E /* Service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 184C472D1296BC6E0006DB3E /* Service.cpp */; };
@@ -2781,6 +2799,19 @@
 /* Begin PBXFileReference section */
 		0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FavouritesDirectory.cpp; sourceTree = "<group>"; };
 		0E3036EB1760F68A00D93596 /* FavouritesDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FavouritesDirectory.h; sourceTree = "<group>"; };
+		181493831BD1769600586683 /* GUIDialogMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GUIDialogMN.cpp; path = nwmn/GUIDialogMN.cpp; sourceTree = "<group>"; };
+		181493841BD1769600586683 /* GUIDialogMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GUIDialogMN.h; path = nwmn/GUIDialogMN.h; sourceTree = "<group>"; };
+		181493851BD1769600586683 /* GUIDialogMNDemand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GUIDialogMNDemand.cpp; path = nwmn/GUIDialogMNDemand.cpp; sourceTree = "<group>"; };
+		181493861BD1769600586683 /* GUIDialogMNDemand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GUIDialogMNDemand.h; path = nwmn/GUIDialogMNDemand.h; sourceTree = "<group>"; };
+		181493871BD1769600586683 /* MNMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MNMedia.h; path = nwmn/MNMedia.h; sourceTree = "<group>"; };
+		181493881BD1769600586683 /* PlayerManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlayerManagerMN.cpp; path = nwmn/PlayerManagerMN.cpp; sourceTree = "<group>"; };
+		181493891BD1769600586683 /* PlayerManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlayerManagerMN.h; path = nwmn/PlayerManagerMN.h; sourceTree = "<group>"; };
+		1814938A1BD1769600586683 /* PythonBindingsMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PythonBindingsMN.cpp; path = nwmn/PythonBindingsMN.cpp; sourceTree = "<group>"; };
+		1814938B1BD1769600586683 /* PythonBindingsMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PythonBindingsMN.h; path = nwmn/PythonBindingsMN.h; sourceTree = "<group>"; };
+		1814938C1BD1769600586683 /* UpdateManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateManagerMN.cpp; path = nwmn/UpdateManagerMN.cpp; sourceTree = "<group>"; };
+		1814938D1BD1769600586683 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UpdateManagerMN.h; path = nwmn/UpdateManagerMN.h; sourceTree = "<group>"; };
+		1814938E1BD1769600586683 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UtilitiesMN.cpp; path = nwmn/UtilitiesMN.cpp; sourceTree = "<group>"; };
+		1814938F1BD1769600586683 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UtilitiesMN.h; path = nwmn/UtilitiesMN.h; sourceTree = "<group>"; };
 		18308CB41303370800AA309E /* stat_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stat_utf8.h; sourceTree = "<group>"; };
 		18308CB51303370800AA309E /* stdio_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdio_utf8.h; sourceTree = "<group>"; };
 		1840B74B13993D8A007C848B /* JSONVariantParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSONVariantParser.cpp; sourceTree = "<group>"; };
@@ -5097,6 +5128,26 @@
 			name = "System Libs and Frameworks";
 			sourceTree = "<group>";
 		};
+		181493821BD1766A00586683 /* nwmn */ = {
+			isa = PBXGroup;
+			children = (
+				181493831BD1769600586683 /* GUIDialogMN.cpp */,
+				181493841BD1769600586683 /* GUIDialogMN.h */,
+				181493851BD1769600586683 /* GUIDialogMNDemand.cpp */,
+				181493861BD1769600586683 /* GUIDialogMNDemand.h */,
+				181493871BD1769600586683 /* MNMedia.h */,
+				181493881BD1769600586683 /* PlayerManagerMN.cpp */,
+				181493891BD1769600586683 /* PlayerManagerMN.h */,
+				1814938A1BD1769600586683 /* PythonBindingsMN.cpp */,
+				1814938B1BD1769600586683 /* PythonBindingsMN.h */,
+				1814938C1BD1769600586683 /* UpdateManagerMN.cpp */,
+				1814938D1BD1769600586683 /* UpdateManagerMN.h */,
+				1814938E1BD1769600586683 /* UtilitiesMN.cpp */,
+				1814938F1BD1769600586683 /* UtilitiesMN.h */,
+			);
+			name = nwmn;
+			sourceTree = "<group>";
+		};
 		18690DCB1B94DA6200E762C1 /* subtitles */ = {
 			isa = PBXGroup;
 			children = (
@@ -7121,6 +7172,7 @@
 				DF4A3BAC1B4B0FC100F9CDC0 /* messaging */,
 				18B7C853129423A7009E7A26 /* music */,
 				431376F212D6449100680C15 /* network */,
+				181493821BD1766A00586683 /* nwmn */,
 				F5E1050C140AA38000175026 /* peripherals */,
 				4313767E12D63EC200680C15 /* pictures */,
 				F59045261BA372A600DB589A /* platform */,
@@ -9071,6 +9123,7 @@
 				E38E20AF0D25F9FD00618676 /* GUIWindowFullScreen.cpp in Sources */,
 				E38E20B10D25F9FD00618676 /* GUIWindowHome.cpp in Sources */,
 				E38E20B20D25F9FD00618676 /* GUIWindowLoginScreen.cpp in Sources */,
+				1814939C1BD1769600586683 /* UpdateManagerMN.cpp in Sources */,
 				E38E20B30D25F9FD00618676 /* GUIWindowMusicBase.cpp in Sources */,
 				E38E20B40D25F9FD00618676 /* GUIDialogMusicInfo.cpp in Sources */,
 				E38E20B50D25F9FD00618676 /* GUIWindowMusicNav.cpp in Sources */,
@@ -9155,6 +9208,7 @@
 				F5A4F29E1BB086FE0083FC69 /* ExifParse.cpp in Sources */,
 				E38E22FD0D25F9FE00618676 /* VideoInfoTag.cpp in Sources */,
 				E38E23040D25F9FE00618676 /* XBApplicationEx.cpp in Sources */,
+				181493961BD1769600586683 /* PlayerManagerMN.cpp in Sources */,
 				E38E25C00D263DC100618676 /* DVDFactoryDemuxer.cpp in Sources */,
 				E38E25C30D263DE200618676 /* DVDDemuxFFmpeg.cpp in Sources */,
 				E3A4780A0D29029A00F3C3A6 /* GUIDialogCache.cpp in Sources */,
@@ -9302,6 +9356,7 @@
 				18B7C7BB1294222E009E7A26 /* GUIControlProfiler.cpp in Sources */,
 				F590458E1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */,
 				18B7C7BC1294222E009E7A26 /* GUIDialog.cpp in Sources */,
+				181493991BD1769600586683 /* PythonBindingsMN.cpp in Sources */,
 				18B7C7BD1294222E009E7A26 /* GUIEditControl.cpp in Sources */,
 				18B7C7BE1294222E009E7A26 /* GUIFadeLabelControl.cpp in Sources */,
 				F59045811BA372A600DB589A /* smc.c in Sources */,
@@ -9380,6 +9435,7 @@
 				18B7C8F31294261F009E7A26 /* StringUtils.cpp in Sources */,
 				5EB3113C1A978B9B00551907 /* CueInfoLoader.cpp in Sources */,
 				18B7C8FB12942718009E7A26 /* GUIDialogAddonSettings.cpp in Sources */,
+				181493931BD1769600586683 /* GUIDialogMNDemand.cpp in Sources */,
 				F5BBDE081BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */,
 				18B7C90012942761009E7A26 /* GUIDialogAudioSubtitleSettings.cpp in Sources */,
 				18B7C911129427A6009E7A26 /* GUIDialogVideoSettings.cpp in Sources */,
@@ -9626,6 +9682,7 @@
 				DF28EDA7170E1A11005FA9D2 /* ProfilesManager.cpp in Sources */,
 				DF28EDA8170E1A11005FA9D2 /* GUIWindowSettingsProfile.cpp in Sources */,
 				DF28EE03170E1E51005FA9D2 /* DisplaySettings.cpp in Sources */,
+				181493901BD1769600586683 /* GUIDialogMN.cpp in Sources */,
 				7C87B2CE162CE39600EF897D /* PlayerController.cpp in Sources */,
 				F52CC5F01713AAA200113454 /* DirectoryNodeGrouped.cpp in Sources */,
 				F52CC6AA1713BD2B00113454 /* DirectoryNodeGrouped.cpp in Sources */,
@@ -9649,6 +9706,7 @@
 				DFBB430A178B574E006CC20A /* AddonCallbacksCodec.cpp in Sources */,
 				55611BA31766672F00754072 /* RenderFlags.cpp in Sources */,
 				5558ED10176396CD00118C35 /* StereoscopicsManager.cpp in Sources */,
+				1814939F1BD1769600586683 /* UtilitiesMN.cpp in Sources */,
 				F59EED7E17AD5174005BB7C6 /* ApplicationPlayer.cpp in Sources */,
 				F590457B1BA372A600DB589A /* OSXGLView.mm in Sources */,
 				DF28DF4D17B8379E0077F41A /* ProfilesOperations.cpp in Sources */,
@@ -9829,6 +9887,7 @@
 				E499117B174E5CE000741B6D /* AddonCallbacksAddon.cpp in Sources */,
 				E499117C174E5CE000741B6D /* AddonCallbacksGUI.cpp in Sources */,
 				E499117D174E5CE000741B6D /* AddonCallbacksPVR.cpp in Sources */,
+				181493941BD1769600586683 /* GUIDialogMNDemand.cpp in Sources */,
 				E499117E174E5CE000741B6D /* AddonDatabase.cpp in Sources */,
 				F590456E1BA372A600DB589A /* IOSKeyboard.mm in Sources */,
 				E499117F174E5CE000741B6D /* AddonInstaller.cpp in Sources */,
@@ -9882,6 +9941,7 @@
 				E49911D5174E5D2E00741B6D /* DVDDemuxFFmpeg.cpp in Sources */,
 				E49911D7174E5D2E00741B6D /* DVDDemuxPVRClient.cpp in Sources */,
 				E49911D8174E5D2E00741B6D /* DVDDemuxShoutcast.cpp in Sources */,
+				1814939D1BD1769600586683 /* UpdateManagerMN.cpp in Sources */,
 				E49911D9174E5D2E00741B6D /* DVDDemuxUtils.cpp in Sources */,
 				F5D0E1161BA667650070EE9C /* MCRuntimeLibStartupLogger.cpp in Sources */,
 				E49911DA174E5D2E00741B6D /* DVDDemuxVobsub.cpp in Sources */,
@@ -9970,6 +10030,7 @@
 				E499123D174E5D7E00741B6D /* GUIDialogKeyboardGeneric.cpp in Sources */,
 				E499123E174E5D7E00741B6D /* GUIDialogMediaFilter.cpp in Sources */,
 				E499123F174E5D7E00741B6D /* GUIDialogMediaSource.cpp in Sources */,
+				181493971BD1769600586683 /* PlayerManagerMN.cpp in Sources */,
 				E4991240174E5D7E00741B6D /* GUIDialogMuteBug.cpp in Sources */,
 				E4991241174E5D7E00741B6D /* GUIDialogNumeric.cpp in Sources */,
 				E4991242174E5D7E00741B6D /* GUIDialogOK.cpp in Sources */,
@@ -10013,6 +10074,7 @@
 				E4991273174E5D8F00741B6D /* IFile.cpp in Sources */,
 				E4991274174E5D8F00741B6D /* ImageFile.cpp in Sources */,
 				E4991278174E5D8F00741B6D /* LibraryDirectory.cpp in Sources */,
+				1814939A1BD1769600586683 /* PythonBindingsMN.cpp in Sources */,
 				E4991279174E5D8F00741B6D /* MemBufferCache.cpp in Sources */,
 				E499127A174E5D8F00741B6D /* MultiPathDirectory.cpp in Sources */,
 				E499127B174E5D8F00741B6D /* MultiPathFile.cpp in Sources */,
@@ -10260,6 +10322,7 @@
 				E49913A2174E5F0E00741B6D /* Song.cpp in Sources */,
 				E49913A3174E5F2100741B6D /* HTTPImageHandler.cpp in Sources */,
 				E49913A4174E5F2100741B6D /* HTTPJsonRpcHandler.cpp in Sources */,
+				181493911BD1769600586683 /* GUIDialogMN.cpp in Sources */,
 				E49913A5174E5F2100741B6D /* HTTPVfsHandler.cpp in Sources */,
 				E49913A6174E5F2100741B6D /* HTTPWebinterfaceAddonsHandler.cpp in Sources */,
 				E49913A7174E5F2100741B6D /* HTTPWebinterfaceHandler.cpp in Sources */,
@@ -10535,6 +10598,7 @@
 				E4991547174E642900741B6D /* ThumbLoader.cpp in Sources */,
 				E4991548174E642900741B6D /* ThumbnailCache.cpp in Sources */,
 				E4991549174E642900741B6D /* URL.cpp in Sources */,
+				181493A01BD1769600586683 /* UtilitiesMN.cpp in Sources */,
 				E499154A174E642900741B6D /* Util.cpp in Sources */,
 				E499154B174E642900741B6D /* XBApplicationEx.cpp in Sources */,
 				E499154C174E642900741B6D /* XBDateTime.cpp in Sources */,
@@ -10974,6 +11038,7 @@
 				F5D13FBC1BAF0B6D0075A95C /* SpecialProtocol.cpp in Sources */,
 				F5D13FBD1BAF0B6D0075A95C /* SpecialProtocolDirectory.cpp in Sources */,
 				F5D13FBE1BAF0B6D0075A95C /* SpecialProtocolFile.cpp in Sources */,
+				181493921BD1769600586683 /* GUIDialogMN.cpp in Sources */,
 				F5D13FBF1BAF0B6D0075A95C /* StackDirectory.cpp in Sources */,
 				F5D13FC01BAF0B6D0075A95C /* udf25.cpp in Sources */,
 				F5D13FC11BAF0B6D0075A95C /* UDFDirectory.cpp in Sources */,
@@ -11115,6 +11180,7 @@
 				F5D140481BAF0B6D0075A95C /* PlayerOperations.cpp in Sources */,
 				F5D140491BAF0B6D0075A95C /* DictionaryUtils.mm in Sources */,
 				F5D1404A1BAF0B6D0075A95C /* PlaylistOperations.cpp in Sources */,
+				1814939B1BD1769600586683 /* PythonBindingsMN.cpp in Sources */,
 				F5D1404B1BAF0B6D0075A95C /* PVROperations.cpp in Sources */,
 				F5D1404C1BAF0B6D0075A95C /* SystemOperations.cpp in Sources */,
 				F5D1404D1BAF0B6D0075A95C /* VideoLibrary.cpp in Sources */,
@@ -11216,6 +11282,7 @@
 				F5D140AB1BAF0B6D0075A95C /* GUIDialogPictureInfo.cpp in Sources */,
 				F5D140AC1BAF0B6D0075A95C /* GUIViewStatePictures.cpp in Sources */,
 				F5D140AD1BAF0B6D0075A95C /* GUIWindowPictures.cpp in Sources */,
+				181493981BD1769600586683 /* PlayerManagerMN.cpp in Sources */,
 				F5D140AE1BAF0B6D0075A95C /* GUIWindowSlideShow.cpp in Sources */,
 				F5D140AF1BAF0B6D0075A95C /* Picture.cpp in Sources */,
 				F5D140B01BAF0B6D0075A95C /* PictureInfoLoader.cpp in Sources */,
@@ -11285,6 +11352,7 @@
 				F5D140F01BAF0B6D0075A95C /* MediaSourceSettings.cpp in Sources */,
 				F5D140F11BAF0B6D0075A95C /* SettingAddon.cpp in Sources */,
 				F5D140F21BAF0B6D0075A95C /* SettingControl.cpp in Sources */,
+				1814939E1BD1769600586683 /* UpdateManagerMN.cpp in Sources */,
 				F5D140F31BAF0B6D0075A95C /* SettingPath.cpp in Sources */,
 				F5D140F41BAF0B6D0075A95C /* Settings.cpp in Sources */,
 				F5D140F51BAF0B6D0075A95C /* SkinSettings.cpp in Sources */,
@@ -11305,6 +11373,7 @@
 				F5D141041BAF0B6D0075A95C /* DVDDemuxCC.cpp in Sources */,
 				F5D141051BAF0B6D0075A95C /* AliasShortcutUtils.cpp in Sources */,
 				F5A4F2A31BB086FE0083FC69 /* IptcParse.cpp in Sources */,
+				181493A11BD1769600586683 /* UtilitiesMN.cpp in Sources */,
 				F5D141061BAF0B6D0075A95C /* Archive.cpp in Sources */,
 				F5D141071BAF0B6D0075A95C /* AsyncFileCopy.cpp in Sources */,
 				F5D141081BAF0B6D0075A95C /* Base64.cpp in Sources */,
@@ -11462,6 +11531,7 @@
 				F5D1419C1BAF0B6D0075A95C /* CompileInfo.cpp in Sources */,
 				F5D1419D1BAF0B6D0075A95C /* LanguageInvokerThread.cpp in Sources */,
 				F5D1419E1BAF0B6D0075A95C /* ScriptInvocationManager.cpp in Sources */,
+				181493951BD1769600586683 /* GUIDialogMNDemand.cpp in Sources */,
 				F5D1419F1BAF0B6D0075A95C /* VideoSyncIos.cpp in Sources */,
 				F5D141A01BAF0B6D0075A95C /* AddonCallbacksCodec.cpp in Sources */,
 				F5D141A11BAF0B6D0075A95C /* StereoscopicsManager.cpp in Sources */,
