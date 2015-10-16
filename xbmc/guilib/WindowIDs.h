@@ -104,6 +104,9 @@
 #define WINDOW_DIALOG_MEDIA_FILTER        10152
 #define WINDOW_DIALOG_SUBTITLES           10153
 
+#define WINDOW_DIALOG_RED                 10400
+#define WINDOW_DIALOG_RED_ABOUT           10401
+
 #define WINDOW_MUSIC_PLAYLIST             10500
 #define WINDOW_MUSIC_FILES                10501
 #define WINDOW_MUSIC_NAV                  10502

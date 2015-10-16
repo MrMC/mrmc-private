@@ -109,6 +109,9 @@
 #include "network/GUIDialogAccessPoints.h"
 #endif
 
+#include "red/GUIDialogRed.h"
+#include "red/GUIDialogRedAbout.h"
+
 /* PVR related include Files */
 #include "pvr/PVRManager.h"
 #include "pvr/windows/GUIWindowPVRChannels.h"
@@ -232,6 +235,9 @@ void CGUIWindowManager::CreateWindows()
   Add(new CGUIDialogMediaFilter);
   Add(new CGUIDialogSubtitles);
 
+  Add(new CGUIDialogRed);
+  Add(new CGUIDialogRedAbout);
+  
   Add(new CGUIWindowMusicPlayList);
   Add(new CGUIWindowMusicSongs);
   Add(new CGUIWindowMusicNav);
@@ -324,6 +330,9 @@ bool CGUIWindowManager::DestroyWindows()
     Delete(WINDOW_DIALOG_SLIDER);
     Delete(WINDOW_DIALOG_MEDIA_FILTER);
     Delete(WINDOW_DIALOG_SUBTITLES);
+    
+    Delete(WINDOW_DIALOG_RED);
+    Delete(WINDOW_DIALOG_RED_ABOUT);
 
     /* Delete PVR related windows and dialogs */
     Delete(WINDOW_TV_CHANNELS);

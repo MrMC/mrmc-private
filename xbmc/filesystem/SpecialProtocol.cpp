@@ -84,6 +84,11 @@ void CSpecialProtocol::SetLogsPath(const std::string &dir)
   SetPath("logs", dir);
 }
 
+void CSpecialProtocol::SetREDPath(const std::string &dir)
+{
+  SetPath("red", dir);
+}
+
 bool CSpecialProtocol::ComparePath(const std::string &path1, const std::string &path2)
 {
   return TranslatePath(path1) == TranslatePath(path2);
@@ -166,7 +171,8 @@ std::string CSpecialProtocol::TranslatePath(const CURL &url)
            RootDir == "logs" ||
            RootDir == "profile" ||
            RootDir == "masterprofile" ||
-           RootDir == "frameworks")
+           RootDir == "frameworks" ||
+           RootDir == "red")
   {
     std::string basePath = GetPath(RootDir);
     if (!basePath.empty())

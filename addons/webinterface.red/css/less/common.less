@@ -1,0 +1,454 @@
+@import "functions.less";
+@import "elusive-webfont.less";
+@import "table.less";
+@import "form.less";
+
+@normalSize: 14px;
+
+@grayDark: #ccc;
+@grayLight: #eee;
+@grayBorder: #aaa;
+
+@blueDark: #002149;
+@blueLight: #DEF0FF;
+
+.topGradient(){
+    .gradient(#536779, #47596A, #5D768D);
+}
+.darkerGradient(){
+    .gradient(#516980, #2D3B48, #5D768D);
+}
+
+body, html, #global{
+    height: 100%;
+}
+
+body{
+    position: relative;
+}
+
+a:hover,
+:focus{
+    outline: none;
+}
+a.icon{
+    text-decoration: none;
+}
+a.icon:hover {
+    color: #C95048;
+}
+
+header#top{
+    .topGradient();
+    padding: 10px;
+    border-bottom: 1px solid @blueDark;
+}
+
+.navbar-static-top{
+    margin: 0;
+}
+
+.nav {
+    .navbar-btn {
+        margin: 6px;
+    }
+    .navbar-btn .caret{
+        border-top-color: white;
+        border-bottom-color: white;
+    }
+
+    .navbar-btn.open{
+        > a, 
+        > a:hover, 
+            > a:focus{
+
+        }
+    }
+
+    .big-icon{
+        font-size: 0;
+        line-height:0;
+        text-indent: -9999px;
+        display: inline-block;
+    }
+
+    .big-icon:before{
+        font-size: 36px;
+        line-height: 16px;
+        padding:0;
+        margin:0;
+        vertical-align: middle;
+        text-indent: 0px;
+        display: block;
+    }
+
+    &.nav-tabs li .btn-group{
+        margin: 6px 0;
+    }
+}
+
+#topNav{
+    border-width: 0 0 1px;
+    margin-bottom: 10px;
+    .container-fluid{
+        background: url(/images/Blackbird.png) no-repeat top right;
+        padding-right: 60px;
+    }
+    .navbar-nav > li > a {
+        border-right: 0;
+        border-left: 0;
+        font-size :20px;
+        padding-bottom: 14px;
+        padding-top: 14px;
+    }
+    .navbar-nav > li.divider-vertical,
+    .navbar-brand {
+        border-right: 1px solid rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar-nav > li.divider-vertical + li,
+    .navbar-nav:first-child > li:first-child{
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar-brand{
+        background: #EF4135;
+        color: #fff;
+        background: url(/images/headerREDLogo.jpg) no-repeat top left;
+        width: 100px;
+        text-indent: -99999px
+    }
+
+}
+
+@media (max-width: 768px) {
+    .navbar-toggle {
+        float: left;
+        margin-left: 10px
+    }
+
+
+    li.logo{
+        display: none; 
+    }
+}
+
+.player {
+
+    margin: -10px 0 10px;
+    padding: 0 ;
+    background: #000;
+    position: relative;
+    padding-left: 135px;
+    overflow: hidden;
+    .gradient(#000, #111, #444);   
+
+
+
+    .progress{
+        height: 15px;
+        position:absolute;
+        left:60px;
+        right:60px;
+    }
+
+    .track-poster{
+
+        position: absolute;
+        top:0;
+        left:0;
+        bottom:0;
+        height:100%;
+        border-right: 1px solid #444;
+        width: 135px;
+        z-index:0;
+
+		overflow: hidden;
+		img {
+			max-width: 100%;
+			width: 100%;
+			height: auto;
+			max-height:100%;
+			left:0;
+			right:0;
+			position: absolute;
+			z-index: 2;
+		}
+		img.old {
+			z-index: 0;
+		}
+    }
+
+    .track-info{
+        padding: 10px;
+        overflow: hidden;
+        border-bottom: 1px solid #444;
+        border-left: 1px solid #444;
+        margin-left: -1px;
+
+
+        .track-title{
+            margin-left: 10px;
+        }
+        .duration {
+        	position:relative;
+        }
+        .duration span{
+            float: left;
+            display: box;
+            line-height: 20px;
+            margin: 0 10px;
+            width: 40px
+        }
+
+        .duration .duration{
+            float: right;
+        }
+    }
+
+
+    .track-control,
+    .track-volume{
+        position: relative;
+        float: left;
+        width: 50%;
+        padding: 5px;
+        border-left: 1px solid #444;
+        height: 63px;
+
+        .center{
+            top: 0; left:10px; right: 10px; bottom:0;
+            height: 30px;
+            position: absolute;
+            margin: auto;
+        }
+
+    }
+
+    .track-control{
+        margin-left: -1px;
+
+        a{
+            display: block;
+            float: left;
+            height: 30px;
+            width: 30px;
+            margin: 0 0 0 35px;
+            text-indent: -9999px;
+
+            &:first-child{
+                margin:0;
+            }
+
+            &#control-play{
+                width: 40px
+            }
+            &#control-play.paused {
+            	color: #ec433d;
+            }
+        }
+
+
+        .center{
+            overflow: hidden;
+            width: 171px;
+            background: url(../images/track-control.png) no-repeat right center;
+        }
+    }
+    .track-volume{
+
+        #mute {
+            float: left;
+            display: block;
+            margin-right: 10px;
+            height: 30px;
+            width: 30px;
+            background: url(../images/track-volume.png) no-repeat center center;
+            text-indent: -9999px;
+        }
+        .slider-horizontal{
+            float: left;
+
+            margin: 5px 0 0;
+        }
+
+        input.slider{
+            width: 150px;
+        }
+    }
+}
+
+
+#playlist th.play{
+    width: 30px;
+}
+#playlist .icon-play {visibility:hidden;}
+#playlist .current .icon-play {visibility:visible;}
+
+.panel {
+    &.panel-default{
+        border: 1px solid #17191B;
+    }
+
+    .panel-heading{
+        .topGradient();
+        color: #fff;
+    }
+
+    .panel-footer {
+        padding: 5px;
+    }
+
+}
+
+
+table td.value{
+    text-align: right
+}
+
+
+
+* > h1:first-child,
+* > h2:first-child,
+* > h3:first-child,
+* > h4:first-child{
+    margin-top: 0;
+}
+@media (max-width: 768px) {
+    form .row [class*="col"]:not(:first-child) {
+        padding-top: 10px
+    }
+}
+
+@media (max-width: 768px) {
+
+    .navbar-collapse p.navbar-text{
+        background: #EC433D url(/images/headerREDLogo.jpg) no-repeat center left;
+        margin: 0 -15px 10px;
+        height: 50px;
+        text-indent: -9999px;
+        border-bottom: 1px solid #111;
+    }
+
+    #global.offcanvas{
+        left: 0;
+        position: relative;
+        transition: left 0.3s ease-in 0s;
+
+        .side-navigation{
+            transition: left 0.3s ease-in 0s;
+            display: none;
+            background: none repeat scroll 0 0 #111;
+            border-right: 1px solid #111;
+            display: block;
+
+            margin: 0;
+            position: fixed;
+
+            width: 80%;
+            left: -100%;    
+            top: 0;
+            bottom: 0;
+            height: 100%;
+            max-height: inherit;
+        }
+
+        &.active{
+            left: 80%;
+
+            .side-navigation {
+
+                left: 0;
+            }
+            h1.title{
+                display: none;
+            }
+        }
+
+    }
+
+}
+
+@media (max-width: 768px) {
+    h1.title{
+        position: absolute;
+        top: -60px;
+        z-index: 1001;
+        margin:0;
+        padding:0;
+        font-size: 16px;
+        line-height: 50px;
+        left: 50px;
+        right: 50px;
+        text-align: center;
+    }
+}
+
+
+.slider-handle {
+    background: #EC433D;
+    opacity: 1;
+}
+
+.slider-track{
+    .gradient(#000, #000, #222);
+}
+
+.slider-selection {
+    .gradient(#fff, #ddd, #fff);
+}
+
+
+@media (max-width: 768px) {
+
+
+    .player{
+        padding: 0;
+        background: none;
+
+        .track-info {
+            border:none;
+            border-bottom: 1px solid #444444;
+            float: none;
+            .gradient(#000, #111, #333);
+
+            .track-title{
+                margin-left: 0;
+            }
+        }
+
+
+
+        .track-poster {
+            position: fixed;
+            top: 123px;
+            width: 100%;
+            background: #000;
+            bottom: 126px;
+            clear: both;
+
+        }
+
+
+        .track-control,  .track-volume{
+            clear: both;
+            float: none;
+            margin: 0;
+            width: 100%;
+            border-top:1px solid #333;
+            .gradient(#000, #111, #2a2a2a);
+            position: fixed;
+            bottom: 63px;
+        }
+
+        .track-volume{
+            bottom: 0;
+            .center{
+                width: 200px;
+            }
+            
+        }
+    }
+
+
+}
