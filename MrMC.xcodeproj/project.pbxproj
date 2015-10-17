@@ -27,6 +27,9 @@
 		1814939F1BD1769600586683 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938E1BD1769600586683 /* UtilitiesMN.cpp */; };
 		181493A01BD1769600586683 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938E1BD1769600586683 /* UtilitiesMN.cpp */; };
 		181493A11BD1769600586683 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938E1BD1769600586683 /* UtilitiesMN.cpp */; };
+		181493A41BD19B9400586683 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493A21BD19B9400586683 /* MNJSONOperations.cpp */; };
+		181493A51BD19B9400586683 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493A21BD19B9400586683 /* MNJSONOperations.cpp */; };
+		181493A61BD19B9400586683 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493A21BD19B9400586683 /* MNJSONOperations.cpp */; };
 		1840B74D13993D8A007C848B /* JSONVariantParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B74B13993D8A007C848B /* JSONVariantParser.cpp */; };
 		1840B75313993DA0007C848B /* JSONVariantWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B75113993DA0007C848B /* JSONVariantWriter.cpp */; };
 		184C472F1296BC6E0006DB3E /* Service.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 184C472D1296BC6E0006DB3E /* Service.cpp */; };
@@ -2812,6 +2815,8 @@
 		1814938D1BD1769600586683 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UpdateManagerMN.h; path = nwmn/UpdateManagerMN.h; sourceTree = "<group>"; };
 		1814938E1BD1769600586683 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UtilitiesMN.cpp; path = nwmn/UtilitiesMN.cpp; sourceTree = "<group>"; };
 		1814938F1BD1769600586683 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UtilitiesMN.h; path = nwmn/UtilitiesMN.h; sourceTree = "<group>"; };
+		181493A21BD19B9400586683 /* MNJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MNJSONOperations.cpp; path = nwmn/MNJSONOperations.cpp; sourceTree = "<group>"; };
+		181493A31BD19B9400586683 /* MNJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MNJSONOperations.h; path = nwmn/MNJSONOperations.h; sourceTree = "<group>"; };
 		18308CB41303370800AA309E /* stat_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stat_utf8.h; sourceTree = "<group>"; };
 		18308CB51303370800AA309E /* stdio_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdio_utf8.h; sourceTree = "<group>"; };
 		1840B74B13993D8A007C848B /* JSONVariantParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSONVariantParser.cpp; sourceTree = "<group>"; };
@@ -5135,6 +5140,8 @@
 				181493841BD1769600586683 /* GUIDialogMN.h */,
 				181493851BD1769600586683 /* GUIDialogMNDemand.cpp */,
 				181493861BD1769600586683 /* GUIDialogMNDemand.h */,
+				181493A21BD19B9400586683 /* MNJSONOperations.cpp */,
+				181493A31BD19B9400586683 /* MNJSONOperations.h */,
 				181493871BD1769600586683 /* MNMedia.h */,
 				181493881BD1769600586683 /* PlayerManagerMN.cpp */,
 				181493891BD1769600586683 /* PlayerManagerMN.h */,
@@ -9396,6 +9403,7 @@
 				18B7C7DF1294222E009E7A26 /* GUISpinControl.cpp in Sources */,
 				399442711A8DD920006C39E9 /* VideoLibraryJob.cpp in Sources */,
 				18B7C7E01294222E009E7A26 /* GUISpinControlEx.cpp in Sources */,
+				181493A41BD19B9400586683 /* MNJSONOperations.cpp in Sources */,
 				18B7C7E21294222E009E7A26 /* GUIStaticItem.cpp in Sources */,
 				18B7C7E31294222E009E7A26 /* GUITextBox.cpp in Sources */,
 				18B7C7E41294222E009E7A26 /* GUITextLayout.cpp in Sources */,
@@ -10028,6 +10036,7 @@
 				E499123B174E5D7E00741B6D /* GUIDialogGamepad.cpp in Sources */,
 				E499123C174E5D7E00741B6D /* GUIDialogKaiToast.cpp in Sources */,
 				E499123D174E5D7E00741B6D /* GUIDialogKeyboardGeneric.cpp in Sources */,
+				181493A51BD19B9400586683 /* MNJSONOperations.cpp in Sources */,
 				E499123E174E5D7E00741B6D /* GUIDialogMediaFilter.cpp in Sources */,
 				E499123F174E5D7E00741B6D /* GUIDialogMediaSource.cpp in Sources */,
 				181493971BD1769600586683 /* PlayerManagerMN.cpp in Sources */,
@@ -10876,6 +10885,7 @@
 				F5D13F1C1BAF0B6D0075A95C /* DVDSubtitleTagMicroDVD.cpp in Sources */,
 				F5D13F1D1BAF0B6D0075A95C /* DVDSubtitleTagSami.cpp in Sources */,
 				F5D13F1E1BAF0B6D0075A95C /* DVDAudio.cpp in Sources */,
+				181493A61BD19B9400586683 /* MNJSONOperations.cpp in Sources */,
 				F5D13F1F1BAF0B6D0075A95C /* DVDClock.cpp in Sources */,
 				F5D13F201BAF0B6D0075A95C /* DVDDemuxSPU.cpp in Sources */,
 				F5D13F211BAF0B6D0075A95C /* DVDFileInfo.cpp in Sources */,
