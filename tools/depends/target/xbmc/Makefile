@@ -15,6 +15,7 @@ CONFIGURE = cp -f $(CONFIG_SUB) $(CONFIG_GUESS) build-aux/ ;\
 ifeq ($(OS),android)
 CONFIGURE += --enable-codec=amcodec --enable-breakpad
 endif
+CONFIGURE += --disable-upnp
 
 ifeq ($(Configuration),Release)
 DEBUG = --enable-debug=no
