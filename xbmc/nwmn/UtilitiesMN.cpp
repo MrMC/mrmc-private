@@ -1,7 +1,7 @@
 /*
  *  Copyright (C) 2014 Team MN
  *
- *  This Program is free software; you can MNistribute it and/or modify
+ *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
@@ -19,14 +19,15 @@
 
 #include "MNMedia.h"
 #include "UtilitiesMN.h"
-//#include "DBManagerMN.h"
 
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 #include "URL.h"
 #include "Util.h"
 #include "utils/md5.h"
-#include "XFileUtils.h"
+#include "FileItem.h"
+#include "linux/XFileUtils.h"
 #include "filesystem/File.h"
+#include "filesystem/Directory.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/SpecialProtocol.h"
 #include "storage/MediaManager.h"
@@ -367,7 +368,7 @@ void ParseMediaXML(PlayerSettings settings,std::vector<MNCategory> &categories, 
   TiXmlElement* rootXmlNode = xml.RootElement();
   
   CXBMCTinyXML xmlDoc;
-  TiXmlNode *pRoot = xmlDoc.InsertEndChild(*rootXmlNode);
+  xmlDoc.InsertEndChild(*rootXmlNode);
   
   // save media xml
   std::string localMediaXML = "special://MN/media_xml.xml";
@@ -456,7 +457,7 @@ void ParseSettingsXML(PlayerSettings &settings)
   TiXmlElement* rootXmlNode = xml.RootElement();
   
   CXBMCTinyXML xmlDoc;
-  TiXmlNode *pRoot = xmlDoc.InsertEndChild(*rootXmlNode);
+  xmlDoc.InsertEndChild(*rootXmlNode);
   
   // save settings xml
   std::string localSettingsXML = "special://MN/settings_xml.xml";
@@ -591,11 +592,41 @@ void LogSettings(std::string home,PlayerSettings settings)
 
 void UploadLogs(PlayerSettings settings)
 {
-//  std::string cmd;
-//  cmd = StringUtils::Format("RunAddon(script.nationwide_helper,upload,%s,%s,%s)",
-//                            settings.strLocation_id.c_str(),
-//                            settings.strMachine_id.c_str(),
-//                            settings.strMachine_sn.c_str()
-//                            );
-//  CApplicationMessenger::GetInstance().ExecBuiltIn(cmd, false);
+  CFileItemList items;
+  std::string srcLogPath = "special://MN/" + kMNDownloadLogPath;
+  XFILE::CDirectory::GetDirectory(srcLogPath, items, ".log", XFILE::DIR_FLAG_NO_FILE_DIRS);
+  for (int i = 0; i < items.Size(); ++i)
+  {
+    CURL url;
+    url.SetProtocol("ftp");
+#if 0
+    url.SetUserName("davilla");
+    url.SetPassword("neveryoumind");
+    url.SetHostName("192.168.2.131");
+    std::string localPath = items[i]->GetPath();
+    url.SetFileName("Public/" + URIUtils::GetFileName(localPath));
+#else
+    url.SetUserName("ftp");
+    url.SetPassword("f2+va$uP");
+    url.SetHostName("nationwidemember.com");
+    std::string localPath = items[i]->GetPath();
+    // do not use and absolute path here, should be relative to ftp site 'home' dir.
+    url.SetFileName("tvlogs/" + URIUtils::GetFileName(localPath));
+#endif
+    XFILE::CCurlFile *cfile = new XFILE::CCurlFile();
+    if (cfile->OpenForWrite(url, true))
+    {
+      XFILE::CFile localfile;
+      XFILE::auto_buffer localfilebuffer;
+      localfile.LoadFile(localPath, localfilebuffer);
+      ssize_t wlength = cfile->Write(localfilebuffer.get(), localfilebuffer.size());
+      if (wlength > 0 && wlength == (ssize_t)localfilebuffer.size())
+      {
+        XFILE::CFile::Delete(localPath);
+        CLog::Log(LOGDEBUG, "**NWMN** - UploadLogs() - %s", localPath.c_str());
+      }
+      cfile->Close();
+    }
+    delete cfile;
+  }
 }
