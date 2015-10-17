@@ -22,11 +22,11 @@
 #include "messaging/ApplicationMessenger.h"
 #include "utils/Variant.h"
 #include "powermanagement/PowerManager.h"
-#include "JSONRPCUtils.h"
+#include "interfaces/json-rpc/JSONRPCUtils.h"
+#include "interfaces/json-rpc/AudioLibrary.h"
 #include "utils/JSONVariantWriter.h"
 #include "utils/JSONVariantParser.h"
 
-#include "AudioLibrary.h"
 #include "music/MusicDatabase.h"
 #include "FileItem.h"
 #include "Util.h"
