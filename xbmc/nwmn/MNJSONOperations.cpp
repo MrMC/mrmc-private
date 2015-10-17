@@ -30,10 +30,12 @@
 #include "music/MusicDatabase.h"
 #include "FileItem.h"
 #include "Util.h"
+#include "filesystem/File.h"
 #include "utils/SortUtils.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
+#include "utils/log.h"
 #include "music/tags/MusicInfoTag.h"
 #include "music/Artist.h"
 #include "music/Album.h"
@@ -60,13 +62,25 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
       {
         argv1 = it->second.asString();
         StringUtils::Replace(argv1, ";", ",");
-        StringUtils::Replace(argv1, "values=", "");
-        StringUtils::Replace(argv1, "\\", "");
-        StringUtils::Replace(argv1, "},",";");
+//        StringUtils::Replace(argv1, "values=", "");
+//        StringUtils::Replace(argv1, "\\", "");
+//        StringUtils::Replace(argv1, "},",";");
       }
     }
   }
   
+  std::string settingsFile = "special://home/MN/settings.txt";
+  
+  XFILE::CFile file;
+  if (!file.OpenForWrite(settingsFile, true))
+  {
+    CLog::Log(LOGERROR, "MN Save settings.txt - Unable to open file");
+  }
+  else
+  {
+    file.Write(argv1.c_str(), argv1.size());
+  }
+  file.Close();
   // we have to parse  above and extract values for url, machine and location ID
   
   return OK;

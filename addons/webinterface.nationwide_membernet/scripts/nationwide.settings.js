@@ -111,9 +111,9 @@
 				cache: false,
 				async: false,
 				type: 'GET',
-				url: 'vfs/' + encodeURIComponent('special://home/MN/settings.txt'),
+				url: 'vfs/' + encodeURIComponent('special://MN/settings.txt'),
 				success: function(msg){
-				setting_url = 'vfs/' + encodeURIComponent('special://home/MN/settings.txt');
+				setting_url = 'vfs/' + encodeURIComponent('special://MN/settings.txt');
 				},
 				error: function(jqXHR, textStatus, errorThrown){
 				setting_url = 'settings.txt?' + Math.random(10);
