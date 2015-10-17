@@ -225,7 +225,6 @@ CPlayerManagerMN* CPlayerManagerMN::GetPlayerManager()
 
 void CPlayerManagerMN::Startup()
 {
-  m_settings = GetSettings();
   StartDialog();
   ParseMediaXML(m_settings,m_categories,m_OnDemand);
   ParseSettingsXML(m_settings);
@@ -237,10 +236,22 @@ void CPlayerManagerMN::Startup()
   Create();
 }
 
+void CPlayerManagerMN::SetSettings(PlayerSettings settings)
+{
+  m_settings = settings;
+  CSettings::GetInstance().SetString("MN.location_id" ,settings.strLocation_id);
+  CSettings::GetInstance().SetString("MN.machine_id"  ,settings.strMachine_id);
+  CSettings::GetInstance().SetString("MN.url_feed"    ,settings.strUrl_feed);
+  StopThread();
+  Startup();
+}
+
+
 void CPlayerManagerMN::FullUpdate()
 {
 //  m_UpdateManager->StopThread();
   StopThread();
+  m_settings = GetSettings();
   Startup();
 }
 
@@ -295,7 +306,14 @@ PlayerSettings CPlayerManagerMN::GetSettings()
     settings.strUrl_feed = "http://www.nationwidemember.com";
     settings.strLocation_id = "10140003";
     settings.strMachine_id  = "1147";
+    
+    CSettings::GetInstance().SetString("MN.location_id" ,settings.strLocation_id);
+    CSettings::GetInstance().SetString("MN.machine_id"  ,settings.strMachine_id);
+    CSettings::GetInstance().SetString("MN.url_feed"    ,settings.strUrl_feed);
   }
+  
+  if (settings.strMachine_sn.empty())
+    settings.strMachine_sn = "UNKNOWN";
   return settings;
 }
 
