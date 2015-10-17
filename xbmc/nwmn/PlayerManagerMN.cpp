@@ -321,6 +321,14 @@ PlayerSettings CPlayerManagerMN::GetSettings()
     CSettings::GetInstance().SetString("MN.url_feed"    ,settings.strUrl_feed);
   }
   
+  if (settings.strMachine_ethernet_id.empty())
+  {
+    CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
+    if (iface)
+    settings.strMachine_ethernet_id = iface->GetMacAddress();
+  }
+
+
   if (settings.strMachine_sn.empty())
     settings.strMachine_sn = "UNKNOWN";
   return settings;
