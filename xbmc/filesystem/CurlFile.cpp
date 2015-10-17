@@ -940,6 +940,12 @@ void CCurlFile::Reset()
 
 bool CCurlFile::Open(const CURL& url)
 {
+  if (!g_curlInterface.IsLoaded())
+  {
+    CLog::Log(LOGERROR, "CurlFile::Open: curl interface not loaded");
+    return false;
+  }
+
   m_opened = true;
   m_seekable = true;
 
@@ -1032,7 +1038,7 @@ bool CCurlFile::OpenForWrite(const CURL& url, bool bOverWrite)
   if(m_opened)
     return false;
 
-  if (Exists(url) && !bOverWrite)
+  if (!bOverWrite && Exists(url))
     return false;
 
   CURL url2(url);
@@ -1528,8 +1534,9 @@ bool CCurlFile::CReadState::FillBuffer(unsigned int want)
                   msg->data.result == CURLE_RECV_ERROR)        &&
                   !m_bFirstLoop)
               CURLresult = msg->data.result;
-            else if ( (msg->data.result == CURLE_HTTP_RANGE_ERROR     ||
-                       httpCode == 416 /* = Requested Range Not Satisfiable */) &&
+            else if ( (msg->data.result == CURLE_HTTP_RANGE_ERROR              ||
+                       httpCode == 416 /* = Requested Range Not Satisfiable */ ||
+                       httpCode == 406 /* = Not Acceptable (fixes issues with non compliant HDHomerun servers */) &&
                        m_bFirstLoop                                   &&
                        m_filePos == 0                                 &&
                        m_sendRange)
