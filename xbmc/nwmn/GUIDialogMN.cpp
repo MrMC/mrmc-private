@@ -290,7 +290,7 @@ void CGUIDialogMN::OnInitWindow()
 
   m_PlayerManager = new CPlayerManagerMN();
   m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
-  m_PlayerManager->Startup();
+  m_PlayerManager->FullUpdate();
   
    CGUIWindow::OnInitWindow();
 
@@ -307,7 +307,7 @@ void CGUIDialogMN::Refresh()
   CLog::Log(LOGDEBUG, "**MN** - CGUIDialogMN::Refresh()");
   CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
   if (MNPlayerManager)
-    MNPlayerManager->FullUpdate();
+    MNPlayerManager->Startup();
 }
 
 void CGUIDialogMN::OnStartup()
