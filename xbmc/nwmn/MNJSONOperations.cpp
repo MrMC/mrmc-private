@@ -44,6 +44,8 @@
 #include "messaging/ApplicationMessenger.h"
 #include "filesystem/Directory.h"
 #include "settings/Settings.h"
+#include "PlayerManagerMN.h"
+#include "dialogs/GUIDialogKaiToast.h"
 
 using namespace JSONRPC;
 using namespace KODI::MESSAGING;
@@ -83,5 +85,54 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
   file.Close();
   // we have to parse  above and extract values for url, machine and location ID
   
+  
+  // Below is a major HACK, I take no responsibilities for it :)
+  std::vector<std::string> steps = StringUtils::Split(argv1, "},");
+  
+  std::string url;
+  std::string machineID;
+  std::string locationID;
+  
+  for (int k = 0; k < steps.size(); ++k)
+  {
+    size_t pos = steps[k].find("{\"url\":{\"feed\":");
+    if (pos != std::string::npos)
+    {
+      int iSize = steps[k].size();
+
+      url = steps[k].substr(pos+16,iSize);
+      StringUtils::Replace(url, "\"","");
+    }
+    pos = steps[k].find("machine\":{\"id\":");
+    if (pos != std::string::npos)
+    {
+      size_t endPos = steps[k].find(",\"name\":");
+      
+      machineID = steps[k].substr(pos+15,endPos-16);
+      StringUtils::Replace(machineID, "\"","");
+    }
+    pos = steps[k].find("location\":{\"id\":");
+    if (pos != std::string::npos)
+    {
+      size_t endPos = steps[k].find("},\"machine");
+      
+      locationID = steps[k].substr(pos+16,endPos-10);
+      StringUtils::Replace(locationID, "\"","");
+    }
+  }
+  CLog::Log(LOGERROR, "MN parsed settings, url - %s, Machine ID - %s , location ID - %s", url.c_str(), machineID.c_str(), locationID.c_str());
+  
+  PlayerSettings settings;
+  settings.strLocation_id = locationID;
+  settings.strMachine_id  = machineID;
+  settings.strUrl_feed    = url;
+  // Notify that we have changed settings
+  CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
+                                        "MemberNet",
+                                        "Player details updated",
+                                        TOAST_DISPLAY_TIME, false);
+  CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
+  if (MNPlayerManager)
+    MNPlayerManager->SetSettings(settings);
   return OK;
 }
