@@ -29,10 +29,11 @@
 #include "interfaces/IAnnouncer.h"
 
 #include "MNMedia.h"
-#include "UpdateManagerMN.h"
 
 typedef void (*PlayerCallBackFn)(const void *ctx, bool status);
 
+class CLogManagerMN;
+class CUpdateManagerMN;
 
 class CPlayerManagerMN : public CThread, public ANNOUNCEMENT::IAnnouncer
 {
@@ -85,7 +86,9 @@ protected:
   std::vector<MNCategory> m_categories;
   MNCategory       m_OnDemand;
 
+  CLogManagerMN    *m_LogManager;
   CUpdateManagerMN *m_UpdateManager;
+
   static CCriticalSection m_player_lock;
   static CPlayerManagerMN *m_PlayerManager;
   CGUIDialogProgress* m_dlgProgress;

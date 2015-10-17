@@ -1708,6 +1708,9 @@
 		F508E7991BCEA52900FEB3DC /* CustomURLProtocol.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */; };
 		F508E79C1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */; };
 		F508E79D1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */; };
+		F508E7A11BD2E38600FEB3DC /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F508E7A01BD2E38500FEB3DC /* LogManagerMN.cpp */; };
+		F508E7A21BD2E38600FEB3DC /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F508E7A01BD2E38500FEB3DC /* LogManagerMN.cpp */; };
+		F508E7A31BD2E38600FEB3DC /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F508E7A01BD2E38500FEB3DC /* LogManagerMN.cpp */; };
 		F50FDC5A119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */; };
 		F52A733D1560BC34005B1A0B /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F52A733C1560BC34005B1A0B /* CoreFoundation.framework */; };
 		F52B063B11869862004B1D66 /* Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B063A11869862004B1D66 /* Skin.cpp */; };
@@ -4733,6 +4736,8 @@
 		F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CustomURLProtocol.mm; sourceTree = "<group>"; };
 		F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MrMCCustomURLDelegate.mm; sourceTree = "<group>"; };
 		F508E79B1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MrMCCustomURLDelegate.h; sourceTree = "<group>"; };
+		F508E79F1BD2E38500FEB3DC /* LogManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LogManagerMN.h; path = nwmn/LogManagerMN.h; sourceTree = "<group>"; };
+		F508E7A01BD2E38500FEB3DC /* LogManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LogManagerMN.cpp; path = nwmn/LogManagerMN.cpp; sourceTree = "<group>"; };
 		F50FDC58119B4B2C00C8B8CD /* GUIDialogTextViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogTextViewer.h; sourceTree = "<group>"; };
 		F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogTextViewer.cpp; sourceTree = "<group>"; };
 		F52A733C1560BC34005B1A0B /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -5143,6 +5148,8 @@
 				181493A21BD19B9400586683 /* MNJSONOperations.cpp */,
 				181493A31BD19B9400586683 /* MNJSONOperations.h */,
 				181493871BD1769600586683 /* MNMedia.h */,
+				F508E79F1BD2E38500FEB3DC /* LogManagerMN.h */,
+				F508E7A01BD2E38500FEB3DC /* LogManagerMN.cpp */,
 				181493881BD1769600586683 /* PlayerManagerMN.cpp */,
 				181493891BD1769600586683 /* PlayerManagerMN.h */,
 				1814938A1BD1769600586683 /* PythonBindingsMN.cpp */,
@@ -9044,6 +9051,7 @@
 				E38E20270D25F9FD00618676 /* IDirectory.cpp in Sources */,
 				E38E20280D25F9FD00618676 /* IFile.cpp in Sources */,
 				E38E20330D25F9FD00618676 /* MultiPathDirectory.cpp in Sources */,
+				F508E7A11BD2E38600FEB3DC /* LogManagerMN.cpp in Sources */,
 				E38E20340D25F9FD00618676 /* DirectoryNode.cpp in Sources */,
 				E38E20350D25F9FD00618676 /* DirectoryNodeAlbum.cpp in Sources */,
 				E38E20360D25F9FD00618676 /* DirectoryNodeAlbumCompilations.cpp in Sources */,
@@ -10618,6 +10626,7 @@
 				4260D5C81B67BB8F003F6F2D /* GUIWindowSplash.cpp in Sources */,
 				E499156E174E65AB00741B6D /* SDLJoystick.cpp in Sources */,
 				E499156F174E65AC00741B6D /* XBMC_keytable.cpp in Sources */,
+				F508E7A21BD2E38600FEB3DC /* LogManagerMN.cpp in Sources */,
 				E4991574174E661400741B6D /* WinEventsIOS.mm in Sources */,
 				E4991575174E661400741B6D /* WinSystemIOS.mm in Sources */,
 				DF56EF251A798A5E00CAAEFB /* HttpRangeUtils.cpp in Sources */,
@@ -11085,6 +11094,7 @@
 				F5D13FDF1BAF0B6D0075A95C /* ZipManager.cpp in Sources */,
 				F5D13FE01BAF0B6D0075A95C /* DDSImage.cpp in Sources */,
 				F5D13FE11BAF0B6D0075A95C /* DirectXGraphics.cpp in Sources */,
+				F508E7A31BD2E38600FEB3DC /* LogManagerMN.cpp in Sources */,
 				F5D13FE21BAF0B6D0075A95C /* DirtyRegionSolvers.cpp in Sources */,
 				F5D13FE31BAF0B6D0075A95C /* DirtyRegionTracker.cpp in Sources */,
 				F5D13FE41BAF0B6D0075A95C /* FrameBufferObject.cpp in Sources */,
