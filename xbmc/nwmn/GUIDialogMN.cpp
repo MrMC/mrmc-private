@@ -2,7 +2,7 @@
  *  Copyright (C) 2014 Team MN
  *
  *
- *  This Program is free software; you can MNistribute it and/or modify
+ *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
@@ -27,7 +27,7 @@
 #include "UtilitiesMN.h"
 
 #include "Application.h"
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 #include "URL.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"

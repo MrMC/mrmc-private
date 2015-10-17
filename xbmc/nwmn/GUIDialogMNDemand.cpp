@@ -34,7 +34,7 @@
 #include "Application.h"
 #include "filesystem/SpecialProtocol.h"
 #include "settings/MediaSettings.h"
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 
 #define ONDEMAND_LIST      50
 

@@ -19,7 +19,7 @@
 
 #include "PythonBindingsMN.h"
 
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "PlayerManagerMN.h"
 

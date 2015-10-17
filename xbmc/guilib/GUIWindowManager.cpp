@@ -109,8 +109,8 @@
 #include "network/GUIDialogAccessPoints.h"
 #endif
 
-#include "GUIDialogMN.h"
-#include "GUIDialogMNDemand.h"
+#include "nwmn/GUIDialogMN.h"
+#include "nwmn/GUIDialogMNDemand.h"
 
 /* PVR related include Files */
 #include "pvr/PVRManager.h"

@@ -21,7 +21,7 @@
 #include "PlayerManagerMN.h"
 #include "UtilitiesMN.h"
 
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 #include "Util.h"
 #include "filesystem/File.h"
 #include "utils/log.h"
