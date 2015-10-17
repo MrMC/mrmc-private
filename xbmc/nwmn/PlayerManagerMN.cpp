@@ -334,7 +334,7 @@ void CPlayerManagerMN::Process()
       int itemCount = 0;
       bool run = false;
       m_CreatePlaylist = false;
-      CFileItemList* PlayListItems = new CFileItemList;
+      CFileItemList *PlayListItems = new CFileItemList;
 
       for (size_t cat = 0; cat < m_categories.size(); cat++)
       {
@@ -386,7 +386,9 @@ void CPlayerManagerMN::Process()
         PlayListItems->SetProperty("repeat", PLAYLIST::REPEAT_ALL);
         g_playlistPlayer.Add(PLAYLIST_VIDEO, *PlayListItems);
         g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
-        g_playlistPlayer.Play(0);
+        // do not call g_playlistPlayer.Play directly, we are not on main thread.
+        KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_PLAY, 0);
+
         CloseDialog();
       }
     }
