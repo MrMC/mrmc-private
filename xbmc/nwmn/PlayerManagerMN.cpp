@@ -411,9 +411,13 @@ void CPlayerManagerMN::Process()
       {
         CSingleLock lock(m_player_lock);
         
+        CMediaSettings::GetInstance().SetVideoPlaylistRepeat(true);
+        CSettings::GetInstance().Save();
+
         CMediaSettings::GetInstance().SetVideoStartWindowed(false);
         PlayListItems->SetProperty("repeat", PLAYLIST::REPEAT_ALL);
         g_playlistPlayer.Add(PLAYLIST_VIDEO, *PlayListItems);
+        g_playlistPlayer.SetRepeat(PLAYLIST_VIDEO, PLAYLIST::REPEAT_ALL, false);
         g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
         // do not call g_playlistPlayer.Play directly, we are not on main thread.
         KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_PLAY, 0);
