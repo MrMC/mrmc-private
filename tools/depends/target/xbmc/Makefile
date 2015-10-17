@@ -21,6 +21,7 @@ endif
 ifeq ($(OS),osx)
 CONFIGURE += --disable-airplay --disable-airtunes
 endif
+CONFIGURE += --disable-upnp
 
 ifeq ($(Configuration),Release)
 DEBUG = --enable-debug=no
