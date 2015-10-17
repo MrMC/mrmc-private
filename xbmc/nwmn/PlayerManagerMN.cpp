@@ -210,7 +210,8 @@ void CPlayerManagerMN::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char 
     if (strcmp(message, "OnPlay") == 0)
     {
       CLog::Log(LOGDEBUG, "**MN** - CPlayerManagerMN::Announce() - Playback started");
-      std::string assetID = URIUtils::GetFileName(g_application.CurrentFileItem().GetVideoInfoTag()->m_strFileNameAndPath);
+      std::string strPath = g_application.CurrentFileItem().GetPath();
+      std::string assetID = URIUtils::GetFileName(strPath);
       URIUtils::RemoveExtension(assetID);
       LogPlayback(m_strHome, m_settings,assetID.c_str());
     }
@@ -242,6 +243,7 @@ void CPlayerManagerMN::SetSettings(PlayerSettings settings)
   CSettings::GetInstance().SetString("MN.location_id" ,settings.strLocation_id);
   CSettings::GetInstance().SetString("MN.machine_id"  ,settings.strMachine_id);
   CSettings::GetInstance().SetString("MN.url_feed"    ,settings.strUrl_feed);
+  StopPlaying();
   StopThread();
   Startup();
 }
