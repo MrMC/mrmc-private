@@ -334,7 +334,7 @@ void CPlayerManagerMN::Process()
       int itemCount = 0;
       bool run = false;
       m_CreatePlaylist = false;
-      CFileItemList* PlayListItems = new CFileItemList;
+      CFileItemList PlayListItems;
 
       for (size_t cat = 0; cat < m_categories.size(); cat++)
       {
@@ -370,7 +370,7 @@ void CPlayerManagerMN::Process()
             item->SetPath(CSpecialProtocol::TranslatePath(copyCategories[c].items[0].video_localpath));
             item->GetVideoInfoTag()->m_strTitle = copyCategories[c].items[0].title;
             item->GetVideoInfoTag()->m_streamDetails.Reset();
-            PlayListItems->Add(item);
+            PlayListItems.Add(item);
             --itemCount;
             // pop the added asset
             copyCategories[c].items.erase(copyCategories[c].items.begin());
@@ -383,10 +383,12 @@ void CPlayerManagerMN::Process()
         CSingleLock lock(m_player_lock);
         
         CMediaSettings::GetInstance().SetVideoStartWindowed(false);
-        PlayListItems->SetProperty("repeat", PLAYLIST::REPEAT_ALL);
-        g_playlistPlayer.Add(PLAYLIST_VIDEO, *PlayListItems);
+        PlayListItems.SetProperty("repeat", PLAYLIST::REPEAT_ALL);
+        g_playlistPlayer.Add(PLAYLIST_VIDEO, PlayListItems);
         g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
-        g_playlistPlayer.Play(0);
+        // do not call g_playlistPlayer.Play directly, we are not on main thread.
+        KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_PLAY, 0);
+
         CloseDialog();
       }
     }
