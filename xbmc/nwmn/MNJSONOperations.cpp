@@ -62,9 +62,9 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
       {
         argv1 = it->second.asString();
         StringUtils::Replace(argv1, ";", ",");
-        StringUtils::Replace(argv1, "values=", "");
-        StringUtils::Replace(argv1, "\\", "");
-        StringUtils::Replace(argv1, "},",";");
+//        StringUtils::Replace(argv1, "values=", "");
+//        StringUtils::Replace(argv1, "\\", "");
+//        StringUtils::Replace(argv1, "},",";");
       }
     }
   }
