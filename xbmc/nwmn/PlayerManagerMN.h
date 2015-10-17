@@ -41,7 +41,7 @@ public:
   virtual ~CPlayerManagerMN();
 
   static CPlayerManagerMN* GetPlayerManager();
-  
+  void          SetSettings(PlayerSettings settings);
   void          Startup();
   void          FullUpdate();
   void          PlayPause();
