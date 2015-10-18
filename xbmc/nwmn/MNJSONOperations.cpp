@@ -52,9 +52,8 @@ using namespace KODI::MESSAGING;
 
 JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
-  std::string argv1;
+  std::string argv;
   CVariant params = parameterObject["params"];
-  std::string xmlStr = parameterObject["set"].asString();
   
   if (params.isObject())
   {
@@ -62,11 +61,8 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
     {
       if (it->first == "values")
       {
-        argv1 = it->second.asString();
-        StringUtils::Replace(argv1, ";", ",");
-//        StringUtils::Replace(argv1, "values=", "");
-//        StringUtils::Replace(argv1, "\\", "");
-//        StringUtils::Replace(argv1, "},",";");
+        argv = it->second.asString();
+        StringUtils::Replace(argv, ";", ",");
       }
     }
   }
@@ -80,59 +76,54 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
   }
   else
   {
-    file.Write(argv1.c_str(), argv1.size());
+    file.Write(argv.c_str(), argv.size());
   }
   file.Close();
-  // we have to parse  above and extract values for url, machine and location ID
   
-  
-  // Below is a major HACK, I take no responsibilities for it :)
-  std::vector<std::string> steps = StringUtils::Split(argv1, "},");
+  CVariant obj = CJSONVariantParser::Parse((const unsigned char *)argv.c_str(), argv.size());
   
   std::string url;
   std::string machineID;
   std::string locationID;
   
-  for (size_t k = 0; k < steps.size(); ++k)
+  if (obj.isObject())
   {
-    size_t pos = steps[k].find("{\"url\":{\"feed\":");
-    if (pos != std::string::npos)
+    for (CVariant::const_iterator_map it = obj.begin_map(); it != obj.end_map(); it++)
     {
-      int iSize = steps[k].size();
-
-      url = steps[k].substr(pos+16,iSize);
-      StringUtils::Replace(url, "\"","");
-    }
-    pos = steps[k].find("machine\":{\"id\":");
-    if (pos != std::string::npos)
-    {
-      size_t endPos = steps[k].find(",\"name\":");
-      
-      machineID = steps[k].substr(pos+15,endPos-16);
-      StringUtils::Replace(machineID, "\"","");
-    }
-    pos = steps[k].find("location\":{\"id\":");
-    if (pos != std::string::npos)
-    {
-      size_t endPos = steps[k].find("},\"machine");
-      
-      locationID = steps[k].substr(pos+16,endPos-10);
-      StringUtils::Replace(locationID, "\"","");
+      if (it->first == "url")
+      {
+        url = it->second["feed"].asString();
+      }
+      else if (it->first == "location")
+      {
+        locationID = it->second["id"].asString();
+      }
+      else if (it->first == "machine")
+      {
+        machineID = it->second["id"].asString();
+      }
     }
   }
-  CLog::Log(LOGERROR, "MN parsed settings, url - %s, Machine ID - %s , location ID - %s", url.c_str(), machineID.c_str(), locationID.c_str());
   
-  PlayerSettings settings;
-  settings.strLocation_id = locationID;
-  settings.strMachine_id  = machineID;
-  settings.strUrl_feed    = url;
-  // Notify that we have changed settings
-  CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
-                                        "MemberNet",
-                                        "Player details updated",
-                                        TOAST_DISPLAY_TIME, false);
-  CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
-  if (MNPlayerManager)
-    MNPlayerManager->SetSettings(settings);
+  if (url.empty() || machineID.empty() || locationID.empty())
+  {
+    CLog::Log(LOGERROR, "MN ERROR parsing settings, url - %s, Machine ID - %s , location ID - %s", url.c_str(), machineID.c_str(), locationID.c_str());
+  }
+  else
+  {
+    CLog::Log(LOGERROR, "MN Updated settings, url - %s, Machine ID - %s , location ID - %s", url.c_str(), machineID.c_str(), locationID.c_str());
+    PlayerSettings settings;
+    settings.strLocation_id = locationID;
+    settings.strMachine_id  = machineID;
+    settings.strUrl_feed    = url;
+    // Notify that we have changed settings
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
+                                          "MemberNet",
+                                          "Player details updated",
+                                          TOAST_DISPLAY_TIME, false);
+    CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
+    if (MNPlayerManager)
+      MNPlayerManager->SetSettings(settings);
+  }
   return OK;
 }
