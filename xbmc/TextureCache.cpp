@@ -67,11 +67,8 @@ bool CTextureCache::IsCachedImage(const std::string &url) const
   if (URIUtils::IsInPath(url, "special://skin/") ||
       URIUtils::IsInPath(url, "special://temp/") ||
       URIUtils::IsInPath(url, "resource://") ||
-      URIUtils::IsInPath(url, "androidapp://")
-#if !defined(TARGET_DARWIN_TVOS)
-      || URIUtils::IsInPath(url, CProfilesManager::GetInstance().GetThumbnailsFolder())
-#endif
-      )
+      URIUtils::IsInPath(url, "androidapp://")   ||
+      URIUtils::IsInPath(url, CProfilesManager::GetInstance().GetThumbnailsFolder()))
     return true;
   return false;
 }

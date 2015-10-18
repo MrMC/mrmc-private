@@ -35,11 +35,7 @@ CImageLoader::CImageLoader(const std::string &path, const bool useCache):
   m_path(path)
 {
   m_texture = NULL;
-#if !defined(TARGET_DARWIN_TVOS)
   m_use_cache = useCache;
-#else
-  m_use_cache = false;
-#endif
 }
 
 CImageLoader::~CImageLoader()
