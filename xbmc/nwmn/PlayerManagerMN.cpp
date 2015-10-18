@@ -271,7 +271,7 @@ void CPlayerManagerMN::PausePlaying()
 void CPlayerManagerMN::StopPlaying()
 {
   CSingleLock lock(m_player_lock);
-  g_application.StopPlaying();
+  KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP, 0);
   CLog::Log(LOGDEBUG, "**MN** - CPlayerManagerMN::StopPlaying()");
 }
 
