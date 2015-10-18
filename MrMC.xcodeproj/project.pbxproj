@@ -18,9 +18,6 @@
 		181493961BD1769600586683 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493881BD1769600586683 /* PlayerManagerMN.cpp */; };
 		181493971BD1769600586683 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493881BD1769600586683 /* PlayerManagerMN.cpp */; };
 		181493981BD1769600586683 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 181493881BD1769600586683 /* PlayerManagerMN.cpp */; };
-		181493991BD1769600586683 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938A1BD1769600586683 /* PythonBindingsMN.cpp */; };
-		1814939A1BD1769600586683 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938A1BD1769600586683 /* PythonBindingsMN.cpp */; };
-		1814939B1BD1769600586683 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938A1BD1769600586683 /* PythonBindingsMN.cpp */; };
 		1814939C1BD1769600586683 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938C1BD1769600586683 /* UpdateManagerMN.cpp */; };
 		1814939D1BD1769600586683 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938C1BD1769600586683 /* UpdateManagerMN.cpp */; };
 		1814939E1BD1769600586683 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1814938C1BD1769600586683 /* UpdateManagerMN.cpp */; };
@@ -2812,8 +2809,6 @@
 		181493871BD1769600586683 /* MNMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MNMedia.h; path = nwmn/MNMedia.h; sourceTree = "<group>"; };
 		181493881BD1769600586683 /* PlayerManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PlayerManagerMN.cpp; path = nwmn/PlayerManagerMN.cpp; sourceTree = "<group>"; };
 		181493891BD1769600586683 /* PlayerManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PlayerManagerMN.h; path = nwmn/PlayerManagerMN.h; sourceTree = "<group>"; };
-		1814938A1BD1769600586683 /* PythonBindingsMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PythonBindingsMN.cpp; path = nwmn/PythonBindingsMN.cpp; sourceTree = "<group>"; };
-		1814938B1BD1769600586683 /* PythonBindingsMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PythonBindingsMN.h; path = nwmn/PythonBindingsMN.h; sourceTree = "<group>"; };
 		1814938C1BD1769600586683 /* UpdateManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UpdateManagerMN.cpp; path = nwmn/UpdateManagerMN.cpp; sourceTree = "<group>"; };
 		1814938D1BD1769600586683 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UpdateManagerMN.h; path = nwmn/UpdateManagerMN.h; sourceTree = "<group>"; };
 		1814938E1BD1769600586683 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UtilitiesMN.cpp; path = nwmn/UtilitiesMN.cpp; sourceTree = "<group>"; };
@@ -5152,8 +5147,6 @@
 				F508E7A01BD2E38500FEB3DC /* LogManagerMN.cpp */,
 				181493881BD1769600586683 /* PlayerManagerMN.cpp */,
 				181493891BD1769600586683 /* PlayerManagerMN.h */,
-				1814938A1BD1769600586683 /* PythonBindingsMN.cpp */,
-				1814938B1BD1769600586683 /* PythonBindingsMN.h */,
 				1814938C1BD1769600586683 /* UpdateManagerMN.cpp */,
 				1814938D1BD1769600586683 /* UpdateManagerMN.h */,
 				1814938E1BD1769600586683 /* UtilitiesMN.cpp */,
@@ -9371,7 +9364,6 @@
 				18B7C7BB1294222E009E7A26 /* GUIControlProfiler.cpp in Sources */,
 				F590458E1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */,
 				18B7C7BC1294222E009E7A26 /* GUIDialog.cpp in Sources */,
-				181493991BD1769600586683 /* PythonBindingsMN.cpp in Sources */,
 				18B7C7BD1294222E009E7A26 /* GUIEditControl.cpp in Sources */,
 				18B7C7BE1294222E009E7A26 /* GUIFadeLabelControl.cpp in Sources */,
 				F59045811BA372A600DB589A /* smc.c in Sources */,
@@ -10091,7 +10083,6 @@
 				E4991273174E5D8F00741B6D /* IFile.cpp in Sources */,
 				E4991274174E5D8F00741B6D /* ImageFile.cpp in Sources */,
 				E4991278174E5D8F00741B6D /* LibraryDirectory.cpp in Sources */,
-				1814939A1BD1769600586683 /* PythonBindingsMN.cpp in Sources */,
 				E4991279174E5D8F00741B6D /* MemBufferCache.cpp in Sources */,
 				E499127A174E5D8F00741B6D /* MultiPathDirectory.cpp in Sources */,
 				E499127B174E5D8F00741B6D /* MultiPathFile.cpp in Sources */,
@@ -11200,7 +11191,6 @@
 				F5D140481BAF0B6D0075A95C /* PlayerOperations.cpp in Sources */,
 				F5D140491BAF0B6D0075A95C /* DictionaryUtils.mm in Sources */,
 				F5D1404A1BAF0B6D0075A95C /* PlaylistOperations.cpp in Sources */,
-				1814939B1BD1769600586683 /* PythonBindingsMN.cpp in Sources */,
 				F5D1404B1BAF0B6D0075A95C /* PVROperations.cpp in Sources */,
 				F5D1404C1BAF0B6D0075A95C /* SystemOperations.cpp in Sources */,
 				F5D1404D1BAF0B6D0075A95C /* VideoLibrary.cpp in Sources */,
