@@ -139,8 +139,7 @@ void CUpdateManagerMN::Process()
       {
         m_update_fired = false;
         MNPlayerManager->StopPlaying();
-        MNPlayerManager->FullUpdate();
-        
+        MNPlayerManager->Startup();
       }
     }
   }

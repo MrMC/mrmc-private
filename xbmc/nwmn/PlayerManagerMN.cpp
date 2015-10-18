@@ -191,6 +191,8 @@ CPlayerManagerMN::CPlayerManagerMN()
   
   CSingleLock lock(m_player_lock);
   m_PlayerManager = this;
+  
+  m_settings = GetSettings();
 }
 
 CPlayerManagerMN::~CPlayerManagerMN()
@@ -253,14 +255,6 @@ void CPlayerManagerMN::SetSettings(PlayerSettings settings)
   CSettings::GetInstance().SetString("MN.url_feed"    ,settings.strUrl_feed);
   StopPlaying();
   StopThread();
-  Startup();
-}
-
-
-void CPlayerManagerMN::FullUpdate()
-{
-  StopThread();
-  m_settings = GetSettings();
   Startup();
 }
 
