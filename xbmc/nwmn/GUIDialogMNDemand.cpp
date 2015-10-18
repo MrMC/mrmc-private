@@ -146,8 +146,7 @@ bool CGUIDialogMNDemand::OnAction(const CAction& action)
       action.GetID() == ACTION_NAV_BACK)
   {
     if (g_application.m_pPlayer->IsPlaying())
-//      CApplicationMessenger::Get().MediaStop();
-      g_application.StopPlaying();
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP, 0);
     else
       Close();
     return true;
