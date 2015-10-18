@@ -272,8 +272,7 @@ bool CGUIDialogMN::OnAction(const CAction &action)
     
     if (g_application.m_pPlayer->IsPlaying())
     {
-//      CApplicationMessenger::Get().MediaStop();
-      g_application.StopPlaying();
+      m_PlayerManager->StopPlaying();
       return true;
     }
   }
@@ -284,12 +283,12 @@ bool CGUIDialogMN::OnAction(const CAction &action)
 
 void CGUIDialogMN::OnInitWindow()
 {
-  // below needs to be called once we run the update, it disables buttons in skin
-  //DisableButtonsOnRefresh(true);
+   // below needs to be called once we run the update, it disables buttons in skin
+   //DisableButtonsOnRefresh(true);
 
-  m_PlayerManager = new CPlayerManagerMN();
-  m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
-  m_PlayerManager->FullUpdate();
+   m_PlayerManager = new CPlayerManagerMN();
+   m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
+   m_PlayerManager->Startup();
   
    CGUIWindow::OnInitWindow();
 
@@ -361,11 +360,6 @@ void CGUIDialogMN::PlayerCallBack(const void *ctx, bool status)
 void CGUIDialogMN::PlaybackCallBack(const void *ctx, int msg, MNMediaAsset &asset)
 {
   CLog::Log(LOGDEBUG, "**MN** - CGUIDialogMN::PlaybackCallBack(): playing \'%s\'", asset.title.c_str());
-  //CGUIDialogMN *dlog = (CGUIDialogMN*)ctx;
-//  CDBManagerMN database;
-//  database.Open();
-//  database.AddAssetPlayback(asset);
-//  database.Close();
 }
 
 void CGUIDialogMN::DisableButtonsOnRefresh(bool disable)
