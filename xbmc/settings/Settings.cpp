@@ -398,6 +398,23 @@ const std::string CSettings::SETTING_GENERAL_ADDONNOTIFICATIONS = "general.addon
 const std::string CSettings::SETTING_GENERAL_ADDONFOREIGNFILTER = "general.addonforeignfilter";
 const std::string CSettings::SETTING_GENERAL_ADDONBROKENFILTER = "general.addonbrokenfilter";
 
+// NWMN settings strings
+const std::string CSettings::MN_URL = "mn.url_feed";
+const std::string CSettings::MN_MACHINE_ID = "mn.machine_id";
+const std::string CSettings::MN_LOCATION_ID = "mn.location_id";
+const std::string CSettings::MN_MACHINE_DESCRIPTION = "mn.machine_description";
+const std::string CSettings::MN_MACHINE_ETHERNET_ID = "mn.machine_ethernet_id";
+const std::string CSettings::MN_MACHINE_HW_VERSION = "mn.machine_hw_version";
+const std::string CSettings::MN_MACHINE_NAME = "mn.machine_name";
+const std::string CSettings::MN_MACHINE_PURCHASE_DATE = "mn.machine_purchase_date";
+const std::string CSettings::MN_MACHINE_SN = "mn.machine_sn";
+const std::string CSettings::MN_MACHINE_VENDOR = "mn.machine_vendor";
+const std::string CSettings::MN_MACHINE_WARRANTY = "mn.machine_warrenty_nr";
+const std::string CSettings::MN_MACHINE_WIRELESS = "mn.machine_wireless_id";
+const std::string CSettings::MN_SETTINGS_CF_BUNDLE = "mn.settings_cf_bundle_version";
+const std::string CSettings::MN_SETTINGS_UPDATE_INTERVAL = "mn.settings_update_interval";
+const std::string CSettings::MN_SETTINGS_UPDATE_TIME = "mn.settings_update_time";
+
 CSettings::CSettings()
   : m_initialized(false)
 {

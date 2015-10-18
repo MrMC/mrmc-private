@@ -111,10 +111,10 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
   else
   {
     CLog::Log(LOGERROR, "MN Updated settings, url - %s, Machine ID - %s , location ID - %s", url.c_str(), machineID.c_str(), locationID.c_str());
-    PlayerSettings settings;
-    settings.strLocation_id = locationID;
-    settings.strMachine_id  = machineID;
-    settings.strUrl_feed    = url;
+    
+    CSettings::GetInstance().SetString(CSettings::MN_LOCATION_ID ,locationID);
+    CSettings::GetInstance().SetString(CSettings::MN_MACHINE_ID  ,machineID);
+    CSettings::GetInstance().SetString(CSettings::MN_URL         ,url);
     // Notify that we have changed settings
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
                                           "MemberNet",
@@ -122,7 +122,8 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
                                           TOAST_DISPLAY_TIME, false);
     CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
     if (MNPlayerManager)
-      MNPlayerManager->SetSettings(settings);
+      MNPlayerManager->Startup();
+    
   }
   return OK;
 }
