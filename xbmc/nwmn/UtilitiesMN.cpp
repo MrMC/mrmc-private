@@ -22,6 +22,7 @@
 
 #include "URL.h"
 #include "utils/md5.h"
+#include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/SpecialProtocol.h"
 #include "storage/MediaManager.h"
@@ -250,20 +251,27 @@ void ParseMediaXML(PlayerSettings settings,std::vector<MNCategory> &categories, 
                                         );
   categories.clear();
   
-  XFILE::CCurlFile http;
-  std::string strXML;
-  http.Get(url, strXML);
-  
-  TiXmlDocument xml;
-  xml.Parse(strXML.c_str());
-  TiXmlElement* rootXmlNode = xml.RootElement();
+  // local media xml
+  std::string localMediaXML = "special://MN/media_xml.xml";
   
   CXBMCTinyXML xmlDoc;
-  xmlDoc.InsertEndChild(*rootXmlNode);
-  
-  // save media xml
-  std::string localMediaXML = "special://MN/media_xml.xml";
-  xmlDoc.SaveFile(localMediaXML);
+  TiXmlElement *rootXmlNode;
+  if (PingMNServer(url))
+  {
+    XFILE::CCurlFile http;
+    std::string strXML;
+    http.Get(url, strXML);
+    
+    xmlDoc.Parse(strXML.c_str());
+    rootXmlNode = xmlDoc.RootElement();
+    xmlDoc.InsertEndChild(*rootXmlNode);
+    xmlDoc.SaveFile(localMediaXML);
+  }
+  else if (XFILE::CFile::Exists(localMediaXML))// No internet
+  {
+    xmlDoc.LoadFile(localMediaXML);
+    rootXmlNode = xmlDoc.RootElement();
+  }
   
   if (rootXmlNode)
   {
@@ -338,21 +346,28 @@ void ParseSettingsXML(PlayerSettings &settings)
                                         settings.strMachine_id.c_str()
                                         );
   
-  XFILE::CCurlFile http;
-  std::string strXML;
-  http.Get(url, strXML);
-
-  
-  TiXmlDocument xml;
-  xml.Parse(strXML.c_str());
-  TiXmlElement* rootXmlNode = xml.RootElement();
+  // Local settings xml
+  std::string localSettingsXML = "special://MN/settings_xml.xml";
   
   CXBMCTinyXML xmlDoc;
-  xmlDoc.InsertEndChild(*rootXmlNode);
+  TiXmlElement *rootXmlNode;
   
-  // save settings xml
-  std::string localSettingsXML = "special://MN/settings_xml.xml";
-  xmlDoc.SaveFile(localSettingsXML);
+  if (PingMNServer(url))
+  {
+    XFILE::CCurlFile http;
+    std::string strXML;
+    http.Get(url, strXML);
+    
+    xmlDoc.Parse(strXML.c_str());
+    rootXmlNode = xmlDoc.RootElement();
+    xmlDoc.InsertEndChild(*rootXmlNode);
+    xmlDoc.SaveFile(localSettingsXML);
+  }
+  else if (XFILE::CFile::Exists(localSettingsXML))// No internet
+  {
+    xmlDoc.LoadFile(localSettingsXML);
+    rootXmlNode = xmlDoc.RootElement();
+  }
   
 
   
