@@ -266,6 +266,7 @@ void CPlayerManagerMN::SetSettings(PlayerSettings settings)
   CSettings::GetInstance().SetString(CSettings::MN_SETTINGS_UPDATE_INTERVAL,settings.strSettings_update_interval);
   CSettings::GetInstance().SetString(CSettings::MN_SETTINGS_UPDATE_TIME,settings.strSettings_update_time);
   CSettings::GetInstance().SetString(CSettings::MN_URL,settings.strUrl_feed);
+  CSettings::GetInstance().Save();
 }
 
 void CPlayerManagerMN::PlayPause()
