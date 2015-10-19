@@ -414,6 +414,7 @@ const std::string CSettings::MN_MACHINE_WIRELESS = "mn.machine_wireless_id";
 const std::string CSettings::MN_SETTINGS_CF_BUNDLE = "mn.settings_cf_bundle_version";
 const std::string CSettings::MN_SETTINGS_UPDATE_INTERVAL = "mn.settings_update_interval";
 const std::string CSettings::MN_SETTINGS_UPDATE_TIME = "mn.settings_update_time";
+const std::string CSettings::MN_VERTICAL = "mn.vertical";
 
 CSettings::CSettings()
   : m_initialized(false)

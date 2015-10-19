@@ -325,6 +325,11 @@
           <level>0</level>
           <default>123456</default>
           <control type="edit" format="string" />
+        </setting> 
+        <setting id="mn.vertical" type="boolean" label="20026" help="36115">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle" />
         </setting>       
       </group>
     </category>

@@ -4,7 +4,7 @@
 	<views>50</views>
 	<controls>
     <control type="image">
-      <visible>!Skin.HasSetting(NW_Vertical)</visible>
+      <visible>!system.getbool(mn.vertical)</visible>
       <description>Background</description>
       <posx>0</posx>
       <posy>0</posy>
@@ -13,7 +13,7 @@
       <texture>MNTVSkin.jpg</texture>
     </control>
     <control type="image">
-      <visible>Skin.HasSetting(NW_Vertical)</visible>
+      <visible>system.getbool(mn.vertical)</visible>
       <posx>0</posx>
       <posy>0</posy>
       <width>1280</width>
@@ -21,7 +21,7 @@
       <texture>MNTV-Plus-Vertical.png</texture>
     </control>	
     <control type="group">
-	   <animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+	   <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
           <effect type="slide" start="0,0" end="-250,190" time="0" />
           <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
           <effect type="zoom" end="90" center="640,360" time="200" />
@@ -251,7 +251,7 @@
     <control type="group">
         <posx>60</posx>
         <posy>0</posy>
-        <animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+        <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
           <effect type="slide" start="0,0" end="250,210" time="0" />
           <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
         </animation>
@@ -293,7 +293,7 @@
     <control type="group">
       <posx>260r</posx>
       <posy>0</posy>
-      <animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+      <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
         <effect type="slide" start="0,0" end="-230,240" time="0" />
         <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
       </animation>
@@ -318,7 +318,7 @@
       </control>
     </control>
     <control type="group">
-        <animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+        <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
           <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
           <effect type="slide" start="0,0" end="0,0" time="0" />
         </animation>

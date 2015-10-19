@@ -375,6 +375,7 @@ public:
   static const std::string MN_SETTINGS_CF_BUNDLE;
   static const std::string MN_SETTINGS_UPDATE_INTERVAL;
   static const std::string MN_SETTINGS_UPDATE_TIME;
+  static const std::string MN_VERTICAL;
 
   /*!
    \brief Creates a new settings wrapper around a new settings manager.
