@@ -21,7 +21,7 @@
 #include "UtilitiesRed.h"
 
 #include "Application.h"
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 #include "FileItem.h"
 #include "filesystem/File.h"
 #include "music/tags/MusicInfoTag.h"

@@ -21,7 +21,7 @@
 #include "UtilitiesRed.h"
 #include "DBManagerRed.h"
 
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 #include "URL.h"
 #include "utils/md5.h"
 #include "filesystem/File.h"

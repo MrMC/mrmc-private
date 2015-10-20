@@ -26,7 +26,7 @@
 #include "PlayerManagerRed.h"
 #include "UtilitiesRed.h"
 
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 #include "URL.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"

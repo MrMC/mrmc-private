@@ -23,7 +23,6 @@
 #include "utils/Variant.h"
 #include "powermanagement/PowerManager.h"
 
-#include "ApplicationMessenger.h"
 #include "Application.h"
 #include "PlayerManagerRed.h"
 #include "dialogs/GUIDialogKaiToast.h"

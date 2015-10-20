@@ -29,7 +29,7 @@
 #include "GUIDialogRedAbout.h"
 
 #include "Application.h"
-#include "ApplicationMessenger.h"
+#include "messaging/ApplicationMessenger.h"
 #include "Util.h"
 #include "URL.h"
 #include "filesystem/Directory.h"
