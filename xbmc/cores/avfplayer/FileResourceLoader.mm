@@ -23,7 +23,7 @@
 #import "utils/log.h"
 #import "cores/avfplayer/FileResourceLoader.h"
 
-#define CFILERESOURCELOADER_DEBUG 1
+#define CFILERESOURCELOADER_DEBUG 0
 #define CFILERESOURCELOADER_BUFFERSIZE (2048*1024)
 
 //static NSString *kResourceLoaderErrorDomain = @"ResourceLoaderError";
