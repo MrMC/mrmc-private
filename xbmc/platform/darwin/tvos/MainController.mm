@@ -113,9 +113,9 @@ id objectFromVariant(const CVariant &data)
 
 void AnnounceBridge(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
 {
-  LOG(@"AnnounceBridge: [%s], [%s], [%s]", ANNOUNCEMENT::AnnouncementFlagToString(flag), sender, message);
+  //LOG(@"AnnounceBridge: [%s], [%s], [%s]", ANNOUNCEMENT::AnnouncementFlagToString(flag), sender, message);
   NSDictionary *dict = dictionaryFromVariantMap(data);
-  LOG(@"data: %@", dict.description);
+  //LOG(@"data: %@", dict.description);
   const std::string msg(message);
   if (msg == "OnPlay")
   {
@@ -127,7 +127,7 @@ void AnnounceBridge(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, con
     {
       bool needsRecaching;
       std::string cachedThumb(CTextureCache::GetInstance().CheckCachedImage(thumb, false, needsRecaching));
-      LOG("thumb: %s, %s", thumb.c_str(), cachedThumb.c_str());
+      //LOG("thumb: %s, %s", thumb.c_str(), cachedThumb.c_str());
       if (!cachedThumb.empty())
       {
         std::string thumbRealPath = CSpecialProtocol::TranslatePath(cachedThumb);
@@ -157,7 +157,7 @@ void AnnounceBridge(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, con
         [item setValue:genreArray forKey:@"genre"];
       }
     }
-    LOG(@"item: %@", item.description);
+    //LOG(@"item: %@", item.description);
     [g_xbmcController performSelectorOnMainThread:@selector(onPlay:) withObject:item  waitUntilDone:NO];
   }
   else if (msg == "OnSpeedChanged" || msg == "OnPause")
@@ -166,7 +166,7 @@ void AnnounceBridge(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, con
     NSDictionary *player = [dict valueForKey:@"player"];
     [item setValue:[player valueForKey:@"speed"] forKey:@"speed"];
     [item setValue:[NSNumber numberWithDouble:g_application.GetTime()] forKey:@"elapsed"];
-    LOG(@"item: %@", item.description);
+    //LOG(@"item: %@", item.description);
     [g_xbmcController performSelectorOnMainThread:@selector(OnSpeedChanged:) withObject:item  waitUntilDone:NO];
     if (msg == "OnPause")
       [g_xbmcController performSelectorOnMainThread:@selector(onPause:) withObject:[dict valueForKey:@"item"]  waitUntilDone:NO];
@@ -266,7 +266,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)startKeyPressTimer:(XBMCKey)keyId
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
     [self stopKeyPressTimer];
 
@@ -290,7 +290,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 - (void)stopKeyPressTimer
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
   {
     [self.pressAutoRepeatTimer invalidate];
@@ -300,7 +300,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 }
 - (void)keyPressTimerCallback:(NSTimer*)theTimer
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   // if queue is empty - skip this timer event before letting it process
   if (CWinEvents::GetQueueSize())
     return;
@@ -329,7 +329,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   return YES;
 }
 
@@ -338,7 +338,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 // for a new press. return NO to prevent the gesture recognizer from seeing this press
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   BOOL handled = YES;
   switch (press.type)
   {
@@ -373,7 +373,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)createTapGestureRecognizers
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   //1 finger single tap
   auto singleFingerSingleTap = [[UITapGestureRecognizer alloc]
     initWithTarget:self action:@selector(handleSingleFingerSingleTap:)];
@@ -391,7 +391,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)createPanGestureRecognizers
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   // for pan gestures with one finger
   auto pan = [[UIPanGestureRecognizer alloc]
     initWithTarget:self action:@selector(handlePan:)];
@@ -402,7 +402,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)createSwipeGestureRecognizers
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   // single finger swipe left
   UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc]
     initWithTarget:self action:@selector(handleSwipe:)];
@@ -442,7 +442,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)createPressGesturecognizers
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   // we need UILongPressGestureRecognizer here because it will give
   // UIGestureRecognizerStateBegan AND UIGestureRecognizerStateEnded
   // even if we hold down for a long time. UITapGestureRecognizer
@@ -491,14 +491,14 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void) activateKeyboard:(UIView *)view
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   [self.view addSubview:view];
   m_glView.userInteractionEnabled = NO;
 }
 //--------------------------------------------------------------
 - (void) deactivateKeyboard:(UIView *)view
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   [view removeFromSuperview];
   m_glView.userInteractionEnabled = YES; 
   [self becomeFirstResponder];
@@ -521,44 +521,44 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
 - (void)menuPressed:(UITapGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed  - menu");
+    //NSLog(@"button pressed  - menu");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released - menu");
+    //NSLog(@"button released - menu");
     [self sendKeyDownUp:XBMCK_ESCAPE];
   }
 }
 - (void)selectPressed:(UITapGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed  - select");
+    //NSLog(@"button pressed  - select");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released - select");
+    //NSLog(@"button released - select");
     [self sendKeyDownUp:XBMCK_RETURN];
   }
 }
 
 - (void)longSelectPressed:(UITapGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed  - select");
+    //NSLog(@"button pressed  - select");
     [self sendKeyDownUp:XBMCK_c];
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released - select");
+    //NSLog(@"button released - select");
     
   }
 }
 
 - (void)playPausePressed:(UITapGestureRecognizer *) sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed  - playPause");
+    //NSLog(@"button pressed  - playPause");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released - playPause");
+    //NSLog(@"button released - playPause");
     [self sendKeyDownUp:XBMCK_SPACE];
   }
 }
@@ -566,16 +566,16 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)gameControllerUpArrowPressed:(UIGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed   - UpArrow");
+    //NSLog(@"button pressed   - UpArrow");
     [self startKeyPressTimer:XBMCK_UP];
   } else if (sender.state == UIGestureRecognizerStateChanged) {
-      NSLog(@"button changed - UpArrow");
+    //NSLog(@"button changed - UpArrow");
   } else if (sender.state == UIGestureRecognizerStateCancelled) {
-    NSLog(@"button cancelled - UpArrow");
+    //NSLog(@"button cancelled - UpArrow");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released  - UpArrow");
+    //NSLog(@"button released  - UpArrow");
     [self stopKeyPressTimer];
     [self sendKeyUp:XBMCK_UP];
   }
@@ -583,16 +583,16 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)gameControllerDownArrowPressed:(UIGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed   - DownArrow");
+    //NSLog(@"button pressed   - DownArrow");
     [self startKeyPressTimer:XBMCK_DOWN];
   } else if (sender.state == UIGestureRecognizerStateChanged) {
-    NSLog(@"button changed   - DownArrow");
+    //NSLog(@"button changed   - DownArrow");
   } else if (sender.state == UIGestureRecognizerStateCancelled) {
-    NSLog(@"button cancelled - DownArrow");
+    //NSLog(@"button cancelled - DownArrow");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released  - DownArrow");
+    //NSLog(@"button released  - DownArrow");
     [self stopKeyPressTimer];
     [self sendKeyUp:XBMCK_DOWN];
   }
@@ -600,16 +600,16 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)gameControllerLeftArrowPressed:(UIGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed   - LeftArrow");
+    //NSLog(@"button pressed   - LeftArrow");
     [self startKeyPressTimer:XBMCK_LEFT];
   } else if (sender.state == UIGestureRecognizerStateChanged) {
-    NSLog(@"button changed   - LeftArrow");
+    //NSLog(@"button changed   - LeftArrow");
   } else if (sender.state == UIGestureRecognizerStateCancelled) {
-    NSLog(@"button cancelled - LeftArrow");
+    //NSLog(@"button cancelled - LeftArrow");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released  - LeftArrow");
+    //NSLog(@"button released  - LeftArrow");
     [self stopKeyPressTimer];
     [self sendKeyUp:XBMCK_LEFT];
   }
@@ -617,16 +617,16 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)gameControllerRightArrowPressed:(UIGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (sender.state == UIGestureRecognizerStateBegan) {
-    NSLog(@"button pressed   - RightArrow");
+    //NSLog(@"button pressed   - RightArrow");
     [self startKeyPressTimer:XBMCK_RIGHT];
   } else if (sender.state == UIGestureRecognizerStateChanged) {
-    NSLog(@"button changed   - RightArrow");
+    //NSLog(@"button changed   - RightArrow");
   } else if (sender.state == UIGestureRecognizerStateCancelled) {
-    NSLog(@"button cancelled - RightArrow");
+    //NSLog(@"button cancelled - RightArrow");
   } else if (sender.state == UIGestureRecognizerStateEnded) {
-    NSLog(@"button released  - RightArrow");
+    //NSLog(@"button released  - RightArrow");
     [self stopKeyPressTimer];
     [self sendKeyUp:XBMCK_RIGHT];
   }
@@ -635,7 +635,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)handlePan:(UIPanGestureRecognizer *)sender 
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
   { 
     CGPoint velocity = [sender velocityInView:m_glView];
@@ -693,7 +693,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)handleSwipe:(UISwipeGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
   {
     if (sender.state == UIGestureRecognizerStateRecognized)
@@ -719,7 +719,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)handleSingleFingerSingleTap:(UIGestureRecognizer *)sender 
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   //Allow the tap gesture during init
   //(for allowing the user to tap away any messagboxes during init)
   if (m_readyToRun == YES && [sender numberOfTouches] > 0)
@@ -735,7 +735,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)handleDoubleFingerSingleTap:(UIGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
   {
     CGPoint point = [sender locationOfTouch:0 inView:m_glView];
@@ -749,7 +749,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (IBAction)handleSingleFingerSingleLongTap:(UIGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
   {
     CGPoint point = [sender locationOfTouch:0 inView:m_glView];
@@ -790,7 +790,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
 - (id)initWithFrame:(CGRect)frame withScreen:(UIScreen *)screen
 { 
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   m_screenIdx = 0;
   self = [super init];
   if (!self)
@@ -895,8 +895,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)viewWillAppear:(BOOL)animated
 {
-  PRINT_SIGNATURE();
-  
+  //PRINT_SIGNATURE();
   // move this later into CocoaPowerSyscall
   [[UIApplication sharedApplication] setIdleTimerDisabled:YES];
   [self resumeAnimation];
@@ -912,8 +911,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)viewWillDisappear:(BOOL)animated
 {  
-  PRINT_SIGNATURE();
-  
+  //PRINT_SIGNATURE();
   [self pauseAnimation];
   // move this later into CocoaPowerSyscall
   [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
@@ -1014,7 +1012,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)enterBackground
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
   {
     m_isPlayingBeforeInactive = YES;
@@ -1025,7 +1023,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
 - (void)enterForeground
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   g_Windowing.OnAppFocusChange(true);
   // when we come back, restore playing if we were.
   if (m_isPlayingBeforeInactive)
@@ -1053,21 +1051,21 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)pauseAnimation
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   m_pause = TRUE;
   MCRuntimeLib_SetRenderGUI(false);
 }
 //--------------------------------------------------------------
 - (void)resumeAnimation
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   m_pause = FALSE;
   MCRuntimeLib_SetRenderGUI(true);
 }
 //--------------------------------------------------------------
 - (void)startAnimation
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_animating == NO && [m_glView getContext])
   {
     // kick off an animation thread
@@ -1081,7 +1079,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)stopAnimation
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_animating == NO && [m_glView getContext])
   {
     m_appAlive = FALSE;
@@ -1143,7 +1141,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)disableNetworkAutoSuspend
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_bgTask != UIBackgroundTaskInvalid)
   {
     [[UIApplication sharedApplication] endBackgroundTask: m_bgTask];
@@ -1162,7 +1160,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)enableNetworkAutoSuspend:(id)obj
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_bgTask != UIBackgroundTaskInvalid)
   {
     [[UIApplication sharedApplication] endBackgroundTask: m_bgTask];
@@ -1172,7 +1170,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)remoteControlReceivedWithEvent:(UIEvent*)receivedEvent
 {
-  LOG(@"%s: type %ld, subtype: %d", __PRETTY_FUNCTION__, (long)receivedEvent.type, (int)receivedEvent.subtype);
+  //LOG(@"%s: type %ld, subtype: %d", __PRETTY_FUNCTION__, (long)receivedEvent.type, (int)receivedEvent.subtype);
   if (receivedEvent.type == UIEventTypeRemoteControl)
   {
     [self disableNetworkAutoSuspend];
@@ -1211,7 +1209,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
           CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, -1, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
         break;
       default:
-        LOG(@"unhandled subtype: %d", (int)receivedEvent.subtype);
+        //LOG(@"unhandled subtype: %d", (int)receivedEvent.subtype);
         break;
     }
     [self rescheduleNetworkAutoSuspend];
@@ -1228,7 +1226,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)onPlay:(NSDictionary *)item
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
 
   NSString *title = [item objectForKey:@"title"];
@@ -1303,7 +1301,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)OnSpeedChanged:(NSDictionary *)item
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (NSClassFromString(@"MPNowPlayingInfoCenter"))
   {
     NSMutableDictionary *info = [self.m_nowPlayingInfo mutableCopy];
@@ -1320,7 +1318,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)onPause:(NSDictionary *)item
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   m_playbackState = IOS_PLAYBACK_PAUSED;
   // schedule set network auto suspend state for save power if idle.
   [self rescheduleNetworkAutoSuspend];
@@ -1328,7 +1326,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)onStop:(NSDictionary *)item
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   [self setIOSNowPlayingInfo:nil];
 
   m_playbackState = IOS_PLAYBACK_STOPPED;
@@ -1338,7 +1336,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)rescheduleNetworkAutoSuspend
 {
-  LOG(@"%s: playback state: %d", __PRETTY_FUNCTION__,  m_playbackState);
+  //LOG(@"%s: playback state: %d", __PRETTY_FUNCTION__,  m_playbackState);
   if (m_playbackState == IOS_PLAYBACK_PLAYING)
   {
     [self disableNetworkAutoSuspend];

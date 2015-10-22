@@ -145,14 +145,14 @@ static CEvent keyboardFinishedEvent;
   if (CDarwinUtils::GetIOSVersion() >= 8.0)
     kbRect = [self convertRect:kbRect fromView:nil];
 #endif
-  LOG(@"keyboardWillShow: keyboard frame: %@", NSStringFromCGRect(kbRect));
+  //LOG(@"keyboardWillShow: keyboard frame: %@", NSStringFromCGRect(kbRect));
   _kbRect = kbRect;
   [self setNeedsLayout];
   _keyboardIsShowing = 1;
 }
 
 -(void)keyboardDidShow:(NSNotification *) notification{
-  LOG(@"keyboardDidShow: deactivated: %d", _deactivated);
+  //LOG(@"keyboardDidShow: deactivated: %d", _deactivated);
   _keyboardIsShowing = 2;
   if (_deactivated)
     [self doDeactivate:nil];
@@ -166,7 +166,7 @@ static CEvent keyboardFinishedEvent;
 
 - (BOOL)textFieldShouldEndEditing:(UITextField *)textField
 {
-  LOG(@"%s: keyboard IsShowing %d", __PRETTY_FUNCTION__, _keyboardIsShowing);
+  //LOG(@"%s: keyboard IsShowing %d", __PRETTY_FUNCTION__, _keyboardIsShowing);
   // Do not break the keyboard show up process, else we will lost
   // keyboard did hide notifaction.
   return _keyboardIsShowing != 1;
@@ -174,14 +174,14 @@ static CEvent keyboardFinishedEvent;
 
 - (void)textFieldDidEndEditing:(UITextField *)textField
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   _confirmed = YES;
   [_textField resignFirstResponder];
   [self deactivate];
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField{
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   _confirmed = YES;
   [_textField resignFirstResponder];
   return YES;
@@ -193,13 +193,13 @@ static CEvent keyboardFinishedEvent;
 
 - (void)keyboardDidHide:(id)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   
   _keyboardIsShowing = 0;
 
   if (_textField.editing)
   {
-    LOG(@"kb hide when editing, it could be a language switch");
+    //LOG(@"kb hide when editing, it could be a language switch");
     return;
   }
 
@@ -208,7 +208,7 @@ static CEvent keyboardFinishedEvent;
 
 - (void) doActivate:(NSDictionary *)dict
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   [g_xbmcController activateKeyboard:self];
   [_textField becomeFirstResponder];
   [self setNeedsLayout];
@@ -217,7 +217,7 @@ static CEvent keyboardFinishedEvent;
 
 - (void)activate
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if([NSThread currentThread] != [NSThread mainThread])
   {
     [self performSelectorOnMainThread:@selector(doActivate:) withObject:nil  waitUntilDone:YES];  
@@ -246,7 +246,7 @@ static CEvent keyboardFinishedEvent;
 
 - (void) doDeactivate:(NSDictionary *)dict
 {
-  LOG(@"%s: keyboard IsShowing %d", __PRETTY_FUNCTION__, _keyboardIsShowing);
+  //LOG(@"%s: keyboard IsShowing %d", __PRETTY_FUNCTION__, _keyboardIsShowing);
   _deactivated = YES;
   
   // Do not break keyboard show up process, if so there's a bug of ios4 will not
@@ -279,7 +279,7 @@ static CEvent keyboardFinishedEvent;
 
 - (void) deactivate
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if([NSThread currentThread] != [NSThread mainThread])
   {
     [self performSelectorOnMainThread:@selector(doDeactivate:) withObject:nil  waitUntilDone:YES];  
@@ -292,7 +292,7 @@ static CEvent keyboardFinishedEvent;
 
 - (void) setKeyboardText:(NSString*)aText closeKeyboard:(BOOL)closeKeyboard
 {
-  LOG(@"%s: %@, %d", __PRETTY_FUNCTION__, aText, closeKeyboard);
+  //LOG(@"%s: %@, %d", __PRETTY_FUNCTION__, aText, closeKeyboard);
   if([NSThread currentThread] != [NSThread mainThread])
   {
     [self performSelectorOnMainThread:@selector(setDefault:) withObject:aText  waitUntilDone:YES];
@@ -347,7 +347,7 @@ static CEvent keyboardFinishedEvent;
 
 - (void) dealloc
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   self.text = nil;
   [super dealloc];
 }

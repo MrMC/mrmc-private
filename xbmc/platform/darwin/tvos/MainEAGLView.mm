@@ -190,7 +190,7 @@ using namespace KODI::MESSAGING;
 //--------------------------------------------------------------
 - (void)setContext:(EAGLContext *)newContext
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_context != newContext)
   {
     [self deleteFramebuffer];
@@ -237,7 +237,7 @@ using namespace KODI::MESSAGING;
 {
   if (m_context)
   {
-    PRINT_SIGNATURE();
+    //PRINT_SIGNATURE();
     [EAGLContext setCurrentContext:m_context];
     
     if (m_defaultFramebuffer)
