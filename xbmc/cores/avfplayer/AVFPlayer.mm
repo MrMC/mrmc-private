@@ -70,6 +70,7 @@
 #endif
 #import "cores/avfplayer/CustomURLProtocol.h"
 #import "cores/avfplayer/FileResourceLoader.h"
+#import "cores/avfplayer/DynamicHLSTransMuxer.h"
 
 static const NSString *ItemStatusContext;
 NSString * const kTracksKey        = @"tracks";
@@ -1179,6 +1180,9 @@ void CAVFPlayer::Process()
     }
     CLog::Log(LOGDEBUG, "CAVFPlayer::Process: URL=%s", url.c_str());
 */
+
+    //CDynamicHLSTransMuxer *segmenter = new CDynamicHLSTransMuxer();
+    //segmenter->Open(m_item);
 
     //for (NSString *mime in [AVURLAsset audiovisualMIMETypes])
     //{

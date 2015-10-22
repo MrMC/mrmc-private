@@ -1687,6 +1687,7 @@
 		F508E7991BCEA52900FEB3DC /* CustomURLProtocol.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */; };
 		F508E79C1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */; };
 		F508E79D1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */; };
+		F508E7A61BD321B200FEB3DC /* DynamicHLSTransMuxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F508E7A41BD321B200FEB3DC /* DynamicHLSTransMuxer.cpp */; };
 		F50FDC5A119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */; };
 		F52A733D1560BC34005B1A0B /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F52A733C1560BC34005B1A0B /* CoreFoundation.framework */; };
 		F52B063B11869862004B1D66 /* Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B063A11869862004B1D66 /* Skin.cpp */; };
@@ -4697,6 +4698,8 @@
 		F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CustomURLProtocol.mm; sourceTree = "<group>"; };
 		F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = MrMCCustomURLDelegate.mm; sourceTree = "<group>"; };
 		F508E79B1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MrMCCustomURLDelegate.h; sourceTree = "<group>"; };
+		F508E7A41BD321B200FEB3DC /* DynamicHLSTransMuxer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DynamicHLSTransMuxer.cpp; sourceTree = "<group>"; };
+		F508E7A51BD321B200FEB3DC /* DynamicHLSTransMuxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DynamicHLSTransMuxer.h; sourceTree = "<group>"; };
 		F50FDC58119B4B2C00C8B8CD /* GUIDialogTextViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogTextViewer.h; sourceTree = "<group>"; };
 		F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogTextViewer.cpp; sourceTree = "<group>"; };
 		F52A733C1560BC34005B1A0B /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
@@ -8429,6 +8432,8 @@
 				F508E7971BCEA52900FEB3DC /* CustomURLProtocol.mm */,
 				F508E7921BCEA28000FEB3DC /* FileResourceLoader.h */,
 				F508E7931BCEA28000FEB3DC /* FileResourceLoader.mm */,
+				F508E7A51BD321B200FEB3DC /* DynamicHLSTransMuxer.h */,
+				F508E7A41BD321B200FEB3DC /* DynamicHLSTransMuxer.cpp */,
 				F508E79B1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.h */,
 				F508E79A1BCEAA1300FEB3DC /* MrMCCustomURLDelegate.mm */,
 			);
@@ -11305,6 +11310,7 @@
 				F5D141041BAF0B6D0075A95C /* DVDDemuxCC.cpp in Sources */,
 				F5D141051BAF0B6D0075A95C /* AliasShortcutUtils.cpp in Sources */,
 				F5A4F2A31BB086FE0083FC69 /* IptcParse.cpp in Sources */,
+				F508E7A61BD321B200FEB3DC /* DynamicHLSTransMuxer.cpp in Sources */,
 				F5D141061BAF0B6D0075A95C /* Archive.cpp in Sources */,
 				F5D141071BAF0B6D0075A95C /* AsyncFileCopy.cpp in Sources */,
 				F5D141081BAF0B6D0075A95C /* Base64.cpp in Sources */,
