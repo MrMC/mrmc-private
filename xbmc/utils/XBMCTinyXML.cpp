@@ -132,6 +132,8 @@ bool CXBMCTinyXML::SaveFile(const std::string& _filename) const
   if (CDarwinNSUserDefaults::IsKeyFromPath(_filename))
   {
     TiXmlPrinter printer;
+    printer.SetIndent(NULL);
+    printer.SetLineBreak(NULL);
     Accept(&printer);
 
     std::string xml_data = printer.CStr();
