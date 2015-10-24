@@ -24,6 +24,8 @@
 #include "GUIUserMessages.h"
 #include "utils/log.h"
 #include "utils/URIUtils.h"
+#include "utils/StringUtils.h"
+
 #include "CompileInfo.h"
 
 #if defined(TARGET_DARWIN)
@@ -428,10 +430,75 @@ int  CDarwinUtils::GetExecutablePath(char* path, size_t *pathsize)
   return 0;
 }
 
-const char* CDarwinUtils::GetAppRootFolder(void)
+const char* CDarwinUtils::GetAppLogDirectory(void)
 {
-  static std::string rootFolder = "";
-  if ( rootFolder.length() == 0)
+  static std::string appLogFolder;
+  if (appLogFolder.empty())
+  {
+    // log file location
+    #if defined(TARGET_DARWIN_TVOS)
+      appLogFolder = CDarwinUtils::GetOSCachesDirectory();
+    #elif defined(TARGET_DARWIN_IOS)
+      appLogFolder = URIUtils::AddFileToFolder(getenv("HOME"), std::string(CDarwinUtils::GetOSAppRootFolder());
+    #else
+      appLogFolder = URIUtils::AddFileToFolder(getenv("HOME"), "Library");
+    #endif
+    appLogFolder = URIUtils::AddFileToFolder(appLogFolder, "logs");
+    mkdir(appLogFolder.c_str(), 0755);
+    // stupid log directory wants a ending slash
+    URIUtils::AddSlashAtEnd(appLogFolder);
+  }
+
+  return appLogFolder.c_str();
+}
+
+const char* CDarwinUtils::GetAppTempDirectory(void)
+{
+  static std::string appTempFolder;
+  if (appTempFolder.empty())
+  {
+    // location for temp files
+    #if defined(TARGET_DARWIN_TVOS)
+      appTempFolder = CDarwinUtils::GetOSTemporaryDirectory();
+    #elif defined(TARGET_DARWIN_IOS)
+      appTempFolder = URIUtils::AddFileToFolder(getenv("HOME"),  std::string(CDarwinUtils::GetOSAppRootFolder());
+      appTempFolder = URIUtils::AddFileToFolder(appTempFolder,  CCompileInfo::GetAppName());
+    #else
+      std::string dotLowerAppName = "." + CCompileInfo::GetAppName();
+      StringUtils::ToLower(dotLowerAppName);
+      appTempFolder = URIUtils::AddFileToFolder(getenv("HOME"), dotLowerAppName);
+      mkdir(appTempFolder.c_str(), 0755);
+    #endif
+    appTempFolder = URIUtils::AddFileToFolder(appTempFolder, "temp");
+  }
+
+  return appTempFolder.c_str();
+}
+
+const char* CDarwinUtils::GetAppHomeDirectory(void)
+{
+  static std::string appHomeFolder;
+  if (appHomeFolder.empty())
+  {
+    #if defined(TARGET_DARWIN_TVOS)
+      appHomeFolder = CDarwinUtils::GetOSCachesDirectory();
+    #elif defined(TARGET_DARWIN_IOS)
+      appHomeFolder = URIUtils::AddFileToFolder(getenv("HOME"), CDarwinUtils::GetOSAppRootFolder());
+      appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, CCompileInfo::GetAppName());
+    #else
+      appHomeFolder = URIUtils::AddFileToFolder(getenv("HOME"), CDarwinUtils::GetOSAppRootFolder());
+      appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, "Library/Application Support");
+      appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, CCompileInfo::GetAppName());
+    #endif
+  }
+
+  return appHomeFolder.c_str();
+}
+
+const char* CDarwinUtils::GetOSAppRootFolder(void)
+{
+  static std::string rootFolder;
+  if (rootFolder.empty())
   {
     if (IsIosSandboxed())
     {
@@ -448,22 +515,26 @@ const char* CDarwinUtils::GetAppRootFolder(void)
   return rootFolder.c_str();
 }
 
-const char* CDarwinUtils::GetCachesDirectory()
+const char* CDarwinUtils::GetOSCachesDirectory()
 {
-  static std::string cacheFolder = "";
-  if (cacheFolder.length() == 0)
+  static std::string cacheFolder;
+  if (cacheFolder.empty())
   {
     NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
     cacheFolder = [cachePath UTF8String];
+    URIUtils::RemoveSlashAtEnd(cacheFolder);
   }
   return cacheFolder.c_str();
 }
 
-const char* CDarwinUtils::GetTemporaryDirectory()
+const char* CDarwinUtils::GetOSTemporaryDirectory()
 {
-  static std::string tmpFolder = "";
-  if (tmpFolder.length() == 0)
+  static std::string tmpFolder;
+  if (tmpFolder.empty())
+  {
     tmpFolder = [NSTemporaryDirectory() UTF8String];
+    URIUtils::RemoveSlashAtEnd(tmpFolder);
+  }
 
   return tmpFolder.c_str();
 }

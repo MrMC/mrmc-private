@@ -399,13 +399,7 @@ void CAdvancedSettings::Initialize()
   m_extraLogLevels = 0;
 
   #if defined(TARGET_DARWIN)
-    std::string logDir = getenv("HOME");
-    #if defined(TARGET_DARWIN_OSX)
-    logDir += "/Library/Logs/";
-    #else // ios
-    logDir += "/" + std::string(CDarwinUtils::GetAppRootFolder()) + "/";
-    #endif
-    m_logFolder = logDir;
+    m_logFolder = CDarwinUtils::GetAppLogDirectory();
   #else
     m_logFolder = "special://home/";              // log file location
   #endif

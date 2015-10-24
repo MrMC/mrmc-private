@@ -908,60 +908,17 @@ bool CApplication::InitDirectoriesOSX()
     CSpecialProtocol::SetXBMCPath(appPath);
     CSpecialProtocol::SetXBMCBinPath(appPath);
 
-    std::string appName = CCompileInfo::GetAppName();
-    #if defined(TARGET_DARWIN_TVOS)
-      std::string strHomePath = CDarwinUtils::GetCachesDirectory();
-      CSpecialProtocol::SetHomePath(strHomePath);
-      CSpecialProtocol::SetMasterProfilePath(strHomePath + "/userdata");
-    #elif defined(TARGET_DARWIN_IOS)
-      CSpecialProtocol::SetHomePath(userHome + "/" + CDarwinUtils::GetAppRootFolder() + "/" + appName);
-      CSpecialProtocol::SetMasterProfilePath(userHome + "/" + CDarwinUtils::GetAppRootFolder() + "/" + appName + "/userdata");
-    #else
-      CSpecialProtocol::SetHomePath(userHome + "/Library/Application Support/" + appName);
-      CSpecialProtocol::SetMasterProfilePath(userHome + "/Library/Application Support/" + appName + "/userdata");
-    #endif
+    // home and masterprofile locations
+    std::string strHomePath = CDarwinUtils::GetAppHomeDirectory();
+    CSpecialProtocol::SetHomePath(strHomePath);
+    CSpecialProtocol::SetMasterProfilePath(strHomePath + "/userdata");
 
-    std::string dotLowerAppName = "." + appName;
-    StringUtils::ToLower(dotLowerAppName);
-    // location for temp files
-    #if defined(TARGET_DARWIN_TVOS)
-      std::string strTempPath = CDarwinUtils::GetTemporaryDirectory();
-      strTempPath += "temp";
-    #elif defined(TARGET_DARWIN_IOS)
-      std::string strTempPath = URIUtils::AddFileToFolder(userHome,  std::string(CDarwinUtils::GetAppRootFolder()) + "/" + appName + "/temp");
-    #else
-      std::string strTempPath = URIUtils::AddFileToFolder(userHome, dotLowerAppName + "/");
-      CDirectory::Create(strTempPath);
-      strTempPath = URIUtils::AddFileToFolder(userHome, dotLowerAppName + "/temp");
-    #endif
-    CSpecialProtocol::SetTempPath(strTempPath);
-
+    // temp files location
+    CSpecialProtocol::SetTempPath(CDarwinUtils::GetAppTempDirectory());
     // xbmc.log file location
-    #if defined(TARGET_DARWIN_IOS)
-      strTempPath = userHome + "/" + std::string(CDarwinUtils::GetAppRootFolder());
-    #else
-      strTempPath = userHome + "/Library/Logs";
-    #endif
-    URIUtils::AddSlashAtEnd(strTempPath);
-    g_advancedSettings.m_logFolder = strTempPath;
+    g_advancedSettings.m_logFolder = CDarwinUtils::GetAppLogDirectory();
 
     CreateUserDirs();
-  }
-  else
-  {
-    URIUtils::AddSlashAtEnd(appPath);
-    g_advancedSettings.m_logFolder = appPath;
-
-    CSpecialProtocol::SetXBMCBinPath(appPath);
-    CSpecialProtocol::SetXBMCPath(appPath);
-    CSpecialProtocol::SetHomePath(URIUtils::AddFileToFolder(appPath, "portable_data"));
-    CSpecialProtocol::SetMasterProfilePath(URIUtils::AddFileToFolder(appPath, "portable_data/userdata"));
-
-    std::string strTempPath = URIUtils::AddFileToFolder(appPath, "portable_data/temp");
-    CSpecialProtocol::SetTempPath(strTempPath);
-
-    URIUtils::AddSlashAtEnd(strTempPath);
-    g_advancedSettings.m_logFolder = strTempPath;
   }
 
   return true;
@@ -987,9 +944,7 @@ void CApplication::CreateUserDirs()
 bool CApplication::Initialize()
 {
   if (!m_bPlatformDirectories)
-  {
     CDirectory::Create("special://xbmc/addons");
-  }
 
   // load the language and its translated strings
   if (!LoadLanguage(false))
