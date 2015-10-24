@@ -166,6 +166,7 @@
 #endif
 #ifdef TARGET_DARWIN
 #include "platform/darwin/DarwinUtils.h"
+#include "platform/darwin/DarwinNSUserDefaults.h"
 #endif
 
 #include "storage/MediaManager.h"
@@ -336,14 +337,34 @@ extern "C" void cleanup_emu_environ();
 // Utility function used to copy files from the application bundle
 // over to the user data directory in Application Support/Kodi.
 //
-static void CopyUserDataIfNeeded(const std::string &strPath, const std::string &file)
+static void CopyUserDataXMLFilesIfNeeded(const std::string &strPath, const std::string &file)
 {
-  std::string destPath = URIUtils::AddFileToFolder(strPath, file);
-  if (!CFile::Exists(destPath))
+  // this needs to move out into DarwinUtils
+  std::string dstPath = URIUtils::AddFileToFolder(strPath, file);
+  std::string srcPath = URIUtils::AddFileToFolder("special://xbmc/userdata/", file);
+#if defined(TARGET_DARWIN_TVOS)
+  if (CDarwinNSUserDefaults::IsKeyFromPath(dstPath))
   {
-    // need to copy it across
-    std::string srcPath = URIUtils::AddFileToFolder("special://xbmc/userdata/", file);
-    CFile::Copy(srcPath, destPath);
+    if (!CDarwinNSUserDefaults::KeyFromPathExists(dstPath))
+    {
+      XFILE::CFile file;
+      XFILE::auto_buffer buffer;
+      if (file.LoadFile(srcPath, buffer))
+      {
+        std::string xml_data(buffer.get(), buffer.length());
+        CDarwinNSUserDefaults::SetKeyFromPath(dstPath, xml_data, true);
+      }
+    }
+  }
+  else
+#endif
+  {
+    if (!CFile::Exists(dstPath))
+    {
+      // need to copy it across
+      std::string srcPath = URIUtils::AddFileToFolder("special://xbmc/userdata/", file);
+      CFile::Copy(srcPath, dstPath);
+    }
   }
 }
 
@@ -407,10 +428,10 @@ bool CApplication::Create()
   if (!inited)
     inited = InitDirectoriesOSX();
 
-  // copy required files
-  CopyUserDataIfNeeded("special://masterprofile/", "RssFeeds.xml");
-  CopyUserDataIfNeeded("special://masterprofile/", "favourites.xml");
-  CopyUserDataIfNeeded("special://masterprofile/", "Lircmap.xml");
+  // copy required xml files
+  CopyUserDataXMLFilesIfNeeded("special://masterprofile/", "RssFeeds.xml");
+  CopyUserDataXMLFilesIfNeeded("special://masterprofile/", "favourites.xml");
+  CopyUserDataXMLFilesIfNeeded("special://masterprofile/", "Lircmap.xml");
 
   if (!CLog::Init(CSpecialProtocol::TranslatePath(g_advancedSettings.m_logFolder).c_str()))
   {
