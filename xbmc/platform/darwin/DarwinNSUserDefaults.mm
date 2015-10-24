@@ -30,7 +30,7 @@ static bool translatePathIntoKey(const std::string &path, std::string &key)
 {
   size_t pos;
   std::string translated_key = CSpecialProtocol::TranslatePath(path);
-  if ((pos = translated_key.find("userdata")) != std::string::npos)
+  if ((pos = translated_key.find("Caches/userdata")) != std::string::npos)
   {
     key = translated_key.erase(0, pos);
     return true;
@@ -102,7 +102,7 @@ bool CDarwinNSUserDefaults::KeyExists(const std::string &key)
   if (!key.empty())
   {
     NSString *nsstring_key = [NSString stringWithUTF8String: key.c_str()];
-    if (![[NSUserDefaults standardUserDefaults] objectForKey:nsstring_key])
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:nsstring_key])
       return true;
   }
 
