@@ -347,13 +347,9 @@ static void CopyUserDataXMLFilesIfNeeded(const std::string &strPath, const std::
   {
     if (!CDarwinNSUserDefaults::KeyFromPathExists(dstPath))
     {
-      XFILE::CFile file;
-      XFILE::auto_buffer buffer;
-      if (file.LoadFile(srcPath, buffer))
-      {
-        std::string xml_data(buffer.get(), buffer.length());
-        CDarwinNSUserDefaults::SetKeyFromPath(dstPath, xml_data, true);
-      }
+      CXBMCTinyXML xmlDoc;
+      if (xmlDoc.LoadFile(srcPath))
+        xmlDoc.SaveFile(dstPath);
     }
   }
   else
