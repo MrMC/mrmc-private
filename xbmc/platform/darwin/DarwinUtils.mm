@@ -464,7 +464,7 @@ const char* CDarwinUtils::GetAppTempDirectory(void)
       appTempFolder = URIUtils::AddFileToFolder(getenv("HOME"),  std::string(CDarwinUtils::GetOSAppRootFolder());
       appTempFolder = URIUtils::AddFileToFolder(appTempFolder,  CCompileInfo::GetAppName());
     #else
-      std::string dotLowerAppName = "." + CCompileInfo::GetAppName();
+      std::string dotLowerAppName = StringUtils::Format(".%s", CCompileInfo::GetAppName());
       StringUtils::ToLower(dotLowerAppName);
       appTempFolder = URIUtils::AddFileToFolder(getenv("HOME"), dotLowerAppName);
       mkdir(appTempFolder.c_str(), 0755);

@@ -53,7 +53,7 @@
 #include "addons/AddonManager.h"
 #include "addons/AudioDecoder.h"
 #include "guilib/GUIWindowManager.h"
-#if defined(TARGET_DARWIN_IOS)
+#if defined(TARGET_DARWIN)
 #include "platform/darwin/DarwinUtils.h"
 #endif
 
