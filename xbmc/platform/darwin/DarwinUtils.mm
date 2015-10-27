@@ -486,8 +486,7 @@ const char* CDarwinUtils::GetAppHomeDirectory(void)
       appHomeFolder = URIUtils::AddFileToFolder(getenv("HOME"), CDarwinUtils::GetOSAppRootFolder());
       appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, CCompileInfo::GetAppName());
     #else
-      appHomeFolder = URIUtils::AddFileToFolder(getenv("HOME"), CDarwinUtils::GetOSAppRootFolder());
-      appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, "Library/Application Support");
+      appHomeFolder = URIUtils::AddFileToFolder(getenv("HOME"), "Library/Application Support");
       appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, CCompileInfo::GetAppName());
     #endif
   }
@@ -498,7 +497,6 @@ const char* CDarwinUtils::GetAppHomeDirectory(void)
 const char* CDarwinUtils::GetOSAppRootFolder(void)
 {
   static std::string rootFolder;
-#if defined(TARGET_DARWIN_IOS)
   if (rootFolder.empty())
   {
     if (IsIosSandboxed())
@@ -513,7 +511,6 @@ const char* CDarwinUtils::GetOSAppRootFolder(void)
       rootFolder = "Library/Preferences";
     }
   }
-#endif
   return rootFolder.c_str();
 }
 
