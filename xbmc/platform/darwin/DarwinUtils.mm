@@ -498,6 +498,7 @@ const char* CDarwinUtils::GetAppHomeDirectory(void)
 const char* CDarwinUtils::GetOSAppRootFolder(void)
 {
   static std::string rootFolder;
+#if defined(TARGET_DARWIN_IOS)
   if (rootFolder.empty())
   {
     if (IsIosSandboxed())
@@ -512,6 +513,7 @@ const char* CDarwinUtils::GetOSAppRootFolder(void)
       rootFolder = "Library/Preferences";
     }
   }
+#endif
   return rootFolder.c_str();
 }
 
