@@ -52,7 +52,6 @@
 #include "storage/MediaManager.h"
 #include "utils/StringUtils.h"
 #include "guilib/LocalizeStrings.h"
-#include "utils/FileUtils.h"
 #include "utils/log.h"
 #include "TextureCache.h"
 #include "interfaces/AnnouncementManager.h"
@@ -864,28 +863,72 @@ void CVideoDatabase::UpdateFileDateAdded(int idFile, const std::string& strFileN
 {
   if (idFile < 0 || strFileNameAndPath.empty())
     return;
-
-  CDateTime dateAdded;
+    
+  std::string strSQL = "";
   try
   {
     if (NULL == m_pDB.get()) return;
     if (NULL == m_pDS.get()) return;
-     
-    // 1 prefering to use the files mtime(if it's valid) and only using the file's ctime if the mtime isn't valid
-    if (g_advancedSettings.m_iVideoLibraryDateAdded == 1)
-      dateAdded = CFileUtils::GetModificationDate(strFileNameAndPath, false);
-    //2 using the newer datetime of the file's mtime and ctime
-    else if (g_advancedSettings.m_iVideoLibraryDateAdded == 2)
-      dateAdded = CFileUtils::GetModificationDate(strFileNameAndPath, true);
-    //0 using the current datetime if non of the above matches or one returns an invalid datetime
+
+    std::string file = strFileNameAndPath;
+    if (URIUtils::IsStack(strFileNameAndPath))
+      file = CStackDirectory::GetFirstStackedFile(strFileNameAndPath);
+
+    if (URIUtils::IsInArchive(file))
+      file = CURL(file).GetHostName();
+
+    CDateTime dateAdded;
+    // Skip looking at the files ctime/mtime if defined by the user through as.xml
+    if (g_advancedSettings.m_iVideoLibraryDateAdded > 0)
+    {
+      // Let's try to get the modification datetime
+      struct __stat64 buffer;
+      if (CFile::Stat(file, &buffer) == 0 && (buffer.st_mtime != 0 || buffer.st_ctime !=0))
+      {
+        time_t now = time(NULL);
+        time_t addedTime;
+        // Prefer the modification time if it's valid
+        if (g_advancedSettings.m_iVideoLibraryDateAdded == 1)
+        {
+          if (buffer.st_mtime != 0 && (time_t)buffer.st_mtime <= now)
+            addedTime = (time_t)buffer.st_mtime;
+          else
+            addedTime = (time_t)buffer.st_ctime;
+        }
+        // Use the newer of the creation and modification time
+        else
+        {
+          addedTime = std::max((time_t)buffer.st_ctime, (time_t)buffer.st_mtime);
+          // if the newer of the two dates is in the future, we try it with the older one
+          if (addedTime > now)
+            addedTime = std::min((time_t)buffer.st_ctime, (time_t)buffer.st_mtime);
+        }
+
+        // make sure the datetime does is not in the future
+        if (addedTime <= now)
+        {
+          struct tm *time;
+#ifdef HAVE_LOCALTIME_R
+          struct tm result = {};
+          time = localtime_r(&addedTime, &result);
+#else
+          time = localtime(&addedTime);
+#endif
+          if (time)
+            dateAdded = *time;
+        }
+      }
+    }
+
     if (!dateAdded.IsValid())
       dateAdded = CDateTime::GetCurrentDateTime();
 
-    m_pDS->exec(PrepareSQL("UPDATE files SET dateAdded='%s' WHERE idFile=%d", dateAdded.GetAsDBDateTime().c_str(), idFile));
+    strSQL = PrepareSQL("update files set dateAdded='%s' where idFile=%d", dateAdded.GetAsDBDateTime().c_str(), idFile);
+    m_pDS->exec(strSQL.c_str());
   }
   catch (...)
   {
-    CLog::Log(LOGERROR, "%s (%s, %s) failed", __FUNCTION__, CURL::GetRedacted(strFileNameAndPath).c_str(), dateAdded.GetAsDBDateTime().c_str());
+    CLog::Log(LOGERROR, "%s unable to update dateadded for file (%s)", __FUNCTION__, strSQL.c_str());
   }
 }
 

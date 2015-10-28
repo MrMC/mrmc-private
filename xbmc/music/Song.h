@@ -103,7 +103,6 @@ public:
   int iYear;
   int iTimesPlayed;
   CDateTime lastPlayed;
-  CDateTime dateAdded;
   int iStartOffset;
   int iEndOffset;
   bool bCompilation;

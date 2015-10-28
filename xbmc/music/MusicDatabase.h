@@ -487,12 +487,6 @@ private:
   CAlbum GetAlbumFromDataset(dbiplus::Dataset* pDS, int offset = 0, bool imageURL = false);
   CAlbum GetAlbumFromDataset(const dbiplus::sql_record* const record, int offset = 0, bool imageURL = false);
   CArtistCredit GetArtistCreditFromDataset(const dbiplus::sql_record* const record, int offset = 0);
-  /*! \brief Updates the dateAdded field in the song table for the file
-  with the given songId and the given path based on the files modification date
-  \param songId id of the song in the song table
-  \param strFileNameAndPath path to the file
-  */
-  void UpdateFileDateAdded(int songId, const std::string& strFileNameAndPath);
   void GetFileItemFromDataset(CFileItem* item, const CMusicDbUrl &baseUrl);
   void GetFileItemFromDataset(const dbiplus::sql_record* const record, CFileItem* item, const CMusicDbUrl &baseUrl);
   CSong GetAlbumInfoSongFromDataset(const dbiplus::sql_record* const record, int offset = 0);
@@ -537,7 +531,6 @@ private:
     song_strAlbumArtists,
     song_strAlbumReleaseType,
     song_mood,
-    song_dateAdded,
     song_enumCount // end of the enum, do not add past here
   } SongFields;
 

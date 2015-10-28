@@ -304,7 +304,6 @@ void CAdvancedSettings::Initialize()
   m_prioritiseAPEv2tags = false;
   m_musicItemSeparator = " / ";
   m_videoItemSeparator = " / ";
-  m_iMusicLibraryDateAdded = 1; // prefer mtime over ctime and current time
 
   m_bVideoLibraryAllItemsOnBottom = false;
   m_iVideoLibraryRecentlyAddedItems = 25;
@@ -736,7 +735,6 @@ void CAdvancedSettings::ParseSettingsFile(const std::string &file)
     XMLUtils::GetString(pElement, "albumformat", m_strMusicLibraryAlbumFormat);
     XMLUtils::GetString(pElement, "albumformatright", m_strMusicLibraryAlbumFormatRight);
     XMLUtils::GetString(pElement, "itemseparator", m_musicItemSeparator);
-    XMLUtils::GetInt(pElement, "dateadded", m_iMusicLibraryDateAdded);
   }
 
   pElement = pRootElement->FirstChildElement("videolibrary");

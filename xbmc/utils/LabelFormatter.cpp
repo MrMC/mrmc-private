@@ -319,8 +319,6 @@ std::string CLabelFormatter::GetMaskContent(const CMaskString &mask, const CFile
   case 'a': // Date Added
     if (movie && movie->m_dateAdded.IsValid())
       value = movie->m_dateAdded.GetAsLocalizedDate();
-    if (music && music->GetDateAdded().IsValid())
-      value = music->GetDateAdded().GetAsLocalizedDate();
     break;
   case 'd': // date and time
     if (item->m_dateTime.IsValid())
