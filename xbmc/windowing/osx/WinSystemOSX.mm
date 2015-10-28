@@ -364,8 +364,8 @@ bool CWinSystemOSX::CreateNewWindow(const std::string& name, bool fullScreen, RE
   {
     NSWindow *appWindow = [[OSXGLWindow alloc] initWithContentRect:NSMakeRect(0, 0, m_nWidth, m_nHeight) styleMask:windowStyleMask];
     NSString *title = [NSString stringWithUTF8String:m_name.c_str()];
-    [(NSWindow*)m_appWindow setBackgroundColor:[NSColor blackColor]];
-    [(NSWindow*)m_appWindow setTitle:title];
+    [appWindow setBackgroundColor:[NSColor blackColor]];
+    [appWindow setTitle:title];
     [appWindow setOneShot:NO];
 
     //if (!fullScreen)
