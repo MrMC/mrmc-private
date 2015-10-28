@@ -388,13 +388,13 @@ bool CWinSystemOSX::CreateNewWindow(const std::string& name, bool fullScreen, RE
     [[contentView getGLContext] update];
 
     // now that we have a view, and a current gl context, then we can show window.
-    [(NSWindow*)appWindow orderFront:nil];
+//    [appWindow orderFront:nil];
 
     m_appWindow = appWindow;
     m_bWindowCreated = true;
   }
 
-  [(NSWindow*)m_appWindow makeKeyWindow];
+  [(NSWindow*)m_appWindow makeKeyAndOrderFront:nil];
 /*
   [(NSWindow*)m_appWindow update];
   [(NSWindow*)m_appWindow display];
