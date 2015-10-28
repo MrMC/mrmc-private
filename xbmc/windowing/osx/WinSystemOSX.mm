@@ -63,7 +63,7 @@ CRect CGRectToCRect(CGRect cgrect)
 void SetMenuBarVisible(bool visible)
 {
   // native fullscreen stuff handles this for us...
-  if (!visible && CDarwinUtils::DeviceHasNativeFullscreen())
+  if (!visible)
     return;
 
   if ([NSApplication sharedApplication] == nil)
@@ -355,12 +355,12 @@ bool CWinSystemOSX::CreateNewWindow(const std::string& name, bool fullScreen, RE
 
   // for native fullscreen we always want to set the same windowed flags
   NSUInteger windowStyleMask;
-  if (fullScreen && !CDarwinUtils::DeviceHasNativeFullscreen())
+  if (fullScreen && 0)
     windowStyleMask = NSBorderlessWindowMask;
   else
     windowStyleMask = NSTitledWindowMask|NSResizableWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask;
 
-  if (m_appWindow == NULL || !CDarwinUtils::DeviceHasNativeFullscreen())
+  if (m_appWindow == NULL)
   {
     NSWindow *appWindow = [[OSXGLWindow alloc] initWithContentRect:NSMakeRect(0, 0, m_nWidth, m_nHeight) styleMask:windowStyleMask];
     NSString *title = [NSString stringWithUTF8String:m_name.c_str()];
@@ -459,10 +459,7 @@ bool CWinSystemOSX::DestroyWindow()
   // when using native fullscreen
   // we never destroy the window
   // we reuse it ...
-  if (CDarwinUtils::DeviceHasNativeFullscreen())
-    return true;
-
-  return DestroyWindowInternal();
+  return true;
 }
 
 bool CWinSystemOSX::ResizeWindow(int newWidth, int newHeight, int newLeft, int newTop)
@@ -526,7 +523,7 @@ bool CWinSystemOSX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool bl
   
   // we are toggled by osx fullscreen feature
   // only resize and reset the toggle flag
-  if (CDarwinUtils::DeviceHasNativeFullscreen() && m_fullscreenWillToggle)
+  if (0 && m_fullscreenWillToggle)
   {
     ResizeWindow(m_nWidth, m_nHeight, -1, -1);
     m_fullscreenWillToggle = false;
@@ -567,7 +564,7 @@ bool CWinSystemOSX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool bl
       // old behaviour - set origin to 0,0 when going
       // to fullscreen - not needed when we use native
       // fullscreen mode
-      if (!CDarwinUtils::DeviceHasNativeFullscreen())
+//      if (!CDarwinUtils::DeviceHasNativeFullscreen())
       {
         [window setFrameOrigin:[pScreen frame].origin];
         [view setFrameOrigin:NSMakePoint(0.0, 0.0)];
@@ -577,7 +574,7 @@ bool CWinSystemOSX::SetFullScreen(bool fullScreen, RESOLUTION_INFO& res, bool bl
       NSString *title = [NSString stringWithFormat:@"%s" , ""];
       window.title = title;
       
-      if (!CDarwinUtils::DeviceHasNativeFullscreen())
+      if (!1)
       {
         NSUInteger windowStyleMask = NSBorderlessWindowMask;
         [window setStyleMask:windowStyleMask];
