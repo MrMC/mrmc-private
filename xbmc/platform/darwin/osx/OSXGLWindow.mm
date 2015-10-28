@@ -320,4 +320,9 @@
   if (Cocoa_IsMouseHidden())
     CWinEventsOSXImp::HandleInputEvent(theEvent);
 }
+
+- (BOOL) canBecomeKeyWindow
+{
+  return YES;
+}
 @end
