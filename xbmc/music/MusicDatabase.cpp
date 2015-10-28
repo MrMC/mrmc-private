@@ -165,6 +165,10 @@ void CMusicDatabase::CreateTables()
   CLog::Log(LOGINFO, "create discography table");
   m_pDS->exec("CREATE TABLE discography (idArtist integer, strAlbum text, strYear text)");
 
+  CLog::Log(LOGINFO, "create karaokedata table");
+  m_pDS->exec("CREATE TABLE karaokedata (iKaraNumber integer, idSong integer, iKaraDelay integer, strKaraEncoding text, "
+              "strKaralyrics text, strKaraLyrFileCRC text)");
+
   CLog::Log(LOGINFO, "create art table");
   m_pDS->exec("CREATE TABLE art(art_id INTEGER PRIMARY KEY, media_id INTEGER, media_type TEXT, type TEXT, url TEXT)");
 
@@ -209,6 +213,9 @@ void CMusicDatabase::CreateAnalytics()
 
   m_pDS->exec("CREATE INDEX idxAlbumInfoSong_1 ON albuminfosong ( idAlbumInfo )");
 
+  m_pDS->exec("CREATE INDEX idxKaraNumber on karaokedata(iKaraNumber)");
+  m_pDS->exec("CREATE INDEX idxKarSong on karaokedata(idSong)");
+
   m_pDS->exec("CREATE INDEX idxDiscography_1 ON discography ( idArtist )");
 
   m_pDS->exec("CREATE INDEX ix_art ON art(media_id, media_type(20), type(20))");
@@ -232,6 +239,7 @@ void CMusicDatabase::CreateAnalytics()
   m_pDS->exec("CREATE TRIGGER tgrDeleteSong AFTER delete ON song FOR EACH ROW BEGIN"
               "  DELETE FROM song_artist WHERE song_artist.idSong = old.idSong;"
               "  DELETE FROM song_genre WHERE song_genre.idSong = old.idSong;"
+              "  DELETE FROM karaokedata WHERE karaokedata.idSong = old.idSong;"
               "  DELETE FROM art WHERE media_id=old.idSong AND media_type='song';"
               " END");
   m_pDS->exec("CREATE TRIGGER tgrDeletePath AFTER delete ON path FOR EACH ROW BEGIN"
@@ -269,7 +277,9 @@ void CMusicDatabase::CreateViews()
               "  JOIN album ON"
               "    song.idAlbum=album.idAlbum"
               "  JOIN path ON"
-              "    song.idPath=path.idPath");
+              "    song.idPath=path.idPath"
+              "  LEFT OUTER JOIN karaokedata ON"
+              "    song.idSong=karaokedata.idSong");
 
   CLog::Log(LOGINFO, "create album view");
   m_pDS->exec("CREATE VIEW albumview AS SELECT "
@@ -492,7 +502,8 @@ bool CMusicDatabase::AddAlbum(CAlbum& album)
                            song->iTimesPlayed, song->iStartOffset,
                            song->iEndOffset,
                            song->lastPlayed,
-                           song->rating);
+                           song->rating,
+                           song->iKaraokeNumber);
 
     for (VECARTISTCREDITS::iterator artistCredit = song->artistCredits.begin(); artistCredit != song->artistCredits.end(); ++artistCredit)
     {
@@ -567,7 +578,8 @@ bool CMusicDatabase::UpdateAlbum(CAlbum& album)
                song->iStartOffset,
                song->iEndOffset,
                song->lastPlayed,
-               song->rating);
+               song->rating,
+               song->iKaraokeNumber);
     DeleteSongArtistsBySong(song->idSong);
     for (VECARTISTCREDITS::iterator artistCredit = song->artistCredits.begin(); artistCredit != song->artistCredits.end(); ++artistCredit)
     {
@@ -600,7 +612,7 @@ int CMusicDatabase::AddSong(const int idAlbum,
                             const std::string &artistString, const std::vector<std::string>& genres,
                             int iTrack, int iDuration, int iYear,
                             const int iTimesPlayed, int iStartOffset, int iEndOffset,
-                            const CDateTime& dtLastPlayed, char rating)
+                            const CDateTime& dtLastPlayed, char rating, int iKaraokeNumber)
 {
   int idSong = -1;
   std::string strSQL;
@@ -660,13 +672,14 @@ int CMusicDatabase::AddSong(const int idAlbum,
     {
       idSong = m_pDS->fv("idSong").get_asInt();
       m_pDS->close();
-      UpdateSong(idSong, strTitle, strMusicBrainzTrackID, strPathAndFileName, strComment, strMood, strThumb, artistString, genres, iTrack, iDuration, iYear, iTimesPlayed, iStartOffset, iEndOffset, dtLastPlayed, rating);
+      UpdateSong(idSong, strTitle, strMusicBrainzTrackID, strPathAndFileName, strComment, strMood, strThumb, artistString, genres, iTrack, iDuration, iYear, iTimesPlayed, iStartOffset, iEndOffset, dtLastPlayed, rating,  iKaraokeNumber);
     }
 
     if (!strThumb.empty())
       SetArtForItem(idSong, MediaTypeSong, "thumb", strThumb);
 
     unsigned int index = 0;
+
     for (vector<string>::const_iterator i = genres.begin(); i != genres.end(); ++i)
     {
       // index will be wrong for albums, but ordering is not all that relevant
@@ -675,7 +688,7 @@ int CMusicDatabase::AddSong(const int idAlbum,
       AddSongGenre(idGenre, idSong, index);
       AddAlbumGenre(idGenre, idAlbum, index++);
     }
-
+    
     UpdateFileDateAdded(idSong, strPathAndFileName);
 
     AnnounceUpdate(MediaTypeSong, idSong);
@@ -754,7 +767,8 @@ int CMusicDatabase::UpdateSong(int idSong, const CSong &song)
                     song.iStartOffset,
                     song.iEndOffset,
                     song.lastPlayed,
-                    song.rating);
+                    song.rating,
+                    song.iKaraokeNumber);
 }
 
 int CMusicDatabase::UpdateSong(int idSong,
@@ -764,7 +778,7 @@ int CMusicDatabase::UpdateSong(int idSong,
                                const std::string& artistString, const std::vector<std::string>& genres,
                                int iTrack, int iDuration, int iYear,
                                int iTimesPlayed, int iStartOffset, int iEndOffset,
-                               const CDateTime& dtLastPlayed, char rating)
+                               const CDateTime& dtLastPlayed, char rating, int iKaraokeNumber)
 {
   if (idSong < 0)
     return -1;
@@ -1646,6 +1660,9 @@ CSong CMusicDatabase::GetSongFromDataset(const dbiplus::sql_record* const record
   song.rating = record->at(offset + song_rating).get_asChar();
   song.strComment = record->at(offset + song_comment).get_asString();
   song.strMood = record->at(offset + song_mood).get_asString();
+  song.iKaraokeNumber = record->at(offset + song_iKarNumber).get_asInt();
+  song.strKaraokeLyrEncoding = record->at(offset + song_strKarEncoding).get_asString();
+  song.iKaraokeDelay = record->at(offset + song_iKarDelay).get_asInt();
   song.bCompilation = record->at(offset + song_bCompilation).get_asInt() == 1;
   song.albumArtist = StringUtils::Split(record->at(offset + song_strAlbumArtists).get_asString(), g_advancedSettings.m_musicItemSeparator);
 
@@ -3620,6 +3637,7 @@ void CMusicDatabase::UpdateTables(int version)
   if (version < 48)
   { // null out columns that are no longer used
     m_pDS->exec("UPDATE song SET dwFileNameCRC=NULL, idThumb=NULL");
+    m_pDS->exec("UPDATE karaokedata SET strKaraLyrFileCRC=NULL");
     m_pDS->exec("UPDATE album SET idThumb=NULL");
   }
   if (version < 49)
