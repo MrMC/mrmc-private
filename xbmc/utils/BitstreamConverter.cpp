@@ -273,31 +273,28 @@ bool CBitstreamParser::FindIdrSlice(const uint8_t *buf, int buf_size)
       break;
     }
 
-    --buf;
-    int src_length = buf_end - buf;
     switch (state & 0x1f)
     {
       default:
-        CLog::Log(LOGDEBUG, "FindIdrSlice: found nal_type(%d)", state & 0x1f);
+        //CLog::Log(LOGDEBUG, "FindIdrSlice: found nal_type(%d)", state & 0x1f);
         break;
       case AVC_NAL_SLICE:
-        CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_SLICE");
+        //CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_SLICE");
         break;
       case AVC_NAL_IDR_SLICE:
-        CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_IDR_SLICE");
-        rtn = true;
+        //CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_IDR_SLICE");
+        return true;
         break;
       case AVC_NAL_SEI:
-        CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_SEI");
+        //CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_SEI");
         break;
       case AVC_NAL_SPS:
-        CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_SPS");
+        //CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_SPS");
         break;
       case AVC_NAL_PPS:
-        CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_PPS");
+        //CLog::Log(LOGDEBUG, "FindIdrSlice: found NAL_PPS");
         break;
     }
-    buf += src_length;
   }
 
   return rtn;
@@ -486,14 +483,14 @@ bool CBitstreamConverter::Open(enum AVCodecID codec, uint8_t *in_extradata, int 
 void CBitstreamConverter::Close(void)
 {
   if (m_sps_pps_context.sps_pps_data)
-    av_free(m_sps_pps_context.sps_pps_data), m_sps_pps_context.sps_pps_data = NULL;
+    av_freep(&m_sps_pps_context.sps_pps_data);
 
   if (m_convertBuffer)
-    av_free(m_convertBuffer), m_convertBuffer = NULL;
+    av_freep(&m_convertBuffer);
   m_convertSize = 0;
 
   if (m_extradata)
-    av_free(m_extradata), m_extradata = NULL;
+    av_freep(&m_extradata);
   m_extrasize = 0;
 
   m_inputSize = 0;
