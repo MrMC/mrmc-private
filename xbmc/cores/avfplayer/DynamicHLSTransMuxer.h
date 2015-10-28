@@ -27,6 +27,8 @@ namespace XFILE
   class CFile;
 }
 
+struct AVFormatContext;
+
 class CDynamicHLSTransMuxer : public CThread
 {
 public:
@@ -57,4 +59,7 @@ private:
 
   CFileItem       m_fileitem;
   XFILE::CFile   *m_infile;
+
+  AVFormatContext *m_ifmt_ctx;
+  AVFormatContext *m_ofmt_ctx;
 };
