@@ -1792,7 +1792,6 @@
 		F5BBDE081BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
 		F5BBDE091BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
 		F5BBDE0A1BB796AC00FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
-		F5BBDE0C1BB79F6A00FB1ACF /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5BBDE0B1BB79F6A00FB1ACF /* VideoToolbox.framework */; };
 		F5BBDE0F1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
 		F5BBDE101BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
 		F5BBDE111BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
@@ -4870,7 +4869,6 @@
 		F5B413131065900C0035D105 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDVideoCodecVTB.cpp; sourceTree = "<group>"; };
 		F5BBDE071BB7346700FB1ACF /* DVDVideoCodecVTB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDVideoCodecVTB.h; sourceTree = "<group>"; };
-		F5BBDE0B1BB79F6A00FB1ACF /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS9.1.sdk/System/Library/Frameworks/VideoToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		F5BBDE0D1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDVideoCodecSampleBufferLayer.h; sourceTree = "<group>"; };
 		F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DVDVideoCodecSampleBufferLayer.mm; sourceTree = "<group>"; };
 		F5BBDE121BB8444C00FB1ACF /* SampleBufferLayerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleBufferLayerView.h; sourceTree = "<group>"; };
@@ -5037,7 +5035,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F5BBDE0C1BB79F6A00FB1ACF /* VideoToolbox.framework in Frameworks */,
 				E49910F3174E54FB00741B6D /* AVFoundation.framework in Frameworks */,
 				F5024C0D1BB433F400134B16 /* UIKit.framework in Frameworks */,
 				E49910F1174E54ED00741B6D /* CFNetwork.framework in Frameworks */,
@@ -8093,7 +8090,6 @@
 		E49910F6174E55D400741B6D /* iOS */ = {
 			isa = PBXGroup;
 			children = (
-				F5BBDE0B1BB79F6A00FB1ACF /* VideoToolbox.framework */,
 				F5D142E31BAF88880075A95C /* MediaPlayer.framework */,
 				F5D142E11BAF88760075A95C /* CoreGraphics.framework */,
 				F5D142DF1BAF88630075A95C /* UIKit.framework */,
