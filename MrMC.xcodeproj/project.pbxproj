@@ -1692,6 +1692,8 @@
 		F51063421BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
 		F51063431BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
 		F51063441BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
+		F51063991BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063981BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm */; };
+		F510639C1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F510639A1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp */; };
 		F52A733D1560BC34005B1A0B /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F52A733C1560BC34005B1A0B /* CoreFoundation.framework */; };
 		F52B063B11869862004B1D66 /* Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B063A11869862004B1D66 /* Skin.cpp */; };
 		F52B06BA1187CE18004B1D66 /* DVDVideoCodecVDA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B06B81187CE18004B1D66 /* DVDVideoCodecVDA.cpp */; };
@@ -4707,6 +4709,10 @@
 		F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogTextViewer.cpp; sourceTree = "<group>"; };
 		F51063401BDAA11D00BBCED6 /* DarwinNSUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DarwinNSUserDefaults.h; sourceTree = "<group>"; };
 		F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DarwinNSUserDefaults.mm; sourceTree = "<group>"; };
+		F51063971BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDVideoCodecAVPlayer.h; sourceTree = "<group>"; };
+		F51063981BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DVDVideoCodecAVPlayer.mm; sourceTree = "<group>"; };
+		F510639A1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CodecAVPlayerHLSTransMuxer.cpp; sourceTree = "<group>"; };
+		F510639B1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodecAVPlayerHLSTransMuxer.h; sourceTree = "<group>"; };
 		F52A733C1560BC34005B1A0B /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		F52B063911869862004B1D66 /* Skin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skin.h; sourceTree = "<group>"; };
 		F52B063A11869862004B1D66 /* Skin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Skin.cpp; sourceTree = "<group>"; };
@@ -7374,8 +7380,12 @@
 		E38E153A0D25F9F900618676 /* Video */ = {
 			isa = PBXGroup;
 			children = (
+				F510639B1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.h */,
+				F510639A1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp */,
 				F597B05A18A804E0005AADAE /* DVDVideoCodec.cpp */,
 				E38E153C0D25F9F900618676 /* DVDVideoCodec.h */,
+				F51063971BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.h */,
+				F51063981BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm */,
 				F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */,
 				F5BBDE0D1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.h */,
 				E38E153D0D25F9F900618676 /* DVDVideoCodecFFmpeg.cpp */,
@@ -10913,6 +10923,7 @@
 				F5D13F701BAF0B6D0075A95C /* DAVCommon.cpp in Sources */,
 				F5D13F711BAF0B6D0075A95C /* DAVDirectory.cpp in Sources */,
 				F5D13F721BAF0B6D0075A95C /* DAVFile.cpp in Sources */,
+				F51063991BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm in Sources */,
 				F5D13F741BAF0B6D0075A95C /* Directory.cpp in Sources */,
 				F5D13F751BAF0B6D0075A95C /* DirectoryCache.cpp in Sources */,
 				F5D13F761BAF0B6D0075A95C /* DirectoryFactory.cpp in Sources */,
@@ -10958,6 +10969,7 @@
 				F5D13F9D1BAF0B6D0075A95C /* DirectoryNodeTop100.cpp in Sources */,
 				F5D13F9E1BAF0B6D0075A95C /* DirectoryNodeYearAlbum.cpp in Sources */,
 				F5D13F9F1BAF0B6D0075A95C /* DirectoryNodeYearSong.cpp in Sources */,
+				F510639C1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp in Sources */,
 				F5D13FA01BAF0B6D0075A95C /* QueryParams.cpp in Sources */,
 				F5D13FA11BAF0B6D0075A95C /* MusicDatabaseDirectory.cpp in Sources */,
 				F5D13FA21BAF0B6D0075A95C /* MusicDatabaseFile.cpp in Sources */,
