@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2010-2013 Team XBMC
+ *      Copyright (C) 2010-2015 Team XBMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -23,6 +23,7 @@
 #endif
 
 #if defined(HAVE_VIDEOTOOLBOXDECODER)
+#include "DynamicDll.h"
 #include "DVDClock.h"
 #include "DVDStreamInfo.h"
 #include "DVDCodecUtils.h"
@@ -39,14 +40,13 @@ extern "C" {
 #include "libavformat/avformat.h"
 }
 
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 #if defined(__cplusplus)
 extern "C"
 {
 #endif
-
 #pragma pack(push, 4)
-
-//-----------------------------------------------------------------------------------
 // /System/Library/PrivateFrameworks/VideoToolbox.framework
 enum VTFormat {
   kVTFormatJPEG         = 'jpeg', // kCMVideoCodecType_JPEG
@@ -72,7 +72,7 @@ enum {
 };
 enum {
   // decode and return buffers for all frames currently in flight.
-  kVTDecoderFlush_EmitFrames = 1 << 0		
+  kVTDecoderFlush_EmitFrames = 1 << 0          
 };
 
 typedef UInt32 VTFormatId;
@@ -91,9 +91,7 @@ struct _VTDecompressionOutputCallback {
   void *refcon;
 };
 
-extern CFStringRef kVTVideoDecoderSpecification_EnableSandboxedVideoDecoder;
-
-extern OSStatus VTDecompressionSessionCreate(
+OSStatus VTDecompressionSessionCreate(
   CFAllocatorRef allocator,
   CMFormatDescriptionRef videoFormatDescription,
   CFTypeRef sessionOptions,
@@ -101,17 +99,15 @@ extern OSStatus VTDecompressionSessionCreate(
   VTDecompressionOutputCallback *outputCallback,
   VTDecompressionSessionRef *session);
 
-extern OSStatus VTDecompressionSessionDecodeFrame(
+OSStatus VTDecompressionSessionDecodeFrame(
   VTDecompressionSessionRef session, CMSampleBufferRef sbuf,
   uint32_t decoderFlags, CFDictionaryRef frameInfo, uint32_t unk1);
 
-extern OSStatus VTDecompressionSessionCopyProperty(VTDecompressionSessionRef session, CFTypeRef key, void* unk, CFTypeRef * value);
-extern OSStatus VTDecompressionSessionCopySupportedPropertyDictionary(VTDecompressionSessionRef session, CFDictionaryRef * dict);
-extern OSStatus VTDecompressionSessionSetProperty(VTDecompressionSessionRef session, CFStringRef propName, CFTypeRef propValue);
-extern void VTDecompressionSessionInvalidate(VTDecompressionSessionRef session);
-extern void VTDecompressionSessionRelease(VTDecompressionSessionRef session);
-extern VTDecompressionSessionRef VTDecompressionSessionRetain(VTDecompressionSessionRef session);
-extern OSStatus VTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session);
+OSStatus VTDecompressionSessionCopyProperty(VTDecompressionSessionRef session, CFTypeRef key, void* unk, CFTypeRef * value);
+OSStatus VTDecompressionSessionCopySupportedPropertyDictionary(VTDecompressionSessionRef session, CFDictionaryRef * dict);
+OSStatus VTDecompressionSessionSetProperty(VTDecompressionSessionRef session, CFStringRef propName, CFTypeRef propValue);
+void VTDecompressionSessionInvalidate(VTDecompressionSessionRef session);
+OSStatus VTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session);
 
 //-----------------------------------------------------------------------------------
 // /System/Library/Frameworks/CoreMedia.framework
@@ -132,13 +128,76 @@ extern OSStatus FigVideoFormatDescriptionCreateWithSampleDescriptionExtensionAto
   UInt32 atomId, const UInt8 *data, CFIndex len, CMFormatDescriptionRef *formatDesc);
 
 extern CMSampleBufferRef FigSampleBufferRetain(CMSampleBufferRef buf);
-//-----------------------------------------------------------------------------------
 #pragma pack(pop)
     
 #if defined(__cplusplus)
 }
 #endif
 
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+class DllVideoToolBoxInterface
+{
+public:
+  virtual ~DllVideoToolBoxInterface() {}
+
+  virtual OSStatus VTDecompressionSessionCreate(CFAllocatorRef allocator, CMFormatDescriptionRef videoFormatDescription, CFTypeRef sessionOptions, CFDictionaryRef destinationPixelBufferAttributes, VTDecompressionOutputCallback *outputCallback, VTDecompressionSessionRef *session) = 0;
+  virtual OSStatus VTDecompressionSessionDecodeFrame(VTDecompressionSessionRef session, CMSampleBufferRef sbuf, uint32_t decoderFlags, CFDictionaryRef frameInfo, uint32_t unk1) = 0;
+  virtual OSStatus VTDecompressionSessionCopyProperty(VTDecompressionSessionRef session, CFTypeRef key, void* unk, CFTypeRef * value) = 0;
+  virtual OSStatus VTDecompressionSessionCopySupportedPropertyDictionary(VTDecompressionSessionRef session, CFDictionaryRef * dict) = 0;
+  virtual OSStatus VTDecompressionSessionSetProperty(VTDecompressionSessionRef session, CFStringRef propName, CFTypeRef propValue) = 0;
+  virtual void VTDecompressionSessionInvalidate(VTDecompressionSessionRef session) = 0;
+  virtual OSStatus VTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session) = 0;
+};
+
+// load from private framework path - needed for ios 5.x
+class DllVideoToolBoxPrivate : public DllDynamic, public DllVideoToolBoxInterface
+{
+  DECLARE_DLL_WRAPPER(DllVideoToolBoxPrivate, "/System/Library/PrivateFrameworks/VideoToolbox.framework/VideoToolbox")
+  DEFINE_METHOD6(OSStatus, VTDecompressionSessionCreate, (CFAllocatorRef p1, CMFormatDescriptionRef p2, CFTypeRef p3, CFDictionaryRef p4, VTDecompressionOutputCallback *p5, VTDecompressionSessionRef *p6))
+  DEFINE_METHOD5(OSStatus, VTDecompressionSessionDecodeFrame, (VTDecompressionSessionRef p1, CMSampleBufferRef p2, uint32_t p3, CFDictionaryRef p4, uint32_t p5))
+  DEFINE_METHOD4(OSStatus, VTDecompressionSessionCopyProperty, (VTDecompressionSessionRef p1, CFTypeRef p2, void* p3, CFTypeRef * p4))
+  DEFINE_METHOD2(OSStatus, VTDecompressionSessionCopySupportedPropertyDictionary, (VTDecompressionSessionRef p1, CFDictionaryRef * p2))
+  DEFINE_METHOD3(OSStatus, VTDecompressionSessionSetProperty, (VTDecompressionSessionRef p1, CFStringRef p2, CFTypeRef p3))
+  DEFINE_METHOD1(void, VTDecompressionSessionInvalidate, (VTDecompressionSessionRef p1))
+  DEFINE_METHOD1(OSStatus, VTDecompressionSessionWaitForAsynchronousFrames, (VTDecompressionSessionRef p1))
+
+  BEGIN_METHOD_RESOLVE()
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionCreate, VTDecompressionSessionCreate)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionDecodeFrame, VTDecompressionSessionDecodeFrame)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionCopyProperty, VTDecompressionSessionCopyProperty)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionCopySupportedPropertyDictionary, VTDecompressionSessionCopySupportedPropertyDictionary)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionSetProperty, VTDecompressionSessionSetProperty)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionInvalidate, VTDecompressionSessionInvalidate)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionWaitForAsynchronousFrames, VTDecompressionSessionWaitForAsynchronousFrames)
+  END_METHOD_RESOLVE()
+};
+
+// load from public framework path -> available for >= ios 6.0
+class DllVideoToolBoxPublic : public DllDynamic, public DllVideoToolBoxInterface
+{
+  DECLARE_DLL_WRAPPER(DllVideoToolBoxPublic, "/System/Library/Frameworks/VideoToolbox.framework/VideoToolbox")
+  DEFINE_METHOD6(OSStatus, VTDecompressionSessionCreate, (CFAllocatorRef p1, CMFormatDescriptionRef p2, CFTypeRef p3, CFDictionaryRef p4, VTDecompressionOutputCallback *p5, VTDecompressionSessionRef *p6))
+  DEFINE_METHOD5(OSStatus, VTDecompressionSessionDecodeFrame, (VTDecompressionSessionRef p1, CMSampleBufferRef p2, uint32_t p3, CFDictionaryRef p4, uint32_t p5))
+  DEFINE_METHOD4(OSStatus, VTDecompressionSessionCopyProperty, (VTDecompressionSessionRef p1, CFTypeRef p2, void* p3, CFTypeRef * p4))
+  DEFINE_METHOD2(OSStatus, VTDecompressionSessionCopySupportedPropertyDictionary, (VTDecompressionSessionRef p1, CFDictionaryRef * p2))
+  DEFINE_METHOD3(OSStatus, VTDecompressionSessionSetProperty, (VTDecompressionSessionRef p1, CFStringRef p2, CFTypeRef p3))
+  DEFINE_METHOD1(void, VTDecompressionSessionInvalidate, (VTDecompressionSessionRef p1))
+  DEFINE_METHOD1(OSStatus, VTDecompressionSessionWaitForAsynchronousFrames, (VTDecompressionSessionRef p1))
+
+  BEGIN_METHOD_RESOLVE()
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionCreate, VTDecompressionSessionCreate)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionDecodeFrame, VTDecompressionSessionDecodeFrame)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionCopyProperty, VTDecompressionSessionCopyProperty)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionCopySupportedPropertyDictionary, VTDecompressionSessionCopySupportedPropertyDictionary)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionSetProperty, VTDecompressionSessionSetProperty)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionInvalidate, VTDecompressionSessionInvalidate)
+    RESOLVE_METHOD_RENAME(VTDecompressionSessionWaitForAsynchronousFrames, VTDecompressionSessionWaitForAsynchronousFrames)
+  END_METHOD_RESOLVE()
+};
+
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
 static int CheckNP2( unsigned x )
 {
     --x;
@@ -203,7 +262,7 @@ vtdec_session_dump_property(CFStringRef prop_name, CFDictionaryRef prop_attrs, V
     free(attrs_str);
   }
 
-  status = VTDecompressionSessionCopyProperty(dpc->session, prop_name, NULL, &prop_value);
+  status = CDVDVideoCodecVideoToolBox::GetDllImpl()->VTDecompressionSessionCopyProperty(dpc->session, prop_name, NULL, &prop_value);
   if (status == kVTDecoderNoErr)
   {
     char *value_str;
@@ -231,7 +290,7 @@ void vtdec_session_dump_properties(VTDecompressionSessionRef session)
   CFDictionaryRef dict;
   OSStatus status;
 
-  status = VTDecompressionSessionCopySupportedPropertyDictionary(session, &dict);
+  status = CDVDVideoCodecVideoToolBox::GetDllImpl()->VTDecompressionSessionCopySupportedPropertyDictionary(session, &dict);
   if (status != kVTDecoderNoErr)
     goto error;
   CFDictionaryApplyFunction(dict, (CFDictionaryApplierFunction)vtdec_session_dump_property, &dpc);
@@ -244,6 +303,7 @@ error:
     CLog::Log(LOGDEBUG, "failed to dump properties\n");
 }
 #endif
+
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
 // helper function that wraps dts/pts into a dictionary
@@ -1018,6 +1078,8 @@ bool validate_avcC_spc(uint8_t *extradata, uint32_t extrasize, int32_t *max_ref_
 
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
+DllVideoToolBoxInterface *CDVDVideoCodecVideoToolBox::m_pLibVTB = NULL;
+
 CDVDVideoCodecVideoToolBox::CDVDVideoCodecVideoToolBox() : CDVDVideoCodec()
 {
   m_fmt_desc    = NULL;
@@ -1034,13 +1096,59 @@ CDVDVideoCodecVideoToolBox::CDVDVideoCodecVideoToolBox() : CDVDVideoCodec()
   memset(&m_videobuffer, 0, sizeof(DVDVideoPicture));
   m_DropPictures = false;
   m_sort_time_offset = 0.0;
+  
+  if (m_pLibVTB == NULL)
+  {
+    if (CDarwinUtils::GetIOSVersion() < 6.0)
+    {
+      m_pLibVTB = new DllVideoToolBoxPrivate();
+    }
+    else
+    {
+      m_pLibVTB = new DllVideoToolBoxPublic();// todo - load the public version
+    }
+  }
 }
 
 CDVDVideoCodecVideoToolBox::~CDVDVideoCodecVideoToolBox()
 {
   Dispose();
   pthread_mutex_destroy(&m_queue_mutex);
+  if (m_pLibVTB != NULL)
+  {
+    delete m_pLibVTB;
+    m_pLibVTB = NULL; // its a static!
+  }
 }
+
+bool CDVDVideoCodecVideoToolBox::HandleDyLoad()
+{
+  bool ret = true;
+  if (CDarwinUtils::GetIOSVersion() < 6.0)
+  {
+    if(!((DllVideoToolBoxPrivate *)m_pLibVTB)->IsLoaded())
+    {
+      if(!((DllVideoToolBoxPrivate *)m_pLibVTB)->Load())
+      {
+        CLog::Log(LOGERROR,"VideoToolBox: Error loading private VideoToolBox framework (%s).",__FUNCTION__);
+        ret = false; //fatal
+      }
+    }
+  }
+  else
+  {
+    if(!((DllVideoToolBoxPublic *)m_pLibVTB)->IsLoaded())
+    {
+      if(!((DllVideoToolBoxPublic *)m_pLibVTB)->Load())
+      {
+        CLog::Log(LOGERROR,"VideoToolBox: Error loading public VideoToolBox framework (%s).",__FUNCTION__);
+        ret = false; //fatal
+      }
+    }
+  }
+  return ret;
+}
+
 
 bool CDVDVideoCodecVideoToolBox::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
@@ -1055,6 +1163,9 @@ bool CDVDVideoCodecVideoToolBox::Open(CDVDStreamInfo &hints, CDVDCodecOptions &o
     unsigned int extrasize = hints.extrasize; // extra data for codec to use
     uint8_t *extradata = (uint8_t*)hints.extradata; // size of extra data
  
+    if (!HandleDyLoad())
+      return false;
+
     switch(profile)
     {
       case FF_PROFILE_H264_HIGH_10:
@@ -1368,7 +1479,7 @@ int CDVDVideoCodecVideoToolBox::Decode(uint8_t* pData, int iSize, double dts, do
     }
 
     // submit for decoding
-    status = VTDecompressionSessionDecodeFrame(m_vt_session, sampleBuff, decoderFlags, frameInfo, 0);
+    status = GetDllImpl()->VTDecompressionSessionDecodeFrame(m_vt_session, sampleBuff, decoderFlags, frameInfo, 0);
     if (status != kVTDecoderNoErr)
     {
       CLog::Log(LOGNOTICE, "%s - VTDecompressionSessionDecodeFrame returned(%d)",
@@ -1385,7 +1496,7 @@ int CDVDVideoCodecVideoToolBox::Decode(uint8_t* pData, int iSize, double dts, do
     }
 
     // wait for decoding to finish
-    status = VTDecompressionSessionWaitForAsynchronousFrames(m_vt_session);
+    status = GetDllImpl()->VTDecompressionSessionWaitForAsynchronousFrames(m_vt_session);
     if (status != kVTDecoderNoErr)
     {
       CLog::Log(LOGNOTICE, "%s - VTDecompressionSessionWaitForAsynchronousFrames returned(%d)",
@@ -1414,7 +1525,7 @@ int CDVDVideoCodecVideoToolBox::Decode(uint8_t* pData, int iSize, double dts, do
 void CDVDVideoCodecVideoToolBox::Reset(void)
 {
   // flush decoder
-  VTDecompressionSessionWaitForAsynchronousFrames(m_vt_session);
+  GetDllImpl()->VTDecompressionSessionWaitForAsynchronousFrames(m_vt_session);
 
   while (m_queue_depth)
     DisplayQueuePop();
@@ -1550,7 +1661,7 @@ CDVDVideoCodecVideoToolBox::CreateVTSession(int width, int height, CMFormatDescr
   outputCallback.callback = VTDecoderCallback;
   outputCallback.refcon = this;
 
-  status = VTDecompressionSessionCreate(
+  status = GetDllImpl()->VTDecompressionSessionCreate(
     NULL, // CFAllocatorRef allocator
     fmt_desc,
     NULL, // CFTypeRef sessionOptions
@@ -1576,7 +1687,7 @@ CDVDVideoCodecVideoToolBox::DestroyVTSession(void)
 {
   if (m_vt_session)
   {
-    VTDecompressionSessionInvalidate((VTDecompressionSessionRef)m_vt_session);
+    GetDllImpl()->VTDecompressionSessionInvalidate((VTDecompressionSessionRef)m_vt_session);
     CFRelease((VTDecompressionSessionRef)m_vt_session);
     m_vt_session = NULL;
   }
