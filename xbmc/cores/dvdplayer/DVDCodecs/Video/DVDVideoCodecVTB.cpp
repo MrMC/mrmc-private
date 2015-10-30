@@ -165,6 +165,7 @@ CreateSampleBufferFrom(CMFormatDescriptionRef fmt_desc,
 CDVDVideoCodecVTB::CDVDVideoCodecVTB() : CDVDVideoCodec()
 {
   m_fmt_desc    = NULL;
+  m_bitstream   = NULL;
   m_vt_session  = NULL;
   m_pFormatName = "vtbn";
 
@@ -337,7 +338,7 @@ void CDVDVideoCodecVTB::Dispose()
   DestroyVTSession();
   if (m_fmt_desc)
     CFRelease(m_fmt_desc), m_fmt_desc = NULL;
-  
+  SAFE_DELETE(m_bitstream);
   if (m_videobuffer.iFlags & DVP_FLAG_ALLOCATED)
   {
     // release any previous retained cvbuffer reference
