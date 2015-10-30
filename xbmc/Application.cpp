@@ -971,11 +971,10 @@ bool CApplication::Initialize()
   const CSetting *mysqlSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_MYSQL_ENABLED);
   if (((CSettingBool*)mysqlSetting)->GetValue())
   {
+    if (g_advancedSettings.m_splashImage)
+      CSplash::GetInstance().Show(g_localizeStrings.Get(12374));
     g_advancedSettings.setInetrnalMYSQL(((CSettingBool*)mysqlSetting)->GetValue(), false);
   }
-
-  if (g_advancedSettings.m_splashImage)
-    CSplash::GetInstance().Show(g_localizeStrings.Get(12374));
   
   // initialize (and update as needed) our databases
   CDatabaseManager::GetInstance().Initialize();
