@@ -28,6 +28,7 @@
 #include <CoreMedia/CoreMedia.h>
 
 class DllVideoToolBox;
+class CBitstreamConverter;
 struct VTDumpDecompressionPropCtx;
 
 // tracks a frame in and output queue in display order
@@ -72,7 +73,8 @@ protected:
 
   DllVideoToolBox   *m_dll;
   void              *m_vt_session;    // opaque videotoolbox session
-  CMFormatDescriptionRef m_fmt_desc;
+  CBitstreamConverter    *m_bitstream;
+  CMFormatDescriptionRef  m_fmt_desc;
 
   const char        *m_pFormatName;
   bool              m_DropPictures;
@@ -83,9 +85,6 @@ protected:
   frame_queue       *m_display_queue; // display-order queue - next display frame is always at the queue head
   int32_t           m_queue_depth;    // we will try to keep the queue depth at m_max_ref_frames
   int32_t           m_max_ref_frames;
-
-  bool              m_convert_bytestream;
-  bool              m_convert_3byteTo4byteNALSize;
 };
 
 #endif
