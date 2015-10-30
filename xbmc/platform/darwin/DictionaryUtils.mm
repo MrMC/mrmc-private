@@ -18,6 +18,7 @@
  *
  */
 
+#import <CoreFoundation/CFString.h>
 #import "platform/darwin/DictionaryUtils.h"
 
 
@@ -94,4 +95,24 @@ void CFDictionarySetDouble(CFMutableDictionaryRef dictionary, CFStringRef key, d
   number = CFNumberCreate(NULL, kCFNumberDoubleType, &numberDouble);
   CFDictionaryAddValue(dictionary, key, number);
   CFRelease(number);
+}
+
+void CFMutableDictionarySetData(CFMutableDictionaryRef dict, CFStringRef key, const uint8_t *value, int length)
+{
+  CFDataRef data = CFDataCreate(NULL, value, length);
+  CFDictionarySetValue(dict, key, data);
+  CFRelease(data);
+}
+
+void CFMutableDictionarySetObject(CFMutableDictionaryRef dict, CFStringRef key, CFTypeRef *value)
+{
+  CFDictionarySetValue(dict, key, value);
+  CFRelease(value);
+}
+
+void CFMutableDictionarySetString(CFMutableDictionaryRef dict, CFStringRef key, const char *value)
+{
+  CFStringRef string = CFStringCreateWithCString(NULL, value, kCFStringEncodingASCII);
+  CFDictionarySetValue(dict, key, string);
+  CFRelease(string);
 }
