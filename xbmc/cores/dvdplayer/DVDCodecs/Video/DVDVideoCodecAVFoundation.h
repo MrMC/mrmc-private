@@ -31,11 +31,11 @@ struct pktTracker;
 class CAVFCodecMessage;
 class CBitstreamConverter;
 
-class CDVDVideoCodecSampleBufferLayer : public CDVDVideoCodec, CThread
+class CDVDVideoCodecAVFoundation : public CDVDVideoCodec, CThread
 {
 public:
-  CDVDVideoCodecSampleBufferLayer();
-  virtual ~CDVDVideoCodecSampleBufferLayer();
+  CDVDVideoCodecAVFoundation();
+  virtual ~CDVDVideoCodecAVFoundation();
 
   // Required overrides
   virtual bool  Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);

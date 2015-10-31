@@ -19,12 +19,12 @@
  */
 
 #import <string>
-#import "platform/darwin/ios/SampleBufferLayerView.h"
+#import "platform/darwin/ios-common/VideoLayerView.h"
 
 #define MCSAMPLEBUFFER_DEBUG_MESSAGES 0
 
 #pragma mark -
-@implementation SampleBufferLayerView
+@implementation VideoLayerView
 
 - (id)initWithFrame:(CGRect)frame
 {

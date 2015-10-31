@@ -34,10 +34,10 @@
   #if defined(TARGET_DARWIN_TVOS)
     #include "Video/DVDVideoCodecAVPlayer.h"
     #include "Video/DVDVideoCodecVideoToolBox.h"
-    #include "Video/DVDVideoCodecSampleBufferLayer.h"
+    #include "Video/DVDVideoCodecAVFoundation.h"
   #else
     #include "Video/DVDVideoCodecVTB.h"
-    #include "Video/DVDVideoCodecSampleBufferLayer.h"
+    #include "Video/DVDVideoCodecAVFoundation.h"
   #endif
   #include "utils/SystemInfo.h"
 #endif
@@ -251,11 +251,11 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
           #if defined(TARGET_DARWIN_TVOS)
             //if ( (pCodec = OpenCodec(new CDVDVideoCodecAVPlayer(), hint, options)) ) return pCodec;
             //if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
-            if ( (pCodec = OpenCodec(new CDVDVideoCodecSampleBufferLayer(), hint, options)) ) return pCodec;
+            if ( (pCodec = OpenCodec(new CDVDVideoCodecAVFoundation(), hint, options)) ) return pCodec;
           #else
             //if ( (pCodec = OpenCodec(new CDVDVideoCodecVTB(), hint, options)) ) return pCodec;
             //if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
-            if ( (pCodec = OpenCodec(new CDVDVideoCodecSampleBufferLayer(), hint, options)) ) return pCodec;
+            if ( (pCodec = OpenCodec(new CDVDVideoCodecAVFoundation(), hint, options)) ) return pCodec;
           #endif
           break;
         default:

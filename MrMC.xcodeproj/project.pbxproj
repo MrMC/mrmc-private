@@ -1694,8 +1694,7 @@
 		F51063441BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
 		F51063991BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063981BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm */; };
 		F510639C1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F510639A1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp */; };
-		F51063A01BE3CD1900BBCED6 /* SampleBufferLayerView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE131BB8444C00FB1ACF /* SampleBufferLayerView.mm */; };
-		F51063A11BE3CD4B00BBCED6 /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
+		F51063A11BE3CD4B00BBCED6 /* DVDVideoCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm */; };
 		F52A733D1560BC34005B1A0B /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F52A733C1560BC34005B1A0B /* CoreFoundation.framework */; };
 		F52B063B11869862004B1D66 /* Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B063A11869862004B1D66 /* Skin.cpp */; };
 		F52B06BA1187CE18004B1D66 /* DVDVideoCodecVDA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B06B81187CE18004B1D66 /* DVDVideoCodecVDA.cpp */; };
@@ -1780,6 +1779,8 @@
 		F5A7B37E113AFB900059D6AA /* SFTPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A7B37C113AFB900059D6AA /* SFTPDirectory.cpp */; };
 		F5A7B42C113CBB950059D6AA /* AddonsDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A7B42B113CBB950059D6AA /* AddonsDirectory.cpp */; };
 		F5A9D3091097C9370050490F /* AliasShortcutUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5A9D3081097C9370050490F /* AliasShortcutUtils.cpp */; };
+		F5AA30F11BE5643A00693976 /* VideoLayerView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AA30F01BE5643A00693976 /* VideoLayerView.mm */; };
+		F5AA30F21BE5643A00693976 /* VideoLayerView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AA30F01BE5643A00693976 /* VideoLayerView.mm */; };
 		F5AACA680FB3DE2D00DBB77C /* GUIDialogSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AACA670FB3DE2D00DBB77C /* GUIDialogSelect.cpp */; };
 		F5AACA970FB3E2B800DBB77C /* GUIDialogSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AACA950FB3E2B800DBB77C /* GUIDialogSlider.cpp */; };
 		F5AE409C13415D9E0004BD79 /* AudioLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE408013415D9E0004BD79 /* AudioLibrary.cpp */; };
@@ -1794,9 +1795,8 @@
 		F5BBDE081BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
 		F5BBDE091BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
 		F5BBDE0A1BB796AC00FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
-		F5BBDE0F1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
-		F5BBDE101BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
-		F5BBDE141BB8444C00FB1ACF /* SampleBufferLayerView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE131BB8444C00FB1ACF /* SampleBufferLayerView.mm */; };
+		F5BBDE0F1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm */; };
+		F5BBDE101BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm */; };
 		F5BD02F6148D3A7E001B5583 /* CryptThreading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BD02F4148D3A7E001B5583 /* CryptThreading.cpp */; };
 		F5BDB80C120202F400F0B710 /* DVDSubtitleTagSami.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB80B120202F400F0B710 /* DVDSubtitleTagSami.cpp */; };
 		F5BDB81A1202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB8191202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp */; };
@@ -4842,6 +4842,8 @@
 		F5A7B42B113CBB950059D6AA /* AddonsDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AddonsDirectory.cpp; sourceTree = "<group>"; };
 		F5A9D3071097C9370050490F /* AliasShortcutUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AliasShortcutUtils.h; sourceTree = "<group>"; };
 		F5A9D3081097C9370050490F /* AliasShortcutUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AliasShortcutUtils.cpp; sourceTree = "<group>"; };
+		F5AA30EF1BE5643A00693976 /* VideoLayerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoLayerView.h; sourceTree = "<group>"; };
+		F5AA30F01BE5643A00693976 /* VideoLayerView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = VideoLayerView.mm; sourceTree = "<group>"; };
 		F5AACA660FB3DE2D00DBB77C /* GUIDialogSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogSelect.h; sourceTree = "<group>"; };
 		F5AACA670FB3DE2D00DBB77C /* GUIDialogSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogSelect.cpp; sourceTree = "<group>"; };
 		F5AACA950FB3E2B800DBB77C /* GUIDialogSlider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogSlider.cpp; sourceTree = "<group>"; };
@@ -4870,10 +4872,8 @@
 		F5B413131065900C0035D105 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDVideoCodecVTB.cpp; sourceTree = "<group>"; };
 		F5BBDE071BB7346700FB1ACF /* DVDVideoCodecVTB.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDVideoCodecVTB.h; sourceTree = "<group>"; };
-		F5BBDE0D1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDVideoCodecSampleBufferLayer.h; sourceTree = "<group>"; };
-		F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DVDVideoCodecSampleBufferLayer.mm; sourceTree = "<group>"; };
-		F5BBDE121BB8444C00FB1ACF /* SampleBufferLayerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleBufferLayerView.h; sourceTree = "<group>"; };
-		F5BBDE131BB8444C00FB1ACF /* SampleBufferLayerView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SampleBufferLayerView.mm; sourceTree = "<group>"; };
+		F5BBDE0D1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDVideoCodecAVFoundation.h; sourceTree = "<group>"; };
+		F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DVDVideoCodecAVFoundation.mm; sourceTree = "<group>"; };
 		F5BD02F4148D3A7E001B5583 /* CryptThreading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CryptThreading.cpp; sourceTree = "<group>"; };
 		F5BD02F5148D3A7E001B5583 /* CryptThreading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CryptThreading.h; sourceTree = "<group>"; };
 		F5BDB80A120202F400F0B710 /* DVDSubtitleTagSami.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDSubtitleTagSami.h; sourceTree = "<group>"; };
@@ -7384,8 +7384,8 @@
 				E38E153C0D25F9F900618676 /* DVDVideoCodec.h */,
 				F51063971BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.h */,
 				F51063981BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm */,
-				F5BBDE0D1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.h */,
-				F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */,
+				F5BBDE0D1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.h */,
+				F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm */,
 				E38E153D0D25F9F900618676 /* DVDVideoCodecFFmpeg.cpp */,
 				E38E153E0D25F9F900618676 /* DVDVideoCodecFFmpeg.h */,
 				F52B06B81187CE18004B1D66 /* DVDVideoCodecVDA.cpp */,
@@ -8234,6 +8234,7 @@
 			isa = PBXGroup;
 			children = (
 				F590452D1BA372A600DB589A /* ios */,
+				F5AA30EE1BE5643A00693976 /* ios-common */,
 				F59045451BA372A600DB589A /* osx */,
 				F5D142911BAF31FB0075A95C /* tvos */,
 				F59045281BA372A600DB589A /* AutoPool.h */,
@@ -8269,8 +8270,6 @@
 				F590453C1BA372A600DB589A /* IOSKeyboardView.mm */,
 				F590453D1BA372A600DB589A /* IOSScreenManager.h */,
 				F590453E1BA372A600DB589A /* IOSScreenManager.mm */,
-				F5BBDE121BB8444C00FB1ACF /* SampleBufferLayerView.h */,
-				F5BBDE131BB8444C00FB1ACF /* SampleBufferLayerView.mm */,
 				F590453F1BA372A600DB589A /* XBMCApplication.h */,
 				F59045401BA372A600DB589A /* XBMCApplication.mm */,
 				F59045411BA372A600DB589A /* XBMCController.h */,
@@ -8314,6 +8313,15 @@
 				F5A4F29C1BB086FE0083FC69 /* libexif.h */,
 			);
 			path = exif;
+			sourceTree = "<group>";
+		};
+		F5AA30EE1BE5643A00693976 /* ios-common */ = {
+			isa = PBXGroup;
+			children = (
+				F5AA30EF1BE5643A00693976 /* VideoLayerView.h */,
+				F5AA30F01BE5643A00693976 /* VideoLayerView.mm */,
+			);
+			path = "ios-common";
 			sourceTree = "<group>";
 		};
 		F5AE407F13415D9E0004BD79 /* json-rpc */ = {
@@ -9763,7 +9771,7 @@
 				7CCDA1E6192753E30074CF51 /* RenderingControlSCPD.cpp in Sources */,
 				7CCDA1F3192753E30074CF51 /* ConnectionManagerSCPD.cpp in Sources */,
 				7CCDA1FE192753E30074CF51 /* ContentDirectorySCPD.cpp in Sources */,
-				F5BBDE0F1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */,
+				F5BBDE0F1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm in Sources */,
 				7CCDA209192753E30074CF51 /* ContentDirectorywSearchSCPD.cpp in Sources */,
 				7CCDA214192753E30074CF51 /* PltDidl.cpp in Sources */,
 				7CCDA21D192753E30074CF51 /* PltFileMediaServer.cpp in Sources */,
@@ -9848,7 +9856,7 @@
 				DF1D2DF41B6E85EE002BB9DB /* XbtManager.cpp in Sources */,
 				E4991179174E5CE000741B6D /* Addon.cpp in Sources */,
 				E499117A174E5CE000741B6D /* AddonCallbacks.cpp in Sources */,
-				F5BBDE101BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */,
+				F5BBDE101BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm in Sources */,
 				E499117B174E5CE000741B6D /* AddonCallbacksAddon.cpp in Sources */,
 				E499117C174E5CE000741B6D /* AddonCallbacksGUI.cpp in Sources */,
 				E499117D174E5CE000741B6D /* AddonCallbacksPVR.cpp in Sources */,
@@ -10230,7 +10238,6 @@
 				F59045721BA372A600DB589A /* IOSScreenManager.mm in Sources */,
 				E4991351174E5EBE00741B6D /* FavouritesOperations.cpp in Sources */,
 				E4991352174E5EBE00741B6D /* FileItemHandler.cpp in Sources */,
-				F5BBDE141BB8444C00FB1ACF /* SampleBufferLayerView.mm in Sources */,
 				E4991353174E5EBE00741B6D /* FileOperations.cpp in Sources */,
 				E4991354174E5EBE00741B6D /* GUIOperations.cpp in Sources */,
 				E4991355174E5EBE00741B6D /* InputOperations.cpp in Sources */,
@@ -10560,6 +10567,7 @@
 				E4991548174E642900741B6D /* ThumbnailCache.cpp in Sources */,
 				E4991549174E642900741B6D /* URL.cpp in Sources */,
 				E499154A174E642900741B6D /* Util.cpp in Sources */,
+				F5AA30F11BE5643A00693976 /* VideoLayerView.mm in Sources */,
 				E499154B174E642900741B6D /* XBApplicationEx.cpp in Sources */,
 				E499154C174E642900741B6D /* XBDateTime.cpp in Sources */,
 				E499154F174E64F200741B6D /* MouseStat.cpp in Sources */,
@@ -10933,6 +10941,7 @@
 				F5D13F7B1BAF0B6D0075A95C /* FileDirectoryFactory.cpp in Sources */,
 				F5D13F7C1BAF0B6D0075A95C /* FileFactory.cpp in Sources */,
 				F5D13F7D1BAF0B6D0075A95C /* AddonManagementEvent.cpp in Sources */,
+				F5AA30F21BE5643A00693976 /* VideoLayerView.mm in Sources */,
 				F5D13F7E1BAF0B6D0075A95C /* FileReaderFile.cpp in Sources */,
 				F5D13F7F1BAF0B6D0075A95C /* FTPDirectory.cpp in Sources */,
 				F5D13F801BAF0B6D0075A95C /* FTPParse.cpp in Sources */,
@@ -10968,7 +10977,6 @@
 				F5D13F9D1BAF0B6D0075A95C /* DirectoryNodeTop100.cpp in Sources */,
 				F5D13F9E1BAF0B6D0075A95C /* DirectoryNodeYearAlbum.cpp in Sources */,
 				F5D13F9F1BAF0B6D0075A95C /* DirectoryNodeYearSong.cpp in Sources */,
-				F51063A01BE3CD1900BBCED6 /* SampleBufferLayerView.mm in Sources */,
 				F510639C1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp in Sources */,
 				F5D13FA01BAF0B6D0075A95C /* QueryParams.cpp in Sources */,
 				F5D13FA11BAF0B6D0075A95C /* MusicDatabaseDirectory.cpp in Sources */,
@@ -11530,7 +11538,7 @@
 				F5D141C41BAF0B6D0075A95C /* ActiveAESink.cpp in Sources */,
 				F5D141C51BAF0B6D0075A95C /* ActiveAESound.cpp in Sources */,
 				F5D141C61BAF0B6D0075A95C /* ActiveAEStream.cpp in Sources */,
-				F51063A11BE3CD4B00BBCED6 /* DVDVideoCodecSampleBufferLayer.mm in Sources */,
+				F51063A11BE3CD4B00BBCED6 /* DVDVideoCodecAVFoundation.mm in Sources */,
 				F5D141C71BAF0B6D0075A95C /* ActorProtocol.cpp in Sources */,
 				F5D141C81BAF0B6D0075A95C /* EndianSwap.cpp in Sources */,
 				F5D141C91BAF0B6D0075A95C /* AESinkFactory.cpp in Sources */,

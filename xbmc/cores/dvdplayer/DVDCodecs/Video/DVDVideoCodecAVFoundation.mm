@@ -21,14 +21,14 @@
 #import "config.h"
 
 #if defined(TARGET_DARWIN_IOS)
-#import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSampleBufferLayer.h"
+#import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecAVFoundation.h"
 
 #import "cores/dvdplayer/DVDClock.h"
 #import "cores/dvdplayer/DVDStreamInfo.h"
 #import "cores/VideoRenderers/RenderManager.h"
 #import "platform/darwin/AutoPool.h"
 #import "platform/darwin/DarwinUtils.h"
-#import "platform/darwin/ios/SampleBufferLayerView.h"
+#import "platform/darwin/ios-common/VideoLayerView.h"
 #if defined(TARGET_DARWIN_TVOS)
 #import "platform/darwin/tvos/MainController.h"
 #else
@@ -152,11 +152,11 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////////////////
 // This codec renders direct to a UIView/CALayer via AVSampleBufferLayer.
 // DVDPlayer/VideoRenderer runs in bypass mode as we totally bypass them.
-CDVDVideoCodecSampleBufferLayer::CDVDVideoCodecSampleBufferLayer()
+CDVDVideoCodecAVFoundation::CDVDVideoCodecAVFoundation()
 : CDVDVideoCodec()
-, CThread("DVDVideoCodecSampleBufferLayer")
+, CThread("CDVDVideoCodecAVFoundation")
 , m_decoder(nullptr)
-, m_pFormatName("sbl-")
+, m_pFormatName("avf-")
 , m_speed(DVD_PLAYSPEED_NORMAL)
 , m_bitstream(nullptr)
 , m_withBlockRunning(false)
@@ -173,14 +173,14 @@ CDVDVideoCodecSampleBufferLayer::CDVDVideoCodecSampleBufferLayer()
   dispatch_set_target_queue( m_providerQueue, dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_HIGH, 0 ) );
 }
 
-CDVDVideoCodecSampleBufferLayer::~CDVDVideoCodecSampleBufferLayer()
+CDVDVideoCodecAVFoundation::~CDVDVideoCodecAVFoundation()
 {
   Dispose();
 }
 
-bool CDVDVideoCodecSampleBufferLayer::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
+bool CDVDVideoCodecAVFoundation::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
-  //if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USESBL) && !hints.software)
+  //if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEAVF) && !hints.software)
   {
     CCocoaAutoPool pool;
 
@@ -218,7 +218,7 @@ bool CDVDVideoCodecSampleBufferLayer::Open(CDVDStreamInfo &hints, CDVDCodecOptio
           return false;
 
         m_format = 'avc1';
-        m_pFormatName = "sbl-h264";
+        m_pFormatName = "avf-h264";
       break;
       default:
         return false;
@@ -265,12 +265,12 @@ bool CDVDVideoCodecSampleBufferLayer::Open(CDVDStreamInfo &hints, CDVDCodecOptio
     CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
      parameterSetCount, parameterSetPointers, parameterSetSizes, nalUnitHeaderLength, &m_fmt_desc);
 
-    // SampleBufferLayerView create MUST be done on main thread or
+    // VideoLayerView create MUST be done on main thread or
     // it will not get updates when a new video frame is decoded and presented.
-    __block SampleBufferLayerView *mcview = nullptr;
+    __block VideoLayerView *mcview = nullptr;
     dispatch_sync(dispatch_get_main_queue(),^{
       CGRect bounds = CGRectMake(0, 0, width, height);
-      mcview = [[SampleBufferLayerView alloc] initWithFrame:bounds];
+      mcview = [[VideoLayerView alloc] initWithFrame:bounds];
       [g_xbmcController insertVideoView:mcview];
     });
     m_decoder = mcview;
@@ -287,7 +287,7 @@ bool CDVDVideoCodecSampleBufferLayer::Open(CDVDStreamInfo &hints, CDVDCodecOptio
   return false;
 }
 
-void CDVDVideoCodecSampleBufferLayer::Dispose()
+void CDVDVideoCodecAVFoundation::Dispose()
 {
   StopThread();
 
@@ -301,20 +301,17 @@ void CDVDVideoCodecSampleBufferLayer::Dispose()
     pthread_mutex_destroy(&m_sampleBuffersMutex);
 
     dispatch_sync(dispatch_get_main_queue(),^{
-      SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+      VideoLayerView *mcview = (VideoLayerView*)m_decoder;
       [g_xbmcController removeVideoView:mcview];
       [mcview release];
     });
     m_decoder = nullptr;
   }
-
-  if (m_bitstream)
-    delete m_bitstream, m_bitstream = nullptr;
-  
-  delete m_messages, m_messages = nullptr;
+  SAFE_DELETE(m_bitstream);
+  SAFE_DELETE(m_messages);
 }
 
-int CDVDVideoCodecSampleBufferLayer::Decode(uint8_t* pData, int iSize, double dts, double pts)
+int CDVDVideoCodecAVFoundation::Decode(uint8_t* pData, int iSize, double dts, double pts)
 {
   if (pData)
   {
@@ -361,13 +358,13 @@ int CDVDVideoCodecSampleBufferLayer::Decode(uint8_t* pData, int iSize, double dt
   return VC_PICTURE;
 }
 
-void CDVDVideoCodecSampleBufferLayer::Reset(void)
+void CDVDVideoCodecAVFoundation::Reset(void)
 {
   m_messages->enqueue(RESET);
   m_messages->enqueue(START);
 }
 
-bool CDVDVideoCodecSampleBufferLayer::GetPicture(DVDVideoPicture* pDvdVideoPicture)
+bool CDVDVideoCodecAVFoundation::GetPicture(DVDVideoPicture* pDvdVideoPicture)
 {
   if (m_framerate_ms > 0.0)
     pDvdVideoPicture->iDuration     = 1.0 / m_framerate_ms * DVD_TIME_BASE;
@@ -408,7 +405,7 @@ bool CDVDVideoCodecSampleBufferLayer::GetPicture(DVDVideoPicture* pDvdVideoPictu
   return true;
 }
 
-void CDVDVideoCodecSampleBufferLayer::SetDropState(bool bDrop)
+void CDVDVideoCodecAVFoundation::SetDropState(bool bDrop)
 {
   // this gets called before 'Decode',
   // it tells us to drop the next picture frame.
@@ -426,7 +423,7 @@ void CDVDVideoCodecSampleBufferLayer::SetDropState(bool bDrop)
   }
 }
 
-void CDVDVideoCodecSampleBufferLayer::SetSpeed(int iSpeed)
+void CDVDVideoCodecAVFoundation::SetSpeed(int iSpeed)
 {
   if (iSpeed == m_speed)
     return;
@@ -444,7 +441,7 @@ void CDVDVideoCodecSampleBufferLayer::SetSpeed(int iSpeed)
   m_speed = iSpeed;
 }
 
-int CDVDVideoCodecSampleBufferLayer::GetDataSize(void)
+int CDVDVideoCodecAVFoundation::GetDataSize(void)
 {
   pthread_mutex_lock(&m_trackerQueueMutex);
 
@@ -455,12 +452,12 @@ int CDVDVideoCodecSampleBufferLayer::GetDataSize(void)
 
   pthread_mutex_unlock(&m_trackerQueueMutex);
 
-  CLog::Log(LOGDEBUG, "CDVDVideoCodecSampleBufferLayer::GetDataSize(%d)", datasize);
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecAVFoundation::GetDataSize(%d)", datasize);
 
   return datasize;
 }
 
-double CDVDVideoCodecSampleBufferLayer::GetTimeSize(void)
+double CDVDVideoCodecAVFoundation::GetTimeSize(void)
 {
   double timesize = 0.0;
 
@@ -468,7 +465,7 @@ double CDVDVideoCodecSampleBufferLayer::GetTimeSize(void)
   if (m_framerate_ms > 0.0)
     timesize = m_trackerQueue.size() * (m_framerate_ms / 1000.0);
   pthread_mutex_unlock(&m_trackerQueueMutex);
-  CLog::Log(LOGDEBUG, "CDVDVideoCodecSampleBufferLayer::GetTimeSize(%f)", timesize);
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecAVFoundation::GetTimeSize(%f)", timesize);
 
   // lie to DVDPlayer, it is hardcoded to a max of 8 seconds,
   // if you buffer more than 8 seconds, it goes nuts.
@@ -480,9 +477,9 @@ double CDVDVideoCodecSampleBufferLayer::GetTimeSize(void)
   return timesize;
 }
 
-void CDVDVideoCodecSampleBufferLayer::Process()
+void CDVDVideoCodecAVFoundation::Process()
 {
-  CLog::Log(LOGDEBUG, "CDVDVideoCodecSampleBufferLayer::Process Started");
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecAVFoundation::Process Started");
 
   // bump our priority to be level with the krAEken (ActiveAE)
   SetPriority(THREAD_PRIORITY_ABOVE_NORMAL);
@@ -508,13 +505,13 @@ void CDVDVideoCodecSampleBufferLayer::Process()
         if (player_s > 0.0)
         {
           // startup with video timebase matching the player clock.
-          SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+          VideoLayerView *mcview = (VideoLayerView*)m_decoder;
           // video clock was stopped, set the starting time and crank it up.
           AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
           CMTimebaseSetTime(videolayer.controlTimebase, CMTimeMake(player_s, 1));
           CMTimebaseSetRate(videolayer.controlTimebase, 1.0);
           message = NONE;
-          CLog::Log(LOGDEBUG, "%s - CDVDVideoCodecSampleBufferLayer::Start player_s(%f)", __FUNCTION__, player_s);
+          CLog::Log(LOGDEBUG, "%s - CDVDVideoCodecAVFoundation::Start player_s(%f)", __FUNCTION__, player_s);
         }
       }
       break;
@@ -524,7 +521,7 @@ void CDVDVideoCodecSampleBufferLayer::Process()
         // just reset here, someone else will start us up again if needed.
         dispatch_sync(dispatch_get_main_queue(),^{
           // Flush the previous enqueued sample buffers for display while scrubbing
-          SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+          VideoLayerView *mcview = (VideoLayerView*)m_decoder;
           // stop decoding by setting control timebase rate to zero.
           AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
           CMTimebaseSetRate(videolayer.controlTimebase, 0.0);
@@ -534,7 +531,7 @@ void CDVDVideoCodecSampleBufferLayer::Process()
           DrainQueues();
         });
         message = NONE;
-        CLog::Log(LOGDEBUG, "%s - CDVDVideoCodecSampleBufferLayer::Reset", __FUNCTION__);
+        CLog::Log(LOGDEBUG, "%s - CDVDVideoCodecAVFoundation::Reset", __FUNCTION__);
       }
       break;
 
@@ -542,17 +539,17 @@ void CDVDVideoCodecSampleBufferLayer::Process()
       {
         // to pause, we just set the video timebase rate to zero.
         // buffers in flight are retained but not shown until the rate is non-zero.
-        SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+        VideoLayerView *mcview = (VideoLayerView*)m_decoder;
         AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
         CMTimebaseSetRate(videolayer.controlTimebase, 0.0);
-        CLog::Log(LOGDEBUG, "%s - CDVDVideoCodecSampleBufferLayer::Pause", __FUNCTION__);
+        CLog::Log(LOGDEBUG, "%s - CDVDVideoCodecAVFoundation::Pause", __FUNCTION__);
         message = NONE;
       }
       break;
 
       case PLAY:
       {
-        SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+        VideoLayerView *mcview = (VideoLayerView*)m_decoder;
         AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
 
         // check if the usingBlock is running, if not, start it up.
@@ -642,10 +639,10 @@ void CDVDVideoCodecSampleBufferLayer::Process()
   }
 
   SetPriority(THREAD_PRIORITY_NORMAL);
-  CLog::Log(LOGDEBUG, "CDVDVideoCodecSampleBufferLayer::Process Stopped");
+  CLog::Log(LOGDEBUG, "CDVDVideoCodecAVFoundation::Process Stopped");
 }
 
-void CDVDVideoCodecSampleBufferLayer::DrainQueues()
+void CDVDVideoCodecAVFoundation::DrainQueues()
 {
   pthread_mutex_lock(&m_trackerQueueMutex);
   while (!m_trackerQueue.empty())
@@ -667,9 +664,9 @@ void CDVDVideoCodecSampleBufferLayer::DrainQueues()
   pthread_mutex_unlock(&m_sampleBuffersMutex);
 }
 
-void CDVDVideoCodecSampleBufferLayer::StartSampleProviderWithBlock()
+void CDVDVideoCodecAVFoundation::StartSampleProviderWithBlock()
 {
-  SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+  VideoLayerView *mcview = (VideoLayerView*)m_decoder;
   AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
 
   // ok, for those that have never seen a usingBlock structure. these are
@@ -695,7 +692,7 @@ void CDVDVideoCodecSampleBufferLayer::StartSampleProviderWithBlock()
 
           if ([videolayer status] == AVQueuedSampleBufferRenderingStatusFailed)
           {
-            CLog::Log(LOGNOTICE, "%s - AFVDecoderDecode failed, status(%ld)",
+            CLog::Log(LOGNOTICE, "%s - CDVDVideoCodecAVFoundation failed, status(%ld)",
               __FUNCTION__, (long)[videolayer error].code);
           }
         }
@@ -711,16 +708,16 @@ void CDVDVideoCodecSampleBufferLayer::StartSampleProviderWithBlock()
   }];
 }
 
-void CDVDVideoCodecSampleBufferLayer::StopSampleProvider()
+void CDVDVideoCodecAVFoundation::StopSampleProvider()
 {
   dispatch_sync(dispatch_get_main_queue(),^{
-    SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+    VideoLayerView *mcview = (VideoLayerView*)m_decoder;
     AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
     [videolayer stopRequestingMediaData];
   });
 }
 
-double CDVDVideoCodecSampleBufferLayer::GetPlayerPtsSeconds()
+double CDVDVideoCodecAVFoundation::GetPlayerPtsSeconds()
 {
   double clock_pts = 0.0;
   CDVDClock *playerclock = CDVDClock::GetMasterClock();
@@ -730,7 +727,7 @@ double CDVDVideoCodecSampleBufferLayer::GetPlayerPtsSeconds()
   return clock_pts;
 }
 
-void CDVDVideoCodecSampleBufferLayer::UpdateFrameRateTracking(double pts)
+void CDVDVideoCodecAVFoundation::UpdateFrameRateTracking(double pts)
 {
   static double last_pts = DVD_NOPTS_VALUE;
 

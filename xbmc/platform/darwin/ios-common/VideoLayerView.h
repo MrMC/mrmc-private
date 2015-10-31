@@ -23,7 +23,7 @@
 #undef __TVOS_PROHIBITED
 #import <AVFoundation/AVFoundation.h>
 
-@interface SampleBufferLayerView : UIView
+@interface VideoLayerView : UIView
 
 @property (nonatomic, assign) id videolayer;
 
