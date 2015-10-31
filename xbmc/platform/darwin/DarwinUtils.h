@@ -43,9 +43,9 @@ public:
   static const char *GetOSXVersionString(void);
   static int         GetFrameworkPath(char* path, size_t *pathsize);
   static int         GetExecutablePath(char* path, size_t *pathsize);
-  static const char *GetAppLogDirectory(void);
-  static const char *GetAppTempDirectory(void);
-  static const char *GetAppHomeDirectory(void);
+  static const char *GetUserLogDirectory(void);
+  static const char *GetUserTempDirectory(void);
+  static const char *GetUserHomeDirectory(void);
   static const char *GetOSAppRootFolder(void);
   static const char *GetOSCachesDirectory();
   static const char *GetOSTemporaryDirectory();

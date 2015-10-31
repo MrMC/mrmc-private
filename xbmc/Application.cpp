@@ -875,27 +875,35 @@ bool CApplication::InitDirectoriesLinux()
 bool CApplication::InitDirectoriesOSX()
 {
 #if defined(TARGET_DARWIN)
-  std::string userName;
-  if (getenv("USER"))
-    userName = getenv("USER");
-  else
-    userName = "root";
-
   std::string userHome;
+#if defined(TARGET_DARWIN_OSX)
+  // OSX HOME: The user home directory
   if (getenv("HOME"))
     userHome = getenv("HOME");
   else
     userHome = "/root";
+#else
+  // iOS/TVOS HOME: The home directory of your application
+  // change it to match osx definition which is the norm.
+  userHome = CDarwinUtils::GetUserHomeDirectory();
+  setenv("HOME", userHome.c_str(), 1);
+#endif
+  CLog::Log(LOGDEBUG, "CApplication::InitDirectoriesOSX: userHome(%s), HOME(%s)", userHome.c_str() , getenv("HOME"));
 
   std::string appPath;
+  // this is stupid;
+  // GetHomePath gets the app home.
+  // SetHomePath sets path to special://home which is user home.
   CUtil::GetHomePath(appPath);
   setenv("MRMC_HOME", appPath.c_str(), 0);
+  CLog::Log(LOGDEBUG, "CApplication::InitDirectoriesOSX: appPath(%s)", appPath.c_str());
 
 #if defined(TARGET_DARWIN_IOS)
   std::string fontconfigPath;
   fontconfigPath = appPath + "/system/players/dvdplayer/etc/fonts/fonts.conf";
   setenv("FONTCONFIG_FILE", fontconfigPath.c_str(), 0);
 #endif
+  CLog::Log(LOGDEBUG, "CApplication::InitDirectoriesOSX: fontconfigPath(%s)", fontconfigPath.c_str());
 
   // setup path to our internal dylibs so loader can find them
   std::string frameworksPath = CUtil::GetFrameworksPath();
@@ -909,14 +917,13 @@ bool CApplication::InitDirectoriesOSX()
     CSpecialProtocol::SetXBMCBinPath(appPath);
 
     // home and masterprofile locations
-    std::string strHomePath = CDarwinUtils::GetAppHomeDirectory();
-    CSpecialProtocol::SetHomePath(strHomePath);
-    CSpecialProtocol::SetMasterProfilePath(strHomePath + "/userdata");
+    CSpecialProtocol::SetHomePath(userHome);
+    CSpecialProtocol::SetMasterProfilePath(userHome + "/userdata");
 
     // temp files location
-    CSpecialProtocol::SetTempPath(CDarwinUtils::GetAppTempDirectory());
+    CSpecialProtocol::SetTempPath(CDarwinUtils::GetUserTempDirectory());
     // xbmc.log file location
-    g_advancedSettings.m_logFolder = CDarwinUtils::GetAppLogDirectory();
+    g_advancedSettings.m_logFolder = CDarwinUtils::GetUserLogDirectory();
 
     CreateUserDirs();
   }

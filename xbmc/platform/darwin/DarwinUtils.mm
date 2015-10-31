@@ -408,7 +408,7 @@ int  CDarwinUtils::GetExecutablePath(char* path, size_t *pathsize)
   return 0;
 }
 
-const char* CDarwinUtils::GetAppLogDirectory(void)
+const char* CDarwinUtils::GetUserLogDirectory(void)
 {
   static std::string appLogFolder;
   if (appLogFolder.empty())
@@ -430,7 +430,7 @@ const char* CDarwinUtils::GetAppLogDirectory(void)
   return appLogFolder.c_str();
 }
 
-const char* CDarwinUtils::GetAppTempDirectory(void)
+const char* CDarwinUtils::GetUserTempDirectory(void)
 {
   static std::string appTempFolder;
   if (appTempFolder.empty())
@@ -453,13 +453,13 @@ const char* CDarwinUtils::GetAppTempDirectory(void)
   return appTempFolder.c_str();
 }
 
-const char* CDarwinUtils::GetAppHomeDirectory(void)
+const char* CDarwinUtils::GetUserHomeDirectory(void)
 {
   static std::string appHomeFolder;
   if (appHomeFolder.empty())
   {
     #if defined(TARGET_DARWIN_TVOS)
-      appHomeFolder = CDarwinUtils::GetOSCachesDirectory();
+      appHomeFolder = URIUtils::AddFileToFolder(CDarwinUtils::GetOSCachesDirectory(), "home");
     #elif defined(TARGET_DARWIN_IOS)
       appHomeFolder = URIUtils::AddFileToFolder(getenv("HOME"), CDarwinUtils::GetOSAppRootFolder());
       appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, CCompileInfo::GetAppName());
