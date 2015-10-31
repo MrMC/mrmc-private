@@ -902,8 +902,8 @@ bool CApplication::InitDirectoriesOSX()
   std::string fontconfigPath;
   fontconfigPath = appPath + "/system/players/dvdplayer/etc/fonts/fonts.conf";
   setenv("FONTCONFIG_FILE", fontconfigPath.c_str(), 0);
-#endif
   CLog::Log(LOGDEBUG, "CApplication::InitDirectoriesOSX: fontconfigPath(%s)", fontconfigPath.c_str());
+#endif
 
   // setup path to our internal dylibs so loader can find them
   std::string frameworksPath = CUtil::GetFrameworksPath();
