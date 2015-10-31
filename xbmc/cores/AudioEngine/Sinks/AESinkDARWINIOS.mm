@@ -306,15 +306,9 @@ void CAAudioUnitSink::drain()
 
 void CAAudioUnitSink::setCoreAudioBuffersize()
 {
-#if 0
-  // set the buffer size, this affects the number of samples
+  // set the buffer size (in seconds), this affects the number of samples
   // that get rendered every time the audio callback is fired.
   Float32 preferredBufferSize = 512 * m_outputFormat.mChannelsPerFrame / m_outputFormat.mSampleRate;
-  CLog::Log(LOGNOTICE, "%s setting buffer duration to %f", __PRETTY_FUNCTION__, preferredBufferSize);
-  OSStatus status = AudioSessionSetProperty(kAudioSessionProperty_PreferredHardwareIOBufferDuration,
-                                   sizeof(preferredBufferSize), &preferredBufferSize);
-#else
-  Float32 preferredBufferSize = 512 * m_outputFormat.mChannelsPerFrame;
   CLog::Log(LOGNOTICE, "%s setting buffer duration to %f", __PRETTY_FUNCTION__, preferredBufferSize);
 
   NSError *audioSessionError = nullptr;
@@ -322,7 +316,6 @@ void CAAudioUnitSink::setCoreAudioBuffersize()
   [mySession setPreferredIOBufferDuration: (NSTimeInterval)preferredBufferSize error: &audioSessionError];
   if (audioSessionError != nullptr)
     CLog::Log(LOGWARNING, "%s preferredBufferSize couldn't be set", __PRETTY_FUNCTION__);
-#endif
 }
 
 bool CAAudioUnitSink::setCoreAudioInputFormat()
@@ -343,12 +336,6 @@ void CAAudioUnitSink::setCoreAudioPreferredSampleRate()
 {
   Float64 preferredSampleRate = m_outputFormat.mSampleRate;
   CLog::Log(LOGNOTICE, "%s requesting hw samplerate %f", __PRETTY_FUNCTION__, preferredSampleRate);
-#if 0
-  OSStatus status = AudioSessionSetProperty(kAudioSessionProperty_PreferredHardwareSampleRate,
-                                   sizeof(preferredSampleRate), &preferredSampleRate);
-  if (status != noErr)
-    CLog::Log(LOGWARNING, "%s preferredSampleRate couldn't be set (error: %d)", __PRETTY_FUNCTION__, (int)status);
-#endif
 
   NSError *audioSessionError = nil;
   AVAudioSession *mySession = [AVAudioSession sharedInstance];
@@ -358,17 +345,7 @@ void CAAudioUnitSink::setCoreAudioPreferredSampleRate()
 
 Float64 CAAudioUnitSink::getCoreAudioRealisedSampleRate()
 {
-#if 0
-  Float64 outputSampleRate = 0.0;
-  UInt32 ioDataSize = sizeof(outputSampleRate);
-  if (AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareSampleRate,
-                              &ioDataSize, &outputSampleRate) != noErr)
-    CLog::Log(LOGERROR, "%s: error getting CurrentHardwareSampleRate", __FUNCTION__);
-  return outputSampleRate;
-#else
-  AVAudioSession *mySession = [AVAudioSession sharedInstance];
-  return [mySession sampleRate];
-#endif
+  return [[AVAudioSession sharedInstance] sampleRate];
 }
 
 bool CAAudioUnitSink::setupAudio()
@@ -465,30 +442,11 @@ bool CAAudioUnitSink::checkSessionProperties()
 {
   checkAudioRoute();
 
-#if 0
-  UInt32 ioDataSize;
-  ioDataSize = sizeof(m_outputVolume);
-  if (AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareOutputVolume,
-    &ioDataSize, &m_outputVolume) != noErr)
-    CLog::Log(LOGERROR, "%s: error getting CurrentHardwareOutputVolume", __FUNCTION__);
-
-  ioDataSize = sizeof(m_outputLatency);
-  if (AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareOutputLatency,
-    &ioDataSize, &m_outputLatency) != noErr)
-    CLog::Log(LOGERROR, "%s: error getting CurrentHardwareOutputLatency", __FUNCTION__);
-
-  ioDataSize = sizeof(m_bufferDuration);
-  if (AudioSessionGetProperty(kAudioSessionProperty_CurrentHardwareIOBufferDuration,
-    &ioDataSize, &m_bufferDuration) != noErr)
-    CLog::Log(LOGERROR, "%s: error getting CurrentHardwareIOBufferDuration", __FUNCTION__);
-   
-  CLog::Log(LOGDEBUG, "%s: volume = %f, latency = %f, buffer = %f", __FUNCTION__, m_outputVolume, m_outputLatency, m_bufferDuration);
-#else
   AVAudioSession *mySession = [AVAudioSession sharedInstance];
   m_outputVolume = [mySession outputVolume];
   m_outputLatency = [mySession outputLatency];
   m_bufferDuration = [mySession IOBufferDuration];
-#endif
+
   return true;
 }
 
