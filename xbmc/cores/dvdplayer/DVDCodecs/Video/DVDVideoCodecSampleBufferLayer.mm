@@ -510,8 +510,9 @@ void CDVDVideoCodecSampleBufferLayer::Process()
           // startup with video timebase matching the player clock.
           SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
           // video clock was stopped, set the starting time and crank it up.
-          CMTimebaseSetTime(mcview.videoLayer.controlTimebase, CMTimeMake(player_s, 1));
-          CMTimebaseSetRate(mcview.videoLayer.controlTimebase, 1.0);
+          AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
+          CMTimebaseSetTime(videolayer.controlTimebase, CMTimeMake(player_s, 1));
+          CMTimebaseSetRate(videolayer.controlTimebase, 1.0);
           message = NONE;
           CLog::Log(LOGDEBUG, "%s - CDVDVideoCodecSampleBufferLayer::Start player_s(%f)", __FUNCTION__, player_s);
         }
@@ -525,10 +526,11 @@ void CDVDVideoCodecSampleBufferLayer::Process()
           // Flush the previous enqueued sample buffers for display while scrubbing
           SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
           // stop decoding by setting control timebase rate to zero.
-          CMTimebaseSetRate(mcview.videoLayer.controlTimebase, 0.0);
-          [mcview.videoLayer stopRequestingMediaData];
+          AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
+          CMTimebaseSetRate(videolayer.controlTimebase, 0.0);
+          [videolayer stopRequestingMediaData];
           m_withBlockRunning = false;
-          [mcview.videoLayer flush];
+          [videolayer flush];
           DrainQueues();
         });
         message = NONE;
@@ -541,7 +543,8 @@ void CDVDVideoCodecSampleBufferLayer::Process()
         // to pause, we just set the video timebase rate to zero.
         // buffers in flight are retained but not shown until the rate is non-zero.
         SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
-        CMTimebaseSetRate(mcview.videoLayer.controlTimebase, 0.0);
+        AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
+        CMTimebaseSetRate(videolayer.controlTimebase, 0.0);
         CLog::Log(LOGDEBUG, "%s - CDVDVideoCodecSampleBufferLayer::Pause", __FUNCTION__);
         message = NONE;
       }
@@ -550,16 +553,17 @@ void CDVDVideoCodecSampleBufferLayer::Process()
       case PLAY:
       {
         SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+        AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
 
         // check if the usingBlock is running, if not, start it up.
-        if (!m_withBlockRunning && mcview.videoLayer.readyForMoreMediaData == YES)
+        if (!m_withBlockRunning && videolayer.readyForMoreMediaData == YES)
         {
             StartSampleProviderWithBlock();
             m_withBlockRunning = true;
         }
 
         // sync video layer time base to dvdplayer's player clock.
-        CMTime cmtime  = CMTimebaseGetTime(mcview.videoLayer.controlTimebase);
+        CMTime cmtime  = CMTimebaseGetTime(videolayer.controlTimebase);
         Float64 timeBase_s = CMTimeGetSeconds(cmtime);
 
         // player clock returns < zero if reset. check it.
@@ -574,7 +578,7 @@ void CDVDVideoCodecSampleBufferLayer::Process()
             if (timeBase_s > 0.0)
             {
               double rate = 1 * (player_s / timeBase_s);
-              CMTimebaseSetRate(mcview.videoLayer.controlTimebase, rate);
+              CMTimebaseSetRate(videolayer.controlTimebase, rate);
               CLog::Log(LOGDEBUG, "adjusting playback "
                 "rate(%f) timeBase_s(%f) player_s(%f), sampleBuffers(%lu), trackerQueue(%lu)",
                  rate, timeBase_s, player_s, m_sampleBuffers.size(), m_trackerQueue.size());
@@ -585,14 +589,14 @@ void CDVDVideoCodecSampleBufferLayer::Process()
               // quess and set the rate to 1, if the rate is zero,
               // the videoLayer will not pull sample buffers to display
               // and we see nothing.
-              CMTimebaseSetRate(mcview.videoLayer.controlTimebase, 1.0);
+              CMTimebaseSetRate(videolayer.controlTimebase, 1.0);
             }
           }
           else if (error > 0.250)
           {
             // large diff, try a big jump
-            CMTimebaseSetTime(mcview.videoLayer.controlTimebase, CMTimeMake(player_s, 1));
-            CMTimebaseSetRate(mcview.videoLayer.controlTimebase, 1.0);
+            CMTimebaseSetTime(videolayer.controlTimebase, CMTimeMake(player_s, 1));
+            CMTimebaseSetRate(videolayer.controlTimebase, 1.0);
           }
         }
 
@@ -620,7 +624,7 @@ void CDVDVideoCodecSampleBufferLayer::Process()
               mcview.center= CGPointMake(mcview.center.x + offset.x, mcview.center.y + offset.y);
               // video layer needs to get resized too,
               // not sure why, it should track the view.
-              mcview.videoLayer.frame = frame;
+              videolayer.frame = frame;
               // we startup hidden, kick off an animated fade in.
               if (mcview.hidden == YES)
                 [mcview setHiddenAnimated:NO delay:NSTimeInterval(0.1) duration:NSTimeInterval(2.0)];
@@ -666,21 +670,22 @@ void CDVDVideoCodecSampleBufferLayer::DrainQueues()
 void CDVDVideoCodecSampleBufferLayer::StartSampleProviderWithBlock()
 {
   SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
+  AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
 
   // ok, for those that have never seen a usingBlock structure. these are
   // special, works like a mini-thread that fires when videoLayer
   // needs demux data. You need to pair this with StopSampleProvider
   // to stop the callbacks or very bad things might happen...
-  [mcview.videoLayer requestMediaDataWhenReadyOnQueue:m_providerQueue usingBlock:^
+  [videolayer requestMediaDataWhenReadyOnQueue:m_providerQueue usingBlock:^
   {
-    while(mcview.videoLayer.readyForMoreMediaData)
+    while(videolayer.readyForMoreMediaData)
     {
       if (m_sampleBuffers.size())
       {
         CMSampleBufferRef nextSampleBuffer = m_sampleBuffers.front();
         if (nextSampleBuffer)
         {
-          [mcview.videoLayer enqueueSampleBuffer:nextSampleBuffer];
+          [videolayer enqueueSampleBuffer:nextSampleBuffer];
           [mcview setNeedsDisplay];
 
           CFRelease(nextSampleBuffer);
@@ -688,10 +693,10 @@ void CDVDVideoCodecSampleBufferLayer::StartSampleProviderWithBlock()
           m_sampleBuffers.pop();
           pthread_mutex_unlock(&m_sampleBuffersMutex);
 
-          if ([mcview.videoLayer status] == AVQueuedSampleBufferRenderingStatusFailed)
+          if ([videolayer status] == AVQueuedSampleBufferRenderingStatusFailed)
           {
             CLog::Log(LOGNOTICE, "%s - AFVDecoderDecode failed, status(%ld)",
-              __FUNCTION__, (long)[mcview.videoLayer error].code);
+              __FUNCTION__, (long)[videolayer error].code);
           }
         }
       }
@@ -710,7 +715,8 @@ void CDVDVideoCodecSampleBufferLayer::StopSampleProvider()
 {
   dispatch_sync(dispatch_get_main_queue(),^{
     SampleBufferLayerView *mcview = (SampleBufferLayerView*)m_decoder;
-    [mcview.videoLayer stopRequestingMediaData];
+    AVSampleBufferDisplayLayer *videolayer = mcview.videolayer;
+    [videolayer stopRequestingMediaData];
   });
 }
 

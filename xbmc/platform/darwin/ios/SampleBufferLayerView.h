@@ -25,9 +25,8 @@
 
 @interface SampleBufferLayerView : UIView
 
-@property (nonatomic, strong) AVSampleBufferDisplayLayer *videoLayer;
+@property (nonatomic, assign) id videolayer;
 
-- (void*)getVideoLayer;
 - (void) setHiddenAnimated:(BOOL)hide
                     delay:(NSTimeInterval)delay
                  duration:(NSTimeInterval)duration;
