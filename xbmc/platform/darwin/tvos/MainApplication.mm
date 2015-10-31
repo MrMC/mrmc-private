@@ -40,7 +40,7 @@ MainController *m_xbmcController;
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 
   [m_xbmcController resumeAnimation];
   [m_xbmcController enterForeground];
@@ -99,7 +99,7 @@ MainController *m_xbmcController;
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application 
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 
   UIScreen *currentScreen = [UIScreen mainScreen];
 

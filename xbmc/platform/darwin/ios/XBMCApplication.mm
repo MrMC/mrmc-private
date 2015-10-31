@@ -52,7 +52,7 @@ XBMCController *m_xbmcController;
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 
   [m_xbmcController resumeAnimation];
   [m_xbmcController enterForeground];
@@ -111,7 +111,7 @@ XBMCController *m_xbmcController;
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application 
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 
   [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
   UIScreen *currentScreen = [UIScreen mainScreen];
