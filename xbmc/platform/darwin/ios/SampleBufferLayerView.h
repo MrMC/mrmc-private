@@ -20,13 +20,15 @@
  */
 
 #import <UIKit/UIKit.h>
+#undef __TVOS_PROHIBITED
 #import <AVFoundation/AVFoundation.h>
 
 @interface SampleBufferLayerView : UIView
 
 @property (nonatomic, strong) AVSampleBufferDisplayLayer *videoLayer;
 
-- (void)setHiddenAnimated:(BOOL)hide
+- (void*)getVideoLayer;
+- (void) setHiddenAnimated:(BOOL)hide
                     delay:(NSTimeInterval)delay
                  duration:(NSTimeInterval)duration;
 @end

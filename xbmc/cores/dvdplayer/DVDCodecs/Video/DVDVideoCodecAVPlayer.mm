@@ -140,29 +140,6 @@ CDVDVideoCodecAVPlayer::~CDVDVideoCodecAVPlayer()
 
 bool CDVDVideoCodecAVPlayer::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
-/*
-  {
-    Class AVSampleBufferDisplayLayerClass = NSClassFromString(@"AVSampleBufferDisplayLayer");
-    if (Nil == AVSampleBufferDisplayLayerClass) {
-      void *handle = dlopen("System/Library/Frameworks/Foundation.framework/Foundation", RTLD_NOW);
-      if (handle) {
-        AVSampleBufferDisplayLayerClass = NSClassFromString(@"AVSampleBufferDisplayLayerClass");
-        assert(AVSampleBufferDisplayLayerClass != Nil);
-        id avSampleBufferDisplayLayerId = [[[AVSampleBufferDisplayLayerClass alloc] init] autorelease];
-        printf("avSampleBufferDisplayLayerId: %p\n", avSampleBufferDisplayLayerId);
-        if (0 != dlclose(handle)) {
-            printf("dlclose failed! %s\n", dlerror());
-        }
-      } else {
-          printf("dlopen failed! %s\n", dlerror());
-      }
-    } else {
-      id avSampleBufferDisplayLayerId = [[[AVSampleBufferDisplayLayerClass alloc] init] autorelease];
-      printf("avSampleBufferDisplayLayerId: %p\n", avSampleBufferDisplayLayerId);
-    }
-  }
-*/
-
   //if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEAVP) && !hints.software)
   {
     int width  = hints.width;

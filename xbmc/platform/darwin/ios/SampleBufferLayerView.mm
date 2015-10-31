@@ -34,7 +34,8 @@
     [self layoutIfNeeded];
 
     self.hidden = YES;
-		self.videoLayer = [[[AVSampleBufferDisplayLayer alloc] init] autorelease];
+    Class AVSampleBufferDisplayLayerClass = NSClassFromString(@"AVSampleBufferDisplayLayer");
+		self.videoLayer = [[[AVSampleBufferDisplayLayerClass alloc] init] autorelease];
 		self.videoLayer.bounds = self.bounds;
 		self.videoLayer.position = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds));
 		self.videoLayer.videoGravity = AVLayerVideoGravityResizeAspect;
@@ -94,6 +95,11 @@
   toggle++;
 }
 #endif
+
+- (void*)getVideoLayer
+{
+  return nullptr;
+}
 
 - (void)setHiddenAnimated:(BOOL)hide
   delay:(NSTimeInterval)delay duration:(NSTimeInterval)duration

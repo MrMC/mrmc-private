@@ -32,7 +32,9 @@
 #endif
 #if defined(HAVE_VIDEOTOOLBOXDECODER)
   #if defined(TARGET_DARWIN_TVOS)
+    #include "Video/DVDVideoCodecAVPlayer.h"
     #include "Video/DVDVideoCodecVideoToolBox.h"
+    #include "Video/DVDVideoCodecSampleBufferLayer.h"
   #else
     #include "Video/DVDVideoCodecVTB.h"
     #include "Video/DVDVideoCodecSampleBufferLayer.h"
@@ -247,10 +249,13 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
           if (hint.codec == AV_CODEC_ID_H264 && hint.ptsinvalid)
             break;
           #if defined(TARGET_DARWIN_TVOS)
-            if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
+            //if ( (pCodec = OpenCodec(new CDVDVideoCodecAVPlayer(), hint, options)) ) return pCodec;
+            //if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
+            if ( (pCodec = OpenCodec(new CDVDVideoCodecSampleBufferLayer(), hint, options)) ) return pCodec;
           #else
-            if ( (pCodec = OpenCodec(new CDVDVideoCodecVTB(), hint, options)) ) return pCodec;
-            //if ( (pCodec = OpenCodec(new CDVDVideoCodecSampleBufferLayer(), hint, options)) ) return pCodec;
+            //if ( (pCodec = OpenCodec(new CDVDVideoCodecVTB(), hint, options)) ) return pCodec;
+            //if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
+            if ( (pCodec = OpenCodec(new CDVDVideoCodecSampleBufferLayer(), hint, options)) ) return pCodec;
           #endif
           break;
         default:

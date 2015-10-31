@@ -1694,6 +1694,8 @@
 		F51063441BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
 		F51063991BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063981BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm */; };
 		F510639C1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F510639A1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp */; };
+		F51063A01BE3CD1900BBCED6 /* SampleBufferLayerView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE131BB8444C00FB1ACF /* SampleBufferLayerView.mm */; };
+		F51063A11BE3CD4B00BBCED6 /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
 		F52A733D1560BC34005B1A0B /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F52A733C1560BC34005B1A0B /* CoreFoundation.framework */; };
 		F52B063B11869862004B1D66 /* Skin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B063A11869862004B1D66 /* Skin.cpp */; };
 		F52B06BA1187CE18004B1D66 /* DVDVideoCodecVDA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52B06B81187CE18004B1D66 /* DVDVideoCodecVDA.cpp */; };
@@ -1794,7 +1796,6 @@
 		F5BBDE0A1BB796AC00FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
 		F5BBDE0F1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
 		F5BBDE101BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
-		F5BBDE111BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */; };
 		F5BBDE141BB8444C00FB1ACF /* SampleBufferLayerView.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE131BB8444C00FB1ACF /* SampleBufferLayerView.mm */; };
 		F5BD02F6148D3A7E001B5583 /* CryptThreading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BD02F4148D3A7E001B5583 /* CryptThreading.cpp */; };
 		F5BDB80C120202F400F0B710 /* DVDSubtitleTagSami.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB80B120202F400F0B710 /* DVDSubtitleTagSami.cpp */; };
@@ -7383,8 +7384,8 @@
 				E38E153C0D25F9F900618676 /* DVDVideoCodec.h */,
 				F51063971BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.h */,
 				F51063981BDEF2BA00BBCED6 /* DVDVideoCodecAVPlayer.mm */,
-				F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */,
 				F5BBDE0D1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.h */,
+				F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm */,
 				E38E153D0D25F9F900618676 /* DVDVideoCodecFFmpeg.cpp */,
 				E38E153E0D25F9F900618676 /* DVDVideoCodecFFmpeg.h */,
 				F52B06B81187CE18004B1D66 /* DVDVideoCodecVDA.cpp */,
@@ -10749,7 +10750,6 @@
 				F5D142B41BAF31FB0075A95C /* MainController.mm in Sources */,
 				F5D13ECA1BAF0B6D0075A95C /* XbtManager.cpp in Sources */,
 				F5D13ECB1BAF0B6D0075A95C /* Addon.cpp in Sources */,
-				F5BBDE111BB80A4600FB1ACF /* DVDVideoCodecSampleBufferLayer.mm in Sources */,
 				F5D13ECC1BAF0B6D0075A95C /* AddonCallbacks.cpp in Sources */,
 				F5D13ECD1BAF0B6D0075A95C /* AddonCallbacksAddon.cpp in Sources */,
 				F5D13ECE1BAF0B6D0075A95C /* AddonCallbacksGUI.cpp in Sources */,
@@ -10965,6 +10965,7 @@
 				F5D13F9D1BAF0B6D0075A95C /* DirectoryNodeTop100.cpp in Sources */,
 				F5D13F9E1BAF0B6D0075A95C /* DirectoryNodeYearAlbum.cpp in Sources */,
 				F5D13F9F1BAF0B6D0075A95C /* DirectoryNodeYearSong.cpp in Sources */,
+				F51063A01BE3CD1900BBCED6 /* SampleBufferLayerView.mm in Sources */,
 				F510639C1BDFD58500BBCED6 /* CodecAVPlayerHLSTransMuxer.cpp in Sources */,
 				F5D13FA01BAF0B6D0075A95C /* QueryParams.cpp in Sources */,
 				F5D13FA11BAF0B6D0075A95C /* MusicDatabaseDirectory.cpp in Sources */,
@@ -11526,6 +11527,7 @@
 				F5D141C41BAF0B6D0075A95C /* ActiveAESink.cpp in Sources */,
 				F5D141C51BAF0B6D0075A95C /* ActiveAESound.cpp in Sources */,
 				F5D141C61BAF0B6D0075A95C /* ActiveAEStream.cpp in Sources */,
+				F51063A11BE3CD4B00BBCED6 /* DVDVideoCodecSampleBufferLayer.mm in Sources */,
 				F5D141C71BAF0B6D0075A95C /* ActorProtocol.cpp in Sources */,
 				F5D141C81BAF0B6D0075A95C /* EndianSwap.cpp in Sources */,
 				F5D141C91BAF0B6D0075A95C /* AESinkFactory.cpp in Sources */,

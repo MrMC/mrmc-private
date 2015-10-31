@@ -309,7 +309,7 @@ bool CCodecAVPlayerHLSTransMuxer::Write(uint8_t* pData, int iSize, double dts, d
 
     int outbuf_size = 0;
     uint8_t *outbuf = NULL;
-    int len = av_parser_parse2(m_parser_ctx
+    av_parser_parse2(m_parser_ctx
       , m_ofmt_ctx->streams[0]->codec, &outbuf, &outbuf_size
       , packet.data, packet.size
       , packet.pts

@@ -20,7 +20,7 @@
 
 #import "config.h"
 
-#if defined(TARGET_DARWIN_IOS) && !defined(TARGET_DARWIN_TVOS)
+#if defined(TARGET_DARWIN_IOS)
 #import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecSampleBufferLayer.h"
 
 #import "cores/dvdplayer/DVDClock.h"
@@ -29,7 +29,11 @@
 #import "platform/darwin/AutoPool.h"
 #import "platform/darwin/DarwinUtils.h"
 #import "platform/darwin/ios/SampleBufferLayerView.h"
+#if defined(TARGET_DARWIN_TVOS)
+#import "platform/darwin/tvos/MainController.h"
+#else
 #import "platform/darwin/ios/XBMCController.h"
+#endif
 #import "utils/BitstreamConverter.h"
 #import "utils/log.h"
 
