@@ -23,6 +23,9 @@ export CFLAGS+=-D_FILE_OFFSET_BITS=64 -D_OFF_T_DEFINED_ -Doff_t=off64_t -Dlseek=
 ANDROID_OFF_T_FIX=sed -ie "s|off_t|off64_t|g" "$(PLATFORM)/source/include/libsmbclient.h"
 endif
 
+# clang issue with optimizing out functions
+CONFIGURE_HAMMER=samba_cv_optimize_out_funcation_calls=no
+
 CONFIGURE= cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
           ./configure --prefix=$(PREFIX) \
         --disable-cups \
@@ -44,6 +47,7 @@ CONFIGURE= cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
         --with-libiconv=$(STAGING_DIR) \
         --without-cifsmount \
         --without-winbind \
+        $(CONFIGURE_HAMMER)
 
 LIBDYLIB=$(PLATFORM)/source/bin/libsmbclient.a
 
@@ -64,6 +68,13 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); patch -p1 < ../samba30-3.0.37-wle-fix.patch
 	cd $(PLATFORM); patch -p0 < ../samba_android.patch
 	$(ANDROID_OFF_T_FIX)
+	# remove fork/execX/system, it is not used for client
+	sed -ie "s|forkret = fork()|forkret = (pid_t)-1|" "$(PLATFORM)/source/lib/system.c"
+	sed -ie "s|execv|//execv|" "$(PLATFORM)/source/lib/system.c"
+	sed -ie "s|execl(|(|" "$(PLATFORM)/source/lib/smbrun.c"
+	sed -ie "s|system(cmd)|-1|" "$(PLATFORM)/source/lib/util.c"
+	sed -ie "s|fork()|-1|" "$(PLATFORM)/source/lib/sock_exec.c"
+	sed -ie "s|system(prog)|-1|" "$(PLATFORM)/source/lib/sock_exec.c"
 	cd $(PLATFORM)/source && ./autogen.sh
 	cd $(PLATFORM)/source; $(CONFIGURE)
 
@@ -74,6 +85,16 @@ $(LIBDYLIB): $(PLATFORM)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
 	$(MAKE) -C $(PLATFORM)/source installclientlib
+	# internal collides with _MD5xxx in libmicrohttpd.a
+	$(RPL) -e "_MD5Init" "_MDxInit" $(PREFIX)/lib/libsmbclient.a
+	$(RPL) -e "_MD5Final" "_MDxFinal" $(PREFIX)/lib/libsmbclient.a
+	$(RPL) -e "_MD5Update" "_MDxUpdate" $(PREFIX)/lib/libsmbclient.a
+	# internal collides with _SHA256_xxx in libcrypto.a(sha256.o)
+	$(RPL) -e "_SHA256_Init" "_SHA256xInit" $(PREFIX)/lib/libsmbclient.a
+	$(RPL) -e "_SHA256_Final" "_SHA256xFinal" $(PREFIX)/lib/libsmbclient.a
+	$(RPL) -e "_SHA256_Update" "_SHA256xUpdate" $(PREFIX)/lib/libsmbclient.a
+	# internal collides with _packet_send libssh.a(packet.o)
+	$(RPL) -e "_packet_send" "_SMBpkt_send" $(PREFIX)/lib/libsmbclient.a
 	touch $@
 
 clean:

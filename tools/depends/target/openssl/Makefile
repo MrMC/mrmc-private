@@ -14,7 +14,7 @@ ifeq ($(OS), android)
 endif
 ifeq ($(OS), ios)
   # No darwin-arm-cc so use darwin-i386-cc and patch files after configure
-  CONFIGURE=./Configure darwin-i386-cc zlib no-asm no-krb5 shared --openssldir=$(PREFIX)
+  CONFIGURE=./Configure darwin-i386-cc zlib no-asm no-krb5 --openssldir=$(PREFIX)
 endif
 ifeq ($(OS), osx)
   ifeq ($(CPU),x86_64)

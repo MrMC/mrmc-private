@@ -8631,6 +8631,9 @@
 					E4991088174D0D2600741B6D = {
 						DevelopmentTeam = 5CY78AG2Q7;
 					};
+					F5D13EC51BAF0B6D0075A95C = {
+						DevelopmentTeam = 5CY78AG2Q7;
+					};
 				};
 			};
 			buildConfigurationList = 1DEB924B08733DCA0010E9CD /* Build configuration list for PBXProject "MrMC" */;
@@ -11859,10 +11862,10 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_BITCODE = NO;
+				ENABLE_BITCODE = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				HEADER_SEARCH_PATHS = "$(inherited)";
@@ -11885,10 +11888,10 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer: Scott Davilla (FMV8PXPEJ8)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_BITCODE = NO;
+				ENABLE_BITCODE = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				HEADER_SEARCH_PATHS = "$(inherited)";

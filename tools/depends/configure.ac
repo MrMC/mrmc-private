@@ -311,6 +311,8 @@ case $host in
         if test "$use_platform" = "tvos"; then
           found_sdk_version=[`$use_xcodebuild -showsdks | grep appletvos | sort | tail -n 1 | awk '{ print $2}'`]
           use_sdk="${use_sdk:-$found_sdk_version}"
+	  platform_cflags+=" -fembed-bitcode"
+	  platform_cxxflags+=" -fembed-bitcode"
           sdk_name=appletvos$use_sdk
           platform_min_version="appletvos-version-min=9.0"
         else
