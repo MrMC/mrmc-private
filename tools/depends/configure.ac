@@ -581,7 +581,11 @@ if test "$platform_os" == "android"; then
 fi
 
 if test "$platform_os" == "ios"; then
-  simulator_sdk_path=[`$use_xcodebuild -version -sdk $sdk_name  | grep ^Path | awk '{ print $2}'`]
+  if test "$use_platform" = "tvos"; then
+    simulator_sdk_path=[`$use_xcodebuild -version -sdk appletvsimulator$use_sdk  | grep ^Path | awk '{ print $2}'`]
+  else
+    simulator_sdk_path=[`$use_xcodebuild -version -sdk iphonesimulator$use_sdk  | grep ^Path | awk '{ print $2}'`]
+  fi
   cp -vf $simulator_sdk_path/usr/include/crt_externs.h $prefix/$deps_dir/include
 fi
 echo -e "use simulator:\t $use_simulator"
