@@ -60,8 +60,8 @@ fi
 #gnutls
 gl_cv_func_gettimeofday_clobber=no
 
-#samba
-#if test "${PACKAGE_NAME}" = "Samba"; then
+#samba (changes for all platforms)
+if test "${PACKAGE_NAME}" = "Samba"; then
   SMB_BUILD_CC_NEGATIVE_ENUM_VALUES=yes
   samba_cv_CC_NEGATIVE_ENUM_VALUES=yes
   libreplace_cv_HAVE_C99_VSNPRINTF=yes
@@ -71,7 +71,7 @@ gl_cv_func_gettimeofday_clobber=no
   ac_cv_file__proc_sys_kernel_core_pattern=no
   samba_cv_SYSCONF_SC_NPROCESSORS_ONLN=no
   libreplace_cv_HAVE_GETADDRINFO=no
-#fi
+fi
 
 if test "${PACKAGE_NAME}" = "Samba" -a "@platform_os@" = "osx"; then
   # ios/osx-10.6 issue with collision of _MD5 exported from a system lib
