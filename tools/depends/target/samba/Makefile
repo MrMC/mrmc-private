@@ -1,9 +1,12 @@
 include ../../Makefile.include
-DEPS= ../../Makefile.include Makefile samba30-3.0.37-configure.in.patch \
+DEPS= ../../Makefile.include Makefile \
+      samba30-3.0.37-configure.in.patch \
       samba30-3.0.37-CVE-2010-2063.patch \
       samba30-3.0.37-silence-receive-warning.patch \
-      samba30-3.0.37-vfs_default.c.patch samba30-3.0.37-wle-fix.patch \
-      samba_android.patch
+      samba30-3.0.37-vfs_default.c.patch \
+      samba30-3.0.37-wle-fix.patch \
+      samba30-3.0.37-android.patch \
+      samba30-3.0.37_darwin-iface-getifaddrs.patch
 
 # lib name, version
 LIBNAME=samba
@@ -66,7 +69,8 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); patch -p1 < ../samba30-3.0.37-silence-receive-warning.patch
 	cd $(PLATFORM); patch -p1 < ../samba30-3.0.37-vfs_default.c.patch
 	cd $(PLATFORM); patch -p1 < ../samba30-3.0.37-wle-fix.patch
-	cd $(PLATFORM); patch -p0 < ../samba_android.patch
+	cd $(PLATFORM); patch -p1 < ../samba30-3.0.37-android.patch
+	cd $(PLATFORM); patch -p1 < ../samba30-3.0.37_darwin-iface-getifaddrs.patch
 	$(ANDROID_OFF_T_FIX)
 	# remove fork/execX/system, it is not used for client
 	sed -ie "s|forkret = fork()|forkret = (pid_t)-1|" "$(PLATFORM)/source/lib/system.c"

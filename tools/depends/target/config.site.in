@@ -84,7 +84,9 @@ if test "${PACKAGE_NAME}" = "Samba" -a "@platform_os@" = "osx"; then
   # fixes crash on 10.6 if xbmc is built using 10.7 SDK with 10.6 min
   ac_cv_func_vdprintf=no
 fi
-
+if test "@platform_os@" = "ios"; then
+  samba_cv_HAVE_IFACE_GETIFADDRS=yes
+fi
 if test "@platform_os@" = "android"; then
   #samba
   SMB_BUILD_CC_NEGATIVE_ENUM_VALUES=yes
