@@ -417,7 +417,7 @@ const char* CDarwinUtils::GetUserLogDirectory(void)
     #if defined(TARGET_DARWIN_TVOS)
       appLogFolder = CDarwinUtils::GetOSCachesDirectory();
     #elif defined(TARGET_DARWIN_IOS)
-      appLogFolder = URIUtils::AddFileToFolder(getenv("HOME"), std::string(CDarwinUtils::GetOSAppRootFolder());
+      appLogFolder = URIUtils::AddFileToFolder(CDarwinUtils::GetOSAppRootFolder(), CCompileInfo::GetAppName());
     #else
       appLogFolder = URIUtils::AddFileToFolder(getenv("HOME"), "Library");
     #endif
@@ -439,8 +439,7 @@ const char* CDarwinUtils::GetUserTempDirectory(void)
     #if defined(TARGET_DARWIN_TVOS)
       appTempFolder = CDarwinUtils::GetOSTemporaryDirectory();
     #elif defined(TARGET_DARWIN_IOS)
-      appTempFolder = URIUtils::AddFileToFolder(getenv("HOME"),  std::string(CDarwinUtils::GetOSAppRootFolder());
-      appTempFolder = URIUtils::AddFileToFolder(appTempFolder,  CCompileInfo::GetAppName());
+      appTempFolder = URIUtils::AddFileToFolder(CDarwinUtils::GetOSAppRootFolder(),  CCompileInfo::GetAppName());
     #else
       std::string dotLowerAppName = StringUtils::Format(".%s", CCompileInfo::GetAppName());
       StringUtils::ToLower(dotLowerAppName);
@@ -461,8 +460,7 @@ const char* CDarwinUtils::GetUserHomeDirectory(void)
     #if defined(TARGET_DARWIN_TVOS)
       appHomeFolder = URIUtils::AddFileToFolder(CDarwinUtils::GetOSCachesDirectory(), "home");
     #elif defined(TARGET_DARWIN_IOS)
-      appHomeFolder = URIUtils::AddFileToFolder(getenv("HOME"), CDarwinUtils::GetOSAppRootFolder());
-      appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, CCompileInfo::GetAppName());
+      appHomeFolder = URIUtils::AddFileToFolder(CDarwinUtils::GetOSAppRootFolder(), CCompileInfo::GetAppName());
     #else
       appHomeFolder = URIUtils::AddFileToFolder(getenv("HOME"), "Library/Application Support");
       appHomeFolder = URIUtils::AddFileToFolder(appHomeFolder, CCompileInfo::GetAppName());
