@@ -1078,7 +1078,7 @@
 			<top>55r</top>
 			<include>Window_OpenClose_Animation</include>
 			<control type="group">
-				<visible>!System.Platform.IOS</visible>
+				<visible>!System.Platform.IOS + !System.Platform.TVOS</visible>
 				<control type="button" id="20">
 					<description>Power push button</description>
 					<left>55</left>
