@@ -37,6 +37,7 @@
     #include "Video/DVDVideoCodecAVFoundation.h"
   #else
     #include "Video/DVDVideoCodecVTB.h"
+    #include "Video/DVDVideoCodecVideoToolBox.h"
     #include "Video/DVDVideoCodecAVFoundation.h"
   #endif
   #include "utils/SystemInfo.h"
