@@ -94,11 +94,15 @@ void CSplash::Show(const std::string& message)
       m_messageLayout->Update(message, 1150, false, true);
       float textWidth, textHeight;
       m_messageLayout->GetTextExtent(textWidth, textHeight);
+      
+      int width = g_graphicsContext.GetWidth();
+      int height = g_graphicsContext.GetHeight();
+      
       // ideally place text in center of empty area below splash image
       float y = 480 + m_image->GetTextureHeight() / 4 - textHeight / 2;
-      if (y + textHeight > 720) // make sure entire text is visible
-        y = 650 - textHeight;
-      m_messageLayout->RenderOutline(640, y, 0, 0xFF000000, XBFONT_CENTER_X, 1280);
+      if (y + textHeight > height) // make sure entire text is visible
+        y = height - textHeight - 30; // -30 for safe viewing area
+      m_messageLayout->RenderOutline(width/2, y, 0, 0xFF000000, XBFONT_CENTER_X, width);
     }
   }
   //show it on screen
