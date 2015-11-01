@@ -475,21 +475,9 @@ const char* CDarwinUtils::GetUserHomeDirectory(void)
 const char* CDarwinUtils::GetOSAppRootFolder(void)
 {
   static std::string rootFolder;
-  if (rootFolder.empty())
-  {
-    if (IsIosSandboxed())
-    {
-      // when we are sandbox, make documents our root
-      // so that user can access everything he needs 
-      // via itunes sharing
-      rootFolder = "Documents";
-    }
-    else
-    {
-      rootFolder = "Library/Preferences";
-    }
-  }
-  return rootFolder.c_str();
+  NSArray *writablePaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+  NSString *appTempFolder = [writablePaths lastObject];
+  return [appTempFolder UTF8String];
 }
 
 const char* CDarwinUtils::GetOSCachesDirectory()
@@ -514,77 +502,6 @@ const char* CDarwinUtils::GetOSTemporaryDirectory()
   }
 
   return tmpFolder.c_str();
-}
-
-bool CDarwinUtils::IsIosSandboxed(void)
-{
-  static int ret = -1;
-  if (ret == -1)
-  {
-    size_t   path_size = 2*MAXPATHLEN;
-    char     given_path[2*MAXPATHLEN];
-    int      result = -1; 
-    ret = 0;
-    memset(given_path, 0x0, path_size);
-    /* Get Application directory */  
-    result = GetExecutablePath(given_path, &path_size);
-    if (result == 0)
-    {
-      // we are sandboxed if we are installed in /var/mobile/Applications
-      if (strlen("/var/mobile/Applications/") < path_size &&
-        strncmp(given_path, "/var/mobile/Applications/", strlen("/var/mobile/Applications/")) == 0)
-      {
-        ret = 1;
-      }
-
-      // since ios8 the sandbox filesystem has moved to container approach
-      // we are also sandboxed if this is our bundle path
-      if (strlen("/var/mobile/Containers/Bundle/") < path_size &&
-        strncmp(given_path, "/var/mobile/Containers/Bundle/", strlen("/var/mobile/Containers/Bundle/")) == 0)
-      {
-        ret = 1;
-      }
-    }
-  }
-  return ret == 1;
-}
-
-bool CDarwinUtils::HasVideoToolboxDecoder(void)
-{
-  static int DecoderAvailable = -1;
-
-  if (DecoderAvailable == -1)
-  {
-    {
-      /* When XBMC is started from a sandbox directory we have to check the sysctl values */      
-      if (IsIosSandboxed())
-      {
-        uint64_t proc_enforce = 0;
-        uint64_t vnode_enforce = 0; 
-        size_t size = sizeof(vnode_enforce);
-
-        sysctlbyname("security.mac.proc_enforce",  &proc_enforce,  &size, NULL, 0);  
-        sysctlbyname("security.mac.vnode_enforce", &vnode_enforce, &size, NULL, 0);
-
-        if (vnode_enforce && proc_enforce)
-        {
-          DecoderAvailable = 1;
-          CLog::Log(LOGINFO, "VideoToolBox decoder not available. Use : sysctl -w security.mac.proc_enforce=0; sysctl -w security.mac.vnode_enforce=0\n");
-        }
-        else
-        {
-          DecoderAvailable = 1;
-          CLog::Log(LOGINFO, "VideoToolBox decoder available\n");
-        }  
-      }
-      else
-      {
-        DecoderAvailable = 1;
-      }
-    }
-  }
-
-  return (DecoderAvailable == 1);
 }
 
 int CDarwinUtils::BatteryLevel(void)

@@ -1005,7 +1005,7 @@ std::string CSysInfo::GetBuildDate()
 bool CSysInfo::HasVideoToolBoxDecoder()
 {
 #if defined(HAVE_VIDEOTOOLBOXDECODER)
-  return CDarwinUtils::HasVideoToolboxDecoder();
+  return true;
 #else
   return false;
 #endif
