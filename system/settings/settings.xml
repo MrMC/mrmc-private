@@ -2396,7 +2396,7 @@
           <constraints>
             <allowempty>true</allowempty>
           </constraints>
-          <control type="edit" format="ip" />
+          <control type="edit" format="string" />
         </setting>
         <setting id="mysql.port" type="string" label="730" help="1264">
         <dependencies>

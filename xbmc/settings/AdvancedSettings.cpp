@@ -133,8 +133,14 @@ void CAdvancedSettings::OnSettingChanged(const CSetting *setting)
     m_extraLogEnabled = static_cast<const CSettingBool*>(setting)->GetValue();
   else if (settingId == CSettings::SETTING_DEBUG_SETEXTRALOGLEVEL)
     setExtraLogLevel(CSettingUtils::GetList(static_cast<const CSettingList*>(setting)));
-  else if (settingId == CSettings::SETTING_MYSQL_ENABLED)
-    setInetrnalMYSQL(((CSettingBool*)setting)->GetValue(), true);
+  else if (settingId == CSettings::SETTING_MYSQL_ENABLED ||
+           settingId == CSettings::SETTING_MYSQL_HOST ||
+           settingId == CSettings::SETTING_MYSQL_USER ||
+           settingId == CSettings::SETTING_MYSQL_PASS ||
+           settingId == CSettings::SETTING_MYSQL_VIDEO ||
+           settingId == CSettings::SETTING_MYSQL_MUSIC
+           )
+    setInetrnalMYSQL(CSettings::GetInstance().GetBool(CSettings::SETTING_MYSQL_ENABLED), true);
 //  CSettings::GetInstance().Save();
 }
 
