@@ -1793,7 +1793,6 @@
 		F5AE40A713415D9E0004BD79 /* VideoLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE409813415D9E0004BD79 /* VideoLibrary.cpp */; };
 		F5AE40A813415D9E0004BD79 /* XBMCOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE409A13415D9E0004BD79 /* XBMCOperations.cpp */; };
 		F5BBDE081BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
-		F5BBDE091BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
 		F5BBDE0A1BB796AC00FB1ACF /* DVDVideoCodecVTB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE061BB7346700FB1ACF /* DVDVideoCodecVTB.cpp */; };
 		F5BBDE0F1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm */; };
 		F5BBDE101BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5BBDE0E1BB80A4600FB1ACF /* DVDVideoCodecAVFoundation.mm */; };
@@ -10059,7 +10058,6 @@
 				E4991283174E5D9900741B6D /* DirectoryNodeAlbumRecentlyPlayedSong.cpp in Sources */,
 				E4991284174E5D9900741B6D /* DirectoryNodeAlbumTop100.cpp in Sources */,
 				E4991285174E5D9900741B6D /* DirectoryNodeAlbumTop100Song.cpp in Sources */,
-				F5BBDE091BB7346700FB1ACF /* DVDVideoCodecVTB.cpp in Sources */,
 				E4991286174E5D9900741B6D /* DirectoryNodeArtist.cpp in Sources */,
 				DF29BCEF1B5D911800904347 /* BaseEvent.cpp in Sources */,
 				E4991287174E5D9900741B6D /* DirectoryNodeGrouped.cpp in Sources */,
