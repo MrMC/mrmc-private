@@ -71,6 +71,10 @@ public:
   virtual ~CAdvancedSettingsJob()
   {
   }
+  virtual bool operator==(const CJob *job) const
+  {
+    return true;
+  }
   virtual bool DoWork()
   {
     CDatabaseManager::GetInstance().Initialize();
