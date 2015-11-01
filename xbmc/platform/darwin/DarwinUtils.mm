@@ -472,7 +472,6 @@ const char* CDarwinUtils::GetUserHomeDirectory(void)
 
 const char* CDarwinUtils::GetOSAppRootFolder(void)
 {
-  static std::string rootFolder;
   NSArray *writablePaths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
   NSString *appTempFolder = [writablePaths lastObject];
   return [appTempFolder UTF8String];
