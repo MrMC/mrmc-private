@@ -34,6 +34,7 @@
 #else
 #import "platform/darwin/ios/XBMCController.h"
 #endif
+#import "settings/Settings.h"
 #import "utils/BitstreamConverter.h"
 #import "utils/log.h"
 
@@ -180,7 +181,7 @@ CDVDVideoCodecAVFoundation::~CDVDVideoCodecAVFoundation()
 
 bool CDVDVideoCodecAVFoundation::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
 {
-  //if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEAVF) && !hints.software)
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEAVF) && !hints.software)
   {
     CCocoaAutoPool pool;
 
