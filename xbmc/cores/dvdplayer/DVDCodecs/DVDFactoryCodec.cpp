@@ -136,7 +136,6 @@ CDVDOverlayCodec* CDVDFactoryCodec::OpenCodec(CDVDOverlayCodec* pCodec, CDVDStre
   return NULL;
 }
 
-
 CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const CRenderInfo &info)
 {
   CDVDVideoCodec* pCodec = NULL;
@@ -148,59 +147,6 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
     options.m_formats = info.formats;
 
   options.m_opaque_pointer = info.opaque_pointer;
-
-  //when support for a hardware decoder is not compiled in
-  //only print it if it's actually available on the platform
-  std::string hwSupport;
-#if defined(TARGET_DARWIN_OSX)
-  hwSupport += "VDADecoder:yes ";
-#endif
-#if defined(HAVE_VIDEOTOOLBOXDECODER) && defined(TARGET_DARWIN)
-  hwSupport += "VideoToolBoxDecoder:yes ";
-#elif defined(TARGET_DARWIN)
-  hwSupport += "VideoToolBoxDecoder:no ";
-#endif
-#if defined(HAS_LIBAMCODEC)
-  hwSupport += "AMCodec:yes ";
-#else
-  hwSupport += "AMCodec:no ";
-#endif
-#if defined(TARGET_ANDROID)
-  hwSupport += "MediaCodec:yes ";
-#else
-  hwSupport += "MediaCodec:no ";
-#endif
-#if defined(HAVE_LIBOPENMAX)
-  hwSupport += "OpenMax:yes ";
-#elif defined(TARGET_POSIX)
-  hwSupport += "OpenMax:no ";
-#endif
-#if defined(HAS_LIBSTAGEFRIGHT)
-  hwSupport += "libstagefright:yes ";
-#elif defined(_LINUX)
-  hwSupport += "libstagefright:no ";
-#endif
-#if defined(HAVE_LIBVDPAU) && defined(TARGET_POSIX)
-  hwSupport += "VDPAU:yes ";
-#elif defined(TARGET_POSIX) && !defined(TARGET_DARWIN)
-  hwSupport += "VDPAU:no ";
-#endif
-#if defined(HAVE_LIBVA) && defined(TARGET_POSIX)
-  hwSupport += "VAAPI:yes ";
-#elif defined(TARGET_POSIX) && !defined(TARGET_DARWIN)
-  hwSupport += "VAAPI:no ";
-#endif
-#if defined(HAS_IMXVPU)
-  hwSupport += "iMXVPU:yes ";
-#else
-  hwSupport += "iMXVPU:no ";
-#endif
-#if defined(HAS_MMAL)
-  hwSupport += "MMAL:yes ";
-#else
-  hwSupport += "MMAL:no ";
-#endif
-  CLog::Log(LOGDEBUG, "CDVDFactoryCodec: compiled in hardware support: %s", hwSupport.c_str());
 
 #if defined(HAS_LIBAMCODEC)
   // amcodec can handle dvd playback.
