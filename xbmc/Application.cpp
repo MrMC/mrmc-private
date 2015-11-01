@@ -899,10 +899,11 @@ bool CApplication::InitDirectoriesOSX()
   CLog::Log(LOGDEBUG, "CApplication::InitDirectoriesOSX: appPath(%s)", appPath.c_str());
 
 #if defined(TARGET_DARWIN_IOS)
-  std::string fontconfigPath;
-  fontconfigPath = appPath + "/system/players/dvdplayer/etc/fonts/fonts.conf";
-  setenv("FONTCONFIG_FILE", fontconfigPath.c_str(), 0);
-  CLog::Log(LOGDEBUG, "CApplication::InitDirectoriesOSX: fontconfigPath(%s)", fontconfigPath.c_str());
+  std::string fontconfigFilePath;
+  fontconfigFilePath = appPath + "/system/players/dvdplayer/etc/fonts/fonts.conf";
+  // the location of the fonts.conf file
+  setenv("FONTCONFIG_FILE", fontconfigFilePath.c_str(), 1);
+  CLog::Log(LOGDEBUG, "CApplication::InitDirectoriesOSX: fontconfigFilePath(%s)", fontconfigFilePath.c_str());
 #endif
 
   // setup path to our internal dylibs so loader can find them
