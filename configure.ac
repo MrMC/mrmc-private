@@ -2067,7 +2067,7 @@ OUTPUT_FILES="$OUTPUT_FILES tools/darwin/packaging/ios/mkdeb-ios.sh"
 OUTPUT_FILES="$OUTPUT_FILES tools/darwin/packaging/osx/mkdmg-osx.sh"
 
 OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/darwin/osx/Info.plist"
-OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/darwin/ios/IOS-Info.plist"
+OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/darwin/ios/Info.plist"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/darwin/tvos/Info.plist"
 else
 OUTPUT_FILES="$OUTPUT_FILES tools/Linux/${APP_NAME_LC}.sh"
