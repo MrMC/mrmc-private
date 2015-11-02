@@ -1184,7 +1184,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
         break;
       case UIEventSubtypeRemoteControlPause:
         // ACTION_PAUSE sometimes cause unpause, use MediaPauseIfPlaying to make sure pause only
-        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE_IF_PLAYING);
+        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE);
         break;
       case UIEventSubtypeRemoteControlNextTrack:
         CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, -1, -1, static_cast<void*>(new CAction(ACTION_NEXT_ITEM)));
