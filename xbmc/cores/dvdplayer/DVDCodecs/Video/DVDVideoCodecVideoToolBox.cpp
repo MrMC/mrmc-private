@@ -870,7 +870,7 @@ CDVDVideoCodecVideoToolBox::CreateVTSession(int width, int height, CMFormatDescr
     width = new_width;
     height = height * w_scaler;
   }
-#if !defined(__LP64__) && !defined(TARGET_OS_SIMULATOR)
+#if !defined(__LP64__) || !defined(TARGET_OS_SIMULATOR)
   // scale output pictures down to 720p size for display
   if (width > width_clamp)
   {
