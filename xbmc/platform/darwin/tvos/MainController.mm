@@ -259,8 +259,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 #pragma mark - key press auto-repeat methods
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-// start repeating after 0.25s
-#define REPEATED_KEYPRESS_DELAY_S 0.25
 // pause 0.01s (10ms) between keypresses
 #define REPEATED_KEYPRESS_PAUSE_S 0.05
 //--------------------------------------------------------------
@@ -273,7 +271,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self sendKeyDown:keyId];
 
   NSNumber *number = [NSNumber numberWithInt:keyId];
-  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:REPEATED_KEYPRESS_DELAY_S];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:m_keypressDelay];
 
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
@@ -309,23 +307,9 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self sendKeyDown:(XBMCKey)[keyId intValue]];
 }
 
-
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 #pragma mark - gesture methods
-//--------------------------------------------------------------
-/*
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{
-  PRINT_SIGNATURE();
-  if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-    return YES;
-  }
-
-  return NO;
-}
-*/
-
 //--------------------------------------------------------------
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
@@ -369,25 +353,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 
   return handled;
 }
-
-//--------------------------------------------------------------
-- (void)createTapGestureRecognizers
-{
-  //PRINT_SIGNATURE();
-  //1 finger single tap
-  auto singleFingerSingleTap = [[UITapGestureRecognizer alloc]
-    initWithTarget:self action:@selector(handleSingleFingerSingleTap:)];
-  singleFingerSingleTap.delegate = self;
-  [m_glView addGestureRecognizer:singleFingerSingleTap];
-  [singleFingerSingleTap release];
-/*
-  // 1 finger single long tap - right mouse - alernative
-  auto singleFingerSingleLongTap = [[UILongPressGestureRecognizer alloc]
-    initWithTarget:self action:@selector(handleSingleFingerSingleLongTap:)];
-  [m_glView addGestureRecognizer:singleFingerSingleLongTap];
-  [singleFingerSingleLongTap release];
-*/
-}
 //--------------------------------------------------------------
 - (void)createPanGestureRecognizers
 {
@@ -398,46 +363,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   pan.delegate = self;
   [m_glView addGestureRecognizer:pan];
   [pan release];
-}
-//--------------------------------------------------------------
-- (void)createSwipeGestureRecognizers
-{
-  //PRINT_SIGNATURE();
-  // single finger swipe left
-  UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc]
-    initWithTarget:self action:@selector(handleSwipe:)];
-  swipeLeft.delaysTouchesBegan = NO;
-  swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
-  swipeLeft.delegate = self;
-  [m_glView addGestureRecognizer:swipeLeft];
-  [swipeLeft release];
-
-  // single finger swipe right
-  UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc]
-    initWithTarget:self action:@selector(handleSwipe:)];
-  swipeRight.delaysTouchesBegan = NO;
-  swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
-  swipeRight.delegate = self;
-  [m_glView addGestureRecognizer:swipeRight];
-  [swipeRight release];
-
-  // single finger swipe up
-  UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc]
-    initWithTarget:self action:@selector(handleSwipe:)];
-  swipeUp.delaysTouchesBegan = NO;
-  swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
-  swipeUp.delegate = self;
-  [m_glView addGestureRecognizer:swipeUp];
-  [swipeUp release];
-
-  // single finger swipe down
-  UISwipeGestureRecognizer *swipeDown = [[UISwipeGestureRecognizer alloc]
-    initWithTarget:self action:@selector(handleSwipe:)];
-  swipeDown.delaysTouchesBegan = NO;
-  swipeDown.direction = UISwipeGestureRecognizerDirectionDown;
-  swipeDown.delegate = self;
-  [m_glView addGestureRecognizer:swipeDown];
-  [swipeDown release];
 }
 //--------------------------------------------------------------
 - (void)createPressGesturecognizers
@@ -503,22 +428,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   m_glView.userInteractionEnabled = YES; 
   [self becomeFirstResponder];
 }
-/*
 //--------------------------------------------------------------
--(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
-{
-  PRINT_SIGNATURE();
-  if ([m_glView isXBMCAlive]) //NO GESTURES BEFORE WE ARE UP AND RUNNING
-  {
-    UITouch *touch = (UITouch *)[[touches allObjects] objectAtIndex:0];
-    CGPoint point = [touch locationInView:m_glView];
-    point.x *= m_screenScale;
-    point.y *= m_screenScale;
-    CGenericTouchActionHandler::GetInstance().OnSingleTouchStart(point.x, point.y);
-  }
-}
-*/
-
 - (void)menuPressed:(UITapGestureRecognizer *)sender
 {
   //PRINT_SIGNATURE();
@@ -529,6 +439,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     [self sendKeyDownUp:XBMCK_ESCAPE];
   }
 }
+//--------------------------------------------------------------
 - (void)selectPressed:(UITapGestureRecognizer *)sender
 {
   //PRINT_SIGNATURE();
@@ -631,7 +542,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
     [self sendKeyUp:XBMCK_RIGHT];
   }
 }
-
 //--------------------------------------------------------------
 - (IBAction)handlePan:(UIPanGestureRecognizer *)sender 
 {
@@ -639,7 +549,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
   { 
     CGPoint velocity = [sender velocityInView:m_glView];
-
+    XBMCKey key;
     if ([sender state] == UIGestureRecognizerStateBegan)
     {
       CGPoint point = [sender locationOfTouch:0 inView:m_glView];
@@ -654,128 +564,47 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
       CGPoint point = [sender locationOfTouch:0 inView:m_glView];
       point.x *= m_screenScale;
       point.y *= m_screenScale;
-      bool bNotify = false;
       CGFloat yMovement=point.y - m_lastGesturePoint.y;
       CGFloat xMovement=point.x - m_lastGesturePoint.x;
       
-      if (xMovement)
-        bNotify = true;
-      
-      if (yMovement)
-        bNotify = true;
-      
-      if (bNotify)
+      if (!m_touchBeginSignaled)
       {
-        if (!m_touchBeginSignaled)
+        if (fabs(xMovement) > fabs(yMovement))
         {
-          CGenericTouchActionHandler::GetInstance().OnTouchGestureStart((float)point.x, (float)point.y);
-          m_touchBeginSignaled = true;
+          //x axis
+          m_keypressDelay = [self mapVelocity:fabs(velocity.x)];
+          if (xMovement > 0.0f)
+            //left > right
+            key = XBMCK_RIGHT;
+          else
+            //right > left
+            key = XBMCK_LEFT;
         }
-
-        CGenericTouchActionHandler::GetInstance().OnTouchGesturePan((float)point.x, (float)point.y,
-          (float)xMovement, (float)yMovement, (float)velocity.x, (float)velocity.y);
-        m_lastGesturePoint = point;
+        else
+        {
+          // y axis
+          m_keypressDelay = [self mapVelocity:fabs(velocity.y)];
+          if (yMovement > 0.0f)
+            // up > down
+            key = XBMCK_DOWN;
+          else
+            // down > up
+            key = XBMCK_UP;
+        }
+        m_touchBeginSignaled = true;
+        [self startKeyPressTimer:key];
       }
     }
     
     if (m_touchBeginSignaled &&
        ([sender state] == UIGestureRecognizerStateEnded || [sender state] == UIGestureRecognizerStateCancelled))
     {
-      //signal end of pan - this will start inertial scrolling with deacceleration in CApplication
-      CGenericTouchActionHandler::GetInstance().OnTouchGestureEnd(
-       (float)m_lastGesturePoint.x, (float)m_lastGesturePoint.y,
-       (float)0.0, (float)0.0, (float)velocity.x, (float)velocity.y);
-
       m_touchBeginSignaled = false;
+      [self stopKeyPressTimer];
+      [self sendKeyUp:key];
     }
   }
 }
-//--------------------------------------------------------------
-- (IBAction)handleSwipe:(UISwipeGestureRecognizer *)sender
-{
-  //PRINT_SIGNATURE();
-  if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
-  {
-    if (sender.state == UIGestureRecognizerStateRecognized)
-    {
-      switch ([sender direction])
-      {
-        case UISwipeGestureRecognizerDirectionRight:
-          [g_xbmcController sendKeyDownUp:XBMCK_RIGHT];
-          break;
-        case UISwipeGestureRecognizerDirectionLeft:
-          [g_xbmcController sendKeyDownUp:XBMCK_LEFT];
-          break;
-        case UISwipeGestureRecognizerDirectionUp:
-          [g_xbmcController sendKeyDownUp:XBMCK_UP];
-          break;
-        case UISwipeGestureRecognizerDirectionDown:
-          [g_xbmcController sendKeyDownUp:XBMCK_DOWN];
-          break;
-      }
-    }
-  }
-}
-//--------------------------------------------------------------
-- (IBAction)handleSingleFingerSingleTap:(UIGestureRecognizer *)sender 
-{
-  //PRINT_SIGNATURE();
-  //Allow the tap gesture during init
-  //(for allowing the user to tap away any messagboxes during init)
-  if (m_readyToRun == YES && [sender numberOfTouches] > 0)
-  {
-    CGPoint point = [sender locationOfTouch:0 inView:m_glView];
-    point.x *= m_screenScale;
-    point.y *= m_screenScale;
-    //NSLog(@"%s singleTap", __PRETTY_FUNCTION__);
-    CGenericTouchActionHandler::GetInstance().OnTap(
-      (float)point.x, (float)point.y, (int32_t)[sender numberOfTouches]);
-  }
-}
-//--------------------------------------------------------------
-- (IBAction)handleDoubleFingerSingleTap:(UIGestureRecognizer *)sender
-{
-  //PRINT_SIGNATURE();
-  if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
-  {
-    CGPoint point = [sender locationOfTouch:0 inView:m_glView];
-    point.x *= m_screenScale;
-    point.y *= m_screenScale;
-    //NSLog(@"%s toubleTap", __PRETTY_FUNCTION__);
-    CGenericTouchActionHandler::GetInstance().OnTap(
-      (float)point.x, (float)point.y, (int32_t)[sender numberOfTouches]);
-  }
-}
-//--------------------------------------------------------------
-- (IBAction)handleSingleFingerSingleLongTap:(UIGestureRecognizer *)sender
-{
-  //PRINT_SIGNATURE();
-  if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
-  {
-    CGPoint point = [sender locationOfTouch:0 inView:m_glView];
-    point.x *= m_screenScale;
-    point.y *= m_screenScale;
-
-    if (sender.state == UIGestureRecognizerStateBegan)
-    {
-      m_lastGesturePoint = point;
-      // mark the control
-      //CGenericTouchActionHandler::GetInstance().OnSingleTouchStart((float)point.x, (float)point.y);
-    }
-
-    if (sender.state == UIGestureRecognizerStateEnded)
-    {
-      CGenericTouchActionHandler::GetInstance().OnSingleTouchMove(
-        (float)point.x, (float)point.y, point.x - m_lastGesturePoint.x, point.y - m_lastGesturePoint.y, 0, 0);
-    }
-    
-    if (sender.state == UIGestureRecognizerStateEnded)
-    {	
-      CGenericTouchActionHandler::GetInstance().OnLongPress((float)point.x, (float)point.y);
-    }
-  }
-}
-
 #pragma mark -
 - (void) insertVideoView:(UIView*)view
 {
@@ -887,9 +716,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [playPauseRecognizer release];
 
 
-  //[self createTapGestureRecognizers];
-  //[self createPanGestureRecognizers];
-  [self createSwipeGestureRecognizers];
+  [self createPanGestureRecognizers];
   [self createPressGesturecognizers];
 }
 //--------------------------------------------------------------
@@ -1137,6 +964,18 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [g_xbmcController enableSystemSleep];
 }
 
+- (float)mapVelocity:(float)velocity
+{
+  CGFloat const inMin = 8500.0;
+  CGFloat const inMax = 0.0;
+  
+  CGFloat const outMin = 0.25;
+  CGFloat const outMax = 1.5;
+  
+  CGFloat out = outMin + (outMax - outMin) * (velocity - inMin) / (inMax - inMin);
+  
+  return out < 0.25f ? 0.25f : floorf(out * 4) / 4;
+}
 #pragma mark - remote control routines
 //--------------------------------------------------------------
 - (void)disableNetworkAutoSuspend
