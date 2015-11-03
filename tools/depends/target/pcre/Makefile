@@ -3,22 +3,17 @@ DEPS= ../../Makefile.include Makefile
 
 # lib name, version
 LIBNAME=pcre
-VERSION=8.33
+VERSION=8.36
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
-
-ifeq ($(CPU),arm64)
-  CONFIGURE_FLAGS+=--disable-jit
-else
-  CONFIGURE_FLAGS+=--enable-jit
-endif
+BASE_URL=http://ftp.csx.cam.ac.uk/pub/software/programming/pcre
 
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; ./configure --prefix=$(PREFIX) \
 	--disable-shared --disable-stack-for-recursion \
 	--enable-pcre8 --disable-pcre16 --disable-pcre32 \
-	--enable-utf --enable-unicode-properties \
-	--enable-newline-is-anycrlf $(CONFIGURE_FLAGS)
+	--enable-jit --enable-utf --enable-unicode-properties \
+	--enable-newline-is-anycrlf
 
 
 LIBDYLIB=$(PLATFORM)/.libs/lib$(LIBNAME).a
