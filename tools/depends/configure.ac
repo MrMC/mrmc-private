@@ -62,13 +62,6 @@ AC_ARG_WITH([sdk],
   [spcify sdk platform version (optional for android). default is android-17])],
   [use_sdk=$withval])
 
-AC_ARG_ENABLE([gplv3],
-  [AS_HELP_STRING([--enable-gplv3],
-  [enable gplv3 components. default is yes])],
-  [use_gplv3=$enableval],
-  [use_gplv3=yes])
-
-
 AC_CHECK_PROG(HAVE_UNZIP,unzip,"yes","no",)
 if test "x$HAVE_UNZIP" = "xno" ; then
   AC_MSG_ERROR("Missing program: unzip")
@@ -567,7 +560,6 @@ AC_SUBST(build_os)
 AC_SUBST(has_zlib)
 AC_SUBST(link_iconv)
 AC_SUBST(need_libiconv)
-AC_SUBST(use_gplv3)
 AC_SUBST(has_libcrystax)
 AC_SUBST(use_xcode)
 AC_SUBST(use_simulator)

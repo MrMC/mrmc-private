@@ -48,12 +48,7 @@ DEPENDS += ffmpeg
 DEPENDS += platform
 DEPENDS += crossguid
 DEPENDS += libcpluff
-
-ifeq ($(ENABLE_GPLV3),yes)
-  DEPENDS+=samba-gplv3
-else
-  DEPENDS+=samba
-endif
+DEPENDS += samba
 
 EXCLUDED_DEPENDS =
 ifeq ($(OS),ios)
@@ -118,7 +113,6 @@ libzip: $(ZLIB)
 libpng: $(ZLIB)
 openssl: $(ZLIB)
 samba: libssh2
-samba-gplv3: libssh2
 gnutls: nettle $(ZLIB)
 nettle: gmp
 libsdl2: $(LINUX_SYSTEM_LIBS)
