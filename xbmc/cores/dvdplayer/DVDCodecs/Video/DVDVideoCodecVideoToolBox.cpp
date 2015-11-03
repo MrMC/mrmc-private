@@ -50,7 +50,8 @@ extern "C"
 // /System/Library/PrivateFrameworks/VideoToolbox.framework
 enum VTFormat {
   kVTFormatJPEG         = 'jpeg', // kCMVideoCodecType_JPEG
-  kVTFormatH264         = 'avc1', // kCMVideoCodecType_H264 (MPEG-4 Part 10))
+  kVTFormatH264         = 'avc1', // kCMVideoCodecType_H264 (MPEG-4 Part 10)
+  kVTFormatH265         = 'hvc1', // kCMVideoCodecType_H265 (MPEG-4 Part 15)
   kVTFormatMPEG4Video   = 'mp4v', // kCMVideoCodecType_MPEG4Video (MPEG-4 Part 2)
   kVTFormatMPEG2Video   = 'mp2v'  // kCMVideoCodecType_MPEG2Video
 };
@@ -284,6 +285,29 @@ static CFDataRef avvCCreate(const uint8_t *p_buf, int i_buf_size)
   return data;
 }
 
+static CFDataRef hevCCreate(const uint8_t *p_buf, int i_buf_size)
+{
+  CFDataRef data;
+  // each NAL sent to the decoder is preceded by a 4 byte header
+  // we need to change the hevC header to signal headers of 4 bytes, if needed
+  if (i_buf_size >= 4 && (p_buf[4] & 0x03) != 0x03)
+  {
+    uint8_t *p_fixed_buf = (uint8_t*)malloc(i_buf_size);
+    if (!p_fixed_buf)
+        return NULL;
+
+    memcpy(p_fixed_buf, p_buf, i_buf_size);
+    p_fixed_buf[4] |= 0x03;
+    data = CFDataCreate(kCFAllocatorDefault, p_fixed_buf, i_buf_size);
+  }
+  else
+  {
+    data = CFDataCreate(kCFAllocatorDefault, p_buf, i_buf_size);
+  }
+
+  return data;
+}
+
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
 // helper function that wraps dts/pts into a dictionary
@@ -357,9 +381,9 @@ CreateFormatDescription(VTFormatId format_id, int width, int height)
   else
     return NULL;
 }
-// helper function to create a avcC atom format descriptor
+// helper function to create a avcC/hevC/esds atom format descriptor
 static CMFormatDescriptionRef
-CreateFormatDescriptionFromCodecData(VTFormatId format_id, int width, int height, const uint8_t *extradata, int extradata_size, uint32_t atom)
+CreateFormatDescriptionFromCodecData(VTFormatId format_id, int width, int height, const uint8_t *extradata, int extradata_size)
 {
   CFMutableDictionaryRef pixelAspectRatio = CFDictionaryCreateMutable (NULL, 0, &kCFTypeDictionaryKeyCallBacks,
     &kCFTypeDictionaryValueCallBacks);
@@ -368,14 +392,18 @@ CreateFormatDescriptionFromCodecData(VTFormatId format_id, int width, int height
 
   CFMutableDictionaryRef atoms = CFDictionaryCreateMutable(NULL,
     0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-  CFMutableDictionarySetData(atoms, CFSTR("avcC"), extradata, extradata_size);
 
   if (format_id == kVTFormatH264)
   {
     CFDataRef avcCData = avvCCreate(extradata, extradata_size);
-    //CFDataRef avcCData = CFDataCreate(kCFAllocatorDefault, extradata, extradata_size);
     CFDictionarySetValue(atoms, CFSTR ("avcC"), avcCData);
     CFRelease(avcCData);
+  }
+  else if (format_id == kVTFormatH265)
+  {
+    CFDataRef hevCData = hevCCreate(extradata, extradata_size);
+    CFDictionarySetValue(atoms, CFSTR ("hevC"), hevCData);
+    CFRelease(hevCData);
   }
   else if (format_id == kVTFormatMPEG4Video)
   {
@@ -526,13 +554,23 @@ bool CDVDVideoCodecVideoToolBox::Open(CDVDStreamInfo &hints, CDVDCodecOptions &o
     {
       case AV_CODEC_ID_MPEG4:
         m_fmt_desc = CreateFormatDescriptionFromCodecData(
-          kVTFormatMPEG4Video, width, height, extradata, extrasize, 'esds');
+          kVTFormatMPEG4Video, width, height, extradata, extrasize);
         m_pFormatName = "vtb-mpeg4";
       break;
 
       case AV_CODEC_ID_MPEG2VIDEO:
         m_fmt_desc = CreateFormatDescription(kVTFormatMPEG2Video, width, height);
         m_pFormatName = "vtb-mpeg2";
+      break;
+
+      case AV_CODEC_ID_H265:
+        // use a bitstream converter for all flavors
+        m_bitstream = new CBitstreamConverter;
+        if (!m_bitstream->Open(hints.codec, (uint8_t*)hints.extradata, hints.extrasize, false))
+          return false;
+        m_fmt_desc = CreateFormatDescriptionFromCodecData(
+          kVTFormatH265, width, height, extradata, extrasize);
+        m_pFormatName = "vtb-h265";
       break;
 
       case AV_CODEC_ID_H264:
@@ -578,7 +616,7 @@ bool CDVDVideoCodecVideoToolBox::Open(CDVDStreamInfo &hints, CDVDCodecOptions &o
           }
 
           m_fmt_desc = CreateFormatDescriptionFromCodecData(
-            kVTFormatH264, width, height, extradata, extrasize, 'avcC');
+            kVTFormatH264, width, height, extradata, extrasize);
 
           CLog::Log(LOGNOTICE, "%s - using avcC atom of size(%d), ref_frames(%d)", __FUNCTION__, extrasize, m_max_ref_frames);
         }
@@ -696,8 +734,9 @@ int CDVDVideoCodecVideoToolBox::Decode(uint8_t* pData, int iSize, double dts, do
       return VC_ERROR;
       // VTDecompressionSessionDecodeFrame returned 8969 (codecBadDataErr)
       // VTDecompressionSessionDecodeFrame returned -12350
-      // VTDecompressionSessionDecodeFrame returned -12902
-      // VTDecompressionSessionDecodeFrame returned -12911
+      // VTDecompressionSessionDecodeFrame returned -12902 (kVTParameterErr)
+      // VTDecompressionSessionDecodeFrame returned -12909 (kVTVideoDecoderBadDataErr)
+      // VTDecompressionSessionDecodeFrame returned -12911 (kVTVideoDecoderMalfunctionErr)
     }
 
     // wait for decoding to finish
@@ -873,6 +912,7 @@ CDVDVideoCodecVideoToolBox::CreateVTSession(int width, int height, CMFormatDescr
   {
     m_vt_session = NULL;
     CLog::Log(LOGERROR, "%s - failed with status = (%d)", __FUNCTION__, (int)status);
+    // -12906, kVTCouldNotFindVideoDecoderErr
   }
   else
   {
