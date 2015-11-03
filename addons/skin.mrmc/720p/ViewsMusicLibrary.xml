@@ -638,7 +638,6 @@
 					<itemgap>0</itemgap>
 					<orientation>horizontal</orientation>
 					<include>VideoCodecFlaggingConditions</include>
-					<include>AudioCodecFlaggingConditions</include>
 				</control>
 				<control type="label">
 					<left>10</left>
