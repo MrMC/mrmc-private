@@ -30,17 +30,9 @@
 #if defined(TARGET_DARWIN_OSX)
   #include "Video/DVDVideoCodecVDA.h"
 #endif
-#if defined(HAVE_VIDEOTOOLBOXDECODER)
-  #if defined(TARGET_DARWIN_TVOS)
-    #include "Video/DVDVideoCodecAVPlayer.h"
-    #include "Video/DVDVideoCodecVideoToolBox.h"
-    #include "Video/DVDVideoCodecAVFoundation.h"
-  #else
-    #include "Video/DVDVideoCodecVTB.h"
-    #include "Video/DVDVideoCodecVideoToolBox.h"
-    #include "Video/DVDVideoCodecAVFoundation.h"
-  #endif
-  #include "utils/SystemInfo.h"
+#if defined(TARGET_DARWIN_IOS)
+  #include "Video/DVDVideoCodecVideoToolBox.h"
+  #include "Video/DVDVideoCodecAVFoundation.h"
 #endif
 #include "Video/DVDVideoCodecFFmpeg.h"
 #include "Video/DVDVideoCodecOpenMax.h"
@@ -185,29 +177,22 @@ CDVDVideoCodec* CDVDFactoryCodec::CreateVideoCodec(CDVDStreamInfo &hint, const C
   }
 #endif
 
-#if defined(HAVE_VIDEOTOOLBOXDECODER)
-  if (!hint.software && CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEVIDEOTOOLBOX))
+#if defined(TARGET_DARWIN_IOS) // && !defined(TARGET_DARWIN_TVOS)
+  if (!hint.software)
   {
-    if (g_sysinfo.HasVideoToolBoxDecoder())
+    switch(hint.codec)
     {
-      switch(hint.codec)
-      {
-        case AV_CODEC_ID_H264:
-          if (hint.codec == AV_CODEC_ID_H264 && hint.ptsinvalid)
-            break;
-          #if defined(TARGET_DARWIN_TVOS)
-            //if ( (pCodec = OpenCodec(new CDVDVideoCodecAVPlayer(), hint, options)) ) return pCodec;
-            //if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
-            if ( (pCodec = OpenCodec(new CDVDVideoCodecAVFoundation(), hint, options)) ) return pCodec;
-          #else
-            //if ( (pCodec = OpenCodec(new CDVDVideoCodecVTB(), hint, options)) ) return pCodec;
-            //if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
-            if ( (pCodec = OpenCodec(new CDVDVideoCodecAVFoundation(), hint, options)) ) return pCodec;
-          #endif
+      case AV_CODEC_ID_H264:
+      case AV_CODEC_ID_MPEG4:
+        if (hint.codec == AV_CODEC_ID_H264 && hint.ptsinvalid)
           break;
-        default:
-          break;
-      }
+        if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEVIDEOTOOLBOX))
+          if ( (pCodec = OpenCodec(new CDVDVideoCodecVideoToolBox(), hint, options)) ) return pCodec;
+        if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEAVF))
+          if ( (pCodec = OpenCodec(new CDVDVideoCodecAVFoundation(), hint, options)) ) return pCodec;
+        break;
+      default:
+        break;
     }
   }
 #endif
