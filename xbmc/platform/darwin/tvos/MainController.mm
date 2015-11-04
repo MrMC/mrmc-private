@@ -271,7 +271,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self sendKeyDown:keyId];
 
   NSNumber *number = [NSNumber numberWithInt:keyId];
-  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:0.25];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:0.50];
 
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
@@ -564,35 +564,40 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
       CGPoint point = [sender locationOfTouch:0 inView:m_glView];
       point.x *= m_screenScale;
       point.y *= m_screenScale;
-      CGFloat yMovement=point.y - m_lastGesturePoint.y;
-      CGFloat xMovement=point.x - m_lastGesturePoint.x;
+      CGFloat yMovement = point.y - m_lastGesturePoint.y;
+      CGFloat xMovement = point.x - m_lastGesturePoint.x;
       
       if (!m_touchBeginSignaled)
       {
-        if ((fabs(xMovement) > fabs(yMovement)) && (fabs(velocity.x) > fabs(velocity.y)))
+        CGFloat xSlop = 100 * (1000 / m_screensize.width);
+        CGFloat ySlop = 100 * (1000 / m_screensize.height);
+        if (fabs(xMovement) > xSlop || fabs(yMovement) > ySlop)
         {
-          //x axis
-          m_keypressDelay = [self mapVelocity:fabs(velocity.x)];
-          if (xMovement > 0.0f)
-            //left > right
-            key = XBMCK_RIGHT;
+          if ((fabs(xMovement) > fabs(yMovement)) && (fabs(velocity.x) > fabs(velocity.y)))
+          {
+            //x axis
+            m_keypressDelay = [self mapVelocity:fabs(velocity.x)];
+            if (xMovement > 0.0f)
+              //left > right
+              key = XBMCK_RIGHT;
+            else
+              //right > left
+              key = XBMCK_LEFT;
+          }
           else
-            //right > left
-            key = XBMCK_LEFT;
+          {
+            // y axis
+            m_keypressDelay = [self mapVelocity:fabs(velocity.y)];
+            if (yMovement > 0.0f)
+              // up > down
+              key = XBMCK_DOWN;
+            else
+              // down > up
+              key = XBMCK_UP;
+          }
+          m_touchBeginSignaled = true;
+          [self startKeyPressTimer:key];
         }
-        else
-        {
-          // y axis
-          m_keypressDelay = [self mapVelocity:fabs(velocity.y)];
-          if (yMovement > 0.0f)
-            // up > down
-            key = XBMCK_DOWN;
-          else
-            // down > up
-            key = XBMCK_UP;
-        }
-        m_touchBeginSignaled = true;
-        [self startKeyPressTimer:key];
       }
     }
     
