@@ -569,7 +569,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
       
       if (!m_touchBeginSignaled)
       {
-        if (fabs(xMovement) > fabs(yMovement))
+        if ((fabs(xMovement) > fabs(yMovement)) && (fabs(velocity.x) > fabs(velocity.y)))
         {
           //x axis
           m_keypressDelay = [self mapVelocity:fabs(velocity.x)];
