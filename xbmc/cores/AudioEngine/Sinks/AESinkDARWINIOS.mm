@@ -553,11 +553,18 @@ static void EnumerateDevices(AEDeviceInfoList &list)
   device.m_displayNameExtra = "";
   // TODO screen changing on ios needs to call
   // devices changed once this is available in activae
+#if defined(TARGET_DARWIN_TVOS)
+  if (1)
+#else
   if (g_Windowing.GetCurrentScreen() > 0)
+#endif
   {
     device.m_deviceType = AE_DEVTYPE_IEC958; //allow passthrough for tvout
     device.m_dataFormats.push_back(AE_FMT_AC3);
     device.m_dataFormats.push_back(AE_FMT_DTS);
+    device.m_dataFormats.push_back(AE_FMT_EAC3);
+    device.m_dataFormats.push_back(AE_FMT_TRUEHD);
+    device.m_dataFormats.push_back(AE_FMT_DTSHD);
   }
   else
     device.m_deviceType = AE_DEVTYPE_PCM;
