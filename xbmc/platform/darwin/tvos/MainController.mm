@@ -271,7 +271,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self sendKeyDown:keyId];
 
   NSNumber *number = [NSNumber numberWithInt:keyId];
-  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:m_keypressDelay];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:0.25];
 
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
