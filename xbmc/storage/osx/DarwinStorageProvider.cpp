@@ -51,7 +51,7 @@ void CDarwinStorageProvider::GetLocalDrives(VECSOURCES &localDrives)
   localDrives.push_back(share);
 #endif
 
-#if defined(TARGET_DARWIN_IOS)
+#if defined(TARGET_DARWIN_IOS) && defined(TARGET_OS_SIMULATOR)
   // User Pictures folder
   share.strPath = "Users/davilla";
   share.strPath += "/Pictures";

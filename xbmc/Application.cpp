@@ -4086,7 +4086,9 @@ void CApplication::Process()
     ProcessSlow();
   }
 
+#if !defined(TARGET_DARWIN)
   g_cpuInfo.getUsedPercentage(); // must call it to recalculate pct values
+#endif
 }
 
 // We get called every 500ms
