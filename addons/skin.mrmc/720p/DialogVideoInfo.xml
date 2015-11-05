@@ -58,7 +58,6 @@
 					<include>VisibleFadeEffect</include>
 					<visible>!Control.IsVisible(50) + [Container.Content(Movies) | Container.Content(Episodes) | Container.Content(MusicVideos)]</visible>
 					<include>VideoCodecFlaggingConditions</include>
-					<include>AudioCodecFlaggingConditions</include>
 					<include>AudioChannelsFlaggingConditions</include>
 					<include>AspectCodecFlaggingConditions</include>
 					<include>VideoStereoscopicsFlaggingConditions</include>
