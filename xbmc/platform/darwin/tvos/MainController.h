@@ -59,7 +59,6 @@ typedef enum
   BOOL                        m_readyToRun;
   NSConditionLock            *m_animationThreadLock;
   NSThread                   *m_animationThread;
-  float                      m_keypressDelay;
 }
 // why are these properties ?
 @property (nonatomic, retain) NSDictionary *m_nowPlayingInfo;
@@ -87,7 +86,6 @@ typedef enum
 - (CGFloat) getScreenScale:(UIScreen *)screen;
 - (void) activateKeyboard:(UIView *)view;
 - (void) deactivateKeyboard:(UIView *)view;
-- (float)mapVelocity:(float)velocity;
 
 - (void) disableNetworkAutoSuspend;
 - (void) enableNetworkAutoSuspend:(id)obj;

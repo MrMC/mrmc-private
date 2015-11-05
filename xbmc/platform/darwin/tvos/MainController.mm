@@ -259,6 +259,8 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 #pragma mark - key press auto-repeat methods
 //--------------------------------------------------------------
 //--------------------------------------------------------------
+// start repeating after 0.25s
+#define REPEATED_KEYPRESS_DELAY_S 0.50
 // pause 0.01s (10ms) between keypresses
 #define REPEATED_KEYPRESS_PAUSE_S 0.05
 //--------------------------------------------------------------
@@ -271,7 +273,7 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self sendKeyDown:keyId];
 
   NSNumber *number = [NSNumber numberWithInt:keyId];
-  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:0.50];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:REPEATED_KEYPRESS_DELAY_S];
 
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
@@ -576,7 +578,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
           if ((fabs(xMovement) > fabs(yMovement)) && (fabs(velocity.x) > fabs(velocity.y)))
           {
             //x axis
-            m_keypressDelay = [self mapVelocity:fabs(velocity.x)];
             if (xMovement > 0.0f)
               //left > right
               key = XBMCK_RIGHT;
@@ -587,7 +588,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
           else
           {
             // y axis
-            m_keypressDelay = [self mapVelocity:fabs(velocity.y)];
             if (yMovement > 0.0f)
               // up > down
               key = XBMCK_DOWN;
@@ -969,18 +969,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [g_xbmcController enableSystemSleep];
 }
 
-- (float)mapVelocity:(float)velocity
-{
-  CGFloat const inMin = 8500.0;
-  CGFloat const inMax = 0.0;
-  
-  CGFloat const outMin = 0.25;
-  CGFloat const outMax = 1.5;
-  
-  CGFloat out = outMin + (outMax - outMin) * (velocity - inMin) / (inMax - inMin);
-  
-  return out < 0.25f ? 0.25f : floorf(out * 4) / 4;
-}
 #pragma mark - remote control routines
 //--------------------------------------------------------------
 - (void)disableNetworkAutoSuspend
