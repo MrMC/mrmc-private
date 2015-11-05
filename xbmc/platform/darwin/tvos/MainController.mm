@@ -406,15 +406,38 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [self.view addGestureRecognizer: rightRecognizer];
   [rightRecognizer release];
   
-  auto longSelectRecognizer = [[UILongPressGestureRecognizer alloc]
-                          initWithTarget: self action: @selector(longSelectPressed:)];
-  longSelectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
-  longSelectRecognizer.minimumPressDuration = 1.0;
-  longSelectRecognizer.delegate = self;
-  [self.view addGestureRecognizer: longSelectRecognizer];
-  [longSelectRecognizer release];
+  // we always have these under tvos
+  auto menuRecognizer = [[UITapGestureRecognizer alloc]
+                         initWithTarget: self action: @selector(menuPressed:)];
+  menuRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeMenu]];
+  menuRecognizer.delegate  = self;
+  [m_glView addGestureRecognizer: menuRecognizer];
+  [menuRecognizer release];
+  
+  auto playPauseRecognizer = [[UITapGestureRecognizer alloc]
+                              initWithTarget: self action: @selector(playPausePressed:)];
+  playPauseRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypePlayPause]];
+  playPauseRecognizer.delegate  = self;
+  [m_glView addGestureRecognizer: playPauseRecognizer];
+  [playPauseRecognizer release];
+  
+  auto selectRecognizer = [[UILongPressGestureRecognizer alloc]
+                          initWithTarget: self action: @selector(selectPressed:)];
+  selectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
+  selectRecognizer.minimumPressDuration = 0.01;
+  selectRecognizer.delegate = self;
+  [self.view addGestureRecognizer: selectRecognizer];
+  [selectRecognizer release];
+  
 }
 
+//--------------------------------------------------------------
+- (void)incrementCounter
+{
+  self.m_holdCounter++;
+  [self.m_holdTimer invalidate];
+  [self sendKeyDownUp:XBMCK_c];
+}
 //--------------------------------------------------------------
 - (void) activateKeyboard:(UIView *)view
 {
@@ -444,24 +467,25 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)selectPressed:(UITapGestureRecognizer *)sender
 {
-  //PRINT_SIGNATURE();
-  if (sender.state == UIGestureRecognizerStateBegan) {
-    //NSLog(@"button pressed  - select");
-  } else if (sender.state == UIGestureRecognizerStateEnded) {
-    //NSLog(@"button released - select");
-    [self sendKeyDownUp:XBMCK_RETURN];
-  }
-}
-
-- (void)longSelectPressed:(UITapGestureRecognizer *)sender
-{
-  //PRINT_SIGNATURE();
-  if (sender.state == UIGestureRecognizerStateBegan) {
-    //NSLog(@"button pressed  - select");
-    [self sendKeyDownUp:XBMCK_c];
-  } else if (sender.state == UIGestureRecognizerStateEnded) {
-    //NSLog(@"button released - select");
-    
+  switch (sender.state) {
+    case UIGestureRecognizerStateBegan:
+      self.m_holdCounter = 0;
+      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(incrementCounter) userInfo:nil repeats:YES];
+      break;
+    case UIGestureRecognizerStateChanged:
+      if (self.m_holdCounter > 1)
+      {
+        [self.m_holdTimer invalidate];
+        [self sendKeyDownUp:XBMCK_c];
+      }
+      break;
+    case UIGestureRecognizerStateEnded:
+      [self.m_holdTimer invalidate];
+      if (self.m_holdCounter < 1)
+        [self sendKeyDownUp:XBMCK_RETURN];
+      break;
+    default:
+      break;
   }
 }
 
@@ -697,28 +721,6 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-
-  // we always have these under tvos
-  auto menuRecognizer = [[UITapGestureRecognizer alloc]
-    initWithTarget: self action: @selector(menuPressed:)];
-  menuRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeMenu]];
-  menuRecognizer.delegate  = self;
-  [m_glView addGestureRecognizer: menuRecognizer];
-  [menuRecognizer release];
-
-  auto selectRecognizer = [[UITapGestureRecognizer alloc]
-    initWithTarget: self action: @selector(selectPressed:)];
-  selectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
-  selectRecognizer.delegate  = self;
-  [m_glView addGestureRecognizer: selectRecognizer];
-  [selectRecognizer release];
-
-  auto playPauseRecognizer = [[UITapGestureRecognizer alloc]
-    initWithTarget: self action: @selector(playPausePressed:)];
-  playPauseRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypePlayPause]];
-  playPauseRecognizer.delegate  = self;
-  [m_glView addGestureRecognizer: playPauseRecognizer];
-  [playPauseRecognizer release];
 
 
   [self createPanGestureRecognizers];

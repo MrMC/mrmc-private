@@ -63,6 +63,8 @@ typedef enum
 // why are these properties ?
 @property (nonatomic, retain) NSDictionary *m_nowPlayingInfo;
 @property (nonatomic, retain) NSTimer      *m_networkAutoSuspendTimer;
+@property (nonatomic, strong) NSTimer      *m_holdTimer;
+@property int                 m_holdCounter;
 @property CGPoint             m_lastGesturePoint;
 @property CGFloat             m_screenScale;
 @property bool                m_touchBeginSignaled;
