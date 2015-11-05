@@ -2715,10 +2715,6 @@
 		F5D142451BAF0B6D0075A95C /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E499108D174D0D2600741B6D /* Foundation.framework */; };
 		F5D142481BAF0B6D0075A95C /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910EA174E54C900741B6D /* CoreAudio.framework */; };
 		F5D142AB1BAF31FB0075A95C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F5D142931BAF31FB0075A95C /* Assets.xcassets */; };
-		F5D142AC1BAF31FB0075A95C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F5D142941BAF31FB0075A95C /* Default-568h@2x.png */; };
-		F5D142AD1BAF31FB0075A95C /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = F5D142951BAF31FB0075A95C /* Default-667h@2x.png */; };
-		F5D142AE1BAF31FB0075A95C /* Default-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F5D142961BAF31FB0075A95C /* Default-736h@3x.png */; };
-		F5D142AF1BAF31FB0075A95C /* Default-Landscape-736h@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = F5D142971BAF31FB0075A95C /* Default-Landscape-736h@3x.png */; };
 		F5D142B01BAF31FB0075A95C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F5D142981BAF31FB0075A95C /* InfoPlist.strings */; };
 		F5D142B31BAF31FB0075A95C /* MainApplication.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D1429D1BAF31FB0075A95C /* MainApplication.mm */; };
 		F5D142B41BAF31FB0075A95C /* MainController.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5D1429F1BAF31FB0075A95C /* MainController.mm */; };
@@ -4909,10 +4905,6 @@
 		F5D142651BAF0B6D0075A95C /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5D142901BAF29E20075A95C /* App-TVOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-TVOS.xcconfig"; sourceTree = "<group>"; };
 		F5D142931BAF31FB0075A95C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F5D142941BAF31FB0075A95C /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		F5D142951BAF31FB0075A95C /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-667h@2x.png"; sourceTree = "<group>"; };
-		F5D142961BAF31FB0075A95C /* Default-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-736h@3x.png"; sourceTree = "<group>"; };
-		F5D142971BAF31FB0075A95C /* Default-Landscape-736h@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-Landscape-736h@3x.png"; sourceTree = "<group>"; };
 		F5D142991BAF31FB0075A95C /* English */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F5D1429A1BAF31FB0075A95C /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F5D1429B1BAF31FB0075A95C /* Info.plist.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info.plist.in; sourceTree = "<group>"; };
@@ -8419,10 +8411,6 @@
 			isa = PBXGroup;
 			children = (
 				F5D142931BAF31FB0075A95C /* Assets.xcassets */,
-				F5D142941BAF31FB0075A95C /* Default-568h@2x.png */,
-				F5D142951BAF31FB0075A95C /* Default-667h@2x.png */,
-				F5D142961BAF31FB0075A95C /* Default-736h@3x.png */,
-				F5D142971BAF31FB0075A95C /* Default-Landscape-736h@3x.png */,
 				F5D142981BAF31FB0075A95C /* InfoPlist.strings */,
 				F5D1429A1BAF31FB0075A95C /* Info.plist */,
 				F5D1429B1BAF31FB0075A95C /* Info.plist.in */,
@@ -8699,11 +8687,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F5D142B01BAF31FB0075A95C /* InfoPlist.strings in Resources */,
-				F5D142AD1BAF31FB0075A95C /* Default-667h@2x.png in Resources */,
 				F5D142AB1BAF31FB0075A95C /* Assets.xcassets in Resources */,
-				F5D142AC1BAF31FB0075A95C /* Default-568h@2x.png in Resources */,
-				F5D142AE1BAF31FB0075A95C /* Default-736h@3x.png in Resources */,
-				F5D142AF1BAF31FB0075A95C /* Default-Landscape-736h@3x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
