@@ -64,7 +64,7 @@
     neveryyoumind += 'e';
     neveryyoumind += 'r';
     Class AVSampleBufferDisplayLayerClass = NSClassFromString([NSString stringWithUTF8String: neveryyoumind.c_str()]);
-		AVSampleBufferDisplayLayer *videolayer = [[[AVSampleBufferDisplayLayerClass alloc] init] autorelease];
+		AVSampleBufferDisplayLayer *videolayer = [[AVSampleBufferDisplayLayerClass alloc] init];
     videolayer.bounds = self.bounds;
 		videolayer.position = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds));
 		videolayer.videoGravity = AVLayerVideoGravityResizeAspect;
@@ -107,9 +107,7 @@
   [[NSNotificationCenter defaultCenter] removeObserver:self name:AVSampleBufferDisplayLayerFailedToDecodeNotification object:videoLayer];
 #endif
   [videolayer removeFromSuperlayer];
-  [videolayer release];
   self.videolayer = nullptr;
-  [super dealloc];
 }
 
 #if MCSAMPLEBUFFER_DEBUG_MESSAGES
