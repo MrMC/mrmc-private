@@ -678,18 +678,23 @@ void CDVDVideoCodecAVFoundation::StartSampleProviderWithBlock()
   {
     while(videolayer.readyForMoreMediaData)
     {
-      if (m_sampleBuffers.size())
+      pthread_mutex_lock(&m_sampleBuffersMutex);
+      size_t bufferCount = m_sampleBuffers.size();
+      pthread_mutex_unlock(&m_sampleBuffersMutex);
+
+      if (bufferCount)
       {
+        pthread_mutex_lock(&m_sampleBuffersMutex);
         CMSampleBufferRef nextSampleBuffer = m_sampleBuffers.front();
+        if (nextSampleBuffer)
+          m_sampleBuffers.pop();
+        pthread_mutex_unlock(&m_sampleBuffersMutex);
+
         if (nextSampleBuffer)
         {
           [videolayer enqueueSampleBuffer:nextSampleBuffer];
-          [mcview setNeedsDisplay];
-
           CFRelease(nextSampleBuffer);
-          pthread_mutex_lock(&m_sampleBuffersMutex);
-          m_sampleBuffers.pop();
-          pthread_mutex_unlock(&m_sampleBuffersMutex);
+          [mcview setNeedsDisplay];
 
           if ([videolayer status] == AVQueuedSampleBufferRenderingStatusFailed)
           {
