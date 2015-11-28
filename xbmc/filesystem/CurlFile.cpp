@@ -1038,7 +1038,7 @@ bool CCurlFile::OpenForWrite(const CURL& url, bool bOverWrite)
   if(m_opened)
     return false;
 
-  if (Exists(url) && !bOverWrite)
+  if (!bOverWrite && Exists(url))
     return false;
 
   CURL url2(url);
