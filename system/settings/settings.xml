@@ -275,6 +275,90 @@
         </setting>
       </group>
     </category>
+        <category id="MN" label="membernet" help="">
+      <group id="1">
+        <setting id="mn.location_id" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>10140003</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_id" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1147</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.url_feed" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>http://www.nationwidemember.com</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_description" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>Some description</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_ethernet_id" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1234567890</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_hw_version" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>abcde</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_name" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>Name of Machine</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_purchase_date" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>09/03/2012</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_sn" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1234567890</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_vendor" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>Dummy</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_warrenty_nr" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1234567890</default>
+          <control type="edit" format="string" />
+        </setting> 
+        <setting id="mn.machine_wireless_id" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1234567890</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.settings_cf_bundle_version" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>0.2.5a</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.settings_update_interval" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>123456</default>
+          <control type="edit" format="string" />
+        </setting>  
+         <setting id="mn.settings_update_time" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>123456</default>
+          <control type="edit" format="string" />
+        </setting> 
+        <setting id="mn.vertical" type="boolean" label="20026" help="36115">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>       
+      </group>
+    </category>
     <category id="filelists" label="14081" help="36121">
       <group id="1">
         <setting id="filelists.showparentdiritems" type="boolean" label="13306" help="36122">

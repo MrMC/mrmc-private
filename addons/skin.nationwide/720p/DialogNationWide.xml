@@ -10,7 +10,7 @@
 		<control type="group" id="90500">
 			
 			<control type="group">
-				<visible>!Skin.HasSetting(NW_Vertical)</visible>
+				<visible>!system.getbool(mn.vertical)</visible>
 				<control type="image">
 						<posx>0</posx>
 						<posy>0</posy>
@@ -28,7 +28,7 @@
 			</control>
 
 			<control type="image">
-					<visible>Skin.HasSetting(NW_Vertical)</visible>
+					<visible>system.getbool(mn.vertical)</visible>
 					<posx>0</posx>
 					<posy>0</posy>
 					<width>1280</width>
@@ -38,7 +38,7 @@
 			<control type="group">
 					<posx>260r</posx>
 					<posy>0</posy>
-					<animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+					<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 						<effect type="slide" start="0,0" end="-230,240" time="0" />
 						<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
 					</animation>
@@ -63,7 +63,7 @@
 					</control>
 			</control>
 			<control type="group">
-				<animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+				<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 					<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
 					<effect type="slide" start="0,0" end="0,-55" time="0" />
 				</animation>
@@ -93,12 +93,12 @@
 						</control>
 						<control type="button" id="90134">
 							<include>ButtonHomeSubCommonValues</include>
-							<visible>!Skin.HasSetting(NW_Vertical)</visible>
+							<visible>!system.getbool(mn.vertical)</visible>
 							<label>Vertical</label>
 						</control>    			
 						<control type="button" id="90144">
 							<include>ButtonHomeSubCommonValues</include>
-							<visible>Skin.HasSetting(NW_Vertical)</visible>
+							<visible>system.getbool(mn.vertical)</visible>
 							<label>Horizontal</label>
 						</control>
 					</control>
@@ -149,7 +149,7 @@
 					<width>500</width>
 					<height>155</height>
 					<visible>false</visible>
-					<animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+					<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 						<effect type="slide" start="0,0" end="270,305" time="0" />
 					</animation>        
 					<animation effect="slide" start="0,100" end="0,0"  time="400" tween="quadratic" easing="out">Visible</animation>
@@ -240,7 +240,7 @@
 					<onup>9000</onup>
 					<ondown>9002</ondown>
 					<control type="grouplist" id="9010">
-						<animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+						<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 							<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
 							<effect type="slide" start="0,0" end="-490,-352" time="0" />
 						</animation>
@@ -269,7 +269,7 @@
 					</control>
 					<!-- HORIZONTAL -->
 					<control type="group">
-						<visible>!Skin.HasSetting(NW_Vertical)</visible>
+						<visible>!system.getbool(mn.vertical)</visible>
 						<control type="grouplist" id="9016">
 							<include>HomeSubMenuCommonValues</include>
 							<onleft>9016</onleft>
@@ -326,8 +326,8 @@
 					<!-- END HORIZONTAL -->
 					<!-- VERTICAL -->
 					<control type="group">
-						<visible>Skin.HasSetting(NW_Vertical)</visible>
-						<animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+						<visible>system.getbool(mn.vertical)</visible>
+						<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 							<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
 							<effect type="slide" start="0,0" end="-100,178" time="0" />
 						</animation>
@@ -398,7 +398,7 @@
 				</control>
 				<!-- END VERTICAL -->
 				<control type="group">
-					<animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+					<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 						<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
 						<effect type="slide" start="0,0" end="-200,142" time="0" />
 					</animation>
@@ -504,7 +504,7 @@
 		<control type="group" id="90200">
 			<posx>0</posx>
 			<posy>0</posy>
-			<animation type="Conditional" condition="Skin.HasSetting(NW_Vertical)" reversible="false">
+			<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 				<effect type="slide" start="0,0" end="-250,-50" time="0" />
 				<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
 			</animation>
