@@ -19,9 +19,11 @@
 
 #include "system.h"
 
-#include "PlayerManagerMN.h"
-#include "MNMedia.h"
-#include "UtilitiesMN.h"
+#include "nwmn/PlayerManagerMN.h"
+#include "nwmn/MNMedia.h"
+#include "nwmn/UtilitiesMN.h"
+#include "nwmn/UpdateManagerMN.h"
+#include "nwmn/LogManagerMN.h"
 
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
@@ -110,6 +112,7 @@ CPlayerManagerMN::CPlayerManagerMN()
  , m_NextUpdateInterval(0, 0, 5, 0)
  , m_NextReportInterval(0, 6, 0, 0)
  , m_NextDownloadTime(CDateTime::GetCurrentDateTime())
+ , m_LogManager(NULL)
  , m_UpdateManager(NULL)
  , m_dlgProgress(NULL)
  , m_PlayerCallBackFn(NULL)
@@ -181,6 +184,9 @@ CPlayerManagerMN::CPlayerManagerMN()
   m_UpdateManager = new CUpdateManagerMN(m_strHome);
   m_UpdateManager->Create();
   
+  m_LogManager = new CLogManagerMN(m_strHome);
+  m_LogManager->Create();
+
   m_dlgProgress = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
   
   CSingleLock lock(m_player_lock);
@@ -190,9 +196,11 @@ CPlayerManagerMN::CPlayerManagerMN()
 CPlayerManagerMN::~CPlayerManagerMN()
 {
   CSingleLock lock(m_player_lock);
-  m_PlayerManager = NULL;
+
+  SAFE_DELETE(m_LogManager);
+  SAFE_DELETE(m_UpdateManager);
   m_PlayerCallBackFn = NULL;
-  m_UpdateManager = NULL;
+  SAFE_DELETE(m_PlayerManager);
   m_dlgProgress = NULL;
   m_http.Cancel();
   StopThread();
@@ -213,7 +221,7 @@ void CPlayerManagerMN::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char 
       std::string strPath = g_application.CurrentFileItem().GetPath();
       std::string assetID = URIUtils::GetFileName(strPath);
       URIUtils::RemoveExtension(assetID);
-      LogPlayback(m_strHome, m_settings,assetID.c_str());
+      m_LogManager->LogPlayback(m_settings, assetID.c_str());
     }
   }
 }
@@ -227,10 +235,10 @@ CPlayerManagerMN* CPlayerManagerMN::GetPlayerManager()
 void CPlayerManagerMN::Startup()
 {
   StartDialog();
-  ParseMediaXML(m_settings,m_categories,m_OnDemand);
+  ParseMediaXML(m_settings, m_categories, m_OnDemand);
   ParseSettingsXML(m_settings);
-  LogSettings(m_strHome,m_settings);
-  UploadLogs(m_settings);
+  m_LogManager->LogSettings(m_settings);
+  m_LogManager->TriggerLogUpload();
   m_UpdateManager->SetDownloadTime(m_settings);
   CheckAssets();
   CreatePlaylist();
@@ -251,7 +259,6 @@ void CPlayerManagerMN::SetSettings(PlayerSettings settings)
 
 void CPlayerManagerMN::FullUpdate()
 {
-//  m_UpdateManager->StopThread();
   StopThread();
   m_settings = GetSettings();
   Startup();
@@ -354,6 +361,8 @@ void CPlayerManagerMN::Process()
       int itemCount = 0;
       bool run = false;
       m_CreatePlaylist = false;
+      // do not manually delete PlayListItems,
+      // ownership transfers when handed off to the playlistPlayer.
       CFileItemList *PlayListItems = new CFileItemList;
 
       for (size_t cat = 0; cat < m_categories.size(); cat++)
