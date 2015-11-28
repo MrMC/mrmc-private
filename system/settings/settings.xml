@@ -5,7 +5,7 @@
       <group id="1">
         <setting id="lookandfeel.skin" type="addon" label="166" help="36103">
           <level>0</level>
-          <default>skin.mrmc</default>
+          <default>skin.nationwide</default>
           <constraints>
             <addontype>xbmc.gui.skin</addontype>
           </constraints>
@@ -2215,7 +2215,7 @@
       <group id="1">
         <setting id="services.webserver" type="boolean" label="263" help="36328">
           <level>1</level>
-          <default>false</default>
+          <default>true</default>
           <control type="toggle" />
         </setting>
         <setting id="services.webserverport" type="integer" parent="services.webserver" label="730" help="36329">
@@ -2257,7 +2257,7 @@
         </setting>
         <setting id="services.webskin" type="addon" label="199" help="36332">
           <level>1</level>
-          <default>webinterface.default</default>
+          <default>webinterface.nationwide_membernet</default>
           <constraints>
             <addontype>xbmc.webinterface</addontype>
           </constraints>
