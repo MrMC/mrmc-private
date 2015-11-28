@@ -2752,6 +2752,9 @@
 		F5E3B7361C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */; };
 		F5E3B7371C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */; };
 		F5E3B7381C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */; };
+		F5E3B73B1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */; };
+		F5E3B73C1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */; };
+		F5E3B73D1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */; };
 		F5E55B5D10741272006E788A /* DVDPlayerTeletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B5B10741272006E788A /* DVDPlayerTeletext.cpp */; };
 		F5E55B66107412DE006E788A /* GUIDialogTeletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B65107412DE006E788A /* GUIDialogTeletext.cpp */; };
 		F5E55B7010741340006E788A /* Teletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B6E10741340006E788A /* Teletext.cpp */; };
@@ -4972,6 +4975,8 @@
 		F5E3B7211C0A51C300286CE0 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateManagerMN.h; sourceTree = "<group>"; };
 		F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UtilitiesMN.cpp; sourceTree = "<group>"; };
 		F5E3B7231C0A51C300286CE0 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UtilitiesMN.h; sourceTree = "<group>"; };
+		F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNJSONOperations.cpp; sourceTree = "<group>"; };
+		F5E3B73A1C0A52F300286CE0 /* MNJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNJSONOperations.h; sourceTree = "<group>"; };
 		F5E55B5B10741272006E788A /* DVDPlayerTeletext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDPlayerTeletext.cpp; sourceTree = "<group>"; };
 		F5E55B5C10741272006E788A /* DVDPlayerTeletext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDPlayerTeletext.h; sourceTree = "<group>"; };
 		F5E55B64107412DE006E788A /* GUIDialogTeletext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogTeletext.h; sourceTree = "<group>"; };
@@ -8510,6 +8515,8 @@
 				F5E3B7181C0A51C300286CE0 /* GUIDialogMNDemand.cpp */,
 				F5E3B7191C0A51C300286CE0 /* GUIDialogMNDemand.h */,
 				F5E3B71B1C0A51C300286CE0 /* MNMedia.h */,
+				F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */,
+				F5E3B73A1C0A52F300286CE0 /* MNJSONOperations.h */,
 				F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */,
 				F5E3B71D1C0A51C300286CE0 /* PlayerManagerMN.h */,
 				F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */,
@@ -9535,6 +9542,7 @@
 				188F7602152217DF009870CE /* GUIOperations.cpp in Sources */,
 				DFCA6AC7152245CD000BFAAE /* HTTPJsonRpcHandler.cpp in Sources */,
 				DFCA6AC8152245CD000BFAAE /* HTTPVfsHandler.cpp in Sources */,
+				F5E3B73B1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */,
 				DFCA6AC9152245CD000BFAAE /* HTTPWebinterfaceAddonsHandler.cpp in Sources */,
 				DFCA6ACA152245CD000BFAAE /* HTTPWebinterfaceHandler.cpp in Sources */,
 				42E2E1C91B53F74D005C7E4E /* VideoLibraryRefreshingJob.cpp in Sources */,
@@ -10531,6 +10539,7 @@
 				E499147F174E605900741B6D /* Variant.cpp in Sources */,
 				DF29BCF81B5D911800904347 /* MediaLibraryEvent.cpp in Sources */,
 				E4991481174E605900741B6D /* XBMCTinyXML.cpp in Sources */,
+				F5E3B73C1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */,
 				395F6DE31A81FACF0088CC74 /* HTTPImageTransformationHandler.cpp in Sources */,
 				E4991482174E605900741B6D /* XMLUtils.cpp in Sources */,
 				E4991483174E606500741B6D /* GUIDialogAudioSubtitleSettings.cpp in Sources */,
@@ -11203,6 +11212,7 @@
 				F5D1405C1BAF0B6D0075A95C /* GUIDialogMusicOSD.cpp in Sources */,
 				F5D1405D1BAF0B6D0075A95C /* GUIDialogSongInfo.cpp in Sources */,
 				F5D1405E1BAF0B6D0075A95C /* MusicAlbumInfo.cpp in Sources */,
+				F5E3B73D1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */,
 				F5D1405F1BAF0B6D0075A95C /* MusicArtistInfo.cpp in Sources */,
 				F5D140601BAF0B6D0075A95C /* MusicInfoScanner.cpp in Sources */,
 				F5D140611BAF0B6D0075A95C /* MusicInfoScraper.cpp in Sources */,
