@@ -93,7 +93,7 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
   std::string machineID;
   std::string locationID;
   
-  for (int k = 0; k < steps.size(); ++k)
+  for (size_t k = 0; k < steps.size(); ++k)
   {
     size_t pos = steps[k].find("{\"url\":{\"feed\":");
     if (pos != std::string::npos)
