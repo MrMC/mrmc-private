@@ -2734,6 +2734,24 @@
 		F5E10544140AA38100175026 /* GUIDialogPeripheralSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E1052F140AA38000175026 /* GUIDialogPeripheralSettings.cpp */; };
 		F5E10547140AA38100175026 /* Peripherals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E10533140AA38000175026 /* Peripherals.cpp */; };
 		F5E1138014357F3800175026 /* PeripheralCecAdapter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E10520140AA38000175026 /* PeripheralCecAdapter.cpp */; };
+		F5E3B7241C0A51C300286CE0 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7161C0A51C300286CE0 /* GUIDialogMN.cpp */; };
+		F5E3B7251C0A51C300286CE0 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7161C0A51C300286CE0 /* GUIDialogMN.cpp */; };
+		F5E3B7261C0A51C300286CE0 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7161C0A51C300286CE0 /* GUIDialogMN.cpp */; };
+		F5E3B7271C0A51C300286CE0 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7181C0A51C300286CE0 /* GUIDialogMNDemand.cpp */; };
+		F5E3B7281C0A51C300286CE0 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7181C0A51C300286CE0 /* GUIDialogMNDemand.cpp */; };
+		F5E3B7291C0A51C300286CE0 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7181C0A51C300286CE0 /* GUIDialogMNDemand.cpp */; };
+		F5E3B72D1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */; };
+		F5E3B72E1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */; };
+		F5E3B72F1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */; };
+		F5E3B7301C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */; };
+		F5E3B7311C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */; };
+		F5E3B7321C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */; };
+		F5E3B7331C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */; };
+		F5E3B7341C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */; };
+		F5E3B7351C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */; };
+		F5E3B7361C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */; };
+		F5E3B7371C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */; };
+		F5E3B7381C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */; };
 		F5E55B5D10741272006E788A /* DVDPlayerTeletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B5B10741272006E788A /* DVDPlayerTeletext.cpp */; };
 		F5E55B66107412DE006E788A /* GUIDialogTeletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B65107412DE006E788A /* GUIDialogTeletext.cpp */; };
 		F5E55B7010741340006E788A /* Teletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B6E10741340006E788A /* Teletext.cpp */; };
@@ -4618,7 +4636,7 @@
 		E46F7C2B0F77219700C25D29 /* ZeroconfOSX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZeroconfOSX.h; sourceTree = "<group>"; };
 		E46F7C2C0F77219700C25D29 /* ZeroconfOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZeroconfOSX.cpp; sourceTree = "<group>"; };
 		E47252BF175115F9001C1AAA /* darwin_codesign_internals.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = darwin_codesign_internals.command; sourceTree = "<group>"; };
-		E4991089174D0D2600741B6D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4991089174D0D2600741B6D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = MrMC.app; path = .app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E499108D174D0D2600741B6D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-iOS.xcconfig"; sourceTree = "<group>"; };
 		E49910D1174E2E0000741B6D /* App-OSX.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-OSX.xcconfig"; sourceTree = "<group>"; };
@@ -4941,6 +4959,19 @@
 		F5E10533140AA38000175026 /* Peripherals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Peripherals.cpp; sourceTree = "<group>"; };
 		F5E10534140AA38000175026 /* Peripherals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Peripherals.h; sourceTree = "<group>"; };
 		F5E10535140AA38000175026 /* PeripheralTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PeripheralTypes.h; sourceTree = "<group>"; };
+		F5E3B7161C0A51C300286CE0 /* GUIDialogMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogMN.cpp; sourceTree = "<group>"; };
+		F5E3B7171C0A51C300286CE0 /* GUIDialogMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogMN.h; sourceTree = "<group>"; };
+		F5E3B7181C0A51C300286CE0 /* GUIDialogMNDemand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogMNDemand.cpp; sourceTree = "<group>"; };
+		F5E3B7191C0A51C300286CE0 /* GUIDialogMNDemand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogMNDemand.h; sourceTree = "<group>"; };
+		F5E3B71B1C0A51C300286CE0 /* MNMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMedia.h; sourceTree = "<group>"; };
+		F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerManagerMN.cpp; sourceTree = "<group>"; };
+		F5E3B71D1C0A51C300286CE0 /* PlayerManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerManagerMN.h; sourceTree = "<group>"; };
+		F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PythonBindingsMN.cpp; sourceTree = "<group>"; };
+		F5E3B71F1C0A51C300286CE0 /* PythonBindingsMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PythonBindingsMN.h; sourceTree = "<group>"; };
+		F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UpdateManagerMN.cpp; sourceTree = "<group>"; };
+		F5E3B7211C0A51C300286CE0 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateManagerMN.h; sourceTree = "<group>"; };
+		F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UtilitiesMN.cpp; sourceTree = "<group>"; };
+		F5E3B7231C0A51C300286CE0 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UtilitiesMN.h; sourceTree = "<group>"; };
 		F5E55B5B10741272006E788A /* DVDPlayerTeletext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDPlayerTeletext.cpp; sourceTree = "<group>"; };
 		F5E55B5C10741272006E788A /* DVDPlayerTeletext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDPlayerTeletext.h; sourceTree = "<group>"; };
 		F5E55B64107412DE006E788A /* GUIDialogTeletext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogTeletext.h; sourceTree = "<group>"; };
@@ -7096,6 +7127,7 @@
 				DF4A3BAC1B4B0FC100F9CDC0 /* messaging */,
 				18B7C853129423A7009E7A26 /* music */,
 				431376F212D6449100680C15 /* network */,
+				F5E3B7151C0A51C300286CE0 /* nwmn */,
 				F5E1050C140AA38000175026 /* peripherals */,
 				4313767E12D63EC200680C15 /* pictures */,
 				F59045261BA372A600DB589A /* platform */,
@@ -8470,6 +8502,26 @@
 			path = dialogs;
 			sourceTree = "<group>";
 		};
+		F5E3B7151C0A51C300286CE0 /* nwmn */ = {
+			isa = PBXGroup;
+			children = (
+				F5E3B7161C0A51C300286CE0 /* GUIDialogMN.cpp */,
+				F5E3B7171C0A51C300286CE0 /* GUIDialogMN.h */,
+				F5E3B7181C0A51C300286CE0 /* GUIDialogMNDemand.cpp */,
+				F5E3B7191C0A51C300286CE0 /* GUIDialogMNDemand.h */,
+				F5E3B71B1C0A51C300286CE0 /* MNMedia.h */,
+				F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */,
+				F5E3B71D1C0A51C300286CE0 /* PlayerManagerMN.h */,
+				F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */,
+				F5E3B71F1C0A51C300286CE0 /* PythonBindingsMN.h */,
+				F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */,
+				F5E3B7211C0A51C300286CE0 /* UpdateManagerMN.h */,
+				F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */,
+				F5E3B7231C0A51C300286CE0 /* UtilitiesMN.h */,
+			);
+			path = nwmn;
+			sourceTree = "<group>";
+		};
 		F5E56B11108284E6006E788A /* playercorefactory */ = {
 			isa = PBXGroup;
 			children = (
@@ -9078,6 +9130,7 @@
 				E38E20AE0D25F9FD00618676 /* GUIWindowFileManager.cpp in Sources */,
 				E38E20AF0D25F9FD00618676 /* GUIWindowFullScreen.cpp in Sources */,
 				E38E20B10D25F9FD00618676 /* GUIWindowHome.cpp in Sources */,
+				F5E3B7331C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */,
 				E38E20B20D25F9FD00618676 /* GUIWindowLoginScreen.cpp in Sources */,
 				E38E20B30D25F9FD00618676 /* GUIWindowMusicBase.cpp in Sources */,
 				E38E20B40D25F9FD00618676 /* GUIDialogMusicInfo.cpp in Sources */,
@@ -9162,6 +9215,7 @@
 				E38E22FC0D25F9FE00618676 /* VideoInfoScanner.cpp in Sources */,
 				F5A4F29E1BB086FE0083FC69 /* ExifParse.cpp in Sources */,
 				E38E22FD0D25F9FE00618676 /* VideoInfoTag.cpp in Sources */,
+				F5E3B72D1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */,
 				E38E23040D25F9FE00618676 /* XBApplicationEx.cpp in Sources */,
 				E38E25C00D263DC100618676 /* DVDFactoryDemuxer.cpp in Sources */,
 				E38E25C30D263DE200618676 /* DVDDemuxFFmpeg.cpp in Sources */,
@@ -9301,6 +9355,7 @@
 				18B7C7B21294222E009E7A26 /* GUIBorderedImage.cpp in Sources */,
 				18B7C7B31294222E009E7A26 /* GUIButtonControl.cpp in Sources */,
 				18B7C7B51294222E009E7A26 /* GUICheckMarkControl.cpp in Sources */,
+				F5E3B7241C0A51C300286CE0 /* GUIDialogMN.cpp in Sources */,
 				18B7C7B61294222E009E7A26 /* GUIColorManager.cpp in Sources */,
 				18B7C7B71294222E009E7A26 /* GUIControl.cpp in Sources */,
 				397877D81AAAF87700F98A45 /* Temperature.cpp in Sources */,
@@ -9308,6 +9363,7 @@
 				18B7C7B91294222E009E7A26 /* GUIControlGroup.cpp in Sources */,
 				18B7C7BA1294222E009E7A26 /* GUIControlGroupList.cpp in Sources */,
 				18B7C7BB1294222E009E7A26 /* GUIControlProfiler.cpp in Sources */,
+				F5E3B7301C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */,
 				F590458E1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */,
 				18B7C7BC1294222E009E7A26 /* GUIDialog.cpp in Sources */,
 				18B7C7BD1294222E009E7A26 /* GUIEditControl.cpp in Sources */,
@@ -9324,6 +9380,7 @@
 				18B7C7C81294222E009E7A26 /* GUILabel.cpp in Sources */,
 				4260D5C71B67BB8F003F6F2D /* GUIWindowSplash.cpp in Sources */,
 				18B7C7C91294222E009E7A26 /* GUILabelControl.cpp in Sources */,
+				F5E3B7271C0A51C300286CE0 /* GUIDialogMNDemand.cpp in Sources */,
 				18B7C7CA1294222E009E7A26 /* GUIListContainer.cpp in Sources */,
 				18B7C7CB1294222E009E7A26 /* GUIListGroup.cpp in Sources */,
 				18B7C7CC1294222E009E7A26 /* GUIListItem.cpp in Sources */,
@@ -9656,6 +9713,7 @@
 				DFBB430A178B574E006CC20A /* AddonCallbacksCodec.cpp in Sources */,
 				55611BA31766672F00754072 /* RenderFlags.cpp in Sources */,
 				5558ED10176396CD00118C35 /* StereoscopicsManager.cpp in Sources */,
+				F5E3B7361C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */,
 				F59EED7E17AD5174005BB7C6 /* ApplicationPlayer.cpp in Sources */,
 				F590457B1BA372A600DB589A /* OSXGLView.mm in Sources */,
 				DF28DF4D17B8379E0077F41A /* ProfilesOperations.cpp in Sources */,
@@ -9830,6 +9888,7 @@
 				DF29BCFE1B5D911800904347 /* GUIWindowEventLog.cpp in Sources */,
 				DF4BF0181A4EF31E0053AC56 /* cc_decoder708.cpp in Sources */,
 				DF1D2DF41B6E85EE002BB9DB /* XbtManager.cpp in Sources */,
+				F5E3B7281C0A51C300286CE0 /* GUIDialogMNDemand.cpp in Sources */,
 				E4991179174E5CE000741B6D /* Addon.cpp in Sources */,
 				E499117A174E5CE000741B6D /* AddonCallbacks.cpp in Sources */,
 				E499117B174E5CE000741B6D /* AddonCallbacksAddon.cpp in Sources */,
@@ -10020,6 +10079,7 @@
 				E4991273174E5D8F00741B6D /* IFile.cpp in Sources */,
 				E4991274174E5D8F00741B6D /* ImageFile.cpp in Sources */,
 				E4991278174E5D8F00741B6D /* LibraryDirectory.cpp in Sources */,
+				F5E3B7371C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */,
 				E4991279174E5D8F00741B6D /* MemBufferCache.cpp in Sources */,
 				E499127A174E5D8F00741B6D /* MultiPathDirectory.cpp in Sources */,
 				E499127B174E5D8F00741B6D /* MultiPathFile.cpp in Sources */,
@@ -10066,6 +10126,7 @@
 				E49912AC174E5D9900741B6D /* SFTPDirectory.cpp in Sources */,
 				E49912AD174E5D9900741B6D /* SFTPFile.cpp in Sources */,
 				E49912AE174E5D9900741B6D /* ShoutcastFile.cpp in Sources */,
+				F5E3B72E1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */,
 				395C29C21A98A0A000EBC7AD /* Webinterface.cpp in Sources */,
 				E49912B2174E5D9900741B6D /* SmartPlaylistDirectory.cpp in Sources */,
 				E49912B3174E5D9900741B6D /* SMBDirectory.cpp in Sources */,
@@ -10233,6 +10294,7 @@
 				DF6A0D851A4584E80075BBFC /* OverrideFile.cpp in Sources */,
 				DF29BD031B5D913B00904347 /* EventsDirectory.cpp in Sources */,
 				E4991371174E5EF700741B6D /* XMemUtils.cpp in Sources */,
+				F5E3B7251C0A51C300286CE0 /* GUIDialogMN.cpp in Sources */,
 				E4991372174E5EF700741B6D /* XTimeUtils.cpp in Sources */,
 				E4991373174E5F0E00741B6D /* GUIDialogMusicInfo.cpp in Sources */,
 				E4991374174E5F0E00741B6D /* GUIDialogMusicOSD.cpp in Sources */,
@@ -10339,6 +10401,7 @@
 				E49913EB174E5FB000741B6D /* GUIDialogLockSettings.cpp in Sources */,
 				E49913EC174E5FB000741B6D /* GUIDialogProfileSettings.cpp in Sources */,
 				F590458F1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */,
+				F5E3B7311C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */,
 				E49913ED174E5FB000741B6D /* GUIWindowSettingsProfile.cpp in Sources */,
 				E49913EE174E5FB000741B6D /* Profile.cpp in Sources */,
 				E49913EF174E5FB000741B6D /* ProfilesManager.cpp in Sources */,
@@ -10533,6 +10596,7 @@
 				E4991542174E642900741B6D /* SystemGlobals.cpp in Sources */,
 				E4991544174E642900741B6D /* TextureCache.cpp in Sources */,
 				E4991545174E642900741B6D /* TextureCacheJob.cpp in Sources */,
+				F5E3B7341C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */,
 				E4991546174E642900741B6D /* TextureDatabase.cpp in Sources */,
 				F59045761BA372A600DB589A /* XBMCController.mm in Sources */,
 				E4991547174E642900741B6D /* ThumbLoader.cpp in Sources */,
@@ -10727,6 +10791,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5E3B7291C0A51C300286CE0 /* GUIDialogMNDemand.cpp in Sources */,
 				F5D13EC81BAF0B6D0075A95C /* GUIWindowEventLog.cpp in Sources */,
 				F5D13EC91BAF0B6D0075A95C /* cc_decoder708.cpp in Sources */,
 				F5D142B41BAF31FB0075A95C /* MainController.mm in Sources */,
@@ -10982,6 +11047,7 @@
 				F5D13FC31BAF0B6D0075A95C /* UPnPDirectory.cpp in Sources */,
 				F5D13FC41BAF0B6D0075A95C /* UPnPFile.cpp in Sources */,
 				F5D13FC51BAF0B6D0075A95C /* DirectoryNode.cpp in Sources */,
+				F5E3B72F1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */,
 				F5D13FC61BAF0B6D0075A95C /* XbtFile.cpp in Sources */,
 				F5D13FC71BAF0B6D0075A95C /* DirectoryNodeEpisodes.cpp in Sources */,
 				F5D13FC81BAF0B6D0075A95C /* DirectoryNodeGrouped.cpp in Sources */,
@@ -11203,6 +11269,7 @@
 				F5D1409D1BAF0B6D0075A95C /* PeripheralBus.cpp in Sources */,
 				F5D1409E1BAF0B6D0075A95C /* Peripheral.cpp in Sources */,
 				F5D1409F1BAF0B6D0075A95C /* PeripheralBluetooth.cpp in Sources */,
+				F5E3B7261C0A51C300286CE0 /* GUIDialogMN.cpp in Sources */,
 				F5D140A01BAF0B6D0075A95C /* PeripheralCecAdapter.cpp in Sources */,
 				F5D140A11BAF0B6D0075A95C /* PeripheralDisk.cpp in Sources */,
 				F5D140A21BAF0B6D0075A95C /* PeripheralHID.cpp in Sources */,
@@ -11315,6 +11382,7 @@
 				F5D1410C1BAF0B6D0075A95C /* CharsetConverter.cpp in Sources */,
 				F5D1410D1BAF0B6D0075A95C /* CPUInfo.cpp in Sources */,
 				F5D1410E1BAF0B6D0075A95C /* Crc32.cpp in Sources */,
+				F5E3B7321C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */,
 				F5D1410F1BAF0B6D0075A95C /* CryptThreading.cpp in Sources */,
 				F5D141101BAF0B6D0075A95C /* DatabaseUtils.cpp in Sources */,
 				F5D141111BAF0B6D0075A95C /* Environment.cpp in Sources */,
@@ -11347,6 +11415,7 @@
 				F5D1412C1BAF0B6D0075A95C /* RssReader.cpp in Sources */,
 				F5D1412D1BAF0B6D0075A95C /* ScraperParser.cpp in Sources */,
 				F5D1412E1BAF0B6D0075A95C /* ScraperUrl.cpp in Sources */,
+				F5E3B7381C0A51C300286CE0 /* UtilitiesMN.cpp in Sources */,
 				18FD1CAB1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
 				F5D1412F1BAF0B6D0075A95C /* Screenshot.cpp in Sources */,
 				F5D141301BAF0B6D0075A95C /* SeekHandler.cpp in Sources */,
@@ -11596,6 +11665,7 @@
 				F5D142241BAF0B6D0075A95C /* PosixFile.cpp in Sources */,
 				F5D142251BAF0B6D0075A95C /* NptPosixDynamicLibraries.cpp in Sources */,
 				F5D142261BAF0B6D0075A95C /* NptPosixEnvironment.cpp in Sources */,
+				F5E3B7351C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */,
 				F5D142271BAF0B6D0075A95C /* NptPosixNetwork.cpp in Sources */,
 				F5D142281BAF0B6D0075A95C /* NptPosixQueue.cpp in Sources */,
 				F5D142291BAF0B6D0075A95C /* NptPosixSystem.cpp in Sources */,
