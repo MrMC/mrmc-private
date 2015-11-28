@@ -2755,6 +2755,9 @@
 		F5E3B73B1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */; };
 		F5E3B73C1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */; };
 		F5E3B73D1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */; };
+		F5E3B7401C0A544200286CE0 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B73E1C0A544200286CE0 /* LogManagerMN.cpp */; };
+		F5E3B7411C0A544200286CE0 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B73E1C0A544200286CE0 /* LogManagerMN.cpp */; };
+		F5E3B7421C0A544200286CE0 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B73E1C0A544200286CE0 /* LogManagerMN.cpp */; };
 		F5E55B5D10741272006E788A /* DVDPlayerTeletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B5B10741272006E788A /* DVDPlayerTeletext.cpp */; };
 		F5E55B66107412DE006E788A /* GUIDialogTeletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B65107412DE006E788A /* GUIDialogTeletext.cpp */; };
 		F5E55B7010741340006E788A /* Teletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B6E10741340006E788A /* Teletext.cpp */; };
@@ -4977,6 +4980,8 @@
 		F5E3B7231C0A51C300286CE0 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UtilitiesMN.h; sourceTree = "<group>"; };
 		F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNJSONOperations.cpp; sourceTree = "<group>"; };
 		F5E3B73A1C0A52F300286CE0 /* MNJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNJSONOperations.h; sourceTree = "<group>"; };
+		F5E3B73E1C0A544200286CE0 /* LogManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LogManagerMN.cpp; sourceTree = "<group>"; };
+		F5E3B73F1C0A544200286CE0 /* LogManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogManagerMN.h; sourceTree = "<group>"; };
 		F5E55B5B10741272006E788A /* DVDPlayerTeletext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDPlayerTeletext.cpp; sourceTree = "<group>"; };
 		F5E55B5C10741272006E788A /* DVDPlayerTeletext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDPlayerTeletext.h; sourceTree = "<group>"; };
 		F5E55B64107412DE006E788A /* GUIDialogTeletext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogTeletext.h; sourceTree = "<group>"; };
@@ -8514,6 +8519,8 @@
 				F5E3B7171C0A51C300286CE0 /* GUIDialogMN.h */,
 				F5E3B7181C0A51C300286CE0 /* GUIDialogMNDemand.cpp */,
 				F5E3B7191C0A51C300286CE0 /* GUIDialogMNDemand.h */,
+				F5E3B73E1C0A544200286CE0 /* LogManagerMN.cpp */,
+				F5E3B73F1C0A544200286CE0 /* LogManagerMN.h */,
 				F5E3B71B1C0A51C300286CE0 /* MNMedia.h */,
 				F5E3B7391C0A52F300286CE0 /* MNJSONOperations.cpp */,
 				F5E3B73A1C0A52F300286CE0 /* MNJSONOperations.h */,
@@ -9540,6 +9547,7 @@
 				DF527737151BAF4C00B5B63B /* WebSocketV8.cpp in Sources */,
 				188F75FE152217BC009870CE /* Mime.cpp in Sources */,
 				188F7602152217DF009870CE /* GUIOperations.cpp in Sources */,
+				F5E3B7401C0A544200286CE0 /* LogManagerMN.cpp in Sources */,
 				DFCA6AC7152245CD000BFAAE /* HTTPJsonRpcHandler.cpp in Sources */,
 				DFCA6AC8152245CD000BFAAE /* HTTPVfsHandler.cpp in Sources */,
 				F5E3B73B1C0A52F300286CE0 /* MNJSONOperations.cpp in Sources */,
@@ -10377,6 +10385,7 @@
 				E49913CC174E5F8100741B6D /* PeripheralCecAdapter.cpp in Sources */,
 				E49913CD174E5F8100741B6D /* PeripheralDisk.cpp in Sources */,
 				E49913CE174E5F8100741B6D /* PeripheralHID.cpp in Sources */,
+				F5E3B7411C0A544200286CE0 /* LogManagerMN.cpp in Sources */,
 				E49913CF174E5F8100741B6D /* PeripheralImon.cpp in Sources */,
 				E49913D0174E5F8100741B6D /* PeripheralNIC.cpp in Sources */,
 				E49913D1174E5F8100741B6D /* PeripheralNyxboard.cpp in Sources */,
@@ -11670,6 +11679,7 @@
 				F5D1421F1BAF0B6D0075A95C /* NptTls.cpp in Sources */,
 				F5D142201BAF0B6D0075A95C /* NptUri.cpp in Sources */,
 				F5D142211BAF0B6D0075A95C /* NptUtils.cpp in Sources */,
+				F5E3B7421C0A544200286CE0 /* LogManagerMN.cpp in Sources */,
 				F5D142221BAF0B6D0075A95C /* NptXml.cpp in Sources */,
 				F5D142231BAF0B6D0075A95C /* NptZip.cpp in Sources */,
 				F5D142241BAF0B6D0075A95C /* PosixFile.cpp in Sources */,

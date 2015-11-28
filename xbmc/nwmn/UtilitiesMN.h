@@ -19,10 +19,14 @@
  *
  */
 
+#include <vector>
 #include "XBDateTime.h"
 
+struct MNCategory;
+struct MNMediaAsset;
 struct PlayerInfo;
-class TiXmlElement;
+struct PlayerSettings;
+class  TiXmlElement;
 
 bool        PingMNServer(const std::string& strURL);
 std::string Encode(const std::string& strURLData);
@@ -44,9 +48,3 @@ bool        SetDownloadedAsset(const std::string AssetID, bool downloaded=true);
 
 void        ParseMediaXML(PlayerSettings settings,std::vector<MNCategory> &categories, MNCategory &OnDemand);
 void        ParseSettingsXML(PlayerSettings &settings);
-void        LogPlayback(std::string home,PlayerSettings settings,std::string assetID);
-void        LogSettings(std::string home,PlayerSettings settings);
-void        UploadLogs(PlayerSettings settings);
-
-
-

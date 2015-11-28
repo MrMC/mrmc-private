@@ -17,30 +17,21 @@
  *
  */
 
-#include "MNMedia.h"
-#include "UtilitiesMN.h"
+#include "nwmn/UtilitiesMN.h"
+#include "nwmn/MNMedia.h"
 
-#include "messaging/ApplicationMessenger.h"
 #include "URL.h"
-#include "Util.h"
 #include "utils/md5.h"
-#include "FileItem.h"
-#include "linux/XFileUtils.h"
-#include "filesystem/File.h"
-#include "filesystem/Directory.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/SpecialProtocol.h"
 #include "storage/MediaManager.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
-#include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
-#include "utils/URIUtils.h"
-#include "LangInfo.h"
 
 #if defined(TARGET_LINUX)
-#include "linux/LinuxTimezone.h"
+  #include "linux/LinuxTimezone.h"
 #endif
 
 bool PingMNServer(const std::string& apiURL)
@@ -402,131 +393,5 @@ void ParseSettingsXML(PlayerSettings &settings)
     settings.strSettings_cf_bundle_version = ((TiXmlElement*) pSWNode)->Attribute("CFBundleVersion");
     settings.strSettings_software_version  = ((TiXmlElement*) pSWNode)->Attribute("version");
     settings.strSettings_software_url      = ((TiXmlElement*) pSWNode)->Attribute("url");
-  }
-}
-
-void LogPlayback(std::string home,PlayerSettings settings,std::string assetID)
-{
-  
-//  date,assetID
-//  2015-02-05 12:01:40-0500,58350
-//  2015-02-05 12:05:40-0500,57116
-  
-  CDateTime time = CDateTime::GetCurrentDateTime();
-  std::string strFileName = StringUtils::Format("%slog/%s_%s_%s_%s_playback.log",
-                                                home.c_str(),
-                                                settings.strLocation_id.c_str(),
-                                                settings.strMachine_id.c_str(),
-                                                settings.strMachine_sn.c_str(),
-                                                time.GetAsDBDate().c_str()
-                                                );
-                                                
-                                                
-  XFILE::CFile file;
-  XFILE::auto_buffer buffer;
-  
-  if (XFILE::CFile::Exists(strFileName))
-  {
-    file.LoadFile(strFileName, buffer);
-    file.OpenForWrite(strFileName);
-    file.Write(buffer.get(), buffer.size());
-  }
-  else
-  {
-    std::string header = "date,assetID\n";
-    file.OpenForWrite(strFileName);
-    file.Write(buffer.get(), buffer.size());
-  }
-  CLangInfo langInfo;
-  std::string strData = StringUtils::Format("%s%s,%s\n",
-                                            time.GetAsDBDateTime().c_str(),
-                                            langInfo.GetTimeZone().c_str(),
-                                            assetID.c_str()
-                                            );
-  file.Write(strData.c_str(), strData.size());
-  file.Close();
-}
-
-void LogSettings(std::string home,PlayerSettings settings)
-{
-  
-  //  date,uptime,disk-used,disk-free,smart-status
-  //  2015-03-04 18:08:21+0400,11 days 2 hours 12 minutes,118GB,24GB,Disks OK
-  
-  CDateTime time = CDateTime::GetCurrentDateTime();
-  std::string strFileName = StringUtils::Format("%slog/%s_%s_%s_%s_settings.log",
-                                                home.c_str(),
-                                                settings.strLocation_id.c_str(),
-                                                settings.strMachine_id.c_str(),
-                                                settings.strMachine_sn.c_str(),
-                                                time.GetAsDBDate().c_str()
-                                                );
-  
-  
-  XFILE::CFile file;
-  XFILE::auto_buffer buffer;
-  
-  if (XFILE::CFile::Exists(strFileName))
-  {
-    file.LoadFile(strFileName, buffer);
-    file.OpenForWrite(strFileName);
-    file.Write(buffer.get(), buffer.size());
-  }
-  else
-  {
-    std::string header = "date,uptime,disk-used,disk-free,smart-status\n";
-    file.OpenForWrite(strFileName);
-    file.Write(buffer.get(), buffer.size());
-  }
-  CLangInfo langInfo;
-  std::string strData = StringUtils::Format("%s%s,%s,%s,%s,Disks OK\n",
-                                            time.GetAsDBDateTime().c_str(),
-                                            langInfo.GetTimeZone().c_str(),
-                                            GetSystemUpTime().c_str(),
-                                            GetDiskUsed("/").c_str(),
-                                            GetDiskFree("/").c_str()
-                                            );
-  file.Write(strData.c_str(), strData.size());
-  file.Close();
-}
-
-void UploadLogs(PlayerSettings settings)
-{
-  CFileItemList items;
-  std::string srcLogPath = "special://MN/" + kMNDownloadLogPath;
-  XFILE::CDirectory::GetDirectory(srcLogPath, items, ".log", XFILE::DIR_FLAG_NO_FILE_DIRS);
-  for (int i = 0; i < items.Size(); ++i)
-  {
-    CURL url;
-    url.SetProtocol("ftp");
-#if 0
-    url.SetUserName("davilla");
-    url.SetPassword("neveryoumind");
-    url.SetHostName("192.168.2.131");
-    std::string localPath = items[i]->GetPath();
-    url.SetFileName("Public/" + URIUtils::GetFileName(localPath));
-#else
-    url.SetUserName("ftp");
-    url.SetPassword("f2+va$uP");
-    url.SetHostName("nationwidemember.com");
-    std::string localPath = items[i]->GetPath();
-    // do not use and absolute path here, should be relative to ftp site 'home' dir.
-    url.SetFileName("tvlogs/" + URIUtils::GetFileName(localPath));
-#endif
-    XFILE::CCurlFile *cfile = new XFILE::CCurlFile();
-    if (cfile->OpenForWrite(url, true))
-    {
-      XFILE::CFile localfile;
-      XFILE::auto_buffer localfilebuffer;
-      localfile.LoadFile(localPath, localfilebuffer);
-      ssize_t wlength = cfile->Write(localfilebuffer.get(), localfilebuffer.size());
-      if (wlength > 0 && wlength == (ssize_t)localfilebuffer.size())
-      {
-        XFILE::CFile::Delete(localPath);
-        CLog::Log(LOGDEBUG, "**NWMN** - UploadLogs() - %s", localPath.c_str());
-      }
-      cfile->Close();
-    }
-    delete cfile;
   }
 }
