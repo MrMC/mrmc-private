@@ -2743,9 +2743,6 @@
 		F5E3B72D1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */; };
 		F5E3B72E1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */; };
 		F5E3B72F1C0A51C300286CE0 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */; };
-		F5E3B7301C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */; };
-		F5E3B7311C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */; };
-		F5E3B7321C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */; };
 		F5E3B7331C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */; };
 		F5E3B7341C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */; };
 		F5E3B7351C0A51C300286CE0 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */; };
@@ -4972,8 +4969,6 @@
 		F5E3B71B1C0A51C300286CE0 /* MNMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMedia.h; sourceTree = "<group>"; };
 		F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerManagerMN.cpp; sourceTree = "<group>"; };
 		F5E3B71D1C0A51C300286CE0 /* PlayerManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerManagerMN.h; sourceTree = "<group>"; };
-		F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PythonBindingsMN.cpp; sourceTree = "<group>"; };
-		F5E3B71F1C0A51C300286CE0 /* PythonBindingsMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PythonBindingsMN.h; sourceTree = "<group>"; };
 		F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UpdateManagerMN.cpp; sourceTree = "<group>"; };
 		F5E3B7211C0A51C300286CE0 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateManagerMN.h; sourceTree = "<group>"; };
 		F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UtilitiesMN.cpp; sourceTree = "<group>"; };
@@ -8526,8 +8521,6 @@
 				F5E3B73A1C0A52F300286CE0 /* MNJSONOperations.h */,
 				F5E3B71C1C0A51C300286CE0 /* PlayerManagerMN.cpp */,
 				F5E3B71D1C0A51C300286CE0 /* PlayerManagerMN.h */,
-				F5E3B71E1C0A51C300286CE0 /* PythonBindingsMN.cpp */,
-				F5E3B71F1C0A51C300286CE0 /* PythonBindingsMN.h */,
 				F5E3B7201C0A51C300286CE0 /* UpdateManagerMN.cpp */,
 				F5E3B7211C0A51C300286CE0 /* UpdateManagerMN.h */,
 				F5E3B7221C0A51C300286CE0 /* UtilitiesMN.cpp */,
@@ -9377,7 +9370,6 @@
 				18B7C7B91294222E009E7A26 /* GUIControlGroup.cpp in Sources */,
 				18B7C7BA1294222E009E7A26 /* GUIControlGroupList.cpp in Sources */,
 				18B7C7BB1294222E009E7A26 /* GUIControlProfiler.cpp in Sources */,
-				F5E3B7301C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */,
 				F590458E1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */,
 				18B7C7BC1294222E009E7A26 /* GUIDialog.cpp in Sources */,
 				18B7C7BD1294222E009E7A26 /* GUIEditControl.cpp in Sources */,
@@ -10418,7 +10410,6 @@
 				E49913EB174E5FB000741B6D /* GUIDialogLockSettings.cpp in Sources */,
 				E49913EC174E5FB000741B6D /* GUIDialogProfileSettings.cpp in Sources */,
 				F590458F1BA372A600DB589A /* MCRuntimeLib.cpp in Sources */,
-				F5E3B7311C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */,
 				E49913ED174E5FB000741B6D /* GUIWindowSettingsProfile.cpp in Sources */,
 				E49913EE174E5FB000741B6D /* Profile.cpp in Sources */,
 				E49913EF174E5FB000741B6D /* ProfilesManager.cpp in Sources */,
@@ -11401,7 +11392,6 @@
 				F5D1410C1BAF0B6D0075A95C /* CharsetConverter.cpp in Sources */,
 				F5D1410D1BAF0B6D0075A95C /* CPUInfo.cpp in Sources */,
 				F5D1410E1BAF0B6D0075A95C /* Crc32.cpp in Sources */,
-				F5E3B7321C0A51C300286CE0 /* PythonBindingsMN.cpp in Sources */,
 				F5D1410F1BAF0B6D0075A95C /* CryptThreading.cpp in Sources */,
 				F5D141101BAF0B6D0075A95C /* DatabaseUtils.cpp in Sources */,
 				F5D141111BAF0B6D0075A95C /* Environment.cpp in Sources */,
