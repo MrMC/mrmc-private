@@ -210,9 +210,7 @@ bool CGUIDialogMN::OnMessage(CGUIMessage& message)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), SETVERTICAL);
       OnMessage(msg);
-      
-      int string = CSkinSettings::GetInstance().TranslateBool("NW_Vertical");
-      CSkinSettings::GetInstance().SetBool(string, true);
+      CSettings::GetInstance().SetBool(CSettings::MN_VERTICAL, true);
       CSettings::GetInstance().Save();
       
       return true;
@@ -221,8 +219,7 @@ bool CGUIDialogMN::OnMessage(CGUIMessage& message)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), SETHORIZONTAL);
       OnMessage(msg);
-      
-      CSkinSettings::GetInstance().Reset("NW_Vertical");
+      CSettings::GetInstance().SetBool(CSettings::MN_VERTICAL, false);
       CSettings::GetInstance().Save();
       
       return true;

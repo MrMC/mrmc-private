@@ -191,8 +191,6 @@ CPlayerManagerMN::CPlayerManagerMN()
   
   CSingleLock lock(m_player_lock);
   m_PlayerManager = this;
-  
-  m_settings = GetSettings();
 }
 
 CPlayerManagerMN::~CPlayerManagerMN()
@@ -236,6 +234,9 @@ CPlayerManagerMN* CPlayerManagerMN::GetPlayerManager()
 
 void CPlayerManagerMN::Startup()
 {
+  m_settings = GetSettings();
+  StopPlaying();
+  StopThread();
   StartDialog();
   ParseMediaXML(m_settings, m_categories, m_OnDemand);
   ParseSettingsXML(m_settings);
@@ -244,18 +245,28 @@ void CPlayerManagerMN::Startup()
   m_UpdateManager->SetDownloadTime(m_settings);
   CheckAssets();
   CreatePlaylist();
+  SetSettings(m_settings);
   Create();
 }
 
 void CPlayerManagerMN::SetSettings(PlayerSettings settings)
 {
-  m_settings = settings;
-  CSettings::GetInstance().SetString("MN.location_id" ,settings.strLocation_id);
-  CSettings::GetInstance().SetString("MN.machine_id"  ,settings.strMachine_id);
-  CSettings::GetInstance().SetString("MN.url_feed"    ,settings.strUrl_feed);
-  StopPlaying();
-  StopThread();
-  Startup();
+  CSettings::GetInstance().SetString(CSettings::MN_LOCATION_ID,settings.strLocation_id);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_ID,settings.strMachine_id);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_DESCRIPTION,settings.strMachine_description);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_ETHERNET_ID,settings.strMachine_ethernet_id);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_HW_VERSION,settings.strMachine_hw_version);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_NAME,settings.strMachine_name);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_PURCHASE_DATE,settings.strMachine_purchase_date);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_SN,settings.strMachine_sn);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_VENDOR,settings.strMachine_vendor);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_WARRANTY,settings.strMachine_warrenty_nr);
+  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_WIRELESS,settings.strMachine_wireless_id);
+  CSettings::GetInstance().SetString(CSettings::MN_SETTINGS_CF_BUNDLE,settings.strSettings_cf_bundle_version);
+  CSettings::GetInstance().SetString(CSettings::MN_SETTINGS_UPDATE_INTERVAL,settings.strSettings_update_interval);
+  CSettings::GetInstance().SetString(CSettings::MN_SETTINGS_UPDATE_TIME,settings.strSettings_update_time);
+  CSettings::GetInstance().SetString(CSettings::MN_URL,settings.strUrl_feed);
+  CSettings::GetInstance().Save();
 }
 
 void CPlayerManagerMN::PlayPause()
@@ -288,35 +299,35 @@ void CPlayerManagerMN::PlayPrevious()
 PlayerSettings CPlayerManagerMN::GetSettings()
 {
   PlayerSettings settings;
-  settings.strLocation_id                = CSettings::GetInstance().GetString("MN.location_id");
-  settings.strMachine_id                 = CSettings::GetInstance().GetString("MN.machine_id");
-  settings.strMachine_description        = CSettings::GetInstance().GetString("MN.machine_description");
-  settings.strMachine_ethernet_id        = CSettings::GetInstance().GetString("MN.machine_ethernet_id");
-  settings.strMachine_hw_version         = CSettings::GetInstance().GetString("MN.machine_hw_version");
-  settings.strMachine_name               = CSettings::GetInstance().GetString("MN.machine_name");
-  settings.strMachine_purchase_date      = CSettings::GetInstance().GetString("MN.machine_purchase_date");
-  settings.strMachine_sn                 = CSettings::GetInstance().GetString("MN.machine_sn");
-  settings.strMachine_vendor             = CSettings::GetInstance().GetString("MN.machine_vendor");
-  settings.strMachine_warrenty_nr        = CSettings::GetInstance().GetString("MN.machine_warrenty_nr");
-  settings.strMachine_wireless_id        = CSettings::GetInstance().GetString("MN.machine_wireless_id");
-  settings.strSettings_cf_bundle_version = CSettings::GetInstance().GetString("MN.settings_cf_bundle_version");
-  settings.strSettings_update_interval   = CSettings::GetInstance().GetString("MN.settings_update_interval");
-  settings.strSettings_update_time       = CSettings::GetInstance().GetString("MN.settings_update_time");
-  settings.strUrl_feed                   = CSettings::GetInstance().GetString("MN.url_feed");
-  
-  if (settings.strUrl_feed.empty()) // Deafult settings
-  {
-    settings.strUrl_feed = "http://www.nationwidemember.com";
-    settings.strLocation_id = "10140003";
-    settings.strMachine_id  = "1147";
-    
-    CSettings::GetInstance().SetString("MN.location_id" ,settings.strLocation_id);
-    CSettings::GetInstance().SetString("MN.machine_id"  ,settings.strMachine_id);
-    CSettings::GetInstance().SetString("MN.url_feed"    ,settings.strUrl_feed);
-  }
+  settings.strLocation_id                = CSettings::GetInstance().GetString(CSettings::MN_LOCATION_ID);
+  settings.strMachine_id                 = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_ID);
+  settings.strMachine_description        = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_DESCRIPTION);
+  settings.strMachine_ethernet_id        = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_ETHERNET_ID);
+  settings.strMachine_hw_version         = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_HW_VERSION);
+  settings.strMachine_name               = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_NAME);
+  settings.strMachine_purchase_date      = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_PURCHASE_DATE);
+  settings.strMachine_sn                 = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_SN);
+  settings.strMachine_vendor             = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_VENDOR);
+  settings.strMachine_warrenty_nr        = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_WARRANTY);
+  settings.strMachine_wireless_id        = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_WIRELESS);
+  settings.strSettings_cf_bundle_version = CSettings::GetInstance().GetString(CSettings::MN_SETTINGS_CF_BUNDLE);
+  settings.strSettings_update_interval   = CSettings::GetInstance().GetString(CSettings::MN_SETTINGS_UPDATE_INTERVAL);
+  settings.strSettings_update_time       = CSettings::GetInstance().GetString(CSettings::MN_SETTINGS_UPDATE_TIME);
+  settings.strUrl_feed                   = CSettings::GetInstance().GetString(CSettings::MN_URL);
   
   if (settings.strMachine_sn.empty())
     settings.strMachine_sn = "UNKNOWN";
+
+  if (settings.strMachine_ethernet_id.empty())
+  {
+    CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
+    if (iface)
+    {
+      settings.strMachine_ethernet_id = iface->GetMacAddress();
+      CSettings::GetInstance().SetString(CSettings::MN_MACHINE_ETHERNET_ID,settings.strMachine_ethernet_id);
+    }
+  }
+
   return settings;
 }
 
