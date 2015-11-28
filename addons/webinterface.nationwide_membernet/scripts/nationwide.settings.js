@@ -166,7 +166,7 @@
 			var addonId = id || this.options.addonId;
 			if (addonId) {
 				xbmc.rpc.request({
-					'method': 'Addons.' + action,
+					'method': 'MN.SaveSettings',
 					'params': $.extend( {}, params, {
 						'addonid': addonId
 					}),
