@@ -18,36 +18,18 @@
  */
 
 #include "MNJSONOperations.h"
-#include "messaging/ApplicationMessenger.h"
 #include "utils/Variant.h"
-#include "powermanagement/PowerManager.h"
-#include "JSONRPCUtils.h"
+#include "interfaces/json-rpc/JSONRPCUtils.h"
 #include "utils/JSONVariantWriter.h"
 #include "utils/JSONVariantParser.h"
 
-#include "AudioLibrary.h"
-#include "music/MusicDatabase.h"
-#include "FileItem.h"
-#include "Util.h"
 #include "filesystem/File.h"
-#include "utils/SortUtils.h"
-#include "utils/StringUtils.h"
-#include "utils/URIUtils.h"
-#include "utils/Variant.h"
 #include "utils/log.h"
-#include "music/tags/MusicInfoTag.h"
-#include "music/Artist.h"
-#include "music/Album.h"
-#include "music/Song.h"
-#include "music/Artist.h"
-#include "messaging/ApplicationMessenger.h"
-#include "filesystem/Directory.h"
 #include "settings/Settings.h"
 #include "PlayerManagerMN.h"
 #include "dialogs/GUIDialogKaiToast.h"
 
 using namespace JSONRPC;
-using namespace KODI::MESSAGING;
 
 JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {

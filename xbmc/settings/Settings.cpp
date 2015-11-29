@@ -879,7 +879,7 @@ void CSettings::InitializeDefaults()
 {
   // set some default values if necessary
 #if defined(HAS_TOUCH_SKIN) && defined(TARGET_DARWIN_IOS)
-  ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->SetDefault("skin.re-touched");
+  ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->SetDefault("skin.nationwide");
 #endif
 
 #if defined(TARGET_POSIX)
