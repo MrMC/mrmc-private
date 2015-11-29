@@ -18,7 +18,7 @@
  *
  */
 
-#include "JSONRPC.h"
+#include "interfaces/json-rpc/JSONRPC.h"
 
 class CVariant;
 
