@@ -38,11 +38,12 @@
 bool PingMNServer(const std::string& apiURL)
 {
   CURL url(apiURL.c_str());
-  XFILE::CCurlFile http;
   std::string http_path = url.GetProtocol().c_str();
   http_path += "://" + url.GetHostName();
+
+  XFILE::CCurlFile http;
   CURL http_url(http_path.c_str());
-  bool found = http.Exists(http_url);
+  bool found = http.Open(http_url);
   if (!found && (errno == EACCES))
     found = true;
   http.Close();
