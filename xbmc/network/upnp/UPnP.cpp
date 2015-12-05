@@ -639,11 +639,11 @@ CUPnP::CreateServer(int port /* = 0 */)
                     CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_WEBSERVERPORT),
                     "/").ToString();
 
-    device->m_ModelName        = "MrMC";
+    device->m_ModelName        = "MemberNetTV";
     device->m_ModelNumber      = CSysInfo::GetVersion().c_str();
-    device->m_ModelDescription = "MrMC - Media Server";
+    device->m_ModelDescription = "MemberNetTV - Media Server";
     device->m_ModelURL         = "http://mrmc.tv/";
-    device->m_Manufacturer     = "MrMC Foundation";
+    device->m_Manufacturer     = "Nationwide";
     device->m_ManufacturerURL  = "http://mrmc.tv/";
 
     device->SetDelegate(device);
