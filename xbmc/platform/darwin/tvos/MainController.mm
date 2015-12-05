@@ -750,6 +750,8 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   
   AnnounceReceiver::init();
 
+  [self disableScreenSaver];
+
   return self;
 }
 //--------------------------------------------------------------
@@ -889,8 +891,10 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
 //--------------------------------------------------------------
 - (void)enableScreenSaver
 {
+/*
   if ([UIApplication sharedApplication].idleTimerDisabled == YES)
     [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+*/
 }
 //--------------------------------------------------------------
 - (bool)changeScreen:(unsigned int)screenIdx withMode:(UIScreenMode *)mode
