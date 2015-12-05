@@ -163,6 +163,11 @@ CAAudioUnitSink::CAAudioUnitSink()
   {
     CLog::Log(LOGERROR, "AVAudioSession setActive YES failed: %ld", (long)err.code);
   }
+  err = nil;
+  if (![[AVAudioSession sharedInstance] setMode: AVAudioSessionModeMoviePlayback error: &err])
+  {
+    CLog::Log(LOGERROR, "AVAudioSession setMode AVAudioSessionModeMoviePlayback failed: %ld", (long)err.code);
+  }
 }
 
 CAAudioUnitSink::~CAAudioUnitSink()
