@@ -568,7 +568,7 @@ void CDVDPlayerAudio::Process()
     }
 
     // Zero out the frame data if we are supposed to silence the audio
-    if (m_silence || m_syncclock)
+    if (m_silence)
     {
       int size = audioframe.nb_frames * audioframe.framesize / audioframe.planes;
       for (unsigned int i=0; i<audioframe.planes; i++)
@@ -751,54 +751,7 @@ void CDVDPlayerAudio::HandleSyncError(double duration)
 
 bool CDVDPlayerAudio::OutputPacket(DVDAudioFrame &audioframe)
 {
-  if (m_syncclock)
-  {
-    double absolute;
-    double clock = m_pClock->GetClock(absolute);
-    double error = m_dvdAudio.GetPlayingPts() - clock;
-    m_dvdAudio.SetResampleRatio(1.0);
-
-    // sync audio by skipping or dropping frames if we are above or
-    // below a given threshold. the constants are aligned with known
-    // durations: DTS = 11ms, AC3 = 32ms
-    // during this stage audio is muted
-    if (error > DVD_MSEC_TO_TIME(10))
-    {
-      unsigned int nb_frames = audioframe.nb_frames;
-      double duration = audioframe.duration;
-
-      // reduce large packets for better sync, i.e. FLAC can have 96ms packets
-      // 32ms because I know this works good for AC3
-      if (audioframe.duration > DVD_MSEC_TO_TIME(32) && audioframe.sample_rate)
-      {
-        audioframe.nb_frames = 0.032 * audioframe.sample_rate;
-        audioframe.duration = ((double)audioframe.nb_frames * DVD_TIME_BASE) / audioframe.sample_rate;
-      }
-
-      int dups = std::min(DVD_MSEC_TO_TIME(100), error) / audioframe.duration;
-      if (dups > 0)
-        CLog::Log(LOGNOTICE,"CDVDPlayerAudio::OutputPacket duplicate %d packets of duration %d",
-                  dups, DVD_TIME_TO_MSEC(audioframe.duration));
-      for (int i = 0; i < dups; i++)
-      {
-        m_dvdAudio.AddPackets(audioframe);
-      }
-
-      audioframe.nb_frames = nb_frames;
-      audioframe.duration = duration;
-
-      m_dvdAudio.AddPackets(audioframe);
-    }
-    else if (error < -DVD_MSEC_TO_TIME(32))
-    {
-      m_dvdAudio.SetPlayingPts(audioframe.pts);
-    }
-    else
-    {
-      m_dvdAudio.AddPackets(audioframe);
-    }
-  }
-  else if (m_synctype == SYNC_DISCON)
+  if (m_synctype == SYNC_DISCON)
   {
     m_dvdAudio.AddPackets(audioframe);
   }
