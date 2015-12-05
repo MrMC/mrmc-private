@@ -337,11 +337,15 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   {
     // single press key, but also detect hold and back to tvos.
     case UIPressTypeMenu:
-      // menu is special.
-      //  a) if at our home view, should return to atv home screen.
-      //  b) if not, let it pass to us.
-      if (g_windowManager.GetActiveWindow() == WINDOW_HOME && g_windowManager.GetFocusedWindow() != WINDOW_DIALOG_FAVOURITES)
-        handled = NO;
+      {
+        // menu is special.
+        //  a) if at our home view, should return to atv home screen.
+        //  b) if not, let it pass to us.
+        int windowID = g_windowManager.GetActiveWindow();
+        if ((windowID == WINDOW_HOME || windowID == WINDOW_DIALOG_MN || windowID == WINDOW_STARTUP_ANIM) &&
+          g_windowManager.GetFocusedWindow() != WINDOW_DIALOG_FAVOURITES)
+          handled = NO;
+      }
       break;
 
     // single press keys
@@ -745,6 +749,8 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   [center addObserver: self
      selector: @selector(observeDefaultCenterStuff:) name: nil object: nil];
 
+  [self observeAudioSessionNotifications:YES];
+
   [m_window makeKeyAndVisible];
   g_xbmcController = self;  
   
@@ -770,6 +776,8 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   // take us off the default center for our app
   center = [NSNotificationCenter defaultCenter];
   [center removeObserver: self];
+
+  [self observeAudioSessionNotifications:NO];
   
   [super dealloc];
 }
@@ -1043,6 +1051,41 @@ AnnounceReceiver *AnnounceReceiver::g_announceReceiver = NULL;
   
   [self enableScreenSaver];
   [self enableSystemSleep];
+}
+
+#pragma mark - AudioSession notifications
+//--------------------------------------------------------------
+- (void)observeAudioSessionNotifications:(BOOL)observe
+{
+  NSLog(@"%s YES: %d", __FUNCTION__, observe);
+
+  AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+
+  if (observe)
+  {
+    [center addObserver:self selector:@selector(handleAudioSessionMediaServicesWereLost:)
+      name:AVAudioSessionMediaServicesWereLostNotification object:audioSession];
+    [center addObserver:self selector:@selector(handleAudioSessionMediaServicesWereReset:)
+      name:AVAudioSessionMediaServicesWereResetNotification object:audioSession];
+  }
+  else
+  {
+    [center removeObserver:self name:AVAudioSessionMediaServicesWereLostNotification object:audioSession];
+    [center removeObserver:self name:AVAudioSessionMediaServicesWereResetNotification object:audioSession];
+  }
+}
+
+-(void)handleAudioSessionMediaServicesWereLost:(NSNotification *)notification
+{
+  NSLog(@"%s [Main:%d] Object: %@ withInfo: %@", __FUNCTION__,
+    [NSThread isMainThread], notification.object, notification.userInfo);
+}
+
+-(void)handleAudioSessionMediaServicesWereReset:(NSNotification *)notification
+{
+  NSLog(@"%s [Main:%d] Object: %@ withInfo: %@", __FUNCTION__,
+    [NSThread isMainThread], notification.object, notification.userInfo);
 }
 
 #pragma mark - remote control routines
