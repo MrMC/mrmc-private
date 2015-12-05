@@ -234,7 +234,7 @@ bool CFile::Open(const CURL& file, const unsigned int flags)
     }
 
     CURL url(URIUtils::SubstitutePath(file));
-
+/*
     if (!(m_flags & READ_NO_CACHE))
     {
       const std::string pathToUrl(url.Get());
@@ -248,7 +248,7 @@ bool CFile::Open(const CURL& file, const unsigned int flags)
         return m_pFile->Open(url);
       }
     }
-
+*/
     m_pFile = CFileFactory::CreateLoader(url);
     if (!m_pFile)
       return false;
