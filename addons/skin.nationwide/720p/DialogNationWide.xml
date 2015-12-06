@@ -73,7 +73,7 @@
 					<visible>Control.HasFocus(90104) | Control.HasFocus(90114) | Control.HasFocus(90124) | Control.HasFocus(90134)| Control.HasFocus(90144)</visible>
 					<control type="grouplist" id="90100">
 						<posx>520</posx>
-						<posy>505</posy>
+						<posy>470</posy>
 						<width>250</width>
 						<height>105</height>
 						<align>center</align>
@@ -83,14 +83,6 @@
 						<onright>90104</onright>        	
 						<itemgap>0</itemgap>
 						<orientation>Vertical</orientation>         
-						<control type="button" id="90114">
-							<include>ButtonHomeSubCommonValues</include>
-							<label>720p</label>
-						</control>
-						<control type="button" id="90124">
-							<include>ButtonHomeSubCommonValues</include>
-							<label>1080p</label>
-						</control>
 						<control type="button" id="90134">
 							<include>ButtonHomeSubCommonValues</include>
 							<visible>!system.getbool(mn.vertical)</visible>
@@ -102,29 +94,13 @@
 							<label>Horizontal</label>
 						</control>
 					</control>
-					<control type="image">
-						<posx>665</posx>
-						<posy>515</posy>
-						<width>16</width>
-						<height>16</height>
-						<visible>Skin.HasSetting(NW_720)</visible>
-						<texture border="0,0,0,3" flipx="true">OverlayWatching.png</texture>
-					</control>     		
-					<control type="image">
-						<posx>665</posx>
-						<posy>550</posy>    		
-						<width>16</width>
-						<height>16</height>
-						<visible>!Skin.HasSetting(NW_720)</visible>
-						<texture border="0,0,0,3" flipx="true">OverlayWatching.png</texture>
-					</control>
 				</control>  
 				<control type="grouplist" id="90136">
 					<animation effect="slide" start="0,-100" end="0,0"  time="400" tween="quadratic" easing="out">Visible</animation>
 					<animation effect="slide" start="0,0" end="0,-100" time="400" tween="quadratic" easing="out">Hidden</animation>
 					<visible>Control.HasFocus(90106) | Control.HasFocus(90116) | Control.HasFocus(90126)</visible>
 					<posx>520</posx>
-					<posy>487</posy>
+					<posy>470</posy>
 					<width>250</width>
 					<height>105</height>
 					<align>center</align>
@@ -133,10 +109,6 @@
 					<onleft>90103</onleft>
 					<onright>90104</onright>          
 					<itemgap>0</itemgap>    
-					<control type="button" id="90116">
-						<include>ButtonHomeSubCommonValues</include>
-						<label>Setup</label>
-					</control>
 					<control type="button" id="90126">
 						<include>ButtonHomeSubCommonValues</include>
 						<label>Test</label>
@@ -294,26 +266,19 @@
 								<pulseonselect>false</pulseonselect>
 								<label>Media Content Update</label>
 							</control>
-							<control type="button" id="90107">
-								<include>ButtonHomeSubCommonValues</include>
-								<label>Software Update</label>
-							</control>
 							<control type="button" id="90105">
 								<include>ButtonHomeSubCommonValues</include>
 								<label>About</label>
 							</control>
-							<control type="button" id="90108">
-							<include>ButtonHomeSubCommonValues</include>
-								<label>Restart</label>
-							</control>
 							<control type="button" id="90106">
 								<include>ButtonHomeSubCommonValues</include>
-								<ondown>90116</ondown>
+								<ondown>90126</ondown>
 								<label>Network</label>
 							</control>    					
 							<control type="button" id="90104">
 								<include>ButtonHomeSubCommonValues</include>
-								<ondown>90114</ondown>
+								<ondown condition="!system.getbool(mn.vertical)">90134</ondown>
+								<ondown condition="system.getbool(mn.vertical)">90144</ondown>
 								<label>Display Setup</label>
 							</control>
 							<control type="image">
@@ -366,26 +331,19 @@
 								<pulseonselect>false</pulseonselect>
 								<label>Media Content Update</label>
 							</control>
-							<control type="button" id="90107">
-								<include>ButtonHomeSubCommonValues</include>
-								<label>Software Update</label>
-							</control>
 							<control type="button" id="90105">
 								<include>ButtonHomeSubCommonValues</include>
 								<label>About</label>
 							</control>
-							<control type="button" id="90108">
-							<include>ButtonHomeSubCommonValues</include>
-								<label>Restart</label>
-							</control>
 							<control type="button" id="90106">
 								<include>ButtonHomeSubCommonValues</include>
-								<ondown>90116</ondown>
+								<ondown>90126</ondown>
 								<label>Network</label>
 							</control>    					
 							<control type="button" id="90104">
 								<include>ButtonHomeSubCommonValues</include>
-								<ondown>90114</ondown>
+								<ondown condition="!system.getbool(mn.vertical)">90134</ondown>
+								<ondown condition="system.getbool(mn.vertical)">90144</ondown>
 								<label>Display Setup</label>
 							</control>
 							<control type="image">

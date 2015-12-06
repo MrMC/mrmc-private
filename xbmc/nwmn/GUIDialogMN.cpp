@@ -43,12 +43,8 @@
 #define ONDEMAND          90102
 #define MEDIAUPDATE       90103
 #define ABOUT             90105
-#define SWUPDATE          90107
-#define RESTART           90108
 #define NETWORKSET        90116
 #define NETWORKTEST       90126
-#define DISPLAY720        90114
-#define DISPLAY1080       90124
 #define SETVERTICAL       90134
 #define SETHORIZONTAL     90144
 #define ABOUTDIALOG       90200
@@ -83,16 +79,8 @@ bool CGUIDialogMN::OnMessage(CGUIMessage& message)
   if  (message.GetMessage() == GUI_MSG_CLICKED)
   {
     int iControl = message.GetSenderId();
-
-    if (iControl == RESTART)
-    {
-      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), RESTART);
-      OnMessage(msg);
-
-//      CApplicationMessenger::Get().Restart();
-      return true;
-    }
-    else if (iControl == ABOUT)
+    
+    if (iControl == ABOUT)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ABOUT);
       OnMessage(msg);
@@ -144,36 +132,11 @@ bool CGUIDialogMN::OnMessage(CGUIMessage& message)
     }
     else if (iControl == MEDIAUPDATE)
     {
-      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), SWUPDATE);
+      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), MEDIAUPDATE);
       OnMessage(msg);
       Refresh();
       return true;
     }
-    else if (iControl == SWUPDATE)
-    {
-      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), SWUPDATE);
-      OnMessage(msg);
-      
-      // do the SWUPDATE thing
-
-      return true;
-    }
-
-    else if (iControl == NETWORKSET)
-    {
-      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), NETWORKSET);
-      OnMessage(msg);
-
-#if defined(TARGET_ANDROID)
-      OpenAndroidSettings()
-#elseif defined(TARGET_LINUX) // no way to do this only on Openelec?
-      CStdString cmd;
-      cmd = StringUtils::Format("RunAddon(service.openelec.settings)");
-      CApplicationMessenger::Get().ExecBuiltIn(cmd, false);
-#endif
-      return true;
-    }
-
     else if (iControl == NETWORKTEST)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), NETWORKTEST);
@@ -183,29 +146,6 @@ bool CGUIDialogMN::OnMessage(CGUIMessage& message)
       
       return true;
     }
-    
-    else if (iControl == DISPLAY720)
-    {
-      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), DISPLAY720);
-      OnMessage(msg);
-      
-      // set 720P here
-      const std::string strResolution = "00128000720060.00000p";
-      SetResolution(strResolution);
-      return true;
-    }
-    
-    else if (iControl == DISPLAY1080)
-    {
-      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), DISPLAY1080);
-      OnMessage(msg);
-      
-      // set 1080p here
-      const std::string strResolution = "00192001080060.00000p";
-      SetResolution(strResolution);
-      return true;
-    }
-    
     else if (iControl == SETVERTICAL)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), SETVERTICAL);
@@ -365,14 +305,12 @@ void CGUIDialogMN::DisableButtonsOnRefresh(bool disable)
   {
     CONTROL_DISABLE(PLAYLIST);
     CONTROL_DISABLE(ONDEMAND);
-    CONTROL_DISABLE(SWUPDATE);
     CONTROL_DISABLE(MEDIAUPDATE);
   }
   else
   {
     CONTROL_ENABLE(PLAYLIST);
     CONTROL_ENABLE(ONDEMAND);
-    CONTROL_ENABLE(SWUPDATE);
     CONTROL_ENABLE(MEDIAUPDATE);
   }
 }
