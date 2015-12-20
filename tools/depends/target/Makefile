@@ -74,6 +74,7 @@ endif
 
 ifeq ($(OS),osx)
   DEPENDS += samba
+  DEPENDS += libsdl
   ifneq ($(USE_SIMULATOR),yes)
     DEPENDS += libGLEW
   endif
