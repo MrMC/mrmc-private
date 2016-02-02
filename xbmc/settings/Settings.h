@@ -393,6 +393,25 @@ public:
   static const std::string SETTING_MYSQL_VIDEO;
   static const std::string SETTING_MYSQL_MUSIC;
   static const std::string SETTING_THUMBCACHE_CLEAR;
+
+  // NWMN settings strings
+  static const std::string MN_URL;
+  static const std::string MN_MACHINE_ID;
+  static const std::string MN_LOCATION_ID;
+  static const std::string MN_MACHINE_DESCRIPTION;
+  static const std::string MN_MACHINE_ETHERNET_ID;
+  static const std::string MN_MACHINE_HW_VERSION;
+  static const std::string MN_MACHINE_NAME;
+  static const std::string MN_MACHINE_PURCHASE_DATE;
+  static const std::string MN_MACHINE_SN;
+  static const std::string MN_MACHINE_VENDOR;
+  static const std::string MN_MACHINE_WARRANTY;
+  static const std::string MN_MACHINE_WIRELESS;
+  static const std::string MN_SETTINGS_CF_BUNDLE;
+  static const std::string MN_SETTINGS_UPDATE_INTERVAL;
+  static const std::string MN_SETTINGS_UPDATE_TIME;
+  static const std::string MN_VERTICAL;
+
   
   /*!
    \brief Creates a new settings wrapper around a new settings manager.

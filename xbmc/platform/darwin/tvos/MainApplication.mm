@@ -95,6 +95,11 @@ MainController *m_xbmcController;
   {
     NSLog(@"AVAudioSession setActive YES failed: %ld", (long)err.code);
   }
+  err = nil;
+  if (![[AVAudioSession sharedInstance] setMode: AVAudioSessionModeMoviePlayback error: &err])
+  {
+    NSLog(@"AVAudioSession setMode AVAudioSessionModeMoviePlayback failed: %ld", (long)err.code);
+  }
 
   UIScreen *currentScreen = [UIScreen mainScreen];
   m_xbmcController = [[MainController alloc] initWithFrame: [currentScreen bounds] withScreen:currentScreen];

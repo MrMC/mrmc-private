@@ -388,13 +388,25 @@ MainController *g_xbmcController;
   {
     // single press key, but also detect hold and back to tvos.
     case UIPressTypeMenu:
-    {
-      // menu is special.
-      //  a) if at our home view, should return to atv home screen.
-      //  b) if not, let it pass to us.
-      int focusedWindowID = g_windowManager.GetFocusedWindow();
-      if (focusedWindowID == WINDOW_HOME)
-        handled = NO;
+      {
+        // menu is special.
+        //  a) if at our home view, should return to atv home screen.
+        //  b) if not, let it pass to us.
+        int windowID = g_windowManager.GetActiveWindow();
+        int focusedwindowID = g_windowManager.GetFocusedWindow();
+        if ((windowID == WINDOW_HOME || windowID == WINDOW_DIALOG_MN || windowID == WINDOW_STARTUP_ANIM) &&
+            focusedwindowID != WINDOW_DIALOG_MN_DEMAND &&
+            focusedwindowID != WINDOW_DIALOG_FAVOURITES &&
+            focusedwindowID != WINDOW_DIALOG_CONTEXT_MENU &&
+            focusedwindowID != WINDOW_DIALOG_BUSY &&
+            focusedwindowID != WINDOW_DIALOG_VIDEO_INFO)
+        {
+          // About dialog has ID 90200,network test has ID 90145
+          // if MN Home has that visible we shoudl not get out to main ATV screen
+          CGUIWindow *pWindow = (CGUIWindow*)g_windowManager.GetWindow(WINDOW_DIALOG_MN);
+          handled = (BOOL)(pWindow->HasVisibleID(90200) || pWindow->HasVisibleID(90145));
+        }
+      }
       break;
     }
 
@@ -1067,10 +1079,21 @@ MainController *g_xbmcController;
 
   [self enableScreenSaver];
 
+<<<<<<< HEAD
+=======
+  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+  [center addObserver: self
+     selector: @selector(observeDefaultCenterStuff:) name: nil object: nil];
+
+  [self observeAudioSessionNotifications:YES];
+
+>>>>>>> c01f538... nwmn: fixup
   [m_window makeKeyAndVisible];
   g_xbmcController = self;  
 
   CAnnounceReceiver::GetInstance().Initialize();
+
+  [self disableScreenSaver];
 
   return self;
 }
@@ -1086,6 +1109,16 @@ MainController *g_xbmcController;
   [m_glView release];
   [m_window release];
   
+<<<<<<< HEAD
+=======
+  NSNotificationCenter *center;
+  // take us off the default center for our app
+  center = [NSNotificationCenter defaultCenter];
+  [center removeObserver: self];
+
+  [self observeAudioSessionNotifications:NO];
+
+>>>>>>> c01f538... nwmn: fixup
   [super dealloc];
 }
 //--------------------------------------------------------------
@@ -1223,8 +1256,8 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 - (void)enableScreenSaver
 {
-  m_disableIdleTimer = NO;
-  [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+  //m_disableIdleTimer = NO;
+  //[[UIApplication sharedApplication] setIdleTimerDisabled:NO];
 }
 
 //--------------------------------------------------------------
@@ -1508,6 +1541,41 @@ MainController *g_xbmcController;
     // start remote timeout
     [self startRemoteTimer];
   }
+}
+
+#pragma mark - AudioSession notifications
+//--------------------------------------------------------------
+- (void)observeAudioSessionNotifications:(BOOL)observe
+{
+  NSLog(@"%s YES: %d", __FUNCTION__, observe);
+
+  AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+
+  if (observe)
+  {
+    [center addObserver:self selector:@selector(handleAudioSessionMediaServicesWereLost:)
+      name:AVAudioSessionMediaServicesWereLostNotification object:audioSession];
+    [center addObserver:self selector:@selector(handleAudioSessionMediaServicesWereReset:)
+      name:AVAudioSessionMediaServicesWereResetNotification object:audioSession];
+  }
+  else
+  {
+    [center removeObserver:self name:AVAudioSessionMediaServicesWereLostNotification object:audioSession];
+    [center removeObserver:self name:AVAudioSessionMediaServicesWereResetNotification object:audioSession];
+  }
+}
+
+-(void)handleAudioSessionMediaServicesWereLost:(NSNotification *)notification
+{
+  NSLog(@"%s [Main:%d] Object: %@ withInfo: %@", __FUNCTION__,
+    [NSThread isMainThread], notification.object, notification.userInfo);
+}
+
+-(void)handleAudioSessionMediaServicesWereReset:(NSNotification *)notification
+{
+  NSLog(@"%s [Main:%d] Object: %@ withInfo: %@", __FUNCTION__,
+    [NSThread isMainThread], notification.object, notification.userInfo);
 }
 
 #pragma mark - Now Playing routines
