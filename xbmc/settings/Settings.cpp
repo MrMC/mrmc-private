@@ -430,6 +430,24 @@ const std::string CSettings::SETTING_MYSQL_VIDEO = "mysql.video";
 const std::string CSettings::SETTING_MYSQL_MUSIC = "mysql.music";
 const std::string CSettings::SETTING_THUMBCACHE_CLEAR = "thumbcache.cleanup";
 
+// NWMN settings strings
+const std::string CSettings::MN_URL = "mn.url_feed";
+const std::string CSettings::MN_MACHINE_ID = "mn.machine_id";
+const std::string CSettings::MN_LOCATION_ID = "mn.location_id";
+const std::string CSettings::MN_MACHINE_DESCRIPTION = "mn.machine_description";
+const std::string CSettings::MN_MACHINE_ETHERNET_ID = "mn.machine_ethernet_id";
+const std::string CSettings::MN_MACHINE_HW_VERSION = "mn.machine_hw_version";
+const std::string CSettings::MN_MACHINE_NAME = "mn.machine_name";
+const std::string CSettings::MN_MACHINE_PURCHASE_DATE = "mn.machine_purchase_date";
+const std::string CSettings::MN_MACHINE_SN = "mn.machine_sn";
+const std::string CSettings::MN_MACHINE_VENDOR = "mn.machine_vendor";
+const std::string CSettings::MN_MACHINE_WARRANTY = "mn.machine_warrenty_nr";
+const std::string CSettings::MN_MACHINE_WIRELESS = "mn.machine_wireless_id";
+const std::string CSettings::MN_SETTINGS_CF_BUNDLE = "mn.settings_cf_bundle_version";
+const std::string CSettings::MN_SETTINGS_UPDATE_INTERVAL = "mn.settings_update_interval";
+const std::string CSettings::MN_SETTINGS_UPDATE_TIME = "mn.settings_update_time";
+const std::string CSettings::MN_VERTICAL = "mn.vertical";
+
 CSettings::CSettings()
   : m_initialized(false)
 {
@@ -882,7 +900,7 @@ void CSettings::InitializeDefaults()
 {
   // set some default values if necessary
 #if defined(HAS_TOUCH_SKIN) && defined(TARGET_DARWIN_IOS) && !defined(TARGET_DARWIN_TVOS)
-  ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->SetDefault("skin.mrmc-touch");
+  ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->SetDefault("skin.nationwide");
 #endif
 
 #if defined(TARGET_POSIX)
