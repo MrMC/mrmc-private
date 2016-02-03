@@ -42,7 +42,7 @@
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>tv.mrmc.@APP_NAME_LC@.ios</string>
+	<string>tv.mrmc.blackbird</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
