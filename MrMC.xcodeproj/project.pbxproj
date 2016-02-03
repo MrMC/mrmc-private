@@ -20,9 +20,6 @@
 		188F75FE152217BC009870CE /* Mime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 188F75FC152217BC009870CE /* Mime.cpp */; };
 		188F7602152217DF009870CE /* GUIOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 188F7600152217DF009870CE /* GUIOperations.cpp */; };
 		18968DC814155D7C005BA742 /* ApplicationOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18968DC614155D7C005BA742 /* ApplicationOperations.cpp */; };
-		18AC31F01C49445D00AE9433 /* TVServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18AC31EF1C49445D00AE9433 /* TVServices.framework */; };
-		18AC31F41C49445D00AE9433 /* ServiceProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 18AC31F31C49445D00AE9433 /* ServiceProvider.m */; };
-		18AC31F81C49445D00AE9433 /* TopShelf.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 18AC31ED1C49445D00AE9433 /* TopShelf.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		18ACF84313596C9B00B67371 /* RecentlyAddedJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18ACF84113596C9B00B67371 /* RecentlyAddedJob.cpp */; };
 		18B4A0021152BFA5001AF8A6 /* Addon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B49FF11152BFA5001AF8A6 /* Addon.cpp */; };
 		18B4A0051152BFA5001AF8A6 /* Scraper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B49FFC1152BFA5001AF8A6 /* Scraper.cpp */; };
@@ -1785,6 +1782,36 @@
 		F5B721FF1C52917D006432AE /* TVOSFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B721FD1C52917D006432AE /* TVOSFile.cpp */; };
 		F5B722021C52962F006432AE /* NSData+GZIP.m in Sources */ = {isa = PBXBuildFile; fileRef = F5B722011C52962F006432AE /* NSData+GZIP.m */; };
 		F5B722051C584C80006432AE /* PreflightHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5B722041C584C80006432AE /* PreflightHandler.mm */; };
+		F5B722461C626C94006432AE /* DBManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722301C626C94006432AE /* DBManagerRed.cpp */; };
+		F5B722471C626C94006432AE /* DBManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722301C626C94006432AE /* DBManagerRed.cpp */; };
+		F5B722481C626C94006432AE /* DBManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722301C626C94006432AE /* DBManagerRed.cpp */; };
+		F5B722491C626C94006432AE /* GUIDialogRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722321C626C94006432AE /* GUIDialogRed.cpp */; };
+		F5B7224A1C626C94006432AE /* GUIDialogRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722321C626C94006432AE /* GUIDialogRed.cpp */; };
+		F5B7224B1C626C94006432AE /* GUIDialogRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722321C626C94006432AE /* GUIDialogRed.cpp */; };
+		F5B7224C1C626C94006432AE /* GUIDialogRedAbout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722341C626C94006432AE /* GUIDialogRedAbout.cpp */; };
+		F5B7224D1C626C94006432AE /* GUIDialogRedAbout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722341C626C94006432AE /* GUIDialogRedAbout.cpp */; };
+		F5B7224E1C626C94006432AE /* GUIDialogRedAbout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722341C626C94006432AE /* GUIDialogRedAbout.cpp */; };
+		F5B722521C626C94006432AE /* MediaManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722371C626C94006432AE /* MediaManagerRed.cpp */; };
+		F5B722531C626C94006432AE /* MediaManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722371C626C94006432AE /* MediaManagerRed.cpp */; };
+		F5B722541C626C94006432AE /* MediaManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722371C626C94006432AE /* MediaManagerRed.cpp */; };
+		F5B722551C626C94006432AE /* PlayBackManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722391C626C94006432AE /* PlayBackManagerRed.cpp */; };
+		F5B722561C626C94006432AE /* PlayBackManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722391C626C94006432AE /* PlayBackManagerRed.cpp */; };
+		F5B722571C626C94006432AE /* PlayBackManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722391C626C94006432AE /* PlayBackManagerRed.cpp */; };
+		F5B722581C626C94006432AE /* PlayerManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B7223B1C626C94006432AE /* PlayerManagerRed.cpp */; };
+		F5B722591C626C94006432AE /* PlayerManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B7223B1C626C94006432AE /* PlayerManagerRed.cpp */; };
+		F5B7225A1C626C94006432AE /* PlayerManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B7223B1C626C94006432AE /* PlayerManagerRed.cpp */; };
+		F5B7225B1C626C94006432AE /* RedJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B7223D1C626C94006432AE /* RedJSONOperations.cpp */; };
+		F5B7225C1C626C94006432AE /* RedJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B7223D1C626C94006432AE /* RedJSONOperations.cpp */; };
+		F5B7225D1C626C94006432AE /* RedJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B7223D1C626C94006432AE /* RedJSONOperations.cpp */; };
+		F5B7225E1C626C94006432AE /* ReportManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722401C626C94006432AE /* ReportManagerRed.cpp */; };
+		F5B7225F1C626C94006432AE /* ReportManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722401C626C94006432AE /* ReportManagerRed.cpp */; };
+		F5B722601C626C94006432AE /* ReportManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722401C626C94006432AE /* ReportManagerRed.cpp */; };
+		F5B722611C626C94006432AE /* UpdateManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722421C626C94006432AE /* UpdateManagerRed.cpp */; };
+		F5B722621C626C94006432AE /* UpdateManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722421C626C94006432AE /* UpdateManagerRed.cpp */; };
+		F5B722631C626C94006432AE /* UpdateManagerRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722421C626C94006432AE /* UpdateManagerRed.cpp */; };
+		F5B722641C626C94006432AE /* UtilitiesRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722441C626C94006432AE /* UtilitiesRed.cpp */; };
+		F5B722651C626C94006432AE /* UtilitiesRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722441C626C94006432AE /* UtilitiesRed.cpp */; };
+		F5B722661C626C94006432AE /* UtilitiesRed.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B722441C626C94006432AE /* UtilitiesRed.cpp */; };
 		F5BD02F6148D3A7E001B5583 /* CryptThreading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BD02F4148D3A7E001B5583 /* CryptThreading.cpp */; };
 		F5BDB80C120202F400F0B710 /* DVDSubtitleTagSami.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB80B120202F400F0B710 /* DVDSubtitleTagSami.cpp */; };
 		F5BDB81A1202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5BDB8191202032400F0B710 /* DVDSubtitleTagMicroDVD.cpp */; };
@@ -2761,13 +2788,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		18AC31F61C49445D00AE9433 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 18AC31EC1C49445D00AE9433;
-			remoteInfo = TopShelf;
-		};
 		6E2FACC30E26E08100DF79EA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -2784,7 +2804,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				18AC31F81C49445D00AE9433 /* TopShelf.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2818,7 +2837,6 @@
 		188F7601152217DF009870CE /* GUIOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIOperations.h; sourceTree = "<group>"; };
 		18968DC614155D7C005BA742 /* ApplicationOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationOperations.cpp; sourceTree = "<group>"; };
 		18968DC714155D7C005BA742 /* ApplicationOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplicationOperations.h; sourceTree = "<group>"; };
-		18AC31ED1C49445D00AE9433 /* TopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		18AC31EF1C49445D00AE9433 /* TVServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TVServices.framework; path = Library/Frameworks/TVServices.framework; sourceTree = DEVELOPER_DIR; };
 		18AC31F21C49445D00AE9433 /* ServiceProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ServiceProvider.h; sourceTree = "<group>"; };
 		18AC31F31C49445D00AE9433 /* ServiceProvider.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ServiceProvider.m; sourceTree = "<group>"; };
@@ -3730,7 +3748,7 @@
 		889B4D8C0E0EF86C00FAD25E /* RSSDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RSSDirectory.cpp; sourceTree = "<group>"; };
 		889B4D8D0E0EF86C00FAD25E /* RSSDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSSDirectory.h; sourceTree = "<group>"; };
 		88ECB6580DE013C4003396A7 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = /System/Library/Frameworks/DiskArbitration.framework; sourceTree = "<absolute>"; };
-		8DD76F7E0486A8DE00D96B5E /* MrMC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MrMC; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76F7E0486A8DE00D96B5E /* Blackbird */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Blackbird; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE4E87A517354C4A00D15206 /* XSLTUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XSLTUtils.cpp; sourceTree = "<group>"; };
 		AE4E87A617354C4A00D15206 /* XSLTUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XSLTUtils.h; sourceTree = "<group>"; };
 		AE84CB5915A5B8A600A3810E /* TagLibVFSStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TagLibVFSStream.cpp; sourceTree = "<group>"; };
@@ -3852,7 +3870,7 @@
 		C8D0B2AE1265A9A800F0C0AC /* SystemGlobals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SystemGlobals.cpp; sourceTree = "<group>"; };
 		C8EC5D0C1369519D00CCC10D /* XBMC_keytable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XBMC_keytable.cpp; sourceTree = "<group>"; };
 		C8EC5D0D1369519D00CCC10D /* XBMC_keytable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBMC_keytable.h; sourceTree = "<group>"; };
-		D6299ABB1AFC2A9F00E3059D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6299ABB1AFC2A9F00E3059D /* Blackbird.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackbird.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF00492B162DAEA200A971AD /* PVROperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVROperations.cpp; sourceTree = "<group>"; };
 		DF00492C162DAEA200A971AD /* PVROperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVROperations.h; sourceTree = "<group>"; };
 		DF02BA601A910623006DCA16 /* VideoSyncIos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoSyncIos.cpp; path = videosync/VideoSyncIos.cpp; sourceTree = "<group>"; };
@@ -4639,7 +4657,7 @@
 		E46F7C2B0F77219700C25D29 /* ZeroconfOSX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZeroconfOSX.h; sourceTree = "<group>"; };
 		E46F7C2C0F77219700C25D29 /* ZeroconfOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZeroconfOSX.cpp; sourceTree = "<group>"; };
 		E47252BF175115F9001C1AAA /* darwin_codesign_internals.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = darwin_codesign_internals.command; sourceTree = "<group>"; };
-		E4991089174D0D2600741B6D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4991089174D0D2600741B6D /* Blackbird.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackbird.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E499108D174D0D2600741B6D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-iOS.xcconfig"; sourceTree = "<group>"; };
 		E49910D1174E2E0000741B6D /* App-OSX.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-OSX.xcconfig"; sourceTree = "<group>"; };
@@ -4883,6 +4901,27 @@
 		F5B722011C52962F006432AE /* NSData+GZIP.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+GZIP.m"; sourceTree = "<group>"; };
 		F5B722031C584C80006432AE /* PreflightHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreflightHandler.h; sourceTree = "<group>"; };
 		F5B722041C584C80006432AE /* PreflightHandler.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = PreflightHandler.mm; sourceTree = "<group>"; };
+		F5B722301C626C94006432AE /* DBManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DBManagerRed.cpp; sourceTree = "<group>"; };
+		F5B722311C626C94006432AE /* DBManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DBManagerRed.h; sourceTree = "<group>"; };
+		F5B722321C626C94006432AE /* GUIDialogRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogRed.cpp; sourceTree = "<group>"; };
+		F5B722331C626C94006432AE /* GUIDialogRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogRed.h; sourceTree = "<group>"; };
+		F5B722341C626C94006432AE /* GUIDialogRedAbout.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogRedAbout.cpp; sourceTree = "<group>"; };
+		F5B722351C626C94006432AE /* GUIDialogRedAbout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogRedAbout.h; sourceTree = "<group>"; };
+		F5B722371C626C94006432AE /* MediaManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MediaManagerRed.cpp; sourceTree = "<group>"; };
+		F5B722381C626C94006432AE /* MediaManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaManagerRed.h; sourceTree = "<group>"; };
+		F5B722391C626C94006432AE /* PlayBackManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayBackManagerRed.cpp; sourceTree = "<group>"; };
+		F5B7223A1C626C94006432AE /* PlayBackManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayBackManagerRed.h; sourceTree = "<group>"; };
+		F5B7223B1C626C94006432AE /* PlayerManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerManagerRed.cpp; sourceTree = "<group>"; };
+		F5B7223C1C626C94006432AE /* PlayerManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerManagerRed.h; sourceTree = "<group>"; };
+		F5B7223D1C626C94006432AE /* RedJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RedJSONOperations.cpp; sourceTree = "<group>"; };
+		F5B7223E1C626C94006432AE /* RedJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RedJSONOperations.h; sourceTree = "<group>"; };
+		F5B7223F1C626C94006432AE /* RedMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RedMedia.h; sourceTree = "<group>"; };
+		F5B722401C626C94006432AE /* ReportManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ReportManagerRed.cpp; sourceTree = "<group>"; };
+		F5B722411C626C94006432AE /* ReportManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ReportManagerRed.h; sourceTree = "<group>"; };
+		F5B722421C626C94006432AE /* UpdateManagerRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UpdateManagerRed.cpp; sourceTree = "<group>"; };
+		F5B722431C626C94006432AE /* UpdateManagerRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateManagerRed.h; sourceTree = "<group>"; };
+		F5B722441C626C94006432AE /* UtilitiesRed.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UtilitiesRed.cpp; sourceTree = "<group>"; };
+		F5B722451C626C94006432AE /* UtilitiesRed.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UtilitiesRed.h; sourceTree = "<group>"; };
 		F5BD02F4148D3A7E001B5583 /* CryptThreading.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CryptThreading.cpp; sourceTree = "<group>"; };
 		F5BD02F5148D3A7E001B5583 /* CryptThreading.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CryptThreading.h; sourceTree = "<group>"; };
 		F5BDB80A120202F400F0B710 /* DVDSubtitleTagSami.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDSubtitleTagSami.h; sourceTree = "<group>"; };
@@ -4916,7 +4955,7 @@
 		F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DictionaryUtils.mm; sourceTree = "<group>"; };
 		F5D13EBA1BAA17890075A95C /* DictionaryUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DictionaryUtils.h; sourceTree = "<group>"; };
 		F5D13EC01BAE3C060075A95C /* GUIInfoLabels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GUIInfoLabels.h; sourceTree = "<group>"; };
-		F5D142651BAF0B6D0075A95C /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5D142651BAF0B6D0075A95C /* Blackbird.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackbird.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5D142901BAF29E20075A95C /* App-TVOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-TVOS.xcconfig"; sourceTree = "<group>"; };
 		F5D142931BAF31FB0075A95C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F5D142991BAF31FB0075A95C /* English */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -5015,14 +5054,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		18AC31EA1C49445D00AE9433 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				18AC31F01C49445D00AE9433 /* TVServices.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8DD76F780486A8DE00D96B5E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -5530,11 +5561,10 @@
 		19C28FBDFE9D53C911CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76F7E0486A8DE00D96B5E /* MrMC */,
-				D6299ABB1AFC2A9F00E3059D /* MrMC.app */,
-				E4991089174D0D2600741B6D /* MrMC.app */,
-				F5D142651BAF0B6D0075A95C /* MrMC.app */,
-				18AC31ED1C49445D00AE9433 /* TopShelf.appex */,
+				8DD76F7E0486A8DE00D96B5E /* Blackbird */,
+				D6299ABB1AFC2A9F00E3059D /* Blackbird.app */,
+				E4991089174D0D2600741B6D /* Blackbird.app */,
+				F5D142651BAF0B6D0075A95C /* Blackbird.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -7158,6 +7188,7 @@
 				DF28ED92170E1A11005FA9D2 /* profiles */,
 				4313769112D63F9E00680C15 /* programs */,
 				C8482871156CFCD8005A996F /* pvr */,
+				F5B7222F1C626C94006432AE /* red */,
 				43FAC8BF12D63B7400F67914 /* rendering */,
 				E38E1E000D25F9FD00618676 /* settings */,
 				43FAC84E12D62CAE00F67914 /* storage */,
@@ -8403,6 +8434,34 @@
 			path = "json-rpc";
 			sourceTree = "<group>";
 		};
+		F5B7222F1C626C94006432AE /* red */ = {
+			isa = PBXGroup;
+			children = (
+				F5B722301C626C94006432AE /* DBManagerRed.cpp */,
+				F5B722311C626C94006432AE /* DBManagerRed.h */,
+				F5B722321C626C94006432AE /* GUIDialogRed.cpp */,
+				F5B722331C626C94006432AE /* GUIDialogRed.h */,
+				F5B722341C626C94006432AE /* GUIDialogRedAbout.cpp */,
+				F5B722351C626C94006432AE /* GUIDialogRedAbout.h */,
+				F5B722371C626C94006432AE /* MediaManagerRed.cpp */,
+				F5B722381C626C94006432AE /* MediaManagerRed.h */,
+				F5B722391C626C94006432AE /* PlayBackManagerRed.cpp */,
+				F5B7223A1C626C94006432AE /* PlayBackManagerRed.h */,
+				F5B7223B1C626C94006432AE /* PlayerManagerRed.cpp */,
+				F5B7223C1C626C94006432AE /* PlayerManagerRed.h */,
+				F5B7223D1C626C94006432AE /* RedJSONOperations.cpp */,
+				F5B7223E1C626C94006432AE /* RedJSONOperations.h */,
+				F5B7223F1C626C94006432AE /* RedMedia.h */,
+				F5B722401C626C94006432AE /* ReportManagerRed.cpp */,
+				F5B722411C626C94006432AE /* ReportManagerRed.h */,
+				F5B722421C626C94006432AE /* UpdateManagerRed.cpp */,
+				F5B722431C626C94006432AE /* UpdateManagerRed.h */,
+				F5B722441C626C94006432AE /* UtilitiesRed.cpp */,
+				F5B722451C626C94006432AE /* UtilitiesRed.h */,
+			);
+			path = red;
+			sourceTree = "<group>";
+		};
 		F5CC22851814F7B5006B5E91 /* Sinks */ = {
 			isa = PBXGroup;
 			children = (
@@ -8557,26 +8616,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		18AC31EC1C49445D00AE9433 /* TopShelf */ = {
+		6E2FACBA0E26DF7A00DF79EA /* Blackbird.app */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 18AC31F91C49445D00AE9433 /* Build configuration list for PBXNativeTarget "TopShelf" */;
-			buildPhases = (
-				18AC31E91C49445D00AE9433 /* Sources */,
-				18AC31EA1C49445D00AE9433 /* Frameworks */,
-				18AC31EB1C49445D00AE9433 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = TopShelf;
-			productName = TopShelf;
-			productReference = 18AC31ED1C49445D00AE9433 /* TopShelf.appex */;
-			productType = "com.apple.product-type.tv-app-extension";
-		};
-		6E2FACBA0E26DF7A00DF79EA /* MrMC.app */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MrMC.app" */;
+			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "Blackbird.app" */;
 			buildPhases = (
 				F5DEC3580E6DEBB2005A4E24 /* package root files */,
 				6E2FACC70E26E22400DF79EA /* package dylibs */,
@@ -8587,14 +8629,14 @@
 			dependencies = (
 				6E2FACC40E26E08100DF79EA /* PBXTargetDependency */,
 			);
-			name = MrMC.app;
+			name = Blackbird.app;
 			productName = Kodi.app;
-			productReference = D6299ABB1AFC2A9F00E3059D /* MrMC.app */;
+			productReference = D6299ABB1AFC2A9F00E3059D /* Blackbird.app */;
 			productType = "com.apple.product-type.application";
 		};
-		8DD76F740486A8DE00D96B5E /* MrMC */ = {
+		8DD76F740486A8DE00D96B5E /* Blackbird */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB924708733DCA0010E9CD /* Build configuration list for PBXNativeTarget "MrMC" */;
+			buildConfigurationList = 1DEB924708733DCA0010E9CD /* Build configuration list for PBXNativeTarget "Blackbird" */;
 			buildPhases = (
 				F502C011160F378F00C96C76 /* Make interfaces */,
 				8DD76F760486A8DE00D96B5E /* Sources */,
@@ -8605,15 +8647,15 @@
 			);
 			dependencies = (
 			);
-			name = MrMC;
+			name = Blackbird;
 			productInstallPath = "$(HOME)/bin";
 			productName = Kodi;
-			productReference = 8DD76F7E0486A8DE00D96B5E /* MrMC */;
+			productReference = 8DD76F7E0486A8DE00D96B5E /* Blackbird */;
 			productType = "com.apple.product-type.tool";
 		};
-		E4991088174D0D2600741B6D /* MrMC-iOS */ = {
+		E4991088174D0D2600741B6D /* Blackbird-iOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E49910A5174D0D2600741B6D /* Build configuration list for PBXNativeTarget "MrMC-iOS" */;
+			buildConfigurationList = E49910A5174D0D2600741B6D /* Build configuration list for PBXNativeTarget "Blackbird-iOS" */;
 			buildPhases = (
 				E49910C1174D1F6600741B6D /* Make interfaces */,
 				E4991085174D0D2600741B6D /* Sources */,
@@ -8628,14 +8670,14 @@
 			);
 			dependencies = (
 			);
-			name = "MrMC-iOS";
+			name = "Blackbird-iOS";
 			productName = "Kodi-iOS";
-			productReference = E4991089174D0D2600741B6D /* MrMC.app */;
+			productReference = E4991089174D0D2600741B6D /* Blackbird.app */;
 			productType = "com.apple.product-type.application";
 		};
-		F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */ = {
+		F5D13EC51BAF0B6D0075A95C /* Blackbird-TVOS */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F5D142621BAF0B6D0075A95C /* Build configuration list for PBXNativeTarget "MrMC-TVOS" */;
+			buildConfigurationList = F5D142621BAF0B6D0075A95C /* Build configuration list for PBXNativeTarget "Blackbird-TVOS" */;
 			buildPhases = (
 				F5D13EC61BAF0B6D0075A95C /* Make interfaces */,
 				F5D13EC71BAF0B6D0075A95C /* Sources */,
@@ -8650,11 +8692,10 @@
 			buildRules = (
 			);
 			dependencies = (
-				18AC31F71C49445D00AE9433 /* PBXTargetDependency */,
 			);
-			name = "MrMC-TVOS";
+			name = "Blackbird-TVOS";
 			productName = MrMC;
-			productReference = F5D142651BAF0B6D0075A95C /* MrMC.app */;
+			productReference = F5D142651BAF0B6D0075A95C /* Blackbird.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -8665,15 +8706,6 @@
 			attributes = {
 				LastUpgradeCheck = 0710;
 				TargetAttributes = {
-					18AC31EC1C49445D00AE9433 = {
-						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = 8U6WVDN2Q6;
-						SystemCapabilities = {
-							com.apple.ApplicationGroups.iOS = {
-								enabled = 1;
-							};
-						};
-					};
 					E4991088174D0D2600741B6D = {
 						DevelopmentTeam = 8U6WVDN2Q6;
 					};
@@ -8703,23 +8735,15 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8DD76F740486A8DE00D96B5E /* MrMC */,
-				6E2FACBA0E26DF7A00DF79EA /* MrMC.app */,
-				E4991088174D0D2600741B6D /* MrMC-iOS */,
-				F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */,
-				18AC31EC1C49445D00AE9433 /* TopShelf */,
+				8DD76F740486A8DE00D96B5E /* Blackbird */,
+				6E2FACBA0E26DF7A00DF79EA /* Blackbird.app */,
+				E4991088174D0D2600741B6D /* Blackbird-iOS */,
+				F5D13EC51BAF0B6D0075A95C /* Blackbird-TVOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		18AC31EB1C49445D00AE9433 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E4991087174D0D2600741B6D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -8970,14 +8994,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		18AC31E91C49445D00AE9433 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				18AC31F41C49445D00AE9433 /* ServiceProvider.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8DD76F760486A8DE00D96B5E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -9072,6 +9088,7 @@
 				E38E20460D25F9FD00618676 /* DirectoryNodeYearAlbum.cpp in Sources */,
 				E38E20470D25F9FD00618676 /* DirectoryNodeYearSong.cpp in Sources */,
 				F597B05B18A804E0005AADAE /* DVDVideoCodec.cpp in Sources */,
+				F5B722521C626C94006432AE /* MediaManagerRed.cpp in Sources */,
 				E38E20490D25F9FD00618676 /* QueryParams.cpp in Sources */,
 				E38E204A0D25F9FD00618676 /* MusicDatabaseDirectory.cpp in Sources */,
 				E38E204B0D25F9FD00618676 /* MusicSearchDirectory.cpp in Sources */,
@@ -9124,6 +9141,7 @@
 				E38E20950D25F9FD00618676 /* GUIDialogSeekBar.cpp in Sources */,
 				E38E20980D25F9FD00618676 /* GUIDialogSmartPlaylistEditor.cpp in Sources */,
 				E38E20990D25F9FD00618676 /* GUIDialogSmartPlaylistRule.cpp in Sources */,
+				F5B722611C626C94006432AE /* UpdateManagerRed.cpp in Sources */,
 				E38E209A0D25F9FD00618676 /* GUIDialogSongInfo.cpp in Sources */,
 				E38E209B0D25F9FD00618676 /* GUIDialogSubMenu.cpp in Sources */,
 				E38E209D0D25F9FD00618676 /* GUIDialogVideoBookmarks.cpp in Sources */,
@@ -9212,6 +9230,7 @@
 				E38E22E50D25F9FE00618676 /* MusicInfoScraper.cpp in Sources */,
 				E38E22E70D25F9FE00618676 /* Network.cpp in Sources */,
 				E38E22EB0D25F9FE00618676 /* RegExp.cpp in Sources */,
+				F5B722641C626C94006432AE /* UtilitiesRed.cpp in Sources */,
 				E38E22EC0D25F9FE00618676 /* RssReader.cpp in Sources */,
 				E38E22ED0D25F9FE00618676 /* ScraperParser.cpp in Sources */,
 				E38E22F10D25F9FE00618676 /* Splash.cpp in Sources */,
@@ -9285,6 +9304,7 @@
 				F5987FDB0FBE2DFD008EF4FB /* PAPlayer.cpp in Sources */,
 				F548786D0FE060FF00E506FD /* DVDSubtitleParserMPL2.cpp in Sources */,
 				F5487B4C0FE6F02700E506FD /* StreamDetails.cpp in Sources */,
+				F5B7225B1C626C94006432AE /* RedJSONOperations.cpp in Sources */,
 				7CDAE9050FFCA3520040B25F /* DVDTSCorrection.cpp in Sources */,
 				E4DC97540FFE5BA8008E0C07 /* SAPDirectory.cpp in Sources */,
 				E4DC97550FFE5BA8008E0C07 /* SAPFile.cpp in Sources */,
@@ -9454,6 +9474,7 @@
 				18B7C911129427A6009E7A26 /* GUIDialogVideoSettings.cpp in Sources */,
 				18B7C930129428CA009E7A26 /* PlayList.cpp in Sources */,
 				18B7C931129428CA009E7A26 /* PlayListB4S.cpp in Sources */,
+				F5B722491C626C94006432AE /* GUIDialogRed.cpp in Sources */,
 				18B7C932129428CA009E7A26 /* PlayListFactory.cpp in Sources */,
 				18B7C933129428CA009E7A26 /* PlayListM3U.cpp in Sources */,
 				18B7C934129428CA009E7A26 /* PlayListPLS.cpp in Sources */,
@@ -9576,6 +9597,7 @@
 				DF29BCFD1B5D911800904347 /* GUIWindowEventLog.cpp in Sources */,
 				DFB65FCE15373AE7006B8FF1 /* AEChannelInfo.cpp in Sources */,
 				DFB65FD015373AE7006B8FF1 /* AEPackIEC61937.cpp in Sources */,
+				F5B722581C626C94006432AE /* PlayerManagerRed.cpp in Sources */,
 				DFB65FD215373AE7006B8FF1 /* AEStreamInfo.cpp in Sources */,
 				DFB65FD315373AE7006B8FF1 /* AEUtil.cpp in Sources */,
 				DFB6610915374E80006B8FF1 /* DVDAudioCodecPassthrough.cpp in Sources */,
@@ -9591,6 +9613,7 @@
 				C84828C7156CFCD8005A996F /* PVRChannelGroupsContainer.cpp in Sources */,
 				C84828C8156CFCD8005A996F /* GUIDialogPVRChannelManager.cpp in Sources */,
 				C84828C9156CFCD8005A996F /* GUIDialogPVRChannelsOSD.cpp in Sources */,
+				F5B7225E1C626C94006432AE /* ReportManagerRed.cpp in Sources */,
 				C84828CC156CFCD8005A996F /* GUIDialogPVRGroupManager.cpp in Sources */,
 				C84828CD156CFCD8005A996F /* GUIDialogPVRGuideInfo.cpp in Sources */,
 				C84828CE156CFCD8005A996F /* GUIDialogPVRGuideOSD.cpp in Sources */,
@@ -9633,6 +9656,7 @@
 				1DE0443515828F4B005DDB4D /* Exception.cpp in Sources */,
 				7C1D682915A7D2FD00658B65 /* DatabaseManager.cpp in Sources */,
 				7C1A492315A962EE004AF4A4 /* SeekHandler.cpp in Sources */,
+				F5B722461C626C94006432AE /* DBManagerRed.cpp in Sources */,
 				DF830D0C15BB260C00602BE6 /* GUIDialogKeyboardGeneric.cpp in Sources */,
 				DF830D1215BB262700602BE6 /* GUIKeyboardFactory.cpp in Sources */,
 				36A9466315CF1FA600727135 /* DbUrl.cpp in Sources */,
@@ -9781,6 +9805,7 @@
 				7CCDA0ED192753E30074CF51 /* PltConstants.cpp in Sources */,
 				7CCDA0F6192753E30074CF51 /* PltCtrlPoint.cpp in Sources */,
 				7CCDA0FF192753E30074CF51 /* PltCtrlPointTask.cpp in Sources */,
+				F5B7224C1C626C94006432AE /* GUIDialogRedAbout.cpp in Sources */,
 				7CCDA108192753E30074CF51 /* PltDatagramStream.cpp in Sources */,
 				7CCDA111192753E30074CF51 /* PltDeviceData.cpp in Sources */,
 				7CCDA11A192753E30074CF51 /* PltDeviceHost.cpp in Sources */,
@@ -9792,6 +9817,7 @@
 				7CCDA147192753E30074CF51 /* PltHttpServerTask.cpp in Sources */,
 				7CCDA150192753E30074CF51 /* PltIconsData.cpp in Sources */,
 				7CCDA159192753E30074CF51 /* PltMimeType.cpp in Sources */,
+				F5B722551C626C94006432AE /* PlayBackManagerRed.cpp in Sources */,
 				7CCDA162192753E30074CF51 /* PltProtocolInfo.cpp in Sources */,
 				7CCDA16B192753E30074CF51 /* PltService.cpp in Sources */,
 				7CCDA174192753E30074CF51 /* PltSsdp.cpp in Sources */,
@@ -9946,6 +9972,7 @@
 				395C29BD1A94733100EBC7AD /* Key.cpp in Sources */,
 				E49911D0174E5D2500741B6D /* DVDVideoCodecVDA.cpp in Sources */,
 				E49911D1174E5D2500741B6D /* DVDVideoPPFFmpeg.cpp in Sources */,
+				F5B722591C626C94006432AE /* PlayerManagerRed.cpp in Sources */,
 				E49911D2174E5D2E00741B6D /* DVDDemux.cpp in Sources */,
 				E49911D3174E5D2E00741B6D /* DVDDemuxBXA.cpp in Sources */,
 				F590456C1BA372A600DB589A /* IOSExternalTouchController.mm in Sources */,
@@ -10073,6 +10100,7 @@
 				E4991263174E5D8F00741B6D /* File.cpp in Sources */,
 				E4991264174E5D8F00741B6D /* FileCache.cpp in Sources */,
 				E4991265174E5D8F00741B6D /* FileDirectoryFactory.cpp in Sources */,
+				F5B7224D1C626C94006432AE /* GUIDialogRedAbout.cpp in Sources */,
 				E4991266174E5D8F00741B6D /* FileFactory.cpp in Sources */,
 				DF29BCEC1B5D911800904347 /* AddonManagementEvent.cpp in Sources */,
 				E4991267174E5D8F00741B6D /* FileReaderFile.cpp in Sources */,
@@ -10105,6 +10133,7 @@
 				E4991289174E5D9900741B6D /* DirectoryNodeRoot.cpp in Sources */,
 				E499128A174E5D9900741B6D /* DirectoryNodeSingles.cpp in Sources */,
 				E499128B174E5D9900741B6D /* DirectoryNodeSong.cpp in Sources */,
+				F5B7225C1C626C94006432AE /* RedJSONOperations.cpp in Sources */,
 				E499128C174E5D9900741B6D /* DirectoryNodeSongTop100.cpp in Sources */,
 				E499128D174E5D9900741B6D /* DirectoryNodeTop100.cpp in Sources */,
 				E499128E174E5D9900741B6D /* DirectoryNodeYearAlbum.cpp in Sources */,
@@ -10530,6 +10559,7 @@
 				E4991478174E605900741B6D /* SystemInfo.cpp in Sources */,
 				E4991479174E605900741B6D /* TextSearch.cpp in Sources */,
 				E499147B174E605900741B6D /* TimeUtils.cpp in Sources */,
+				F5B722531C626C94006432AE /* MediaManagerRed.cpp in Sources */,
 				E499147D174E605900741B6D /* URIUtils.cpp in Sources */,
 				E499147E174E605900741B6D /* UrlOptions.cpp in Sources */,
 				E499147F174E605900741B6D /* Variant.cpp in Sources */,
@@ -10554,6 +10584,7 @@
 				E4991492174E606600741B6D /* GUIViewStateVideo.cpp in Sources */,
 				E4991493174E606600741B6D /* PlayerController.cpp in Sources */,
 				E4991494174E606600741B6D /* Teletext.cpp in Sources */,
+				F5B722471C626C94006432AE /* DBManagerRed.cpp in Sources */,
 				E4991495174E606600741B6D /* VideoDatabase.cpp in Sources */,
 				E4991496174E606600741B6D /* VideoDbUrl.cpp in Sources */,
 				E4991497174E606600741B6D /* VideoInfoDownloader.cpp in Sources */,
@@ -10586,6 +10617,7 @@
 				E4991533174E642900741B6D /* DatabaseManager.cpp in Sources */,
 				E4991534174E642900741B6D /* DbUrl.cpp in Sources */,
 				E4991535174E642900741B6D /* DynamicDll.cpp in Sources */,
+				F5B7224A1C626C94006432AE /* GUIDialogRed.cpp in Sources */,
 				E4991537174E642900741B6D /* FileItem.cpp in Sources */,
 				E4991538174E642900741B6D /* GUIInfoManager.cpp in Sources */,
 				E4991539174E642900741B6D /* GUILargeTextureManager.cpp in Sources */,
@@ -10613,11 +10645,13 @@
 				E499156A174E65AB00741B6D /* ButtonTranslator.cpp in Sources */,
 				E499156B174E65AB00741B6D /* InertialScrollingHandler.cpp in Sources */,
 				E499156D174E65AB00741B6D /* KeyboardStat.cpp in Sources */,
+				F5B722621C626C94006432AE /* UpdateManagerRed.cpp in Sources */,
 				4260D5C81B67BB8F003F6F2D /* GUIWindowSplash.cpp in Sources */,
 				E499156E174E65AB00741B6D /* SDLJoystick.cpp in Sources */,
 				E499156F174E65AC00741B6D /* XBMC_keytable.cpp in Sources */,
 				E4991574174E661400741B6D /* WinEventsIOS.mm in Sources */,
 				E4991575174E661400741B6D /* WinSystemIOS.mm in Sources */,
+				F5B722651C626C94006432AE /* UtilitiesRed.cpp in Sources */,
 				DF56EF251A798A5E00CAAEFB /* HttpRangeUtils.cpp in Sources */,
 				F59045621BA372A600DB589A /* DarwinUtils.mm in Sources */,
 				E499158A174E68D800741B6D /* LinuxRendererGLES.cpp in Sources */,
@@ -10697,6 +10731,7 @@
 				7CCDA12D192753E30074CF51 /* PltHttp.cpp in Sources */,
 				7CCDA136192753E30074CF51 /* PltHttpClientTask.cpp in Sources */,
 				7CCDA13F192753E30074CF51 /* PltHttpServer.cpp in Sources */,
+				F5B722561C626C94006432AE /* PlayBackManagerRed.cpp in Sources */,
 				7CCDA148192753E30074CF51 /* PltHttpServerTask.cpp in Sources */,
 				DF32466319E931A8005E8CFB /* ActiveAEResampleFFMPEG.cpp in Sources */,
 				7CCDA151192753E30074CF51 /* PltIconsData.cpp in Sources */,
@@ -10714,6 +10749,7 @@
 				7CCDA1BB192753E30074CF51 /* AVTransportSCPD.cpp in Sources */,
 				F590456A1BA372A600DB589A /* IOSEAGLView.mm in Sources */,
 				7CCDA1C8192753E30074CF51 /* PltMediaController.cpp in Sources */,
+				F5B7225F1C626C94006432AE /* ReportManagerRed.cpp in Sources */,
 				7CCDA1D1192753E30074CF51 /* PltMediaRenderer.cpp in Sources */,
 				7CCDA1DC192753E30074CF51 /* RdrConnectionManagerSCPD.cpp in Sources */,
 				7CCDA1E7192753E30074CF51 /* RenderingControlSCPD.cpp in Sources */,
@@ -10874,11 +10910,13 @@
 				F5D13F141BAF0B6D0075A95C /* DVDSubtitleParserMPL2.cpp in Sources */,
 				F5D13F151BAF0B6D0075A95C /* DVDSubtitleParserSami.cpp in Sources */,
 				F5D13F161BAF0B6D0075A95C /* PngIO.cpp in Sources */,
+				F5B722601C626C94006432AE /* ReportManagerRed.cpp in Sources */,
 				F5D13F171BAF0B6D0075A95C /* DVDFactorySubtitle.cpp in Sources */,
 				F5D13F181BAF0B6D0075A95C /* DVDSubtitleLineCollection.cpp in Sources */,
 				F5D13F191BAF0B6D0075A95C /* DVDSubtitleParserSubrip.cpp in Sources */,
 				F5D13F1A1BAF0B6D0075A95C /* DVDSubtitleParserVplayer.cpp in Sources */,
 				F5D13F1B1BAF0B6D0075A95C /* DVDSubtitleStream.cpp in Sources */,
+				F5B722541C626C94006432AE /* MediaManagerRed.cpp in Sources */,
 				F5D13F1C1BAF0B6D0075A95C /* DVDSubtitleTagMicroDVD.cpp in Sources */,
 				F5D13F1D1BAF0B6D0075A95C /* DVDSubtitleTagSami.cpp in Sources */,
 				F5D13F1E1BAF0B6D0075A95C /* DVDAudio.cpp in Sources */,
@@ -11175,6 +11213,7 @@
 				F5D1403A1BAF0B6D0075A95C /* GenericTouchActionHandler.cpp in Sources */,
 				F5D1403B1BAF0B6D0075A95C /* ITouchInputHandling.cpp in Sources */,
 				F5D1403C1BAF0B6D0075A95C /* SkinVariable.cpp in Sources */,
+				F5B7225A1C626C94006432AE /* PlayerManagerRed.cpp in Sources */,
 				F5D1403D1BAF0B6D0075A95C /* AddonsOperations.cpp in Sources */,
 				F5D1403E1BAF0B6D0075A95C /* ApplicationOperations.cpp in Sources */,
 				F5D1403F1BAF0B6D0075A95C /* AudioLibrary.cpp in Sources */,
@@ -11227,6 +11266,7 @@
 				F5D1406D1BAF0B6D0075A95C /* GUIWindowMusicSongs.cpp in Sources */,
 				F5D1406E1BAF0B6D0075A95C /* Album.cpp in Sources */,
 				F5D1406F1BAF0B6D0075A95C /* Artist.cpp in Sources */,
+				F5B722661C626C94006432AE /* UtilitiesRed.cpp in Sources */,
 				F5D140701BAF0B6D0075A95C /* GUIViewStateMusic.cpp in Sources */,
 				F5D140711BAF0B6D0075A95C /* MusicDatabase.cpp in Sources */,
 				F5D140721BAF0B6D0075A95C /* MusicDbUrl.cpp in Sources */,
@@ -11316,6 +11356,7 @@
 				F5D140C51BAF0B6D0075A95C /* ProfilesManager.cpp in Sources */,
 				F5D140C61BAF0B6D0075A95C /* GUIViewStatePrograms.cpp in Sources */,
 				F5D140C71BAF0B6D0075A95C /* GUIWindowPrograms.cpp in Sources */,
+				F5B722631C626C94006432AE /* UpdateManagerRed.cpp in Sources */,
 				F5D140C81BAF0B6D0075A95C /* PVRClient.cpp in Sources */,
 				F5D140C91BAF0B6D0075A95C /* PVRClients.cpp in Sources */,
 				F5D140CA1BAF0B6D0075A95C /* PVRChannel.cpp in Sources */,
@@ -11325,6 +11366,7 @@
 				F5D140CE1BAF0B6D0075A95C /* PVRChannelGroupsContainer.cpp in Sources */,
 				F5D140CF1BAF0B6D0075A95C /* GUIDialogPVRChannelManager.cpp in Sources */,
 				F5D140D01BAF0B6D0075A95C /* GUIDialogPVRChannelsOSD.cpp in Sources */,
+				F5B722481C626C94006432AE /* DBManagerRed.cpp in Sources */,
 				F5D140D11BAF0B6D0075A95C /* GUIDialogPVRGroupManager.cpp in Sources */,
 				F5D140D21BAF0B6D0075A95C /* GUIDialogPVRGuideInfo.cpp in Sources */,
 				F5D140D31BAF0B6D0075A95C /* GUIDialogPVRGuideOSD.cpp in Sources */,
@@ -11399,6 +11441,7 @@
 				F5D141171BAF0B6D0075A95C /* HTMLUtil.cpp in Sources */,
 				F5D141181BAF0B6D0075A95C /* HttpHeader.cpp in Sources */,
 				F5D141191BAF0B6D0075A95C /* HttpParser.cpp in Sources */,
+				F5B722571C626C94006432AE /* PlayBackManagerRed.cpp in Sources */,
 				F5D1411A1BAF0B6D0075A95C /* HttpResponse.cpp in Sources */,
 				F5D1411B1BAF0B6D0075A95C /* InfoLoader.cpp in Sources */,
 				F5D1411C1BAF0B6D0075A95C /* JobManager.cpp in Sources */,
@@ -11518,6 +11561,7 @@
 				F5D141881BAF0B6D0075A95C /* XBApplicationEx.cpp in Sources */,
 				F5D141891BAF0B6D0075A95C /* XBDateTime.cpp in Sources */,
 				F5D1418A1BAF0B6D0075A95C /* MouseStat.cpp in Sources */,
+				F5B7225D1C626C94006432AE /* RedJSONOperations.cpp in Sources */,
 				F5D1418B1BAF0B6D0075A95C /* ButtonTranslator.cpp in Sources */,
 				F5D1418C1BAF0B6D0075A95C /* InertialScrollingHandler.cpp in Sources */,
 				F5D1418D1BAF0B6D0075A95C /* KeyboardStat.cpp in Sources */,
@@ -11600,6 +11644,7 @@
 				F5D141DB1BAF0B6D0075A95C /* PltDatagramStream.cpp in Sources */,
 				F5D141DC1BAF0B6D0075A95C /* PltDeviceData.cpp in Sources */,
 				F5D141DD1BAF0B6D0075A95C /* PltDeviceHost.cpp in Sources */,
+				F5B7224E1C626C94006432AE /* GUIDialogRedAbout.cpp in Sources */,
 				F5D141DE1BAF0B6D0075A95C /* PltEvent.cpp in Sources */,
 				F5D141DF1BAF0B6D0075A95C /* PltHttp.cpp in Sources */,
 				F5D141E01BAF0B6D0075A95C /* PltHttpClientTask.cpp in Sources */,
@@ -11695,20 +11740,16 @@
 				F5D142391BAF0B6D0075A95C /* InputCodingTableBaiduPY.cpp in Sources */,
 				F5D1423A1BAF0B6D0075A95C /* InputCodingTableBasePY.cpp in Sources */,
 				F5D1423B1BAF0B6D0075A95C /* InputCodingTableFactory.cpp in Sources */,
+				F5B7224B1C626C94006432AE /* GUIDialogRed.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		18AC31F71C49445D00AE9433 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 18AC31EC1C49445D00AE9433 /* TopShelf */;
-			targetProxy = 18AC31F61C49445D00AE9433 /* PBXContainerItemProxy */;
-		};
 		6E2FACC40E26E08100DF79EA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 8DD76F740486A8DE00D96B5E /* MrMC */;
+			target = 8DD76F740486A8DE00D96B5E /* Blackbird */;
 			targetProxy = 6E2FACC30E26E08100DF79EA /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -11733,98 +11774,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		18AC31FA1C49445D00AE9433 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = TopShelf/TopShelf.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				INFOPLIST_FILE = TopShelf/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = tv.mrmc.mrmc.tvos.ts;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SDKROOT = appletvos;
-				SKIP_INSTALL = YES;
-				TVOS_DEPLOYMENT_TARGET = 9.1;
-			};
-			name = Debug;
-		};
-		18AC31FB1C49445D00AE9433 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = TopShelf/TopShelf.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Distribution";
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				INFOPLIST_FILE = TopShelf/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = tv.mrmc.mrmc.tvos.ts;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SDKROOT = appletvos;
-				SKIP_INSTALL = YES;
-				TVOS_DEPLOYMENT_TARGET = 9.1;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		1DEB924808733DCA0010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E49910D1174E2E0000741B6D /* App-OSX.xcconfig */;
@@ -11853,7 +11802,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = Blackbird;
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = "";
 				ZERO_LINK = NO;
@@ -11889,7 +11838,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = Blackbird;
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = "";
 				ZERO_LINK = NO;
@@ -11927,7 +11876,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = Blackbird;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -11938,7 +11887,7 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = Blackbird;
 				SDKROOT = macosx;
 				ZERO_LINK = NO;
 			};
@@ -12030,7 +11979,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = Blackbird;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = appletvos;
 				STRIP_STYLE = "non-global";
@@ -12061,7 +12010,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = Blackbird;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = appletvos;
 				SKIP_INSTALL = NO;
@@ -12075,16 +12024,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		18AC31F91C49445D00AE9433 /* Build configuration list for PBXNativeTarget "TopShelf" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				18AC31FA1C49445D00AE9433 /* Debug */,
-				18AC31FB1C49445D00AE9433 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		1DEB924708733DCA0010E9CD /* Build configuration list for PBXNativeTarget "MrMC" */ = {
+		1DEB924708733DCA0010E9CD /* Build configuration list for PBXNativeTarget "Blackbird" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB924808733DCA0010E9CD /* Debug */,
@@ -12102,7 +12042,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MrMC.app" */ = {
+		6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "Blackbird.app" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6E2FACBB0E26DF7A00DF79EA /* Debug */,
@@ -12111,7 +12051,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E49910A5174D0D2600741B6D /* Build configuration list for PBXNativeTarget "MrMC-iOS" */ = {
+		E49910A5174D0D2600741B6D /* Build configuration list for PBXNativeTarget "Blackbird-iOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E49910A3174D0D2600741B6D /* Debug */,
@@ -12120,7 +12060,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F5D142621BAF0B6D0075A95C /* Build configuration list for PBXNativeTarget "MrMC-TVOS" */ = {
+		F5D142621BAF0B6D0075A95C /* Build configuration list for PBXNativeTarget "Blackbird-TVOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F5D142631BAF0B6D0075A95C /* Debug */,
