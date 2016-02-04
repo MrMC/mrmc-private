@@ -154,11 +154,6 @@ bool CRecentlyAddedJob::UpdateVideo()
     home->SetProperty("LatestEpisode." + value + ".RunningTime"   , "");
   }  
 
-#if defined(TARGET_DARWIN_TVOS)
-  // send recently added Movies and TvShows to TopShelf
-  CTVOSTopShelf::GetInstance().SetTopShelfItems(items,TVShowItems);
-#endif
-
   i = 0;
   CFileItemList MusicVideoItems;
 
