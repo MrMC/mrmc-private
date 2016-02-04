@@ -320,7 +320,7 @@ void CGUIDialogMN::TestServers()
 {
   SET_CONTROL_LABEL(GOOGLESERVER, "'www.google.com' --> testing");
   SET_CONTROL_LABEL(NWSEREVER, "'www.nationwidemember.com' --> testing");
-  SET_CONTROL_LABEL(PROXYMNSERVER, "'proxy.membernettv.com' --> testing");
+  //SET_CONTROL_LABEL(PROXYMNSERVER, "'proxy.membernettv.com' --> testing");
   
   if (PingMNServer("http://www.google.com"))
     SET_CONTROL_LABEL(GOOGLESERVER, "'www.google.com' is reachable");
@@ -331,11 +331,12 @@ void CGUIDialogMN::TestServers()
     SET_CONTROL_LABEL(NWSEREVER, "'www.nationwidemember.com' is reachable");
   else
     SET_CONTROL_LABEL(NWSEREVER, "'www.nationwidemember.com' is not reachable");
-  
+  /*
   if (PingMNServer("http://proxy.membernettv.com"))
     SET_CONTROL_LABEL(PROXYMNSERVER, "'proxy.membernettv.com' is reachable");
   else
     SET_CONTROL_LABEL(PROXYMNSERVER, "'proxy.membernettv.com' is not reachable");
+  */
 }
 
 void CGUIDialogMN::SetResolution(const std::string &strResolution)
