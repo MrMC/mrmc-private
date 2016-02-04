@@ -251,9 +251,9 @@ void CPlayBackManagerRed::Process()
               // now play the asset if valid (downloaded and md5 checked)
               if (asset.valid)
               {
-                CFileItem item;
-                item.SetLabel2(asset.name);
-                item.SetPath(asset.localpath);
+                CFileItemPtr item(new CFileItem());
+                item->SetLabel2(asset.name);
+                item->SetPath(asset.localpath);
                 
                 g_playlistPlayer.ClearPlaylist(g_playlistPlayer.GetCurrentPlaylist());
                 g_playlistPlayer.Reset();
@@ -262,14 +262,14 @@ void CPlayBackManagerRed::Process()
                 
                 if (IsRedVideo(asset)) // Video file
                 {
-                  item.GetVideoInfoTag()->m_strTitle = asset.name;
-                  item.GetVideoInfoTag()->m_streamDetails.Reset();
-                  item.GetVideoInfoTag()->m_artist.push_back(asset.artist); // this sets musicvideo
-                  item.GetVideoInfoTag()->m_strAlbum = asset.album;
-                  item.GetVideoInfoTag()->m_genre.push_back(asset.genre);
-                  item.GetVideoInfoTag()->m_iYear = strtol(asset.year.c_str(), NULL, 10);
-                  item.GetVideoInfoTag()->m_iDbId = -1;
-                  item.GetVideoInfoTag()->m_iFileId = -1;
+                  item->GetVideoInfoTag()->m_strTitle = asset.name;
+                  item->GetVideoInfoTag()->m_streamDetails.Reset();
+                  item->GetVideoInfoTag()->m_artist.push_back(asset.artist); // this sets musicvideo
+                  item->GetVideoInfoTag()->m_strAlbum = asset.album;
+                  item->GetVideoInfoTag()->m_genre.push_back(asset.genre);
+                  item->GetVideoInfoTag()->m_iYear = strtol(asset.year.c_str(), NULL, 10);
+                  item->GetVideoInfoTag()->m_iDbId = -1;
+                  item->GetVideoInfoTag()->m_iFileId = -1;
                   CMediaSettings::GetInstance().SetVideoStartWindowed(true);
                   iPlayList = PLAYLIST_VIDEO;
                 }
@@ -277,21 +277,21 @@ void CPlayBackManagerRed::Process()
                 
                 else //Audio file
                 {
-                  item.GetMusicInfoTag()->SetTitle(asset.name);
-                  item.GetMusicInfoTag()->SetArtist(asset.artist);
-                  item.GetMusicInfoTag()->SetAlbum(asset.album);
-                  item.GetMusicInfoTag()->SetYear(strtol(asset.year.c_str(), NULL, 10));
-                  item.GetMusicInfoTag()->SetTrackNumber(strtol(asset.tracknumber.c_str(), NULL, 10));
-                  item.GetMusicInfoTag()->SetGenre(asset.genre);
+                  item->GetMusicInfoTag()->SetTitle(asset.name);
+                  item->GetMusicInfoTag()->SetArtist(asset.artist);
+                  item->GetMusicInfoTag()->SetAlbum(asset.album);
+                  item->GetMusicInfoTag()->SetYear(strtol(asset.year.c_str(), NULL, 10));
+                  item->GetMusicInfoTag()->SetTrackNumber(strtol(asset.tracknumber.c_str(), NULL, 10));
+                  item->GetMusicInfoTag()->SetGenre(asset.genre);
                   
                 }
                 
                 if (XFILE::CFile::Exists(asset.thumbnail_localpath))
-                  item.SetArt("thumb", asset.thumbnail_localpath);
+                  item->SetArt("thumb", asset.thumbnail_localpath);
                 else
-                  item.SetArt("thumb", asset.thumbnail_url);
+                  item->SetArt("thumb", asset.thumbnail_url);
                 
-                g_playlistPlayer.Add(iPlayList, (CFileItemPtr) &item);
+                g_playlistPlayer.Add(iPlayList,item);
                 g_playlistPlayer.SetCurrentPlaylist(iPlayList);
                 
                 // play!
