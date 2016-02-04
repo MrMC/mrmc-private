@@ -2251,7 +2251,6 @@
     "description": "Send RED Click",
     "transport": "Response",
     "permission": "ControlPlayback",
-    // "params": [{ "name": "click", "type": "string"}],
     "params": [ { "name": "click", "type": "string", "required": true }
     ],
     "returns": "string"
