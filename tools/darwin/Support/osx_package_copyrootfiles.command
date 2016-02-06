@@ -17,7 +17,7 @@ SYNC="rsync -aq --exclude .git* --exclude .DS_Store* --exclude *.dll --exclude *
 SYNCSKIN="rsync -aq --exclude .git* --exclude CVS* --exclude .svn* --exclude .cvsignore* --exclude .cvspass* --exclude .DS_Store* --exclude *.dll  --exclude *.DLL --exclude *linux.* --exclude *.png --exclude *.jpg --exclude *.bat"
 
 # rsync command for including everything but the skins
-ADDONSYNC="rsync -aq --no-links --exclude .git* --exclude .DS_Store* --exclude addons/skin.mrmc --exclude addons/skin.mrmc-touch --exclude addons/skin.pm3.hd"
+ADDONSYNC="rsync -aq --no-links --exclude .git* --exclude .DS_Store* --exclude addons/skin.mrmc --exclude addons/skin.mrmc-touch --exclude addons/skin.red"
 
 mkdir -p "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME"
 mkdir -p "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME/addons"
@@ -49,15 +49,15 @@ if [ -d "$SRCROOT/extras/user" ]; then
 	${SYNC} "$SRCROOT/extras/user/" "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME/extras/user"
 fi
 
- # sync pm3.hd skin on tvos
-if [ -f "$SRCROOT/addons/skin.pm3.hd/addon.xml" ]; then
+ # sync red skin on tvos
+if [ -f "$SRCROOT/addons/skin.red/addon.xml" ]; then
   SYNCSKIN_D=${SYNC}
-  if [ -f "$SRCROOT/addons/skin.pm3.hd/media/Textures.xbt" ]; then
+  if [ -f "$SRCROOT/addons/skin.red/media/Textures.xbt" ]; then
     SYNCSKIN_D="${SYNC} --exclude *.png --exclude *.jpg --exclude *.gif --exclude media/Makefile* --prune-empty-dirs"
   fi
-  ${SYNCSKIN_D} "$SRCROOT/addons/skin.pm3.hd"    "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME/addons"
-  ${SYNC} "$SRCROOT/addons/skin.pm3.hd/backgrounds" "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME/addons/skin.pm3.hd"
-  ${SYNC} "$SRCROOT/addons/skin.pm3.hd/icon.png" "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME/addons/skin.pm3.hd"
+  ${SYNCSKIN_D} "$SRCROOT/addons/skin.red"    "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME/addons"
+  ${SYNC} "$SRCROOT/addons/skin.red/backgrounds" "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME/addons/skin.red"
+  ${SYNC} "$SRCROOT/addons/skin.red/icon.png" "$TARGET_BUILD_DIR/$TARGET_NAME/Contents/Resources/$APP_NAME/addons/skin.red"
 fi
 
 # magic that gets the icon to update
