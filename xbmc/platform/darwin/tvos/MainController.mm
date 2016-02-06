@@ -1065,7 +1065,7 @@ MainController *g_xbmcController;
   m_window.autoresizingMask = 0;
   m_window.autoresizesSubviews = NO;
 
-  [self enableScreenSaver];
+  [self disableScreenSaver];
 
   NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
   [center addObserver: self
@@ -1231,8 +1231,8 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 - (void)enableScreenSaver
 {
-  m_disableIdleTimer = NO;
-  [[UIApplication sharedApplication] setIdleTimerDisabled:NO];
+  //m_disableIdleTimer = NO;
+  //[[UIApplication sharedApplication] setIdleTimerDisabled:NO];
 }
 
 //--------------------------------------------------------------
