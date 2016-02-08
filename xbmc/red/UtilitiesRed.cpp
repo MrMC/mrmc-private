@@ -108,10 +108,12 @@ std::string FormatUrl(const PlayerInfo &PlayerInfo, const std::string &function,
 
 void SetDefaultPlayerInfo(PlayerInfo &player)
 {
-  player.strPlayerID = "1";
+  player.strPlayerID = "22";
   player.strSecretKey= "MsqTZFsBYXeNiTprJk3W";
   player.strApiKey   = "cFpN1RnsW9YulGb2Vhvy";
-  player.strApiURL   = "http://ec2-54-235-246-85.compute-1.amazonaws.com/api/1";
+  player.strApiURL   = "http://ec2-54-235-246-85.compute-1.amazonaws.com/api/1/";
+  player.strPlayerClientID = "1";
+  player.strProgramID = "15";
   CLog::Log(LOGDEBUG, "**RED** - SetDefaultPlayerInfo: using player-id=%s", player.strPlayerID.c_str());
 }
 
