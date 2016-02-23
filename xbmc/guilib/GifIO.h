@@ -21,7 +21,7 @@
  */
 
 #include "guilib/iimage.h"
-#include "DllLibGif.h"
+#include <gif_lib.h>
 #include <memory>
 #include <vector>
 #include "URL.h"
@@ -89,7 +89,6 @@ private:
   unsigned int m_loops;
   unsigned int m_numFrames;
 
-  DllLibGif m_dll;
   std::string m_filename;
   GifFileType* m_gif;
   std::vector<GifColor> m_globalPalette;

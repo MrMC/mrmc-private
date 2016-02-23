@@ -77,21 +77,17 @@ CGifIO::CGifIO() :
   m_pTemplate(nullptr),
   m_isAnimated(-1)
 {
-  if (!m_dll.Load())
-    CLog::Log(LOGERROR, "Gif::Gif(): Could not load giflib");
   m_gifFile = new XFILE::CFile();
 }
 
 CGifIO::~CGifIO()
 {
-  if (m_dll.IsLoaded())
+  if (m_gifFile)
   {
     Close(m_gif);
-
-    m_dll.Unload();
     Release();
   }
-  delete m_gifFile;
+  SAFE_DELETE(m_gifFile);
 }
 
 void CGifIO::Close(GifFileType* gif)
@@ -99,11 +95,11 @@ void CGifIO::Close(GifFileType* gif)
   int err = 0;
   int reason = 0;
 #if GIFLIB_MAJOR == 5 && GIFLIB_MINOR >= 1
-  err = m_dll.DGifCloseFile(gif, &reason);
+  err = DGifCloseFile(gif, &reason);
 #else
-  err = m_dll.DGifCloseFile(gif);
+  err = DGifCloseFile(gif);
 #if GIFLIB_MAJOR < 5
-  reason = m_dll.GifLastError();
+  reason = GifLastError();
 #endif
   if (err == GIF_ERROR)
     free(gif);
@@ -136,7 +132,7 @@ void CGifIO::ConvertColorTable(std::vector<GifColor> &dest, ColorMapObject* src,
 
 bool CGifIO::LoadGifMetaData(GifFileType* gif)
 {
-  if (!m_dll.IsLoaded() || !Slurp(gif))
+  if (!Slurp(gif))
     return false;
 
   m_height = gif->SHeight;
@@ -183,9 +179,6 @@ bool CGifIO::LoadGifMetaData(GifFileType* gif)
 
 bool CGifIO::LoadGifMetaData(const char* file)
 {
-  if (!m_dll.IsLoaded())
-    return false;
-
   m_gifFile->Close();
   if (!m_gifFile->Open(file) || !Open(m_gif, m_gifFile, ReadFromVfs))
     return false;
@@ -195,7 +188,7 @@ bool CGifIO::LoadGifMetaData(const char* file)
 
 bool CGifIO::Slurp(GifFileType* gif)
 {
-  if (m_dll.DGifSlurp(gif) == GIF_ERROR)
+  if (DGifSlurp(gif) == GIF_ERROR)
   {
     int reason = 0;
 #if GIFLIB_MAJOR == 5
@@ -244,9 +237,6 @@ bool CGifIO::LoadGif(const char* file)
 
 bool CGifIO::IsAnimated(const char* file)
 {
-  if (!m_dll.IsLoaded())
-    return false;
-
   if (m_isAnimated < 0)
   {
     m_filename = file;
@@ -274,11 +264,11 @@ bool CGifIO::Open(GifFileType*& gif, void *dataPtr, InputFunc readFunc)
 {
   int err = 0;
 #if GIFLIB_MAJOR == 5
-  gif = m_dll.DGifOpen(dataPtr, readFunc, &err);
+  gif = DGifOpen(dataPtr, readFunc, &err);
 #else
-  gif = m_dll.DGifOpen(dataPtr, readFunc);
+  gif = DGifOpen(dataPtr, readFunc);
   if (!gif)
-    err = m_dll.GifLastError();
+    err = GifLastError();
 #endif
 
   gif = DGifOpen(dataPtr, readFunc, &err);
@@ -315,7 +305,7 @@ bool CGifIO::GcbToFrame(GifFrame &frame, unsigned int imgIdx)
   {
 #if GIFLIB_MAJOR == 5
     GraphicsControlBlock gcb;
-    if (!m_dll.DGifSavedExtensionToGCB(m_gif, imgIdx, &gcb))
+    if (!DGifSavedExtensionToGCB(m_gif, imgIdx, &gcb))
     {
       PrettyPrintError(StringUtils::Format("Gif::GcbToFrame(): Could not read GraphicsControlBlock of frame %d in file %s",
         imgIdx, memOrFile().c_str()), m_gif->Error);
@@ -536,9 +526,6 @@ void CGifIO::ClearFrameAreaToTransparency(unsigned char* dest, const GifFrame &f
 
 bool CGifIO::LoadImageFromMemory(unsigned char* buffer, unsigned int bufSize, unsigned int width, unsigned int height)
 {
-  if (!m_dll.IsLoaded())
-    return false;
-
   if (!buffer || !bufSize || !width || !height)
     return false;
 
@@ -586,7 +573,7 @@ bool CGifIO::LoadImageFromMemory(unsigned char* buffer, unsigned int bufSize, un
 bool CGifIO::Decode(unsigned char* const pixels, unsigned int width, unsigned int height, unsigned int pitch, unsigned int format)
 {
   if (m_width == 0 || m_height == 0
-    || !m_dll.IsLoaded() || !m_gif
+    || !m_gif
     || format != XB_FMT_A8R8G8B8 || !m_numFrames)
     return false;
 
@@ -625,7 +612,7 @@ bool CGifIO::CreateThumbnailFromSurface(unsigned char* bufferin, unsigned int wi
 
 void CGifIO::PrettyPrintError(std::string messageTemplate, int reason)
 {
-  const char* error = m_dll.GifErrorString(reason);
+  const char* error = GifErrorString(reason);
   std::string message;
   if (error)
   {
