@@ -1271,7 +1271,7 @@ MainController *g_xbmcController;
   bool inActive = [UIApplication sharedApplication].applicationState == UIApplicationStateInactive;
   if (inActive)
   {
-    NSURL *url = [NSURL URLWithString:@"mrmc://wakeup"];
+    NSURL *url = [NSURL URLWithString:@"nwmn://wakeup"];
     [[UIApplication sharedApplication] openURL:url];
   }
 
