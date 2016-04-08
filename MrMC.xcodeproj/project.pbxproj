@@ -9,27 +9,27 @@
 /* Begin PBXBuildFile section */
 		0E3036EC1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
 		0E3036ED1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
-		1835888A1CB6E09500D84C73 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887A1CB6E09500D84C73 /* GUIDialogMN.cpp */; };
-		1835888B1CB6E09500D84C73 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887A1CB6E09500D84C73 /* GUIDialogMN.cpp */; };
-		1835888C1CB6E09500D84C73 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887A1CB6E09500D84C73 /* GUIDialogMN.cpp */; };
-		1835888D1CB6E09500D84C73 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887C1CB6E09500D84C73 /* GUIDialogMNDemand.cpp */; };
-		1835888E1CB6E09500D84C73 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887C1CB6E09500D84C73 /* GUIDialogMNDemand.cpp */; };
-		1835888F1CB6E09500D84C73 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887C1CB6E09500D84C73 /* GUIDialogMNDemand.cpp */; };
-		183588901CB6E09500D84C73 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887E1CB6E09500D84C73 /* LogManagerMN.cpp */; };
-		183588911CB6E09500D84C73 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887E1CB6E09500D84C73 /* LogManagerMN.cpp */; };
-		183588921CB6E09500D84C73 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1835887E1CB6E09500D84C73 /* LogManagerMN.cpp */; };
-		183588961CB6E09500D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588811CB6E09500D84C73 /* MNJSONOperations.cpp */; };
-		183588971CB6E09500D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588811CB6E09500D84C73 /* MNJSONOperations.cpp */; };
-		183588981CB6E09500D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588811CB6E09500D84C73 /* MNJSONOperations.cpp */; };
-		183588991CB6E09500D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588841CB6E09500D84C73 /* PlayerManagerMN.cpp */; };
-		1835889A1CB6E09500D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588841CB6E09500D84C73 /* PlayerManagerMN.cpp */; };
-		1835889B1CB6E09500D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588841CB6E09500D84C73 /* PlayerManagerMN.cpp */; };
-		1835889C1CB6E09500D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588861CB6E09500D84C73 /* UpdateManagerMN.cpp */; };
-		1835889D1CB6E09500D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588861CB6E09500D84C73 /* UpdateManagerMN.cpp */; };
-		1835889E1CB6E09500D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588861CB6E09500D84C73 /* UpdateManagerMN.cpp */; };
-		1835889F1CB6E09500D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588881CB6E09500D84C73 /* UtilitiesMN.cpp */; };
-		183588A01CB6E09500D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588881CB6E09500D84C73 /* UtilitiesMN.cpp */; };
-		183588A11CB6E09500D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588881CB6E09500D84C73 /* UtilitiesMN.cpp */; };
+		183588DC1CB76FC900D84C73 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588CC1CB76FC900D84C73 /* GUIDialogMN.cpp */; };
+		183588DD1CB76FC900D84C73 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588CC1CB76FC900D84C73 /* GUIDialogMN.cpp */; };
+		183588DE1CB76FC900D84C73 /* GUIDialogMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588CC1CB76FC900D84C73 /* GUIDialogMN.cpp */; };
+		183588DF1CB76FC900D84C73 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588CE1CB76FC900D84C73 /* GUIDialogMNDemand.cpp */; };
+		183588E01CB76FC900D84C73 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588CE1CB76FC900D84C73 /* GUIDialogMNDemand.cpp */; };
+		183588E11CB76FC900D84C73 /* GUIDialogMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588CE1CB76FC900D84C73 /* GUIDialogMNDemand.cpp */; };
+		183588E21CB76FC900D84C73 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D01CB76FC900D84C73 /* LogManagerMN.cpp */; };
+		183588E31CB76FC900D84C73 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D01CB76FC900D84C73 /* LogManagerMN.cpp */; };
+		183588E41CB76FC900D84C73 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D01CB76FC900D84C73 /* LogManagerMN.cpp */; };
+		183588E81CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */; };
+		183588E91CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */; };
+		183588EA1CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */; };
+		183588EB1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */; };
+		183588EC1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */; };
+		183588ED1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */; };
+		183588EE1CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */; };
+		183588EF1CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */; };
+		183588F01CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */; };
+		183588F11CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */; };
+		183588F21CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */; };
+		183588F31CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */; };
 		183CB23B1C0B4C5A004218C2 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 183CB23A1C0B4C5A004218C2 /* Images.xcassets */; };
 		1840B74D13993D8A007C848B /* JSONVariantParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B74B13993D8A007C848B /* JSONVariantParser.cpp */; };
 		1840B75313993DA0007C848B /* JSONVariantWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1840B75113993DA0007C848B /* JSONVariantWriter.cpp */; };
@@ -41,9 +41,6 @@
 		188F75FE152217BC009870CE /* Mime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 188F75FC152217BC009870CE /* Mime.cpp */; };
 		188F7602152217DF009870CE /* GUIOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 188F7600152217DF009870CE /* GUIOperations.cpp */; };
 		18968DC814155D7C005BA742 /* ApplicationOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18968DC614155D7C005BA742 /* ApplicationOperations.cpp */; };
-		18AC31F01C49445D00AE9433 /* TVServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18AC31EF1C49445D00AE9433 /* TVServices.framework */; };
-		18AC31F41C49445D00AE9433 /* (null) in Sources */ = {isa = PBXBuildFile; };
-		18AC31F81C49445D00AE9433 /* TopShelf.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 18AC31ED1C49445D00AE9433 /* TopShelf.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		18ACF84313596C9B00B67371 /* RecentlyAddedJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18ACF84113596C9B00B67371 /* RecentlyAddedJob.cpp */; };
 		18B4A0021152BFA5001AF8A6 /* Addon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B49FF11152BFA5001AF8A6 /* Addon.cpp */; };
 		18B4A0051152BFA5001AF8A6 /* Scraper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B49FFC1152BFA5001AF8A6 /* Scraper.cpp */; };
@@ -3103,13 +3100,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		18AC31F61C49445D00AE9433 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 18AC31EC1C49445D00AE9433;
-			remoteInfo = TopShelf;
-		};
 		6E2FACC30E26E08100DF79EA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -3126,7 +3116,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				18AC31F81C49445D00AE9433 /* TopShelf.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3139,21 +3128,21 @@
 		18252F0A1C497D94002E71F9 /* MrMC.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = MrMC.entitlements; sourceTree = "<group>"; };
 		18308CB41303370800AA309E /* stat_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stat_utf8.h; sourceTree = "<group>"; };
 		18308CB51303370800AA309E /* stdio_utf8.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdio_utf8.h; sourceTree = "<group>"; };
-		1835887A1CB6E09500D84C73 /* GUIDialogMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogMN.cpp; sourceTree = "<group>"; };
-		1835887B1CB6E09500D84C73 /* GUIDialogMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogMN.h; sourceTree = "<group>"; };
-		1835887C1CB6E09500D84C73 /* GUIDialogMNDemand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogMNDemand.cpp; sourceTree = "<group>"; };
-		1835887D1CB6E09500D84C73 /* GUIDialogMNDemand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogMNDemand.h; sourceTree = "<group>"; };
-		1835887E1CB6E09500D84C73 /* LogManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LogManagerMN.cpp; sourceTree = "<group>"; };
-		1835887F1CB6E09500D84C73 /* LogManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogManagerMN.h; sourceTree = "<group>"; };
-		183588811CB6E09500D84C73 /* MNJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNJSONOperations.cpp; sourceTree = "<group>"; };
-		183588821CB6E09500D84C73 /* MNJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNJSONOperations.h; sourceTree = "<group>"; };
-		183588831CB6E09500D84C73 /* MNMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMedia.h; sourceTree = "<group>"; };
-		183588841CB6E09500D84C73 /* PlayerManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerManagerMN.cpp; sourceTree = "<group>"; };
-		183588851CB6E09500D84C73 /* PlayerManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerManagerMN.h; sourceTree = "<group>"; };
-		183588861CB6E09500D84C73 /* UpdateManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UpdateManagerMN.cpp; sourceTree = "<group>"; };
-		183588871CB6E09500D84C73 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateManagerMN.h; sourceTree = "<group>"; };
-		183588881CB6E09500D84C73 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UtilitiesMN.cpp; sourceTree = "<group>"; };
-		183588891CB6E09500D84C73 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UtilitiesMN.h; sourceTree = "<group>"; };
+		183588CC1CB76FC900D84C73 /* GUIDialogMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogMN.cpp; sourceTree = "<group>"; };
+		183588CD1CB76FC900D84C73 /* GUIDialogMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogMN.h; sourceTree = "<group>"; };
+		183588CE1CB76FC900D84C73 /* GUIDialogMNDemand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogMNDemand.cpp; sourceTree = "<group>"; };
+		183588CF1CB76FC900D84C73 /* GUIDialogMNDemand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogMNDemand.h; sourceTree = "<group>"; };
+		183588D01CB76FC900D84C73 /* LogManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LogManagerMN.cpp; sourceTree = "<group>"; };
+		183588D11CB76FC900D84C73 /* LogManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogManagerMN.h; sourceTree = "<group>"; };
+		183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNJSONOperations.cpp; sourceTree = "<group>"; };
+		183588D41CB76FC900D84C73 /* MNJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNJSONOperations.h; sourceTree = "<group>"; };
+		183588D51CB76FC900D84C73 /* MNMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMedia.h; sourceTree = "<group>"; };
+		183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerManagerMN.cpp; sourceTree = "<group>"; };
+		183588D71CB76FC900D84C73 /* PlayerManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerManagerMN.h; sourceTree = "<group>"; };
+		183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UpdateManagerMN.cpp; sourceTree = "<group>"; };
+		183588D91CB76FC900D84C73 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateManagerMN.h; sourceTree = "<group>"; };
+		183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UtilitiesMN.cpp; sourceTree = "<group>"; };
+		183588DB1CB76FC900D84C73 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UtilitiesMN.h; sourceTree = "<group>"; };
 		183CB23A1C0B4C5A004218C2 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		1840B74B13993D8A007C848B /* JSONVariantParser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JSONVariantParser.cpp; sourceTree = "<group>"; };
 		1840B74C13993D8A007C848B /* JSONVariantParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONVariantParser.h; sourceTree = "<group>"; };
@@ -3174,8 +3163,6 @@
 		188F7601152217DF009870CE /* GUIOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIOperations.h; sourceTree = "<group>"; };
 		18968DC614155D7C005BA742 /* ApplicationOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationOperations.cpp; sourceTree = "<group>"; };
 		18968DC714155D7C005BA742 /* ApplicationOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplicationOperations.h; sourceTree = "<group>"; };
-		18AC31ED1C49445D00AE9433 /* TopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		18AC31EF1C49445D00AE9433 /* TVServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = TVServices.framework; path = Library/Frameworks/TVServices.framework; sourceTree = DEVELOPER_DIR; };
 		18ACF84113596C9B00B67371 /* RecentlyAddedJob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RecentlyAddedJob.cpp; sourceTree = "<group>"; };
 		18ACF84213596C9B00B67371 /* RecentlyAddedJob.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RecentlyAddedJob.h; sourceTree = "<group>"; };
 		18B49FF11152BFA5001AF8A6 /* Addon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Addon.cpp; sourceTree = "<group>"; };
@@ -4081,7 +4068,7 @@
 		889B4D8C0E0EF86C00FAD25E /* RSSDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RSSDirectory.cpp; sourceTree = "<group>"; };
 		889B4D8D0E0EF86C00FAD25E /* RSSDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSSDirectory.h; sourceTree = "<group>"; };
 		88ECB6580DE013C4003396A7 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = /System/Library/Frameworks/DiskArbitration.framework; sourceTree = "<absolute>"; };
-		8DD76F7E0486A8DE00D96B5E /* MrMC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MrMC; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76F7E0486A8DE00D96B5E /* MemberNetTV */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MemberNetTV; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE4E87A517354C4A00D15206 /* XSLTUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XSLTUtils.cpp; sourceTree = "<group>"; };
 		AE4E87A617354C4A00D15206 /* XSLTUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XSLTUtils.h; sourceTree = "<group>"; };
 		AE84CB5915A5B8A600A3810E /* TagLibVFSStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TagLibVFSStream.cpp; sourceTree = "<group>"; };
@@ -4203,7 +4190,7 @@
 		C8D0B2AE1265A9A800F0C0AC /* SystemGlobals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SystemGlobals.cpp; sourceTree = "<group>"; };
 		C8EC5D0C1369519D00CCC10D /* XBMC_keytable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XBMC_keytable.cpp; sourceTree = "<group>"; };
 		C8EC5D0D1369519D00CCC10D /* XBMC_keytable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBMC_keytable.h; sourceTree = "<group>"; };
-		D6299ABB1AFC2A9F00E3059D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF00492B162DAEA200A971AD /* PVROperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVROperations.cpp; sourceTree = "<group>"; };
 		DF00492C162DAEA200A971AD /* PVROperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVROperations.h; sourceTree = "<group>"; };
 		DF02BA601A910623006DCA16 /* VideoSyncIos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoSyncIos.cpp; path = videosync/VideoSyncIos.cpp; sourceTree = "<group>"; };
@@ -4979,7 +4966,7 @@
 		E46F7C2B0F77219700C25D29 /* ZeroconfOSX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZeroconfOSX.h; sourceTree = "<group>"; };
 		E46F7C2C0F77219700C25D29 /* ZeroconfOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZeroconfOSX.cpp; sourceTree = "<group>"; };
 		E47252BF175115F9001C1AAA /* darwin_codesign_internals.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = darwin_codesign_internals.command; sourceTree = "<group>"; };
-		E4991089174D0D2600741B6D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4991089174D0D2600741B6D /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E499108D174D0D2600741B6D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-iOS.xcconfig"; sourceTree = "<group>"; };
 		E49910D1174E2E0000741B6D /* App-OSX.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-OSX.xcconfig"; sourceTree = "<group>"; };
@@ -5513,7 +5500,7 @@
 		F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DictionaryUtils.mm; sourceTree = "<group>"; };
 		F5D13EBA1BAA17890075A95C /* DictionaryUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DictionaryUtils.h; sourceTree = "<group>"; };
 		F5D13EC01BAE3C060075A95C /* GUIInfoLabels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GUIInfoLabels.h; sourceTree = "<group>"; };
-		F5D142651BAF0B6D0075A95C /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5D142651BAF0B6D0075A95C /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5D142901BAF29E20075A95C /* App-TVOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-TVOS.xcconfig"; sourceTree = "<group>"; };
 		F5D142931BAF31FB0075A95C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F5D142991BAF31FB0075A95C /* English */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -5610,14 +5597,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		18AC31EA1C49445D00AE9433 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				18AC31F01C49445D00AE9433 /* TVServices.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8DD76F780486A8DE00D96B5E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -5718,27 +5697,26 @@
 			name = "System Libs and Frameworks";
 			sourceTree = "<group>";
 		};
-		183588791CB6E09500D84C73 /* nwmn */ = {
+		183588CB1CB76FC900D84C73 /* nwmn */ = {
 			isa = PBXGroup;
 			children = (
-				1835887A1CB6E09500D84C73 /* GUIDialogMN.cpp */,
-				1835887B1CB6E09500D84C73 /* GUIDialogMN.h */,
-				1835887C1CB6E09500D84C73 /* GUIDialogMNDemand.cpp */,
-				1835887D1CB6E09500D84C73 /* GUIDialogMNDemand.h */,
-				1835887E1CB6E09500D84C73 /* LogManagerMN.cpp */,
-				1835887F1CB6E09500D84C73 /* LogManagerMN.h */,
-				183588811CB6E09500D84C73 /* MNJSONOperations.cpp */,
-				183588821CB6E09500D84C73 /* MNJSONOperations.h */,
-				183588831CB6E09500D84C73 /* MNMedia.h */,
-				183588841CB6E09500D84C73 /* PlayerManagerMN.cpp */,
-				183588851CB6E09500D84C73 /* PlayerManagerMN.h */,
-				183588861CB6E09500D84C73 /* UpdateManagerMN.cpp */,
-				183588871CB6E09500D84C73 /* UpdateManagerMN.h */,
-				183588881CB6E09500D84C73 /* UtilitiesMN.cpp */,
-				183588891CB6E09500D84C73 /* UtilitiesMN.h */,
+				183588CC1CB76FC900D84C73 /* GUIDialogMN.cpp */,
+				183588CD1CB76FC900D84C73 /* GUIDialogMN.h */,
+				183588CE1CB76FC900D84C73 /* GUIDialogMNDemand.cpp */,
+				183588CF1CB76FC900D84C73 /* GUIDialogMNDemand.h */,
+				183588D01CB76FC900D84C73 /* LogManagerMN.cpp */,
+				183588D11CB76FC900D84C73 /* LogManagerMN.h */,
+				183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */,
+				183588D41CB76FC900D84C73 /* MNJSONOperations.h */,
+				183588D51CB76FC900D84C73 /* MNMedia.h */,
+				183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */,
+				183588D71CB76FC900D84C73 /* PlayerManagerMN.h */,
+				183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */,
+				183588D91CB76FC900D84C73 /* UpdateManagerMN.h */,
+				183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */,
+				183588DB1CB76FC900D84C73 /* UtilitiesMN.h */,
 			);
-			name = nwmn;
-			path = network/nwmn;
+			path = nwmn;
 			sourceTree = "<group>";
 		};
 		18690DCB1B94DA6200E762C1 /* subtitles */ = {
@@ -5758,7 +5736,6 @@
 		18AC31EE1C49445D00AE9433 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				18AC31EF1C49445D00AE9433 /* TVServices.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -6158,11 +6135,10 @@
 		19C28FBDFE9D53C911CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76F7E0486A8DE00D96B5E /* MrMC */,
-				D6299ABB1AFC2A9F00E3059D /* MrMC.app */,
-				E4991089174D0D2600741B6D /* MrMC.app */,
-				F5D142651BAF0B6D0075A95C /* MrMC.app */,
-				18AC31ED1C49445D00AE9433 /* TopShelf.appex */,
+				8DD76F7E0486A8DE00D96B5E /* MemberNetTV */,
+				D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */,
+				E4991089174D0D2600741B6D /* MemberNetTV.app */,
+				F5D142651BAF0B6D0075A95C /* MemberNetTV.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -7796,7 +7772,7 @@
 				DF4A3BAC1B4B0FC100F9CDC0 /* messaging */,
 				18B7C853129423A7009E7A26 /* music */,
 				431376F212D6449100680C15 /* network */,
-				183588791CB6E09500D84C73 /* nwmn */,
+				183588CB1CB76FC900D84C73 /* nwmn */,
 				F5E1050C140AA38000175026 /* peripherals */,
 				4313767E12D63EC200680C15 /* pictures */,
 				F59045261BA372A600DB589A /* platform */,
@@ -9446,23 +9422,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		18AC31EC1C49445D00AE9433 /* TopShelf */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 18AC31F91C49445D00AE9433 /* Build configuration list for PBXNativeTarget "TopShelf" */;
-			buildPhases = (
-				18AC31E91C49445D00AE9433 /* Sources */,
-				18AC31EA1C49445D00AE9433 /* Frameworks */,
-				18AC31EB1C49445D00AE9433 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = TopShelf;
-			productName = TopShelf;
-			productReference = 18AC31ED1C49445D00AE9433 /* TopShelf.appex */;
-			productType = "com.apple.product-type.tv-app-extension";
-		};
 		6E2FACBA0E26DF7A00DF79EA /* MrMC.app */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MrMC.app" */;
@@ -9478,7 +9437,7 @@
 			);
 			name = MrMC.app;
 			productName = Kodi.app;
-			productReference = D6299ABB1AFC2A9F00E3059D /* MrMC.app */;
+			productReference = D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 		8DD76F740486A8DE00D96B5E /* MrMC */ = {
@@ -9497,7 +9456,7 @@
 			name = MrMC;
 			productInstallPath = "$(HOME)/bin";
 			productName = Kodi;
-			productReference = 8DD76F7E0486A8DE00D96B5E /* MrMC */;
+			productReference = 8DD76F7E0486A8DE00D96B5E /* MemberNetTV */;
 			productType = "com.apple.product-type.tool";
 		};
 		E4991088174D0D2600741B6D /* MrMC-iOS */ = {
@@ -9519,7 +9478,7 @@
 			);
 			name = "MrMC-iOS";
 			productName = "Kodi-iOS";
-			productReference = E4991089174D0D2600741B6D /* MrMC.app */;
+			productReference = E4991089174D0D2600741B6D /* MemberNetTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 		F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */ = {
@@ -9539,11 +9498,10 @@
 			buildRules = (
 			);
 			dependencies = (
-				18AC31F71C49445D00AE9433 /* PBXTargetDependency */,
 			);
 			name = "MrMC-TVOS";
 			productName = MrMC;
-			productReference = F5D142651BAF0B6D0075A95C /* MrMC.app */;
+			productReference = F5D142651BAF0B6D0075A95C /* MemberNetTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -9554,15 +9512,6 @@
 			attributes = {
 				LastUpgradeCheck = 0710;
 				TargetAttributes = {
-					18AC31EC1C49445D00AE9433 = {
-						CreatedOnToolsVersion = 7.2;
-						DevelopmentTeam = 8U6WVDN2Q6;
-						SystemCapabilities = {
-							com.apple.ApplicationGroups.iOS = {
-								enabled = 1;
-							};
-						};
-					};
 					E4991088174D0D2600741B6D = {
 						DevelopmentTeam = 8U6WVDN2Q6;
 					};
@@ -9596,19 +9545,11 @@
 				6E2FACBA0E26DF7A00DF79EA /* MrMC.app */,
 				E4991088174D0D2600741B6D /* MrMC-iOS */,
 				F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */,
-				18AC31EC1C49445D00AE9433 /* TopShelf */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		18AC31EB1C49445D00AE9433 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E4991087174D0D2600741B6D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -9859,14 +9800,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		18AC31E91C49445D00AE9433 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				18AC31F41C49445D00AE9433 /* (null) in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8DD76F760486A8DE00D96B5E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -10433,7 +10366,7 @@
 				F5AE40A113415D9E0004BD79 /* JSONRPC.cpp in Sources */,
 				F5AE40A413415D9E0004BD79 /* PlayerOperations.cpp in Sources */,
 				F5AE40A513415D9E0004BD79 /* PlaylistOperations.cpp in Sources */,
-				1835888A1CB6E09500D84C73 /* GUIDialogMN.cpp in Sources */,
+				183588DC1CB76FC900D84C73 /* GUIDialogMN.cpp in Sources */,
 				F5B723CD1C7C9F5C006432AE /* AddonCallbacksAudioDSP.cpp in Sources */,
 				F5AE40A613415D9E0004BD79 /* SystemOperations.cpp in Sources */,
 				F5AE40A713415D9E0004BD79 /* VideoLibrary.cpp in Sources */,
@@ -10450,7 +10383,7 @@
 				F558F25613ABCF7800631E12 /* WinEventsOSX.mm in Sources */,
 				F558F27B13ABD56600631E12 /* DirtyRegionSolvers.cpp in Sources */,
 				F558F27F13ABD57400631E12 /* DirtyRegionTracker.cpp in Sources */,
-				1835889C1CB6E09500D84C73 /* UpdateManagerMN.cpp in Sources */,
+				183588EE1CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */,
 				F59045781BA372A600DB589A /* CocoaInterface.mm in Sources */,
 				F558F29613ABD7DF00631E12 /* GUIWindowDebugInfo.cpp in Sources */,
 				DF0DF15C13A3ADA7008ED511 /* NFSDirectory.cpp in Sources */,
@@ -10505,7 +10438,7 @@
 				DFCA6ACB152245CD000BFAAE /* IHTTPRequestHandler.cpp in Sources */,
 				DF93D69A1444A8B1007C6459 /* DirectoryCache.cpp in Sources */,
 				DF93D69B1444A8B1007C6459 /* FileCache.cpp in Sources */,
-				1835888D1CB6E09500D84C73 /* GUIDialogMNDemand.cpp in Sources */,
+				183588DF1CB76FC900D84C73 /* GUIDialogMNDemand.cpp in Sources */,
 				3994427A1A8DD920006C39E9 /* VideoLibraryScanningJob.cpp in Sources */,
 				DF93D69D1444A8B1007C6459 /* CurlFile.cpp in Sources */,
 				DF93D69F1444A8B1007C6459 /* DirectoryFactory.cpp in Sources */,
@@ -10741,7 +10674,7 @@
 				7C8AE84F189DE3CD00C33786 /* CoreAudioDevice.cpp in Sources */,
 				7C8AE850189DE3CD00C33786 /* CoreAudioHardware.cpp in Sources */,
 				18FD1CA91BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
-				1835889F1CB6E09500D84C73 /* UtilitiesMN.cpp in Sources */,
+				183588F11CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */,
 				DF5E699A1B28121E009A88C3 /* PVRTimerType.cpp in Sources */,
 				7C8AE851189DE3CD00C33786 /* CoreAudioStream.cpp in Sources */,
 				7C8AE854189DE47F00C33786 /* CoreAudioHelpers.cpp in Sources */,
@@ -10791,7 +10724,7 @@
 				7CCDA1BA192753E30074CF51 /* AVTransportSCPD.cpp in Sources */,
 				7CCDA1C7192753E30074CF51 /* PltMediaController.cpp in Sources */,
 				7CCDA1D0192753E30074CF51 /* PltMediaRenderer.cpp in Sources */,
-				183588961CB6E09500D84C73 /* MNJSONOperations.cpp in Sources */,
+				183588E81CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */,
 				3961C4391ABC0A46002DBBFB /* UISoundsResource.cpp in Sources */,
 				7CCDA1DB192753E30074CF51 /* RdrConnectionManagerSCPD.cpp in Sources */,
 				DF29BCEB1B5D911800904347 /* AddonManagementEvent.cpp in Sources */,
@@ -10823,7 +10756,7 @@
 				7CCDA7BE192756250074CF51 /* NptFile.cpp in Sources */,
 				F5B723361C7C9681006432AE /* ContextMenuItem.cpp in Sources */,
 				7CCDA7C7192756250074CF51 /* NptHash.cpp in Sources */,
-				183588991CB6E09500D84C73 /* PlayerManagerMN.cpp in Sources */,
+				183588EB1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */,
 				DF1D2DED1B6E85EE002BB9DB /* XbtDirectory.cpp in Sources */,
 				7CCDA7D0192756250074CF51 /* NptHttp.cpp in Sources */,
 				7CCDA7D9192756250074CF51 /* NptJson.cpp in Sources */,
@@ -10836,7 +10769,7 @@
 				7CCDA806192756250074CF51 /* NptRingBuffer.cpp in Sources */,
 				7CCDA80F192756250074CF51 /* NptSimpleMessageQueue.cpp in Sources */,
 				7CCDA818192756250074CF51 /* NptSockets.cpp in Sources */,
-				183588901CB6E09500D84C73 /* LogManagerMN.cpp in Sources */,
+				183588E21CB76FC900D84C73 /* LogManagerMN.cpp in Sources */,
 				7CCDA821192756250074CF51 /* NptStreams.cpp in Sources */,
 				F5B724D31C7E150C006432AE /* log.cpp in Sources */,
 				7CCDA82A192756250074CF51 /* NptStrings.cpp in Sources */,
@@ -11023,7 +10956,7 @@
 				E4991226174E5D5A00741B6D /* RenderManager.cpp in Sources */,
 				F5B723DB1C7C9F76006432AE /* ContextMenuAddon.cpp in Sources */,
 				E4991227174E5D5A00741B6D /* DummyVideoPlayer.cpp in Sources */,
-				183588971CB6E09500D84C73 /* MNJSONOperations.cpp in Sources */,
+				183588E91CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */,
 				E4991228174E5D6100741B6D /* Database.cpp in Sources */,
 				E4991229174E5D6100741B6D /* dataset.cpp in Sources */,
 				E499122A174E5D6100741B6D /* mysqldataset.cpp in Sources */,
@@ -11386,7 +11319,7 @@
 				E49913A4174E5F2100741B6D /* HTTPJsonRpcHandler.cpp in Sources */,
 				F5B7240F1C7CA242006432AE /* PVRSettings.cpp in Sources */,
 				F5B723B81C7C9C34006432AE /* GUIDialogAudioDSPSettings.cpp in Sources */,
-				1835888B1CB6E09500D84C73 /* GUIDialogMN.cpp in Sources */,
+				183588DD1CB76FC900D84C73 /* GUIDialogMN.cpp in Sources */,
 				E49913A5174E5F2100741B6D /* HTTPVfsHandler.cpp in Sources */,
 				E49913A6174E5F2100741B6D /* HTTPWebinterfaceAddonsHandler.cpp in Sources */,
 				E49913A7174E5F2100741B6D /* HTTPWebinterfaceHandler.cpp in Sources */,
@@ -11407,7 +11340,7 @@
 				E49913B5174E5F3700741B6D /* WebSocketV8.cpp in Sources */,
 				E49913B6174E5F3C00741B6D /* AirPlayServer.cpp in Sources */,
 				E49913B7174E5F3C00741B6D /* AirTunesServer.cpp in Sources */,
-				1835889A1CB6E09500D84C73 /* PlayerManagerMN.cpp in Sources */,
+				183588EC1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */,
 				E49913B9174E5F3C00741B6D /* DNSNameCache.cpp in Sources */,
 				E49913BA174E5F3C00741B6D /* EventClient.cpp in Sources */,
 				E49913BB174E5F3C00741B6D /* EventPacket.cpp in Sources */,
@@ -11428,7 +11361,7 @@
 				E49913C8174E5F7500741B6D /* PeripheralBusUSB.cpp in Sources */,
 				E49913C9174E5F7500741B6D /* PeripheralBus.cpp in Sources */,
 				E49913CA174E5F8100741B6D /* Peripheral.cpp in Sources */,
-				183588911CB6E09500D84C73 /* LogManagerMN.cpp in Sources */,
+				183588E31CB76FC900D84C73 /* LogManagerMN.cpp in Sources */,
 				E49913CB174E5F8100741B6D /* PeripheralBluetooth.cpp in Sources */,
 				E49913CC174E5F8100741B6D /* PeripheralCecAdapter.cpp in Sources */,
 				E49913CD174E5F8100741B6D /* PeripheralDisk.cpp in Sources */,
@@ -11538,7 +11471,7 @@
 				18FD1CAA1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
 				E4991431174E604300741B6D /* DarwinStorageProvider.cpp in Sources */,
 				F5B7232B1C7C9616006432AE /* DVDDemuxCDDA.cpp in Sources */,
-				183588A01CB6E09500D84C73 /* UtilitiesMN.cpp in Sources */,
+				183588F21CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */,
 				E4991432174E604300741B6D /* AutorunMediaJob.cpp in Sources */,
 				F5B723E81C7C9FBD006432AE /* Visualisation.cpp in Sources */,
 				399442721A8DD920006C39E9 /* VideoLibraryJob.cpp in Sources */,
@@ -11856,7 +11789,7 @@
 				7CCDA7F2192756250074CF51 /* NptNetwork.cpp in Sources */,
 				7CCDA7FB192756250074CF51 /* NptQueue.cpp in Sources */,
 				3961C43A1ABC0A46002DBBFB /* UISoundsResource.cpp in Sources */,
-				1835888E1CB6E09500D84C73 /* GUIDialogMNDemand.cpp in Sources */,
+				183588E01CB76FC900D84C73 /* GUIDialogMNDemand.cpp in Sources */,
 				F5B723771C7C9A51006432AE /* ActiveAEDSPProcess.cpp in Sources */,
 				7CCDA804192756250074CF51 /* NptResults.cpp in Sources */,
 				7CCDA807192756250074CF51 /* NptRingBuffer.cpp in Sources */,
@@ -11880,7 +11813,7 @@
 				7CCDAA83192756250074CF51 /* NptPosixDynamicLibraries.cpp in Sources */,
 				7CCDAA86192756250074CF51 /* NptPosixEnvironment.cpp in Sources */,
 				7CCDAA8C192756250074CF51 /* NptPosixNetwork.cpp in Sources */,
-				1835889D1CB6E09500D84C73 /* UpdateManagerMN.cpp in Sources */,
+				183588EF1CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */,
 				7CCDAA8F192756250074CF51 /* NptPosixQueue.cpp in Sources */,
 				7CCDAA98192756250074CF51 /* NptPosixSystem.cpp in Sources */,
 				7CCDAAA1192756250074CF51 /* NptPosixThreads.cpp in Sources */,
@@ -12099,7 +12032,7 @@
 				F5D13F6C1BAF0B6D0075A95C /* AddonsDirectory.cpp in Sources */,
 				F5D13F6D1BAF0B6D0075A95C /* CacheStrategy.cpp in Sources */,
 				F5D13F6E1BAF0B6D0075A95C /* CircularCache.cpp in Sources */,
-				183588921CB6E09500D84C73 /* LogManagerMN.cpp in Sources */,
+				183588E41CB76FC900D84C73 /* LogManagerMN.cpp in Sources */,
 				F5D13F6F1BAF0B6D0075A95C /* CurlFile.cpp in Sources */,
 				F5D13F701BAF0B6D0075A95C /* DAVCommon.cpp in Sources */,
 				F5D13F711BAF0B6D0075A95C /* DAVDirectory.cpp in Sources */,
@@ -12125,7 +12058,7 @@
 				F5D13F831BAF0B6D0075A95C /* IDirectory.cpp in Sources */,
 				F5D13F841BAF0B6D0075A95C /* IFile.cpp in Sources */,
 				F5D13F851BAF0B6D0075A95C /* ImageFile.cpp in Sources */,
-				1835888F1CB6E09500D84C73 /* GUIDialogMNDemand.cpp in Sources */,
+				183588E11CB76FC900D84C73 /* GUIDialogMNDemand.cpp in Sources */,
 				F5D5F2ED1C2083B700E3FE8B /* darwinICMPPing.m in Sources */,
 				F5D13F861BAF0B6D0075A95C /* LibraryDirectory.cpp in Sources */,
 				F5D13F871BAF0B6D0075A95C /* MemBufferCache.cpp in Sources */,
@@ -12291,7 +12224,7 @@
 				F5D140141BAF0B6D0075A95C /* GUIScrollBarControl.cpp in Sources */,
 				F5D140151BAF0B6D0075A95C /* GUISelectButtonControl.cpp in Sources */,
 				F5D140161BAF0B6D0075A95C /* GUISettingsSliderControl.cpp in Sources */,
-				183588981CB6E09500D84C73 /* MNJSONOperations.cpp in Sources */,
+				183588EA1CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */,
 				F5B723631C7C9A02006432AE /* GUIDialogPVRRadioRDSInfo.cpp in Sources */,
 				F5D140171BAF0B6D0075A95C /* GUIShader.cpp in Sources */,
 				F5B723401C7C9870006432AE /* GUIWindowWeather.cpp in Sources */,
@@ -12315,7 +12248,7 @@
 				F5D140281BAF0B6D0075A95C /* GUIWrappingListContainer.cpp in Sources */,
 				F5D140291BAF0B6D0075A95C /* imagefactory.cpp in Sources */,
 				F5D1402A1BAF0B6D0075A95C /* IWindowManagerCallback.cpp in Sources */,
-				1835889B1CB6E09500D84C73 /* PlayerManagerMN.cpp in Sources */,
+				183588ED1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */,
 				F5D1402B1BAF0B6D0075A95C /* JpegIO.cpp in Sources */,
 				F5D1402C1BAF0B6D0075A95C /* LocalizeStrings.cpp in Sources */,
 				F5D1402D1BAF0B6D0075A95C /* MatrixGLES.cpp in Sources */,
@@ -12556,7 +12489,7 @@
 				F5D140FB1BAF0B6D0075A95C /* MediaManager.cpp in Sources */,
 				F5D140FC1BAF0B6D0075A95C /* Implementation.cpp in Sources */,
 				F5D140FD1BAF0B6D0075A95C /* Atomics.cpp in Sources */,
-				1835888C1CB6E09500D84C73 /* GUIDialogMN.cpp in Sources */,
+				183588DE1CB76FC900D84C73 /* GUIDialogMN.cpp in Sources */,
 				F5D140FE1BAF0B6D0075A95C /* Event.cpp in Sources */,
 				F5D140FF1BAF0B6D0075A95C /* SystemClock.cpp in Sources */,
 				F5D141001BAF0B6D0075A95C /* Thread.cpp in Sources */,
@@ -12706,7 +12639,7 @@
 				F5D141781BAF0B6D0075A95C /* LangInfo.cpp in Sources */,
 				F5D141791BAF0B6D0075A95C /* MediaSource.cpp in Sources */,
 				F5D1417A1BAF0B6D0075A95C /* NfoFile.cpp in Sources */,
-				1835889E1CB6E09500D84C73 /* UpdateManagerMN.cpp in Sources */,
+				183588F01CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */,
 				F5D1417B1BAF0B6D0075A95C /* PartyModeManager.cpp in Sources */,
 				F5D1417C1BAF0B6D0075A95C /* PasswordManager.cpp in Sources */,
 				F5D1417D1BAF0B6D0075A95C /* PlayListPlayer.cpp in Sources */,
@@ -12923,7 +12856,7 @@
 				F5D142381BAF0B6D0075A95C /* KeyboardLayout.cpp in Sources */,
 				F5B723591C7C99A6006432AE /* GUIDialogVisualisationPresetList.cpp in Sources */,
 				F5D142391BAF0B6D0075A95C /* InputCodingTableBaiduPY.cpp in Sources */,
-				183588A11CB6E09500D84C73 /* UtilitiesMN.cpp in Sources */,
+				183588F31CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */,
 				F5D1423A1BAF0B6D0075A95C /* InputCodingTableBasePY.cpp in Sources */,
 				F5D1423B1BAF0B6D0075A95C /* InputCodingTableFactory.cpp in Sources */,
 			);
@@ -12932,11 +12865,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		18AC31F71C49445D00AE9433 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 18AC31EC1C49445D00AE9433 /* TopShelf */;
-			targetProxy = 18AC31F61C49445D00AE9433 /* PBXContainerItemProxy */;
-		};
 		6E2FACC40E26E08100DF79EA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8DD76F740486A8DE00D96B5E /* MrMC */;
@@ -12964,98 +12892,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		18AC31FA1C49445D00AE9433 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = TopShelf/TopShelf.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				INFOPLIST_FILE = TopShelf/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MTL_ENABLE_DEBUG_INFO = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = tv.mrmc.mrmc.tvos.ts;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SDKROOT = appletvos;
-				SKIP_INSTALL = YES;
-				TVOS_DEPLOYMENT_TARGET = 9.1;
-			};
-			name = Debug;
-		};
-		18AC31FB1C49445D00AE9433 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_ENTITLEMENTS = TopShelf/TopShelf.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Distribution";
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				INFOPLIST_FILE = TopShelf/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
-				MTL_ENABLE_DEBUG_INFO = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = tv.mrmc.mrmc.tvos.ts;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SDKROOT = appletvos;
-				SKIP_INSTALL = YES;
-				TVOS_DEPLOYMENT_TARGET = 9.1;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
 		1DEB924808733DCA0010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E49910D1174E2E0000741B6D /* App-OSX.xcconfig */;
@@ -13084,7 +12920,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = "";
 				ZERO_LINK = NO;
@@ -13120,7 +12956,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = "";
 				ZERO_LINK = NO;
@@ -13158,7 +12994,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -13169,7 +13005,7 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				SDKROOT = macosx;
 				ZERO_LINK = NO;
 			};
@@ -13260,7 +13096,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = appletvos;
 				STRIP_STYLE = "non-global";
@@ -13290,7 +13126,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = appletvos;
 				SKIP_INSTALL = NO;
@@ -13304,15 +13140,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		18AC31F91C49445D00AE9433 /* Build configuration list for PBXNativeTarget "TopShelf" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				18AC31FA1C49445D00AE9433 /* Debug */,
-				18AC31FB1C49445D00AE9433 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		1DEB924708733DCA0010E9CD /* Build configuration list for PBXNativeTarget "MrMC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

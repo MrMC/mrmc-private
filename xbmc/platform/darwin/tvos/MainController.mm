@@ -408,7 +408,6 @@ MainController *g_xbmcController;
         }
       }
       break;
-    }
 
     // single press keys
     case UIPressTypeSelect:
@@ -1079,15 +1078,6 @@ MainController *g_xbmcController;
 
   [self enableScreenSaver];
 
-<<<<<<< HEAD
-=======
-  NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-  [center addObserver: self
-     selector: @selector(observeDefaultCenterStuff:) name: nil object: nil];
-
-  [self observeAudioSessionNotifications:YES];
-
->>>>>>> c01f538... nwmn: fixup
   [m_window makeKeyAndVisible];
   g_xbmcController = self;  
 
@@ -1109,16 +1099,6 @@ MainController *g_xbmcController;
   [m_glView release];
   [m_window release];
   
-<<<<<<< HEAD
-=======
-  NSNotificationCenter *center;
-  // take us off the default center for our app
-  center = [NSNotificationCenter defaultCenter];
-  [center removeObserver: self];
-
-  [self observeAudioSessionNotifications:NO];
-
->>>>>>> c01f538... nwmn: fixup
   [super dealloc];
 }
 //--------------------------------------------------------------

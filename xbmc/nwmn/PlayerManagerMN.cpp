@@ -35,7 +35,6 @@
 #include "filesystem/SpecialProtocol.h"
 #include "guilib/GUIWindowManager.h"
 #include "interfaces/AnnouncementManager.h"
-#include "interfaces/Builtins.h"
 #include "network/Network.h"
 #include "settings/Settings.h"
 #include "settings/MediaSettings.h"
