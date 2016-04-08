@@ -45,7 +45,7 @@
 		<string>tv.mrmc.blackbird</string>
 		<key>CFBundleURLSchemes</key>
 		<array>
-			<string>mrmc</string>
+			<string>red</string>
 		</array>
 	</dict>
 	</array>
