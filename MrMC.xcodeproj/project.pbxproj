@@ -9459,9 +9459,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6E2FACBA0E26DF7A00DF79EA /* MrMC.app */ = {
+		6E2FACBA0E26DF7A00DF79EA /* Blackbird.app */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MrMC.app" */;
+			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "Blackbird.app" */;
 			buildPhases = (
 				F5DEC3580E6DEBB2005A4E24 /* package root files */,
 				6E2FACC70E26E22400DF79EA /* package dylibs */,
@@ -9472,7 +9472,7 @@
 			dependencies = (
 				6E2FACC40E26E08100DF79EA /* PBXTargetDependency */,
 			);
-			name = MrMC.app;
+			name = Blackbird.app;
 			productName = Kodi.app;
 			productReference = D6299ABB1AFC2A9F00E3059D /* Blackbird.app */;
 			productType = "com.apple.product-type.application";
@@ -9579,7 +9579,7 @@
 			projectRoot = "";
 			targets = (
 				8DD76F740486A8DE00D96B5E /* MrMC */,
-				6E2FACBA0E26DF7A00DF79EA /* MrMC.app */,
+				6E2FACBA0E26DF7A00DF79EA /* Blackbird.app */,
 				E4991088174D0D2600741B6D /* MrMC-iOS */,
 				F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */,
 			);
@@ -13210,7 +13210,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MrMC.app" */ = {
+		6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "Blackbird.app" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6E2FACBB0E26DF7A00DF79EA /* Debug */,
