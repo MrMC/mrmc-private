@@ -393,7 +393,7 @@ MainController *g_xbmcController;
       //  a) if at our home view, should return to atv home screen.
       //  b) if not, let it pass to us.
       int focusedWindowID = g_windowManager.GetFocusedWindow();
-      if (focusedWindowID == WINDOW_HOME)
+      if (focusedWindowID == WINDOW_HOME || focusedWindowID == WINDOW_DIALOG_RED)
         handled = NO;
       break;
     }
