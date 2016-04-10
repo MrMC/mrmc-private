@@ -295,7 +295,7 @@ void CPlayBackManagerRed::Process()
                 g_playlistPlayer.SetCurrentPlaylist(iPlayList);
                 
                 // play!
-                g_playlistPlayer.Play();
+                CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_PLAY, 0);
                 
                 if (m_PlayBackCallBackFn)
                   (*m_PlayBackCallBackFn)(m_PlayBackCallBackCtx, 0, asset);
