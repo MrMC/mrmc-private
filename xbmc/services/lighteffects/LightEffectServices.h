@@ -54,7 +54,8 @@ private:
   virtual void  Process() override;
 
   std::atomic<bool> m_active;
-  unsigned int      m_width;
-  unsigned int      m_height;
+  int               m_width;
+  int               m_height;
   CCriticalSection  m_critical;
+  void*             m_lighteffect;
 };

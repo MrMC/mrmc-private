@@ -26,12 +26,15 @@
 #include "settings/Settings.h"
 #include "utils/Variant.h"
 
+#include "LightEffectClient.h"
+
+#include "boblight.h"
 
 CLightEffectServices::CLightEffectServices()
 : CThread("LightEffectServices")
 , m_active(false)
-, m_width(0)
-, m_height(0)
+, m_width(32)
+, m_height(32)
 {
 }
 
@@ -52,7 +55,7 @@ bool CLightEffectServices::Start()
 {
   CSingleLock lock(m_critical);
 
-  //CThread::Create();
+  CThread::Create();
   return false;
 }
 
@@ -99,15 +102,57 @@ bool CLightEffectServices::OnSettingUpdate(CSetting* &setting, const char *oldSe
 void CLightEffectServices::Process()
 {
   CRenderCapture *capture = g_renderManager.AllocRenderCapture();
-  g_renderManager.Capture(capture, m_width, m_height, 0);
+  g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
   m_active = true;
+  unsigned char *pixels;
 
+  // below goes to settings
+  // boblightd server IP address and port
+  const char *IP = "192.168.1.4";
+  int port = 19333;
+  m_lighteffect = boblight_init();
+  
+  // Needs replacing with our library call
+  boblight_connect(m_lighteffect, IP, port, 5000000);
+  
+  int row;
+  int rgb[3];
+  
+  // below goes to settings, default values TBC
+  // Needs replacing with our library call
+  boblight_setoption(m_lighteffect,-1, "saturation    2.1");
+  boblight_setoption(m_lighteffect,-1, "value    1.2");
+  boblight_setoption(m_lighteffect,-1, "speed    70.0");
+  boblight_setoption(m_lighteffect,-1, "autospeed    0.0");
+  boblight_setoption(m_lighteffect,-1, "interpolation    0");
+  boblight_setoption(m_lighteffect,-1, "threshold    10.0");
+  
   while(!m_bStop)
   {
-    capture->GetEvent().Wait();
+    capture->GetEvent().WaitMSec(1000);
     if (capture->GetUserState() == CAPTURESTATE_DONE)
     {
-      //do something with m_capture->GetPixels();
+      //read out the pixels
+      pixels = capture->GetPixels();
+      // Needs replacing with our library call
+      boblight_setscanrange(m_lighteffect, m_width, m_height);
+      
+      for (int y = 0; y < m_height;  y++)
+      {
+        row = m_width * y * 4;
+        for (int x = 0; x < m_width; x++)
+        {
+          rgb[0] = pixels[row + x * 4 + 2];
+          rgb[1] = pixels[row + x * 4 + 1];
+          rgb[2] = pixels[row + x * 4];
+          
+          // Needs replacing with our library call
+          boblight_addpixelxy(m_lighteffect, x, y, rgb);
+        }
+      }
+      // Needs replacing with our library call
+      boblight_setpriority(m_lighteffect, 128);
+      boblight_sendrgb(m_lighteffect, 1, NULL);
     }
   }
 
