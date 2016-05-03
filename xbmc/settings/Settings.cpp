@@ -342,6 +342,7 @@ const std::string CSettings::SETTING_SERVICES_AIRPLAYVOLUMECONTROL = "services.a
 const std::string CSettings::SETTING_SERVICES_USEAIRPLAYPASSWORD = "services.useairplaypassword";
 const std::string CSettings::SETTING_SERVICES_AIRPLAYPASSWORD = "services.airplaypassword";
 const std::string CSettings::SETTING_SERVICES_AIRPLAYVIDEOSUPPORT = "services.airplayvideosupport";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTS = "services.lighteffects";
 const std::string CSettings::SETTING_SMB_WINSSERVER = "smb.winsserver";
 const std::string CSettings::SETTING_SMB_WORKGROUP = "smb.workgroup";
 const std::string CSettings::SETTING_SMB_ENABLEDSM = "smb.enabledsm";

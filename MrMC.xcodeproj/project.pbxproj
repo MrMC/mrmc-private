@@ -1708,6 +1708,9 @@
 		F58BF96A1CD51257005BB003 /* VideoDatabaseFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F58BF9681CD51257005BB003 /* VideoDatabaseFile.cpp */; };
 		F58BF96B1CD51257005BB003 /* VideoDatabaseFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F58BF9681CD51257005BB003 /* VideoDatabaseFile.cpp */; };
 		F58BF96C1CD51257005BB003 /* VideoDatabaseFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F58BF9681CD51257005BB003 /* VideoDatabaseFile.cpp */; };
+		F58BF9711CD83FAF005BB003 /* LightEffectServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F58BF96F1CD83FAF005BB003 /* LightEffectServices.cpp */; };
+		F58BF9721CD83FAF005BB003 /* LightEffectServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F58BF96F1CD83FAF005BB003 /* LightEffectServices.cpp */; };
+		F58BF9731CD83FAF005BB003 /* LightEffectServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F58BF96F1CD83FAF005BB003 /* LightEffectServices.cpp */; };
 		F590455E1BA372A600DB589A /* AutoPool.mm in Sources */ = {isa = PBXBuildFile; fileRef = F59045291BA372A600DB589A /* AutoPool.mm */; };
 		F590455F1BA372A600DB589A /* AutoPool.mm in Sources */ = {isa = PBXBuildFile; fileRef = F59045291BA372A600DB589A /* AutoPool.mm */; };
 		F59045611BA372A600DB589A /* DarwinUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = F590452C1BA372A600DB589A /* DarwinUtils.mm */; };
@@ -5091,6 +5094,8 @@
 		F584E12D0F257C5100DB26A5 /* HTTPDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HTTPDirectory.cpp; sourceTree = "<group>"; };
 		F58BF9681CD51257005BB003 /* VideoDatabaseFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VideoDatabaseFile.cpp; sourceTree = "<group>"; };
 		F58BF9691CD51257005BB003 /* VideoDatabaseFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoDatabaseFile.h; sourceTree = "<group>"; };
+		F58BF96F1CD83FAF005BB003 /* LightEffectServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightEffectServices.cpp; sourceTree = "<group>"; };
+		F58BF9701CD83FAF005BB003 /* LightEffectServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightEffectServices.h; sourceTree = "<group>"; };
 		F59045281BA372A600DB589A /* AutoPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AutoPool.h; sourceTree = "<group>"; };
 		F59045291BA372A600DB589A /* AutoPool.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AutoPool.mm; sourceTree = "<group>"; };
 		F590452B1BA372A600DB589A /* DarwinUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DarwinUtils.h; sourceTree = "<group>"; };
@@ -7781,6 +7786,7 @@
 				4313769112D63F9E00680C15 /* programs */,
 				C8482871156CFCD8005A996F /* pvr */,
 				43FAC8BF12D63B7400F67914 /* rendering */,
+				F58BF96D1CD83FAF005BB003 /* services */,
 				E38E1E000D25F9FD00618676 /* settings */,
 				43FAC84E12D62CAE00F67914 /* storage */,
 				43D8300612D64DEF00B38489 /* threads */,
@@ -8893,6 +8899,23 @@
 				F56352B916E5403400D21BAD /* GUIWindowTestPattern.h */,
 			);
 			name = windows;
+			sourceTree = "<group>";
+		};
+		F58BF96D1CD83FAF005BB003 /* services */ = {
+			isa = PBXGroup;
+			children = (
+				F58BF96E1CD83FAF005BB003 /* lighteffects */,
+			);
+			path = services;
+			sourceTree = "<group>";
+		};
+		F58BF96E1CD83FAF005BB003 /* lighteffects */ = {
+			isa = PBXGroup;
+			children = (
+				F58BF96F1CD83FAF005BB003 /* LightEffectServices.cpp */,
+				F58BF9701CD83FAF005BB003 /* LightEffectServices.h */,
+			);
+			path = lighteffects;
 			sourceTree = "<group>";
 		};
 		F59045261BA372A600DB589A /* platform */ = {
@@ -10611,6 +10634,7 @@
 				B5011E4119AF3B56005ADF89 /* PosixFile.cpp in Sources */,
 				3994425B1A8DD8D0006C39E9 /* ProgressJob.cpp in Sources */,
 				395C2A191A9F074C00EBC7AD /* Locale.cpp in Sources */,
+				F58BF9711CD83FAF005BB003 /* LightEffectServices.cpp in Sources */,
 				F5EDC48C1651A6F900B852D8 /* GroupUtils.cpp in Sources */,
 				7C7CEAF1165629530059C9EB /* AELimiter.cpp in Sources */,
 				395F6DE21A81FACF0088CC74 /* HTTPImageTransformationHandler.cpp in Sources */,
@@ -11369,6 +11393,7 @@
 				E49913A6174E5F2100741B6D /* HTTPWebinterfaceAddonsHandler.cpp in Sources */,
 				E49913A7174E5F2100741B6D /* HTTPWebinterfaceHandler.cpp in Sources */,
 				E49913A8174E5F2100741B6D /* IHTTPRequestHandler.cpp in Sources */,
+				F58BF9721CD83FAF005BB003 /* LightEffectServices.cpp in Sources */,
 				3994425C1A8DD8D0006C39E9 /* ProgressJob.cpp in Sources */,
 				E49913A9174E5F2100741B6D /* NetworkLinux.cpp in Sources */,
 				E49913AA174E5F2100741B6D /* ZeroconfBrowserOSX.cpp in Sources */,
@@ -12512,6 +12537,7 @@
 				F5D140EE1BAF0B6D0075A95C /* DisplaySettings.cpp in Sources */,
 				F5D140EF1BAF0B6D0075A95C /* MediaSettings.cpp in Sources */,
 				F5D140F01BAF0B6D0075A95C /* MediaSourceSettings.cpp in Sources */,
+				F58BF9731CD83FAF005BB003 /* LightEffectServices.cpp in Sources */,
 				F5D140F11BAF0B6D0075A95C /* SettingAddon.cpp in Sources */,
 				F5D140F21BAF0B6D0075A95C /* SettingControl.cpp in Sources */,
 				F5D140F31BAF0B6D0075A95C /* SettingPath.cpp in Sources */,

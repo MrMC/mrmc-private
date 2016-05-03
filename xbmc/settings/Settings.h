@@ -295,6 +295,7 @@ public:
   static const std::string SETTING_SERVICES_USEAIRPLAYPASSWORD;
   static const std::string SETTING_SERVICES_AIRPLAYPASSWORD;
   static const std::string SETTING_SERVICES_AIRPLAYVIDEOSUPPORT;
+  static const std::string SETTING_SERVICES_LIGHTEFFECTS;
   static const std::string SETTING_SMB_WINSSERVER;
   static const std::string SETTING_SMB_WORKGROUP;
   static const std::string SETTING_SMB_ENABLEDSM;

@@ -29,6 +29,7 @@
 #include "messaging/ApplicationMessenger.h"
 #include "messaging/helpers/DialogHelper.h"
 #include "network/Network.h"
+#include "services/lighteffects/LightEffectServices.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
@@ -479,6 +480,9 @@ void CNetworkServices::Start()
   StartAirTunesServer();
   StartAirPlayServer();
   StartRss();
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTS) && !StartEventServer())
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
+  StartLightEffectServices();
 }
 
 void CNetworkServices::Stop(bool bWait)
@@ -489,6 +493,7 @@ void CNetworkServices::Stop(bool bWait)
     StopZeroconf();
     StopWebserver();
     StopRss();
+    StopLightEffectServices();
   }
 
   StopEventServer(bWait, false);
@@ -994,6 +999,29 @@ bool CNetworkServices::StopRss()
     return true;
 
   CRssManager::GetInstance().Stop();
+  return true;
+}
+
+bool CNetworkServices::StartLightEffectServices()
+{
+  if (IsLightEffectServicesRunning())
+    return true;
+
+  CLightEffectServices::GetInstance().Start();
+  return true;
+}
+
+bool CNetworkServices::IsLightEffectServicesRunning()
+{
+  return CLightEffectServices::GetInstance().IsActive();
+}
+
+bool CNetworkServices::StopLightEffectServices()
+{
+  if (!IsLightEffectServicesRunning())
+    return true;
+
+  CLightEffectServices::GetInstance().Stop();
   return true;
 }
 
