@@ -66,7 +66,7 @@ CLightEffectServices& CLightEffectServices::GetInstance()
 
 void CLightEffectServices::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
 {
-  // need to figure out how to receive the anouncement from tvOS that screensaver has kicked in
+  // this is not used on tvOS, needs testing on droid
   if (flag == GUI && !strcmp(sender, "xbmc") && !strcmp(message, "OnScreensaverDeactivated"))
   {
     if (!CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER))
