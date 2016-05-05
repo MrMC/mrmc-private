@@ -88,6 +88,7 @@
 #include "utils/Variant.h"
 #include "view/ViewStateSettings.h"
 #include "input/InputManager.h"
+#include "services/lighteffects/LightEffectServices.h"
 
 #define SETTINGS_XML_FOLDER "special://xbmc/system/settings/"
 #define SETTINGS_XML_ROOT   "settings"
@@ -342,7 +343,6 @@ const std::string CSettings::SETTING_SERVICES_AIRPLAYVOLUMECONTROL = "services.a
 const std::string CSettings::SETTING_SERVICES_USEAIRPLAYPASSWORD = "services.useairplaypassword";
 const std::string CSettings::SETTING_SERVICES_AIRPLAYPASSWORD = "services.airplaypassword";
 const std::string CSettings::SETTING_SERVICES_AIRPLAYVIDEOSUPPORT = "services.airplayvideosupport";
-const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTS = "services.lighteffects";
 const std::string CSettings::SETTING_SMB_WINSSERVER = "smb.winsserver";
 const std::string CSettings::SETTING_SMB_WORKGROUP = "smb.workgroup";
 const std::string CSettings::SETTING_SMB_ENABLEDSM = "smb.enabledsm";
@@ -448,6 +448,23 @@ const std::string CSettings::SETTING_MYSQL_VIDEO = "mysql.video";
 const std::string CSettings::SETTING_MYSQL_MUSIC = "mysql.music";
 const std::string CSettings::SETTING_THUMBNAILS_CLEANUP = "thumbnails.cleanup";
 const std::string CSettings::SETTING_THUMBCACHE_CLEAR = "thumbcache.cleanup";
+
+// lightservices, moved here for easier merge later
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE = "services.lighteffects";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSIP = "services.lighteffectsip";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT = "services.lighteffectsport";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION = "services.lighteffectssaturation";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE = "services.lighteffectsvalue";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED = "services.lighteffectsspeed";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED = "services.lighteffectsautospeed";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION = "services.lighteffectsinterpolation";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD = "services.lighteffectsthreshold";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICON = "services.lighteffectsstaticon";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR = "services.lighteffectsstaticr";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG = "services.lighteffectsstaticg";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB = "services.lighteffectsstaticb";
+const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER = "services.lighteffectsstaticscreensaver";
+
 
 CSettings::CSettings()
   : m_initialized(false)
@@ -1285,6 +1302,23 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.clear();
   settingSet.insert(CSettings::SETTING_POWERMANAGEMENT_WAKEONACCESS);
   m_settingsManager->RegisterCallback(&CWakeOnAccess::GetInstance(), settingSet);
+  
+  settingSet.clear();
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSIP);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICON);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER);
+  m_settingsManager->RegisterCallback(&CLightEffectServices::GetInstance(), settingSet);
+  
 }
 
 bool CSettings::Reset()

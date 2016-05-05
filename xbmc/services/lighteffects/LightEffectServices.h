@@ -22,14 +22,17 @@
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
+#include "interfaces/IAnnouncer.h"
 
 class CSetting;
 class TiXmlNode;
 class CLightEffectServices;
+class CVariant;
 
 class CLightEffectServices
 : public CThread
 , public ISettingCallback
+, public ANNOUNCEMENT::IAnnouncer
 {
 public:
   static CLightEffectServices &GetInstance();
@@ -43,11 +46,17 @@ public:
   virtual bool OnSettingChanging(const CSetting *setting) override;
   virtual void OnSettingChanged(const CSetting *setting) override;
   virtual bool OnSettingUpdate(CSetting* &setting, const char *oldSettingId, const TiXmlNode *oldSettingNode) override;
+  
+  void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
 private:
   // private construction, and no assignements; use the provided singleton methods
   CLightEffectServices();
   CLightEffectServices(const CLightEffectServices&);
+  void SetOption(std::string option, std::string value);
+  void SetStatic();
+  void InitConnection();
+  void ApplyUserSettings();
   virtual ~CLightEffectServices();
 
   // IRunnable entry point for thread
@@ -58,4 +67,6 @@ private:
   int               m_height;
   CCriticalSection  m_critical;
   void*             m_lighteffect;
+  bool              m_staticON;
+  
 };
