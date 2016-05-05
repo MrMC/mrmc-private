@@ -57,7 +57,6 @@ CLightEffectServices::~CLightEffectServices()
     Stop();
 }
 
-
 CLightEffectServices& CLightEffectServices::GetInstance()
 {
   static CLightEffectServices sLightEffectServices;
@@ -110,36 +109,11 @@ bool CLightEffectServices::IsActive()
   return m_active;
 }
 
-bool CLightEffectServices::OnSettingChanging(const CSetting *setting)
-{
-  if (setting == NULL)
-    return false;
-
-  //const std::string &settingId = setting->GetId();
-
-  return true;
-}
-
 void CLightEffectServices::OnSettingChanged(const CSetting *setting)
 {
   if (setting == NULL)
     return;
-  /*
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE = "services.lighteffects";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSIP = "services.lighteffectsip";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT = "services.lighteffectsport";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION = "services.lighteffectssaturation";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE = "services.lighteffectsvalue";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED = "services.lighteffectsspeed";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED = "services.lighteffectsautospeed";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION = "services.lighteffectsinterpolation";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD = "services.lighteffectsthreshold";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICON = "services.lighteffectsstaticon";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR = "services.lighteffectsstaticr";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG = "services.lighteffectsstaticg";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB = "services.lighteffectsstaticb";
-   const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER = "services.lighteffectsstaticscreensaver";
-  */
+
   const std::string &settingId = setting->GetId();
   if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE)
   {
@@ -178,25 +152,14 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
   CSettings::GetInstance().Save();
 }
 
-bool CLightEffectServices::OnSettingUpdate(CSetting* &setting, const char *oldSettingId, const TiXmlNode *oldSettingNode)
-{
-  if (setting == NULL)
-    return false;
-
-  //const std::string &settingId = setting->GetId();
-
-  return true;
-}
-
 void CLightEffectServices::Process()
 {
+  int row;
+  int rgb[3];
   m_active = true;
   unsigned char *pixels;
   CRenderCapture *capture = g_renderManager.AllocRenderCapture();
   g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
-  
-  int row;
-  int rgb[3];
   
   while(!m_bStop)
   {
@@ -275,14 +238,12 @@ void CLightEffectServices::InitConnection()
     const CSetting *mysqlSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE);
     ((CSettingBool*)mysqlSetting)->SetValue(false);
   }
-  
 }
 
 void CLightEffectServices::ApplyUserSettings()
 {
-  
   std::string saturation = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION));
-   std::string value = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE));
+  std::string value = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE));
   std::string speed = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED));
   std::string autospeed = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED));
   std::string interpolation = StringUtils::Format("%d", CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION));
@@ -318,7 +279,6 @@ void CLightEffectServices::SetOption(std::string option, std::string value)
 void CLightEffectServices::SetStatic()
 {
   int rgb[3];
-  
   rgb[0] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR);
   rgb[1] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG);
   rgb[2] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB);

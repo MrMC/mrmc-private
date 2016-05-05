@@ -43,11 +43,9 @@ public:
   bool IsActive();
 
   // ISettingCallbacks
-  virtual bool OnSettingChanging(const CSetting *setting) override;
   virtual void OnSettingChanged(const CSetting *setting) override;
-  virtual bool OnSettingUpdate(CSetting* &setting, const char *oldSettingId, const TiXmlNode *oldSettingNode) override;
   
-  void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
+  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)override;
 
 private:
   // private construction, and no assignements; use the provided singleton methods
