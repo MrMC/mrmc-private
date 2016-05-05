@@ -36,6 +36,7 @@
 
 #include "LightEffectClient.h"
 
+// Needs replacing with our library "LightEffectClient.h"
 #include "boblight.h"
 
 using namespace ANNOUNCEMENT;
@@ -245,11 +246,13 @@ void CLightEffectServices::Process()
       // or kill the lights
       else
       {
+        // Needs replacing with our library call
         boblight_setpriority(m_lighteffect, 255);
       }
     }
   }
   g_renderManager.ReleaseRenderCapture(capture);
+  // Needs replacing with our library call
   boblight_setpriority(m_lighteffect, 255);
   m_active = false;
 }
