@@ -294,6 +294,9 @@ void CLightEffectServices::ApplyUserSettings()
   SetOption("autospeed",    autospeed);
   SetOption("interpolation",interpolation);
   SetOption("threshold",    threshold);
+  
+  // this will refresh static colours once options are changed
+  m_staticON = false;
 }
 
 void CLightEffectServices::SetOption(std::string option, std::string value)
