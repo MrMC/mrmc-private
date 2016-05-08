@@ -130,14 +130,35 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
     Stop();
     Start();
   }
-  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION ||
-           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED ||
-           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE ||
-           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED ||
-           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION ||
-           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD)
+  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION)
   {
-    ApplyUserSettings();
+    std::string saturation = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION));
+    SetOption("saturation",saturation);
+  }
+  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED)
+  {
+    std::string speed = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED));
+    SetOption("speed",speed);
+  }
+  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE)
+  {
+    std::string value = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE));
+    SetOption("value",value);
+  }
+  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED)
+  {
+    std::string autospeed = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED));
+    SetOption("autospeed",    autospeed);
+  }
+  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION)
+  {
+    std::string interpolation = StringUtils::Format("%d", CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION));
+    SetOption("interpolation",interpolation);
+  }
+  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD)
+  {
+    std::string threshold = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD));
+    SetOption("threshold",    threshold);
   }
   else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG ||
