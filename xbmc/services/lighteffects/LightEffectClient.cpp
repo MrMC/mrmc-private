@@ -23,6 +23,18 @@
 #include "boblight_client.h"
 
 #include "tcpsocket.h"
+/* This is needed for our implementation, more is better
+boblight_init();
+boblight_destroy(void* vpboblight)
+boblight_connect(m_lighteffect, IP, port, 5000000)
+boblight_setoption(m_lighteffect,-1, data.c_str())
+boblight_addpixel(m_lighteffect, -1, rgb);
+boblight_addpixelxy(m_lighteffect, x, y, rgb);
+boblight_sendrgb(m_lighteffect, 1, NULL);
+boblight_geterror(m_lighteffect)
+boblight_setpriority(m_lighteffect, 255);
+boblight_setscanrange(m_lighteffect, m_width, m_height);
+ */
 
 CLightEffectClient::CLightEffectClient()
 {
