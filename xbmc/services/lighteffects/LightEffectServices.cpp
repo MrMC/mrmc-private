@@ -130,35 +130,14 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
     Stop();
     Start();
   }
-  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION)
+  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION    ||
+           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED         ||
+           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE         ||
+           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED     ||
+           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION ||
+           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD)
   {
-    std::string saturation = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION));
-    SetOption("saturation",saturation);
-  }
-  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED)
-  {
-    std::string speed = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED));
-    SetOption("speed",speed);
-  }
-  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE)
-  {
-    std::string value = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE));
-    SetOption("value",value);
-  }
-  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED)
-  {
-    std::string autospeed = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED));
-    SetOption("autospeed",    autospeed);
-  }
-  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION)
-  {
-    std::string interpolation = StringUtils::Format("%d", CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION));
-    SetOption("interpolation",interpolation);
-  }
-  else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD)
-  {
-    std::string threshold = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD));
-    SetOption("threshold",    threshold);
+    SetOption(settingId);
   }
   else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG ||
@@ -263,26 +242,38 @@ void CLightEffectServices::InitConnection()
 
 void CLightEffectServices::ApplyUserSettings()
 {
-  std::string saturation = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION));
-  std::string value = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE));
-  std::string speed = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED));
-  std::string autospeed = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED));
-  std::string interpolation = StringUtils::Format("%d", CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSITERPOLATION));
-  std::string threshold = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD));
-  
-  SetOption("saturation",   saturation);
-  SetOption("value",        value);
-  SetOption("speed",        speed);
-  SetOption("autospeed",    autospeed);
-  SetOption("interpolation",interpolation);
-  SetOption("threshold",    threshold);
-  
-  // this will refresh static colours once options are changed
-  m_staticON = false;
+  SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION);
+  SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE);
+  SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED);
+  SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED);
+  SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION);
+  SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD);
 }
 
-void CLightEffectServices::SetOption(std::string option, std::string value)
+void CLightEffectServices::SetOption(std::string setting)
 {
+  std::string value;
+  std::string option;
+  if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION)
+  {
+    option = "interpolation";
+    value  = StringUtils::Format("%d", CSettings::GetInstance().GetBool(setting));
+  }
+  else
+  {
+    value  = StringUtils::Format("%.1f", CSettings::GetInstance().GetNumber(setting));
+    if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION)
+      option = "saturation";
+    else if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE)
+      option = "value";
+    else if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED)
+      option = "speed";
+    else if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED)
+      option = "autospeed";
+    else if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD)
+      option = "threshold";
+  }
+    
   std::string data = StringUtils::Format("%s %s", option.c_str(), value.c_str());
        // Needs replacing with our library call
   if (!boblight_setoption(m_lighteffect,-1, data.c_str()))
@@ -291,10 +282,13 @@ void CLightEffectServices::SetOption(std::string option, std::string value)
               option.c_str(),
               value.c_str());
   else
+  {
     CLog::Log(LOGDEBUG, "CLightEffectServices::SetOption - option '%s' and value '%s' - Done!",
               option.c_str(),
               value.c_str());
-    
+    // this will refresh static colours once options are changed
+    m_staticON = false;
+  }
 }
 
 void CLightEffectServices::SetStatic()

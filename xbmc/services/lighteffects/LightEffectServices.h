@@ -51,7 +51,7 @@ private:
   // private construction, and no assignements; use the provided singleton methods
   CLightEffectServices();
   CLightEffectServices(const CLightEffectServices&);
-  void SetOption(std::string option, std::string value);
+  void SetOption(std::string setting);
   void SetStatic();
   void InitConnection();
   void ApplyUserSettings();
