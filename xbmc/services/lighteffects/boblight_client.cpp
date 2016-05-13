@@ -42,6 +42,25 @@ CLight::CLight()
   #undef  BOBLIGHT_OPTION
 */
 
+  // defult values below
+  m_speed = 100.0f;
+  m_autospeed = 0.0f;
+  m_interpolation = false;
+  m_use = true;
+  m_value = 1.0f;
+  m_valuerange[0] = 0.0f;
+  m_valuerange[1] = 1.0f;
+  m_saturation = 1.0f;
+  m_satrange[0] = 0.0f;
+  m_satrange[1] = 1.0f;
+  m_threshold = 0;
+  m_gamma = 1.0f;
+  m_hscan[0] = -1.0f;
+  m_hscan[1] = -1.0f;
+  m_vscan[0] = -1.0f;
+  m_vscan[1] = -1.0f;
+  // end default values
+  
   m_singlechange = 0.0;
 
   m_width = -1;
