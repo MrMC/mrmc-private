@@ -166,6 +166,8 @@ void CLightEffectServices::Process()
     {
       // reset static bool for later
       m_staticON = false;
+      // Needs replacing with our library call
+      m_lighteffect->SetPriority(128);
       
       capture->GetEvent().WaitMSec(1000);
       if (capture->GetUserState() == CAPTURESTATE_DONE)
@@ -189,7 +191,6 @@ void CLightEffectServices::Process()
           }
         }
         // Needs replacing with our library call
-        m_lighteffect->SetPriority(128);
         m_lighteffect->SendRGB(1, NULL);
       }
     }
