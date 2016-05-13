@@ -22,6 +22,7 @@
 #include <string>
 #include <iostream> //debug
 #include <sstream>
+#include <complex>
 
 #include "boblight_client.h"
 #include "misc.h"
@@ -35,9 +36,11 @@ using namespace boblight;
 
 CLight::CLight()
 {
+/*
   #define BOBLIGHT_OPTION(name, type, min, max, default, variable, postprocess) variable = default;
   #include "options.h"
   #undef  BOBLIGHT_OPTION
+*/
 
   m_singlechange = 0.0;
 
@@ -50,8 +53,18 @@ CLight::CLight()
   memset(m_hscanscaled, 0, sizeof(m_hscanscaled));
   memset(m_vscanscaled, 0, sizeof(m_vscanscaled));
 
-  for (int i = 0; i < GAMMASIZE; i++)
+  for (size_t i = 0; i < GAMMASIZE; i++)
     m_gammacurve[i] = i;
+}
+
+float CLight::Clamp(float value, float min, float max)
+{
+  return value < max ? (value > min ? value : min) : max;
+}
+
+int CLight::Clamp(int value, int min, int max)
+{
+  return value < max ? (value > min ? value : min) : max;
 }
 
 string CLight::SetOption(const char* option, bool& send)
@@ -86,12 +99,12 @@ string CLight::SetOption(const char* option, bool& send)
     \
     return ""; \
   }
-  #include "options.h"
+  //#include "options.h"
   #undef BOBLIGHT_OPTION
 
   return "unknown option " + strname;
 }
-
+/*
 std::string CLight::GetOption(const char* option, std::string& output)
 {
   string stroption = option;
@@ -111,7 +124,7 @@ std::string CLight::GetOption(const char* option, std::string& output)
 
   return "unknown option";
 }
-
+*/
 void CLight::AddPixel(int* rgb)
 {
   if (rgb[0] >= m_threshold || rgb[1] >= m_threshold || rgb[2] >= m_threshold)
@@ -124,9 +137,9 @@ void CLight::AddPixel(int* rgb)
     }
     else
     {
-      m_rgb[0] += m_gammacurve[Clamp(rgb[0], 0, GAMMASIZE - 1)];
-      m_rgb[1] += m_gammacurve[Clamp(rgb[1], 0, GAMMASIZE - 1)];
-      m_rgb[2] += m_gammacurve[Clamp(rgb[2], 0, GAMMASIZE - 1)];
+      m_rgb[0] += m_gammacurve[Clamp(rgb[0], 0, (int)GAMMASIZE - 1)];
+      m_rgb[1] += m_gammacurve[Clamp(rgb[1], 0, (int)GAMMASIZE - 1)];
+      m_rgb[2] += m_gammacurve[Clamp(rgb[2], 0, (int)GAMMASIZE - 1)];
     }
   }
   m_rgbcount++;
@@ -158,12 +171,12 @@ void CLight::GetRGB(float* rgb)
   //it needs sync mode to work properly
   if (m_autospeed > 0.0)
   {
-    float change = Abs(rgb[0] - m_prevrgb[0]) + Abs(rgb[1] - m_prevrgb[1]) + Abs(rgb[2] - m_prevrgb[2]);
+    float change = std::abs(rgb[0] - m_prevrgb[0]) + std::abs(rgb[1] - m_prevrgb[1]) + std::abs(rgb[2] - m_prevrgb[2]);
     change /= 3.0;
 
     //only apply singlechange if it's large enough, otherwise we risk sending it continously
     if (change > 0.001)
-      m_singlechange = Clamp(change * m_autospeed / 10.0, 0.0, 1.0);
+      m_singlechange = Clamp(change * m_autospeed / 10.0f, 0.0f, 1.0f);
     else
       m_singlechange = 0.0;
   }
@@ -176,8 +189,8 @@ void CLight::GetRGB(float* rgb)
   {
     //rgb - hsv conversion, thanks wikipedia!
     float hsv[3];
-    float max = Max(rgb[0], rgb[1], rgb[2]);
-    float min = Min(rgb[0], rgb[1], rgb[2]);
+    float max = std::max(std::max(rgb[0], rgb[1]), rgb[2]);
+    float min = std::min(std::min(rgb[0], rgb[1]), rgb[2]);
 
     if (min == max) //grayscale
     {
@@ -261,8 +274,6 @@ int CBoblight::Connect(const char* address, int port, int usectimeout)
 {
   CMessage message;
   CTcpData data;
-  int64_t  now;
-  int64_t  target;
   string   word;
 
   //set address
@@ -341,6 +352,7 @@ int CBoblight::Connect(const char* address, int port, int usectimeout)
 
 CBoblight::CBoblight()
 {
+  /*
   int padsize = 1;
   //get option name pad size so it looks pretty
   #define BOBLIGHT_OPTION(name, type, min, max, default, variable, postprocess) \
@@ -351,7 +363,7 @@ CBoblight::CBoblight()
 
   //stick in a line that describes the options
   string option = "name";
-  option.append(Max(padsize - option.length(), 1), ' ');
+  option.append(Max(padsize - option.length(), (size_t)1), ' ');
   option += "type    min     max     default";
   m_options.push_back(option);
 
@@ -379,6 +391,7 @@ CBoblight::CBoblight()
   }
   #include "options.h"
   #undef BOBLIGHT_OPTION
+  */
 }
 
 //reads from socket until timeout or one message has arrived
@@ -525,7 +538,7 @@ bool CBoblight::CheckLightExists(int lightnr, bool printerror /*= true*/)
 
 void CBoblight::SetScanRange(int width, int height)
 {
-  for (int i = 0; i < m_lights.size(); i++)
+  for (size_t i = 0; i < m_lights.size(); i++)
   {
     m_lights[i].SetScanRange(width, height);
   }
@@ -538,7 +551,7 @@ int CBoblight::AddPixel(int lightnr, int* rgb)
 
   if (lightnr < 0)
   {
-    for (int i = 0; i < m_lights.size(); i++)
+    for (size_t i = 0; i < m_lights.size(); i++)
       m_lights[i].AddPixel(rgb);
   }
   else
@@ -551,7 +564,7 @@ int CBoblight::AddPixel(int lightnr, int* rgb)
 
 void CBoblight::AddPixel(int* rgb, int x, int y)
 {
-  for (int i = 0; i < m_lights.size(); i++)
+  for (size_t i = 0; i < m_lights.size(); i++)
   {
     if (x >= m_lights[i].m_hscanscaled[0] && x <= m_lights[i].m_hscanscaled[1] &&
         y >= m_lights[i].m_vscanscaled[0] && y <= m_lights[i].m_vscanscaled[1])
@@ -565,7 +578,7 @@ int CBoblight::SendRGB(int sync, int* outputused)
 {
   string data;
 
-  for (int i = 0; i < m_lights.size(); i++)
+  for (size_t i = 0; i < m_lights.size(); i++)
   {
     float rgb[3];
     m_lights[i].GetRGB(rgb);
@@ -624,7 +637,7 @@ int CBoblight::Ping(int* outputused, bool send)
 
   return 1;
 }
-
+/*
 int CBoblight::GetNrOptions()
 {
   return m_options.size();
@@ -632,12 +645,12 @@ int CBoblight::GetNrOptions()
 
 const char* CBoblight::GetOptionDescription(int option)
 {
-  if (option < 0 || option >= m_options.size())
+  if (option < 0 || option >= (int)m_options.size())
     return NULL;
 
   return m_options[option].c_str();
 }
-
+*/
 int CBoblight::SetOption(int lightnr, const char* option)
 {
   string error;
@@ -649,7 +662,7 @@ int CBoblight::SetOption(int lightnr, const char* option)
 
   if (lightnr < 0)
   {
-    for (int i = 0; i < m_lights.size(); i++)
+    for (size_t i = 0; i < m_lights.size(); i++)
     {
       error = m_lights[i].SetOption(option, send);
       if (!error.empty())
@@ -682,7 +695,7 @@ int CBoblight::SetOption(int lightnr, const char* option)
 
   return 1;
 }
-
+/*
 int CBoblight::GetOption(int lightnr, const char* option, const char** output)
 {
   if (lightnr < 0) //negative lights don't exist, so we set it to an invalid number to get the error message
@@ -702,3 +715,4 @@ int CBoblight::GetOption(int lightnr, const char* option, const char** output)
   
   return 1;
 }
+*/

@@ -50,9 +50,7 @@ bool CLightEffectClient::Connect(const char* ip, int port, int timeout)
 {
 //  CMessage message;
   CTcpData data;
-  int64_t  now;
-  int64_t  target;
-  std::string   word;
+  std::string word;
   
   m_ip = ip;
   m_port = port;
@@ -66,7 +64,7 @@ bool CLightEffectClient::Connect(const char* ip, int port, int timeout)
   if (!WriteData("hello\n"))
     return 0;
   
-  char test = ReadData();
+  ReadData();
   
   return true;
 }

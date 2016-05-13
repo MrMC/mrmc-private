@@ -29,6 +29,11 @@ class TiXmlNode;
 class CLightEffectServices;
 class CVariant;
 
+namespace boblight
+{
+  class CBoblight;
+}
+
 class CLightEffectServices
 : public CThread
 , public ISettingCallback
@@ -64,7 +69,7 @@ private:
   int               m_width;
   int               m_height;
   CCriticalSection  m_critical;
-  void*             m_lighteffect;
+  boblight::CBoblight *m_lighteffect;
   bool              m_staticON;
   
 };

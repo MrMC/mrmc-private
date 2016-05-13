@@ -35,10 +35,9 @@
 #include "messaging/ApplicationMessenger.h"
 
 #include "LightEffectClient.h"
+#include "boblight_client.h"
 
-// Needs replacing with our library "LightEffectClient.h"
-#include "boblight.h"
-
+using namespace boblight;
 using namespace ANNOUNCEMENT;
 using namespace KODI::MESSAGING;
 
@@ -80,7 +79,7 @@ void CLightEffectServices::Announce(AnnouncementFlag flag, const char *sender, c
     {
       m_staticON = true;
       // Needs replacing with our library call
-      boblight_setpriority(m_lighteffect, 255);
+      m_lighteffect->SetPriority(255);
     }
   }
 }
@@ -174,7 +173,7 @@ void CLightEffectServices::Process()
         //read out the pixels
         pixels = capture->GetPixels();
         // Needs replacing with our library call
-        boblight_setscanrange(m_lighteffect, m_width, m_height);
+        m_lighteffect->SetScanRange(m_width, m_height);
         
         for (int y = 0; y < m_height;  y++)
         {
@@ -186,12 +185,12 @@ void CLightEffectServices::Process()
             rgb[2] = pixels[row + x * 4];
             
             // Needs replacing with our library call
-            boblight_addpixelxy(m_lighteffect, x, y, rgb);
+            m_lighteffect->AddPixel(rgb, x, y);
           }
         }
         // Needs replacing with our library call
-        boblight_setpriority(m_lighteffect, 128);
-        boblight_sendrgb(m_lighteffect, 1, NULL);
+        m_lighteffect->SetPriority(128);
+        m_lighteffect->SendRGB(1, NULL);
       }
     }
     else
@@ -210,13 +209,13 @@ void CLightEffectServices::Process()
       else
       {
         // Needs replacing with our library call
-        boblight_setpriority(m_lighteffect, 255);
+        m_lighteffect->SetPriority(255);
       }
     }
   }
   g_renderManager.ReleaseRenderCapture(capture);
   // Needs replacing with our library call
-  boblight_setpriority(m_lighteffect, 255);
+  m_lighteffect->SetPriority(255);
   m_active = false;
 }
 
@@ -224,14 +223,14 @@ void CLightEffectServices::InitConnection()
 {
   m_staticON = false;
   // Needs replacing with our library call
-  m_lighteffect = boblight_init();
+  m_lighteffect = new CBoblight();
   
   // boblightd server IP address and port
   const char *IP = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_LIGHTEFFECTSIP).c_str();
   int port = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT);
     
   // Needs replacing with our library call
-  if (!boblight_connect(m_lighteffect, IP, port, 5000000))
+  if (!m_lighteffect->Connect(IP, port, 5000000))
   {
     m_staticON = true;
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(882), g_localizeStrings.Get(883), 3000, true);
@@ -276,9 +275,9 @@ void CLightEffectServices::SetOption(std::string setting)
     
   std::string data = StringUtils::Format("%s %s", option.c_str(), value.c_str());
        // Needs replacing with our library call
-  if (!boblight_setoption(m_lighteffect,-1, data.c_str()))
+  if (!m_lighteffect->SetOption(-1, data.c_str()))
     CLog::Log(LOGDEBUG, "CLightEffectServices::SetOption - error: %s for option '%s' and value '%s'",
-              boblight_geterror(m_lighteffect),
+              m_lighteffect->GetError(),
               option.c_str(),
               value.c_str());
   else
@@ -299,7 +298,7 @@ void CLightEffectServices::SetStatic()
   rgb[2] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB);
   
   // Needs replacing with our library call
-  boblight_addpixel(m_lighteffect, -1, rgb);
-  boblight_setpriority(m_lighteffect, 128);
-  boblight_sendrgb(m_lighteffect, 1, NULL);
+  m_lighteffect->AddPixel(-1, rgb);
+  m_lighteffect->SetPriority(128);
+  m_lighteffect->SendRGB(1, NULL);
 }

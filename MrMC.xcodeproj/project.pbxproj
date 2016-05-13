@@ -36,9 +36,6 @@
 		189448C41CD91AC70036E391 /* timeutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C21CD91AC70036E391 /* timeutils.cpp */; };
 		189448C51CD91AC70036E391 /* timeutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C21CD91AC70036E391 /* timeutils.cpp */; };
 		189448C61CD91AC70036E391 /* timeutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C21CD91AC70036E391 /* timeutils.cpp */; };
-		189448CA1CD91B680036E391 /* boblight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C81CD91B680036E391 /* boblight.cpp */; };
-		189448CB1CD91B680036E391 /* boblight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C81CD91B680036E391 /* boblight.cpp */; };
-		189448CC1CD91B680036E391 /* boblight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C81CD91B680036E391 /* boblight.cpp */; };
 		18968DC814155D7C005BA742 /* ApplicationOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18968DC614155D7C005BA742 /* ApplicationOperations.cpp */; };
 		18AC31F01C49445D00AE9433 /* TVServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18AC31EF1C49445D00AE9433 /* TVServices.framework */; };
 		18AC31F41C49445D00AE9433 /* ServiceProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 18AC31F31C49445D00AE9433 /* ServiceProvider.m */; };
@@ -3179,14 +3176,11 @@
 		189448B31CD905B70036E391 /* LightEffectClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightEffectClient.h; sourceTree = "<group>"; };
 		189448B71CD91A2B0036E391 /* boblight_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = boblight_client.cpp; sourceTree = "<group>"; };
 		189448B81CD91A2B0036E391 /* boblight_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boblight_client.h; sourceTree = "<group>"; };
-		189448BC1CD91A7A0036E391 /* options.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = options.h; sourceTree = "<group>"; };
 		189448BD1CD91A9B0036E391 /* messagequeue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = messagequeue.cpp; sourceTree = "<group>"; };
 		189448BE1CD91A9B0036E391 /* messagequeue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = messagequeue.h; sourceTree = "<group>"; };
 		189448C21CD91AC70036E391 /* timeutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timeutils.cpp; sourceTree = "<group>"; };
 		189448C31CD91AC70036E391 /* timeutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timeutils.h; sourceTree = "<group>"; };
 		189448C71CD91B040036E391 /* protocolversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = protocolversion.h; sourceTree = "<group>"; };
-		189448C81CD91B680036E391 /* boblight.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = boblight.cpp; sourceTree = "<group>"; };
-		189448C91CD91B680036E391 /* boblight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boblight.h; sourceTree = "<group>"; };
 		189448CD1CD91B8A0036E391 /* boblight-functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "boblight-functions.h"; sourceTree = "<group>"; };
 		18968DC614155D7C005BA742 /* ApplicationOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationOperations.cpp; sourceTree = "<group>"; };
 		18968DC714155D7C005BA742 /* ApplicationOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplicationOperations.h; sourceTree = "<group>"; };
@@ -8957,7 +8951,6 @@
 				189448C21CD91AC70036E391 /* timeutils.cpp */,
 				189448C31CD91AC70036E391 /* timeutils.h */,
 				189448BE1CD91A9B0036E391 /* messagequeue.h */,
-				189448BC1CD91A7A0036E391 /* options.h */,
 				189448CD1CD91B8A0036E391 /* boblight-functions.h */,
 				189448AC1CD8FAFD0036E391 /* inclstdint.h */,
 				189448AD1CD8FAFD0036E391 /* misc.cpp */,
@@ -8965,8 +8958,6 @@
 				189448A71CD8FA890036E391 /* tcpsocket.cpp */,
 				189448A81CD8FA890036E391 /* tcpsocket.h */,
 				189448C71CD91B040036E391 /* protocolversion.h */,
-				189448C81CD91B680036E391 /* boblight.cpp */,
-				189448C91CD91B680036E391 /* boblight.h */,
 				189448B21CD905B70036E391 /* LightEffectClient.cpp */,
 				189448B31CD905B70036E391 /* LightEffectClient.h */,
 				F58BF96F1CD83FAF005BB003 /* LightEffectServices.cpp */,
@@ -9934,7 +9925,6 @@
 				399442771A8DD920006C39E9 /* VideoLibraryProgressJob.cpp in Sources */,
 				E38E1F3D0D25F9FD00618676 /* AutoSwitch.cpp in Sources */,
 				E38E1F3E0D25F9FD00618676 /* BackgroundInfoLoader.cpp in Sources */,
-				189448CA1CD91B680036E391 /* boblight.cpp in Sources */,
 				DF4BF0151A4EF30F0053AC56 /* cc_decoder.c in Sources */,
 				E38E1F570D25F9FD00618676 /* DllLoaderContainer.cpp in Sources */,
 				E38E1F730D25F9FD00618676 /* LibraryLoader.cpp in Sources */,
@@ -11404,7 +11394,6 @@
 				E4991358174E5EBE00741B6D /* PlayerOperations.cpp in Sources */,
 				F5D13EBE1BAE388E0075A95C /* DictionaryUtils.mm in Sources */,
 				E4991359174E5EBE00741B6D /* PlaylistOperations.cpp in Sources */,
-				189448CB1CD91B680036E391 /* boblight.cpp in Sources */,
 				E499135A174E5EBE00741B6D /* PVROperations.cpp in Sources */,
 				E499135B174E5EBE00741B6D /* SystemOperations.cpp in Sources */,
 				E499135C174E5EBE00741B6D /* VideoLibrary.cpp in Sources */,
@@ -12635,7 +12624,6 @@
 				F5B722F01C7C894F006432AE /* AddonBuiltins.cpp in Sources */,
 				F5D141031BAF0B6D0075A95C /* VideoLibraryProgressJob.cpp in Sources */,
 				F5D141041BAF0B6D0075A95C /* DVDDemuxCC.cpp in Sources */,
-				189448CC1CD91B680036E391 /* boblight.cpp in Sources */,
 				F5D141051BAF0B6D0075A95C /* AliasShortcutUtils.cpp in Sources */,
 				F5A4F2A31BB086FE0083FC69 /* IptcParse.cpp in Sources */,
 				F5B7249E1C7E150C006432AE /* consio.cpp in Sources */,

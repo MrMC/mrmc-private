@@ -32,6 +32,9 @@ namespace boblight
     public:
       CLight();
 
+      int         Clamp(int value, int min, int max);
+      float       Clamp(float value, float min, float max);
+
       std::string SetOption(const char* option, bool& send);
       std::string GetOption(const char* option, std::string& output);
 
@@ -87,10 +90,10 @@ namespace boblight
       int         SendRGB(int sync, int* outputused);
       int         Ping(int* outputused, bool send);
 
-      int         GetNrOptions();
-      const char* GetOptionDescription(int option);
+      //int         GetNrOptions();
+      //const char* GetOptionDescription(int option);
       int         SetOption(int lightnr, const char* option);
-      int         GetOption(int lightnr, const char* option, const char** output);
+      //int         GetOption(int lightnr, const char* option, const char** output);
 
     private:
       CTcpClientSocket m_socket;

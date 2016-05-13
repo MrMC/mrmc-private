@@ -35,16 +35,6 @@ void PrintError(const std::string& error);
 bool GetWord(std::string& data, std::string& word);
 void ConvertFloatLocale(std::string& strfloat);
 
-template <class Value>
-inline std::string ToString(Value value)
-{
-  std::string data;
-  std::stringstream valuestream;
-  valuestream << value;
-  valuestream >> data;
-  return data;
-}
-
 inline std::string GetErrno()
 {
   return strerror(errno);
@@ -55,57 +45,14 @@ inline std::string GetErrno(int err)
   return strerror(err);
 }
 
-template <class A, class B, class C>
-inline A Clamp(A value, B min, C max)
+template <class Value>
+inline std::string ToString(Value value)
 {
-  return value < max ? (value > min ? value : min) : max;
-}
-
-template <class A, class B>
-inline A Max(A value1, B value2)
-{
-  return value1 > value2 ? value1 : value2;
-}
-
-template <class A, class B, class C>
-inline A Max(A value1, B value2, C value3)
-{
-  return (value1 > value2) ? (value1 > value3 ? value1 : value3) : (value2 > value3 ? value2 : value3);
-}
-
-template <class A, class B>
-inline A Min(A value1, B value2)
-{
-  return value1 < value2 ? value1 : value2;
-}
-
-template <class A, class B, class C>
-inline A Min(A value1, B value2, C value3)
-{
-  return (value1 < value2) ? (value1 < value3 ? value1 : value3) : (value2 < value3 ? value2 : value3);
-}
-
-template <class T>
-inline T Abs(T value)
-{
-  return value > 0 ? value : -value;
-}
-
-template <class A, class B>
-inline A Round(B value)
-{
-  if (value == 0.0)
-  {
-    return 0;
-  }
-  else if (value > 0.0)
-  {
-    return (A)(value + 0.5);
-  }
-  else
-  {
-    return (A)(value - 0.5);
-  }
+  std::string data;
+  std::stringstream valuestream;
+  valuestream << value;
+  valuestream >> data;
+  return data;
 }
 
 inline int32_t Round32(float value)

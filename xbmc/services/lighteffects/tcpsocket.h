@@ -85,11 +85,4 @@ class CTcpClientSocket : public CTcpSocket
     int Write(CTcpData& data);
     int SetInfo(std::string address, int port, int sock);
 };
-
-class CTcpServerSocket : public CTcpSocket
-{
-  public:
-    int Open(std::string address, int port, int usectimeout = -1); //empty string for interface means bind to *
-    int Accept(CTcpClientSocket& socket);
-};
 #endif //TCP

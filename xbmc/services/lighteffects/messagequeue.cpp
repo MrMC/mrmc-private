@@ -38,7 +38,7 @@ CMessage CMessageQueue::GetMessage()
 void CMessageQueue::AddData(std::string data)
 {
   int64_t now = GetTimeUs();
-  int nlpos = data.find('\n'); //position of the newline
+  size_t nlpos = data.find('\n'); //position of the newline
 
   //no newline
   if (nlpos == string::npos)
@@ -89,7 +89,7 @@ void CMessageQueue::AddData(char* data, int size)
   strdata[size] = 0;
   AddData(strdata);
 
-  delete strdata;
+  delete [] strdata;
 }
 
 void CMessageQueue::Clear()
