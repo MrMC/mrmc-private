@@ -1309,6 +1309,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE);
+  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD);
