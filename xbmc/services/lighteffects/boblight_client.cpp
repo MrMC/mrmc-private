@@ -77,30 +77,77 @@ string CLight::SetOption(const char* option, bool& send)
   if (!GetWord(stroption, strname))
     return "emtpy option"; //string with only whitespace
 
-  #define BOBLIGHT_OPTION(name, type, min, max, default, variable, postprocess) \
-  if (strname == #name) \
-  { \
-    type value; \
-    if (#type == "bool")\
-    {\
-      if (!StrToBool(stroption, *(bool*)(&value)))\
-        return "invalid value " + stroption + " for option " + strname + " with type " + #type; \
-    }\
-    else\
-    {\
-      stringstream stream; \
-      stream << stroption; \
-      stream >> value; \
-      if (stream.fail()) return "invalid value " + stroption + " for option " + strname + " with type " + #type; \
-      \
-    }\
-    variable = value; \
-    postprocess\
-    \
-    return ""; \
+  if (strname == "interpolation")
+  {
+    bool value;
+    if (!StrToBool(stroption, *(bool*)(&value)))
+      return "invalid value " + stroption + " for option " + strname + " with type bool";
+    m_interpolation = value;
+    send = true;
+    return "";
   }
-  //#include "options.h"
-  #undef BOBLIGHT_OPTION
+  else
+  {
+    float value;
+    stringstream stream;
+    stream << stroption;
+    stream >> value;
+    if (stream.fail())
+      return "invalid value " + stroption + " for option " + strname + " with type float";
+    
+    if (strname == "saturation")
+    {
+      m_saturation = value;
+      m_saturation = std::fmax(m_saturation, 0.0);
+    }
+    else if (strname == "speed")
+    {
+      m_speed = value;
+      m_speed = Clamp(m_speed, 0.0, 100.0);
+      send = true;
+    }
+    else if (strname == "autospeed")
+    {
+      m_autospeed = value;
+      m_autospeed = std::fmax(m_autospeed, 0.0);
+    }
+    else if (strname == "value")
+    {
+      m_value = value;
+      m_value = std::fmax(m_value, 0.0);
+    }
+    else if (strname == "threshold")
+    {
+      m_threshold = value;
+      m_threshold = Clamp(m_threshold, 0, 255);
+    }
+    return "";
+  }
+  
+//  #define BOBLIGHT_OPTION(name, type, min, max, default, variable, postprocess) \
+//  if (strname == #name) \
+//  { \
+//    type value; \
+//    if (#type == "bool")\
+//    {\
+//      if (!StrToBool(stroption, *(bool*)(&value)))\
+//        return "invalid value " + stroption + " for option " + strname + " with type " + #type; \
+//    }\
+//    else\
+//    {\
+//      stringstream stream; \
+//      stream << stroption; \
+//      stream >> value; \
+//      if (stream.fail()) return "invalid value " + stroption + " for option " + strname + " with type " + #type; \
+//      \
+//    }\
+//    variable = value; \
+//    postprocess\
+//    \
+//    return ""; \
+//  }
+//  //#include "options.h"
+//  #undef BOBLIGHT_OPTION
 
   return "unknown option " + strname;
 }
