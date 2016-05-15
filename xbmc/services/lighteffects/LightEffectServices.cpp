@@ -89,6 +89,7 @@ bool CLightEffectServices::Start()
   {
     InitConnection();
     ApplyUserSettings();
+    SetBling();
     CThread::Create();
   }
   return false;
@@ -295,4 +296,19 @@ void CLightEffectServices::SetStatic()
   m_lighteffect->AddStaticPixels(rgb);
   m_lighteffect->SetPriority(128);
   m_lighteffect->SendRGB(true);
+}
+
+void CLightEffectServices::SetBling()
+{
+  m_lighteffect->SetPriority(128);
+  for (int y = 0; y < 4;  y++)
+  {
+    int rgb[3] = {0,0,0};
+    if (y < 3)
+      rgb[y] = 255;
+    m_lighteffect->AddStaticPixels(rgb);
+    m_lighteffect->SendRGB(true);
+    Sleep(1000);
+  }
+
 }

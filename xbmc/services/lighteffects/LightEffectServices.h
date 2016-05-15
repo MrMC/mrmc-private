@@ -54,6 +54,7 @@ private:
   CLightEffectServices(const CLightEffectServices&);
   void SetOption(std::string setting);
   void SetStatic();
+  void SetBling();
   void InitConnection();
   void ApplyUserSettings();
   virtual ~CLightEffectServices();
