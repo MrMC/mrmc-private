@@ -21,9 +21,51 @@
 
 #include <string>
 #include <vector>
-
 #include "tcpsocket.h"
 
+
+class CLightEffectLED
+{
+public:
+  CLightEffectLED();
+  
+  int         Clamp(int value, int min, int max);
+  float       Clamp(float value, float min, float max);
+  
+  std::string SetOption(const char* option, bool& send);
+  std::string GetOption(const char* option, std::string& output);
+  
+  void        SetScanRange(int width, int height);
+  void        AddPixel(int* rgb);
+  
+  std::string m_name;
+  float       m_speed;
+  float       m_autospeed;
+  float       m_singlechange;
+  
+  bool        m_interpolation;
+  bool        m_use;
+  
+  float       m_value;
+  float       m_valuerange[2];
+  float       m_saturation;
+  float       m_satrange[2];
+  int         m_threshold;
+  float       m_gamma;
+  float       m_gammacurve[256];
+  
+  float       m_rgb[3];
+  int         m_rgbcount;
+  float       m_prevrgb[3];
+  void        GetRGB(float* rgb);
+  
+  float       m_hscan[2];
+  float       m_vscan[2];
+  int         m_width;
+  int         m_height;
+  int         m_hscanscaled[2];
+  int         m_vscanscaled[2];
+};
 
 class CLightEffectClient
 {
@@ -32,8 +74,18 @@ public:
   static CLightEffectClient &GetInstance();
   bool         Connect(const char* ip, int port, int timeout);
   bool         WriteData(std::string data);
-  char         ReadData();
-  int          SetPrio(int prio);
+  std::string  ReadData();
+  int          SetPriority(int prio);
+  void         SetScanRange(int width, int height);
+  int          AddStaticPixels(int* rgb);
+  void         AddPixel(int* rgb, int x, int y);
+  int          SendRGB(bool sync);
+  int          SetOption(const char* option);
+  bool         ParseLights(std::string& message);
+  bool         ParseWord(std::string& message, std::string wordtocmp);
+  bool         GetWord(std::string& data, std::string& word);
+  bool         StrToInt(const std::string& data, int& value);
+  void         ConvertFloatLocale(std::string& strfloat);
   
 private:
   CTcpClientSocket m_socket;
@@ -41,4 +93,5 @@ private:
   int              m_port;
   std::string      m_error;
   int              m_timeout;
+  std::vector <CLightEffectLED> m_lights;
 };

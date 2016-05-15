@@ -35,9 +35,7 @@
 #include "messaging/ApplicationMessenger.h"
 
 #include "LightEffectClient.h"
-#include "boblight_client.h"
 
-using namespace boblight;
 using namespace ANNOUNCEMENT;
 using namespace KODI::MESSAGING;
 
@@ -47,6 +45,7 @@ CLightEffectServices::CLightEffectServices()
 , m_width(32)
 , m_height(32)
 , m_staticON(false)
+, m_lightsON(true)
 {
 }
 
@@ -78,7 +77,6 @@ void CLightEffectServices::Announce(AnnouncementFlag flag, const char *sender, c
     if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER))
     {
       m_staticON = true;
-      // Needs replacing with our library call
       m_lighteffect->SetPriority(255);
     }
   }
@@ -166,7 +164,7 @@ void CLightEffectServices::Process()
     {
       // reset static bool for later
       m_staticON = false;
-      // Needs replacing with our library call
+      m_lightsON = true;
       m_lighteffect->SetPriority(128);
       
       capture->GetEvent().WaitMSec(1000);
@@ -174,7 +172,6 @@ void CLightEffectServices::Process()
       {
         //read out the pixels
         pixels = capture->GetPixels();
-        // Needs replacing with our library call
         m_lighteffect->SetScanRange(m_width, m_height);
         
         for (int y = 0; y < m_height;  y++)
@@ -186,12 +183,10 @@ void CLightEffectServices::Process()
             rgb[1] = pixels[row + x * 4 + 1];
             rgb[2] = pixels[row + x * 4];
             
-            // Needs replacing with our library call
             m_lighteffect->AddPixel(rgb, x, y);
           }
         }
-        // Needs replacing with our library call
-        m_lighteffect->SendRGB(1, NULL);
+        m_lighteffect->SendRGB(true);
       }
     }
     else
@@ -203,19 +198,22 @@ void CLightEffectServices::Process()
         if(!m_staticON)
         {
           m_staticON = true;
+          m_lightsON = true;
           SetStatic();
         }
       }
       // or kill the lights
       else
       {
-        // Needs replacing with our library call
-        m_lighteffect->SetPriority(255);
+        if (m_lightsON)
+        {
+          m_lighteffect->SetPriority(255);
+          m_lightsON = false;
+        }
       }
     }
   }
   g_renderManager.ReleaseRenderCapture(capture);
-  // Needs replacing with our library call
   m_lighteffect->SetPriority(255);
   m_active = false;
 }
@@ -223,14 +221,12 @@ void CLightEffectServices::Process()
 void CLightEffectServices::InitConnection()
 {
   m_staticON = false;
-  // Needs replacing with our library call
-  m_lighteffect = new CBoblight();
+  m_lighteffect = new CLightEffectClient();
   
   // boblightd server IP address and port
   const char *IP = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_LIGHTEFFECTSIP).c_str();
   int port = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT);
     
-  // Needs replacing with our library call
   if (!m_lighteffect->Connect(IP, port, 5000000))
   {
     m_staticON = true;
@@ -275,10 +271,8 @@ void CLightEffectServices::SetOption(std::string setting)
   }
     
   std::string data = StringUtils::Format("%s %s", option.c_str(), value.c_str());
-       // Needs replacing with our library call
-  if (!m_lighteffect->SetOption(-1, data.c_str()))
-    CLog::Log(LOGDEBUG, "CLightEffectServices::SetOption - error: %s for option '%s' and value '%s'",
-              m_lighteffect->GetError(),
+  if (!m_lighteffect->SetOption(data.c_str()))
+    CLog::Log(LOGDEBUG, "CLightEffectServices::SetOption - error: for option '%s' and value '%s'",
               option.c_str(),
               value.c_str());
   else
@@ -298,8 +292,7 @@ void CLightEffectServices::SetStatic()
   rgb[1] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG);
   rgb[2] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB);
   
-  // Needs replacing with our library call
-  m_lighteffect->AddPixel(-1, rgb);
+  m_lighteffect->AddStaticPixels(rgb);
   m_lighteffect->SetPriority(128);
-  m_lighteffect->SendRGB(1, NULL);
+  m_lighteffect->SendRGB(true);
 }

@@ -16,7 +16,8 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "inclstdint.h"
+#include <stdint.h>
+#include <inttypes.h>
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -29,7 +30,6 @@
 #include <netinet/tcp.h>
 
 #include "tcpsocket.h"
-#include "misc.h"
 
 using namespace std;
 
@@ -115,7 +115,7 @@ int CTcpSocket::SetNonBlock(bool nonblock)
   int flags = fcntl(m_sock, F_GETFL);
   if (flags == -1)
   {
-    m_error = "F_GETFL " + GetErrno();
+//    m_error = "F_GETFL " + GetErrno();
     return FAIL;
   }
 
@@ -126,7 +126,7 @@ int CTcpSocket::SetNonBlock(bool nonblock)
   
   if (fcntl(m_sock, F_SETFL, flags) == -1)
   {
-    m_error = "F_SETFL " + GetErrno();
+//    m_error = "F_SETFL " + GetErrno();
     return FAIL;
   }
 
@@ -142,7 +142,7 @@ int CTcpSocket::SetSockOptions()
   int flag = 1;
   if (setsockopt(m_sock, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag)) == -1)
   {
-    m_error = "TCP_NODELAY " + GetErrno();
+//    m_error = "TCP_NODELAY " + GetErrno();
     return FAIL;
   }
 
@@ -222,12 +222,12 @@ int CTcpSocket::WaitForSocket(bool write, std::string timeoutstr)
   
   if (returnv == 0) //select timed out
   {
-    m_error = m_address + ":" + ToString(m_port) + " " + timeoutstr + " timed out"; 
+//    m_error = m_address + ":" + ToString(m_port) + " " + timeoutstr + " timed out"; 
     return TIMEOUT;
   }
   else if (returnv == -1) //select had an error
   {
-    m_error = "select() " + GetErrno();
+//    m_error = "select() " + GetErrno();
     return FAIL;
   }
 
@@ -237,12 +237,12 @@ int CTcpSocket::WaitForSocket(bool write, std::string timeoutstr)
   
   if (returnv == -1) //getsockopt had an error
   {
-    m_error = "getsockopt() " + GetErrno();
+//    m_error = "getsockopt() " + GetErrno();
     return FAIL;
   }
   else if (sockstate) //socket had an error
   {
-    m_error = "SO_ERROR " + m_address + ":" + ToString(m_port) + " " + GetErrno(sockstate);
+//    m_error = "SO_ERROR " + m_address + ":" + ToString(m_port) + " " + GetErrno(sockstate);
     return FAIL;
   }
 
@@ -263,7 +263,7 @@ int CTcpClientSocket::Open(std::string address, int port, int usectimeout /*= -1
 
   if (m_sock == -1) //can't make socket
   {
-    m_error = "socket() " + GetErrno();
+//    m_error = "socket() " + GetErrno();
     return FAIL;
   }
 
@@ -282,7 +282,7 @@ int CTcpClientSocket::Open(std::string address, int port, int usectimeout /*= -1
   struct hostent *host = gethostbyname(address.c_str());
   if (!host) //can't find host
   {
-    m_error = "gethostbyname() " + address + ":" + ToString(m_port) + " " + GetErrno();
+//    m_error = "gethostbyname() " + address + ":" + ToString(m_port) + " " + GetErrno();
     return FAIL;
   }
   server.sin_addr.s_addr = *reinterpret_cast<in_addr_t*>(host->h_addr);
@@ -291,7 +291,7 @@ int CTcpClientSocket::Open(std::string address, int port, int usectimeout /*= -1
   {
     if (errno != EINPROGRESS) //because of the non blocking socket, this means we're still connecting
     {
-      m_error = "connect() " + address + ":" + ToString(port) + " " + GetErrno();
+//      m_error = "connect() " + address + ":" + ToString(port) + " " + GetErrno();
       return FAIL;
     }
   }
@@ -335,12 +335,12 @@ int CTcpClientSocket::Read(CTcpData& data)
     }    
     else if (size == -1) //socket had an error
     {
-      m_error = "recv() " + m_address + ":" + ToString(m_port) + " " + GetErrno();
+//      m_error = "recv() " + m_address + ":" + ToString(m_port) + " " + GetErrno();
       return FAIL;
     }
     else if (size == 0 && data.GetSize() == 0) //socket closed and no data received
     {
-      m_error = m_address + ":" + ToString(m_port) + " Connection closed";
+//      m_error = m_address + ":" + ToString(m_port) + " Connection closed";
       return FAIL;
     }
     else if (size == 0) //socket closed but data received
@@ -378,7 +378,7 @@ int CTcpClientSocket::Write(CTcpData& data)
     
     if (size == -1)
     {
-      m_error = "send() " + m_address + ":" + ToString(m_port) + " " + GetErrno();
+//      m_error = "send() " + m_address + ":" + ToString(m_port) + " " + GetErrno();
       return FAIL;
     }
 

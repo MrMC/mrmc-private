@@ -21,21 +21,9 @@
 		189448A91CD8FA890036E391 /* tcpsocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* tcpsocket.cpp */; };
 		189448AA1CD8FA890036E391 /* tcpsocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* tcpsocket.cpp */; };
 		189448AB1CD8FA890036E391 /* tcpsocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* tcpsocket.cpp */; };
-		189448AF1CD8FAFD0036E391 /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448AD1CD8FAFD0036E391 /* misc.cpp */; };
-		189448B01CD8FAFD0036E391 /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448AD1CD8FAFD0036E391 /* misc.cpp */; };
-		189448B11CD8FAFD0036E391 /* misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448AD1CD8FAFD0036E391 /* misc.cpp */; };
 		189448B41CD905B70036E391 /* LightEffectClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B21CD905B70036E391 /* LightEffectClient.cpp */; };
 		189448B51CD905B70036E391 /* LightEffectClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B21CD905B70036E391 /* LightEffectClient.cpp */; };
 		189448B61CD905B70036E391 /* LightEffectClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B21CD905B70036E391 /* LightEffectClient.cpp */; };
-		189448B91CD91A2B0036E391 /* boblight_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B71CD91A2B0036E391 /* boblight_client.cpp */; };
-		189448BA1CD91A2B0036E391 /* boblight_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B71CD91A2B0036E391 /* boblight_client.cpp */; };
-		189448BB1CD91A2B0036E391 /* boblight_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B71CD91A2B0036E391 /* boblight_client.cpp */; };
-		189448BF1CD91A9B0036E391 /* messagequeue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448BD1CD91A9B0036E391 /* messagequeue.cpp */; };
-		189448C01CD91A9B0036E391 /* messagequeue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448BD1CD91A9B0036E391 /* messagequeue.cpp */; };
-		189448C11CD91A9B0036E391 /* messagequeue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448BD1CD91A9B0036E391 /* messagequeue.cpp */; };
-		189448C41CD91AC70036E391 /* timeutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C21CD91AC70036E391 /* timeutils.cpp */; };
-		189448C51CD91AC70036E391 /* timeutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C21CD91AC70036E391 /* timeutils.cpp */; };
-		189448C61CD91AC70036E391 /* timeutils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448C21CD91AC70036E391 /* timeutils.cpp */; };
 		18968DC814155D7C005BA742 /* ApplicationOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18968DC614155D7C005BA742 /* ApplicationOperations.cpp */; };
 		18AC31F01C49445D00AE9433 /* TVServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18AC31EF1C49445D00AE9433 /* TVServices.framework */; };
 		18AC31F41C49445D00AE9433 /* ServiceProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 18AC31F31C49445D00AE9433 /* ServiceProvider.m */; };
@@ -3169,19 +3157,8 @@
 		188F7601152217DF009870CE /* GUIOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIOperations.h; sourceTree = "<group>"; };
 		189448A71CD8FA890036E391 /* tcpsocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tcpsocket.cpp; sourceTree = "<group>"; };
 		189448A81CD8FA890036E391 /* tcpsocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tcpsocket.h; sourceTree = "<group>"; };
-		189448AC1CD8FAFD0036E391 /* inclstdint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inclstdint.h; sourceTree = "<group>"; };
-		189448AD1CD8FAFD0036E391 /* misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = misc.cpp; sourceTree = "<group>"; };
-		189448AE1CD8FAFD0036E391 /* misc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = misc.h; sourceTree = "<group>"; };
 		189448B21CD905B70036E391 /* LightEffectClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightEffectClient.cpp; sourceTree = "<group>"; };
 		189448B31CD905B70036E391 /* LightEffectClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightEffectClient.h; sourceTree = "<group>"; };
-		189448B71CD91A2B0036E391 /* boblight_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = boblight_client.cpp; sourceTree = "<group>"; };
-		189448B81CD91A2B0036E391 /* boblight_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = boblight_client.h; sourceTree = "<group>"; };
-		189448BD1CD91A9B0036E391 /* messagequeue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = messagequeue.cpp; sourceTree = "<group>"; };
-		189448BE1CD91A9B0036E391 /* messagequeue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = messagequeue.h; sourceTree = "<group>"; };
-		189448C21CD91AC70036E391 /* timeutils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timeutils.cpp; sourceTree = "<group>"; };
-		189448C31CD91AC70036E391 /* timeutils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timeutils.h; sourceTree = "<group>"; };
-		189448C71CD91B040036E391 /* protocolversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = protocolversion.h; sourceTree = "<group>"; };
-		189448CD1CD91B8A0036E391 /* boblight-functions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "boblight-functions.h"; sourceTree = "<group>"; };
 		18968DC614155D7C005BA742 /* ApplicationOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationOperations.cpp; sourceTree = "<group>"; };
 		18968DC714155D7C005BA742 /* ApplicationOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplicationOperations.h; sourceTree = "<group>"; };
 		18AC31ED1C49445D00AE9433 /* TopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -8945,19 +8922,8 @@
 		F58BF96E1CD83FAF005BB003 /* lighteffects */ = {
 			isa = PBXGroup;
 			children = (
-				189448B71CD91A2B0036E391 /* boblight_client.cpp */,
-				189448B81CD91A2B0036E391 /* boblight_client.h */,
-				189448BD1CD91A9B0036E391 /* messagequeue.cpp */,
-				189448C21CD91AC70036E391 /* timeutils.cpp */,
-				189448C31CD91AC70036E391 /* timeutils.h */,
-				189448BE1CD91A9B0036E391 /* messagequeue.h */,
-				189448CD1CD91B8A0036E391 /* boblight-functions.h */,
-				189448AC1CD8FAFD0036E391 /* inclstdint.h */,
-				189448AD1CD8FAFD0036E391 /* misc.cpp */,
-				189448AE1CD8FAFD0036E391 /* misc.h */,
 				189448A71CD8FA890036E391 /* tcpsocket.cpp */,
 				189448A81CD8FA890036E391 /* tcpsocket.h */,
-				189448C71CD91B040036E391 /* protocolversion.h */,
 				189448B21CD905B70036E391 /* LightEffectClient.cpp */,
 				189448B31CD905B70036E391 /* LightEffectClient.h */,
 				F58BF96F1CD83FAF005BB003 /* LightEffectServices.cpp */,
@@ -10346,7 +10312,6 @@
 				18B7C392129420E5009E7A26 /* Settings.cpp in Sources */,
 				18B7C3A812942132009E7A26 /* AdvancedSettings.cpp in Sources */,
 				18B7C7AC1294222E009E7A26 /* DDSImage.cpp in Sources */,
-				189448AF1CD8FAFD0036E391 /* misc.cpp in Sources */,
 				18B7C7AD1294222E009E7A26 /* DirectXGraphics.cpp in Sources */,
 				18B7C7AE1294222E009E7A26 /* FrameBufferObject.cpp in Sources */,
 				18B7C7AF1294222E009E7A26 /* GraphicContext.cpp in Sources */,
@@ -10407,7 +10372,6 @@
 				F59045951BA3D75000DB589A /* MCRuntimeLibContext.cpp in Sources */,
 				18B7C7DB1294222E009E7A26 /* GUISettingsSliderControl.cpp in Sources */,
 				18B7C7DC1294222E009E7A26 /* GUIShader.cpp in Sources */,
-				189448C41CD91AC70036E391 /* timeutils.cpp in Sources */,
 				18B7C7DD1294222E009E7A26 /* GUISliderControl.cpp in Sources */,
 				18B7C7DF1294222E009E7A26 /* GUISpinControl.cpp in Sources */,
 				F5B723431C7C98B7006432AE /* DVDVideoCodecLibMpeg2.cpp in Sources */,
@@ -10519,7 +10483,6 @@
 				F5B723891C7C9AF6006432AE /* RarDirectory.cpp in Sources */,
 				DF3488E713FD958F0026A711 /* GUIAction.cpp in Sources */,
 				F5B7249C1C7E150C006432AE /* consio.cpp in Sources */,
-				189448B91CD91A2B0036E391 /* boblight_client.cpp in Sources */,
 				DF34892A13FD9C780026A711 /* AirPlayServer.cpp in Sources */,
 				DF34898213FDAAF60026A711 /* HttpParser.cpp in Sources */,
 				18968DC814155D7C005BA742 /* ApplicationOperations.cpp in Sources */,
@@ -10813,7 +10776,6 @@
 				DF923E5D1A11536A008CDB0C /* DataCacheCore.cpp in Sources */,
 				7CC7B6C3191869EA00DDB120 /* SettingUtils.cpp in Sources */,
 				F5D13EBB1BAA178A0075A95C /* DictionaryUtils.mm in Sources */,
-				189448BF1CD91A9B0036E391 /* messagequeue.cpp in Sources */,
 				7CC7B6C819186A8800DDB120 /* SettingConditions.cpp in Sources */,
 				7CCDA0DB192753E30074CF51 /* PltAction.cpp in Sources */,
 				7CCDA0E4192753E30074CF51 /* PltArgument.cpp in Sources */,
@@ -11400,7 +11362,6 @@
 				E499135D174E5EBE00741B6D /* XBMCOperations.cpp in Sources */,
 				E4991369174E5EEF00741B6D /* AnnouncementManager.cpp in Sources */,
 				E499136B174E5EF700741B6D /* ConvUtils.cpp in Sources */,
-				189448C51CD91AC70036E391 /* timeutils.cpp in Sources */,
 				F5B724CF1C7E150C006432AE /* isnt.cpp in Sources */,
 				E499136C174E5EF700741B6D /* LinuxResourceCounter.cpp in Sources */,
 				E499136D174E5EF700741B6D /* LinuxTimezone.cpp in Sources */,
@@ -11430,7 +11391,6 @@
 				F5AA30FA1BF014C100693976 /* DVDVideoCodecAVFoundation.mm in Sources */,
 				E4991396174E5F0E00741B6D /* GUIWindowMusicNav.cpp in Sources */,
 				F5B722F21C7C894F006432AE /* AndroidBuiltins.cpp in Sources */,
-				189448C01CD91A9B0036E391 /* messagequeue.cpp in Sources */,
 				E4991397174E5F0E00741B6D /* GUIWindowMusicPlaylist.cpp in Sources */,
 				E4991398174E5F0E00741B6D /* GUIWindowMusicPlaylistEditor.cpp in Sources */,
 				E499139B174E5F0E00741B6D /* Album.cpp in Sources */,
@@ -11460,7 +11420,6 @@
 				E49913AE174E5F3300741B6D /* UPnPPlayer.cpp in Sources */,
 				E49913AF174E5F3300741B6D /* UPnPRenderer.cpp in Sources */,
 				E49913B0174E5F3300741B6D /* UPnPServer.cpp in Sources */,
-				189448B01CD8FAFD0036E391 /* misc.cpp in Sources */,
 				E49913B1174E5F3300741B6D /* UPnPSettings.cpp in Sources */,
 				E49913B2174E5F3700741B6D /* WebSocket.cpp in Sources */,
 				E49913B3174E5F3700741B6D /* WebSocketManager.cpp in Sources */,
@@ -11900,7 +11859,6 @@
 				7CCDA7A1192756250074CF51 /* NptConsole.cpp in Sources */,
 				7CCDA7A4192756250074CF51 /* NptCrypto.cpp in Sources */,
 				7CCDA7A7192756250074CF51 /* NptDataBuffer.cpp in Sources */,
-				189448BA1CD91A2B0036E391 /* boblight_client.cpp in Sources */,
 				7CCDA7B0192756250074CF51 /* NptDebug.cpp in Sources */,
 				7CCDA7B9192756250074CF51 /* NptDigest.cpp in Sources */,
 				F5B722701C7BBDE9006432AE /* DVDInputStreamNavigator.cpp in Sources */,
@@ -11979,7 +11937,6 @@
 				F5D13ECE1BAF0B6D0075A95C /* AddonCallbacksGUI.cpp in Sources */,
 				F5D13ECF1BAF0B6D0075A95C /* AddonCallbacksPVR.cpp in Sources */,
 				F5D13ED01BAF0B6D0075A95C /* AddonDatabase.cpp in Sources */,
-				189448C11CD91A9B0036E391 /* messagequeue.cpp in Sources */,
 				F5D13ED21BAF0B6D0075A95C /* AddonInstaller.cpp in Sources */,
 				F5D13ED31BAF0B6D0075A95C /* AddonManager.cpp in Sources */,
 				F5D13ED41BAF0B6D0075A95C /* AddonStatusHandler.cpp in Sources */,
@@ -12302,7 +12259,6 @@
 				F5D13FEA1BAF0B6D0075A95C /* GUIButtonControl.cpp in Sources */,
 				F5D13FEB1BAF0B6D0075A95C /* GUICheckMarkControl.cpp in Sources */,
 				F5B723F51C7CA014006432AE /* DetectDVDType.cpp in Sources */,
-				189448B11CD8FAFD0036E391 /* misc.cpp in Sources */,
 				F5D13FEC1BAF0B6D0075A95C /* GUIColorManager.cpp in Sources */,
 				F5D13FED1BAF0B6D0075A95C /* GUIControl.cpp in Sources */,
 				F559022A1C35D96D00349249 /* DSMFile.cpp in Sources */,
@@ -12464,7 +12420,6 @@
 				F5D1407C1BAF0B6D0075A95C /* ProgressJob.cpp in Sources */,
 				F5D1407D1BAF0B6D0075A95C /* NetworkLinux.cpp in Sources */,
 				F5D1407E1BAF0B6D0075A95C /* ZeroconfBrowserOSX.cpp in Sources */,
-				189448BB1CD91A2B0036E391 /* boblight_client.cpp in Sources */,
 				F5D1407F1BAF0B6D0075A95C /* ZeroconfOSX.cpp in Sources */,
 				F5B723051C7C894F006432AE /* GUIControlBuiltins.cpp in Sources */,
 				F5D140801BAF0B6D0075A95C /* UPnP.cpp in Sources */,
@@ -12634,7 +12589,6 @@
 				F5D1410A1BAF0B6D0075A95C /* BitstreamStats.cpp in Sources */,
 				F5B725241C7E150C006432AE /* ulinks.cpp in Sources */,
 				F5D1410B1BAF0B6D0075A95C /* BooleanLogic.cpp in Sources */,
-				189448C61CD91AC70036E391 /* timeutils.cpp in Sources */,
 				F5B723451C7C98B7006432AE /* DVDVideoCodecLibMpeg2.cpp in Sources */,
 				F5D1410C1BAF0B6D0075A95C /* CharsetConverter.cpp in Sources */,
 				F5D1410D1BAF0B6D0075A95C /* CPUInfo.cpp in Sources */,

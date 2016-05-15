@@ -23,16 +23,12 @@
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
 #include "interfaces/IAnnouncer.h"
+#include "LightEffectClient.h"
 
 class CSetting;
 class TiXmlNode;
 class CLightEffectServices;
 class CVariant;
-
-namespace boblight
-{
-  class CBoblight;
-}
 
 class CLightEffectServices
 : public CThread
@@ -69,7 +65,8 @@ private:
   int               m_width;
   int               m_height;
   CCriticalSection  m_critical;
-  boblight::CBoblight *m_lighteffect;
+  CLightEffectClient *m_lighteffect;
   bool              m_staticON;
+  bool              m_lightsON;
   
 };
