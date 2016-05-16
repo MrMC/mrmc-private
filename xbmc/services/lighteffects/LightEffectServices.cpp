@@ -46,6 +46,7 @@ CLightEffectServices::CLightEffectServices()
 , m_height(32)
 , m_staticON(false)
 , m_lightsON(true)
+, m_startup(true)
 {
 }
 
@@ -87,9 +88,7 @@ bool CLightEffectServices::Start()
   CSingleLock lock(m_critical);
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !m_active)
   {
-    InitConnection();
-    ApplyUserSettings();
-    SetBling();
+    m_startup = true;
     CThread::Create();
   }
   return false;
@@ -161,6 +160,13 @@ void CLightEffectServices::Process()
   
   while(!m_bStop)
   {
+    if (m_startup)
+    {
+      InitConnection();
+      ApplyUserSettings();
+      SetBling();
+      m_startup = false;
+    }
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
       // reset static bool for later

@@ -69,5 +69,6 @@ private:
   CLightEffectClient *m_lighteffect;
   bool              m_staticON;
   bool              m_lightsON;
+  bool              m_startup;
   
 };
