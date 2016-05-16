@@ -18,9 +18,9 @@
 		18700F671C4A724B000A0007 /* TVOSTopShelf.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18700F651C4A724B000A0007 /* TVOSTopShelf.mm */; };
 		188F75FE152217BC009870CE /* Mime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 188F75FC152217BC009870CE /* Mime.cpp */; };
 		188F7602152217DF009870CE /* GUIOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 188F7600152217DF009870CE /* GUIOperations.cpp */; };
-		189448A91CD8FA890036E391 /* tcpsocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* tcpsocket.cpp */; };
-		189448AA1CD8FA890036E391 /* tcpsocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* tcpsocket.cpp */; };
-		189448AB1CD8FA890036E391 /* tcpsocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* tcpsocket.cpp */; };
+		189448A91CD8FA890036E391 /* LightSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* LightSocket.cpp */; };
+		189448AA1CD8FA890036E391 /* LightSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* LightSocket.cpp */; };
+		189448AB1CD8FA890036E391 /* LightSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448A71CD8FA890036E391 /* LightSocket.cpp */; };
 		189448B41CD905B70036E391 /* LightEffectClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B21CD905B70036E391 /* LightEffectClient.cpp */; };
 		189448B51CD905B70036E391 /* LightEffectClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B21CD905B70036E391 /* LightEffectClient.cpp */; };
 		189448B61CD905B70036E391 /* LightEffectClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B21CD905B70036E391 /* LightEffectClient.cpp */; };
@@ -3155,8 +3155,8 @@
 		188F75FD152217BC009870CE /* Mime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Mime.h; sourceTree = "<group>"; };
 		188F7600152217DF009870CE /* GUIOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIOperations.cpp; sourceTree = "<group>"; };
 		188F7601152217DF009870CE /* GUIOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIOperations.h; sourceTree = "<group>"; };
-		189448A71CD8FA890036E391 /* tcpsocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tcpsocket.cpp; sourceTree = "<group>"; };
-		189448A81CD8FA890036E391 /* tcpsocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tcpsocket.h; sourceTree = "<group>"; };
+		189448A71CD8FA890036E391 /* LightSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightSocket.cpp; sourceTree = "<group>"; };
+		189448A81CD8FA890036E391 /* LightSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightSocket.h; sourceTree = "<group>"; };
 		189448B21CD905B70036E391 /* LightEffectClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightEffectClient.cpp; sourceTree = "<group>"; };
 		189448B31CD905B70036E391 /* LightEffectClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightEffectClient.h; sourceTree = "<group>"; };
 		18968DC614155D7C005BA742 /* ApplicationOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationOperations.cpp; sourceTree = "<group>"; };
@@ -8922,8 +8922,8 @@
 		F58BF96E1CD83FAF005BB003 /* lighteffects */ = {
 			isa = PBXGroup;
 			children = (
-				189448A71CD8FA890036E391 /* tcpsocket.cpp */,
-				189448A81CD8FA890036E391 /* tcpsocket.h */,
+				189448A71CD8FA890036E391 /* LightSocket.cpp */,
+				189448A81CD8FA890036E391 /* LightSocket.h */,
 				189448B21CD905B70036E391 /* LightEffectClient.cpp */,
 				189448B31CD905B70036E391 /* LightEffectClient.h */,
 				F58BF96F1CD83FAF005BB003 /* LightEffectServices.cpp */,
@@ -10142,7 +10142,7 @@
 				E38E22CD0D25F9FE00618676 /* Event.cpp in Sources */,
 				E38E22D10D25F9FE00618676 /* GUIInfoManager.cpp in Sources */,
 				E38E22D30D25F9FE00618676 /* HTMLUtil.cpp in Sources */,
-				189448A91CD8FA890036E391 /* tcpsocket.cpp in Sources */,
+				189448A91CD8FA890036E391 /* LightSocket.cpp in Sources */,
 				E38E22D50D25F9FE00618676 /* HttpHeader.cpp in Sources */,
 				E38E22D70D25F9FE00618676 /* VideoInfoDownloader.cpp in Sources */,
 				E38E22D80D25F9FE00618676 /* InfoLoader.cpp in Sources */,
@@ -11342,7 +11342,7 @@
 				E499134F174E5EBE00741B6D /* ApplicationOperations.cpp in Sources */,
 				E4991350174E5EBE00741B6D /* AudioLibrary.cpp in Sources */,
 				F5B723441C7C98B7006432AE /* DVDVideoCodecLibMpeg2.cpp in Sources */,
-				189448AA1CD8FA890036E391 /* tcpsocket.cpp in Sources */,
+				189448AA1CD8FA890036E391 /* LightSocket.cpp in Sources */,
 				F59045721BA372A600DB589A /* IOSScreenManager.mm in Sources */,
 				F5B7236F1C7C9A51006432AE /* ActiveAEDSP.cpp in Sources */,
 				E4991351174E5EBE00741B6D /* FavouritesOperations.cpp in Sources */,
@@ -12076,7 +12076,7 @@
 				F5D13F4E1BAF0B6D0075A95C /* GUIEPGGridContainer.cpp in Sources */,
 				F5B7227B1C7BBE04006432AE /* DVDStateSerializer.cpp in Sources */,
 				F5F23CD31C4D479E004B223A /* AnnounceReceiver.mm in Sources */,
-				189448AB1CD8FA890036E391 /* tcpsocket.cpp in Sources */,
+				189448AB1CD8FA890036E391 /* LightSocket.cpp in Sources */,
 				F5A4F2A61BB086FE0083FC69 /* JpegParse.cpp in Sources */,
 				F5D13F4F1BAF0B6D0075A95C /* GUIDialogBoxBase.cpp in Sources */,
 				F5D13F501BAF0B6D0075A95C /* GUIDialogBusy.cpp in Sources */,

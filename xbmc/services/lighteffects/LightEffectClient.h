@@ -21,8 +21,7 @@
 
 #include <string>
 #include <vector>
-#include "tcpsocket.h"
-
+#include "LightSocket.h"
 
 class CLightEffectLED
 {
@@ -85,10 +84,10 @@ public:
   bool         ParseWord(std::string& message, std::string wordtocmp);
   bool         GetWord(std::string& data, std::string& word);
   bool         StrToInt(const std::string& data, int& value);
-  void         ConvertFloatLocale(std::string& strfloat);
+  void         Locale(std::string& strfloat);
   
 private:
-  CTcpClientSocket m_socket;
+  CLightClientSocket m_socket;
   std::string      m_ip;
   int              m_port;
   std::string      m_error;

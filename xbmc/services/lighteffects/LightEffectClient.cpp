@@ -23,19 +23,6 @@
 #include <sstream>
 #include <cmath>
 
-/* This is needed for our implementation, more is better
-boblight_init();
-boblight_destroy(void* vpboblight)
-boblight_connect(m_lighteffect, IP, port, 5000000)
-boblight_setoption(m_lighteffect,-1, data.c_str())
-boblight_addpixel(m_lighteffect, -1, rgb);
-boblight_addpixelxy(m_lighteffect, x, y, rgb);
-boblight_sendrgb(m_lighteffect, 1, NULL);
-boblight_geterror(m_lighteffect)
-boblight_setpriority(m_lighteffect, 255);
-boblight_setscanrange(m_lighteffect, m_width, m_height);
- */
-
 #define GAMMASIZE (sizeof(m_gammacurve) / sizeof(m_gammacurve[0]))
 
 CLightEffectLED::CLightEffectLED()
@@ -82,7 +69,7 @@ std::string CLightEffectLED::SetOption(const char* option, bool& send)
   send = false;
     
   if (!CLightEffectClient::GetInstance().GetWord(stroption, strname))
-    return "emtpy option"; //string with only whitespace
+    return "emtpy option";
   
   if (strname == "interpolation")
   {
@@ -163,7 +150,6 @@ void CLightEffectLED::AddPixel(int* rgb)
 
 void CLightEffectLED::GetRGB(float* rgb)
 {
-  //if no pixels are set, the denominator is 0, so just return black
   if (m_rgbcount == 0)
   {
     for (int i = 0; i < 3; i++)
@@ -175,22 +161,18 @@ void CLightEffectLED::GetRGB(float* rgb)
     return;
   }
   
-  //convert from numerator/denominator to float
   for (int i = 0; i < 3; i++)
   {
     rgb[i] = Clamp(m_rgb[i] / (float)m_rgbcount / 255.0f, 0.0f, 1.0f);
     m_rgb[i] = 0.0f;
   }
   m_rgbcount = 0;
-  
-  //this tries to set the speed based on how fast the input is changing
-  //it needs sync mode to work properly
+
   if (m_autospeed > 0.0)
   {
     float change = std::abs(rgb[0] - m_prevrgb[0]) + std::abs(rgb[1] - m_prevrgb[1]) + std::abs(rgb[2] - m_prevrgb[2]);
     change /= 3.0;
     
-    //only apply singlechange if it's large enough, otherwise we risk sending it continously
     if (change > 0.001)
       m_singlechange = Clamp(change * m_autospeed / 10.0f, 0.0f, 1.0f);
     else
@@ -199,47 +181,44 @@ void CLightEffectLED::GetRGB(float* rgb)
   
   memcpy(m_prevrgb, rgb, sizeof(m_prevrgb));
   
-  //we need some hsv adjustments
   if (m_value != 1.0 || m_valuerange[0] != 0.0 || m_valuerange[1] != 1.0 ||
       m_saturation != 1.0  || m_satrange[0] != 0.0 || m_satrange[1] != 1.0)
   {
-    //rgb - hsv conversion, thanks wikipedia!
     float hsv[3];
     float max = std::max(std::max(rgb[0], rgb[1]), rgb[2]);
     float min = std::min(std::min(rgb[0], rgb[1]), rgb[2]);
     
-    if (min == max) //grayscale
+    if (min == max)
     {
-      hsv[0] = -1.0f; //undefined
-      hsv[1] = 0.0; //no saturation
-      hsv[2] = min; //value
+      hsv[0] = -1.0f;
+      hsv[1] = 0.0;
+      hsv[2] = min;
     }
     else
     {
-      if (max == rgb[0]) //red zone
+      if (max == rgb[0])
       {
         hsv[0] = (60.0f * ((rgb[1] - rgb[2]) / (max - min)) + 360.0f);
         while (hsv[0] >= 360.0f)
           hsv[0] -= 360.0f;
       }
-      else if (max == rgb[1]) //green zone
+      else if (max == rgb[1])
       {
         hsv[0] = 60.0f * ((rgb[2] - rgb[0]) / (max - min)) + 120.0f;
       }
-      else if (max == rgb[2]) //blue zone
+      else if (max == rgb[2])
       {
         hsv[0] = 60.0f * ((rgb[0] - rgb[1]) / (max - min)) + 240.0f;
       }
       
-      hsv[1] = (max - min) / max; //saturation
-      hsv[2] = max; //value
+      hsv[1] = (max - min) / max;
+      hsv[2] = max;
     }
     
-    //saturation and value adjustment
     hsv[1] = Clamp(hsv[1] * m_saturation, m_satrange[0],   m_satrange[1]);
     hsv[2] = Clamp(hsv[2] * m_value,      m_valuerange[0], m_valuerange[1]);
     
-    if (hsv[0] == -1.0f) //grayscale
+    if (hsv[0] == -1.0f)
     {
       for (int i = 0; i < 3; i++)
         rgb[i] = hsv[2];
@@ -274,7 +253,6 @@ void CLightEffectLED::GetRGB(float* rgb)
   }
 }
 
-//scale the light's scanrange to the dimensions set with boblight_setscanrange()
 void CLightEffectLED::SetScanRange(int width, int height)
 {
   m_width = width;
@@ -334,7 +312,7 @@ bool CLightEffectClient::Connect(const char* ip, int port, int timeout)
 
 bool CLightEffectClient::WriteData(std::string data)
 {
-  CTcpData writedata;
+  CSocketData writedata;
   writedata.SetData(data);
   if (m_socket.Write(writedata) != SUCCESS)
   {
@@ -345,7 +323,7 @@ bool CLightEffectClient::WriteData(std::string data)
 
 std::string CLightEffectClient::ReadData()
 {
-  CTcpData data;
+  CSocketData data;
   if (!m_socket.Read(data))
   {
     return NULL;
@@ -360,7 +338,6 @@ bool CLightEffectClient::ParseLights(std::string& message)
   std::string word;
   int nrlights;
   
-  //first word in the message is "lights", second word is the number of lights
   if (!ParseWord(message, "lights") || !GetWord(message, word) || !StrToInt(word, nrlights) || nrlights < 1)
     return false;
   
@@ -368,17 +345,14 @@ bool CLightEffectClient::ParseLights(std::string& message)
   {
     CLightEffectLED light;
     
-    //first word sent is "light, second one is the name
     if (!ParseWord(message, "light") || !GetWord(message, light.m_name))
     {
       return false;
     }
     
-    //third one is "scan"
     if (!ParseWord(message, "scan"))
       return false;
     
-    //now we read the scanrange
     std::string scanarea;
     for (int i = 0; i < 4; i++)
     {
@@ -388,7 +362,7 @@ bool CLightEffectClient::ParseLights(std::string& message)
       scanarea += word + " ";
     }
     
-    ConvertFloatLocale(scanarea); //workaround for locale mismatch (, and .)
+    Locale(scanarea);
     
     if (sscanf(scanarea.c_str(), "%f %f %f %f", light.m_vscan, light.m_vscan + 1, light.m_hscan, light.m_hscan + 1) != 4)
       return false;
@@ -398,7 +372,6 @@ bool CLightEffectClient::ParseLights(std::string& message)
   return true;
 }
 
-//removes one word from the string in the messages, and compares it to wordtocmp
 bool CLightEffectClient::ParseWord(std::string& message, std::string wordtocmp)
 {
   std::string readword;
@@ -445,8 +418,7 @@ bool CLightEffectClient::StrToInt(const std::string& data, int& value)
   return sscanf(data.c_str(), "%i", &value) == 1;
 }
 
-//convert . or , to the current locale for correct conversion of ascii float
-void CLightEffectClient::ConvertFloatLocale(std::string& strfloat)
+void CLightEffectClient::Locale(std::string& strfloat)
 {
   static struct lconv* locale = localeconv();
   
@@ -511,7 +483,6 @@ int CLightEffectClient::SendRGB(bool sync)
       data += StringUtils::Format("set light %s singlechange %f\n",m_lights[i].m_name.c_str(),m_lights[i].m_singlechange);
   }
   
-  //send a message that we want devices to sync to our input
   if (sync)
     data += "sync\n";
   
