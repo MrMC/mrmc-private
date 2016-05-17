@@ -1,3 +1,4 @@
+#pragma once
 /*
  *      Copyright (C) 2016 Team MrMC
  *      https://github.com/MrMC
@@ -18,68 +19,38 @@
  *
  */
 
-#ifndef TCP
-#define TCP
-
 #include <string>
-#include <netinet/in.h>
 #include <vector>
+#include <netinet/in.h>
 
-#define FAIL    0
-#define SUCCESS 1
-#define TIMEOUT 2
-
-class CSocketData
+class CLightSocket
 {
   public:
-    void SetData(uint8_t* data, int size, bool append = false);
-    void SetData(std::string data, bool append = false);
+  enum {
+    FAIL    = 0,
+    SUCCESS = 1,
+    TIMEOUT = 2,
+  };
 
-    int   GetSize() { return m_data.size() - 1; }
-    char* GetData() { return &m_data[0]; }
-                                                                                          
-    void Clear();
-
-  private:
-    std::vector<char> m_data;
-    void CopyData(char* data, int size, bool append);
-};
-
-class CLightSocket //base class
-{
-  public:
     CLightSocket();
-    ~CLightSocket();
+   ~CLightSocket();
 
-    virtual int Open(std::string address, int port, int usectimeout = -1);
-    void Close();
-    bool IsOpen() { return m_sock != -1; }
-
+    int         Open(std::string address, int port, int timeout_us);
+    void        Close();
+    int         Read(std::string &data);
+    int         Write(const char *data, int size);
+    bool        IsOpen()     { return m_sock != -1; }
     std::string GetAddress() { return m_address; }
     int         GetPort()    { return m_port; }
     int         GetSock()    { return m_sock; }
+    void        SetTimeout(int timeout_us) { m_timeout_us = timeout_us; }
 
-    void        SetTimeout(int usectimeout) { m_usectimeout = usectimeout; }
-    
   protected:
+    int         SetNonBlock(bool nonblock = true);
+    int         WaitForSocket(bool write);
+
+    int         m_port;
     std::string m_address;
-
-    int     m_sock;
-    int     m_usectimeout;
-    int     m_port;
-
-    int SetNonBlock(bool nonblock = true);
-    int SetSockOptions();
-    int SetKeepalive();
-    int WaitForSocket(bool write, std::string timeoutstr);
-};
-
-class CLightClientSocket : public CLightSocket
-{
-  public:
-    int Open(std::string address, int port, int usectimeout = -1);
-    int Read(CSocketData& data);
-    int Write(CSocketData& data);
-    int SetInfo(std::string address, int port, int sock);
-};
-#endif //TCP
+    int         m_sock;
+    int         m_timeout_us;
+ };

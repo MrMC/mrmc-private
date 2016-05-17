@@ -28,6 +28,7 @@
 CLightEffectLED::CLightEffectLED()
 {
   // defult values below
+  /*
   m_speed = 100.0f;
   m_autospeed = 0.0f;
   m_interpolation = false;
@@ -45,35 +46,35 @@ CLightEffectLED::CLightEffectLED()
   m_vscan[0] = -1.0f;
   m_vscan[1] = -1.0f;
   // end default values
-  
+
   m_singlechange = 0.0;
-  
+
   m_width = -1;
   m_height = -1;
-  
+
   memset(m_rgb, 0, sizeof(m_rgb));
   m_rgbcount = 0;
   memset(m_prevrgb, 0, sizeof(m_prevrgb));
   memset(m_hscanscaled, 0, sizeof(m_hscanscaled));
   memset(m_vscanscaled, 0, sizeof(m_vscanscaled));
-  
+  */
+
   for (size_t i = 0; i < GAMMASIZE; i++)
     m_gammacurve[i] = i;
 }
 
 std::string CLightEffectLED::SetOption(const char* option, bool& send)
 {
-  std::string stroption = option;
-  std::string strname;
-  
   send = false;
-    
+
+  std::string strname;
+  std::string stroption = option;
   if (!CLightEffectClient::GetInstance().GetWord(stroption, strname))
     return "emtpy option";
-  
+
   if (strname == "interpolation")
   {
-    // loose the blank space
+    // lose the blank space
     StringUtils::Replace(stroption, " ", "");
     m_interpolation = (stroption == "1");
     send = true;
@@ -120,12 +121,12 @@ std::string CLightEffectLED::SetOption(const char* option, bool& send)
 
 float CLightEffectLED::Clamp(float value, float min, float max)
 {
-  return value < max ? (value > min ? value : min) : max;
+  return std::min(std::max(value, min), max);
 }
 
 int CLightEffectLED::Clamp(int value, int min, int max)
 {
-  return value < max ? (value > min ? value : min) : max;
+  return std::min(std::max(value, min), max);
 }
 
 void CLightEffectLED::AddPixel(int* rgb)
@@ -148,11 +149,11 @@ void CLightEffectLED::AddPixel(int* rgb)
   m_rgbcount++;
 }
 
-void CLightEffectLED::GetRGB(float* rgb)
+void CLightEffectLED::GetRGB(float *rgb)
 {
   if (m_rgbcount == 0)
   {
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; ++i)
     {
       rgb[i] = 0.0f;
       m_rgb[i] = 0.0f;
@@ -160,8 +161,8 @@ void CLightEffectLED::GetRGB(float* rgb)
     
     return;
   }
-  
-  for (int i = 0; i < 3; i++)
+
+  for (int i = 0; i < 3; ++i)
   {
     rgb[i] = Clamp(m_rgb[i] / (float)m_rgbcount / 255.0f, 0.0f, 1.0f);
     m_rgb[i] = 0.0f;
@@ -178,9 +179,8 @@ void CLightEffectLED::GetRGB(float* rgb)
     else
       m_singlechange = 0.0;
   }
-  
   memcpy(m_prevrgb, rgb, sizeof(m_prevrgb));
-  
+
   if (m_value != 1.0 || m_valuerange[0] != 0.0 || m_valuerange[1] != 1.0 ||
       m_saturation != 1.0  || m_satrange[0] != 0.0 || m_satrange[1] != 1.0)
   {
@@ -196,44 +196,45 @@ void CLightEffectLED::GetRGB(float* rgb)
     }
     else
     {
+      float span = max - min;
       if (max == rgb[0])
       {
-        hsv[0] = (60.0f * ((rgb[1] - rgb[2]) / (max - min)) + 360.0f);
+        hsv[0] = (60.0f * ((rgb[1] - rgb[2]) / span) + 360.0f);
         while (hsv[0] >= 360.0f)
           hsv[0] -= 360.0f;
       }
       else if (max == rgb[1])
       {
-        hsv[0] = 60.0f * ((rgb[2] - rgb[0]) / (max - min)) + 120.0f;
+        hsv[0] = 60.0f * ((rgb[2] - rgb[0]) / span) + 120.0f;
       }
       else if (max == rgb[2])
       {
-        hsv[0] = 60.0f * ((rgb[0] - rgb[1]) / (max - min)) + 240.0f;
+        hsv[0] = 60.0f * ((rgb[0] - rgb[1]) / span) + 240.0f;
       }
-      
-      hsv[1] = (max - min) / max;
+
+      hsv[1] = span / max;
       hsv[2] = max;
     }
-    
+
     hsv[1] = Clamp(hsv[1] * m_saturation, m_satrange[0],   m_satrange[1]);
     hsv[2] = Clamp(hsv[2] * m_value,      m_valuerange[0], m_valuerange[1]);
-    
+
     if (hsv[0] == -1.0f)
     {
-      for (int i = 0; i < 3; i++)
+      for (int i = 0; i < 3; ++i)
         rgb[i] = hsv[2];
     }
     else
     {
       int hi = (int)(hsv[0] / 60.0f) % 6;
       float f = (hsv[0] / 60.0f) - (float)(int)(hsv[0] / 60.0f);
-      
+
       float s = hsv[1];
       float v = hsv[2];
       float p = v * (1.0f - s);
       float q = v * (1.0f - f * s);
       float t = v * (1.0f - (1.0f - f) * s);
-      
+
       if (hi == 0)
       { rgb[0] = v; rgb[1] = t; rgb[2] = p; }
       else if (hi == 1)
@@ -247,8 +248,8 @@ void CLightEffectLED::GetRGB(float* rgb)
       else if (hi == 5)
       { rgb[0] = v; rgb[1] = p; rgb[2] = q; }
     }
-    
-    for (int i = 0; i < 3; i++)
+
+    for (int i = 0; i < 3; ++i)
       rgb[i] = Clamp(rgb[i], 0.0f, 1.0f);
   }
 }
@@ -257,7 +258,7 @@ void CLightEffectLED::SetScanRange(int width, int height)
 {
   m_width = width;
   m_height = height;
-  
+
   m_hscanscaled[0] = lround(m_hscan[0] / 100.0 * ((float)width  - 1));
   m_hscanscaled[1] = lround(m_hscan[1] / 100.0 * ((float)width  - 1));
   m_vscanscaled[0] = lround(m_vscan[0] / 100.0 * ((float)height - 1));
@@ -274,85 +275,67 @@ CLightEffectClient& CLightEffectClient::GetInstance()
   return sLightEffectClient;
 }
 
-bool CLightEffectClient::Connect(const char* ip, int port, int timeout)
+bool CLightEffectClient::Connect(const char *ip, int port, int timeout)
 {
-  std::string word;
-  
   m_ip = ip;
   m_port = port;
   m_timeout = timeout;
-  if (m_socket.Open(m_ip, m_port,5000000) != SUCCESS)
-  {
-    return 0;
-  }
-  
-  if (!WriteData("hello\n"))
+  if (m_socket.Open(m_ip, m_port, 5000000) != CLightSocket::SUCCESS)
     return false;
-  
-  if (ReadData() != "hello\n")
+
+  const char hello[] = "hello\n";
+  if (m_socket.Write(hello, strlen(hello)) != CLightSocket::SUCCESS)
     return false;
-  
-  if (!WriteData("get version\n"))
+
+  if (ReadData() != hello)
     return false;
-  
+
+  const char get_version[] = "get version\n";
+  if (m_socket.Write(get_version, strlen(get_version)) != CLightSocket::SUCCESS)
+    return false;
+
   if (ReadData() != "version 5\n")
     return false;
-  
-  if (!WriteData("get lights\n"))
-    return false;
-  
-  word = ReadData();
-  if (!ParseLights(word))
-  {
-    return false;
-  }
-  
-  return true;
-}
 
-bool CLightEffectClient::WriteData(std::string data)
-{
-  CSocketData writedata;
-  writedata.SetData(data);
-  if (m_socket.Write(writedata) != SUCCESS)
-  {
+  const char get_lights[] = "get lights\n";
+  if (m_socket.Write(get_lights, strlen(get_lights)) != CLightSocket::SUCCESS)
     return false;
-  }
+
+  std::string word = ReadData();
+  if (!ParseLights(word))
+    return false;
+
   return true;
 }
 
 std::string CLightEffectClient::ReadData()
 {
-  CSocketData data;
-  if (!m_socket.Read(data))
-  {
-    return NULL;
-  }
-  std::string retdata;
-  retdata += data.GetData();
-  return retdata;
+  std::string data;
+  if (m_socket.Read(data) == CLightSocket::SUCCESS)
+    return data;
+
+  return "error";
 }
 
-bool CLightEffectClient::ParseLights(std::string& message)
+bool CLightEffectClient::ParseLights(std::string &message)
 {
   std::string word;
-  int nrlights;
-  
-  if (!ParseWord(message, "lights") || !GetWord(message, word) || !StrToInt(word, nrlights) || nrlights < 1)
+  if (!ParseWord(message, "lights") || !GetWord(message, word))
     return false;
   
-  for (int i = 0; i < nrlights; i++)
+  int nrlights = std::atol(word.c_str());
+  if (nrlights < 1)
+    return false;
+
+  for (int i = 0; i < nrlights; ++i)
   {
     CLightEffectLED light;
-    
     if (!ParseWord(message, "light") || !GetWord(message, light.m_name))
-    {
       return false;
-    }
-    
+
     if (!ParseWord(message, "scan"))
       return false;
-    
+
     std::string scanarea;
     for (int i = 0; i < 4; i++)
     {
@@ -361,9 +344,9 @@ bool CLightEffectClient::ParseLights(std::string& message)
       
       scanarea += word + " ";
     }
-    
+
     Locale(scanarea);
-    
+
     if (sscanf(scanarea.c_str(), "%f %f %f %f", light.m_vscan, light.m_vscan + 1, light.m_hscan, light.m_hscan + 1) != 4)
       return false;
     
@@ -372,16 +355,16 @@ bool CLightEffectClient::ParseLights(std::string& message)
   return true;
 }
 
-bool CLightEffectClient::ParseWord(std::string& message, std::string wordtocmp)
+bool CLightEffectClient::ParseWord(std::string &message, std::string wordtocmp)
 {
   std::string readword;
   if (!GetWord(message, readword) || readword != wordtocmp)
     return false;
-  
+
   return true;
 }
 
-bool CLightEffectClient::GetWord(std::string& data, std::string& word)
+bool CLightEffectClient::GetWord(std::string &data, std::string &word)
 {
   std::stringstream datastream(data);
   std::string end;
@@ -394,7 +377,6 @@ bool CLightEffectClient::GetWord(std::string& data, std::string& word)
   }
   
   size_t pos = data.find(word) + word.length();
-  
   if (pos >= data.length())
   {
     data.clear();
@@ -413,17 +395,12 @@ bool CLightEffectClient::GetWord(std::string& data, std::string& word)
   return true;
 }
 
-bool CLightEffectClient::StrToInt(const std::string& data, int& value)
-{
-  return sscanf(data.c_str(), "%i", &value) == 1;
-}
-
-void CLightEffectClient::Locale(std::string& strfloat)
+void CLightEffectClient::Locale(std::string &strfloat)
 {
   static struct lconv* locale = localeconv();
-  
+
   size_t pos = strfloat.find_first_of(",.");
-  
+
   while (pos != std::string::npos)
   {
     strfloat.replace(pos, 1, 1, *locale->decimal_point);
@@ -439,29 +416,28 @@ void CLightEffectClient::Locale(std::string& strfloat)
 int CLightEffectClient::SetPriority(int prio)
 {
   std::string data = StringUtils::Format("set priority %i\n", prio);
-  
-  return WriteData(data);
+  return m_socket.Write(data.c_str(), data.length());
 }
 
 void CLightEffectClient::SetScanRange(int width, int height)
 {
-  for (size_t i = 0; i < m_lights.size(); i++)
+  for (size_t i = 0; i < m_lights.size(); ++i)
   {
     m_lights[i].SetScanRange(width, height);
   }
 }
 
-int CLightEffectClient::AddStaticPixels(int* rgb)
+int CLightEffectClient::AddStaticPixels(int *rgb)
 {
-
-  for (size_t i = 0; i < m_lights.size(); i++)
+  for (size_t i = 0; i < m_lights.size(); ++i)
     m_lights[i].AddPixel(rgb);
 
   return 1;
 }
-void CLightEffectClient::AddPixel(int* rgb, int x, int y)
+
+void CLightEffectClient::AddPixel(int *rgb, int x, int y)
 {
-  for (size_t i = 0; i < m_lights.size(); i++)
+  for (size_t i = 0; i < m_lights.size(); ++i)
   {
     if (x >= m_lights[i].m_hscanscaled[0] && x <= m_lights[i].m_hscanscaled[1] &&
         y >= m_lights[i].m_vscanscaled[0] && y <= m_lights[i].m_vscanscaled[1])
@@ -470,11 +446,12 @@ void CLightEffectClient::AddPixel(int* rgb, int x, int y)
     }
   }
 }
+
 int CLightEffectClient::SendRGB(bool sync)
 {
   std::string data;
-  
-  for (size_t i = 0; i < m_lights.size(); i++)
+
+  for (size_t i = 0; i < m_lights.size(); ++i)
   {
     float rgb[3];
     m_lights[i].GetRGB(rgb);
@@ -482,37 +459,30 @@ int CLightEffectClient::SendRGB(bool sync)
     if (m_lights[i].m_autospeed > 0.0 && m_lights[i].m_singlechange > 0.0)
       data += StringUtils::Format("set light %s singlechange %f\n",m_lights[i].m_name.c_str(),m_lights[i].m_singlechange);
   }
-  
+
   if (sync)
     data += "sync\n";
-  
-  if (!WriteData(data))
+
+  if (m_socket.Write(data.c_str(), data.length()) != CLightSocket::SUCCESS)
     return 0;
-  
+
   return 1;
 }
-int CLightEffectClient::SetOption(const char* option)
+int CLightEffectClient::SetOption(const char *option)
 {
-  std::string error;
   std::string data;
-  bool   send;
-  
-  for (size_t i = 0; i < m_lights.size(); i++)
+  for (size_t i = 0; i < m_lights.size(); ++i)
   {
-    error = m_lights[i].SetOption(option, send);
+    bool send;
+    std::string error = m_lights[i].SetOption(option, send);
     if (!error.empty())
-    {
       return 0;
-    }
     if (send)
-    {
       data += StringUtils::Format("set light %s %s\n",m_lights[i].m_name.c_str(),option);
-    }
   }
 
-  if (!WriteData(data))
+  if (m_socket.Write(data.c_str(), data.length()) != CLightSocket::SUCCESS)
     return 0;
-  
+
   return 1;
-  
 }

@@ -46,7 +46,6 @@ CLightEffectServices::CLightEffectServices()
 , m_height(32)
 , m_staticON(false)
 , m_lightsON(true)
-, m_startup(true)
 {
 }
 
@@ -88,7 +87,6 @@ bool CLightEffectServices::Start()
   CSingleLock lock(m_critical);
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !m_active)
   {
-    m_startup = true;
     CThread::Create();
   }
   return false;
@@ -151,22 +149,17 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
 
 void CLightEffectServices::Process()
 {
-  int row;
-  int rgb[3];
   m_active = true;
-  unsigned char *pixels;
+
+  InitConnection();
+  ApplyUserSettings();
+  SetBling();
+
   CRenderCapture *capture = g_renderManager.AllocRenderCapture();
   g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
-  
+
   while(!m_bStop)
   {
-    if (m_startup)
-    {
-      InitConnection();
-      ApplyUserSettings();
-      SetBling();
-      m_startup = false;
-    }
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
       // reset static bool for later
@@ -178,18 +171,20 @@ void CLightEffectServices::Process()
       if (capture->GetUserState() == CAPTURESTATE_DONE)
       {
         //read out the pixels
-        pixels = capture->GetPixels();
+        unsigned char *pixels = capture->GetPixels();
         m_lighteffect->SetScanRange(m_width, m_height);
         
         for (int y = 0; y < m_height;  y++)
         {
-          row = m_width * y * 4;
+          int row = m_width * y * 4;
           for (int x = 0; x < m_width; x++)
           {
-            rgb[0] = pixels[row + x * 4 + 2];
-            rgb[1] = pixels[row + x * 4 + 1];
-            rgb[2] = pixels[row + x * 4];
-            
+            int pixel = row + (x * 4);
+            int rgb[3] = {
+              pixels[pixel + 2],
+              pixels[pixel + 1],
+              pixels[pixel]
+            };
             m_lighteffect->AddPixel(rgb, x, y);
           }
         }
@@ -222,6 +217,7 @@ void CLightEffectServices::Process()
   }
   g_renderManager.ReleaseRenderCapture(capture);
   m_lighteffect->SetPriority(255);
+
   m_active = false;
 }
 
@@ -316,5 +312,4 @@ void CLightEffectServices::SetBling()
     m_lighteffect->SendRGB(true);
     Sleep(1000);
   }
-
 }

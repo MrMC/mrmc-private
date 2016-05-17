@@ -18,60 +18,22 @@
  *
  */
 
-#include <stdint.h>
-#include <inttypes.h>
-
-#include <stdio.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <iostream> //debug
-#include <string.h>
-#include <unistd.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <netdb.h>
+#include <string.h>
+#include <stdio.h>
+#include <unistd.h>
 #include <netinet/tcp.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 #include "LightSocket.h"
 
-using namespace std;
-
-void CSocketData::SetData(uint8_t* data, int size, bool append)
-{
-  CopyData(reinterpret_cast<char*>(data), size, append);
-}
-
-void CSocketData::SetData(std::string data, bool append)
-{
-  CopyData(const_cast<char*>(data.c_str()), data.length(), append);
-}
-
-void CSocketData::CopyData(char* data, int size, bool append)
-{
-  if (append)
-  {
-    int start = m_data.size() - 1;
-    m_data.resize(m_data.size() + size);
-    memcpy(&m_data[start], data, size);
-    m_data.back() = 0;
-  }
-  else
-  {
-    m_data.resize(size + 1);
-    memcpy(&m_data[0], data, size);
-    m_data.back() = 0;
-  }
-}
-
-void CSocketData::Clear()
-{
-  m_data.resize(1);
-  m_data.back() = 0;
-}
-
 CLightSocket::CLightSocket()
 {
-  m_sock = -1;
   m_port = -1;
+  m_sock = -1;
 }
 
 CLightSocket::~CLightSocket()
@@ -79,9 +41,48 @@ CLightSocket::~CLightSocket()
   Close();
 }
 
-int CLightSocket::Open(std::string address, int port, int usectimeout)
+int CLightSocket::Open(std::string address, int port, int timeout_us)
 {
-  return FAIL;
+  Close();
+
+  m_port = port;
+  m_address = address;
+  m_timeout_us = timeout_us;
+
+  m_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+  if (m_sock == -1)
+    return FAIL;
+
+  if (SetNonBlock() != SUCCESS)
+    return FAIL;
+
+  struct sockaddr_in server = {0};
+  server.sin_port = htons(port);
+  server.sin_family = AF_INET;
+  server.sin_addr.s_addr = inet_addr(address.c_str());
+
+  struct hostent *host = gethostbyname(address.c_str());
+  if (!host)
+    return FAIL;
+
+  server.sin_addr.s_addr = *reinterpret_cast<in_addr_t*>(host->h_addr);
+
+  if (connect(m_sock, reinterpret_cast<struct sockaddr*>(&server), sizeof(server)) < 0)
+  {
+    if (errno != EINPROGRESS)
+      return FAIL;
+  }
+
+  int returnv = WaitForSocket(true);
+  if (returnv == FAIL || returnv == TIMEOUT)
+    return returnv;
+
+  int flag = 1;
+  if (setsockopt(m_sock, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag)) == -1)
+    return FAIL;
+
+  return SUCCESS;
 }
 
 void CLightSocket::Close()
@@ -94,13 +95,67 @@ void CLightSocket::Close()
   }
 }
 
+int CLightSocket::Read(std::string &data)
+{
+  if (m_sock == -1)
+    return FAIL;
+
+  int returnv = WaitForSocket(false);
+  if (returnv != SUCCESS)
+    return returnv;
+
+  data = "";
+  while(1)
+  {
+    char buff[1024];
+    int size = recv(m_sock, buff, sizeof(buff), 0);
+
+    if (errno == EAGAIN && size == -1)
+      return SUCCESS;
+    else if (size == -1)
+      return FAIL;
+    else if (size == 0 && data.length() == 0)
+      return FAIL;
+    else if (size == 0)
+      return SUCCESS;
+
+    buff[size] = 0x00;
+    data += buff;
+  }
+
+  return SUCCESS;
+}
+
+int CLightSocket::Write(const char *data, int size)
+{
+  if (m_sock == -1)
+    return FAIL;
+
+  int bytestowrite = size;
+  int byteswritten = 0;
+
+  while (byteswritten < bytestowrite)
+  {
+    int returnv = WaitForSocket(true);
+
+    if (returnv == FAIL || returnv == TIMEOUT)
+      return returnv;
+
+    int size = send(m_sock, data + byteswritten, size - byteswritten, 0);
+    if (size == -1)
+      return FAIL;
+
+    byteswritten += size;
+  }
+
+  return SUCCESS;
+}
+
 int CLightSocket::SetNonBlock(bool nonblock)
 {
   int flags = fcntl(m_sock, F_GETFL);
   if (flags == -1)
-  {
     return FAIL;
-  }
 
   if (nonblock)
     flags |= O_NONBLOCK;
@@ -108,189 +163,45 @@ int CLightSocket::SetNonBlock(bool nonblock)
     flags &= ~O_NONBLOCK;
   
   if (fcntl(m_sock, F_SETFL, flags) == -1)
-  {
     return FAIL;
-  }
 
   return SUCCESS;
 }
 
-int CLightSocket::SetSockOptions()
+int CLightSocket::WaitForSocket(bool write)
 {
-  int flag = 1;
-  if (setsockopt(m_sock, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag)) == -1)
-  {
-    return FAIL;
-  }
-
-  return SUCCESS;
-}
-
-int CLightSocket::WaitForSocket(bool write, std::string timeoutstr)
-{
-  int returnv;
   fd_set rwsock;
-  struct timeval *tv = NULL;
-
   FD_ZERO(&rwsock);
   FD_SET(m_sock, &rwsock);
 
+  struct timeval *tv = NULL;
   struct timeval timeout;
-  if (m_usectimeout > 0)
+  if (m_timeout_us > 0)
   {
-    timeout.tv_sec = m_usectimeout / 1000000;
-    timeout.tv_usec = m_usectimeout % 1000000;
+    timeout.tv_sec = m_timeout_us / 1000000;
+    timeout.tv_usec = m_timeout_us % 1000000;
     tv = &timeout;
   }
 
+  int returnv;
   if (write)
     returnv = select(m_sock + 1, NULL, &rwsock, NULL, tv);
   else
     returnv = select(m_sock + 1, &rwsock, NULL, NULL, tv);
   
   if (returnv == 0)
-  {
     return TIMEOUT;
-  }
   else if (returnv == -1)
-  {
     return FAIL;
-  }
 
-  int sockstate, sockstatelen = sizeof(sockstate);
-  returnv = getsockopt(m_sock, SOL_SOCKET, SO_ERROR, &sockstate, reinterpret_cast<socklen_t*>(&sockstatelen));
+  int sockstate;
+  socklen_t sockstatelen = sizeof(sockstate);
+  returnv = getsockopt(m_sock, SOL_SOCKET, SO_ERROR, &sockstate, &sockstatelen);
   
   if (returnv == -1)
-  {
     return FAIL;
-  }
-  else if (sockstate) //socket had an error
-  {
+  else if (sockstate)
     return FAIL;
-  }
 
-  return SUCCESS;
-}
-
-int CLightClientSocket::Open(std::string address, int port, int usectimeout /*= -1*/)
-{
-  Close();
-
-  m_address = address;
-  m_port = port;
-  m_usectimeout = usectimeout;
-  
-  m_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-  if (m_sock == -1)
-  {
-    return FAIL;
-  }
-
-  if (SetNonBlock() != SUCCESS)
-  {
-    return FAIL;
-  }
-  
-  struct sockaddr_in server;
-  memset(&server, 0, sizeof(server));
-
-  server.sin_family = AF_INET;
-  server.sin_addr.s_addr = inet_addr(address.c_str());
-  server.sin_port = htons(port);
-
-  struct hostent *host = gethostbyname(address.c_str());
-  if (!host)
-  {
-    return FAIL;
-  }
-  server.sin_addr.s_addr = *reinterpret_cast<in_addr_t*>(host->h_addr);
-
-  if (connect(m_sock, reinterpret_cast<struct sockaddr*>(&server), sizeof(server)) < 0)
-  {
-    if (errno != EINPROGRESS)
-    {
-      return FAIL;
-    }
-  }
-
-  int returnv = WaitForSocket(true, "Connect");
-
-  if (returnv == FAIL || returnv == TIMEOUT)
-    return returnv;
-
-  SetSockOptions();
-  
-  return SUCCESS;
-}
-
-int CLightClientSocket::Read(CSocketData& data)
-{
-  uint8_t buff[1000];
-  
-  if (m_sock == -1)
-  {
-    return FAIL;
-  }
-
-  int returnv = WaitForSocket(false, "Read");
-  if (returnv == FAIL || returnv == TIMEOUT)
-    return returnv;  
-
-  data.Clear();
-
-  while(1)
-  {
-    int size = recv(m_sock, buff, sizeof(buff), 0);
-
-    if (errno == EAGAIN && size == -1)
-    {
-      return SUCCESS;
-    }    
-    else if (size == -1)
-    {
-      return FAIL;
-    }
-    else if (size == 0 && data.GetSize() == 0)
-    {
-      return FAIL;
-    }
-    else if (size == 0)
-    {
-      return SUCCESS;
-    }
-
-    data.SetData(buff, size, true);
-  }
-
-  return SUCCESS;
-}
-
-int CLightClientSocket::Write(CSocketData& data)
-{
-  if (m_sock == -1)
-  {
-    return FAIL;
-  }
-
-  int bytestowrite = data.GetSize();
-  int byteswritten = 0;
-
-  while (byteswritten < bytestowrite)
-  {
-    int returnv = WaitForSocket(true, "Write");
-
-    if (returnv == FAIL || returnv == TIMEOUT)
-      return returnv;
-
-    int size = send(m_sock, data.GetData() + byteswritten, data.GetSize() - byteswritten, 0);
-    
-    if (size == -1)
-    {
-      return FAIL;
-    }
-
-    byteswritten += size;
-  }
   return SUCCESS;
 }

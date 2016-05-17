@@ -31,39 +31,40 @@ public:
   int         Clamp(int value, int min, int max);
   float       Clamp(float value, float min, float max);
   
-  std::string SetOption(const char* option, bool& send);
-  std::string GetOption(const char* option, std::string& output);
+  std::string SetOption(const char *option, bool &send);
+  std::string GetOption(const char *option, std::string &output);
   
   void        SetScanRange(int width, int height);
-  void        AddPixel(int* rgb);
-  
+  void        AddPixel(int *rgb);
+  void        GetRGB(float *rgb);
+
   std::string m_name;
-  float       m_speed;
-  float       m_autospeed;
-  float       m_singlechange;
+
+  bool        m_use = true;;
+  float       m_speed = 100.0f;
+  float       m_autospeed = 0.0f;
+  float       m_singlechange = 0.0;
+  bool        m_interpolation = false;
   
-  bool        m_interpolation;
-  bool        m_use;
+  float       m_value = 1.0f;;
+  float       m_valuerange[2] = {0.0f, -1.0f};
+  float       m_saturation = 1.0f;
+  float       m_satrange[2] = {0.0f, -1.0f};
+  int         m_threshold = 0;
   
-  float       m_value;
-  float       m_valuerange[2];
-  float       m_saturation;
-  float       m_satrange[2];
-  int         m_threshold;
-  float       m_gamma;
+  int         m_rgbcount = 0;
+  float       m_rgb[3] = {0};
+  float       m_prevrgb[3] = {0};
+  
+  int         m_width = -1;
+  int         m_height = -1;
+  float       m_hscan[2] = {-1.0f, -1.0f};
+  float       m_vscan[2] = {-1.0f, -1.0f};
+  int         m_hscanscaled[2] = {0};
+  int         m_vscanscaled[2] = {0};
+
+  float       m_gamma = 1.0f;
   float       m_gammacurve[256];
-  
-  float       m_rgb[3];
-  int         m_rgbcount;
-  float       m_prevrgb[3];
-  void        GetRGB(float* rgb);
-  
-  float       m_hscan[2];
-  float       m_vscan[2];
-  int         m_width;
-  int         m_height;
-  int         m_hscanscaled[2];
-  int         m_vscanscaled[2];
 };
 
 class CLightEffectClient
@@ -71,23 +72,21 @@ class CLightEffectClient
 public:
   CLightEffectClient();
   static CLightEffectClient &GetInstance();
-  bool         Connect(const char* ip, int port, int timeout);
-  bool         WriteData(std::string data);
+  bool         Connect(const char *ip, int port, int timeout);
   std::string  ReadData();
   int          SetPriority(int prio);
   void         SetScanRange(int width, int height);
-  int          AddStaticPixels(int* rgb);
-  void         AddPixel(int* rgb, int x, int y);
+  int          AddStaticPixels(int *rgb);
+  void         AddPixel(int *rgb, int x, int y);
   int          SendRGB(bool sync);
-  int          SetOption(const char* option);
-  bool         ParseLights(std::string& message);
-  bool         ParseWord(std::string& message, std::string wordtocmp);
-  bool         GetWord(std::string& data, std::string& word);
-  bool         StrToInt(const std::string& data, int& value);
-  void         Locale(std::string& strfloat);
+  int          SetOption(const char *option);
+  bool         ParseLights(std::string &message);
+  bool         ParseWord(std::string &message, std::string wordtocmp);
+  bool         GetWord(std::string &data, std::string &word);
+  void         Locale(std::string &strfloat);
   
 private:
-  CLightClientSocket m_socket;
+  CLightSocket     m_socket;
   std::string      m_ip;
   int              m_port;
   std::string      m_error;
