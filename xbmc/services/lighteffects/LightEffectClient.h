@@ -40,30 +40,30 @@ public:
 
   std::string m_name;
 
-  bool        m_use = true;;
-  float       m_speed = 100.0f;
-  float       m_autospeed = 0.0f;
-  float       m_singlechange = 0.0;
-  bool        m_interpolation = false;
+  bool        m_use;
+  float       m_speed;
+  float       m_autospeed;
+  float       m_singlechange;
+  bool        m_interpolation;
   
-  float       m_value = 1.0f;;
-  float       m_valuerange[2] = {0.0f, -1.0f};
-  float       m_saturation = 1.0f;
-  float       m_satrange[2] = {0.0f, -1.0f};
-  int         m_threshold = 0;
+  float       m_value;
+  float       m_valuerange[2];
+  float       m_saturation;
+  float       m_satrange[2];
+  int         m_threshold;
   
-  int         m_rgbcount = 0;
-  float       m_rgb[3] = {0};
-  float       m_prevrgb[3] = {0};
+  int         m_rgbcount;
+  float       m_rgb[3];
+  float       m_prevrgb[3];
   
-  int         m_width = -1;
-  int         m_height = -1;
-  float       m_hscan[2] = {-1.0f, -1.0f};
-  float       m_vscan[2] = {-1.0f, -1.0f};
-  int         m_hscanscaled[2] = {0};
-  int         m_vscanscaled[2] = {0};
+  int         m_width;
+  int         m_height;
+  float       m_hscan[2];
+  float       m_vscan[2];
+  int         m_hscanscaled[2];
+  int         m_vscanscaled[2];
 
-  float       m_gamma = 1.0f;
+  float       m_gamma;
   float       m_gammacurve[256];
 };
 

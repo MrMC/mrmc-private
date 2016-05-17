@@ -141,11 +141,11 @@ int CLightSocket::Write(const char *data, int size)
     if (returnv == FAIL || returnv == TIMEOUT)
       return returnv;
 
-    int ret = send(m_sock, data + byteswritten, size - byteswritten, 0);
+    int ret = send(m_sock, data + byteswritten, bytestowrite - byteswritten, 0);
     if (ret == -1)
       return FAIL;
 
-    byteswritten += size;
+    byteswritten += ret;
   }
 
   return SUCCESS;
