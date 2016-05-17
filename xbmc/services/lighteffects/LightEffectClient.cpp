@@ -28,7 +28,6 @@
 CLightEffectLED::CLightEffectLED()
 {
   // defult values below
-  /*
   m_speed = 100.0f;
   m_autospeed = 0.0f;
   m_interpolation = false;
@@ -57,7 +56,6 @@ CLightEffectLED::CLightEffectLED()
   memset(m_prevrgb, 0, sizeof(m_prevrgb));
   memset(m_hscanscaled, 0, sizeof(m_hscanscaled));
   memset(m_vscanscaled, 0, sizeof(m_vscanscaled));
-  */
 
   for (size_t i = 0; i < GAMMASIZE; i++)
     m_gammacurve[i] = i;

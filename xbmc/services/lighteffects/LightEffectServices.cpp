@@ -149,16 +149,20 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
 
 void CLightEffectServices::Process()
 {
-  m_active = true;
+  m_active = false;
 
-  InitConnection();
-  ApplyUserSettings();
-  SetBling();
+  if (InitConnection())
+  {
+    ApplyUserSettings();
+    SetBling();
+    m_active = true;
+  }
+
 
   CRenderCapture *capture = g_renderManager.AllocRenderCapture();
   g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
 
-  while(!m_bStop)
+  while(!m_bStop && m_active)
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
@@ -221,7 +225,7 @@ void CLightEffectServices::Process()
   m_active = false;
 }
 
-void CLightEffectServices::InitConnection()
+bool CLightEffectServices::InitConnection()
 {
   m_staticON = false;
   m_lighteffect = new CLightEffectClient();
@@ -236,7 +240,9 @@ void CLightEffectServices::InitConnection()
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(882), g_localizeStrings.Get(883), 3000, true);
     const CSetting *mysqlSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE);
     ((CSettingBool*)mysqlSetting)->SetValue(false);
+    return false;
   }
+  return true;
 }
 
 void CLightEffectServices::ApplyUserSettings()

@@ -108,7 +108,7 @@ int CLightSocket::Read(std::string &data)
   while(1)
   {
     char buff[1024];
-    int size = recv(m_sock, buff, sizeof(buff), 0);
+    int size = recv(m_sock, buff, 1023, 0);
 
     if (errno == EAGAIN && size == -1)
       return SUCCESS;
@@ -141,8 +141,8 @@ int CLightSocket::Write(const char *data, int size)
     if (returnv == FAIL || returnv == TIMEOUT)
       return returnv;
 
-    int size = send(m_sock, data + byteswritten, size - byteswritten, 0);
-    if (size == -1)
+    int ret = send(m_sock, data + byteswritten, size - byteswritten, 0);
+    if (ret == -1)
       return FAIL;
 
     byteswritten += size;
