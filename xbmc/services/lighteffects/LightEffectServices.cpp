@@ -24,20 +24,15 @@
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderCapture.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "messaging/ApplicationMessenger.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
-#include "utils/Variant.h"
 #include "guilib/LocalizeStrings.h"
-#include "interfaces/AnnouncementManager.h"
-#include "messaging/ApplicationMessenger.h"
 
 #include "LightEffectClient.h"
 
 using namespace ANNOUNCEMENT;
-using namespace KODI::MESSAGING;
 
 CLightEffectServices::CLightEffectServices()
 : CThread("LightEffectServices")
@@ -204,7 +199,7 @@ void CLightEffectServices::Process()
       if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICON))
       {
         // only set static colour once, no point doing it over and over again
-        if(!m_staticON)
+        if (!m_staticON)
         {
           m_staticON = true;
           m_lightsON = true;
@@ -224,8 +219,10 @@ void CLightEffectServices::Process()
           }
         }
       }
+      usleep(50 * 1000);
     }
   }
+
   g_renderManager.ReleaseRenderCapture(capture);
   m_lighteffect->SetPriority(255);
 }
@@ -287,13 +284,11 @@ void CLightEffectServices::SetOption(std::string setting)
   std::string data = StringUtils::Format("%s %s", option.c_str(), value.c_str());
   if (!m_lighteffect->SetOption(data.c_str()))
     CLog::Log(LOGDEBUG, "CLightEffectServices::SetOption - error: for option '%s' and value '%s'",
-              option.c_str(),
-              value.c_str());
+      option.c_str(), value.c_str());
   else
   {
     CLog::Log(LOGDEBUG, "CLightEffectServices::SetOption - option '%s' and value '%s' - Done!",
-              option.c_str(),
-              value.c_str());
+      option.c_str(), value.c_str());
     // this will refresh static colours once options are changed
     m_staticON = false;
   }
@@ -301,10 +296,11 @@ void CLightEffectServices::SetOption(std::string setting)
 
 void CLightEffectServices::SetStatic()
 {
-  int rgb[3];
-  rgb[0] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR);
-  rgb[1] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG);
-  rgb[2] = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB);
+  int rgb[3] = {
+    CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR),
+    CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG),
+    CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB)
+  };
   
   m_lighteffect->AddStaticPixels(rgb);
   m_lighteffect->SetPriority(128);

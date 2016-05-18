@@ -81,12 +81,14 @@ std::string CLightEffectLED::SetOption(const char* option, bool& send)
   else
   {
     float value;
-    std::stringstream stream;
-    stream << stroption;
-    stream >> value;
-    if (stream.fail())
+    try {
+      value = std::stod(stroption);
+    }
+    catch (...)
+    {
       return "invalid value " + stroption + " for option " + strname + " with type float";
-    
+    }
+
     if (strname == "saturation")
     {
       m_saturation = value;
