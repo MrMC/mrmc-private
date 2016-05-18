@@ -87,6 +87,8 @@ bool CLightEffectServices::Start()
   CSingleLock lock(m_critical);
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !m_active)
   {
+    if (m_active)
+      StopThread();
     CThread::Create();
   }
   return false;
@@ -162,6 +164,7 @@ void CLightEffectServices::Process()
   CRenderCapture *capture = g_renderManager.AllocRenderCapture();
   g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
 
+  int priority = -1;
   while(!m_bStop && m_active)
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
@@ -169,7 +172,11 @@ void CLightEffectServices::Process()
       // reset static bool for later
       m_staticON = false;
       m_lightsON = true;
-      m_lighteffect->SetPriority(128);
+      if (priority != 128)
+      {
+        priority = 128;
+        m_lighteffect->SetPriority(priority);
+      }
       
       capture->GetEvent().WaitMSec(1000);
       if (capture->GetUserState() == CAPTURESTATE_DONE)
@@ -213,8 +220,12 @@ void CLightEffectServices::Process()
       {
         if (m_lightsON)
         {
-          m_lighteffect->SetPriority(255);
           m_lightsON = false;
+          if (priority != 255)
+          {
+            priority = 255;
+            m_lighteffect->SetPriority(priority);
+          }
         }
       }
     }
