@@ -476,13 +476,13 @@ void CNetworkServices::Start()
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_ESENABLED) && !StartJSONRPCServer())
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33103), g_localizeStrings.Get(33100));
   
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !StartLightEffectServices())
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
+
   // note - airtunesserver has to start before airplay server (ios7 client detection bug)
   StartAirTunesServer();
   StartAirPlayServer();
   StartRss();
-  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !StartEventServer())
-    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
-  StartLightEffectServices();
 }
 
 void CNetworkServices::Stop(bool bWait)
