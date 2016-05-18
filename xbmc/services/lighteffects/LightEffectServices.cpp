@@ -41,7 +41,6 @@ using namespace KODI::MESSAGING;
 
 CLightEffectServices::CLightEffectServices()
 : CThread("LightEffectServices")
-, m_active(false)
 , m_width(32)
 , m_height(32)
 , m_staticON(false)
@@ -51,7 +50,7 @@ CLightEffectServices::CLightEffectServices()
 
 CLightEffectServices::~CLightEffectServices()
 {
-  if (m_active)
+  if (IsRunning())
     Stop();
 }
 
@@ -85,9 +84,9 @@ void CLightEffectServices::Announce(AnnouncementFlag flag, const char *sender, c
 bool CLightEffectServices::Start()
 {
   CSingleLock lock(m_critical);
-  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !m_active)
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !IsRunning())
   {
-    if (m_active)
+    if (IsRunning())
       StopThread();
     CThread::Create();
   }
@@ -97,13 +96,13 @@ bool CLightEffectServices::Start()
 void CLightEffectServices::Stop()
 {
   CSingleLock lock(m_critical);
-  if (m_active)
+  if (IsRunning())
     StopThread();
 }
 
 bool CLightEffectServices::IsActive()
 {
-  return m_active;
+  return IsRunning();
 }
 
 void CLightEffectServices::OnSettingChanged(const CSetting *setting)
@@ -151,13 +150,10 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
 
 void CLightEffectServices::Process()
 {
-  m_active = false;
-
   if (InitConnection())
   {
     ApplyUserSettings();
     SetBling();
-    m_active = true;
   }
 
 
@@ -165,7 +161,7 @@ void CLightEffectServices::Process()
   g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
 
   int priority = -1;
-  while(!m_bStop && m_active)
+  while (!m_bStop)
   {
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
@@ -232,8 +228,6 @@ void CLightEffectServices::Process()
   }
   g_renderManager.ReleaseRenderCapture(capture);
   m_lighteffect->SetPriority(255);
-
-  m_active = false;
 }
 
 bool CLightEffectServices::InitConnection()
