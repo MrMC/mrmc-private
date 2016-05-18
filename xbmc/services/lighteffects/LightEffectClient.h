@@ -76,7 +76,7 @@ public:
   std::string  ReadData();
   int          SetPriority(int prio);
   void         SetScanRange(int width, int height);
-  int          AddStaticPixels(int *rgb);
+  void         AddStaticPixels(int *rgb);
   void         AddPixel(int *rgb, int x, int y);
   int          SendRGB(bool sync);
   int          SetOption(const char *option);

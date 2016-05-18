@@ -72,7 +72,7 @@ std::string CLightEffectLED::SetOption(const char* option, bool& send)
 
   if (strname == "interpolation")
   {
-    // lose the blank space
+    // eat the blank space
     StringUtils::Replace(stroption, " ", "");
     m_interpolation = (stroption == "1");
     send = true;
@@ -162,6 +162,7 @@ void CLightEffectLED::GetRGB(float *rgb)
     return;
   }
 
+  // 0 to 255 rgb convert to 0.0 to 1.0 rgb
   for (int i = 0; i < 3; ++i)
   {
     rgb[i] = Clamp(m_rgb[i] / (float)m_rgbcount / 255.0f, 0.0f, 1.0f);
@@ -169,6 +170,7 @@ void CLightEffectLED::GetRGB(float *rgb)
   }
   m_rgbcount = 0;
 
+  // apply 'autospeed' correction
   if (m_autospeed > 0.0)
   {
     float change = std::abs(rgb[0] - m_prevrgb[0]) + std::abs(rgb[1] - m_prevrgb[1]) + std::abs(rgb[2] - m_prevrgb[2]);
@@ -181,6 +183,7 @@ void CLightEffectLED::GetRGB(float *rgb)
   }
   memcpy(m_prevrgb, rgb, sizeof(m_prevrgb));
 
+  // rgb -> hvs convert, apply value/saturation, hvs -> rgb convert.
   if (m_value != 1.0 || m_valuerange[0] != 0.0 || m_valuerange[1] != 1.0 ||
       m_saturation != 1.0  || m_satrange[0] != 0.0 || m_satrange[1] != 1.0)
   {
@@ -199,7 +202,7 @@ void CLightEffectLED::GetRGB(float *rgb)
       float span = max - min;
       if (max == rgb[0])
       {
-        hsv[0] = (60.0f * ((rgb[1] - rgb[2]) / span) + 360.0f);
+        hsv[0] = 60.0f * ((rgb[1] - rgb[2]) / span) + 360.0f;
         while (hsv[0] >= 360.0f)
           hsv[0] -= 360.0f;
       }
@@ -235,18 +238,27 @@ void CLightEffectLED::GetRGB(float *rgb)
       float q = v * (1.0f - f * s);
       float t = v * (1.0f - (1.0f - f) * s);
 
-      if (hi == 0)
-      { rgb[0] = v; rgb[1] = t; rgb[2] = p; }
-      else if (hi == 1)
-      { rgb[0] = q; rgb[1] = v; rgb[2] = p; }
-      else if (hi == 2)
-      { rgb[0] = p; rgb[1] = v; rgb[2] = t; }
-      else if (hi == 3)
-      { rgb[0] = p; rgb[1] = q; rgb[2] = v; }
-      else if (hi == 4)
-      { rgb[0] = t; rgb[1] = p; rgb[2] = v; }
-      else if (hi == 5)
-      { rgb[0] = v; rgb[1] = p; rgb[2] = q; }
+      switch(hi)
+      {
+        case 0:
+          rgb[0] = v; rgb[1] = t; rgb[2] = p;
+          break;
+        case 1:
+          rgb[0] = q; rgb[1] = v; rgb[2] = p;
+          break;
+        case 2:
+          rgb[0] = p; rgb[1] = v; rgb[2] = t;
+          break;
+        case 3:
+          rgb[0] = p; rgb[1] = q; rgb[2] = v;
+          break;
+        case 4:
+          rgb[0] = t; rgb[1] = p; rgb[2] = v;
+          break;
+        case 5:
+          rgb[0] = v; rgb[1] = p; rgb[2] = q;
+          break;
+      }
     }
 
     for (int i = 0; i < 3; ++i)
@@ -422,17 +434,13 @@ int CLightEffectClient::SetPriority(int prio)
 void CLightEffectClient::SetScanRange(int width, int height)
 {
   for (size_t i = 0; i < m_lights.size(); ++i)
-  {
     m_lights[i].SetScanRange(width, height);
-  }
 }
 
-int CLightEffectClient::AddStaticPixels(int *rgb)
+void CLightEffectClient::AddStaticPixels(int *rgb)
 {
   for (size_t i = 0; i < m_lights.size(); ++i)
     m_lights[i].AddPixel(rgb);
-
-  return 1;
 }
 
 void CLightEffectClient::AddPixel(int *rgb, int x, int y)
@@ -453,6 +461,7 @@ int CLightEffectClient::SendRGB(bool sync)
 
   for (size_t i = 0; i < m_lights.size(); ++i)
   {
+    // convert from 0 to 255 range rgb -> 0.0 to 1.0 range rgb
     float rgb[3];
     m_lights[i].GetRGB(rgb);
     data += StringUtils::Format("set light %s rgb %f %f %f\n",m_lights[i].m_name.c_str(),rgb[0],rgb[1],rgb[2]);
@@ -468,6 +477,7 @@ int CLightEffectClient::SendRGB(bool sync)
 
   return 1;
 }
+
 int CLightEffectClient::SetOption(const char *option)
 {
   std::string data;
