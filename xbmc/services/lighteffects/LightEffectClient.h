@@ -40,31 +40,24 @@ public:
 
   std::string m_name;
 
-  bool        m_use;
   float       m_speed;
-  float       m_autospeed;
-  float       m_singlechange;
+  int         m_threshold;
   bool        m_interpolation;
   
   float       m_value;
   float       m_valuerange[2];
   float       m_saturation;
-  float       m_satrange[2];
-  int         m_threshold;
+  float       m_saturationrange[2];
   
-  int         m_rgbcount;
   float       m_rgb[3];
-  float       m_prevrgb[3];
-  
+  int         m_rgbcount;
+
   int         m_width;
   int         m_height;
   float       m_hscan[2];
   float       m_vscan[2];
   int         m_hscanscaled[2];
   int         m_vscanscaled[2];
-
-  float       m_gamma;
-  float       m_gammacurve[256];
 };
 
 class CLightEffectClient
@@ -76,7 +69,7 @@ public:
   std::string  ReadData();
   int          SetPriority(int prio);
   void         SetScanRange(int width, int height);
-  void         AddStaticPixels(int *rgb);
+  void         SetAllLights(int *rgb);
   void         AddPixel(int *rgb, int x, int y);
   int          SendRGB(bool sync);
   int          SetOption(const char *option);

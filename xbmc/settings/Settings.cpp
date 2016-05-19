@@ -456,7 +456,6 @@ const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT = "services.light
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION = "services.lighteffectssaturation";
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE = "services.lighteffectsvalue";
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED = "services.lighteffectsspeed";
-const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED = "services.lighteffectsautospeed";
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION = "services.lighteffectsinterpolation";
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD = "services.lighteffectsthreshold";
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICON = "services.lighteffectsstaticon";
@@ -1309,7 +1308,6 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE);
-  settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION);
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD);

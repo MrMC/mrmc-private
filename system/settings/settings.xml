@@ -2566,21 +2566,6 @@
             <condition on="setting" setting="services.lighteffects" operator="!is"></condition>
           </dependencies>
         </setting>
-        <setting id="services.lighteffectsautospeed" type="number" parent="services.lighteffects" label="865" help="866">
-          <level>1</level>
-          <default>0.0</default>
-          <constraints>
-            <minimum>0.0</minimum>
-            <step>1.0</step>
-            <maximum>100.0</maximum>
-          </constraints>
-          <control type="slider" format="number">
-            <formatlabel>862</formatlabel>
-          </control>  
-          <dependencies>
-            <condition on="setting" setting="services.lighteffects" operator="!is"></condition>
-          </dependencies>
-        </setting>    
         <setting id="services.lighteffectssaturation" type="number" parent="services.lighteffects" label="859" help="860">
           <level>1</level>
           <default>1.0</default>

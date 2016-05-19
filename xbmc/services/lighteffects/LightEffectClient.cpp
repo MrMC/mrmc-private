@@ -23,42 +23,28 @@
 #include <sstream>
 #include <cmath>
 
-#define GAMMASIZE (sizeof(m_gammacurve) / sizeof(m_gammacurve[0]))
-
 CLightEffectLED::CLightEffectLED()
 {
-  // defult values below
   m_speed = 100.0f;
-  m_autospeed = 0.0f;
+  m_threshold = 0;
   m_interpolation = false;
-  m_use = true;
+
   m_value = 1.0f;
   m_valuerange[0] = 0.0f;
   m_valuerange[1] = 1.0f;
   m_saturation = 1.0f;
-  m_satrange[0] = 0.0f;
-  m_satrange[1] = 1.0f;
-  m_threshold = 0;
-  m_gamma = 1.0f;
-  m_hscan[0] = -1.0f;
-  m_hscan[1] = -1.0f;
-  m_vscan[0] = -1.0f;
-  m_vscan[1] = -1.0f;
-  // end default values
+  m_saturationrange[0] = 0.0f;
+  m_saturationrange[1] = 1.0f;
 
-  m_singlechange = 0.0;
+  m_rgb[0] = m_rgb[1] = m_rgb[2] = 0.0f;
+  m_rgbcount = 0;
 
   m_width = -1;
   m_height = -1;
-
-  memset(m_rgb, 0, sizeof(m_rgb));
-  m_rgbcount = 0;
-  memset(m_prevrgb, 0, sizeof(m_prevrgb));
-  memset(m_hscanscaled, 0, sizeof(m_hscanscaled));
-  memset(m_vscanscaled, 0, sizeof(m_vscanscaled));
-
-  for (size_t i = 0; i < GAMMASIZE; i++)
-    m_gammacurve[i] = i;
+  m_hscan[0] = m_hscan[1] = -1.0f;
+  m_vscan[0] = m_vscan[1] = -1.0f;
+  m_hscanscaled[0] = m_hscanscaled[1] = 0;
+  m_vscanscaled[0] = m_vscanscaled[1] = 0;
 }
 
 std::string CLightEffectLED::SetOption(const char* option, bool& send)
@@ -68,7 +54,7 @@ std::string CLightEffectLED::SetOption(const char* option, bool& send)
   std::string strname;
   std::string stroption = option;
   if (!CLightEffectClient::GetInstance().GetWord(stroption, strname))
-    return "emtpy option";
+    return "empty option";
 
   if (strname == "interpolation")
   {
@@ -100,11 +86,6 @@ std::string CLightEffectLED::SetOption(const char* option, bool& send)
       m_speed = Clamp(m_speed, 0.0, 100.0);
       send = true;
     }
-    else if (strname == "autospeed")
-    {
-      m_autospeed = value;
-      m_autospeed = fmax(m_autospeed, 0.0);
-    }
     else if (strname == "value")
     {
       m_value = value;
@@ -133,18 +114,9 @@ void CLightEffectLED::AddPixel(int* rgb)
 {
   if (rgb[0] >= m_threshold || rgb[1] >= m_threshold || rgb[2] >= m_threshold)
   {
-    if (m_gamma == 1.0)
-    {
-      m_rgb[0] += Clamp(rgb[0], 0, 255);
-      m_rgb[1] += Clamp(rgb[1], 0, 255);
-      m_rgb[2] += Clamp(rgb[2], 0, 255);
-    }
-    else
-    {
-      m_rgb[0] += m_gammacurve[Clamp(rgb[0], 0, (int)GAMMASIZE - 1)];
-      m_rgb[1] += m_gammacurve[Clamp(rgb[1], 0, (int)GAMMASIZE - 1)];
-      m_rgb[2] += m_gammacurve[Clamp(rgb[2], 0, (int)GAMMASIZE - 1)];
-    }
+    m_rgb[0] += Clamp(rgb[0], 0, 255);
+    m_rgb[1] += Clamp(rgb[1], 0, 255);
+    m_rgb[2] += Clamp(rgb[2], 0, 255);
   }
   m_rgbcount++;
 }
@@ -170,22 +142,9 @@ void CLightEffectLED::GetRGB(float *rgb)
   }
   m_rgbcount = 0;
 
-  // apply 'autospeed' correction
-  if (m_autospeed > 0.0)
-  {
-    float change = std::abs(rgb[0] - m_prevrgb[0]) + std::abs(rgb[1] - m_prevrgb[1]) + std::abs(rgb[2] - m_prevrgb[2]);
-    change /= 3.0;
-    
-    if (change > 0.001)
-      m_singlechange = Clamp(change * m_autospeed / 10.0f, 0.0f, 1.0f);
-    else
-      m_singlechange = 0.0;
-  }
-  memcpy(m_prevrgb, rgb, sizeof(m_prevrgb));
-
   // rgb -> hvs convert, apply value/saturation, hvs -> rgb convert.
   if (m_value != 1.0 || m_valuerange[0] != 0.0 || m_valuerange[1] != 1.0 ||
-      m_saturation != 1.0  || m_satrange[0] != 0.0 || m_satrange[1] != 1.0)
+      m_saturation != 1.0  || m_saturationrange[0] != 0.0 || m_saturationrange[1] != 1.0)
   {
     float hsv[3];
     float max = std::max(std::max(rgb[0], rgb[1]), rgb[2]);
@@ -219,7 +178,7 @@ void CLightEffectLED::GetRGB(float *rgb)
       hsv[2] = max;
     }
 
-    hsv[1] = Clamp(hsv[1] * m_saturation, m_satrange[0],   m_satrange[1]);
+    hsv[1] = Clamp(hsv[1] * m_saturation, m_saturationrange[0],   m_saturationrange[1]);
     hsv[2] = Clamp(hsv[2] * m_value,      m_valuerange[0], m_valuerange[1]);
 
     if (hsv[0] == -1.0f)
@@ -437,7 +396,7 @@ void CLightEffectClient::SetScanRange(int width, int height)
     m_lights[i].SetScanRange(width, height);
 }
 
-void CLightEffectClient::AddStaticPixels(int *rgb)
+void CLightEffectClient::SetAllLights(int *rgb)
 {
   for (size_t i = 0; i < m_lights.size(); ++i)
     m_lights[i].AddPixel(rgb);
@@ -465,8 +424,6 @@ int CLightEffectClient::SendRGB(bool sync)
     float rgb[3];
     m_lights[i].GetRGB(rgb);
     data += StringUtils::Format("set light %s rgb %f %f %f\n",m_lights[i].m_name.c_str(),rgb[0],rgb[1],rgb[2]);
-    if (m_lights[i].m_autospeed > 0.0 && m_lights[i].m_singlechange > 0.0)
-      data += StringUtils::Format("set light %s singlechange %f\n",m_lights[i].m_name.c_str(),m_lights[i].m_singlechange);
   }
 
   if (sync)
@@ -487,6 +444,7 @@ int CLightEffectClient::SetOption(const char *option)
     std::string error = m_lights[i].SetOption(option, send);
     if (!error.empty())
       return 0;
+
     if (send)
       data += StringUtils::Format("set light %s %s\n",m_lights[i].m_name.c_str(),option);
   }

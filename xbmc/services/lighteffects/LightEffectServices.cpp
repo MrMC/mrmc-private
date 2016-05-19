@@ -63,7 +63,7 @@ void CLightEffectServices::Announce(AnnouncementFlag flag, const char *sender, c
     if (!CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER))
     {
       m_staticON = false;
-      SetStatic();
+      SetAllLightsToStaticRGB();
     }
   }
   else if (flag == GUI && !strcmp(sender, "xbmc") && !strcmp(message, "OnScreensaverActivated"))
@@ -124,7 +124,6 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
   else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION    ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED         ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE         ||
-           settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED     ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD)
   {
@@ -154,6 +153,7 @@ void CLightEffectServices::Process()
 
   CRenderCapture *capture = g_renderManager.AllocRenderCapture();
   g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
+  m_lighteffect->SetScanRange(m_width, m_height);
 
   int priority = -1;
   while (!m_bStop)
@@ -174,8 +174,6 @@ void CLightEffectServices::Process()
       {
         //read out the pixels
         unsigned char *pixels = capture->GetPixels();
-        m_lighteffect->SetScanRange(m_width, m_height);
-        
         for (int y = 0; y < m_height;  y++)
         {
           int row = m_width * y * 4;
@@ -203,7 +201,7 @@ void CLightEffectServices::Process()
         {
           m_staticON = true;
           m_lightsON = true;
-          SetStatic();
+          SetAllLightsToStaticRGB();
         }
       }
       // or kill the lights
@@ -252,7 +250,6 @@ void CLightEffectServices::ApplyUserSettings()
   SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION);
   SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSVALUE);
   SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED);
-  SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED);
   SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION);
   SetOption(CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD);
 }
@@ -275,8 +272,6 @@ void CLightEffectServices::SetOption(std::string setting)
       option = "value";
     else if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED)
       option = "speed";
-    else if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSAUTOSPEED)
-      option = "autospeed";
     else if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD)
       option = "threshold";
   }
@@ -294,7 +289,7 @@ void CLightEffectServices::SetOption(std::string setting)
   }
 }
 
-void CLightEffectServices::SetStatic()
+void CLightEffectServices::SetAllLightsToStaticRGB()
 {
   int rgb[3] = {
     CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR),
@@ -302,7 +297,7 @@ void CLightEffectServices::SetStatic()
     CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB)
   };
   
-  m_lighteffect->AddStaticPixels(rgb);
+  m_lighteffect->SetAllLights(rgb);
   m_lighteffect->SetPriority(128);
   m_lighteffect->SendRGB(true);
 }
@@ -315,7 +310,7 @@ void CLightEffectServices::SetBling()
     int rgb[3] = {0,0,0};
     if (y < 3)
       rgb[y] = 255;
-    m_lighteffect->AddStaticPixels(rgb);
+    m_lighteffect->SetAllLights(rgb);
     m_lighteffect->SendRGB(true);
     Sleep(1000);
   }
