@@ -21,68 +21,62 @@
 
 #include <string>
 #include <vector>
-#include "LightSocket.h"
-
-class CLightEffectLED
-{
-public:
-  CLightEffectLED();
-  
-  int         Clamp(int value, int min, int max);
-  float       Clamp(float value, float min, float max);
-  
-  std::string SetOption(const char *option, bool &send);
-  std::string GetOption(const char *option, std::string &output);
-  
-  void        SetScanRange(int width, int height);
-  void        AddPixel(int *rgb);
-  void        GetRGB(float *rgb);
-
-  std::string m_name;
-
-  float       m_speed;
-  int         m_threshold;
-  bool        m_interpolation;
-  
-  float       m_value;
-  float       m_valuerange[2];
-  float       m_saturation;
-  float       m_saturationrange[2];
-  
-  float       m_rgb[3];
-  int         m_rgbcount;
-
-  int         m_width;
-  int         m_height;
-  float       m_hscan[2];
-  float       m_vscan[2];
-  int         m_hscanscaled[2];
-  int         m_vscanscaled[2];
-};
+#include "network/TCPClient.h"
 
 class CLightEffectClient
 {
 public:
   CLightEffectClient();
-  static CLightEffectClient &GetInstance();
-  bool         Connect(const char *ip, int port, int timeout);
-  std::string  ReadData();
-  int          SetPriority(int prio);
-  void         SetScanRange(int width, int height);
-  void         SetAllLights(int *rgb);
-  void         AddPixel(int *rgb, int x, int y);
-  int          SendRGB(bool sync);
-  int          SetOption(const char *option);
-  bool         ParseLights(std::string &message);
-  bool         ParseWord(std::string &message, std::string wordtocmp);
-  bool         GetWord(std::string &data, std::string &word);
-  void         Locale(std::string &strfloat);
+
+  bool Connect(const char *ip, int port, int timeout);
+  int  SetPriority(int prio);
+  bool SetOption(const char *option);
+  void SetScanRange(int width, int height);
+  void SetPixel(int rgb[], int x, int y);
+  int  SendLights(bool sync);
+  void SendLights(int rgb[], bool sync);
   
 private:
-  CLightSocket     m_socket;
-  std::string      m_ip;
-  int              m_port;
-  std::string      m_error;
-  int              m_timeout;
-  std::vector <CLightEffectLED> m_lights;
+  class CLight
+  {
+  public:
+    CLight()
+    {
+      rgbcount = 0;
+      rgb[0] = rgb[1] = rgb[2] = 0.0f;
+      hscan[0] = hscan[1] = -1.0f;
+      vscan[0] = vscan[1] = -1.0f;
+      hscanscaled[0] = hscanscaled[1] = 0;
+      vscanscaled[0] = vscanscaled[1] = 0;
+    }
+
+    std::string name;
+    float rgb[3];
+    int   rgbcount;
+    float hscan[2];
+    float vscan[2];
+    int   hscanscaled[2];
+    int   vscanscaled[2];
+  };
+
+  std::string  ReadReply();
+  bool         ParseGetLights(std::string &message);
+  bool         ParseWord(std::string &message, std::string wordtocmp);
+  bool         GetWord(std::string &data, std::string &word);
+  void         ConvertLocale(std::string &strfloat);
+  void         GetRGBFromLight(CLight &light, float rgb[]);
+  void         AddPixelToLight(CLight &light, int rgb[]);
+
+  std::string  m_ip;
+  int          m_port;
+  std::string  m_error;
+  int          m_timeout;
+  CTCPClient   m_socket;
+
+  float        m_speed;
+  int          m_threshold;
+  bool         m_interpolation;
+  float        m_value;
+  float        m_saturation;
+  std::vector <CLight> m_lights;
 };

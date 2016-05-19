@@ -38,6 +38,7 @@ CLightEffectServices::CLightEffectServices()
 : CThread("LightEffectServices")
 , m_width(32)
 , m_height(32)
+, m_lighteffect(nullptr)
 , m_staticON(false)
 , m_lightsON(true)
 {
@@ -71,28 +72,32 @@ void CLightEffectServices::Announce(AnnouncementFlag flag, const char *sender, c
     if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER))
     {
       m_staticON = true;
-      m_lighteffect->SetPriority(255);
+      if (m_lighteffect)
+        m_lighteffect->SetPriority(255);
     }
   }
 }
 
-bool CLightEffectServices::Start()
+void CLightEffectServices::Start()
 {
   CSingleLock lock(m_critical);
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !IsRunning())
   {
     if (IsRunning())
       StopThread();
+    m_blingEvent.Reset();
     CThread::Create();
   }
-  return false;
 }
 
 void CLightEffectServices::Stop()
 {
   CSingleLock lock(m_critical);
   if (IsRunning())
+  {
+    m_blingEvent.Set();
     StopThread();
+  }
 }
 
 bool CLightEffectServices::IsActive()
@@ -117,9 +122,12 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
   else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSIP ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT)
   {
-    //restart
-    Stop();
-    Start();
+    // restart to pick up ip/port changes
+    if (IsRunning())
+    {
+      Stop();
+      Start();
+    }
   }
   else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSATURATION    ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSPEED         ||
@@ -127,7 +135,10 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSTHRESHOLD)
   {
-    SetOption(settingId);
+    // only set if we are running, the values
+    // will get picked up when started.
+    if (IsRunning())
+      SetOption(settingId);
   }
   else if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR ||
            settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG ||
@@ -137,8 +148,8 @@ void CLightEffectServices::OnSettingChanged(const CSetting *setting)
     m_staticON = false;
     if (settingId == CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICON)
       m_staticON = !static_cast<const CSettingBool*>(setting)->GetValue();
-      
   }
+
   CSettings::GetInstance().Save();
 }
 
@@ -147,82 +158,99 @@ void CLightEffectServices::Process()
   if (InitConnection())
   {
     ApplyUserSettings();
+    m_lighteffect->SetScanRange(m_width, m_height);
+
     SetBling();
-  }
 
-
-  CRenderCapture *capture = g_renderManager.AllocRenderCapture();
-  g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
-  m_lighteffect->SetScanRange(m_width, m_height);
-
-  int priority = -1;
-  while (!m_bStop)
-  {
-    if (g_application.m_pPlayer->IsPlayingVideo())
+    int priority = -1;
+    CRenderCapture *capture = nullptr;
+    while (!m_bStop)
     {
-      // reset static bool for later
-      m_staticON = false;
-      m_lightsON = true;
-      if (priority != 128)
+      if (g_application.m_pPlayer->IsPlayingVideo())
       {
-        priority = 128;
-        m_lighteffect->SetPriority(priority);
-      }
-      
-      capture->GetEvent().WaitMSec(1000);
-      if (capture->GetUserState() == CAPTURESTATE_DONE)
-      {
-        //read out the pixels
-        unsigned char *pixels = capture->GetPixels();
-        for (int y = 0; y < m_height;  y++)
+        // if starting, alloc a rendercapture and start capturing
+        if (capture == nullptr)
         {
-          int row = m_width * y * 4;
-          for (int x = 0; x < m_width; x++)
+          capture = g_renderManager.AllocRenderCapture();
+          g_renderManager.Capture(capture, m_width, m_height, CAPTUREFLAG_CONTINUOUS);
+        }
+
+        // reset static bool for later
+        m_staticON = false;
+        m_lightsON = true;
+        if (priority != 128)
+        {
+          priority = 128;
+          m_lighteffect->SetPriority(priority);
+        }
+        
+        capture->GetEvent().WaitMSec(1000);
+        if (capture->GetUserState() == CAPTURESTATE_DONE)
+        {
+          //read out the pixels
+          unsigned char *pixels = capture->GetPixels();
+          for (int y = 0; y < m_height; ++y)
           {
-            int pixel = row + (x * 4);
-            int rgb[3] = {
-              pixels[pixel + 2],
-              pixels[pixel + 1],
-              pixels[pixel]
-            };
-            m_lighteffect->AddPixel(rgb, x, y);
+            int row = m_width * y * 4;
+            for (int x = 0; x < m_width; ++x)
+            {
+              int pixel = row + (x * 4);
+              int rgb[3] = {
+                pixels[pixel + 2],
+                pixels[pixel + 1],
+                pixels[pixel]
+              };
+              m_lighteffect->SetPixel(rgb, x, y);
+            }
           }
-        }
-        m_lighteffect->SendRGB(true);
-      }
-    }
-    else
-    {
-      // set static if its enabled
-      if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICON))
-      {
-        // only set static colour once, no point doing it over and over again
-        if (!m_staticON)
-        {
-          m_staticON = true;
-          m_lightsON = true;
-          SetAllLightsToStaticRGB();
+          m_lighteffect->SendLights(true);
         }
       }
-      // or kill the lights
       else
       {
-        if (m_lightsON)
+        if (capture != nullptr)
         {
-          m_lightsON = false;
-          if (priority != 255)
+          g_renderManager.ReleaseRenderCapture(capture);
+          capture = nullptr;
+        }
+        // set static if its enabled
+        if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICON))
+        {
+          // only set static colour once, no point doing it over and over again
+          if (!m_staticON)
           {
-            priority = 255;
-            m_lighteffect->SetPriority(priority);
+            m_staticON = true;
+            m_lightsON = true;
+            SetAllLightsToStaticRGB();
           }
         }
+        // or kill the lights
+        else
+        {
+          if (m_lightsON)
+          {
+            m_lightsON = false;
+            if (priority != 255)
+            {
+              priority = 255;
+              m_lighteffect->SetPriority(priority);
+            }
+          }
+        }
+        usleep(50 * 1000);
       }
-      usleep(50 * 1000);
     }
-  }
 
-  g_renderManager.ReleaseRenderCapture(capture);
-  m_lighteffect->SetPriority(255);
+    // have to check this in case we go
+    // right from playing to death.
+    if (capture != nullptr)
+    {
+      g_renderManager.ReleaseRenderCapture(capture);
+      capture = nullptr;
+    }
+    m_lighteffect->SetPriority(255);
+    SAFE_DELETE(m_lighteffect);
+  }
 }
 
 bool CLightEffectServices::InitConnection()
@@ -233,15 +261,20 @@ bool CLightEffectServices::InitConnection()
   // boblightd server IP address and port
   const char *IP = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_LIGHTEFFECTSIP).c_str();
   int port = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT);
-    
+
+  // timeout is in microseconds, so 5 seconds.
   if (!m_lighteffect->Connect(IP, port, 5000000))
   {
     m_staticON = true;
-    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, g_localizeStrings.Get(882), g_localizeStrings.Get(883), 3000, true);
-    const CSetting *mysqlSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE);
-    ((CSettingBool*)mysqlSetting)->SetValue(false);
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
+      g_localizeStrings.Get(882), g_localizeStrings.Get(883), 3000, true);
+    const CSetting *setting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE);
+    ((CSettingBool*)setting)->SetValue(false);
+    
+    SAFE_DELETE(m_lighteffect);
     return false;
   }
+
   return true;
 }
 
@@ -256,6 +289,8 @@ void CLightEffectServices::ApplyUserSettings()
 
 void CLightEffectServices::SetOption(std::string setting)
 {
+  CSingleLock lock(m_critical);
+
   std::string value;
   std::string option;
   if (setting == CSettings::SETTING_SERVICES_LIGHTEFFECTSINTERPOLATION)
@@ -291,27 +326,33 @@ void CLightEffectServices::SetOption(std::string setting)
 
 void CLightEffectServices::SetAllLightsToStaticRGB()
 {
+  if (!m_lighteffect)
+    return;
+
   int rgb[3] = {
     CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICR),
     CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG),
     CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB)
   };
   
-  m_lighteffect->SetAllLights(rgb);
   m_lighteffect->SetPriority(128);
-  m_lighteffect->SendRGB(true);
+  m_lighteffect->SendLights(rgb, true);
 }
 
 void CLightEffectServices::SetBling()
 {
+  if (!m_lighteffect)
+    return;
+
   m_lighteffect->SetPriority(128);
-  for (int y = 0; y < 4;  y++)
+  for (int y = 0; y < 4; ++y)
   {
     int rgb[3] = {0,0,0};
     if (y < 3)
       rgb[y] = 255;
-    m_lighteffect->SetAllLights(rgb);
-    m_lighteffect->SendRGB(true);
-    Sleep(1000);
+    m_lighteffect->SendLights(rgb, true);
+    m_blingEvent.WaitMSec(1000);
+    if (m_blingEvent.Signaled())
+      break;
   }
 }

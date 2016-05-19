@@ -23,17 +23,22 @@
 #include <vector>
 #include <netinet/in.h>
 
-class CLightSocket
+class CTCPClient
 {
   public:
-  enum {
-    FAIL    = 0,
-    SUCCESS = 1,
-    TIMEOUT = 2,
-  };
+    enum LS_RW {
+      READ    = 0,
+      WRITE   = 1,
+    };
 
-    CLightSocket();
-   ~CLightSocket();
+    enum {
+      FAIL    = 0,
+      SUCCESS = 1,
+      TIMEOUT = 2,
+    };
+
+    CTCPClient();
+   ~CTCPClient();
 
     int         Open(std::string address, int port, int timeout_us);
     void        Close();
@@ -47,7 +52,7 @@ class CLightSocket
 
   protected:
     int         SetNonBlock(bool nonblock = true);
-    int         WaitForSocket(bool write);
+    int         WaitForSocket(LS_RW direction);
 
     int         m_port;
     std::string m_address;

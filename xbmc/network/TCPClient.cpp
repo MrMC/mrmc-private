@@ -28,20 +28,20 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include "LightSocket.h"
+#include "TCPClient.h"
 
-CLightSocket::CLightSocket()
+CTCPClient::CTCPClient()
 {
   m_port = -1;
   m_sock = -1;
 }
 
-CLightSocket::~CLightSocket()
+CTCPClient::~CTCPClient()
 {
   Close();
 }
 
-int CLightSocket::Open(std::string address, int port, int timeout_us)
+int CTCPClient::Open(std::string address, int port, int timeout_us)
 {
   Close();
 
@@ -74,7 +74,7 @@ int CLightSocket::Open(std::string address, int port, int timeout_us)
       return FAIL;
   }
 
-  int returnv = WaitForSocket(true);
+  int returnv = WaitForSocket(LS_RW::WRITE);
   if (returnv == FAIL || returnv == TIMEOUT)
     return returnv;
 
@@ -85,7 +85,7 @@ int CLightSocket::Open(std::string address, int port, int timeout_us)
   return SUCCESS;
 }
 
-void CLightSocket::Close()
+void CTCPClient::Close()
 {
   if (m_sock != -1)
   {
@@ -95,12 +95,12 @@ void CLightSocket::Close()
   }
 }
 
-int CLightSocket::Read(std::string &data)
+int CTCPClient::Read(std::string &data)
 {
   if (m_sock == -1)
     return FAIL;
 
-  int returnv = WaitForSocket(false);
+  int returnv = WaitForSocket(LS_RW::READ);
   if (returnv != SUCCESS)
     return returnv;
 
@@ -126,7 +126,7 @@ int CLightSocket::Read(std::string &data)
   return SUCCESS;
 }
 
-int CLightSocket::Write(const char *data, int size)
+int CTCPClient::Write(const char *data, int size)
 {
   if (m_sock == -1)
     return FAIL;
@@ -136,7 +136,7 @@ int CLightSocket::Write(const char *data, int size)
 
   while (byteswritten < bytestowrite)
   {
-    int returnv = WaitForSocket(true);
+    int returnv = WaitForSocket(LS_RW::WRITE);
 
     if (returnv == FAIL || returnv == TIMEOUT)
       return returnv;
@@ -151,7 +151,7 @@ int CLightSocket::Write(const char *data, int size)
   return SUCCESS;
 }
 
-int CLightSocket::SetNonBlock(bool nonblock)
+int CTCPClient::SetNonBlock(bool nonblock)
 {
   int flags = fcntl(m_sock, F_GETFL);
   if (flags == -1)
@@ -168,7 +168,7 @@ int CLightSocket::SetNonBlock(bool nonblock)
   return SUCCESS;
 }
 
-int CLightSocket::WaitForSocket(bool write)
+int CTCPClient::WaitForSocket(LS_RW direction)
 {
   fd_set rwsock;
   FD_ZERO(&rwsock);
@@ -184,7 +184,7 @@ int CLightSocket::WaitForSocket(bool write)
   }
 
   int returnv;
-  if (write)
+  if (direction == LS_RW::WRITE)
     returnv = select(m_sock + 1, NULL, &rwsock, NULL, tv);
   else
     returnv = select(m_sock + 1, &rwsock, NULL, NULL, tv);

@@ -25,11 +25,6 @@
 #include "interfaces/IAnnouncer.h"
 #include "LightEffectClient.h"
 
-class CSetting;
-class TiXmlNode;
-class CLightEffectServices;
-class CVariant;
-
 class CLightEffectServices
 : public CThread
 , public ISettingCallback
@@ -38,29 +33,30 @@ class CLightEffectServices
 public:
   static CLightEffectServices &GetInstance();
 
-  bool Start();
+  void Start();
   void Stop();
-  
   bool IsActive();
 
-  // ISettingCallbacks
+  // ISetting callbacks
   virtual void OnSettingChanged(const CSetting *setting) override;
-  
+
+  // IAnnouncer callbacks
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)override;
 
 private:
   // private construction, and no assignements; use the provided singleton methods
   CLightEffectServices();
   CLightEffectServices(const CLightEffectServices&);
+  virtual ~CLightEffectServices();
+
+  // IRunnable entry point for thread
+  virtual void  Process() override;
+
   void SetOption(std::string setting);
   void SetAllLightsToStaticRGB();
   void SetBling();
   bool InitConnection();
   void ApplyUserSettings();
-  virtual ~CLightEffectServices();
-
-  // IRunnable entry point for thread
-  virtual void  Process() override;
 
   std::atomic<bool> m_active;
   int               m_width;
@@ -69,4 +65,6 @@ private:
   CLightEffectClient *m_lighteffect;
   bool              m_staticON;
   bool              m_lightsON;
+  CEvent            m_blingEvent;
+
 };
