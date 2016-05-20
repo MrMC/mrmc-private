@@ -26,7 +26,7 @@
 class CTCPClient
 {
   public:
-    enum LS_RW {
+    enum TCP_RW {
       READ    = 0,
       WRITE   = 1,
     };
@@ -40,7 +40,7 @@ class CTCPClient
     CTCPClient();
    ~CTCPClient();
 
-    int         Open(std::string address, int port, int timeout_us);
+    int         Open(const std::string &address, int port, int timeout_us);
     void        Close();
     int         Read(std::string &data);
     int         Write(const char *data, int size);
@@ -52,7 +52,7 @@ class CTCPClient
 
   protected:
     int         SetNonBlock(bool nonblock = true);
-    int         WaitForSocket(LS_RW direction);
+    int         WaitForSocket(TCP_RW direction);
 
     int         m_port;
     std::string m_address;

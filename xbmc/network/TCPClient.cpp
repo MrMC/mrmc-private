@@ -41,7 +41,7 @@ CTCPClient::~CTCPClient()
   Close();
 }
 
-int CTCPClient::Open(std::string address, int port, int timeout_us)
+int CTCPClient::Open(const std::string &address, int port, int timeout_us)
 {
   Close();
 
@@ -73,7 +73,7 @@ int CTCPClient::Open(std::string address, int port, int timeout_us)
       return FAIL;
   }
 
-  int returnv = WaitForSocket(LS_RW::WRITE);
+  int returnv = WaitForSocket(TCP_RW::WRITE);
   if (returnv == FAIL || returnv == TIMEOUT)
     return returnv;
 
@@ -99,7 +99,7 @@ int CTCPClient::Read(std::string &data)
   if (m_sock == -1)
     return FAIL;
 
-  int returnv = WaitForSocket(LS_RW::READ);
+  int returnv = WaitForSocket(TCP_RW::READ);
   if (returnv != SUCCESS)
     return returnv;
 
@@ -135,7 +135,7 @@ int CTCPClient::Write(const char *data, int size)
 
   while (byteswritten < bytestowrite)
   {
-    int returnv = WaitForSocket(LS_RW::WRITE);
+    int returnv = WaitForSocket(TCP_RW::WRITE);
 
     if (returnv == FAIL || returnv == TIMEOUT)
       return returnv;
@@ -167,7 +167,7 @@ int CTCPClient::SetNonBlock(bool nonblock)
   return SUCCESS;
 }
 
-int CTCPClient::WaitForSocket(LS_RW direction)
+int CTCPClient::WaitForSocket(TCP_RW direction)
 {
   fd_set rwsock;
   FD_ZERO(&rwsock);
@@ -183,7 +183,7 @@ int CTCPClient::WaitForSocket(LS_RW direction)
   }
 
   int returnv;
-  if (direction == LS_RW::WRITE)
+  if (direction == TCP_RW::WRITE)
     returnv = select(m_sock + 1, NULL, &rwsock, NULL, tv);
   else
     returnv = select(m_sock + 1, &rwsock, NULL, NULL, tv);
