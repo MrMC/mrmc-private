@@ -50,7 +50,6 @@ int CTCPClient::Open(std::string address, int port, int timeout_us)
   m_timeout_us = timeout_us;
 
   m_sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-
   if (m_sock == -1)
     return FAIL;
 

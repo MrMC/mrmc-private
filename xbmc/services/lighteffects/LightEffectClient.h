@@ -32,31 +32,20 @@ public:
   int  SetPriority(int prio);
   bool SetOption(const char *option);
   void SetScanRange(int width, int height);
-  void SetPixel(int rgb[], int x, int y);
+  void SetPixel(const int rgb[], int x, int y);
   int  SendLights(bool sync);
-  void SendLights(int rgb[], bool sync);
+  void SendLights(const int rgb[], bool sync);
   
 private:
-  class CLight
+  struct CLight
   {
-  public:
-    CLight()
-    {
-      rgbcount = 0;
-      rgb[0] = rgb[1] = rgb[2] = 0.0f;
-      hscan[0] = hscan[1] = -1.0f;
-      vscan[0] = vscan[1] = -1.0f;
-      hscanscaled[0] = hscanscaled[1] = 0;
-      vscanscaled[0] = vscanscaled[1] = 0;
-    }
-
-    std::string name;
-    float rgb[3];
-    int   rgbcount;
-    float hscan[2];
-    float vscan[2];
-    int   hscanscaled[2];
-    int   vscanscaled[2];
+    int   count = 0;
+    float rgb[3] = {0, 0, 0};
+    float hscan[2] = {-1.0f, -1.0f};
+    float vscan[2] = {-1.0f, -1.0f};
+    int   hscanscaled[2] = {0, 0};
+    int   vscanscaled[2] = {0, 0};
+    std::string name = "";
   };
 
   std::string  ReadReply();
@@ -64,13 +53,9 @@ private:
   bool         ParseWord(std::string &message, std::string wordtocmp);
   bool         GetWord(std::string &data, std::string &word);
   void         ConvertLocale(std::string &strfloat);
+  void         AddPixelToLight(CLight &light, const int rgb[]);
   void         GetRGBFromLight(CLight &light, float rgb[]);
-  void         AddPixelToLight(CLight &light, int rgb[]);
 
-  std::string  m_ip;
-  int          m_port;
-  std::string  m_error;
-  int          m_timeout;
   CTCPClient   m_socket;
 
   float        m_speed;

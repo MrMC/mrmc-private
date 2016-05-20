@@ -34,20 +34,17 @@ static inline float ClampValue(float value, float min, float max)
 }
 
 CLightEffectClient::CLightEffectClient()
+: m_speed(100.0f)
+, m_threshold(0)
+, m_interpolation(false)
+, m_value(1.0f)
+, m_saturation(1.0f)
 {
-  m_speed = 100.0f;
-  m_threshold = 0;
-  m_interpolation = false;
-  m_value = 1.0f;
-  m_saturation = 1.0f;
 }
 
 bool CLightEffectClient::Connect(const char *ip, int port, int timeout)
 {
-  m_ip = ip;
-  m_port = port;
-  m_timeout = timeout;
-  if (m_socket.Open(m_ip, m_port, m_timeout) != CTCPClient::SUCCESS)
+  if (m_socket.Open(ip, port, timeout) != CTCPClient::SUCCESS)
     return false;
 
   const char hello[] = "hello\n";
@@ -149,18 +146,21 @@ bool CLightEffectClient::SetOption(const char *option)
 
 void CLightEffectClient::SetScanRange(int width, int height)
 {
+  float fwidth = (float)(width  - 1);
+  float fheight = (float)(height  - 1);
+  
   for (size_t i = 0; i < m_lights.size(); ++i)
   {
     // m_hscan, m_vscan come ParseLights when we
     // connect to a device. They are paired for each light.
-    m_lights[i].hscanscaled[0] = lround(m_lights[i].hscan[0] / 100.0 * ((float)width  - 1));
-    m_lights[i].hscanscaled[1] = lround(m_lights[i].hscan[1] / 100.0 * ((float)width  - 1));
-    m_lights[i].vscanscaled[0] = lround(m_lights[i].vscan[0] / 100.0 * ((float)height - 1));
-    m_lights[i].vscanscaled[1] = lround(m_lights[i].vscan[1] / 100.0 * ((float)height - 1));
+    m_lights[i].hscanscaled[0] = lround(m_lights[i].hscan[0] / 100.0f * fwidth);
+    m_lights[i].hscanscaled[1] = lround(m_lights[i].hscan[1] / 100.0f * fwidth);
+    m_lights[i].vscanscaled[0] = lround(m_lights[i].vscan[0] / 100.0f * fheight);
+    m_lights[i].vscanscaled[1] = lround(m_lights[i].vscan[1] / 100.0f * fheight);
   }
 }
 
-void CLightEffectClient::SetPixel(int rgb[], int x, int y)
+void CLightEffectClient::SetPixel(const int rgb[], int x, int y)
 {
   for (size_t i = 0; i < m_lights.size(); ++i)
   {
@@ -194,7 +194,7 @@ int CLightEffectClient::SendLights(bool sync)
   return 1;
 }
 
-void CLightEffectClient::SendLights(int rgb[], bool sync)
+void CLightEffectClient::SendLights(const int rgb[], bool sync)
 {
   for (size_t i = 0; i < m_lights.size(); ++i)
     AddPixelToLight(m_lights[i], rgb);
@@ -291,10 +291,9 @@ bool CLightEffectClient::GetWord(std::string &data, std::string &word)
 
 void CLightEffectClient::ConvertLocale(std::string &strfloat)
 {
-  static struct lconv* locale = localeconv();
+  static struct lconv *locale = localeconv();
 
   size_t pos = strfloat.find_first_of(",.");
-
   while (pos != std::string::npos)
   {
     strfloat.replace(pos, 1, 1, *locale->decimal_point);
@@ -307,10 +306,26 @@ void CLightEffectClient::ConvertLocale(std::string &strfloat)
   }
 }
 
+void CLightEffectClient::AddPixelToLight(CLight &light, const int rgb[])
+{
+  // anything below the threshold retains
+  // the default value of zero (for black)
+  if (rgb[0] >= m_threshold ||
+      rgb[1] >= m_threshold ||
+      rgb[2] >= m_threshold)
+  {
+    // m_rgb is sum of all pixels as defined by SetScanRange.
+    light.rgb[0] += ClampValue(rgb[0], 0, 255);
+    light.rgb[1] += ClampValue(rgb[1], 0, 255);
+    light.rgb[2] += ClampValue(rgb[2], 0, 255);
+  }
+  light.count++;
+}
+
 void CLightEffectClient::GetRGBFromLight(CLight &light, float rgb[])
 {
   // SetPixel/AddPixelToLight never called, quick exit
-  if (light.rgbcount == 0)
+  if (light.count == 0)
   {
     for (int i = 0; i < 3; ++i)
     {
@@ -321,13 +336,13 @@ void CLightEffectClient::GetRGBFromLight(CLight &light, float rgb[])
   }
 
   // 0 to 255 rgb convert to 0.0 to 1.0 rgb
-  // this also clears the internal light rgb to black.
+  // this also clears the internal light rgb value to black.
   for (int i = 0; i < 3; ++i)
   {
-    rgb[i] = ClampValue(light.rgb[i] / (float)light.rgbcount / 255.0f, 0.0f, 1.0f);
+    rgb[i] = ClampValue(light.rgb[i] / (float)light.count / 255.0f, 0.0f, 1.0f);
     light.rgb[i] = 0.0f;
   }
-  light.rgbcount = 0;
+  light.count = 0;
 
   // apply value/saturation if different from default
   if (m_value != 1.0 || m_saturation != 1.0)
@@ -413,20 +428,4 @@ void CLightEffectClient::GetRGBFromLight(CLight &light, float rgb[])
     for (int i = 0; i < 3; ++i)
       rgb[i] = ClampValue(rgb[i], 0.0f, 1.0f);
   }
-}
-
-void CLightEffectClient::AddPixelToLight(CLight &light, int rgb[])
-{
-  // anything below the threshold retains
-  // the default value of zero (for black)
-  if (rgb[0] >= m_threshold ||
-      rgb[1] >= m_threshold ||
-      rgb[2] >= m_threshold)
-  {
-    // m_rgb is sum of all pixels as defined by SetScanRange.
-    light.rgb[0] += ClampValue(rgb[0], 0, 255);
-    light.rgb[1] += ClampValue(rgb[1], 0, 255);
-    light.rgb[2] += ClampValue(rgb[2], 0, 255);
-  }
-  light.rgbcount++;
 }
