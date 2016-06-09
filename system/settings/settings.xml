@@ -2136,6 +2136,12 @@
           <default>MrMC</default>
           <control type="edit" format="string" />
         </setting>
+        <setting id="services.uuid" type="string" label="" help="">
+          <level>0</level>
+          <default>replaceme</default>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
       </group>
     </category>
     <category id="upnp" label="20187" help="36322">
@@ -2515,6 +2521,47 @@
         </setting> 
       </group>	
     </category>
+    <category id="plex" label="1236" help="1237">
+      <group id="1">
+        <setting id="plex.signin" type="string" label="1238" help="1239">
+          <level>0</level>
+          <default>fillme</default>
+          <control type="button" format="action" delayed="true"/>
+        </setting>
+        <setting id="plex.gdmserver" type="boolean" label="1242" help="1243">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="plex.myplexusername" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="plex.myplexpassword" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="plex.myplexauthtoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+      </group>
+    </category>    
     <category id="lighteffects" label="857" help="858">
       <group id="1">
         <setting id="services.lighteffects" type="boolean" label="853" help="854">

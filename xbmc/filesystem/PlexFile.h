@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2015 Team MrMC
+ *      Copyright (C) 2016 Team MrMC
  *      https://github.com/MrMC
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,22 +19,22 @@
  *
  */
 
-#include "FileItem.h"
-#include "threads/CriticalSection.h"
+#include "filesystem/CurlFile.h"
 
-class CTVOSTopShelf
+namespace XFILE
 {
- public:
-  CTVOSTopShelf();
-  ~CTVOSTopShelf();
-  static CTVOSTopShelf &GetInstance();
-  void               RunTopShelf();
-  void               SetTopShelfItems(CFileItemList& movies, CFileItemList& tv);
-  void               HandleTopShelfUrl(const std::string& url, const bool run);
-  
- private:
-  static std::string m_url;
-  static bool        m_handleUrl;
-  CFileItemList*               m_RecentlyAddedTV;
-  CFileItemList*               m_RecentlyAddedMovies;
-};
+  class CPlexFile : public CCurlFile
+  {
+  public:
+    CPlexFile();
+    virtual ~CPlexFile();
+    virtual bool Open(const CURL& url);
+    virtual bool Exists(const CURL& url);
+
+    static bool TranslatePath(const std::string &path, std::string &translatedPath);
+    static bool TranslatePath(const CURL &url, std::string &translatedPath);
+
+  protected:
+    virtual std::string TranslatePath(const CURL &url);
+  };
+}
