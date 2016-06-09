@@ -416,6 +416,9 @@ public:
   static const std::string SETTING_SERVICES_LIGHTEFFECTSSTATICB;
   static const std::string SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER;
   
+  // plex services
+  static const std::string SETTING_SERVICES_PLEXENABLE;
+
   /*!
    \brief Creates a new settings wrapper around a new settings manager.
 

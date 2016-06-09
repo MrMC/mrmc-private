@@ -90,6 +90,7 @@
 #include "view/ViewStateSettings.h"
 #include "input/InputManager.h"
 #include "services/lighteffects/LightEffectServices.h"
+#include "services/plex/PlexServices.h"
 
 #define SETTINGS_XML_FOLDER "special://xbmc/system/settings/"
 #define SETTINGS_XML_ROOT   "settings"
@@ -466,6 +467,8 @@ const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICG = "services.li
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB = "services.lighteffectsstaticb";
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER = "services.lighteffectsstaticscreensaver";
 
+// plex services
+const std::string CSettings::SETTING_SERVICES_PLEXENABLE = "services.plex";
 
 CSettings::CSettings()
   : m_initialized(false)
@@ -1328,6 +1331,9 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER);
   m_settingsManager->RegisterCallback(&CLightEffectServices::GetInstance(), settingSet);
   
+  settingSet.clear();
+  settingSet.insert(CSettings::SETTING_SERVICES_PLEXENABLE);
+  m_settingsManager->RegisterCallback(&CPlexServices::GetInstance(), settingSet);
 }
 
 bool CSettings::Reset()
