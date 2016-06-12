@@ -30,12 +30,17 @@
 #include "utils/StringUtils.h"
 #include "guilib/LocalizeStrings.h"
 
+#include "PlexClient.h"
 
 using namespace ANNOUNCEMENT;
 
 CPlexServices::CPlexServices()
 : CThread("PlexServices")
 {
+  // my local movie URL
+  std::string url = "http://192.168.1.200:32400/library/sections/1/all";
+  CPlexClient::GetInstance().GetLocalMovies(url);
+  
 }
 
 CPlexServices::~CPlexServices()

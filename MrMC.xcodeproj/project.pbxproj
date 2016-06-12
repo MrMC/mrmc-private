@@ -136,6 +136,9 @@
 		18B7C97C1294380A009E7A26 /* GUIWindowAddonBrowser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C97A12943809009E7A26 /* GUIWindowAddonBrowser.cpp */; };
 		18B7C9831294385F009E7A26 /* XMLUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18B7C9811294385F009E7A26 /* XMLUtils.cpp */; };
 		18C1D22D13033F6A00CFFE59 /* GLUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C1D22B13033F6A00CFFE59 /* GLUtils.cpp */; };
+		18D18CE81D0DC14400BBAB05 /* PlexClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexClient.cpp */; };
+		18D18CE91D0DC14400BBAB05 /* PlexClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexClient.cpp */; };
+		18D18CEA1D0DC14400BBAB05 /* PlexClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexClient.cpp */; };
 		18ECC96213CF178D00A9ED6C /* StreamUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18ECC96013CF178D00A9ED6C /* StreamUtils.cpp */; };
 		18FD1CA91BC8E62600027005 /* PodnapisiSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */; };
 		18FD1CAA1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */; };
@@ -3409,6 +3412,8 @@
 		18B7C9E7129447B9009E7A26 /* MathUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MathUtils.h; sourceTree = "<group>"; };
 		18C1D22B13033F6A00CFFE59 /* GLUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLUtils.cpp; sourceTree = "<group>"; };
 		18C1D22C13033F6A00CFFE59 /* GLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLUtils.h; sourceTree = "<group>"; };
+		18D18CE61D0DC14400BBAB05 /* PlexClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlexClient.cpp; sourceTree = "<group>"; };
+		18D18CE71D0DC14400BBAB05 /* PlexClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlexClient.h; sourceTree = "<group>"; };
 		18ECC96013CF178D00A9ED6C /* StreamUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamUtils.cpp; sourceTree = "<group>"; };
 		18ECC96113CF178D00A9ED6C /* StreamUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamUtils.h; sourceTree = "<group>"; };
 		18FD1CA31BC7DC2900027005 /* SubtitleSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleSearch.h; sourceTree = "<group>"; };
@@ -8892,6 +8897,8 @@
 		F55BD2FF1D0A14ED0072FE3A /* plex */ = {
 			isa = PBXGroup;
 			children = (
+				18D18CE61D0DC14400BBAB05 /* PlexClient.cpp */,
+				18D18CE71D0DC14400BBAB05 /* PlexClient.h */,
 				F55BD3001D0A14ED0072FE3A /* PlexServices.cpp */,
 				F55BD3011D0A14ED0072FE3A /* PlexServices.h */,
 			);
@@ -10421,6 +10428,7 @@
 				18B7C7F41294222E009E7A26 /* Texture.cpp in Sources */,
 				18B7C7F51294222E009E7A26 /* TextureBundle.cpp in Sources */,
 				18B7C7F61294222E009E7A26 /* TextureBundleXBT.cpp in Sources */,
+				18D18CE81D0DC14400BBAB05 /* PlexClient.cpp in Sources */,
 				18B7C7F71294222E009E7A26 /* TextureBundleXPR.cpp in Sources */,
 				F590457D1BA372A600DB589A /* OSXGLWindow.mm in Sources */,
 				18B7C7F91294222E009E7A26 /* TextureGL.cpp in Sources */,
@@ -11573,6 +11581,7 @@
 				E4991422174E603C00741B6D /* MediaSourceSettings.cpp in Sources */,
 				E4991424174E603C00741B6D /* SettingAddon.cpp in Sources */,
 				E4991427174E603C00741B6D /* SettingControl.cpp in Sources */,
+				18D18CE91D0DC14400BBAB05 /* PlexClient.cpp in Sources */,
 				F5B723D81C7C9F76006432AE /* AudioEncoder.cpp in Sources */,
 				E4991429174E603C00741B6D /* SettingPath.cpp in Sources */,
 				E499142A174E603C00741B6D /* Settings.cpp in Sources */,
@@ -12295,6 +12304,7 @@
 				F5D13FF31BAF0B6D0075A95C /* GUIDialog.cpp in Sources */,
 				F5D13FF41BAF0B6D0075A95C /* GUIEditControl.cpp in Sources */,
 				F5D13FF51BAF0B6D0075A95C /* GUIFadeLabelControl.cpp in Sources */,
+				18D18CEA1D0DC14400BBAB05 /* PlexClient.cpp in Sources */,
 				F5D13FF61BAF0B6D0075A95C /* GUIFixedListContainer.cpp in Sources */,
 				F5D13FF71BAF0B6D0075A95C /* GUIFont.cpp in Sources */,
 				F5D142B71BAF31FB0075A95C /* MainKeyboard.mm in Sources */,
