@@ -29,6 +29,9 @@ public:
   ~CPlexClient();
   static CPlexClient &GetInstance();
   void GetLocalMovies(CFileItemList &items);
+  void SetWatched(std::string id);
+  void SetUnWatched(std::string id);
+  void SetOffset(CFileItem item);
 
 
 private:

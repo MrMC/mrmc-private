@@ -68,6 +68,8 @@
 #include "utils/URIUtils.h"
 #include "utils/Variant.h"
 #include "video/VideoLibraryQueue.h"
+#include "video/VideoInfoTag.h"
+#include "services/plex/PlexClient.h"
 
 #define CONTROL_BTNVIEWASICONS       2
 #define CONTROL_BTNSORTBY            3
@@ -1590,6 +1592,16 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
   case CONTEXT_BUTTON_MARK_UNWATCHED:
     {
       CFileItemPtr item = m_vecItems->Get(itemNumber);
+      if (item->IsPlex())
+      {
+        if (button == CONTEXT_BUTTON_MARK_WATCHED)
+          CPlexClient::GetInstance().SetWatched(item->GetVideoInfoTag()->m_strPlexId);
+        else
+          CPlexClient::GetInstance().SetUnWatched(item->GetVideoInfoTag()->m_strPlexId);
+        item->GetVideoInfoTag()->m_playCount = (button == CONTEXT_BUTTON_MARK_WATCHED);
+        item->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_playCount > 0);
+        return true;
+      }
       m_viewControl.SetSelectedItem(m_viewControl.GetSelectedItem() + 1);
       CVideoLibraryQueue::GetInstance().MarkAsWatched(item, (button == CONTEXT_BUTTON_MARK_WATCHED));
       return true;

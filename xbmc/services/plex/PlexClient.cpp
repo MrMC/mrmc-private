@@ -20,6 +20,7 @@
 
 #include "PlexClient.h"
 
+#include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
@@ -45,6 +46,33 @@ CPlexClient& CPlexClient::GetInstance()
 {
   static CPlexClient sPlexClient;
   return sPlexClient;
+}
+
+void CPlexClient::SetWatched(std::string id)
+{
+  // http://localhost:32400/:/scrobble?identifier=com.plexapp.plugins.library&amp;key=
+  
+  std::string url = "http://192.168.1.200:32400";
+  std::string scrobbleUrl = StringUtils::Format("%s/:/scrobble?identifier=com.plexapp.plugins.library&key=%s", url.c_str(), id.c_str());
+  XFILE::CCurlFile http;
+  std::string response;
+  http.Get(scrobbleUrl, response);
+}
+
+void CPlexClient::SetUnWatched(std::string id)
+{
+  //http://localhost:32400/:/unscrobble?identifier=com.plexapp.plugins.library&amp;key=
+  std::string url = "http://192.168.1.200:32400";
+    std::string unscrobbleUrl = StringUtils::Format("%s/:/unscrobble?identifier=com.plexapp.plugins.library&key=%s", url.c_str(), id.c_str());
+  XFILE::CCurlFile http;
+  std::string response;
+  http.Get(unscrobbleUrl, response);
+}
+
+void CPlexClient::SetOffset(CFileItem items)
+{
+  //192.168.1.200:32400/:/progress?key=418&identifier=com.plexapp.plugins.library&time=7765&state=stopped
+  //  http://192.168.1.200:32400/:/timeline?ratingKey=65&key=/library/metadata/65&state=stopped&playQueueItemID=3&time=3010&duration=8050153
 }
 
 void CPlexClient::GetLocalMovies(CFileItemList &items)
@@ -106,10 +134,9 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
        
       */
       CFileItemPtr plexItem(new CFileItem());
-      const char* ratingKey = ((TiXmlElement*) videoNode)->Attribute("ratingKey");
       const char* year = ((TiXmlElement*) videoNode)->Attribute("year");
   
-      plexItem->GetVideoInfoTag()->m_iDbId = atoi(ratingKey);
+      plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(videoNode, "ratingKey");
       plexItem->GetVideoInfoTag()->m_type = MediaTypePlexMovie;
       plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
       plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
@@ -119,6 +146,13 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
       plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(videoNode, "year").c_str());
       plexItem->GetVideoInfoTag()->m_fRating = atof(XMLUtils::GetAttribute(videoNode, "rating").c_str());
       plexItem->GetVideoInfoTag()->m_strMPAARating = XMLUtils::GetAttribute(videoNode, "contentRating");
+      
+      // lastViewedAt means that it was watched, if so we set m_playCount to 1 and set overlay
+      if (((TiXmlElement*) videoNode)->Attribute("lastViewedAt"))
+      {
+        plexItem->GetVideoInfoTag()->m_playCount = 1;
+      }
+      plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
       
       // looks like plex is sending only one studio?
       std::vector<std::string> studios;

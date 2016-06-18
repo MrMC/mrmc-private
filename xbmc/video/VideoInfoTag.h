@@ -172,6 +172,7 @@ public:
   int m_iSeason;
   int m_iEpisode;
   std::string m_strUniqueId;
+  std::string m_strPlexId;
   int m_iDbId;
   int m_iFileId;
   int m_iSpecialSortSeason;
