@@ -222,6 +222,23 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
         */
         const char* videoResolution = ((TiXmlElement*) mediaNode)->Attribute("videoResolution");
       
+        CStreamDetails details;
+        CStreamDetailVideo *p = new CStreamDetailVideo();
+        p->m_strCodec = XMLUtils::GetAttribute(mediaNode, "videoCodec");
+        p->m_fAspect = atof(XMLUtils::GetAttribute(mediaNode, "aspectRatio").c_str());
+        p->m_iWidth = atoi(XMLUtils::GetAttribute(mediaNode, "width").c_str());
+        p->m_iHeight = atoi(XMLUtils::GetAttribute(mediaNode, "height").c_str());
+        p->m_iDuration = atoi(XMLUtils::GetAttribute(mediaNode, "videoCodec").c_str());
+        details.AddStream(p);
+        
+        CStreamDetailAudio *a = new CStreamDetailAudio();
+        a->m_strCodec = XMLUtils::GetAttribute(mediaNode, "audioCodec");
+        a->m_iChannels = atoi(XMLUtils::GetAttribute(mediaNode, "audioChannels").c_str());
+        a->m_strLanguage = XMLUtils::GetAttribute(mediaNode, "audioChannels");
+        details.AddStream(a);
+        
+        plexItem->GetVideoInfoTag()->m_streamDetails = details;
+        
         /// plex has duration in milliseconds
         plexItem->GetVideoInfoTag()->m_duration = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
         
