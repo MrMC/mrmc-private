@@ -52,6 +52,8 @@
 #include "pvr/recordings/PVRRecording.h"
 #include "ContextMenuManager.h"
 
+#include "services/plex/PlexClient.h"
+
 #include <utility>
 
 using namespace XFILE;
@@ -561,6 +563,20 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
       newTag->SetSpecialSort(SortSpecialOnTop);
       items.Add(newTag);
     }
+    
+    // if plex is enabled, list movies or tvshows
+    if (1)
+    {
+      if (StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/titles/"))
+      {
+        // list all plex movies
+        CPlexClient::GetInstance().GetLocalMovies(items);
+      }
+      else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/titles/"))
+      {
+        // list all plex tvShows
+      }
+    }
   }
   return bResult;
 }
@@ -980,7 +996,7 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
         buttons.Add(CONTEXT_BUTTON_INFO, item->m_bIsFolder ? 20351 : 20352);
       else if (info && info->Content() == CONTENT_MUSICVIDEOS)
         buttons.Add(CONTEXT_BUTTON_INFO,20393);
-      else if (info && info->Content() == CONTENT_MOVIES)
+      else if ((info && info->Content() == CONTENT_MOVIES) || item->GetVideoContentType() == PLEX_CONTENT_MOVIE)
         buttons.Add(CONTEXT_BUTTON_INFO, 13346);
 
       // can we update the database?

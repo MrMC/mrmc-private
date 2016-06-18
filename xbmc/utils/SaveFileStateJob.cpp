@@ -38,6 +38,13 @@
 
 bool CSaveFileStateJob::DoWork()
 {
+  // if its plex item, skip database update for it
+  if (m_item.IsPlex())
+  {
+   //    do some plex shit but do not write to our DB
+    return true;
+  }
+  
   std::string progressTrackingFile = m_item.GetPath();
 
   if (m_item.HasVideoInfoTag() && StringUtils::StartsWith(m_item.GetVideoInfoTag()->m_strFileNameAndPath, "removable://"))

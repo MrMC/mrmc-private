@@ -20,6 +20,7 @@
  */
 
 #include <string>
+#include "FileItem.h"
 
 class CPlexClient
 {
@@ -27,7 +28,7 @@ public:
   CPlexClient();
   ~CPlexClient();
   static CPlexClient &GetInstance();
-  void GetLocalMovies(std::string url);
+  void GetLocalMovies(CFileItemList &items);
 
 
 private:

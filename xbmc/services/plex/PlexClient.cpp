@@ -28,6 +28,8 @@
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
 
+#include "video/VideoInfoTag.h"
+
 
 CPlexClient::CPlexClient()
 {
@@ -45,7 +47,7 @@ CPlexClient& CPlexClient::GetInstance()
   return sPlexClient;
 }
 
-void CPlexClient::GetLocalMovies(std::string url)
+void CPlexClient::GetLocalMovies(CFileItemList &items)
 {
  /*
   <Video ratingKey="65" key="/library/metadata/65" studio="Plan B Entertainment" type="movie" title="12 Years a Slave" contentRating="R" summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life." rating="7.8" viewOffset="158000" lastViewedAt="1465154711" year="2013" tagline="The extraordinary true story of Solomon Northup" thumb="/library/metadata/65/thumb/1465152014" art="/library/metadata/65/art/1465152014" duration="8050153" originallyAvailableAt="2013-10-30" addedAt="1392893688" updatedAt="1465152014" chapterSource="">
@@ -63,9 +65,12 @@ void CPlexClient::GetLocalMovies(std::string url)
   <Role tag="Benedict Cumberbatch" />
   </Video>
   */
+  
+  std::string url = "http://192.168.1.200:32400";
+  std::string movieXmlPath = url + "/library/sections/1/all";
   XFILE::CCurlFile http;
   std::string strXML;
-  http.Get(url, strXML);
+  http.Get(movieXmlPath, strXML);
 
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
@@ -82,7 +87,8 @@ void CPlexClient::GetLocalMovies(std::string url)
       ratingKey="65"
       key="/library/metadata/65"
       studio="Plan B Entertainment"
-      type="movie" title="12 Years a Slave"
+      type="movie"
+      title="12 Years a Slave"
       contentRating="R"
       summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life."
       rating="7.8"
@@ -99,8 +105,97 @@ void CPlexClient::GetLocalMovies(std::string url)
       chapterSource=""
        
       */
+      CFileItemPtr plexItem(new CFileItem());
       const char* ratingKey = ((TiXmlElement*) videoNode)->Attribute("ratingKey");
-
+      const char* year = ((TiXmlElement*) videoNode)->Attribute("year");
+  
+      plexItem->GetVideoInfoTag()->m_iDbId = atoi(ratingKey);
+      plexItem->GetVideoInfoTag()->m_type = MediaTypePlexMovie;
+      plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
+      plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
+      plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(videoNode, "summary"));
+      plexItem->SetArt("fanart", url + XMLUtils::GetAttribute(videoNode, "art"));
+      plexItem->SetArt("thumb", url + XMLUtils::GetAttribute(videoNode, "thumb"));
+      plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(videoNode, "year").c_str());
+      plexItem->GetVideoInfoTag()->m_fRating = atof(XMLUtils::GetAttribute(videoNode, "rating").c_str());
+      plexItem->GetVideoInfoTag()->m_strMPAARating = XMLUtils::GetAttribute(videoNode, "contentRating");
+      
+      // looks like plex is sending only one studio?
+      std::vector<std::string> studios;
+      studios.push_back(XMLUtils::GetAttribute(videoNode, "studio"));
+      plexItem->GetVideoInfoTag()->m_studio = studios;
+    
+      
+      // get all genres
+      std::vector<std::string> genres;
+      const TiXmlElement* genreNode = videoNode->FirstChildElement("Genre");
+      if (genreNode)
+      {
+        while (genreNode)
+        {
+          std::string genre = XMLUtils::GetAttribute(genreNode, "tag");
+          genres.push_back(genre);
+          genreNode = genreNode->NextSiblingElement("Genre");
+        }
+      }
+      plexItem->GetVideoInfoTag()->SetGenre(genres);
+      
+      // get all writers
+      std::vector<std::string> writers;
+      const TiXmlElement* writerNode = videoNode->FirstChildElement("Writer");
+      if (writerNode)
+      {
+        while (writerNode)
+        {
+          std::string writer = XMLUtils::GetAttribute(writerNode, "tag");
+          writers.push_back(writer);
+          writerNode = writerNode->NextSiblingElement("Writer");
+        }
+      }
+      plexItem->GetVideoInfoTag()->SetWritingCredits(writers);
+      
+      // get all directors
+      std::vector<std::string> directors;
+      const TiXmlElement* directorNode = videoNode->FirstChildElement("Director");
+      if (directorNode)
+      {
+        while (directorNode)
+        {
+          std::string director = XMLUtils::GetAttribute(directorNode, "tag");
+          directors.push_back(director);
+          directorNode = directorNode->NextSiblingElement("Director");
+        }
+      }
+      plexItem->GetVideoInfoTag()->SetDirector(directors);
+     
+      // get all countries
+      std::vector<std::string> countries;
+      const TiXmlElement* countryNode = videoNode->FirstChildElement("Country");
+      if (countryNode)
+      {
+        while (countryNode)
+        {
+          std::string country = XMLUtils::GetAttribute(countryNode, "tag");
+          countries.push_back(country);
+          countryNode = countryNode->NextSiblingElement("Country");
+        }
+      }
+      plexItem->GetVideoInfoTag()->SetCountry(countries);
+   
+      // get all roles
+      std::vector< SActorInfo > roles;
+      const TiXmlElement* roleNode = videoNode->FirstChildElement("Role");
+      if (roleNode)
+      {
+        while (roleNode)
+        {
+          SActorInfo role;
+          role.strName = XMLUtils::GetAttribute(roleNode, "tag");
+          roles.push_back(role);
+          roleNode = roleNode->NextSiblingElement("Role");
+        }
+      }
+      plexItem->GetVideoInfoTag()->m_cast = roles;
       
       const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
       if (mediaNode)
@@ -127,6 +222,14 @@ void CPlexClient::GetLocalMovies(std::string url)
         */
         const char* videoResolution = ((TiXmlElement*) mediaNode)->Attribute("videoResolution");
       
+        /// plex has duration in milliseconds
+        plexItem->GetVideoInfoTag()->m_duration = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
+        
+        CBookmark m_bookmark;
+        m_bookmark.timeInSeconds = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
+        m_bookmark.totalTimeInSeconds = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
+        plexItem->GetVideoInfoTag()->m_resumePoint = m_bookmark;
+        
         const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
         if (partNode)
         {
@@ -147,12 +250,14 @@ void CPlexClient::GetLocalMovies(std::string url)
            videoProfile="high"
            
           */
-          
-          const char* file = ((TiXmlElement*) partNode)->Attribute("file");
+          std::string path = url + ((TiXmlElement*) partNode)->Attribute("key");
+          plexItem->SetPath(path);
+//          plexItem->GetVideoInfoTag()->SetFile(path);
         }
       }
 
       videoNode = videoNode->NextSiblingElement("Video");
+      items.Add(plexItem);
     }
   }
 }

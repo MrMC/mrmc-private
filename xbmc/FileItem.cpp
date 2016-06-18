@@ -1076,6 +1076,11 @@ bool CFileItem::IsLiveTV() const
   return URIUtils::IsLiveTV(m_strPath);
 }
 
+bool CFileItem::IsPlex() const
+{
+  return GetVideoContentType() == PLEX_CONTENT_MOVIE || GetVideoContentType() == PLEX_CONTENT_EPISODES;
+}
+
 bool CFileItem::IsHD() const
 {
   return URIUtils::IsHD(m_strPath);
@@ -3289,7 +3294,10 @@ int CFileItem::GetVideoContentType() const
     return VIDEODB_CONTENT_EPISODES;
   if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypeMusicVideo)
     return VIDEODB_CONTENT_MUSICVIDEOS;
-
+  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypePlexMovie)
+    return PLEX_CONTENT_MOVIE;
+  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypePlexEpisode)
+    return PLEX_CONTENT_EPISODES;
   CVideoDatabaseDirectory dir;
   VIDEODATABASEDIRECTORY::CQueryParams params;
   dir.GetQueryParams(m_strPath, params);

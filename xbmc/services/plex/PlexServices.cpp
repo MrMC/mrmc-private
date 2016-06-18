@@ -38,8 +38,8 @@ CPlexServices::CPlexServices()
 : CThread("PlexServices")
 {
   // my local movie URL
-  std::string url = "http://192.168.1.200:32400/library/sections/1/all";
-  CPlexClient::GetInstance().GetLocalMovies(url);
+  
+//  CPlexClient::GetInstance().GetLocalMovies(url);
   
 }
 
