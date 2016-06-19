@@ -35,6 +35,7 @@
 #include "GUIUserMessages.h"
 #include "music/MusicDatabase.h"
 #include "cores/AudioEngine/DSPAddons/ActiveAEDSP.h"
+#include "services/plex/PlexClient.h"
 
 bool CSaveFileStateJob::DoWork()
 {
@@ -42,6 +43,7 @@ bool CSaveFileStateJob::DoWork()
   if (m_item.IsPlex())
   {
    //    do some plex shit but do not write to our DB
+    CPlexClient::GetInstance().SetOffset(m_item, m_bookmark.timeInSeconds);
     return true;
   }
   
