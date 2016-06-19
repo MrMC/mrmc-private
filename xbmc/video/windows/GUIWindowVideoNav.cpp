@@ -565,7 +565,7 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
     }
     
     // if plex is enabled, list movies or tvshows
-    if (1)
+    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
     {
       if (StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/titles/"))
       {
