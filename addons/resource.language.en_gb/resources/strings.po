@@ -4260,6 +4260,52 @@ msgctxt "#1235"
 msgid "Programs & pictures & video"
 msgstr ""
 
+
+#: system/settings/settings.xml
+msgctxt "#1236"
+msgid "Plex"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1237"
+msgid "Enable Plex client"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1238"
+msgid "Myplex"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1239"
+msgid "Enable Myplex server connection"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1240"
+msgid "Local"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1241"
+msgid "Enable Local server connection"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1242"
+msgid "Auto Discovery"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1243"
+msgid "Enable Auto Discovery"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1244"
+msgid "Enable Plex server discovery and connection"
+msgstr ""
+
 #empty strings from id 1236 to 1258
 
 #: system/settings/settings.xml

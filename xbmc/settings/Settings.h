@@ -418,6 +418,9 @@ public:
   
   // plex services
   static const std::string SETTING_SERVICES_PLEXENABLE;
+  static const std::string SETTING_SERVICES_PLEXMYPLEX;
+  static const std::string SETTING_SERVICES_PLEXLOCAL;
+  static const std::string SETTING_SERVICES_PLEXAUTO;
 
   /*!
    \brief Creates a new settings wrapper around a new settings manager.

@@ -468,7 +468,10 @@ const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB = "services.li
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER = "services.lighteffectsstaticscreensaver";
 
 // plex services
-const std::string CSettings::SETTING_SERVICES_PLEXENABLE = "services.plex";
+const std::string CSettings::SETTING_SERVICES_PLEXENABLE = "plex.enabled";
+const std::string CSettings::SETTING_SERVICES_PLEXMYPLEX = "plex.myplex";
+const std::string CSettings::SETTING_SERVICES_PLEXLOCAL = "plex.local";
+const std::string CSettings::SETTING_SERVICES_PLEXAUTO = "plex.auto";
 
 CSettings::CSettings()
   : m_initialized(false)

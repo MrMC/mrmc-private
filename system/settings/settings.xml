@@ -2515,6 +2515,45 @@
         </setting> 
       </group>	
     </category>
+    <category id="plex" label="1236" help="1244">
+      <group id="1">
+        <setting id="plex.enabled" type="boolean" label="24022" help="1237">
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="plex.myplex" type="boolean" label="1238" help="1239">
+          <dependencies>
+            <dependency type="enable">
+                <condition on="setting" setting="plex.enabled" operator="!is"></condition>
+            </dependency>
+          </dependencies>          
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="plex.local" type="boolean" label="1240" help="1241">
+          <dependencies>
+            <dependency type="enable">
+                <condition on="setting" setting="plex.enabled" operator="!is"></condition>
+            </dependency>
+          </dependencies>          
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+        <setting id="plex.auto" type="boolean" label="1242" help="1243">
+          <dependencies>
+            <dependency type="enable">
+                <condition on="setting" setting="plex.enabled" operator="!is"></condition>
+            </dependency>
+          </dependencies>
+          <level>1</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting> 
+      </group>  
+    </category>    
     <category id="lighteffects" label="857" help="858">
       <group id="1">
         <setting id="services.lighteffects" type="boolean" label="853" help="854">
