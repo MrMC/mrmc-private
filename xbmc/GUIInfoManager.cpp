@@ -1114,6 +1114,7 @@ int CGUIInfoManager::TranslateSingleString(const std::string &strCondition, bool
       if (prop.name == "isscanning") return LIBRARY_IS_SCANNING;
       else if (prop.name == "isscanningvideo") return LIBRARY_IS_SCANNING_VIDEO; // TODO: change to IsScanning(Video)
       else if (prop.name == "isscanningmusic") return LIBRARY_IS_SCANNING_MUSIC;
+      else if (prop.name == "hasplex") return LIBRARY_HASPLEX;
       else if (prop.name == "hascontent" && prop.num_params())
       {
         std::string cat = prop.param(0);
@@ -2462,6 +2463,9 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
   {
     bReturn = g_application.IsMusicScanning();
   }
+  else if (condition == LIBRARY_HASPLEX)
+    bReturn = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE);
+  
   else if (condition == SYSTEM_PLATFORM_LINUX)
 #if defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
     bReturn = true;
