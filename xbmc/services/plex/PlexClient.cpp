@@ -138,7 +138,6 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
        
       */
       CFileItemPtr plexItem(new CFileItem());
-      
       plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(videoNode, "ratingKey");
       plexItem->GetVideoInfoTag()->m_type = MediaTypePlexMovie;
       plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
@@ -312,6 +311,173 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
 
       videoNode = videoNode->NextSiblingElement("Video");
       items.Add(plexItem);
+    }
+  }
+}
+
+void CPlexClient::GetLocalTvshows(CFileItemList &items)
+{
+  /*
+   <Directory
+     ratingKey="2255"
+     key="/library/metadata/2255/children" 
+     studio="The CW" 
+     type="show" 
+     title="The 100" 
+     titleSort="100" 
+     contentRating="TV-14" 
+     summary="Based on the books by Kass Morgan, this show takes place 100 years in the future, when the Earth has been abandoned due to radioactivity. The last surviving humans live on an ark orbiting the planet — but the ark won&apos;t last forever. So the repressive regime picks 100 expendable juvenile delinquents to send down to Earth to see if the planet is still habitable."
+     index="1" 
+     rating="8.0" 
+     year="2014" 
+     thumb="/library/metadata/2255/thumb/1465158605" 
+     art="/library/metadata/2255/art/1465158605" 
+     banner="/library/metadata/2255/banner/1465158605" 
+     theme="/library/metadata/2255/theme/1465158605" 
+     duration="2700000" 
+     originallyAvailableAt="2014-03-19" 
+     leafCount="44"
+     viewedLeafCount="0"
+     childCount="3" 
+     addedAt="1410897813" 
+     updatedAt="1465158605">
+     
+   <Genre tag="Drama" />
+   <Genre tag="Science-Fiction" />
+   <Genre tag="Suspense" />
+   <Role tag="Bob Morley" />
+   <Role tag="Marie Avgeropoulos" />
+   <Role tag="Eliza Taylor" />
+   </Directory>
+   
+   */
+  
+  std::string url = "http://192.168.1.200:32400";
+  std::string tvshowXmlPath = url + "/library/sections/2/all";
+  
+  XFILE::CCurlFile http;
+  std::string strXML;
+  http.Get(tvshowXmlPath, strXML);
+  
+  TiXmlDocument xml;
+  xml.Parse(strXML.c_str());
+  
+  TiXmlElement* rootXmlNode = xml.RootElement();
+  if (rootXmlNode)
+  {
+    const TiXmlElement* directoryNode = rootXmlNode->FirstChildElement("Directory");
+    while (directoryNode)
+    {
+      CFileItemPtr plexItem(new CFileItem());
+      // set m_bIsFolder to true to indicate we wre tvshow list
+      plexItem->m_bIsFolder = true;
+      plexItem->SetPath("plex://tvshow");
+      plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
+      plexItem->GetVideoInfoTag()->m_type = MediaTypePlexEpisode;
+      plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
+      plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(directoryNode, "tagline"));
+      plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(directoryNode, "summary"));
+      plexItem->SetArt("fanart", url + XMLUtils::GetAttribute(directoryNode, "art"));
+      plexItem->SetArt("thumb", url + XMLUtils::GetAttribute(directoryNode, "thumb"));
+      plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(directoryNode, "year").c_str());
+      plexItem->GetVideoInfoTag()->m_fRating = atof(XMLUtils::GetAttribute(directoryNode, "rating").c_str());
+      plexItem->GetVideoInfoTag()->m_strMPAARating = XMLUtils::GetAttribute(directoryNode, "contentRating");
+      
+      time_t addedTime = atoi(XMLUtils::GetAttribute(directoryNode, "addedAt").c_str());
+      CDateTime aTime(addedTime);
+      plexItem->GetVideoInfoTag()->m_dateAdded = aTime;
+      plexItem->GetVideoInfoTag()->m_iSeason = atoi(XMLUtils::GetAttribute(directoryNode, "childCount").c_str());
+      plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(directoryNode, "leafCount").c_str());
+      plexItem->GetVideoInfoTag()->m_playCount = atoi(XMLUtils::GetAttribute(directoryNode, "viewedLeafCount").c_str());
+      
+//      plexItem->m_dateTime = XMLUtils::GetAttribute(directoryNode, "contentRating");
+      plexItem->SetProperty("totalseasons", XMLUtils::GetAttribute(directoryNode, "childCount"));
+      plexItem->SetProperty("totalepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
+      plexItem->SetProperty("numepisodes", plexItem->GetVideoInfoTag()->m_iEpisode); // will be changed later to reflect watchmode setting
+      plexItem->SetProperty("watchedepisodes", plexItem->GetVideoInfoTag()->m_playCount);
+      plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - plexItem->GetVideoInfoTag()->m_playCount);
+      
+      plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
+      
+      // looks like plex is sending only one studio?
+      std::vector<std::string> studios;
+      studios.push_back(XMLUtils::GetAttribute(directoryNode, "studio"));
+      plexItem->GetVideoInfoTag()->m_studio = studios;
+      
+      
+      // get all genres
+      std::vector<std::string> genres;
+      const TiXmlElement* genreNode = directoryNode->FirstChildElement("Genre");
+      if (genreNode)
+      {
+        while (genreNode)
+        {
+          std::string genre = XMLUtils::GetAttribute(genreNode, "tag");
+          genres.push_back(genre);
+          genreNode = genreNode->NextSiblingElement("Genre");
+        }
+      }
+      plexItem->GetVideoInfoTag()->SetGenre(genres);
+      
+      // get all writers
+      std::vector<std::string> writers;
+      const TiXmlElement* writerNode = directoryNode->FirstChildElement("Writer");
+      if (writerNode)
+      {
+        while (writerNode)
+        {
+          std::string writer = XMLUtils::GetAttribute(writerNode, "tag");
+          writers.push_back(writer);
+          writerNode = writerNode->NextSiblingElement("Writer");
+        }
+      }
+      plexItem->GetVideoInfoTag()->SetWritingCredits(writers);
+      
+      // get all directors
+      std::vector<std::string> directors;
+      const TiXmlElement* directorNode = directoryNode->FirstChildElement("Director");
+      if (directorNode)
+      {
+        while (directorNode)
+        {
+          std::string director = XMLUtils::GetAttribute(directorNode, "tag");
+          directors.push_back(director);
+          directorNode = directorNode->NextSiblingElement("Director");
+        }
+      }
+      plexItem->GetVideoInfoTag()->SetDirector(directors);
+      
+      // get all countries
+      std::vector<std::string> countries;
+      const TiXmlElement* countryNode = directoryNode->FirstChildElement("Country");
+      if (countryNode)
+      {
+        while (countryNode)
+        {
+          std::string country = XMLUtils::GetAttribute(countryNode, "tag");
+          countries.push_back(country);
+          countryNode = countryNode->NextSiblingElement("Country");
+        }
+      }
+      plexItem->GetVideoInfoTag()->SetCountry(countries);
+      
+      // get all roles
+      std::vector< SActorInfo > roles;
+      const TiXmlElement* roleNode = directoryNode->FirstChildElement("Role");
+      if (roleNode)
+      {
+        while (roleNode)
+        {
+          SActorInfo role;
+          role.strName = XMLUtils::GetAttribute(roleNode, "tag");
+          roles.push_back(role);
+          roleNode = roleNode->NextSiblingElement("Role");
+        }
+      }
+      plexItem->GetVideoInfoTag()->m_cast = roles;
+      
+      items.Add(plexItem);
+      directoryNode = directoryNode->NextSiblingElement("Directory");
     }
   }
 }

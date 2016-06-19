@@ -136,8 +136,9 @@ typedef enum
   VIDEODB_CONTENT_EPISODES = 4,
   VIDEODB_CONTENT_MOVIE_SETS = 5,
   PLEX_CONTENT_MOVIE = 6,
-  PLEX_CONTENT_TVSHOWS = 7,
-  PLEX_CONTENT_EPISODES = 8
+  PLEX_CONTENT_TVSHOW = 7,
+  PLEX_CONTENT_EPISODES = 8,
+  PLEX_CONTENT_SEASON = 9
 } VIDEODB_CONTENT_TYPE;
 
 typedef enum // this enum MUST match the offset struct further down!! and make sure to keep min and max at -1 and sizeof(offsets)

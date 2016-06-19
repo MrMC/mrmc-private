@@ -574,7 +574,16 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
       }
       else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/titles/"))
       {
-        // list all plex tvShows
+        if (items.GetContent() == "tvshows")
+          // list all plex tvShows
+          CPlexClient::GetInstance().GetLocalTvshows(items);
+      }
+    }
+    else
+    {
+      if (StringUtils::StartsWithNoCase(strDirectory, "plex://tvshow/"))
+      {
+        // list seasons here
       }
     }
   }
@@ -992,7 +1001,7 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
       VIDEO::SScanSettings settings;
       GetScraperForItem(item.get(), info, settings);
 
-      if (info && info->Content() == CONTENT_TVSHOWS)
+      if ((info && info->Content() == CONTENT_TVSHOWS) || item->GetVideoContentType() == PLEX_CONTENT_EPISODES || item->GetVideoContentType() == PLEX_CONTENT_TVSHOW)
         buttons.Add(CONTEXT_BUTTON_INFO, item->m_bIsFolder ? 20351 : 20352);
       else if (info && info->Content() == CONTENT_MUSICVIDEOS)
         buttons.Add(CONTEXT_BUTTON_INFO,20393);
@@ -1038,8 +1047,9 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
         {
           if (g_application.IsVideoScanning())
             buttons.Add(CONTEXT_BUTTON_STOP_SCANNING, 13353);
-
-          buttons.Add(CONTEXT_BUTTON_SCAN, 13349);
+          // no scan for new content on plex lib
+          if (item->GetVideoContentType() != PLEX_CONTENT_TVSHOW)
+            buttons.Add(CONTEXT_BUTTON_SCAN, 13349);
         }
 
         if (node == NODE_TYPE_ACTOR && !dir.IsAllItem(item->GetPath()) && item->m_bIsFolder)
