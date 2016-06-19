@@ -74,7 +74,7 @@ void CPlexClient::SetOffset(CFileItem item, int offsetSeconds)
   // looks like this needs proper server communication using headers, maybe plexTalk.cpp that has all the server communication shit?
   // item.GetVideoInfoTag()->m_strPlexId has ratingKey
   // offsetSeconds is time, time in milliseconds
-  
+  // https://www.reddit.com/r/PleX/comments/476a1x/making_an_android_plex_app_what_can_icant_i_do/?
   //192.168.1.200:32400/:/progress?key=418&identifier=com.plexapp.plugins.library&time=7765&state=stopped
   //  http://192.168.1.200:32400/:/timeline?ratingKey=65&key=/library/metadata/65&state=stopped&playQueueItemID=3&time=3010&duration=8050153
 }
