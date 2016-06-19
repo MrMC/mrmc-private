@@ -138,8 +138,7 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
        
       */
       CFileItemPtr plexItem(new CFileItem());
-      const char* year = ((TiXmlElement*) videoNode)->Attribute("year");
-  
+      
       plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(videoNode, "ratingKey");
       plexItem->GetVideoInfoTag()->m_type = MediaTypePlexMovie;
       plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
