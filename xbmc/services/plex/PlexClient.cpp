@@ -122,6 +122,10 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
     else
       fanart = XMLUtils::GetAttribute(videoNode, "art");
     
+    CDateTime firstAired;
+    firstAired.SetFromDBDate(XMLUtils::GetAttribute(videoNode, "originallyAvailableAt"));
+    plexItem->GetVideoInfoTag()->m_firstAired = firstAired;
+    
     plexItem->SetArt("fanart", m_strUrl + fanart);
     plexItem->SetArt("thumb", m_strUrl + XMLUtils::GetAttribute(videoNode, "thumb"));
     plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(videoNode, "year").c_str());
