@@ -48,6 +48,155 @@ CPlexClient& CPlexClient::GetInstance()
   return sPlexClient;
 }
 
+void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string strDirectory)
+{
+  /*
+  "videodb://tvshows/genres"
+  "videodb://tvshows/titles"
+  "videodb://tvshows/years"
+  "videodb://tvshows/actors"
+  "videodb://tvshows/studios"
+  "videodb://tvshows/tags"
+  
+   <Directory secondary="1" key="collection" title="By Collection" />
+   <Directory secondary="1" key="firstCharacter" title="By First Letter" />
+   <Directory secondary="1" key="genre" title="By Genre" />
+   <Directory secondary="1" key="year" title="By Year" />
+   <Directory secondary="1" key="contentRating" title="By Content Rating" />
+   
+   "videodb://movies/titles"
+   "videodb://movies/years"
+   "videodb://movies/genres"
+   "videodb://movies/actors"
+   "videodb://movies/directors"
+   "videodb://movies/sets"
+   "videodb://movies/countries"
+   "videodb://movies/studios"
+   
+   "videodb://movies/tags"
+   
+   <Directory secondary="1" key="collection" title="By Collection" />
+   <Directory secondary="1" key="genre" title="By Genre" />
+   <Directory secondary="1" key="year" title="By Year" />
+   <Directory secondary="1" key="decade" title="By Decade" />
+   <Directory secondary="1" key="director" title="By Director" />
+   <Directory secondary="1" key="actor" title="By Starring Actor" />
+   <Directory secondary="1" key="country" title="By Country" />
+   <Directory secondary="1" key="contentRating" title="By Content Rating" />
+   <Directory secondary="1" key="rating" title="By Rating" />
+   <Directory secondary="1" key="resolution" title="By Resolution" />
+   <Directory secondary="1" key="firstCharacter" title="By First Letter" />
+   
+   */
+// start MOVIES
+  if (StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/titles/"))
+  {
+    GetLocalMovies(items);
+    items.SetContent("movies");
+    bResult = true;
+  }
+  else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/years/")     ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/genres/")    ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/actors/")    ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/directors/") ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/sets/")      ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/countries/") ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/studios/")
+           )
+  {
+    if (items.GetContent() == "movies")
+    {
+      std::string strLabel = items.GetLabel();
+      if (strLabel.empty())
+      {
+        strLabel = URIUtils::GetFileName(items.GetPath());
+      }
+      std::string strFilter = "?" + m_filter + "=" + m_vFilter[strLabel];
+      GetLocalMovies(items, strFilter);
+      items.SetContent("movies");
+    }
+    else
+    {
+      std::string filter = "year";
+      if (items.GetContent() == "genres")
+        filter = "genre";
+      else if (items.GetContent() == "actors")
+        filter = "actor";
+      else if (items.GetContent() == "actors")
+        filter = "actor";
+      else if (items.GetContent() == "directors")
+        filter = "director";
+      else if (items.GetContent() == "sets")
+        filter = "collection";
+      else if (items.GetContent() == "countries")
+        filter = "country";
+      else if (items.GetContent() == "studios")
+        filter = "studio";
+
+      GetLocalFilter(items, filter ,strDirectory, true );
+      items.SetContent("movies");
+    }
+    bResult = true;
+  }
+// start TVSHOWS
+  else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/titles/"))
+  {
+    if (items.GetContent() == "tvshows")
+    {
+      // list all plex tvShows
+      GetLocalTvshows(items);
+      items.SetContent("tvshows");
+      bResult = true;
+    }
+  }
+  else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/years/")     ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/genres/")    ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/actors/")    ||
+           StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/studios/")
+           )
+  {
+    if (items.GetContent() == "tvshows")
+    {
+      std::string strLabel = items.GetLabel();
+      if (strLabel.empty())
+      {
+        strLabel = URIUtils::GetFileName(items.GetPath());
+      }
+      std::string strFilter = "?" + m_filter + "=" + m_vFilter[strLabel];
+      GetLocalTvshows(items, strFilter);
+      items.SetContent("tvshows");
+    }
+    else if (items.GetContent() != "episodes" && items.GetContent() != "seasons")
+    {
+      std::string filter = "year";
+      if (items.GetContent() == "genres")
+        filter = "genre";
+      else if (items.GetContent() == "actors")
+        filter = "actor";
+      else if (items.GetContent() == "studios")
+        filter = "studio";
+      
+      GetLocalFilter(items, filter, strDirectory , false);
+      items.SetContent("tvshows");
+    }
+    bResult = true;
+  }
+  else if (StringUtils::StartsWithNoCase(strDirectory, "plex://tvshow/"))
+  {
+    // list shows here
+    GetLocalSeasons(items,strDirectory);
+    items.SetContent("seasons");
+    bResult = true;
+  }
+  else if (StringUtils::StartsWithNoCase(strDirectory, "plex://seasons/"))
+  {
+    // list seasons here
+    GetLocalEpisodes(items,strDirectory);
+    items.SetContent("episodes");
+    bResult = true;
+  }
+}
+
 void CPlexClient::SetWatched(std::string id)
 {
   // http://localhost:32400/:/scrobble?identifier=com.plexapp.plugins.library&amp;key=
@@ -299,7 +448,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
   }
 }
 
-void CPlexClient::GetLocalMovies(CFileItemList &items)
+void CPlexClient::GetLocalMovies(CFileItemList &items, std::string filter)
 {
  /*
   <Video ratingKey="65" key="/library/metadata/65" studio="Plan B Entertainment" type="movie" title="12 Years a Slave" contentRating="R" summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life." rating="7.8" viewOffset="158000" lastViewedAt="1465154711" year="2013" tagline="The extraordinary true story of Solomon Northup" thumb="/library/metadata/65/thumb/1465152014" art="/library/metadata/65/art/1465152014" duration="8050153" originallyAvailableAt="2013-10-30" addedAt="1392893688" updatedAt="1465152014" chapterSource="">
@@ -318,7 +467,7 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
   </Video>
   */
   
-  std::string movieXmlPath = m_strUrl + "/library/sections/1/all";
+  std::string movieXmlPath = m_strUrl + "/library/sections/1/all" + filter;
   XFILE::CCurlFile http;
   std::string strXML;
   http.Get(movieXmlPath, strXML);
@@ -333,7 +482,7 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
   }
 }
 
-void CPlexClient::GetLocalTvshows(CFileItemList &items)
+void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string filter)
 {
   /*
    <Directory
@@ -370,7 +519,7 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items)
    
    */
   
-  std::string tvshowXmlPath = m_strUrl + "/library/sections/2/all";
+  std::string tvshowXmlPath = m_strUrl + "/library/sections/2/all"+ filter;
   
   XFILE::CCurlFile http;
   std::string strXML;
@@ -615,5 +764,52 @@ void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string direc
     int season = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentIndex").c_str());
     GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode, season);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
+    items.SetProperty("showplot", "fuck plot");
+  }
+}
+
+void CPlexClient::GetLocalFilter(CFileItemList &items, std::string filter, std::string parentPath , bool movie)
+{
+  
+  m_vFilter.clear();
+  m_filter = filter;
+  
+  std::string filterXmlPath = m_strUrl + "/library/sections/" + (movie ? "1":"2") + "/" + filter;
+  XFILE::CCurlFile http;
+  std::string strXML;
+  http.Get(filterXmlPath, strXML);
+  
+  TiXmlDocument xml;
+  xml.Parse(strXML.c_str());
+  
+  TiXmlElement* rootXmlNode = xml.RootElement();
+  if (rootXmlNode)
+  {
+    const TiXmlElement* directoryNode = rootXmlNode->FirstChildElement("Directory");
+    while (directoryNode)
+    {
+      std::string title = XMLUtils::GetAttribute(directoryNode, "title");
+      std::string key = XMLUtils::GetAttribute(directoryNode, "key");
+      bool add = true;
+      for (int i = 0; i < items.Size(); i++)
+      {
+//        const CFileItemPtr pItem = items[i];
+        if (items[i]->GetLabel() == title)
+        {
+          add = false;
+        }
+      }
+      m_vFilter[title] = key;
+      if (add)
+      {
+        CFileItemPtr pItem(new CFileItem(title));
+        pItem->m_bIsFolder = true;
+        pItem->m_bIsShareOrDrive = false;
+        pItem->SetPath(parentPath + "/" + title);
+        pItem->SetLabel(title);
+        items.Add(pItem);
+      }
+      directoryNode = directoryNode->NextSiblingElement("Directory");
+    }
   }
 }

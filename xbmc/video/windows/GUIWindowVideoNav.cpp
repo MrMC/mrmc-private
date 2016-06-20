@@ -563,44 +563,12 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
       newTag->SetSpecialSort(SortSpecialOnTop);
       items.Add(newTag);
     }
-    
-    // if plex is enabled, list movies or tvshows
-    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
-    {
-      if (StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/titles/"))
-      {
-        // list all plex movies
-        CPlexClient::GetInstance().GetLocalMovies(items);
-        items.SetContent("movies");
-      }
-      else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/titles/"))
-      {
-        if (items.GetContent() == "tvshows")
-        {
-          // list all plex tvShows
-          CPlexClient::GetInstance().GetLocalTvshows(items);
-          items.SetContent("tvshows");
-        }
-      }
-    }
   }
-  else
+  
+  // if plex is enabled, list movies or tvshows
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
   {
-    if (StringUtils::StartsWithNoCase(strDirectory, "plex://tvshow/"))
-    {
-      // list seasons here
-      CPlexClient::GetInstance().GetLocalSeasons(items,strDirectory);
-      items.SetContent("seasons");
-      bResult = true;
-    }
-    else if (StringUtils::StartsWithNoCase(strDirectory, "plex://seasons/"))
-    {
-      // list seasons here
-      CPlexClient::GetInstance().GetLocalEpisodes(items,strDirectory);
-      items.SetContent("episodes");
-      bResult = true;
-    }
-      
+    CPlexClient::GetInstance().HandleMedia(items, bResult, strDirectory);
   }
   return bResult;
 }
