@@ -371,9 +371,9 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items)
       CFileItemPtr plexItem(new CFileItem());
       // set m_bIsFolder to true to indicate we wre tvshow list
       plexItem->m_bIsFolder = true;
-      plexItem->SetPath("plex://tvshow");
+      plexItem->SetPath("plex://tvshow/" + XMLUtils::GetAttribute(directoryNode, "ratingKey"));
       plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
-      plexItem->GetVideoInfoTag()->m_type = MediaTypePlexEpisode;
+      plexItem->GetVideoInfoTag()->m_type = MediaTypePlexTvShow;
       plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
       plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(directoryNode, "tagline"));
       plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(directoryNode, "summary"));
@@ -477,6 +477,97 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items)
       plexItem->GetVideoInfoTag()->m_cast = roles;
       
       items.Add(plexItem);
+      directoryNode = directoryNode->NextSiblingElement("Directory");
+    }
+  }
+}
+
+void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string directory)
+{
+  /*
+   <MediaContainer size="4" allowSync="1" art="/library/metadata/2255/art/1465158605" banner="/library/metadata/2255/banner/1465158605" identifier="com.plexapp.plugins.library" key="2255" librarySectionID="2" librarySectionTitle="TV Shows" librarySectionUUID="dd1b7de4-a445-4c1a-b3c9-5d3f7232d857" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1454491350" nocache="1" parentIndex="1" parentTitle="The 100" parentYear="2014" summary="Based on the books by Kass Morgan, this show takes place 100 years in the future, when the Earth has been abandoned due to radioactivity. The last surviving humans live on an ark orbiting the planet — but the ark won&apos;t last forever. So the repressive regime picks 100 expendable juvenile delinquents to send down to Earth to see if the planet is still habitable." theme="/library/metadata/2255/theme/1465158605" thumb="/library/metadata/2255/thumb/1465158605" title1="TV Shows" title2="The 100" viewGroup="season" viewMode="65593">
+   <Directory leafCount="44" thumb="/library/metadata/2255/thumb/1465158605" viewedLeafCount="0" key="/library/metadata/2255/allLeaves" title="All episodes" />
+   
+   <Directory 
+     ratingKey="2289"
+     key="/library/metadata/2289/children"
+     parentRatingKey="2255" 
+     type="season" 
+     title="Season 1" 
+     parentKey="/library/metadata/2255" 
+     summary="" 
+     index="1"
+     thumb="/library/metadata/2289/thumb/1465158577" 
+     leafCount="13" 
+     viewedLeafCount="0" 
+     addedAt="1410897813" 
+     updatedAt="1465158577">
+   </Directory>
+   
+   <Directory ratingKey="2272" key="/library/metadata/2272/children" parentRatingKey="2255" type="season" title="Season 2" parentKey="/library/metadata/2255" summary="" index="2" thumb="/library/metadata/2272/thumb/1465158583" leafCount="16" viewedLeafCount="0" addedAt="1414103447" updatedAt="1465158583"></Directory>
+   <Directory ratingKey="2256" key="/library/metadata/2256/children" parentRatingKey="2255" type="season" title="Season 3" parentKey="/library/metadata/2255" summary="" index="3" thumb="/library/metadata/2256/thumb/1465158605" leafCount="15" viewedLeafCount="0" addedAt="1453437187" updatedAt="1465158605"></Directory>
+   </MediaContainer>
+   
+   */
+  
+  items.ClearItems();
+  items.SetPath(directory);
+  CFileItemPtr pItem(new CFileItem(".."));
+  pItem->SetPath(directory);
+  pItem->m_bIsFolder = true;
+  pItem->m_bIsShareOrDrive = false;
+  items.AddFront(pItem, 0);
+  
+  std::string url = "http://192.168.1.200:32400";
+  std::string strID = URIUtils::GetFileName(directory);
+  std::string seasonsXmlPath = url + "/library/metadata/" + strID + "/children";
+//  http://192.168.1.200:32400/library/metadata/2255/children
+  
+  XFILE::CCurlFile http;
+  std::string strXML;
+  http.Get(seasonsXmlPath, strXML);
+  
+  TiXmlDocument xml;
+  xml.Parse(strXML.c_str());
+  
+  TiXmlElement* rootXmlNode = xml.RootElement();
+  if (rootXmlNode)
+  {
+    const TiXmlElement* directoryNode = rootXmlNode->FirstChildElement("Directory");
+    while (directoryNode)
+    {
+      // only get the seasons listing, the one with "ratingKey"
+      if (((TiXmlElement*) directoryNode)->Attribute("ratingKey"))
+      {
+        CFileItemPtr plexItem(new CFileItem());
+        // set m_bIsFolder to true to indicate we wre tvshow list
+        plexItem->m_bIsFolder = true;
+        plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
+        plexItem->SetPath("plex://seasons/" + XMLUtils::GetAttribute(directoryNode, "ratingKey"));
+        plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
+        plexItem->GetVideoInfoTag()->m_type = MediaTypePlexSeason;
+        plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
+        // we get these from rootXmlNode, where all show info is
+        plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(rootXmlNode, "parentTitle");
+        plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(rootXmlNode, "tagline"));
+        plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(rootXmlNode, "summary"));
+        plexItem->SetArt("fanart", url + XMLUtils::GetAttribute(rootXmlNode, "art"));
+        /// -------
+        plexItem->SetArt("thumb", url + XMLUtils::GetAttribute(directoryNode, "thumb"));
+        plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(directoryNode, "leafCount").c_str());
+        plexItem->GetVideoInfoTag()->m_playCount = atoi(XMLUtils::GetAttribute(directoryNode, "viewedLeafCount").c_str());
+        
+        plexItem->SetProperty("totalseasons", XMLUtils::GetAttribute(directoryNode, "childCount"));
+        plexItem->SetProperty("totalepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
+        plexItem->SetProperty("numepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
+        plexItem->SetProperty("watchedepisodes", plexItem->GetVideoInfoTag()->m_playCount);
+        plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - plexItem->GetVideoInfoTag()->m_playCount);
+        
+        plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
+        
+        items.Add(plexItem);
+      }
+      items.SetContent("seasons");
       directoryNode = directoryNode->NextSiblingElement("Directory");
     }
   }

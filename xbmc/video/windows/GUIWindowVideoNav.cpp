@@ -579,12 +579,14 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
           CPlexClient::GetInstance().GetLocalTvshows(items);
       }
     }
-    else
+  }
+  else
+  {
+    if (StringUtils::StartsWithNoCase(strDirectory, "plex://tvshow/"))
     {
-      if (StringUtils::StartsWithNoCase(strDirectory, "plex://tvshow/"))
-      {
-        // list seasons here
-      }
+      // list seasons here
+      CPlexClient::GetInstance().GetLocalSeasons(items,strDirectory);
+      bResult = true;
     }
   }
   return bResult;
