@@ -571,12 +571,16 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
       {
         // list all plex movies
         CPlexClient::GetInstance().GetLocalMovies(items);
+        items.SetContent("movies");
       }
       else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://tvshows/titles/"))
       {
         if (items.GetContent() == "tvshows")
+        {
           // list all plex tvShows
           CPlexClient::GetInstance().GetLocalTvshows(items);
+          items.SetContent("tvshows");
+        }
       }
     }
   }
@@ -586,8 +590,17 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
     {
       // list seasons here
       CPlexClient::GetInstance().GetLocalSeasons(items,strDirectory);
+      items.SetContent("seasons");
       bResult = true;
     }
+    else if (StringUtils::StartsWithNoCase(strDirectory, "plex://seasons/"))
+    {
+      // list seasons here
+      CPlexClient::GetInstance().GetLocalEpisodes(items,strDirectory);
+      items.SetContent("episodes");
+      bResult = true;
+    }
+      
   }
   return bResult;
 }

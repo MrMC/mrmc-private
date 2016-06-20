@@ -22,7 +22,7 @@
 
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
-#include "utils/XBMCTinyXML.h"
+//#include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
 #include "Util.h"
 #include "URL.h"
@@ -34,7 +34,7 @@
 
 CPlexClient::CPlexClient()
 {
-  
+  m_strUrl = "http://192.168.1.200:32400";
 }
 
 CPlexClient::~CPlexClient()
@@ -52,8 +52,7 @@ void CPlexClient::SetWatched(std::string id)
 {
   // http://localhost:32400/:/scrobble?identifier=com.plexapp.plugins.library&amp;key=
   
-  std::string url = "http://192.168.1.200:32400";
-  std::string scrobbleUrl = StringUtils::Format("%s/:/scrobble?identifier=com.plexapp.plugins.library&key=%s", url.c_str(), id.c_str());
+  std::string scrobbleUrl = StringUtils::Format("%s/:/scrobble?identifier=com.plexapp.plugins.library&key=%s", m_strUrl.c_str(), id.c_str());
   XFILE::CCurlFile http;
   std::string response;
   http.Get(scrobbleUrl, response);
@@ -62,8 +61,7 @@ void CPlexClient::SetWatched(std::string id)
 void CPlexClient::SetUnWatched(std::string id)
 {
   //http://localhost:32400/:/unscrobble?identifier=com.plexapp.plugins.library&amp;key=
-  std::string url = "http://192.168.1.200:32400";
-    std::string unscrobbleUrl = StringUtils::Format("%s/:/unscrobble?identifier=com.plexapp.plugins.library&key=%s", url.c_str(), id.c_str());
+    std::string unscrobbleUrl = StringUtils::Format("%s/:/unscrobble?identifier=com.plexapp.plugins.library&key=%s", m_strUrl.c_str(), id.c_str());
   XFILE::CCurlFile http;
   std::string response;
   http.Get(unscrobbleUrl, response);
@@ -77,6 +75,224 @@ void CPlexClient::SetOffset(CFileItem item, int offsetSeconds)
   // https://www.reddit.com/r/PleX/comments/476a1x/making_an_android_plex_app_what_can_icant_i_do/?
   //192.168.1.200:32400/:/progress?key=418&identifier=com.plexapp.plugins.library&time=7765&state=stopped
   //  http://192.168.1.200:32400/:/timeline?ratingKey=65&key=/library/metadata/65&state=stopped&playQueueItemID=3&time=3010&duration=8050153
+}
+
+void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
+{
+  const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
+  while (videoNode)
+  {
+    /*
+     attributes:
+     
+     ratingKey="65"
+     key="/library/metadata/65"
+     studio="Plan B Entertainment"
+     type="movie"
+     title="12 Years a Slave"
+     contentRating="R"
+     summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life."
+     rating="7.8"
+     viewOffset="158000"
+     lastViewedAt="1465154711"
+     year="2013"
+     tagline="The extraordinary true story of Solomon Northup"
+     thumb="/library/metadata/65/thumb/1465152014"
+     art="/library/metadata/65/art/1465152014"
+     duration="8050153"
+     originallyAvailableAt="2013-10-30"
+     addedAt="1392893688"
+     updatedAt="1465152014"
+     chapterSource=""
+     
+     */
+    CFileItemPtr plexItem(new CFileItem());
+    plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
+    plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(videoNode, "ratingKey");
+    plexItem->GetVideoInfoTag()->m_type = type;
+    plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
+    plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
+    plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(videoNode, "summary"));
+    
+    std::string fanart;
+    // if we have season means we are listing episodes, we need to get the fanart from rootXmlNode.
+    // movies has it in videoNode
+    if (season > -1)
+      fanart = XMLUtils::GetAttribute(rootXmlNode, "art");
+    else
+      fanart = XMLUtils::GetAttribute(videoNode, "art");
+    
+    plexItem->SetArt("fanart", m_strUrl + fanart);
+    plexItem->SetArt("thumb", m_strUrl + XMLUtils::GetAttribute(videoNode, "thumb"));
+    plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(videoNode, "year").c_str());
+    plexItem->GetVideoInfoTag()->m_fRating = atof(XMLUtils::GetAttribute(videoNode, "rating").c_str());
+    plexItem->GetVideoInfoTag()->m_strMPAARating = XMLUtils::GetAttribute(videoNode, "contentRating");
+    plexItem->GetVideoInfoTag()->m_iSeason = season;
+    plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(videoNode, "index").c_str());
+    
+    // lastViewedAt means that it was watched, if so we set m_playCount to 1 and set overlay
+    if (((TiXmlElement*) videoNode)->Attribute("lastViewedAt"))
+    {
+      plexItem->GetVideoInfoTag()->m_playCount = 1;
+    }
+    plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
+    
+    // looks like plex is sending only one studio?
+    std::vector<std::string> studios;
+    studios.push_back(XMLUtils::GetAttribute(videoNode, "studio"));
+    plexItem->GetVideoInfoTag()->m_studio = studios;
+    
+    
+    // get all genres
+    std::vector<std::string> genres;
+    const TiXmlElement* genreNode = videoNode->FirstChildElement("Genre");
+    if (genreNode)
+    {
+      while (genreNode)
+      {
+        std::string genre = XMLUtils::GetAttribute(genreNode, "tag");
+        genres.push_back(genre);
+        genreNode = genreNode->NextSiblingElement("Genre");
+      }
+    }
+    plexItem->GetVideoInfoTag()->SetGenre(genres);
+    
+    // get all writers
+    std::vector<std::string> writers;
+    const TiXmlElement* writerNode = videoNode->FirstChildElement("Writer");
+    if (writerNode)
+    {
+      while (writerNode)
+      {
+        std::string writer = XMLUtils::GetAttribute(writerNode, "tag");
+        writers.push_back(writer);
+        writerNode = writerNode->NextSiblingElement("Writer");
+      }
+    }
+    plexItem->GetVideoInfoTag()->SetWritingCredits(writers);
+    
+    // get all directors
+    std::vector<std::string> directors;
+    const TiXmlElement* directorNode = videoNode->FirstChildElement("Director");
+    if (directorNode)
+    {
+      while (directorNode)
+      {
+        std::string director = XMLUtils::GetAttribute(directorNode, "tag");
+        directors.push_back(director);
+        directorNode = directorNode->NextSiblingElement("Director");
+      }
+    }
+    plexItem->GetVideoInfoTag()->SetDirector(directors);
+    
+    // get all countries
+    std::vector<std::string> countries;
+    const TiXmlElement* countryNode = videoNode->FirstChildElement("Country");
+    if (countryNode)
+    {
+      while (countryNode)
+      {
+        std::string country = XMLUtils::GetAttribute(countryNode, "tag");
+        countries.push_back(country);
+        countryNode = countryNode->NextSiblingElement("Country");
+      }
+    }
+    plexItem->GetVideoInfoTag()->SetCountry(countries);
+    
+    // get all roles
+    std::vector< SActorInfo > roles;
+    const TiXmlElement* roleNode = videoNode->FirstChildElement("Role");
+    if (roleNode)
+    {
+      while (roleNode)
+      {
+        SActorInfo role;
+        role.strName = XMLUtils::GetAttribute(roleNode, "tag");
+        roles.push_back(role);
+        roleNode = roleNode->NextSiblingElement("Role");
+      }
+    }
+    plexItem->GetVideoInfoTag()->m_cast = roles;
+    
+    const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
+    if (mediaNode)
+    {
+      /*
+       attributes:
+       
+       videoResolution="720"
+       id="65"
+       duration="8050153"
+       bitrate="964"
+       width="1280"
+       height="536"
+       aspectRatio="2.35"
+       audioChannels="2"
+       audioCodec="aac"
+       videoCodec="h264"
+       container="mp4"
+       videoFrameRate="24p"
+       optimizedForStreaming="1"
+       audioProfile="lc"
+       has64bitOffsets="0"
+       videoProfile="high"
+       */
+      const char* videoResolution = ((TiXmlElement*) mediaNode)->Attribute("videoResolution");
+      
+      CStreamDetails details;
+      CStreamDetailVideo *p = new CStreamDetailVideo();
+      p->m_strCodec = XMLUtils::GetAttribute(mediaNode, "videoCodec");
+      p->m_fAspect = atof(XMLUtils::GetAttribute(mediaNode, "aspectRatio").c_str());
+      p->m_iWidth = atoi(XMLUtils::GetAttribute(mediaNode, "width").c_str());
+      p->m_iHeight = atoi(XMLUtils::GetAttribute(mediaNode, "height").c_str());
+      p->m_iDuration = atoi(XMLUtils::GetAttribute(mediaNode, "videoCodec").c_str());
+      details.AddStream(p);
+      
+      CStreamDetailAudio *a = new CStreamDetailAudio();
+      a->m_strCodec = XMLUtils::GetAttribute(mediaNode, "audioCodec");
+      a->m_iChannels = atoi(XMLUtils::GetAttribute(mediaNode, "audioChannels").c_str());
+      a->m_strLanguage = XMLUtils::GetAttribute(mediaNode, "audioChannels");
+      details.AddStream(a);
+      
+      plexItem->GetVideoInfoTag()->m_streamDetails = details;
+      
+      /// plex has duration in milliseconds
+      plexItem->GetVideoInfoTag()->m_duration = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
+      
+      CBookmark m_bookmark;
+      m_bookmark.timeInSeconds = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
+      m_bookmark.totalTimeInSeconds = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
+      plexItem->GetVideoInfoTag()->m_resumePoint = m_bookmark;
+      
+      const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
+      if (partNode)
+      {
+        
+        /*
+         
+         attributes:
+         
+         id="66"
+         key="/library/parts/66/file.mp4"
+         duration="8050153"
+         file="/share/Movies/12 Years a Slave (2013)/12.Years.a.Slave.2013.720p.BluRay.x264.YIFY.mp4"
+         size="970087940"
+         audioProfile="lc"
+         container="mp4"
+         has64bitOffsets="0"
+         optimizedForStreaming="1"
+         videoProfile="high"
+         
+         */
+        std::string path = m_strUrl + ((TiXmlElement*) partNode)->Attribute("key");
+        plexItem->SetPath(path);
+        //          plexItem->GetVideoInfoTag()->SetFile(path);
+      }
+    }
+    
+    videoNode = videoNode->NextSiblingElement("Video");
+    items.Add(plexItem);
+  }
 }
 
 void CPlexClient::GetLocalMovies(CFileItemList &items)
@@ -98,8 +314,7 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
   </Video>
   */
   
-  std::string url = "http://192.168.1.200:32400";
-  std::string movieXmlPath = url + "/library/sections/1/all";
+  std::string movieXmlPath = m_strUrl + "/library/sections/1/all";
   XFILE::CCurlFile http;
   std::string strXML;
   http.Get(movieXmlPath, strXML);
@@ -110,208 +325,7 @@ void CPlexClient::GetLocalMovies(CFileItemList &items)
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
-    while (videoNode)
-    {
-      /*
-      attributes:
-       
-      ratingKey="65"
-      key="/library/metadata/65"
-      studio="Plan B Entertainment"
-      type="movie"
-      title="12 Years a Slave"
-      contentRating="R"
-      summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life."
-      rating="7.8"
-      viewOffset="158000"
-      lastViewedAt="1465154711"
-      year="2013"
-      tagline="The extraordinary true story of Solomon Northup"
-      thumb="/library/metadata/65/thumb/1465152014"
-      art="/library/metadata/65/art/1465152014"
-      duration="8050153"
-      originallyAvailableAt="2013-10-30"
-      addedAt="1392893688"
-      updatedAt="1465152014"
-      chapterSource=""
-       
-      */
-      CFileItemPtr plexItem(new CFileItem());
-      plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(videoNode, "ratingKey");
-      plexItem->GetVideoInfoTag()->m_type = MediaTypePlexMovie;
-      plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
-      plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
-      plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(videoNode, "summary"));
-      plexItem->SetArt("fanart", url + XMLUtils::GetAttribute(videoNode, "art"));
-      plexItem->SetArt("thumb", url + XMLUtils::GetAttribute(videoNode, "thumb"));
-      plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(videoNode, "year").c_str());
-      plexItem->GetVideoInfoTag()->m_fRating = atof(XMLUtils::GetAttribute(videoNode, "rating").c_str());
-      plexItem->GetVideoInfoTag()->m_strMPAARating = XMLUtils::GetAttribute(videoNode, "contentRating");
-      
-      // lastViewedAt means that it was watched, if so we set m_playCount to 1 and set overlay
-      if (((TiXmlElement*) videoNode)->Attribute("lastViewedAt"))
-      {
-        plexItem->GetVideoInfoTag()->m_playCount = 1;
-      }
-      plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
-      
-      // looks like plex is sending only one studio?
-      std::vector<std::string> studios;
-      studios.push_back(XMLUtils::GetAttribute(videoNode, "studio"));
-      plexItem->GetVideoInfoTag()->m_studio = studios;
-    
-      
-      // get all genres
-      std::vector<std::string> genres;
-      const TiXmlElement* genreNode = videoNode->FirstChildElement("Genre");
-      if (genreNode)
-      {
-        while (genreNode)
-        {
-          std::string genre = XMLUtils::GetAttribute(genreNode, "tag");
-          genres.push_back(genre);
-          genreNode = genreNode->NextSiblingElement("Genre");
-        }
-      }
-      plexItem->GetVideoInfoTag()->SetGenre(genres);
-      
-      // get all writers
-      std::vector<std::string> writers;
-      const TiXmlElement* writerNode = videoNode->FirstChildElement("Writer");
-      if (writerNode)
-      {
-        while (writerNode)
-        {
-          std::string writer = XMLUtils::GetAttribute(writerNode, "tag");
-          writers.push_back(writer);
-          writerNode = writerNode->NextSiblingElement("Writer");
-        }
-      }
-      plexItem->GetVideoInfoTag()->SetWritingCredits(writers);
-      
-      // get all directors
-      std::vector<std::string> directors;
-      const TiXmlElement* directorNode = videoNode->FirstChildElement("Director");
-      if (directorNode)
-      {
-        while (directorNode)
-        {
-          std::string director = XMLUtils::GetAttribute(directorNode, "tag");
-          directors.push_back(director);
-          directorNode = directorNode->NextSiblingElement("Director");
-        }
-      }
-      plexItem->GetVideoInfoTag()->SetDirector(directors);
-     
-      // get all countries
-      std::vector<std::string> countries;
-      const TiXmlElement* countryNode = videoNode->FirstChildElement("Country");
-      if (countryNode)
-      {
-        while (countryNode)
-        {
-          std::string country = XMLUtils::GetAttribute(countryNode, "tag");
-          countries.push_back(country);
-          countryNode = countryNode->NextSiblingElement("Country");
-        }
-      }
-      plexItem->GetVideoInfoTag()->SetCountry(countries);
-   
-      // get all roles
-      std::vector< SActorInfo > roles;
-      const TiXmlElement* roleNode = videoNode->FirstChildElement("Role");
-      if (roleNode)
-      {
-        while (roleNode)
-        {
-          SActorInfo role;
-          role.strName = XMLUtils::GetAttribute(roleNode, "tag");
-          roles.push_back(role);
-          roleNode = roleNode->NextSiblingElement("Role");
-        }
-      }
-      plexItem->GetVideoInfoTag()->m_cast = roles;
-      
-      const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
-      if (mediaNode)
-      {
-        /*
-        attributes:
-        
-        videoResolution="720"
-        id="65"
-        duration="8050153" 
-        bitrate="964"
-        width="1280"
-        height="536"
-        aspectRatio="2.35"
-        audioChannels="2"
-        audioCodec="aac"
-        videoCodec="h264"
-        container="mp4"
-        videoFrameRate="24p"
-        optimizedForStreaming="1"
-        audioProfile="lc"
-        has64bitOffsets="0"
-        videoProfile="high"
-        */
-        const char* videoResolution = ((TiXmlElement*) mediaNode)->Attribute("videoResolution");
-      
-        CStreamDetails details;
-        CStreamDetailVideo *p = new CStreamDetailVideo();
-        p->m_strCodec = XMLUtils::GetAttribute(mediaNode, "videoCodec");
-        p->m_fAspect = atof(XMLUtils::GetAttribute(mediaNode, "aspectRatio").c_str());
-        p->m_iWidth = atoi(XMLUtils::GetAttribute(mediaNode, "width").c_str());
-        p->m_iHeight = atoi(XMLUtils::GetAttribute(mediaNode, "height").c_str());
-        p->m_iDuration = atoi(XMLUtils::GetAttribute(mediaNode, "videoCodec").c_str());
-        details.AddStream(p);
-        
-        CStreamDetailAudio *a = new CStreamDetailAudio();
-        a->m_strCodec = XMLUtils::GetAttribute(mediaNode, "audioCodec");
-        a->m_iChannels = atoi(XMLUtils::GetAttribute(mediaNode, "audioChannels").c_str());
-        a->m_strLanguage = XMLUtils::GetAttribute(mediaNode, "audioChannels");
-        details.AddStream(a);
-        
-        plexItem->GetVideoInfoTag()->m_streamDetails = details;
-        
-        /// plex has duration in milliseconds
-        plexItem->GetVideoInfoTag()->m_duration = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
-        
-        CBookmark m_bookmark;
-        m_bookmark.timeInSeconds = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
-        m_bookmark.totalTimeInSeconds = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
-        plexItem->GetVideoInfoTag()->m_resumePoint = m_bookmark;
-        
-        const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
-        if (partNode)
-        {
-          
-          /*
-          
-           attributes:
-           
-           id="66"
-           key="/library/parts/66/file.mp4" 
-           duration="8050153" 
-           file="/share/Movies/12 Years a Slave (2013)/12.Years.a.Slave.2013.720p.BluRay.x264.YIFY.mp4" 
-           size="970087940" 
-           audioProfile="lc" 
-           container="mp4" 
-           has64bitOffsets="0" 
-           optimizedForStreaming="1" 
-           videoProfile="high"
-           
-          */
-          std::string path = url + ((TiXmlElement*) partNode)->Attribute("key");
-          plexItem->SetPath(path);
-//          plexItem->GetVideoInfoTag()->SetFile(path);
-        }
-      }
-
-      videoNode = videoNode->NextSiblingElement("Video");
-      items.Add(plexItem);
-    }
+    GetVideoItems(items,rootXmlNode, MediaTypePlexMovie);
   }
 }
 
@@ -352,8 +366,7 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items)
    
    */
   
-  std::string url = "http://192.168.1.200:32400";
-  std::string tvshowXmlPath = url + "/library/sections/2/all";
+  std::string tvshowXmlPath = m_strUrl + "/library/sections/2/all";
   
   XFILE::CCurlFile http;
   std::string strXML;
@@ -369,7 +382,7 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items)
     while (directoryNode)
     {
       CFileItemPtr plexItem(new CFileItem());
-      // set m_bIsFolder to true to indicate we wre tvshow list
+      // set m_bIsFolder to true to indicate we are tvshow list
       plexItem->m_bIsFolder = true;
       plexItem->SetPath("plex://tvshow/" + XMLUtils::GetAttribute(directoryNode, "ratingKey"));
       plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
@@ -377,8 +390,8 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items)
       plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
       plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(directoryNode, "tagline"));
       plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(directoryNode, "summary"));
-      plexItem->SetArt("fanart", url + XMLUtils::GetAttribute(directoryNode, "art"));
-      plexItem->SetArt("thumb", url + XMLUtils::GetAttribute(directoryNode, "thumb"));
+      plexItem->SetArt("fanart", m_strUrl + XMLUtils::GetAttribute(directoryNode, "art"));
+      plexItem->SetArt("thumb", m_strUrl + XMLUtils::GetAttribute(directoryNode, "thumb"));
       plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(directoryNode, "year").c_str());
       plexItem->GetVideoInfoTag()->m_fRating = atof(XMLUtils::GetAttribute(directoryNode, "rating").c_str());
       plexItem->GetVideoInfoTag()->m_strMPAARating = XMLUtils::GetAttribute(directoryNode, "contentRating");
@@ -518,9 +531,8 @@ void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string direct
   pItem->m_bIsShareOrDrive = false;
   items.AddFront(pItem, 0);
   
-  std::string url = "http://192.168.1.200:32400";
   std::string strID = URIUtils::GetFileName(directory);
-  std::string seasonsXmlPath = url + "/library/metadata/" + strID + "/children";
+  std::string seasonsXmlPath = m_strUrl + "/library/metadata/" + strID + "/children";
 //  http://192.168.1.200:32400/library/metadata/2255/children
   
   XFILE::CCurlFile http;
@@ -551,9 +563,9 @@ void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string direct
         plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(rootXmlNode, "parentTitle");
         plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(rootXmlNode, "tagline"));
         plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(rootXmlNode, "summary"));
-        plexItem->SetArt("fanart", url + XMLUtils::GetAttribute(rootXmlNode, "art"));
+        plexItem->SetArt("fanart", m_strUrl + XMLUtils::GetAttribute(rootXmlNode, "art"));
         /// -------
-        plexItem->SetArt("thumb", url + XMLUtils::GetAttribute(directoryNode, "thumb"));
+        plexItem->SetArt("thumb", m_strUrl + XMLUtils::GetAttribute(directoryNode, "thumb"));
         plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(directoryNode, "leafCount").c_str());
         plexItem->GetVideoInfoTag()->m_playCount = atoi(XMLUtils::GetAttribute(directoryNode, "viewedLeafCount").c_str());
         
@@ -567,8 +579,37 @@ void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string direct
         
         items.Add(plexItem);
       }
-      items.SetContent("seasons");
       directoryNode = directoryNode->NextSiblingElement("Directory");
     }
+    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
+  }
+}
+
+void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string directory)
+{
+  items.ClearItems();
+  items.SetPath(directory);
+  CFileItemPtr pItem(new CFileItem(".."));
+  pItem->SetPath(directory);
+  pItem->m_bIsFolder = true;
+  pItem->m_bIsShareOrDrive = false;
+  items.AddFront(pItem, 0);
+  
+  std::string strID = URIUtils::GetFileName(directory);
+  std::string seasonsXmlPath = m_strUrl + "/library/metadata/" + strID + "/children";
+  
+  XFILE::CCurlFile http;
+  std::string strXML;
+  http.Get(seasonsXmlPath, strXML);
+  
+  TiXmlDocument xml;
+  xml.Parse(strXML.c_str());
+  
+  TiXmlElement* rootXmlNode = xml.RootElement();
+  if (rootXmlNode)
+  {
+    int season = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentIndex").c_str());
+    GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode, season);
+    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   }
 }
