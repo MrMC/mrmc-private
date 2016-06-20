@@ -265,6 +265,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
       std::string title = StringUtils::Format("%02d.%s",atoi(XMLUtils::GetAttribute(videoNode, "index").c_str()), XMLUtils::GetAttribute(videoNode, "title").c_str());
       plexItem->SetLabel(title);
       plexItem->GetVideoInfoTag()->m_strTitle = title;
+      plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(videoNode, "grandparentTitle");
     }
     else
     {
