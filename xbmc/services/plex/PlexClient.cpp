@@ -256,20 +256,27 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
      
      */
     CFileItemPtr plexItem(new CFileItem());
-    plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
-    plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(videoNode, "ratingKey");
-    plexItem->GetVideoInfoTag()->m_type = type;
-    plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
-    plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
-    plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(videoNode, "summary"));
-    
     std::string fanart;
     // if we have season means we are listing episodes, we need to get the fanart from rootXmlNode.
     // movies has it in videoNode
     if (season > -1)
+    {
       fanart = XMLUtils::GetAttribute(rootXmlNode, "art");
+      std::string title = StringUtils::Format("%02d.%s",atoi(XMLUtils::GetAttribute(videoNode, "index").c_str()), XMLUtils::GetAttribute(videoNode, "title").c_str());
+      plexItem->SetLabel(title);
+      plexItem->GetVideoInfoTag()->m_strTitle = title;
+    }
     else
+    {
       fanart = XMLUtils::GetAttribute(videoNode, "art");
+      plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
+      plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
+    }
+    
+    plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(videoNode, "ratingKey");
+    plexItem->GetVideoInfoTag()->m_type = type;
+    plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
+    plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(videoNode, "summary"));
     
     CDateTime firstAired;
     firstAired.SetFromDBDate(XMLUtils::GetAttribute(videoNode, "originallyAvailableAt"));
