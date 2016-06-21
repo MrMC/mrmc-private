@@ -22,7 +22,6 @@
 
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
-//#include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
 #include "Util.h"
 #include "URL.h"
@@ -262,18 +261,16 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
     if (season > -1)
     {
       fanart = XMLUtils::GetAttribute(rootXmlNode, "art");
-      std::string title = StringUtils::Format("%02d.%s",atoi(XMLUtils::GetAttribute(videoNode, "index").c_str()), XMLUtils::GetAttribute(videoNode, "title").c_str());
-      plexItem->SetLabel(title);
-      plexItem->GetVideoInfoTag()->m_strTitle = title;
       plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(videoNode, "grandparentTitle");
     }
     else
     {
       fanart = XMLUtils::GetAttribute(videoNode, "art");
       plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
-      plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(videoNode, "title");
     }
-    
+    std::string title = XMLUtils::GetAttribute(videoNode, "title");
+    plexItem->SetLabel(title);
+    plexItem->GetVideoInfoTag()->m_strTitle = title;
     plexItem->GetVideoInfoTag()->m_strPlexId = XMLUtils::GetAttribute(videoNode, "ratingKey");
     plexItem->GetVideoInfoTag()->m_type = type;
     plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
@@ -398,7 +395,6 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
        has64bitOffsets="0"
        videoProfile="high"
        */
-      const char* videoResolution = ((TiXmlElement*) mediaNode)->Attribute("videoResolution");
       
       CStreamDetails details;
       CStreamDetailVideo *p = new CStreamDetailVideo();
@@ -447,7 +443,6 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
          */
         std::string path = m_strUrl + ((TiXmlElement*) partNode)->Attribute("key");
         plexItem->SetPath(path);
-        //          plexItem->GetVideoInfoTag()->SetFile(path);
       }
     }
     
@@ -567,10 +562,9 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string filter)
       plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(directoryNode, "leafCount").c_str());
       plexItem->GetVideoInfoTag()->m_playCount = atoi(XMLUtils::GetAttribute(directoryNode, "viewedLeafCount").c_str());
       
-//      plexItem->m_dateTime = XMLUtils::GetAttribute(directoryNode, "contentRating");
       plexItem->SetProperty("totalseasons", XMLUtils::GetAttribute(directoryNode, "childCount"));
       plexItem->SetProperty("totalepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
-      plexItem->SetProperty("numepisodes", plexItem->GetVideoInfoTag()->m_iEpisode); // will be changed later to reflect watchmode setting
+      plexItem->SetProperty("numepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
       plexItem->SetProperty("watchedepisodes", plexItem->GetVideoInfoTag()->m_playCount);
       plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - plexItem->GetVideoInfoTag()->m_playCount);
       
@@ -805,13 +799,12 @@ void CPlexClient::GetLocalFilter(CFileItemList &items, std::string filter, std::
       bool add = true;
       for (int i = 0; i < items.Size(); i++)
       {
-//        const CFileItemPtr pItem = items[i];
         if (items[i]->GetLabel() == title)
         {
           add = false;
         }
       }
-      m_vFilter[title] = key;
+      
       if (add)
       {
         CFileItemPtr pItem(new CFileItem(title));
@@ -821,6 +814,8 @@ void CPlexClient::GetLocalFilter(CFileItemList &items, std::string filter, std::
         pItem->SetLabel(title);
         items.Add(pItem);
       }
+      
+      m_vFilter[title] = key;
       directoryNode = directoryNode->NextSiblingElement("Directory");
     }
   }
