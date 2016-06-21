@@ -68,9 +68,7 @@ void CPlexDiscovery::Process()
     SOCKETS::CAddress my_addr;
     my_addr.SetAddress(iface->GetCurrentIPAddress().c_str(), 32414);
 
-    SOCKETS::CUDPSocket *socket;
-    // create socket and initialize buffer
-    socket = SOCKETS::CSocketFactory::CreateUDPSocket();
+    SOCKETS::CUDPSocket *socket = SOCKETS::CSocketFactory::CreateUDPSocket();
     if (!socket)
     {
       CLog::Log(LOGERROR, "CPlexDiscovery: Could not create socket, aborting!");
@@ -107,7 +105,7 @@ void CPlexDiscovery::Process()
           idleTimer.Reset();
         }
         // start listening until we timeout
-        if (listener.Listen(600))
+        if (listener.Listen(250))
         {
           char buffer[1024] = {0};
           SOCKETS::CAddress sender;
@@ -138,11 +136,12 @@ void CPlexDiscovery::Process()
 */
         if (AddServer(newServer))
         {
-          CLog::Log(LOGNOTICE, "CPlexDiscovery: New server found via GDM %s", host.c_str());
+          CLog::Log(LOGNOTICE, "CPlexDiscovery: Server found via GDM %s", host.c_str());
+          //CLog::Log(LOGNOTICE, "CPlexDiscovery: New server found via GDM %s", data.c_str());
         }
-        else if (GetServer(newServer.m_sUuid))
+        else if (GetServer(newServer.m_uuid))
         {
-          GetServer(newServer.m_sUuid)->ParseData(data, host);
+          GetServer(newServer.m_uuid)->ParseData(data, host);
           CLog::Log(LOGDEBUG, "CPlexDiscovery: Server updated via GDM %s", host.c_str());
         }
       }
@@ -162,7 +161,7 @@ void CPlexDiscovery::SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket)
     CLog::Log(LOGERROR, "CPlexDiscovery: discover send failed");
 }
 
-PlexServer *CPlexDiscovery::GetServer(std::string uuid)
+PlexServer* CPlexDiscovery::GetServer(std::string uuid)
 {
   for (std::vector<PlexServer>::iterator s_it = m_vServers.begin(); s_it != m_vServers.end(); ++s_it)
   {
@@ -181,6 +180,5 @@ bool CPlexDiscovery::AddServer(PlexServer server)
   }
 
   m_vServers.push_back(server);
-  CLog::Log(LOGNOTICE, "CPlexDiscovery: New Server Added: %s", server.GetUri().c_str());
   return true;
 }

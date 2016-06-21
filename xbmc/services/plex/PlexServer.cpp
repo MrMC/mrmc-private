@@ -48,45 +48,44 @@ void PlexServer::ParseData(std::string data, std::string ip)
       substr = s.substr(pos + 1);
       std::string val = StringUtils::Trim(substr);
       if (name == "Content-Type")
-        m_sContentType = val;
+        m_contentType = val;
       else if (name == "Resource-Identifier")
-        m_sUuid = val;
+        m_uuid = val;
       else if (name == "Name")
-        m_sServerName = val;
+        m_serverName = val;
       else if (name == "Port")
         port = atoi(val.c_str());
       else if (name == "Updated-At")
-        m_nUpdated = atol(val.c_str());
+        m_updated = atol(val.c_str());
       else if (name == "Version")
-        m_sVersion = val;
+        m_version = val;
     }
   }
 
-  m_bLocal = true;
+  m_local = true;
 
-  CURL url(m_uri);
-
+  CURL url;
   url.SetHostName(ip);
   url.SetPort(port);
   url.SetProtocol("http");
 
-  m_uri = url.Get();
+  m_url = url.Get();
 }
 
-std::string PlexServer::GetUri()
+std::string PlexServer::GetUrl()
 {
-  return m_uri;
+  return m_url;
 }
 
 std::string PlexServer::GetHost()
 {
-  CURL url(m_uri);
+  CURL url(m_url);
   return url.GetHostName();
 }
 
 int PlexServer::GetPort()
 {
-  CURL url(m_uri);
+  CURL url(m_url);
   return url.GetPort();
 }
 /*
@@ -126,10 +125,10 @@ std::shared_ptr<Poco::Net::HTTPClientSession> PlexServer::MakeRequest(
     request.add("X-Plex-Device-Name", Config::GetInstance().GetHostname());
     request.add("X-Plex-Language", Config::GetInstance().GetLanguage());
     request.add("X-Plex-Model", "Linux");
-    request.add("X-Plex-Platform", "VDR");
-    request.add("X-Plex-Product", "plex for vdr");
+    request.add("X-Plex-Platform", "MrMC");
+    request.add("X-Plex-Product",  "MrMC/Plex");
     request.add("X-Plex-Provides", "player");
-    request.add("X-Plex-Version", VERSION);
+    request.add("X-Plex-Version",  VERSION);
 
     if (Config::GetInstance().UsePlexAccount && !GetAuthToken().empty())
     {

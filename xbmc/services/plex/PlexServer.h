@@ -28,19 +28,19 @@ class PlexServer
 public:
   PlexServer(std::string data, std::string ip);
 
-  const std::string &GetContentType() const { return m_sContentType; }
-  const std::string &GetServerName() const { return m_sServerName; }
-  int64_t GetUpdated() const { return m_nUpdated; }
-  const std::string &GetUuid() const { return m_sUuid; }
-  const std::string &GetVersion() const { return m_sVersion; }
+  const std::string &GetContentType() const { return m_contentType; }
+  const std::string &GetServerName() const { return m_serverName; }
+  int64_t GetUpdated() const { return m_updated; }
+  const std::string &GetUuid() const { return m_uuid; }
+  const std::string &GetVersion() const { return m_version; }
   const std::string &GetAuthToken() const { return m_authToken; }
   void  SetAuthToken(std::string token) { m_authToken = token; }
 
-  const bool &IsLocal() const { return m_bLocal; }
+  const bool &IsLocal() const { return m_local; }
 
   std::string GetHost();
   int         GetPort();
-  std::string GetUri();
+  std::string GetUrl();
 
 protected:
   void ParseData(std::string data, std::string ip);
@@ -48,15 +48,12 @@ protected:
 private:
   std::string m_sDiscovery;
 
-  int         m_nOwned;
-  bool        m_bLocal;
-  int         m_nMaster;
-  std::string m_sRole;
-  std::string m_sContentType;
-  std::string m_sUuid;
-  std::string m_sServerName;
-  std::string m_uri;
+  bool        m_local;
+  std::string m_contentType;
+  std::string m_uuid;
+  std::string m_serverName;
+  std::string m_url;
   std::string m_authToken;
-  int64_t     m_nUpdated;
-  std::string m_sVersion;
+  int64_t     m_updated;
+  std::string m_version;
 };
