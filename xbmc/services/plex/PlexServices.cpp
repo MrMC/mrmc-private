@@ -31,6 +31,7 @@
 #include "guilib/LocalizeStrings.h"
 
 #include "PlexClient.h"
+#include "PlexDiscovery.h"
 
 using namespace ANNOUNCEMENT;
 
@@ -107,6 +108,9 @@ void CPlexServices::Process()
   if (InitConnection())
   {
     ApplyUserSettings();
+
+    CPlexDiscovery *plexDiscover = new CPlexDiscovery();
+    plexDiscover->Start();
 
     while (!m_bStop)
     {
