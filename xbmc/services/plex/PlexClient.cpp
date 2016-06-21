@@ -487,6 +487,9 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string filter)
   if (rootXmlNode)
   {
     GetVideoItems(items,rootXmlNode, MediaTypePlexMovie);
+    // this shit is needed to display movies properly ... dont ask, same as episodes.
+    // good thing it didnt take 2 days to figure it out
+    items.SetProperty("library.filter", "true");
   }
 }
 
