@@ -261,7 +261,9 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
     if (season > -1)
     {
       fanart = XMLUtils::GetAttribute(rootXmlNode, "art");
-      plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(videoNode, "grandparentTitle");
+      plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(rootXmlNode, "grandparentTitle");
+      plexItem->GetVideoInfoTag()->m_iSeason = season;
+      plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(videoNode, "index").c_str());
     }
     else
     {
@@ -285,8 +287,6 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
     plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(videoNode, "year").c_str());
     plexItem->GetVideoInfoTag()->m_fRating = atof(XMLUtils::GetAttribute(videoNode, "rating").c_str());
     plexItem->GetVideoInfoTag()->m_strMPAARating = XMLUtils::GetAttribute(videoNode, "contentRating");
-    plexItem->GetVideoInfoTag()->m_iSeason = season;
-    plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(videoNode, "index").c_str());
     
     // lastViewedAt means that it was watched, if so we set m_playCount to 1 and set overlay
     if (((TiXmlElement*) videoNode)->Attribute("lastViewedAt"))
@@ -442,6 +442,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
          
          */
         std::string path = m_strUrl + ((TiXmlElement*) partNode)->Attribute("key");
+        plexItem->GetVideoInfoTag()->m_strPlexFile = XMLUtils::GetAttribute(partNode, "file");
         plexItem->SetPath(path);
       }
     }

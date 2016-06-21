@@ -150,6 +150,7 @@ public:
   std::string m_strSetOverview;
   std::vector<std::string> m_tags;
   std::string m_strFile;
+  std::string m_strPlexFile;
   std::string m_strPath;
   std::string m_strIMDBNumber;
   std::string m_strMPAARating;
