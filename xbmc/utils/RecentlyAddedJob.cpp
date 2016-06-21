@@ -32,6 +32,8 @@
 #include "settings/AdvancedSettings.h"
 #include "music/MusicThumbLoader.h"
 #include "video/VideoThumbLoader.h"
+#include "settings/Settings.h"
+#include "services/plex/PlexClient.h"
 
 #if defined(TARGET_DARWIN_TVOS)
   #include "platform/darwin/DarwinUtils.h"
@@ -71,30 +73,35 @@ bool CRecentlyAddedJob::UpdateVideo()
   }
 
   videodatabase.Open();
-  if (videodatabase.GetRecentlyAddedMoviesNav(path, items, NUM_ITEMS))
-  {  
-    for (; i < items.Size(); ++i)
-    {
-      CFileItemPtr item = items.Get(i);
-      std::string   value = StringUtils::Format("%i", i + 1);
-      std::string   strRating = StringUtils::Format("%.1f", item->GetVideoInfoTag()->m_fRating);
-      
-      home->SetProperty("LatestMovie." + value + ".Title"       , item->GetLabel());
-      home->SetProperty("LatestMovie." + value + ".Rating"      , strRating);
-      home->SetProperty("LatestMovie." + value + ".Year"        , item->GetVideoInfoTag()->m_iYear);
-      home->SetProperty("LatestMovie." + value + ".Plot"        , item->GetVideoInfoTag()->m_strPlot);
-      home->SetProperty("LatestMovie." + value + ".RunningTime" , item->GetVideoInfoTag()->GetDuration() / 60);
-      home->SetProperty("LatestMovie." + value + ".Path"        , item->GetVideoInfoTag()->m_strFileNameAndPath);
-      home->SetProperty("LatestMovie." + value + ".Trailer"     , item->GetVideoInfoTag()->m_strTrailer);
+  videodatabase.GetRecentlyAddedMoviesNav(path, items, NUM_ITEMS);
+  
+  // if plex is enabled, get recently added Movies
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+  {
+    CPlexClient::GetInstance().GetLocalRecentlyAddedMovies(items);
+  }
+  
+  for (; i < items.Size(); ++i)
+  {
+    CFileItemPtr item = items.Get(i);
+    std::string   value = StringUtils::Format("%i", i + 1);
+    std::string   strRating = StringUtils::Format("%.1f", item->GetVideoInfoTag()->m_fRating);
+    
+    home->SetProperty("LatestMovie." + value + ".Title"       , item->GetLabel());
+    home->SetProperty("LatestMovie." + value + ".Rating"      , strRating);
+    home->SetProperty("LatestMovie." + value + ".Year"        , item->GetVideoInfoTag()->m_iYear);
+    home->SetProperty("LatestMovie." + value + ".Plot"        , item->GetVideoInfoTag()->m_strPlot);
+    home->SetProperty("LatestMovie." + value + ".RunningTime" , item->GetVideoInfoTag()->GetDuration() / 60);
+    home->SetProperty("LatestMovie." + value + ".Path"        , item->GetVideoInfoTag()->m_strFileNameAndPath);
+    home->SetProperty("LatestMovie." + value + ".Trailer"     , item->GetVideoInfoTag()->m_strTrailer);
 
-      if (!item->HasArt("thumb"))
-        loader.LoadItem(item.get());
+    if (!item->HasArt("thumb"))
+      loader.LoadItem(item.get());
 
-      home->SetProperty("LatestMovie." + value + ".Thumb"       , item->GetArt("thumb"));
-      home->SetProperty("LatestMovie." + value + ".Fanart"      , item->GetArt("fanart"));
-    }
-  } 
-  for (; i < NUM_ITEMS; ++i)
+    home->SetProperty("LatestMovie." + value + ".Thumb"       , item->GetArt("thumb"));
+    home->SetProperty("LatestMovie." + value + ".Fanart"      , item->GetArt("fanart"));
+  }
+  for (; i < NUM_ITEMS+10; ++i)
   {
     std::string value = StringUtils::Format("%i", i + 1);
     home->SetProperty("LatestMovie." + value + ".Title"       , "");
@@ -119,41 +126,52 @@ bool CRecentlyAddedJob::UpdateVideo()
     url.AddOption("filter", "{\"type\":\"episodes\", \"rules\":[{\"field\":\"playcount\", \"operator\":\"is\", \"value\":\"0\"}]}");
     path = url.ToString();
   }
-
-  if (videodatabase.GetRecentlyAddedEpisodesNav(path, TVShowItems, NUM_ITEMS))
+  
+  videodatabase.GetRecentlyAddedEpisodesNav(path, TVShowItems, NUM_ITEMS);
+  
+  // if plex is enabled, get recently added TVSHOWS
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
   {
-    for (; i < TVShowItems.Size(); ++i)
-    {    
-      CFileItemPtr item          = TVShowItems.Get(i);
-      int          EpisodeSeason = item->GetVideoInfoTag()->m_iSeason;
-      int          EpisodeNumber = item->GetVideoInfoTag()->m_iEpisode;
-      std::string   EpisodeNo = StringUtils::Format("s%02de%02d", EpisodeSeason, EpisodeNumber);
-      std::string   value = StringUtils::Format("%i", i + 1);
-      std::string   strRating = StringUtils::Format("%.1f", item->GetVideoInfoTag()->m_fRating);
+    CPlexClient::GetInstance().GetLocalRecentlyAddedEpisodes(TVShowItems);
+  }
+  
+  for (; i < TVShowItems.Size(); ++i)
+  {    
+    CFileItemPtr item          = TVShowItems.Get(i);
+    int          EpisodeSeason = item->GetVideoInfoTag()->m_iSeason;
+    int          EpisodeNumber = item->GetVideoInfoTag()->m_iEpisode;
+    std::string   EpisodeNo = StringUtils::Format("s%02de%02d", EpisodeSeason, EpisodeNumber);
+    std::string   value = StringUtils::Format("%i", i + 1);
+    std::string   strRating = StringUtils::Format("%.1f", item->GetVideoInfoTag()->m_fRating);
 
-      home->SetProperty("LatestEpisode." + value + ".ShowTitle"     , item->GetVideoInfoTag()->m_strShowTitle);
-      home->SetProperty("LatestEpisode." + value + ".EpisodeTitle"  , item->GetVideoInfoTag()->m_strTitle);
-      home->SetProperty("LatestEpisode." + value + ".Rating"        , strRating);      
-      home->SetProperty("LatestEpisode." + value + ".Plot"          , item->GetVideoInfoTag()->m_strPlot);
-      home->SetProperty("LatestEpisode." + value + ".EpisodeNo"     , EpisodeNo);
-      home->SetProperty("LatestEpisode." + value + ".EpisodeSeason" , EpisodeSeason);
-      home->SetProperty("LatestEpisode." + value + ".EpisodeNumber" , EpisodeNumber);
-      home->SetProperty("LatestEpisode." + value + ".Path"          , item->GetVideoInfoTag()->m_strFileNameAndPath);
+    home->SetProperty("LatestEpisode." + value + ".ShowTitle"     , item->GetVideoInfoTag()->m_strShowTitle);
+    home->SetProperty("LatestEpisode." + value + ".EpisodeTitle"  , item->GetVideoInfoTag()->m_strTitle);
+    home->SetProperty("LatestEpisode." + value + ".Rating"        , strRating);      
+    home->SetProperty("LatestEpisode." + value + ".Plot"          , item->GetVideoInfoTag()->m_strPlot);
+    home->SetProperty("LatestEpisode." + value + ".EpisodeNo"     , EpisodeNo);
+    home->SetProperty("LatestEpisode." + value + ".EpisodeSeason" , EpisodeSeason);
+    home->SetProperty("LatestEpisode." + value + ".EpisodeNumber" , EpisodeNumber);
+    home->SetProperty("LatestEpisode." + value + ".Path"          , item->GetVideoInfoTag()->m_strFileNameAndPath);
 
-      if (!item->HasArt("thumb"))
-        loader.LoadItem(item.get());
+    if (!item->HasArt("thumb"))
+      loader.LoadItem(item.get());
 
-      std::string seasonThumb;
+    std::string seasonThumb;
+    if (item->IsPlex())
+    {
+      seasonThumb = item->GetArt("tvshow.poster");
+    }
+    else
+    {
       if (item->GetVideoInfoTag()->m_iIdSeason > 0)
         seasonThumb = videodatabase.GetArtForItem(item->GetVideoInfoTag()->m_iIdSeason, MediaTypeSeason, "thumb");
-
-      home->SetProperty("LatestEpisode." + value + ".Thumb"         , item->GetArt("thumb"));
-      home->SetProperty("LatestEpisode." + value + ".ShowThumb"     , item->GetArt("tvshow.thumb"));
-      home->SetProperty("LatestEpisode." + value + ".SeasonThumb"   , seasonThumb);
-      home->SetProperty("LatestEpisode." + value + ".Fanart"        , item->GetArt("fanart"));
     }
-  } 
-  for (; i < NUM_ITEMS; ++i)
+    home->SetProperty("LatestEpisode." + value + ".Thumb"         , item->GetArt("thumb"));
+    home->SetProperty("LatestEpisode." + value + ".ShowThumb"     , item->GetArt("tvshow.thumb"));
+    home->SetProperty("LatestEpisode." + value + ".SeasonThumb"   , seasonThumb);
+    home->SetProperty("LatestEpisode." + value + ".Fanart"        , item->GetArt("fanart"));
+  }
+  for (; i < NUM_ITEMS+10; ++i)
   {
     std::string value = StringUtils::Format("%i", i + 1);
     home->SetProperty("LatestEpisode." + value + ".ShowTitle"     , "");
