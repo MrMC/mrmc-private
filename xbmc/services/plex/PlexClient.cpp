@@ -772,7 +772,8 @@ void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string direc
     int season = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentIndex").c_str());
     GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode, season);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
-    items.SetProperty("showplot", "fuck plot");
+    // this shit is needed to display episodes properly ... dont ask
+    items.SetProperty("library.filter", "true");
   }
 }
 
