@@ -52,5 +52,5 @@ private:
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
-  std::vector<PlexServer> m_vServers;
+  std::vector<PlexServer> m_servers;
 };

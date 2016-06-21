@@ -163,22 +163,23 @@ void CPlexDiscovery::SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket)
 
 PlexServer* CPlexDiscovery::GetServer(std::string uuid)
 {
-  for (std::vector<PlexServer>::iterator s_it = m_vServers.begin(); s_it != m_vServers.end(); ++s_it)
+  for (std::vector<PlexServer>::iterator s_it = m_servers.begin(); s_it != m_servers.end(); ++s_it)
   {
     if (s_it->GetUuid() == uuid)
         return &(*s_it);
   }
-  return NULL;
+  return nullptr;
 }
 
 bool CPlexDiscovery::AddServer(PlexServer server)
 {
-  for (std::vector<PlexServer>::iterator s_it = m_vServers.begin(); s_it != m_vServers.end(); ++s_it)
+  // do not add existing servers
+  for (std::vector<PlexServer>::iterator s_it = m_servers.begin(); s_it != m_servers.end(); ++s_it)
   {
     if (s_it->GetUuid() == server.GetUuid())
     return false;
   }
 
-  m_vServers.push_back(server);
+  m_servers.push_back(server);
   return true;
 }
