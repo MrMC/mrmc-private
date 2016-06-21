@@ -449,6 +449,9 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
     videoNode = videoNode->NextSiblingElement("Video");
     items.Add(plexItem);
   }
+  // this shit is needed to display movies/episodes properly ... dont ask
+  // good thing it didnt take 2 days to figure it out
+  items.SetProperty("library.filter", "true");
 }
 
 void CPlexClient::GetLocalMovies(CFileItemList &items, std::string filter)
@@ -470,7 +473,8 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string filter)
   </Video>
   */
   
-  std::string movieXmlPath = m_strUrl + "/library/sections/1/all" + filter;
+//  std::string movieXmlPath = m_strUrl + "/library/sections/1/all" + filter;
+  std::string movieXmlPath = StringUtils::Format("%s/library/sections/1/all%s",m_strUrl.c_str(),filter.c_str());
   XFILE::CCurlFile http;
   std::string strXML;
   http.Get(movieXmlPath, strXML);
@@ -482,9 +486,6 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string filter)
   if (rootXmlNode)
   {
     GetVideoItems(items,rootXmlNode, MediaTypePlexMovie);
-    // this shit is needed to display movies properly ... dont ask, same as episodes.
-    // good thing it didnt take 2 days to figure it out
-    items.SetProperty("library.filter", "true");
   }
 }
 
@@ -525,7 +526,8 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string filter)
    
    */
   
-  std::string tvshowXmlPath = m_strUrl + "/library/sections/2/all"+ filter;
+//  std::string tvshowXmlPath = m_strUrl + "/library/sections/2/all"+ filter;
+  std::string tvshowXmlPath = StringUtils::Format("%s/library/sections/2/all%s",m_strUrl.c_str(),filter.c_str());
   
   XFILE::CCurlFile http;
   std::string strXML;
@@ -690,8 +692,8 @@ void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string direct
   items.AddFront(pItem, 0);
   
   std::string strID = URIUtils::GetFileName(directory);
-  std::string seasonsXmlPath = m_strUrl + "/library/metadata/" + strID + "/children";
-//  http://192.168.1.200:32400/library/metadata/2255/children
+//  std::string seasonsXmlPath = m_strUrl + "/library/metadata/" + strID + "/children";
+  std::string seasonsXmlPath = StringUtils::Format("%s/library/metadata/%s/children",m_strUrl.c_str(),strID.c_str());
   
   XFILE::CCurlFile http;
   std::string strXML;
@@ -754,7 +756,7 @@ void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string direc
   items.AddFront(pItem, 0);
   
   std::string strID = URIUtils::GetFileName(directory);
-  std::string seasonsXmlPath = m_strUrl + "/library/metadata/" + strID + "/children";
+  std::string seasonsXmlPath = StringUtils::Format("%s/library/metadata/%s/children", m_strUrl.c_str(),strID.c_str());
   
   XFILE::CCurlFile http;
   std::string strXML;
@@ -769,8 +771,6 @@ void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string direc
     int season = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentIndex").c_str());
     GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode, season);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
-    // this shit is needed to display episodes properly ... dont ask
-    items.SetProperty("library.filter", "true");
   }
 }
 
@@ -780,7 +780,8 @@ void CPlexClient::GetLocalFilter(CFileItemList &items, std::string filter, std::
   m_vFilter.clear();
   m_filter = filter;
   
-  std::string filterXmlPath = m_strUrl + "/library/sections/" + (movie ? "1":"2") + "/" + filter;
+  std::string filterXmlPath = StringUtils::Format("%s/library/sections/%s/%s",
+                                                  m_strUrl.c_str(), movie ? "1":"2" ,filter.c_str());
   XFILE::CCurlFile http;
   std::string strXML;
   http.Get(filterXmlPath, strXML);
