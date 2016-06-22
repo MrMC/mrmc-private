@@ -2136,6 +2136,12 @@
           <default>MrMC</default>
           <control type="edit" format="string" />
         </setting>
+        <setting id="services.uuid" type="string" label="" help="">
+          <level>0</level>
+          <default>replaceme</default>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
       </group>
     </category>
     <category id="upnp" label="20187" help="36322">

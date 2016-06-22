@@ -322,6 +322,7 @@ const std::string CSettings::SETTING_WEATHER_CURRENTLOCATION = "weather.currentl
 const std::string CSettings::SETTING_WEATHER_ADDON = "weather.addon";
 const std::string CSettings::SETTING_WEATHER_ADDONSETTINGS = "weather.addonsettings";
 const std::string CSettings::SETTING_SERVICES_DEVICENAME = "services.devicename";
+const std::string CSettings::SETTING_SERVICES_UUID = "services.uuid";
 const std::string CSettings::SETTING_SERVICES_UPNPSERVER = "services.upnpserver";
 const std::string CSettings::SETTING_SERVICES_UPNPANNOUNCE = "services.upnpannounce";
 const std::string CSettings::SETTING_SERVICES_UPNPLOOKFOREXTERNALSUBTITLES = "services.upnplookforexternalsubtitles";
@@ -972,7 +973,6 @@ void CSettings::InitializeVisibility()
 
 void CSettings::InitializeDefaults()
 {
-  // set some default values if necessary
 #if defined(HAS_TOUCH_SKIN)
   bool default_touch_skin = false;
 #if defined(TARGET_DARWIN_IOS) && !defined(TARGET_DARWIN_TVOS)
