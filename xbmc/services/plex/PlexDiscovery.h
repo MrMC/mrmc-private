@@ -46,11 +46,27 @@ private:
   // IRunnable entry point for thread
   virtual void  Process() override;
 
+  void          FetchPlexToken();
+  void          FetchMyPlexServers();
   void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
   PlexServer*   GetServer(std::string uuid);
   bool          AddServer(PlexServer server);
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
+
+  std::string m_plexToken;
+  std::string m_clientIdentifier;
+  std::string m_clientProduct;
+  std::string m_clientVersion;
+  std::string m_clientToken;
+  std::string m_myPlexUser;
+  std::string m_myPlexPass;
+  bool        m_myPlexEnabled;
+
+  std::string m_version;
+  std::string m_friendlyName;
+  std::string m_machineIdentifier;
+
   std::vector<PlexServer> m_servers;
 };

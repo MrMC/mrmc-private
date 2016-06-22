@@ -22,15 +22,27 @@
 #include "PlexServer.h"
 
 #include "Application.h"
+#include "URL.h"
+#include "filesystem/CurlFile.h"
 #include "network/Network.h"
 #include "network/Socket.h"
-
+#include "settings/Settings.h"
 #include "utils/log.h"
+#include "utils/StringUtils.h"
+#include "utils/JSONVariantParser.h"
+#include "utils/XMLUtils.h"
 
 
 CPlexDiscovery::CPlexDiscovery()
 : CThread("PlexDiscovery")
 {
+  m_clientIdentifier = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID);
+  m_clientProduct = "MrMC";
+  m_clientVersion = "2.3.0";
+
+  m_myPlexEnabled = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXMYPLEX);
+  m_myPlexUser = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER);
+  m_myPlexPass = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
 }
 
 CPlexDiscovery::~CPlexDiscovery()
@@ -65,6 +77,12 @@ void CPlexDiscovery::Process()
   CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
   if (iface)
   {
+    if (m_myPlexEnabled)
+    {
+      FetchPlexToken();
+      FetchMyPlexServers();
+    }
+
     SOCKETS::CAddress my_addr;
     my_addr.SetAddress(iface->GetCurrentIPAddress().c_str(), 32414);
 
@@ -147,6 +165,79 @@ void CPlexDiscovery::Process()
       }
 
       usleep(50 * 1000);
+    }
+  }
+}
+
+void CPlexDiscovery::FetchPlexToken()
+{
+  XFILE::CCurlFile plex;
+  plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
+  plex.SetRequestHeader("Content-Length", "0");
+  plex.SetRequestHeader("X-Plex-Client-Identifier", "8334-8A72-4C28-FDAF-29AB-479E-4069-C3A3");
+  //plex.SetRequestHeader("X-Plex-Client-Identifier", m_clientIdentifier);
+  plex.SetRequestHeader("X-Plex-Product", m_clientProduct);
+  plex.SetRequestHeader("X-Plex-Version", m_clientVersion);
+
+  CURL url("https://plex.tv/users/sign_in.json");
+  url.SetUserName(m_myPlexUser);
+  url.SetPassword(m_myPlexPass);
+
+  std::string strResponse;
+  std::string strPostData;
+  if (plex.Post(url.Get(), strPostData, strResponse))
+  {
+    CLog::Log(LOGDEBUG, "CPlexDiscovery: myPlex %s", strResponse.c_str());
+
+    CVariant reply;
+    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+
+    CVariant user = reply["user"];
+    m_clientToken = user["authentication_token"].asString();
+  }
+}
+
+void CPlexDiscovery::FetchMyPlexServers()
+{
+  XFILE::CCurlFile plex;
+  if (!m_clientToken.empty())
+    plex.SetRequestHeader("X-Plex-Token", m_clientToken);
+
+  std::string strResponse;
+  CURL url("https://plex.tv/pms/servers");
+  if (plex.Get(url.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "CPlexDiscovery: servers %s", strResponse.c_str());
+    TiXmlDocument xml;
+    xml.Parse(strResponse.c_str());
+
+    TiXmlElement* MediaContainer = xml.RootElement();
+    if (MediaContainer)
+    {
+      const TiXmlElement* ServerNode = MediaContainer->FirstChildElement("Server");
+      while (ServerNode)
+      {
+        ServerNode = ServerNode->NextSiblingElement("Server");
+      }
+    }
+  }
+
+  strResponse = "";
+  url.Parse("https://plex.tv/pms/system/library/sections");
+  if (plex.Get(url.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "CPlexDiscovery: sections %s", strResponse.c_str());
+    TiXmlDocument xml;
+    xml.Parse(strResponse.c_str());
+
+    TiXmlElement* MediaContainer = xml.RootElement();
+    if (MediaContainer)
+    {
+      const TiXmlElement* DirectoryNode = MediaContainer->FirstChildElement("Directory");
+      while (DirectoryNode)
+      {
+        DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
+      }
     }
   }
 }
