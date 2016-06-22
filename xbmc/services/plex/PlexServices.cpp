@@ -88,6 +88,28 @@ bool CPlexServices::IsActive()
 
 void CPlexServices::OnSettingChanged(const CSetting *setting)
 {
+  // All Plex settings so far
+  /*
+   static const std::string SETTING_SERVICES_PLEXENABLE;
+   static const std::string SETTING_SERVICES_PLEXMYPLEX;
+   static const std::string SETTING_SERVICES_PLEXMYPLEXUSER;
+   static const std::string SETTING_SERVICES_PLEXMYPLEXPASS;
+   static const std::string SETTING_SERVICES_PLEXSERVER;
+   static const std::string SETTING_SERVICES_PLEXSERVERPORT;
+   static const std::string SETTING_SERVICES_PLEXSERVERHOST;
+   */
+  // 1 is local, 2 is auto and port/host below
+  int server = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXSERVER);
+  std::string port = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERPORT);
+  std::string host = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERHOST);
+  // server on/off
+  bool plexServerEnabled = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE);
+  // MyPlex on/off and user/pass below
+  bool myPlexEnabled = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXMYPLEX);
+  std::string user = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER);
+  std::string pass = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
+  // end of Plex settings
+  
   if (setting == NULL)
     return;
 

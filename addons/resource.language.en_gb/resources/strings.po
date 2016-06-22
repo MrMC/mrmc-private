@@ -4268,7 +4268,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1237"
-msgid "Enable Plex client"
+msgid "Enable/Disable Plex client"
 msgstr ""
 
 #: system/settings/settings.xml
@@ -4283,12 +4283,12 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1240"
-msgid "Local"
+msgid "Manual"
 msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1241"
-msgid "Enable Local server connection"
+msgid "Select Manual or Auto server connection"
 msgstr ""
 
 #: system/settings/settings.xml
@@ -4298,12 +4298,52 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1243"
-msgid "Enable Auto Discovery"
+msgid "Choice of Manual or Auto server discovery"
 msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1244"
 msgid "Enable Plex server discovery and connection"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1245"
+msgid "Plex Server Host"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1246"
+msgid "Manually specify host or ip address"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1247"
+msgid "Plex Server Port"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1248"
+msgid "Manually specify port"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1249"
+msgid "MyPlex username"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1250"
+msgid "Registered MyPlex username"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1251"
+msgid "MyPlex password"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1252"
+msgid "Registered MyPlex password"
 msgstr ""
 
 #empty strings from id 1236 to 1258
