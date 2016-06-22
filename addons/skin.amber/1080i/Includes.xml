@@ -340,6 +340,10 @@
     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
     <aspectratio aligny="top">stretch</aspectratio>
   </include>
+  <include name="SquareThumbAlbum">
+    <texture background="true">$INFO[ListItem.Property(thumb)]</texture>
+    <aspectratio aligny="top">stretch</aspectratio>
+  </include>
   <include name="SquareThumbBG">
     <bordersize>-6</bordersize>
     <!--<texture>thumbs/PosterBG_NF.png</texture>-->
@@ -366,6 +370,10 @@
   <include name="PosterThumb">
     <texture background="true">$INFO[ListItem.Art(thumb)]</texture>
     <aspectratio aligny="top">stretch</aspectratio>
+  </include>
+    <include name="PosterThumbEpisodes">
+    <texture background="true">$INFO[ListItem.Art(tvshow.thumb)]</texture>
+    <aspectratio aligny="top">keep</aspectratio>
   </include>
   <include name="PosterThumbBG">
     <bordersize>-6</bordersize>
