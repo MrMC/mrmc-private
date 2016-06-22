@@ -291,13 +291,16 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
       plexItem->SetArt("tvshow.poster", m_strUrl + XMLUtils::GetAttribute(videoNode, "parentThumb"));
       plexItem->SetArt("thumb", m_strUrl + XMLUtils::GetAttribute(videoNode, "parentThumb"));
       plexItem->SetArt("tvshow.thumb", m_strUrl + XMLUtils::GetAttribute(videoNode, "parentThumb"));
+      plexItem->SetIconImage(m_strUrl + XMLUtils::GetAttribute(videoNode, "parentThumb"));
     }
     else
     {
       fanart = XMLUtils::GetAttribute(videoNode, "art");
       plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
       plexItem->SetArt("thumb", m_strUrl + XMLUtils::GetAttribute(videoNode, "thumb"));
+      plexItem->SetIconImage(m_strUrl + XMLUtils::GetAttribute(videoNode, "thumb"));
     }
+    
     std::string title = XMLUtils::GetAttribute(videoNode, "title");
     plexItem->SetLabel(title);
     plexItem->GetVideoInfoTag()->m_strTitle = title;
@@ -452,6 +455,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
       m_bookmark.timeInSeconds = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
       m_bookmark.totalTimeInSeconds = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
       plexItem->GetVideoInfoTag()->m_resumePoint = m_bookmark;
+      plexItem->m_lStartOffset = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
       
       const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
       if (partNode)
