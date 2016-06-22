@@ -29,6 +29,7 @@
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "guilib/LocalizeStrings.h"
+#include "interfaces/AnnouncementManager.h"
 
 #include "PlexClient.h"
 #include "PlexDiscovery.h"
@@ -93,6 +94,8 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
   const std::string &settingId = setting->GetId();
   if (settingId == CSettings::SETTING_SERVICES_PLEXENABLE)
   {
+    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
     // start or stop the service
     if (static_cast<const CSettingBool*>(setting)->GetValue())
       Start();
