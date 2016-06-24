@@ -51,18 +51,21 @@ PlexServer::PlexServer(const TiXmlElement* ServerNode)
   m_updated = atol(XMLUtils::GetAttribute(ServerNode, "updatedAt").c_str());
   m_version = XMLUtils::GetAttribute(ServerNode, "updatedAt");
   m_authToken = XMLUtils::GetAttribute(ServerNode, "accessToken");
+  m_scheme = XMLUtils::GetAttribute(ServerNode, "scheme");
+  if (m_scheme.empty())
+    m_scheme = "http";
 
   CURL url;
-  int port = atoi(XMLUtils::GetAttribute(ServerNode, "port").c_str());
   url.SetHostName(XMLUtils::GetAttribute(ServerNode, "address"));
+  int port = atoi(XMLUtils::GetAttribute(ServerNode, "port").c_str());
   url.SetPort(port);
-  url.SetProtocol("http");
+  url.SetProtocol(m_scheme);
 
   m_url = url.Get();
   GetIdentity();
   ParseSections();
-
 }
+
 void PlexServer::ParseData(std::string data, std::string ip)
 {
   int port = 0;
@@ -135,14 +138,13 @@ void PlexServer::ParseSections()
   if (!m_authToken.empty())
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
   
-  std::string strResponse = "";
-  CURL url;
+  std::string url = "library/sections";
   if (m_local)
-    url = CURL(m_url + "system/library/sections");
-  else
-    url = CURL(m_url + "library/sections");
+    url = "system/" + url;
 
-  if (plex.Get(url.Get(), strResponse))
+  CURL curl(m_url + url);
+  std::string strResponse;
+  if (plex.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "PlexServer::ParseSections() %s", strResponse.c_str());
     TiXmlDocument xml;

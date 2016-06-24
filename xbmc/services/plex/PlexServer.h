@@ -83,6 +83,7 @@ private:
   std::string m_serverName;
   std::string m_url;
   std::string m_authToken;
+  std::string m_scheme;
   int64_t     m_updated;
   std::string m_version;
   std::vector<SectionsContent> m_movieSectionsContents;
