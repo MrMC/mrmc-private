@@ -34,7 +34,7 @@
 
 CPlexClient::CPlexClient()
 {
-  m_strUrl = "http://192.168.1.200:32400";
+  m_strUrl = "http://192.168.2.202:32400";
 }
 
 CPlexClient::~CPlexClient()
@@ -138,7 +138,10 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = false;
-            pItem->SetPath("plex://movies/titles/" + contents[c].section);
+            // have to do it this way because raw url has authToken as protocol option
+            CURL curl(servers[i].GetUrl());
+            curl.SetFileName(curl.GetFileName() + contents[c].section + "/all");
+            pItem->SetPath(curl.Get());
             pItem->SetLabel(title);
             items.Add(pItem);
           }

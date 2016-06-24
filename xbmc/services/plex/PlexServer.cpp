@@ -60,6 +60,7 @@ PlexServer::PlexServer(const TiXmlElement* ServerNode)
   int port = atoi(XMLUtils::GetAttribute(ServerNode, "port").c_str());
   url.SetPort(port);
   url.SetProtocol(m_scheme);
+  url.SetProtocolOptions("&X-Plex-Token=" + m_authToken);
 
   m_url = url.Get();
   GetIdentity();
@@ -124,9 +125,10 @@ int PlexServer::GetPort()
 void PlexServer::GetIdentity()
 {
   XFILE::CCurlFile plex;
-    CURL url(m_url + "identity");
+  CURL curl(m_url);
+  curl.SetFileName(curl.GetFileName() + "identity");
   std::string strResponse;
-  if (plex.Get(url.Get(), strResponse))
+  if (plex.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "PlexServer::GetIdentity() %s", strResponse.c_str());
   }
@@ -135,14 +137,15 @@ void PlexServer::GetIdentity()
 void PlexServer::ParseSections()
 {
   XFILE::CCurlFile plex;
-  if (!m_authToken.empty())
-    plex.SetRequestHeader("X-Plex-Token", m_authToken);
+  //if (!m_authToken.empty())
+  //  plex.SetRequestHeader("X-Plex-Token", m_authToken);
   
   std::string url = "library/sections";
   if (m_local)
     url = "system/" + url;
 
-  CURL curl(m_url + url);
+  CURL curl(m_url);
+  curl.SetFileName(curl.GetFileName() + url);
   std::string strResponse;
   if (plex.Get(curl.Get(), strResponse))
   {
@@ -160,7 +163,9 @@ void PlexServer::ParseSections()
         content.type = XMLUtils::GetAttribute(DirectoryNode, "type");
         content.title = XMLUtils::GetAttribute(DirectoryNode, "title");
         content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
-        content.section = URIUtils::GetFileName(XMLUtils::GetAttribute(DirectoryNode, "path"));
+        std::string key = XMLUtils::GetAttribute(DirectoryNode, "key");
+        content.section = "library/sections/" + key;
+
         if (content.type == "movie")
           m_movieSectionsContents.push_back(content);
         else
