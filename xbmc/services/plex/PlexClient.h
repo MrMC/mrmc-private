@@ -36,6 +36,8 @@ public:
   void GetLocalRecentlyAddedEpisodes(CFileItemList &items);
   void GetLocalRecentlyAddedMovies(CFileItemList &items);
 
+  void GetMovies(CFileItemList &items, std::string strXML, std::string filter = "");
+
 
 private:
   // private construction, and no assignements; use the provided singleton methods

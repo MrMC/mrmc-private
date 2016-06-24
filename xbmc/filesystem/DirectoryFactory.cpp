@@ -101,6 +101,7 @@
 #include "AndroidContentDirectory.h"
 #endif
 #include "ResourceDirectory.h"
+#include "PlexDirectory.h"
 
 using namespace XFILE;
 
@@ -155,7 +156,7 @@ IDirectory* CDirectoryFactory::Create(const CURL& url)
   if (url.IsProtocol("playlistvideo")) return new CPlaylistDirectory();
   if (url.IsProtocol("musicdb")) return new CMusicDatabaseDirectory();
   if (url.IsProtocol("musicsearch")) return new CMusicSearchDirectory();
-  if (url.IsProtocol("videodb") || url.IsProtocol("plex")) return new CVideoDatabaseDirectory();
+  if (url.IsProtocol("videodb")) return new CVideoDatabaseDirectory();
   if (url.IsProtocol("library")) return new CLibraryDirectory();
   if (url.IsProtocol("favourites")) return new CFavouritesDirectory();
   if (url.IsProtocol("filereader"))
@@ -180,6 +181,7 @@ IDirectory* CDirectoryFactory::Create(const CURL& url)
     if (url.IsProtocol("ftp") || url.IsProtocol("ftps")) return new CFTPDirectory();
     if (url.IsProtocol("http") || url.IsProtocol("https")) return new CHTTPDirectory();
     if (url.IsProtocol("dav") || url.IsProtocol("davs")) return new CDAVDirectory();
+    if (url.IsProtocol("plex")) return new CPlexDirectory();
 #ifdef HAS_FILESYSTEM_SFTP
     if (url.IsProtocol("sftp") || url.IsProtocol("ssh")) return new CSFTPDirectory();
 #endif

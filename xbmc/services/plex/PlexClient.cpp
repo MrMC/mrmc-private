@@ -140,6 +140,7 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
             pItem->m_bIsShareOrDrive = false;
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(servers[i].GetUrl());
+            curl.SetProtocol("plex");
             curl.SetFileName(curl.GetFileName() + contents[c].section + "/all");
             pItem->SetPath(curl.Get());
             pItem->SetLabel(title);
@@ -555,6 +556,18 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
   items.SetProperty("library.filter", "true");
 }
 
+void CPlexClient::GetMovies(CFileItemList &items, std::string strXML, std::string filter)
+{
+  TiXmlDocument xml;
+  xml.Parse(strXML.c_str());
+
+  TiXmlElement* rootXmlNode = xml.RootElement();
+  if (rootXmlNode)
+  {
+    GetVideoItems(items, rootXmlNode, MediaTypePlexMovie);
+  }
+}
+
 void CPlexClient::GetLocalMovies(CFileItemList &items, std::string section, std::string filter)
 {
  /*
@@ -586,7 +599,7 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string section, std:
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    GetVideoItems(items,rootXmlNode, MediaTypePlexMovie);
+    GetVideoItems(items, rootXmlNode, MediaTypePlexMovie);
   }
 }
 
