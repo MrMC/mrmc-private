@@ -289,6 +289,7 @@ void CPlexServices::FetchMyPlexServers()
       while (ServerNode)
       {
         PlexServer newServer(ServerNode);
+        AddServer(newServer);
         ServerNode = ServerNode->NextSiblingElement("Server");
       }
       
