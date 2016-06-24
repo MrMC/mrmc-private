@@ -94,10 +94,69 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
    
    */
 // start MOVIES
-  if (StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/titles/"))
+  if (StringUtils::StartsWithNoCase(strDirectory, "plex://movies/titles/") ||
+      StringUtils::StartsWithNoCase(strDirectory, "mrmcdbhandler://movies/titles/"))
   {
-    GetLocalMovies(items);
-    items.SetContent("movies");
+    std::string section = URIUtils::GetFileName(strDirectory);
+    items.ClearItems();
+
+    items.SetPath(strDirectory);
+
+    CFileItemPtr pItem(new CFileItem(".."));
+    pItem->SetPath(strDirectory);
+    pItem->m_bIsFolder = true;
+    pItem->m_bIsShareOrDrive = false;
+    items.AddFront(pItem, 0);
+    
+    if (StringUtils::StartsWithNoCase(strDirectory, "mrmcdbhandler://movies/titles/"))
+    {
+      //add local Shows
+      CFileItemPtr pItem(new CFileItem("Local Movies"));
+      pItem->m_bIsFolder = true;
+      pItem->m_bIsShareOrDrive = false;
+      pItem->SetPath("videodb://movies/titles/");
+      pItem->SetLabel("Local Movies");
+      items.Add(pItem);
+      section = "all";
+    }
+    if (section == "all")
+    {
+      
+      //look through all plex servers and pull content data for "movie" type
+      std::vector<PlexServer> servers;
+      CPlexServices::GetInstance().GetServers(servers);
+      for (int i = 0; i < (int)servers.size(); i++)
+      {
+        std::vector<SectionsContent> contents = servers[i].GetMovieContent();
+        if (contents.size() > 1)
+        {
+          for (int c = 0; c < (int)contents.size(); c++)
+          {
+            std::string title = StringUtils::Format("Plex - %s - %s",servers[i].GetServerName().c_str(),contents[c].title.c_str());
+            std::string host = servers[i].GetUrl();
+            URIUtils::RemoveSlashAtEnd(host);
+            CFileItemPtr pItem(new CFileItem(title));
+            pItem->m_bIsFolder = true;
+            pItem->m_bIsShareOrDrive = false;
+            pItem->SetPath("plex://movies/titles/" + contents[c].section);
+            pItem->SetLabel(title);
+            items.Add(pItem);
+          }
+        }
+        else if (contents.size() == 1)
+        {
+          GetLocalMovies(items,contents[0].section);
+          items.SetContent("movies");
+          items.SetPath("");
+        }
+      }
+    }
+    else
+    {
+      GetLocalMovies(items,section);
+      items.SetContent("movies");
+    }
+
     bResult = true;
   }
   else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/years/")     ||
@@ -212,39 +271,6 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
     items.SetContent("episodes");
     bResult = true;
   }
-  else if (StringUtils::StartsWithNoCase(strDirectory, "mrmcdbhandler://tvshows/titles/"))
-  {
-    items.Clear();
-
-    //add local Shows
-    CFileItemPtr pItem(new CFileItem("Local TvShows"));
-    pItem->m_bIsFolder = true;
-    pItem->m_bIsShareOrDrive = false;
-    pItem->SetPath("videodb://tvshows/titles/");
-    pItem->SetLabel("Local TvShows");
-    items.Add(pItem);
-    
-    //look through all plex servers and pull content data for "show" type
-    std::vector<PlexServer> servers;
-    CPlexServices::GetInstance().GetServers(servers);
-    for (int i = 0; i < (int)servers.size(); i++)
-    {
-      std::vector<SectionsContent> contents = servers[i].GetTvContent();
-      for (int c = 0; c < (int)contents.size(); c++)
-      {
-        std::string title = StringUtils::Format("Plex - %s - %s",servers[i].GetServerName().c_str(),contents[c].title.c_str());
-        std::string host = servers[i].GetUrl();
-        URIUtils::RemoveSlashAtEnd(host);
-        CFileItemPtr pItem(new CFileItem(title));
-        pItem->m_bIsFolder = true;
-        pItem->m_bIsShareOrDrive = false;
-        pItem->SetPath(host + contents[c].path);
-        pItem->SetLabel(title);
-        items.Add(pItem);
-      }
-    }
-  }
-  
 }
 
 void CPlexClient::SetWatched(std::string id)
@@ -526,7 +552,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
   items.SetProperty("library.filter", "true");
 }
 
-void CPlexClient::GetLocalMovies(CFileItemList &items, std::string filter)
+void CPlexClient::GetLocalMovies(CFileItemList &items, std::string section, std::string filter)
 {
  /*
   <Video ratingKey="65" key="/library/metadata/65" studio="Plan B Entertainment" type="movie" title="12 Years a Slave" contentRating="R" summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life." rating="7.8" viewOffset="158000" lastViewedAt="1465154711" year="2013" tagline="The extraordinary true story of Solomon Northup" thumb="/library/metadata/65/thumb/1465152014" art="/library/metadata/65/art/1465152014" duration="8050153" originallyAvailableAt="2013-10-30" addedAt="1392893688" updatedAt="1465152014" chapterSource="">
@@ -546,7 +572,7 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string filter)
   */
   
 //  std::string movieXmlPath = m_strUrl + "/library/sections/1/all" + filter;
-  std::string movieXmlPath = StringUtils::Format("%s/library/sections/1/all%s",m_strUrl.c_str(),filter.c_str());
+  std::string movieXmlPath = StringUtils::Format("%s/library/sections/%s/all%s", m_strUrl.c_str(),section.c_str(),filter.c_str());
   XFILE::CCurlFile http;
   std::string strXML;
   http.Get(movieXmlPath, strXML);

@@ -145,6 +145,7 @@ void PlexServer::ParseSections()
         content.type = XMLUtils::GetAttribute(DirectoryNode, "type");
         content.title = XMLUtils::GetAttribute(DirectoryNode, "title");
         content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
+        content.section = URIUtils::GetFileName(XMLUtils::GetAttribute(DirectoryNode, "path"));
         if (content.type == "movie")
           m_movieSectionsContents.push_back(content);
         else

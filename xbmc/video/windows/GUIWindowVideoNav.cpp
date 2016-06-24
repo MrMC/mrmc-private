@@ -1243,11 +1243,24 @@ bool CGUIWindowVideoNav::OnClick(int iItem)
 
 std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
 {
+  CVideoDatabase database;
+  database.Open();
+  bool hasMovies = database.HasContent(VIDEODB_CONTENT_MOVIES);
+  bool hasTvShows = database.HasContent(VIDEODB_CONTENT_TVSHOWS);
+  database.Close();
+  
   std::string lower(dir); StringUtils::ToLower(lower);
   if (lower == "moviegenres")
     return "videodb://movies/genres/";
   else if (lower == "movietitles")
+  {
+    int ret = hasMovies + CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE);
+    if (ret > 1)
+      return "mrmcdbhandler://movies/titles/";
+    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+      return "plex://movies/titles/all";
     return "videodb://movies/titles/";
+  }
   else if (lower == "movieyears")
     return "videodb://movies/years/";
   else if (lower == "movieactors")

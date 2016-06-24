@@ -40,6 +40,7 @@ struct SectionsContent
   std::string serverVersion;
   std::string machineIdentifier;
   std::string path;
+  std::string section;
   std::string art;
   };
 

@@ -40,7 +40,7 @@ public:
 private:
   // private construction, and no assignements; use the provided singleton methods
   void GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode, std::string type, int season = -1);
-  void GetLocalMovies(CFileItemList &items, std::string filter = "");
+  void GetLocalMovies(CFileItemList &items, std::string section, std::string filter = "");
   void GetLocalTvshows(CFileItemList &items, std::string filter = "");
   void GetLocalSeasons(CFileItemList &items, const std::string directory);
   void GetLocalEpisodes(CFileItemList &items, const std::string directory);
