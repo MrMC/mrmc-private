@@ -25,7 +25,6 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "filesystem/CurlFile.h"
-#include "settings/Settings.h"
 
 #include <string>
 #include <sstream>
@@ -133,9 +132,6 @@ void PlexServer::GetIdentity()
 void PlexServer::ParseSections()
 {
   XFILE::CCurlFile plex;
-  plex.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
-  plex.SetRequestHeader("X-Plex-Product", "MrMC");
-  plex.SetRequestHeader("X-Plex-Version", "2.3.0");
   if (!m_authToken.empty())
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
   
