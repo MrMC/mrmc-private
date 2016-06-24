@@ -289,7 +289,18 @@ void CPlexServices::FetchMyPlexServers()
       while (ServerNode)
       {
         PlexServer newServer(ServerNode);
-        AddServer(newServer);
+
+        if (AddServer(newServer))
+        {
+          CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", newServer.GetServerName().c_str());
+          //CLog::Log(LOGNOTICE, "CPlexServices: New server found via GDM %s", data.c_str());
+        }
+        else if (GetServer(newServer.m_uuid))
+        {
+          //GetServer(newServer.m_uuid)->ParseData(data, host);
+          CLog::Log(LOGDEBUG, "CPlexServices: Server updated via plex.tv %s", newServer.GetServerName().c_str());
+        }
+
         ServerNode = ServerNode->NextSiblingElement("Server");
       }
       

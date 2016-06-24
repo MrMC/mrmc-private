@@ -25,6 +25,7 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "filesystem/CurlFile.h"
+#include "settings/Settings.h"
 
 #include <string>
 #include <sstream>
@@ -32,6 +33,7 @@
 
 PlexServer::PlexServer(std::string data, std::string ip)
 {
+  m_local = true;
   ParseData(data, ip);
 }
 
@@ -43,15 +45,13 @@ PlexServer::PlexServer(const TiXmlElement* ServerNode)
    </MediaContainer>
    */
   
-  
+  m_local = false;
 //  m_contentType = val;
   m_uuid = XMLUtils::GetAttribute(ServerNode, "machineIdentifier");
   m_serverName = XMLUtils::GetAttribute(ServerNode, "name");
   m_updated = atol(XMLUtils::GetAttribute(ServerNode, "updatedAt").c_str());
   m_version = XMLUtils::GetAttribute(ServerNode, "updatedAt");
   m_authToken = XMLUtils::GetAttribute(ServerNode, "accessToken");
-
-  m_local = false;
 
   CURL url;
   int port = atoi(XMLUtils::GetAttribute(ServerNode, "port").c_str());
@@ -60,6 +60,7 @@ PlexServer::PlexServer(const TiXmlElement* ServerNode)
   url.SetProtocol("http");
 
   m_url = url.Get();
+  GetIdentity();
   ParseSections();
 
 }
@@ -92,8 +93,6 @@ void PlexServer::ParseData(std::string data, std::string ip)
     }
   }
 
-  m_local = true;
-
   CURL url;
   url.SetHostName(ip);
   url.SetPort(port);
@@ -120,15 +119,33 @@ int PlexServer::GetPort()
   return url.GetPort();
 }
 
+void PlexServer::GetIdentity()
+{
+  XFILE::CCurlFile plex;
+    CURL url(m_url + "identity");
+  std::string strResponse;
+  if (plex.Get(url.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "PlexServer::GetIdentity() %s", strResponse.c_str());
+  }
+}
+
 void PlexServer::ParseSections()
 {
-  
   XFILE::CCurlFile plex;
+  plex.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
+  plex.SetRequestHeader("X-Plex-Product", "MrMC");
+  plex.SetRequestHeader("X-Plex-Version", "2.3.0");
   if (!m_authToken.empty())
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
   
   std::string strResponse = "";
-  CURL url(m_url + "system/library/sections");
+  CURL url;
+  if (m_local)
+    url = CURL(m_url + "system/library/sections");
+  else
+    url = CURL(m_url + "library/sections");
+
   if (plex.Get(url.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "PlexServer::ParseSections() %s", strResponse.c_str());

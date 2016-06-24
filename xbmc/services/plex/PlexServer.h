@@ -71,6 +71,7 @@ public:
 
 protected:
   void ParseData(std::string data, std::string ip);
+  void GetIdentity();
   void ParseSections();
 
 private:
