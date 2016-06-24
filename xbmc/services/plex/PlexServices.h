@@ -75,5 +75,8 @@ private:
   std::string       m_myPlexUser;
   std::string       m_myPlexPass;
   std::string       m_myPlexToken;
+  bool              m_localGDM;
+  std::string       m_localHost;
+  std::string       m_localPort;
   std::vector<PlexServer> m_servers;
 };

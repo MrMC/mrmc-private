@@ -135,10 +135,10 @@ void CPlexServices::ApplyUserSettings()
   m_myPlexPass = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
   // end of Plex settings
 
-  // 1 is auto, 2 is manual and port/host below
-  int server = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXSERVER);
-  std::string port = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERPORT);
-  std::string host = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERHOST);
+  // 1 is auto, 2 is manual and host/port below
+  m_localGDM  = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXSERVER) == 1;
+  m_localHost = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERHOST);
+  m_localPort = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERPORT);
 }
 
 void CPlexServices::Process()
@@ -154,84 +154,90 @@ void CPlexServices::Process()
       FetchMyPlexServers();
     }
 
-    SOCKETS::CUDPSocket *socket = SOCKETS::CSocketFactory::CreateUDPSocket();
-    if (!socket)
+    if (m_localGDM)
     {
-      CLog::Log(LOGERROR, "CPlexServices: Could not create socket, aborting!");
-      return;
-    }
-
-    SOCKETS::CAddress my_addr;
-    my_addr.SetAddress(iface->GetCurrentIPAddress().c_str());
-    if (!socket->Bind(my_addr, NS_PLEX_MEDIA_SERVER_PORT, 0))
-    {
-      CLog::Log(LOGERROR, "CPlexServices: Could not listen on port %d", NS_PLEX_MEDIA_SERVER_PORT);
-      SAFE_DELETE(socket);
-      return;
-    }
-    socket->SetBroadCast(true);
-
-    SOCKETS::CSocketListener listener;
-    // add our socket to the 'select' listener
-    listener.AddSocket(socket);
-
-    // do an initial broadcast to get things rolling
-    SendDiscoverBroadcast(socket);
-
-    CStopWatch idleTimer;
-    idleTimer.StartZero();
-    while (!m_bStop)
-    {
-      std::map<std::string, std::string> vBuffer;
-
-      // send a discover broadcast every N seconds
-      if (idleTimer.GetElapsedMilliseconds() > 5000)
+      SOCKETS::CUDPSocket *socket = SOCKETS::CSocketFactory::CreateUDPSocket();
+      if (!socket)
       {
-        SendDiscoverBroadcast(socket);
-        idleTimer.Reset();
-      }
-      // start listening until we timeout
-      if (listener.Listen(250))
-      {
-        char buffer[1024] = {0};
-        SOCKETS::CAddress sender;
-        int packetSize = socket->Read(sender, 1024, buffer);
-        if (packetSize > -1)
-        {
-          std::string buf(buffer, packetSize);
-          if (buf.find("200 OK") != std::string::npos)
-            vBuffer[sender.Address()] = buf;
-        }
+        CLog::Log(LOGERROR, "CPlexServices: Could not create socket, aborting!");
+        return;
       }
 
-      for (std::map<std::string, std::string>::iterator it = vBuffer.begin(); it != vBuffer.end(); ++it)
+      SOCKETS::CAddress my_addr;
+      my_addr.SetAddress(iface->GetCurrentIPAddress().c_str());
+      if (!socket->Bind(my_addr, NS_PLEX_MEDIA_SERVER_PORT, 0))
       {
-        std::string host = it->first;
-        std::string data = it->second;
+        CLog::Log(LOGERROR, "CPlexServices: Could not listen on port %d", NS_PLEX_MEDIA_SERVER_PORT);
+        SAFE_DELETE(socket);
+        return;
+      }
+      socket->SetBroadCast(true);
 
-        PlexServer newServer(data, host);
-/*
-        // Set token for local servers
-        if (Config::GetInstance().UsePlexAccount)
-          newServer.SetAuthToken(Plexservice::GetMyPlexToken());
-*/
-        if (AddServer(newServer))
+      SOCKETS::CSocketListener listener;
+      // add our socket to the 'select' listener
+      listener.AddSocket(socket);
+
+      // do an initial broadcast to get things rolling
+      SendDiscoverBroadcast(socket);
+
+      CStopWatch idleTimer;
+      idleTimer.StartZero();
+      while (!m_bStop)
+      {
+        std::map<std::string, std::string> vBuffer;
+
+        // send a discover broadcast every N seconds
+        if (idleTimer.GetElapsedMilliseconds() > 5000)
         {
-          CLog::Log(LOGNOTICE, "CPlexServices: Server found via GDM %s", host.c_str());
-          //CLog::Log(LOGNOTICE, "CPlexServices: New server found via GDM %s", data.c_str());
+          SendDiscoverBroadcast(socket);
+          idleTimer.Reset();
         }
-        else if (GetServer(newServer.m_uuid))
+        // start listening until we timeout
+        if (listener.Listen(250))
         {
-          GetServer(newServer.m_uuid)->ParseData(data, host);
-          CLog::Log(LOGDEBUG, "CPlexServices: Server updated via GDM %s", host.c_str());
+          char buffer[1024] = {0};
+          SOCKETS::CAddress sender;
+          int packetSize = socket->Read(sender, 1024, buffer);
+          if (packetSize > -1)
+          {
+            std::string buf(buffer, packetSize);
+            if (buf.find("200 OK") != std::string::npos)
+              vBuffer[sender.Address()] = buf;
+          }
         }
+
+        for (std::map<std::string, std::string>::iterator it = vBuffer.begin(); it != vBuffer.end(); ++it)
+        {
+          std::string host = it->first;
+          std::string data = it->second;
+
+          PlexServer newServer(data, host);
+  /*
+          // Set token for local servers
+          if (Config::GetInstance().UsePlexAccount)
+            newServer.SetAuthToken(Plexservice::GetMyPlexToken());
+  */
+          if (AddServer(newServer))
+          {
+            CLog::Log(LOGNOTICE, "CPlexServices: Server found via GDM %s", host.c_str());
+            //CLog::Log(LOGNOTICE, "CPlexServices: New server found via GDM %s", data.c_str());
+          }
+          else if (GetServer(newServer.m_uuid))
+          {
+            GetServer(newServer.m_uuid)->ParseData(data, host);
+            CLog::Log(LOGDEBUG, "CPlexServices: Server updated via GDM %s", host.c_str());
+          }
+        }
+        usleep(50 * 1000);
       }
 
-      usleep(50 * 1000);
+      if (socket)
+        SAFE_DELETE(socket);
     }
-
-    if (socket)
-      SAFE_DELETE(socket);
+    else
+    {
+      // manual connect to local plex server
+    }
   }
 }
 
