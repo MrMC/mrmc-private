@@ -1699,9 +1699,6 @@
 		F55BD3021D0A14ED0072FE3A /* PlexServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3001D0A14ED0072FE3A /* PlexServices.cpp */; };
 		F55BD3031D0A14ED0072FE3A /* PlexServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3001D0A14ED0072FE3A /* PlexServices.cpp */; };
 		F55BD3041D0A14ED0072FE3A /* PlexServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3001D0A14ED0072FE3A /* PlexServices.cpp */; };
-		F55BD3071D186F2E0072FE3A /* PlexDiscovery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3051D186F2E0072FE3A /* PlexDiscovery.cpp */; };
-		F55BD3081D186F2E0072FE3A /* PlexDiscovery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3051D186F2E0072FE3A /* PlexDiscovery.cpp */; };
-		F55BD3091D186F2E0072FE3A /* PlexDiscovery.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3051D186F2E0072FE3A /* PlexDiscovery.cpp */; };
 		F55BD30C1D18C70B0072FE3A /* PlexServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD30A1D18C70B0072FE3A /* PlexServer.cpp */; };
 		F55BD30D1D18C70B0072FE3A /* PlexServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD30A1D18C70B0072FE3A /* PlexServer.cpp */; };
 		F55BD30E1D18C70B0072FE3A /* PlexServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD30A1D18C70B0072FE3A /* PlexServer.cpp */; };
@@ -5094,8 +5091,6 @@
 		F559021E1C30A2BD00349249 /* DSMFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSMFile.h; sourceTree = "<group>"; };
 		F55BD3001D0A14ED0072FE3A /* PlexServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlexServices.cpp; sourceTree = "<group>"; };
 		F55BD3011D0A14ED0072FE3A /* PlexServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlexServices.h; sourceTree = "<group>"; };
-		F55BD3051D186F2E0072FE3A /* PlexDiscovery.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlexDiscovery.cpp; sourceTree = "<group>"; };
-		F55BD3061D186F2E0072FE3A /* PlexDiscovery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlexDiscovery.h; sourceTree = "<group>"; };
 		F55BD30A1D18C70B0072FE3A /* PlexServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlexServer.cpp; sourceTree = "<group>"; };
 		F55BD30B1D18C70B0072FE3A /* PlexServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlexServer.h; sourceTree = "<group>"; };
 		F5632F8F1CB9473A002027D9 /* Autorun.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Autorun.cpp; sourceTree = "<group>"; };
@@ -8909,8 +8904,6 @@
 			children = (
 				18D18CE61D0DC14400BBAB05 /* PlexClient.cpp */,
 				18D18CE71D0DC14400BBAB05 /* PlexClient.h */,
-				F55BD3051D186F2E0072FE3A /* PlexDiscovery.cpp */,
-				F55BD3061D186F2E0072FE3A /* PlexDiscovery.h */,
 				F55BD30A1D18C70B0072FE3A /* PlexServer.cpp */,
 				F55BD30B1D18C70B0072FE3A /* PlexServer.h */,
 				F55BD3001D0A14ED0072FE3A /* PlexServices.cpp */,
@@ -10713,7 +10706,6 @@
 				F56352BC16E5403400D21BAD /* GUIWindowSettingsCategory.cpp in Sources */,
 				F56352BE16E5403400D21BAD /* GUIWindowSettingsScreenCalibration.cpp in Sources */,
 				F5B724CB1C7E150C006432AE /* int64.cpp in Sources */,
-				F55BD3071D186F2E0072FE3A /* PlexDiscovery.cpp in Sources */,
 				F56352BF16E5403400D21BAD /* GUIWindowTestPattern.cpp in Sources */,
 				F56352C816E5436900D21BAD /* AppParamParser.cpp in Sources */,
 				F56353BF16E9BB3500D21BAD /* BitstreamConverter.cpp in Sources */,
@@ -11550,7 +11542,6 @@
 				E49913F2174E5FB000741B6D /* PVRClient.cpp in Sources */,
 				E49913F3174E5FB000741B6D /* PVRClients.cpp in Sources */,
 				E49913F4174E5FB000741B6D /* PVRChannel.cpp in Sources */,
-				F55BD3081D186F2E0072FE3A /* PlexDiscovery.cpp in Sources */,
 				E49913F5174E5FB000741B6D /* PVRChannelGroup.cpp in Sources */,
 				F5D5F2EC1C2083B700E3FE8B /* darwinICMPPing.m in Sources */,
 				E49913F6174E5FB000741B6D /* PVRChannelGroupInternal.cpp in Sources */,
@@ -12066,7 +12057,6 @@
 				F5D13F161BAF0B6D0075A95C /* PngIO.cpp in Sources */,
 				F5D13F171BAF0B6D0075A95C /* DVDFactorySubtitle.cpp in Sources */,
 				F5D13F181BAF0B6D0075A95C /* DVDSubtitleLineCollection.cpp in Sources */,
-				F55BD3091D186F2E0072FE3A /* PlexDiscovery.cpp in Sources */,
 				F5D13F191BAF0B6D0075A95C /* DVDSubtitleParserSubrip.cpp in Sources */,
 				F5D13F1A1BAF0B6D0075A95C /* DVDSubtitleParserVplayer.cpp in Sources */,
 				F5D13F1B1BAF0B6D0075A95C /* DVDSubtitleStream.cpp in Sources */,

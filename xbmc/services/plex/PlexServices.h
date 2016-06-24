@@ -24,6 +24,12 @@
 #include "settings/lib/ISettingCallback.h"
 #include "interfaces/IAnnouncer.h"
 
+namespace SOCKETS
+{
+  class CUDPSocket;
+}
+class PlexServer;
+
 class CPlexServices
 : public CThread
 , public ISettingCallback
@@ -51,9 +57,23 @@ private:
   // IRunnable entry point for thread
   virtual void  Process() override;
 
-  bool InitConnection();
-  void ApplyUserSettings();
+  bool          InitConnection();
+  void          ApplyUserSettings();
+
+  void          FetchPlexToken();
+  void          FetchMyPlexServers();
+  void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
+  PlexServer*   GetServer(std::string uuid);
+  bool          AddServer(PlexServer server);
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
+
+  std::string       m_client_uuid;
+
+  bool              m_myPlexEnabled;
+  std::string       m_myPlexUser;
+  std::string       m_myPlexPass;
+  std::string       m_myPlexToken;
+  std::vector<PlexServer> m_servers;
 };

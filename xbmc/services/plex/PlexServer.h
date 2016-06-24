@@ -23,7 +23,7 @@
 
 class PlexServer
 {
-  friend class CPlexDiscovery;
+  friend class CPlexServices;
 
 public:
   PlexServer(std::string data, std::string ip);
