@@ -288,27 +288,10 @@ void CPlexServices::FetchMyPlexServers()
       const TiXmlElement* ServerNode = MediaContainer->FirstChildElement("Server");
       while (ServerNode)
       {
+        PlexServer newServer(ServerNode);
         ServerNode = ServerNode->NextSiblingElement("Server");
       }
-    }
-  }
-
-  strResponse = "";
-  url.Parse("https://plex.tv/pms/system/library/sections");
-  if (plex.Get(url.Get(), strResponse))
-  {
-    CLog::Log(LOGDEBUG, "CPlexServices: sections %s", strResponse.c_str());
-    TiXmlDocument xml;
-    xml.Parse(strResponse.c_str());
-
-    TiXmlElement* MediaContainer = xml.RootElement();
-    if (MediaContainer)
-    {
-      const TiXmlElement* DirectoryNode = MediaContainer->FirstChildElement("Directory");
-      while (DirectoryNode)
-      {
-        DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
-      }
+      
     }
   }
 }

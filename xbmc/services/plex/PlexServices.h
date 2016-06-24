@@ -23,6 +23,7 @@
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
 #include "interfaces/IAnnouncer.h"
+#include "PlexServer.h"
 
 namespace SOCKETS
 {
@@ -41,7 +42,7 @@ public:
   void Start();
   void Stop();
   bool IsActive();
-
+  void GetServers(std::vector<PlexServer> &servers) const {servers = m_servers; }
   // ISetting callbacks
   virtual void OnSettingChanged(const CSetting *setting) override;
 

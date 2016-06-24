@@ -19,6 +19,7 @@
  */
 
 #include "PlexClient.h"
+#include "PlexServices.h"
 
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
@@ -211,6 +212,39 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
     items.SetContent("episodes");
     bResult = true;
   }
+  else if (StringUtils::StartsWithNoCase(strDirectory, "mrmcdbhandler://tvshows/titles/"))
+  {
+    items.Clear();
+
+    //add local Shows
+    CFileItemPtr pItem(new CFileItem("Local TvShows"));
+    pItem->m_bIsFolder = true;
+    pItem->m_bIsShareOrDrive = false;
+    pItem->SetPath("videodb://tvshows/titles/");
+    pItem->SetLabel("Local TvShows");
+    items.Add(pItem);
+    
+    //look through all plex servers and pull content data for "show" type
+    std::vector<PlexServer> servers;
+    CPlexServices::GetInstance().GetServers(servers);
+    for (int i = 0; i < (int)servers.size(); i++)
+    {
+      std::vector<SectionsContent> contents = servers[i].GetTvContent();
+      for (int c = 0; c < (int)contents.size(); c++)
+      {
+        std::string title = StringUtils::Format("Plex - %s - %s",servers[i].GetServerName().c_str(),contents[c].title.c_str());
+        std::string host = servers[i].GetUrl();
+        URIUtils::RemoveSlashAtEnd(host);
+        CFileItemPtr pItem(new CFileItem(title));
+        pItem->m_bIsFolder = true;
+        pItem->m_bIsShareOrDrive = false;
+        pItem->SetPath(host + contents[c].path);
+        pItem->SetLabel(title);
+        items.Add(pItem);
+      }
+    }
+  }
+  
 }
 
 void CPlexClient::SetWatched(std::string id)
