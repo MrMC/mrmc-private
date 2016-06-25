@@ -395,6 +395,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
     CDateTime aTime(addedTime);
     plexItem->GetVideoInfoTag()->m_dateAdded = aTime;
     
+    StringUtils::TrimLeft(fanart, "/");
     url.SetFileName(fanart);
     plexItem->SetArt("fanart", url.Get());
     
