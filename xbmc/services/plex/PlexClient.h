@@ -30,24 +30,20 @@ public:
   ~CPlexClient();
   static CPlexClient &GetInstance();
   void HandleMedia(CFileItemList &items,bool &bResult, std::string strDirectory);
-  void SetWatched(std::string id);
-  void SetUnWatched(std::string id);
+  void SetWatched(CFileItem* item);
+  void SetUnWatched(CFileItem* item);
   void SetOffset(CFileItem item, int offsetSeconds);
   void GetLocalRecentlyAddedEpisodes(CFileItemList &items);
   void GetLocalRecentlyAddedMovies(CFileItemList &items);
-
-  void GetMovies(CFileItemList &items, std::string strXML, std::string filter = "");
-
-
-private:
-  // private construction, and no assignements; use the provided singleton methods
-  void GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode, std::string type, int season = -1);
-  void GetLocalMovies(CFileItemList &items, std::string section, std::string filter = "");
+  
+  void GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
+  void GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");
   void GetLocalTvshows(CFileItemList &items, std::string filter = "");
   void GetLocalSeasons(CFileItemList &items, const std::string directory);
   void GetLocalEpisodes(CFileItemList &items, const std::string directory);
-  void GetLocalFilter(CFileItemList &items, std::string filter , std::string parentPath ,bool movie);
+  void GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
+
+private:
+  // private construction, and no assignements; use the provided singleton methods
   std::string m_strUrl;
-  std::map<std::string, std::string> m_vFilter;
-  std::string m_filter;
 };

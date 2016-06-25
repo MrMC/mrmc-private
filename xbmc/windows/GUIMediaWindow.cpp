@@ -1595,9 +1595,9 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       if (item->IsPlex())
       {
         if (button == CONTEXT_BUTTON_MARK_WATCHED)
-          CPlexClient::GetInstance().SetWatched(item->GetVideoInfoTag()->m_strPlexId);
+          CPlexClient::GetInstance().SetWatched(item.get());
         else
-          CPlexClient::GetInstance().SetUnWatched(item->GetVideoInfoTag()->m_strPlexId);
+          CPlexClient::GetInstance().SetUnWatched(item.get());
         item->GetVideoInfoTag()->m_playCount = (button == CONTEXT_BUTTON_MARK_WATCHED);
         item->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_playCount > 0);
         return true;

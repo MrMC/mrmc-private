@@ -383,6 +383,9 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
 
   items.ClearArt();
   items.ClearProperties();
+  
+  // we need to remove cache
+  items.RemoveDiscCache(GetID());
 
   bool bResult = CGUIWindowVideoBase::GetDirectory(strDirectory, items);
   if (bResult)
@@ -563,12 +566,6 @@ bool CGUIWindowVideoNav::GetDirectory(const std::string &strDirectory, CFileItem
       newTag->SetSpecialSort(SortSpecialOnTop);
       items.Add(newTag);
     }
-  }
-  
-  // if plex is enabled, list movies or tvshows
-  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
-  {
-    CPlexClient::GetInstance().HandleMedia(items, bResult, strDirectory);
   }
   return bResult;
 }
@@ -1243,36 +1240,52 @@ bool CGUIWindowVideoNav::OnClick(int iItem)
 
 std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
 {
-  CVideoDatabase database;
-  database.Open();
-  bool hasMovies = database.HasContent(VIDEODB_CONTENT_MOVIES);
-  bool hasTvShows = database.HasContent(VIDEODB_CONTENT_TVSHOWS);
-  database.Close();
+  /*
+  "videodb://tvshows/genres"
+  "videodb://tvshows/titles"
+  "videodb://tvshows/years"
+  "videodb://tvshows/actors"
+  "videodb://tvshows/studios"
+  "videodb://tvshows/tags"
   
+   else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/years/")     ||
+   StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/genres/")    ||
+   StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/actors/")    ||
+   StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/directors/") ||
+   StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/sets/")      ||
+   StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/countries/") ||
+   StringUtils::StartsWithNoCase(strDirectory, "videodb://movies/studios/")
+   
+  <Directory secondary="1" key="collection" title="By Collection" />
+  <Directory secondary="1" key="firstCharacter" title="By First Letter" />
+  <Directory secondary="1" key="genre" title="By Genre" />
+  <Directory secondary="1" key="year" title="By Year" />
+  <Directory secondary="1" key="contentRating" title="By Content Rating" />
+  
+  "videodb://movies/titles"
+  "videodb://movies/years"
+  "videodb://movies/genres"
+  "videodb://movies/actors"
+  "videodb://movies/directors"
+  "videodb://movies/sets"
+  "videodb://movies/countries"
+  "videodb://movies/studios"
+  */
   std::string lower(dir); StringUtils::ToLower(lower);
-  if (lower == "moviegenres")
-    return "videodb://movies/genres/";
-  else if (lower == "movietitles")
+  if (lower == "movietitles"||
+      lower == "moviegenres"||
+      lower == "movieyears" ||
+      lower == "movieactors" ||
+      lower == "moviedirectors" ||
+      lower == "moviesets" ||
+      lower == "moviecountries"||
+      lower == "moviestudios")
   {
-    int ret = hasMovies + CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE);
-    if (ret > 1)
-      return "mrmcdbhandler://movies/titles/";
+    StringUtils::Replace(lower, "movie", "");
     if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
-      return "plex://movies/titles/all";
-    return "videodb://movies/titles/";
-  }
-  else if (lower == "movieyears")
-    return "videodb://movies/years/";
-  else if (lower == "movieactors")
-    return "videodb://movies/actors/";
-  else if (lower == "moviedirectors")
-    return "videodb://movies/directors/";
-  else if (lower == "moviestudios")
-    return "videodb://movies/studios/";
-  else if (lower == "moviesets")
-    return "videodb://movies/sets/";
-  else if (lower == "moviecountries")
-    return "videodb://movies/countries/";
+      return "plex://movies/" + lower + "/";
+    return "videodb://movies/" + lower + "/";
+  } 
   else if (lower == "movietags")
     return "videodb://movies/tags/";
   else if (lower == "movies")

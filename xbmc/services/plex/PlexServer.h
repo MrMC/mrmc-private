@@ -58,6 +58,7 @@ public:
   const std::string &GetUuid() const { return m_uuid; }
   const std::string &GetVersion() const { return m_version; }
   const std::string &GetAuthToken() const { return m_authToken; }
+  const std::string &GetScheme() const { return m_scheme; }
   void  SetAuthToken(std::string token) { m_authToken = token; }
   const std::vector<SectionsContent> &GetTvContent() const { return m_showSectionsContents; }
   const std::vector<SectionsContent> &GetMovieContent() const { return m_movieSectionsContents; }

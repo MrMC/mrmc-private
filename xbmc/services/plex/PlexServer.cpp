@@ -64,7 +64,6 @@ PlexServer::PlexServer(const TiXmlElement* ServerNode)
 
   m_url = url.Get();
   GetIdentity();
-  ParseSections();
 }
 
 void PlexServer::ParseData(std::string data, std::string ip)
@@ -102,7 +101,6 @@ void PlexServer::ParseData(std::string data, std::string ip)
   url.SetProtocol("http");
 
   m_url = url.Get();
-  ParseSections();
 }
 
 std::string PlexServer::GetUrl()
@@ -141,8 +139,8 @@ void PlexServer::ParseSections()
   //  plex.SetRequestHeader("X-Plex-Token", m_authToken);
   
   std::string url = "library/sections";
-  if (m_local)
-    url = "system/" + url;
+//  if (m_local)
+//    url = "system/" + url;
 
   CURL curl(m_url);
   curl.SetFileName(curl.GetFileName() + url);

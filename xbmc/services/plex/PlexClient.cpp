@@ -20,7 +20,7 @@
 
 #include "PlexClient.h"
 #include "PlexServices.h"
-
+#include "utils/Base64.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/XMLUtils.h"
@@ -31,10 +31,9 @@
 
 #include "video/VideoInfoTag.h"
 
-
 CPlexClient::CPlexClient()
 {
-  m_strUrl = "http://192.168.2.202:32400";
+//  m_strUrl = "http://192.168.2.202:32400";
 }
 
 CPlexClient::~CPlexClient()
@@ -179,8 +178,8 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
       {
         strLabel = URIUtils::GetFileName(items.GetPath());
       }
-      std::string strFilter = "?" + m_filter + "=" + m_vFilter[strLabel];
-      GetLocalMovies(items, strFilter);
+//      std::string strFilter = "?" + m_filter + "=" + m_vFilter[strLabel];
+//      GetLocalMovies(items, strFilter);
       items.SetContent("movies");
     }
     else
@@ -201,7 +200,7 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
       else if (items.GetContent() == "studios")
         filter = "studio";
 
-      GetLocalFilter(items, filter ,strDirectory, true );
+//      GetLocalFilter(items, filter ,strDirectory, true );
       items.SetContent("movies");
     }
     bResult = true;
@@ -242,8 +241,8 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
       {
         strLabel = URIUtils::GetFileName(items.GetPath());
       }
-      std::string strFilter = "?" + m_filter + "=" + m_vFilter[strLabel];
-      GetLocalTvshows(items, strFilter);
+//      std::string strFilter = "?" + m_filter + "=" + m_vFilter[strLabel];
+//      GetLocalTvshows(items, strFilter);
       items.SetContent("tvshows");
     }
     else if (items.GetContent() != "episodes" && items.GetContent() != "seasons")
@@ -256,7 +255,7 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
       else if (items.GetContent() == "studios")
         filter = "studio";
       
-      GetLocalFilter(items, filter, strDirectory , false);
+//      GetLocalFilter(items, filter, strDirectory , false);
       items.SetContent("tvshows");
     }
     bResult = true;
@@ -277,23 +276,32 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
   }
 }
 
-void CPlexClient::SetWatched(std::string id)
+void CPlexClient::SetWatched(CFileItem* item)
 {
   // http://localhost:32400/:/scrobble?identifier=com.plexapp.plugins.library&amp;key=
   
-  std::string scrobbleUrl = StringUtils::Format("%s/:/scrobble?identifier=com.plexapp.plugins.library&key=%s", m_strUrl.c_str(), id.c_str());
+//  std::string scrobbleUrl = StringUtils::Format("%s/:/scrobble?identifier=com.plexapp.plugins.library&key=%s", m_strUrl.c_str(), id.c_str());
+  
+  CURL url2(item->GetVideoInfoTag()->m_strPath);
+  url2.SetProtocol("http");
   XFILE::CCurlFile http;
+  std::string strXML;
+  std::string scrobbleUrl = url2.Get();
+  http.Get(url2.Get(), strXML);
+  
   std::string response;
   http.Get(scrobbleUrl, response);
+  std::string response2;
 }
 
-void CPlexClient::SetUnWatched(std::string id)
+void CPlexClient::SetUnWatched(CFileItem* item)
 {
-  //http://localhost:32400/:/unscrobble?identifier=com.plexapp.plugins.library&amp;key=
-    std::string unscrobbleUrl = StringUtils::Format("%s/:/unscrobble?identifier=com.plexapp.plugins.library&key=%s", m_strUrl.c_str(), id.c_str());
-  XFILE::CCurlFile http;
-  std::string response;
-  http.Get(unscrobbleUrl, response);
+//  //http://localhost:32400/:/unscrobble?identifier=com.plexapp.plugins.library&amp;key=
+//    std::string unscrobbleUrl = StringUtils::Format("%s/:/unscrobble?identifier=com.plexapp.plugins.library&key=%s", m_strUrl.c_str(), id.c_str());
+//  XFILE::CCurlFile http;
+//  std::string response;
+//  http.Get(unscrobbleUrl, response);
+//  std::string response2;
 }
 
 void CPlexClient::SetOffset(CFileItem item, int offsetSeconds)
@@ -306,7 +314,7 @@ void CPlexClient::SetOffset(CFileItem item, int offsetSeconds)
   //  http://192.168.1.200:32400/:/timeline?ratingKey=65&key=/library/metadata/65&state=stopped&playQueueItemID=3&time=3010&duration=8050153
 }
 
-void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
+void CPlexClient::GetVideoItems(CFileItemList &items, CURL url,TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
 {
   const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
   while (videoNode)
@@ -337,6 +345,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
      */
     CFileItemPtr plexItem(new CFileItem());
     std::string fanart;
+    std::string value;
     // if we have season means we are listing episodes, we need to get the fanart from rootXmlNode.
     // movies has it in videoNode
     if (season > -1)
@@ -352,7 +361,8 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
       plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(videoNode, "grandparentTitle");
       plexItem->GetVideoInfoTag()->m_iSeason = atoi(XMLUtils::GetAttribute(videoNode, "parentIndex").c_str());
       plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(videoNode, "index").c_str());
-      plexItem->SetArt("tvshow.poster", m_strUrl + XMLUtils::GetAttribute(videoNode, "parentThumb"));
+      url.SetFileName(XMLUtils::GetAttribute(videoNode, "parentThumb"));
+      plexItem->SetArt("tvshow.poster", url.Get());
       plexItem->SetArt("thumb", m_strUrl + XMLUtils::GetAttribute(videoNode, "parentThumb"));
       plexItem->SetArt("tvshow.thumb", m_strUrl + XMLUtils::GetAttribute(videoNode, "parentThumb"));
       plexItem->SetIconImage(m_strUrl + XMLUtils::GetAttribute(videoNode, "parentThumb"));
@@ -361,7 +371,11 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
     {
       fanart = XMLUtils::GetAttribute(videoNode, "art");
       plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
-      plexItem->SetArt("thumb", m_strUrl + XMLUtils::GetAttribute(videoNode, "thumb"));
+      // is this the only way to set token and URL??
+      value = XMLUtils::GetAttribute(videoNode, "thumb");
+      StringUtils::TrimLeft(value, "/");
+      url.SetFileName(value);
+      plexItem->SetArt("thumb", url.Get());
       plexItem->SetIconImage(m_strUrl + XMLUtils::GetAttribute(videoNode, "thumb"));
     }
     
@@ -556,19 +570,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, TiXmlElement* rootXmlNode,
   items.SetProperty("library.filter", "true");
 }
 
-void CPlexClient::GetMovies(CFileItemList &items, std::string strXML, std::string filter)
-{
-  TiXmlDocument xml;
-  xml.Parse(strXML.c_str());
-
-  TiXmlElement* rootXmlNode = xml.RootElement();
-  if (rootXmlNode)
-  {
-    GetVideoItems(items, rootXmlNode, MediaTypePlexMovie);
-  }
-}
-
-void CPlexClient::GetLocalMovies(CFileItemList &items, std::string section, std::string filter)
+void CPlexClient::GetLocalMovies(CFileItemList &items, std::string url, std::string filter)
 {
  /*
   <Video ratingKey="65" key="/library/metadata/65" studio="Plan B Entertainment" type="movie" title="12 Years a Slave" contentRating="R" summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life." rating="7.8" viewOffset="158000" lastViewedAt="1465154711" year="2013" tagline="The extraordinary true story of Solomon Northup" thumb="/library/metadata/65/thumb/1465152014" art="/library/metadata/65/art/1465152014" duration="8050153" originallyAvailableAt="2013-10-30" addedAt="1392893688" updatedAt="1465152014" chapterSource="">
@@ -588,18 +590,23 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string section, std:
   */
   
 //  std::string movieXmlPath = m_strUrl + "/library/sections/1/all" + filter;
-  std::string movieXmlPath = StringUtils::Format("%s/library/sections/%s/all%s", m_strUrl.c_str(),section.c_str(),filter.c_str());
+//  std::string movieXmlPath = StringUtils::Format("%s%s", section.c_str(),filter.c_str());
+  CURL url2(url);
+  url2.SetProtocol("http");
   XFILE::CCurlFile http;
   std::string strXML;
-  http.Get(movieXmlPath, strXML);
+  http.Get(url2.Get(), strXML);
 
+  m_strUrl = url2.GetWithoutFilename();
+  
+  URIUtils::RemoveSlashAtEnd(m_strUrl);
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
 
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    GetVideoItems(items, rootXmlNode, MediaTypePlexMovie);
+    GetVideoItems(items, url2, rootXmlNode, MediaTypePlexMovie);
   }
 }
 
@@ -883,7 +890,7 @@ void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string direc
   if (rootXmlNode)
   {
     int season = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentIndex").c_str());
-    GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode, season);
+//    GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode, season);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   }
 }
@@ -904,7 +911,7 @@ void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items)
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode);
+//    GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode);
 //    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
@@ -926,23 +933,23 @@ void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items)
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    GetVideoItems(items,rootXmlNode, MediaTypePlexMovie);
+//    GetVideoItems(items,rootXmlNode, MediaTypePlexMovie);
     //    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
 }
 
-void CPlexClient::GetLocalFilter(CFileItemList &items, std::string filter, std::string parentPath , bool movie)
+void CPlexClient::GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
 {
-  
-  m_vFilter.clear();
-  m_filter = filter;
-  
-  std::string filterXmlPath = StringUtils::Format("%s/library/sections/%s/%s",
-                                                  m_strUrl.c_str(), movie ? "1":"2" ,filter.c_str());
+    
   XFILE::CCurlFile http;
   std::string strXML;
-  http.Get(filterXmlPath, strXML);
+  
+  CURL url2(url);
+  url2.SetProtocol("http");
+  url2.SetFileName(url2.GetFileName() + filter);
+  
+  http.Get(url2.Get(), strXML);
   
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
@@ -955,26 +962,15 @@ void CPlexClient::GetLocalFilter(CFileItemList &items, std::string filter, std::
     {
       std::string title = XMLUtils::GetAttribute(directoryNode, "title");
       std::string key = XMLUtils::GetAttribute(directoryNode, "key");
-      bool add = true;
-      for (int i = 0; i < items.Size(); i++)
-      {
-        if (items[i]->GetLabel() == title)
-        {
-          add = false;
-        }
-      }
-      
-      if (add)
-      {
-        CFileItemPtr pItem(new CFileItem(title));
-        pItem->m_bIsFolder = true;
-        pItem->m_bIsShareOrDrive = false;
-        pItem->SetPath(parentPath + "/" + title);
-        pItem->SetLabel(title);
-        items.Add(pItem);
-      }
-      
-      m_vFilter[title] = key;
+      CFileItemPtr pItem(new CFileItem(title));
+      pItem->m_bIsFolder = true;
+      pItem->m_bIsShareOrDrive = false;
+      CURL url3(url);
+      url3.SetProtocol("http");
+      url3.SetFileName(url3.GetFileName() + "all?" + filter + "=" + key);
+      pItem->SetPath(parentPath + Base64::Encode(url3.Get()));
+      pItem->SetLabel(title);
+      items.Add(pItem);
       directoryNode = directoryNode->NextSiblingElement("Directory");
     }
   }

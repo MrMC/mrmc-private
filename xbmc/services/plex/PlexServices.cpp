@@ -87,6 +87,7 @@ void CPlexServices::Stop()
   {
     StopThread();
   }
+  m_servers.clear();
 }
 
 bool CPlexServices::IsActive()
@@ -336,7 +337,7 @@ bool CPlexServices::AddServer(PlexServer server)
     if (s_it->GetUuid() == server.GetUuid())
     return false;
   }
-
+  server.ParseSections();
   m_servers.push_back(server);
   return true;
 }

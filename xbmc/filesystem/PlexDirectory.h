@@ -30,6 +30,7 @@ namespace XFILE
     virtual ~CPlexDirectory();
 
     virtual bool GetDirectory(const CURL& url, CFileItemList &items);
+    virtual DIR_CACHE_TYPE GetCacheType(const CURL& url) const { return DIR_CACHE_NEVER; };
 
   protected:
     virtual std::string TranslatePath(const CURL &url);
