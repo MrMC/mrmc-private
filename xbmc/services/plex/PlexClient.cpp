@@ -314,7 +314,7 @@ void CPlexClient::SetOffset(CFileItem item, int offsetSeconds)
   //  http://192.168.1.200:32400/:/timeline?ratingKey=65&key=/library/metadata/65&state=stopped&playQueueItemID=3&time=3010&duration=8050153
 }
 
-void CPlexClient::GetVideoItems(CFileItemList &items, CURL url,TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
+void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
 {
   const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
   while (videoNode)
@@ -395,7 +395,8 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url,TiXmlElement* roo
     CDateTime aTime(addedTime);
     plexItem->GetVideoInfoTag()->m_dateAdded = aTime;
     
-    plexItem->SetArt("fanart", m_strUrl + fanart);
+    url.SetFileName(fanart);
+    plexItem->SetArt("fanart", url.Get());
     
     plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(videoNode, "year").c_str());
     plexItem->GetVideoInfoTag()->m_fRating = atof(XMLUtils::GetAttribute(videoNode, "rating").c_str());
@@ -555,10 +556,13 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url,TiXmlElement* roo
          videoProfile="high"
          
          */
-        std::string path = m_strUrl + ((TiXmlElement*) partNode)->Attribute("key");
+        std::string key = ((TiXmlElement*) partNode)->Attribute("key");
+        if (key.size() && (key[0] == '/' || key[0] == '\\'))
+          key = key.substr(1);
+        url.SetFileName(key);
+        plexItem->SetPath(url.Get());
+        plexItem->GetVideoInfoTag()->m_strFileNameAndPath = url.Get();
         plexItem->GetVideoInfoTag()->m_strPlexFile = XMLUtils::GetAttribute(partNode, "file");
-        plexItem->SetPath(path);
-        plexItem->GetVideoInfoTag()->m_strFileNameAndPath = path;
       }
     }
     
@@ -597,7 +601,9 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string url, std::str
   std::string strXML;
   http.Get(url2.Get(), strXML);
 
-  m_strUrl = url2.GetWithoutFilename();
+  CURL url_withAuthToken(url2);
+  url_withAuthToken.SetFileName("");
+  m_strUrl = url_withAuthToken.Get();
   
   URIUtils::RemoveSlashAtEnd(m_strUrl);
   TiXmlDocument xml;
