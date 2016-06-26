@@ -175,7 +175,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
-            pItem->m_bIsShareOrDrive = false;
+            pItem->m_bIsShareOrDrive = true;
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(servers[i].GetUrl());
             curl.SetProtocol("http");
