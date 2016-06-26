@@ -245,21 +245,6 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
     }
     return true;
   }
-  else if (StringUtils::StartsWithNoCase(strUrl, "plex://show/"))
-  {
-    // list shows here
-    //      GetLocalSeasons(items,strUrl);
-    items.SetContent("seasons");
-    return true;
-  }
-  else if (StringUtils::StartsWithNoCase(strUrl, "plex://seasons/"))
-  {
-    // list seasons here
-    //      GetLocalEpisodes(items,strUrl);
-    items.SetContent("episodes");
-    return true;
-  }
-  
   return false;
 }
 
