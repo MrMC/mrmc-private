@@ -71,11 +71,11 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       if (hasMovies)
       {
         //add local Shows
-        CFileItemPtr pItem(new CFileItem("Local Movies"));
+        CFileItemPtr pItem(new CFileItem("MrMC - Movies"));
         pItem->m_bIsFolder = true;
         pItem->m_bIsShareOrDrive = false;
         pItem->SetPath("videodb://movies/" + basePath + "/");
-        pItem->SetLabel("Local Movies");
+        pItem->SetLabel("MrMC - Movies");
         items.Add(pItem);
       }
       //look through all plex servers and pull content data for "movie" type
