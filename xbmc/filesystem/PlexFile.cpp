@@ -62,6 +62,22 @@ bool CPlexFile::Exists(const CURL& url)
     CURL plex_url(Base64::Decode(encoded_url));
     CLog::Log(LOGDEBUG, "CPlexFile::Exists() %s", plex_url.Get().c_str());
   }
+  else if (StringUtils::StartsWithNoCase(url.Get(), "plex://tvshows/title/"))
+  {
+    std::string parentpath = URIUtils::GetParentPath(strUrl);
+    URIUtils::RemoveSlashAtEnd(parentpath);
+    std::string encoded_url = URIUtils::GetFileName(parentpath);
+    CURL plex_url(Base64::Decode(encoded_url));
+    CLog::Log(LOGDEBUG, "CPlexFile::Exists() %s", plex_url.Get().c_str());
+  }
+  else if (StringUtils::StartsWithNoCase(url.Get(), "plex://tvshows/filter/"))
+  {
+    std::string parentpath = URIUtils::GetParentPath(strUrl);
+    URIUtils::RemoveSlashAtEnd(parentpath);
+    std::string encoded_url = URIUtils::GetFileName(parentpath);
+    CURL plex_url(Base64::Decode(encoded_url));
+    CLog::Log(LOGDEBUG, "CPlexFile::Exists() %s", plex_url.Get().c_str());
+  }
   else
   {
     // not sure what we should do here
