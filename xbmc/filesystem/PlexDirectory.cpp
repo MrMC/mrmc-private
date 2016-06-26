@@ -49,28 +49,21 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   bool hasTvShows = database.HasContent(VIDEODB_CONTENT_TVSHOWS);
   database.Close();
   
+  items.ClearItems();
   std::string strUrl = url.Get();
-  if (StringUtils::StartsWithNoCase(url.Get(), "plex://movies/"))
+  std::string section = URIUtils::GetFileName(strUrl);
+  items.SetPath(strUrl);
+  std::string basePath = strUrl;
+  URIUtils::RemoveSlashAtEnd(basePath);
+  basePath = URIUtils::GetFileName(basePath);
+  
+  if (StringUtils::StartsWithNoCase(strUrl, "plex://movies/"))
   {
-    std::string section = URIUtils::GetFileName(strUrl);
-    items.ClearItems();
-    
-    items.SetPath(strUrl);
-    
-//    CFileItemPtr pItem(new CFileItem(".."));
-//    pItem->SetPath(strUrl);
-//    pItem->m_bIsFolder = true;
-//    pItem->m_bIsShareOrDrive = false;
-//    items.AddFront(pItem, 0);
-    std::string basePath = strUrl;
-    URIUtils::RemoveSlashAtEnd(basePath);
-    basePath = URIUtils::GetFileName(basePath);
-    
     if (section.empty())
     {
       if (hasMovies)
       {
-        //add local Shows
+        //add local Movies
         CFileItemPtr pItem(new CFileItem("MrMC - Movies"));
         pItem->m_bIsFolder = true;
         pItem->m_bIsShareOrDrive = false;
@@ -154,8 +147,119 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       }
     }
     return true;
-  }  
-
+  }
+  else if (StringUtils::StartsWithNoCase(strUrl, "plex://tvshows/"))
+  {
+    if (section.empty())
+    {
+      if (hasTvShows)
+      {
+        //add local Shows
+        CFileItemPtr pItem(new CFileItem("MrMC - TvShows"));
+        pItem->m_bIsFolder = true;
+        pItem->m_bIsShareOrDrive = false;
+        pItem->SetPath("videodb://tvshows/" + basePath + "/");
+        pItem->SetLabel("MrMC - TvShows");
+        items.Add(pItem);
+      }
+      //look through all plex servers and pull content data for "show" type
+      std::vector<PlexServer> servers;
+      CPlexServices::GetInstance().GetServers(servers);
+      for (int i = 0; i < (int)servers.size(); i++)
+      {
+        std::vector<SectionsContent> contents = servers[i].GetTvContent();
+        if (contents.size() > 1 || (hasTvShows && contents.size() == 1))
+        {
+          for (int c = 0; c < (int)contents.size(); c++)
+          {
+            std::string title = StringUtils::Format("Plex - %s - %s",servers[i].GetServerName().c_str(),contents[c].title.c_str());
+            std::string host = servers[i].GetUrl();
+            URIUtils::RemoveSlashAtEnd(host);
+            CFileItemPtr pItem(new CFileItem(title));
+            pItem->m_bIsFolder = true;
+            pItem->m_bIsShareOrDrive = false;
+            // have to do it this way because raw url has authToken as protocol option
+            CURL curl(servers[i].GetUrl());
+            curl.SetProtocol("http");
+            std::string filename = StringUtils::Format("%s/%s", contents[c].section.c_str(), (basePath == "titles"? "all":""));
+            curl.SetFileName(filename);
+            pItem->SetPath("plex://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));
+            pItem->SetLabel(title);
+            items.Add(pItem);
+          }
+        }
+        else if (contents.size() == 1)
+        {
+          CURL curl(servers[i].GetUrl());
+          curl.SetProtocol(servers[i].GetScheme());
+          CPlexClient::GetInstance().GetLocalTvshows(items,curl.GetFileName() + Base64::Decode(contents[0].section) + "/all");
+          items.SetContent("movies");
+          items.SetPath("");
+        }
+        StringUtils::ToCapitalize(basePath);
+        items.SetLabel(basePath);
+      }
+    }
+    else
+    {
+      std::string path = URIUtils::GetParentPath(strUrl);
+      URIUtils::RemoveSlashAtEnd(path);
+      path = URIUtils::GetFileName(path);
+      
+      std::string filter = "year";
+      if (path == "genres")
+        filter = "genre";
+      else if (path == "actors")
+        filter = "actor";
+      else if (path == "studios")
+        filter = "studio";
+//      else if (path == "titles")
+//        filter = "all";
+      
+      if (path == "titles" || path == "filter")
+      {
+//        CPlexClient::GetInstance().GetLocalMovies(items, Base64::Decode(section));
+        CPlexClient::GetInstance().GetLocalTvshows(items,Base64::Decode(section));
+        items.SetLabel("Titles");
+        items.SetContent("tvshows");
+      }
+      else if (path == "shows")
+      {
+        //        CPlexClient::GetInstance().GetLocalMovies(items, Base64::Decode(section));
+        CPlexClient::GetInstance().GetLocalSeasons(items,Base64::Decode(section));
+        items.SetContent("seasons");
+      }
+      else if (path == "seasons")
+      {
+        //        CPlexClient::GetInstance().GetLocalMovies(items, Base64::Decode(section));
+        CPlexClient::GetInstance().GetLocalEpisodes(items,Base64::Decode(section));
+        items.SetContent("episodes");
+      }
+      else
+      {
+        CPlexClient::GetInstance().GetLocalFilter(items, Base64::Decode(section), "plex://tvshows/filter/", filter);
+        StringUtils::ToCapitalize(path);
+        items.SetLabel(path);
+        items.SetContent("tvshows");
+      }
+    }
+    return true;
+  }
+  else if (StringUtils::StartsWithNoCase(strUrl, "plex://show/"))
+  {
+    // list shows here
+    //      GetLocalSeasons(items,strUrl);
+    items.SetContent("seasons");
+    return true;
+  }
+  else if (StringUtils::StartsWithNoCase(strUrl, "plex://seasons/"))
+  {
+    // list seasons here
+    //      GetLocalEpisodes(items,strUrl);
+    items.SetContent("episodes");
+    return true;
+  }
+  
   return false;
 }
 

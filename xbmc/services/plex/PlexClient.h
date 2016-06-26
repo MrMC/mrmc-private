@@ -38,9 +38,9 @@ public:
   
   void GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
   void GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");
-  void GetLocalTvshows(CFileItemList &items, std::string filter = "");
-  void GetLocalSeasons(CFileItemList &items, const std::string directory);
-  void GetLocalEpisodes(CFileItemList &items, const std::string directory);
+  void GetLocalTvshows(CFileItemList &items, std::string url);
+  void GetLocalSeasons(CFileItemList &items, const std::string url);
+  void GetLocalEpisodes(CFileItemList &items, const std::string url);
   void GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
 
 private:

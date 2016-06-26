@@ -1290,16 +1290,17 @@ std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
     return "videodb://movies/tags/";
   else if (lower == "movies")
     return "videodb://movies/";
-  else if (lower == "tvshowgenres")
-    return "videodb://tvshows/genres/";
-  else if (lower == "tvshowtitles")
-    return "videodb://tvshows/titles/";
-  else if (lower == "tvshowyears")
-    return "videodb://tvshows/years/";
-  else if (lower == "tvshowactors")
-    return "videodb://tvshows/actors/";
-  else if (lower == "tvshowstudios")
-    return "videodb://tvshows/studios/";
+  else if (lower == "tvshowgenres" ||
+           lower == "tvshowtitles" ||
+           lower == "tvshowyears" ||
+           lower == "tvshowactors" ||
+           lower == "tvshowstudios")
+  {
+    StringUtils::Replace(lower, "tvshow", "");
+    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+      return "plex://tvshows/" + lower + "/";
+    return "videodb://tvshows/" + lower + "/";
+  }
   else if (lower == "tvshowtags")
     return "videodb://tvshows/tags/";
   else if (lower == "tvshows")
