@@ -373,7 +373,8 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
       plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
       // is this the only way to set token and URL??
       value = XMLUtils::GetAttribute(videoNode, "thumb");
-      StringUtils::TrimLeft(value, "/");
+      if (!value.empty() && (value[0] == '/'))
+        StringUtils::TrimLeft(value, "/");
       url.SetFileName(value);
       plexItem->SetArt("thumb", url.Get());
       plexItem->SetIconImage(m_strUrl + XMLUtils::GetAttribute(videoNode, "thumb"));
@@ -395,7 +396,8 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
     CDateTime aTime(addedTime);
     plexItem->GetVideoInfoTag()->m_dateAdded = aTime;
     
-    StringUtils::TrimLeft(fanart, "/");
+    if (!fanart.empty() && (fanart[0] == '/'))
+      StringUtils::TrimLeft(fanart, "/");
     url.SetFileName(fanart);
     plexItem->SetArt("fanart", url.Get());
     
@@ -558,8 +560,8 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
          
          */
         std::string key = ((TiXmlElement*) partNode)->Attribute("key");
-        if (key.size() && (key[0] == '/' || key[0] == '\\'))
-          key = key.substr(1);
+        if (!key.empty() && (key[0] == '/'))
+          StringUtils::TrimLeft(key, "/");
         url.SetFileName(key);
         plexItem->SetPath(url.Get());
         plexItem->GetVideoInfoTag()->m_strFileNameAndPath = url.Get();
