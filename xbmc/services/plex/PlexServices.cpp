@@ -115,7 +115,8 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
     return;
 
   const std::string &settingId = setting->GetId();
-  if (settingId == CSettings::SETTING_SERVICES_PLEXENABLE)
+  if (settingId == CSettings::SETTING_SERVICES_PLEXENABLE ||
+      settingId == CSettings::SETTING_SERVICES_PLEXSERVER)
   {
     ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
     ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
@@ -139,8 +140,8 @@ void CPlexServices::ApplyUserSettings()
   m_myPlexPass = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
   // end of Plex settings
 
-  // 1 is auto, 2 is manual and host/port below
-  m_localGDM  = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXSERVER) == 1;
+  // 0 is disabled, 1 is auto, 2 is manual using host/port
+  m_autoGDM  = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXSERVER) == 1;
   m_localHost = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERHOST);
   m_localPort = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERPORT);
 }
@@ -163,7 +164,7 @@ void CPlexServices::Process()
 
     SOCKETS::CUDPSocket *socket = nullptr;
     SOCKETS::CSocketListener listener;
-    if (m_localGDM)
+    if (m_autoGDM)
     {
       socket = SOCKETS::CSocketFactory::CreateUDPSocket();
       if (socket)

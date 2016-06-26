@@ -2559,9 +2559,10 @@
         </setting>
         <setting id="plex.server" type="integer" label="1241" help="1243">
           <level>0</level>
-          <default>1</default> <!-- Auto Discovery -->
+          <default>0</default> <!-- Disabled -->
           <constraints>
             <options>
+              <option label="13106">0</option> <!-- Disabled -->
               <option label="1242">1</option> <!-- Auto Discovery -->
               <option label="1240">2</option> <!-- Manual -->
             </options>
