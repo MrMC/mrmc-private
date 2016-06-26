@@ -112,8 +112,9 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           items.SetContent("movies");
           items.SetPath("");
         }
-        StringUtils::ToCapitalize(basePath);
-        items.SetLabel(basePath);
+        std::string label = basePath;
+        StringUtils::ToCapitalize(label);
+        items.SetLabel(label);
       }
     }
     else
