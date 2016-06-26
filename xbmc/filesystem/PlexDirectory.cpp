@@ -112,6 +112,8 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           items.SetContent("movies");
           items.SetPath("");
         }
+        StringUtils::ToCapitalize(basePath);
+        items.SetLabel(basePath);
       }
     }
     else
@@ -139,13 +141,14 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       if (path == "titles" || path == "filter")
       {
         CPlexClient::GetInstance().GetLocalMovies(items, Base64::Decode(section));
-        items.SetLabel("titles");
+        items.SetLabel("Titles");
         items.SetContent("movies");
       }
       else
       {
         CPlexClient::GetInstance().GetLocalFilter(items, Base64::Decode(section), "plex://movies/filter/", filter);
-        items.SetLabel(filter);
+        StringUtils::ToCapitalize(path);
+        items.SetLabel(path);
         items.SetContent("movies");
       }
     }
