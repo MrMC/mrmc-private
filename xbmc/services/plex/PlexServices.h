@@ -61,8 +61,8 @@ private:
   bool          InitConnection();
   void          ApplyUserSettings();
 
-  void          FetchPlexToken();
-  void          FetchMyPlexServers();
+  bool          FetchPlexToken();
+  bool          FetchMyPlexServers();
   void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
   PlexServer*   GetServer(std::string uuid);
   bool          AddServer(PlexServer server);
