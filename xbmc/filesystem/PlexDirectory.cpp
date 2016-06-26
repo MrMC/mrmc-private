@@ -77,7 +77,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       for (int i = 0; i < (int)servers.size(); i++)
       {
         std::vector<SectionsContent> contents = servers[i].GetMovieContent();
-        if (contents.size() > 1 || (hasMovies && contents.size() == 1))
+        if (contents.size() > 1 || ((hasMovies || servers.size() > 1) && contents.size() == 1))
         {
           for (int c = 0; c < (int)contents.size(); c++)
           {
@@ -168,7 +168,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       for (int i = 0; i < (int)servers.size(); i++)
       {
         std::vector<SectionsContent> contents = servers[i].GetTvContent();
-        if (contents.size() > 1 || (hasTvShows && contents.size() == 1))
+        if (contents.size() > 1 || ((hasTvShows || servers.size() > 1) && contents.size() == 1))
         {
           for (int c = 0; c < (int)contents.size(); c++)
           {
