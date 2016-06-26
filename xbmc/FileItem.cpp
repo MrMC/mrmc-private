@@ -2795,6 +2795,7 @@ std::string CFileItem::GetTBNFile() const
 bool CFileItem::SkipLocalArt() const
 {
   return (m_strPath.empty()
+       || HasProperty("SkipLocalArt")
        || StringUtils::StartsWithNoCase(m_strPath, "newsmartplaylist://")
        || StringUtils::StartsWithNoCase(m_strPath, "newplaylist://")
        || m_bIsShareOrDrive
