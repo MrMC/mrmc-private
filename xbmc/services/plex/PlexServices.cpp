@@ -34,6 +34,7 @@
 #include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
+#include "utils/SystemInfo.h"
 
 #include "utils/JSONVariantParser.h"
 #include "utils/XMLUtils.h"
@@ -245,11 +246,25 @@ void CPlexServices::Process()
 void CPlexServices::FetchPlexToken()
 {
   XFILE::CCurlFile plex;
-  plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
-  plex.SetRequestHeader("Content-Length", "0");
+  //plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
+  //plex.SetRequestHeader("Content-Length", "0");
   plex.SetRequestHeader("X-Plex-Client-Identifier", m_client_uuid);
   plex.SetRequestHeader("X-Plex-Product", "MrMC");
-  plex.SetRequestHeader("X-Plex-Version", "2.3.0");
+  plex.SetRequestHeader("X-Plex-Version", CSysInfo::GetVersion());
+  plex.SetRequestHeader("X-Plex-Provides", "player");
+  std::string hostname;
+  g_application.getNetwork().GetHostName(hostname);
+  StringUtils::TrimRight(hostname, ".local");
+  plex.SetRequestHeader("X-Plex-Device-Name", hostname);
+#if defined(TARGET_DARWIN_IOS)
+  plex.SetRequestHeader("X-Plex-Device", "iOS");
+#elif defined(TARGET_DARWIN_TVOS)
+  plex.SetRequestHeader("X-Plex-Device", "tvOS");
+#elif defined(TARGET_DARWIN_OSX)
+  plex.SetRequestHeader("X-Plex-Device", "MacOS");
+#elif defined(TARGET_ANDROID)
+  plex.SetRequestHeader("X-Plex-Device", "FireOS");
+#endif
 
   CURL url("https://plex.tv/users/sign_in.json");
   url.SetUserName(m_myPlexUser);
