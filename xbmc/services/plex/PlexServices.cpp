@@ -22,11 +22,13 @@
 
 #include "Application.h"
 #include "URL.h"
+#include "GUIUserMessages.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderCapture.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "filesystem/CurlFile.h"
 #include "guilib/LocalizeStrings.h"
+#include "guilib/GUIWindowManager.h"
 #include "interfaces/AnnouncementManager.h"
 #include "network/Network.h"
 #include "network/Socket.h"
@@ -354,5 +356,9 @@ bool CPlexServices::AddServer(PlexServer server)
   }
   server.ParseSections();
   m_servers.push_back(server);
+
+  CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+  g_windowManager.SendThreadMessage(msg);
+
   return true;
 }
