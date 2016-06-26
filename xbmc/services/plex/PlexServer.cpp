@@ -163,7 +163,11 @@ void PlexServer::ParseSections()
         content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
         std::string key = XMLUtils::GetAttribute(DirectoryNode, "key");
         content.section = "library/sections/" + key;
-
+        std::string art = XMLUtils::GetAttribute(DirectoryNode, "art");
+        if (m_local)
+          content.art = art;
+        else
+          content.art = content.section + "/resources/" + URIUtils::GetFileName(art);
         if (content.type == "movie")
           m_movieSectionsContents.push_back(content);
         else
