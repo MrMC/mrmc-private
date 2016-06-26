@@ -979,6 +979,7 @@ void CPlexClient::GetLocalFilter(CFileItemList &items, std::string url, std::str
       url3.SetFileName(url3.GetFileName() + "all?" + filter + "=" + key);
       pItem->SetPath(parentPath + Base64::Encode(url3.Get()));
       pItem->SetLabel(title);
+      pItem->SetProperty("IsHTTPDirectory", true);
       items.Add(pItem);
       directoryNode = directoryNode->NextSiblingElement("Directory");
     }
