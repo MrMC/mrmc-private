@@ -121,8 +121,6 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         filter = "genre";
       else if (path == "actors")
         filter = "actor";
-      else if (path == "actors")
-        filter = "actor";
       else if (path == "directors")
         filter = "director";
       else if (path == "sets")
