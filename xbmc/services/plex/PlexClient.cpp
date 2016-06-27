@@ -33,7 +33,6 @@
 
 CPlexClient::CPlexClient()
 {
-//  m_strUrl = "http://192.168.2.202:32400";
 }
 
 CPlexClient::~CPlexClient()
