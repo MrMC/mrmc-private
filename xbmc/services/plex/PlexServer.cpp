@@ -38,14 +38,7 @@ PlexServer::PlexServer(std::string data, std::string ip)
 
 PlexServer::PlexServer(const TiXmlElement* ServerNode)
 {
-  /*
-   <MediaContainer friendlyName="myPlex" identifier="com.plexapp.plugins.myplex" machineIdentifier="c2bcb0075f58a249b9d5580fae2769bd4f54514a" size="1">
-   <Server accessToken="wZwzt7EF2sEVz6ezpSzq" name="Ametovic-Qnap" address="94.203.11.95" port="21499" version="0.9.16.6.1993-5089475" scheme="http" host="94.203.11.95" localAddresses="192.168.1.200" machineIdentifier="d44a733a35eabd1c67339602de0f8e5f4f9e1063" createdAt="1466516126" updatedAt="1466714068" owned="1" synced="0"/>
-   </MediaContainer>
-   */
-  
   m_local = false;
-//  m_contentType = val;
   m_uuid = XMLUtils::GetAttribute(ServerNode, "machineIdentifier");
   m_serverName = XMLUtils::GetAttribute(ServerNode, "name");
   m_updated = atol(XMLUtils::GetAttribute(ServerNode, "updatedAt").c_str());
@@ -135,15 +128,9 @@ void PlexServer::GetIdentity()
 void PlexServer::ParseSections()
 {
   XFILE::CCurlFile plex;
-  //if (!m_authToken.empty())
-  //  plex.SetRequestHeader("X-Plex-Token", m_authToken);
-  
-  std::string url = "library/sections";
-//  if (m_local)
-//    url = "system/" + url;
 
   CURL curl(m_url);
-  curl.SetFileName(curl.GetFileName() + url);
+  curl.SetFileName(curl.GetFileName() + "library/sections");
   std::string strResponse;
   if (plex.Get(curl.Get(), strResponse))
   {

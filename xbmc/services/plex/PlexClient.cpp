@@ -190,30 +190,6 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
   const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
   while (videoNode)
   {
-    /*
-     attributes:
-     
-     ratingKey="65"
-     key="/library/metadata/65"
-     studio="Plan B Entertainment"
-     type="movie"
-     title="12 Years a Slave"
-     contentRating="R"
-     summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life."
-     rating="7.8"
-     viewOffset="158000"
-     lastViewedAt="1465154711"
-     year="2013"
-     tagline="The extraordinary true story of Solomon Northup"
-     thumb="/library/metadata/65/thumb/1465152014"
-     art="/library/metadata/65/art/1465152014"
-     duration="8050153"
-     originallyAvailableAt="2013-10-30"
-     addedAt="1392893688"
-     updatedAt="1465152014"
-     chapterSource=""
-     
-     */
     CFileItemPtr plexItem(new CFileItem());
     std::string fanart;
     std::string value;
@@ -257,7 +233,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
     {
       fanart = XMLUtils::GetAttribute(videoNode, "art");
       plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
-      // is this the only way to set token and URL??
+      
       value = XMLUtils::GetAttribute(videoNode, "thumb");
       if (!value.empty() && (value[0] == '/'))
         StringUtils::TrimLeft(value, "/");
@@ -304,27 +280,6 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
     const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
     if (mediaNode)
     {
-      /*
-       attributes:
-       
-       videoResolution="720"
-       id="65"
-       duration="8050153"
-       bitrate="964"
-       width="1280"
-       height="536"
-       aspectRatio="2.35"
-       audioChannels="2"
-       audioCodec="aac"
-       videoCodec="h264"
-       container="mp4"
-       videoFrameRate="24p"
-       optimizedForStreaming="1"
-       audioProfile="lc"
-       has64bitOffsets="0"
-       videoProfile="high"
-       */
-      
       CStreamDetails details;
       CStreamDetailVideo *p = new CStreamDetailVideo();
       p->m_strCodec = XMLUtils::GetAttribute(mediaNode, "videoCodec");
@@ -354,23 +309,6 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
       const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
       if (partNode)
       {
-        
-        /*
-         
-         attributes:
-         
-         id="66"
-         key="/library/parts/66/file.mp4"
-         duration="8050153"
-         file="/share/Movies/12 Years a Slave (2013)/12.Years.a.Slave.2013.720p.BluRay.x264.YIFY.mp4"
-         size="970087940"
-         audioProfile="lc"
-         container="mp4"
-         has64bitOffsets="0"
-         optimizedForStreaming="1"
-         videoProfile="high"
-         
-         */
         std::string key = ((TiXmlElement*) partNode)->Attribute("key");
         if (!key.empty() && (key[0] == '/'))
           StringUtils::TrimLeft(key, "/");
@@ -384,30 +322,13 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
     videoNode = videoNode->NextSiblingElement("Video");
     items.Add(plexItem);
   }
-  // this shit is needed to display movies/episodes properly ... dont ask
+  // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
   items.SetProperty("library.filter", "true");
 }
 
 void CPlexClient::GetLocalMovies(CFileItemList &items, std::string url, std::string filter)
 {
- /*
-  <Video ratingKey="65" key="/library/metadata/65" studio="Plan B Entertainment" type="movie" title="12 Years a Slave" contentRating="R" summary="In the pre-Civil War United States, Solomon Northup, a free black man from upstate New York, is abducted and sold into slavery. Facing cruelty as well as unexpected kindnesses Solomon struggles not only to stay alive, but to retain his dignity. In the twelfth year of his unforgettable odyssey, Solomon’s chance meeting with a Canadian abolitionist will forever alter his life." rating="7.8" viewOffset="158000" lastViewedAt="1465154711" year="2013" tagline="The extraordinary true story of Solomon Northup" thumb="/library/metadata/65/thumb/1465152014" art="/library/metadata/65/art/1465152014" duration="8050153" originallyAvailableAt="2013-10-30" addedAt="1392893688" updatedAt="1465152014" chapterSource="">
-  <Media videoResolution="720" id="65" duration="8050153" bitrate="964" width="1280" height="536" aspectRatio="2.35" audioChannels="2" audioCodec="aac" videoCodec="h264" container="mp4" videoFrameRate="24p" optimizedForStreaming="1" audioProfile="lc" has64bitOffsets="0" videoProfile="high">
-  <Part id="66" key="/library/parts/66/file.mp4" duration="8050153" file="/share/Movies/12 Years a Slave (2013)/12.Years.a.Slave.2013.720p.BluRay.x264.YIFY.mp4" size="970087940" audioProfile="lc" container="mp4" has64bitOffsets="0" optimizedForStreaming="1" videoProfile="high" />
-  </Media>
-  <Genre tag="Drama" />
-  <Genre tag="History" />
-  <Writer tag="John Ridley" />
-  <Director tag="Steve McQueen" />
-  <Country tag="USA" />
-  <Country tag="United Kingdom" />
-  <Role tag="Chiwetel Ejiofor" />
-  <Role tag="Michael Fassbender" />
-  <Role tag="Benedict Cumberbatch" />
-  </Video>
-  */
-  
   CURL url2(url);
   TiXmlDocument xml = GetPlexXML(url);
 
@@ -420,41 +341,6 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string url, std::str
 
 void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string url)
 {
-  /*
-   <Directory
-     ratingKey="2255"
-     key="/library/metadata/2255/children" 
-     studio="The CW" 
-     type="show" 
-     title="The 100" 
-     titleSort="100" 
-     contentRating="TV-14" 
-     summary="Based on the books by Kass Morgan, this show takes place 100 years in the future, when the Earth has been abandoned due to radioactivity. The last surviving humans live on an ark orbiting the planet — but the ark won&apos;t last forever. So the repressive regime picks 100 expendable juvenile delinquents to send down to Earth to see if the planet is still habitable."
-     index="1" 
-     rating="8.0" 
-     year="2014" 
-     thumb="/library/metadata/2255/thumb/1465158605" 
-     art="/library/metadata/2255/art/1465158605" 
-     banner="/library/metadata/2255/banner/1465158605" 
-     theme="/library/metadata/2255/theme/1465158605" 
-     duration="2700000" 
-     originallyAvailableAt="2014-03-19" 
-     leafCount="44"
-     viewedLeafCount="0"
-     childCount="3" 
-     addedAt="1410897813" 
-     updatedAt="1465158605">
-     
-   <Genre tag="Drama" />
-   <Genre tag="Science-Fiction" />
-   <Genre tag="Suspense" />
-   <Role tag="Bob Morley" />
-   <Role tag="Marie Avgeropoulos" />
-   <Role tag="Eliza Taylor" />
-   </Directory>
-   
-   */
-  
   std::string value;
   TiXmlDocument xml = GetPlexXML(url);
   
@@ -519,32 +405,6 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string url)
 
 void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string url)
 {
-  /*
-   <MediaContainer size="4" allowSync="1" art="/library/metadata/2255/art/1465158605" banner="/library/metadata/2255/banner/1465158605" identifier="com.plexapp.plugins.library" key="2255" librarySectionID="2" librarySectionTitle="TV Shows" librarySectionUUID="dd1b7de4-a445-4c1a-b3c9-5d3f7232d857" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1454491350" nocache="1" parentIndex="1" parentTitle="The 100" parentYear="2014" summary="Based on the books by Kass Morgan, this show takes place 100 years in the future, when the Earth has been abandoned due to radioactivity. The last surviving humans live on an ark orbiting the planet — but the ark won&apos;t last forever. So the repressive regime picks 100 expendable juvenile delinquents to send down to Earth to see if the planet is still habitable." theme="/library/metadata/2255/theme/1465158605" thumb="/library/metadata/2255/thumb/1465158605" title1="TV Shows" title2="The 100" viewGroup="season" viewMode="65593">
-   <Directory leafCount="44" thumb="/library/metadata/2255/thumb/1465158605" viewedLeafCount="0" key="/library/metadata/2255/allLeaves" title="All episodes" />
-   
-   <Directory 
-     ratingKey="2289"
-     key="/library/metadata/2289/children"
-     parentRatingKey="2255" 
-     type="season" 
-     title="Season 1" 
-     parentKey="/library/metadata/2255" 
-     summary="" 
-     index="1"
-     thumb="/library/metadata/2289/thumb/1465158577" 
-     leafCount="13" 
-     viewedLeafCount="0" 
-     addedAt="1410897813" 
-     updatedAt="1465158577">
-   </Directory>
-   
-   <Directory ratingKey="2272" key="/library/metadata/2272/children" parentRatingKey="2255" type="season" title="Season 2" parentKey="/library/metadata/2255" summary="" index="2" thumb="/library/metadata/2272/thumb/1465158583" leafCount="16" viewedLeafCount="0" addedAt="1414103447" updatedAt="1465158583"></Directory>
-   <Directory ratingKey="2256" key="/library/metadata/2256/children" parentRatingKey="2255" type="season" title="Season 3" parentKey="/library/metadata/2255" summary="" index="3" thumb="/library/metadata/2256/thumb/1465158605" leafCount="15" viewedLeafCount="0" addedAt="1453437187" updatedAt="1465158605"></Directory>
-   </MediaContainer>
-   
-   */
-  
   TiXmlDocument xml = GetPlexXML(url);
   std::string value;
   
@@ -558,7 +418,6 @@ void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string url)
       if (((TiXmlElement*) directoryNode)->Attribute("ratingKey"))
       {
         CFileItemPtr plexItem(new CFileItem());
-        // set m_bIsFolder to true to indicate we wre tvshow list
         plexItem->m_bIsFolder = true;
         plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
         CURL url1(url);
