@@ -1078,7 +1078,7 @@ bool CFileItem::IsLiveTV() const
 
 bool CFileItem::IsPlex() const
 {
-  return GetVideoContentType() == PLEX_CONTENT_MOVIE || GetVideoContentType() == PLEX_CONTENT_EPISODES || GetVideoContentType() == PLEX_CONTENT_TVSHOW;
+  return GetVideoContentType() == PLEX_CONTENT_MOVIE || GetVideoContentType() == PLEX_CONTENT_EPISODES || GetVideoContentType() == PLEX_CONTENT_TVSHOW || GetVideoContentType() == PLEX_CONTENT_SEASON;
 }
 
 bool CFileItem::IsHD() const
