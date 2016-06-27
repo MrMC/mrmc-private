@@ -43,7 +43,9 @@ bool CSaveFileStateJob::DoWork()
   if (m_item.IsPlex())
   {
     m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
-    m_item.GetVideoInfoTag()->m_playCount++;
+    
+    if (m_bookmark.timeInSeconds > m_item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds * 0.9)
+      m_item.GetVideoInfoTag()->m_playCount++;
     
     CFileItemPtr msgItem(new CFileItem(m_item));
     CGUIMessage message(GUI_MSG_NOTIFY_ALL, g_windowManager.GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, 0, msgItem);
