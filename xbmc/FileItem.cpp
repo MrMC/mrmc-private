@@ -1344,6 +1344,11 @@ bool CFileItem::IsSamePath(const CFileItem *item) const
   }
   if (HasVideoInfoTag() && item->HasVideoInfoTag())
   {
+    if (item->IsPlex())
+    {
+      if (!m_videoInfoTag->m_strPlexId.empty() && !item->m_videoInfoTag->m_strPlexId.empty())
+        return (m_videoInfoTag->m_strPlexId == item->m_videoInfoTag->m_strPlexId);
+    }
     if (m_videoInfoTag->m_iDbId != -1 && item->m_videoInfoTag->m_iDbId != -1)
       return ((m_videoInfoTag->m_iDbId == item->m_videoInfoTag->m_iDbId) &&
         (m_videoInfoTag->m_type == item->m_videoInfoTag->m_type));        

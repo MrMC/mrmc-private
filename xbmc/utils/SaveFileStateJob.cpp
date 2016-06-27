@@ -42,15 +42,15 @@ bool CSaveFileStateJob::DoWork()
   // if its plex item, skip database update for it
   if (m_item.IsPlex())
   {
-   //    do some plex shit but do not write to our DB
-    CPlexClient::GetInstance().SetOffset(m_item, m_bookmark.timeInSeconds);
+    m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
+    m_item.GetVideoInfoTag()->m_playCount++;
     
-    // this is supposed to mark the listing with watched icon... id doesnt :(
-    m_item.SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, true);
-    CUtil::DeleteVideoDatabaseDirectoryCache();
     CFileItemPtr msgItem(new CFileItem(m_item));
-    CGUIMessage message(GUI_MSG_NOTIFY_ALL, g_windowManager.GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, 1, msgItem); // 1 to update the listing as well
+    CGUIMessage message(GUI_MSG_NOTIFY_ALL, g_windowManager.GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, 0, msgItem);
     g_windowManager.SendThreadMessage(message);
+    
+    //    notify Plex Server where we stopped playback
+    CPlexClient::GetInstance().SetOffset(m_item, m_bookmark.timeInSeconds);
     return true;
   }
   
