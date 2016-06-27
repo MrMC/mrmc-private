@@ -80,6 +80,86 @@ TiXmlDocument CPlexClient::GetPlexXML(std::string url, std::string filter)
   return xml;
 }
 
+void CPlexClient::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode)
+{
+  // looks like plex is sending only one studio?
+  std::vector<std::string> studios;
+  studios.push_back(XMLUtils::GetAttribute(videoNode, "studio"));
+  item.GetVideoInfoTag()->m_studio = studios;
+  
+  
+  // get all genres
+  std::vector<std::string> genres;
+  const TiXmlElement* genreNode = videoNode->FirstChildElement("Genre");
+  if (genreNode)
+  {
+    while (genreNode)
+    {
+      std::string genre = XMLUtils::GetAttribute(genreNode, "tag");
+      genres.push_back(genre);
+      genreNode = genreNode->NextSiblingElement("Genre");
+    }
+  }
+  item.GetVideoInfoTag()->SetGenre(genres);
+  
+  // get all writers
+  std::vector<std::string> writers;
+  const TiXmlElement* writerNode = videoNode->FirstChildElement("Writer");
+  if (writerNode)
+  {
+    while (writerNode)
+    {
+      std::string writer = XMLUtils::GetAttribute(writerNode, "tag");
+      writers.push_back(writer);
+      writerNode = writerNode->NextSiblingElement("Writer");
+    }
+  }
+  item.GetVideoInfoTag()->SetWritingCredits(writers);
+  
+  // get all directors
+  std::vector<std::string> directors;
+  const TiXmlElement* directorNode = videoNode->FirstChildElement("Director");
+  if (directorNode)
+  {
+    while (directorNode)
+    {
+      std::string director = XMLUtils::GetAttribute(directorNode, "tag");
+      directors.push_back(director);
+      directorNode = directorNode->NextSiblingElement("Director");
+    }
+  }
+  item.GetVideoInfoTag()->SetDirector(directors);
+  
+  // get all countries
+  std::vector<std::string> countries;
+  const TiXmlElement* countryNode = videoNode->FirstChildElement("Country");
+  if (countryNode)
+  {
+    while (countryNode)
+    {
+      std::string country = XMLUtils::GetAttribute(countryNode, "tag");
+      countries.push_back(country);
+      countryNode = countryNode->NextSiblingElement("Country");
+    }
+  }
+  item.GetVideoInfoTag()->SetCountry(countries);
+  
+  // get all roles
+  std::vector< SActorInfo > roles;
+  const TiXmlElement* roleNode = videoNode->FirstChildElement("Role");
+  if (roleNode)
+  {
+    while (roleNode)
+    {
+      SActorInfo role;
+      role.strName = XMLUtils::GetAttribute(roleNode, "tag");
+      roles.push_back(role);
+      roleNode = roleNode->NextSiblingElement("Role");
+    }
+  }
+  item.GetVideoInfoTag()->m_cast = roles;
+}
+
 void CPlexClient::SetWatched(CFileItem* item)
 {
   std::string url = URIUtils::GetParentPath(item->GetPath());
@@ -220,82 +300,8 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
     }
     plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
     
-    // looks like plex is sending only one studio?
-    std::vector<std::string> studios;
-    studios.push_back(XMLUtils::GetAttribute(videoNode, "studio"));
-    plexItem->GetVideoInfoTag()->m_studio = studios;
     
-    
-    // get all genres
-    std::vector<std::string> genres;
-    const TiXmlElement* genreNode = videoNode->FirstChildElement("Genre");
-    if (genreNode)
-    {
-      while (genreNode)
-      {
-        std::string genre = XMLUtils::GetAttribute(genreNode, "tag");
-        genres.push_back(genre);
-        genreNode = genreNode->NextSiblingElement("Genre");
-      }
-    }
-    plexItem->GetVideoInfoTag()->SetGenre(genres);
-    
-    // get all writers
-    std::vector<std::string> writers;
-    const TiXmlElement* writerNode = videoNode->FirstChildElement("Writer");
-    if (writerNode)
-    {
-      while (writerNode)
-      {
-        std::string writer = XMLUtils::GetAttribute(writerNode, "tag");
-        writers.push_back(writer);
-        writerNode = writerNode->NextSiblingElement("Writer");
-      }
-    }
-    plexItem->GetVideoInfoTag()->SetWritingCredits(writers);
-    
-    // get all directors
-    std::vector<std::string> directors;
-    const TiXmlElement* directorNode = videoNode->FirstChildElement("Director");
-    if (directorNode)
-    {
-      while (directorNode)
-      {
-        std::string director = XMLUtils::GetAttribute(directorNode, "tag");
-        directors.push_back(director);
-        directorNode = directorNode->NextSiblingElement("Director");
-      }
-    }
-    plexItem->GetVideoInfoTag()->SetDirector(directors);
-    
-    // get all countries
-    std::vector<std::string> countries;
-    const TiXmlElement* countryNode = videoNode->FirstChildElement("Country");
-    if (countryNode)
-    {
-      while (countryNode)
-      {
-        std::string country = XMLUtils::GetAttribute(countryNode, "tag");
-        countries.push_back(country);
-        countryNode = countryNode->NextSiblingElement("Country");
-      }
-    }
-    plexItem->GetVideoInfoTag()->SetCountry(countries);
-    
-    // get all roles
-    std::vector< SActorInfo > roles;
-    const TiXmlElement* roleNode = videoNode->FirstChildElement("Role");
-    if (roleNode)
-    {
-      while (roleNode)
-      {
-        SActorInfo role;
-        role.strName = XMLUtils::GetAttribute(roleNode, "tag");
-        roles.push_back(role);
-        roleNode = roleNode->NextSiblingElement("Role");
-      }
-    }
-    plexItem->GetVideoInfoTag()->m_cast = roles;
+    GetVideoDetails(*plexItem, videoNode);
     
     const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
     if (mediaNode)
@@ -504,82 +510,7 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string url)
       
       plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
       
-      // looks like plex is sending only one studio?
-      std::vector<std::string> studios;
-      studios.push_back(XMLUtils::GetAttribute(directoryNode, "studio"));
-      plexItem->GetVideoInfoTag()->m_studio = studios;
-      
-      
-      // get all genres
-      std::vector<std::string> genres;
-      const TiXmlElement* genreNode = directoryNode->FirstChildElement("Genre");
-      if (genreNode)
-      {
-        while (genreNode)
-        {
-          std::string genre = XMLUtils::GetAttribute(genreNode, "tag");
-          genres.push_back(genre);
-          genreNode = genreNode->NextSiblingElement("Genre");
-        }
-      }
-      plexItem->GetVideoInfoTag()->SetGenre(genres);
-      
-      // get all writers
-      std::vector<std::string> writers;
-      const TiXmlElement* writerNode = directoryNode->FirstChildElement("Writer");
-      if (writerNode)
-      {
-        while (writerNode)
-        {
-          std::string writer = XMLUtils::GetAttribute(writerNode, "tag");
-          writers.push_back(writer);
-          writerNode = writerNode->NextSiblingElement("Writer");
-        }
-      }
-      plexItem->GetVideoInfoTag()->SetWritingCredits(writers);
-      
-      // get all directors
-      std::vector<std::string> directors;
-      const TiXmlElement* directorNode = directoryNode->FirstChildElement("Director");
-      if (directorNode)
-      {
-        while (directorNode)
-        {
-          std::string director = XMLUtils::GetAttribute(directorNode, "tag");
-          directors.push_back(director);
-          directorNode = directorNode->NextSiblingElement("Director");
-        }
-      }
-      plexItem->GetVideoInfoTag()->SetDirector(directors);
-      
-      // get all countries
-      std::vector<std::string> countries;
-      const TiXmlElement* countryNode = directoryNode->FirstChildElement("Country");
-      if (countryNode)
-      {
-        while (countryNode)
-        {
-          std::string country = XMLUtils::GetAttribute(countryNode, "tag");
-          countries.push_back(country);
-          countryNode = countryNode->NextSiblingElement("Country");
-        }
-      }
-      plexItem->GetVideoInfoTag()->SetCountry(countries);
-      
-      // get all roles
-      std::vector< SActorInfo > roles;
-      const TiXmlElement* roleNode = directoryNode->FirstChildElement("Role");
-      if (roleNode)
-      {
-        while (roleNode)
-        {
-          SActorInfo role;
-          role.strName = XMLUtils::GetAttribute(roleNode, "tag");
-          roles.push_back(role);
-          roleNode = roleNode->NextSiblingElement("Role");
-        }
-      }
-      plexItem->GetVideoInfoTag()->m_cast = roles;
+      GetVideoDetails(*plexItem, directoryNode);
       
       items.Add(plexItem);
       directoryNode = directoryNode->NextSiblingElement("Directory");

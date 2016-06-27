@@ -46,6 +46,7 @@ public:
 private:
   // private construction, and no assignements; use the provided singleton methods
   void GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
+  void GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode);
   TiXmlDocument GetPlexXML(std::string url, std::string filter = "");
   
 };
