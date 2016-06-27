@@ -514,7 +514,7 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string url)
       plexItem->SetProperty("watchedepisodes", plexItem->GetVideoInfoTag()->m_playCount);
       plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - plexItem->GetVideoInfoTag()->m_playCount);
       
-      plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
+      plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->GetVideoInfoTag()->m_playCount >= plexItem->GetVideoInfoTag()->m_iEpisode);
       
       GetVideoDetails(*plexItem, directoryNode);
       
@@ -522,6 +522,7 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string url)
       directoryNode = directoryNode->NextSiblingElement("Directory");
     }
   }
+  items.SetProperty("library.filter", "true");
 }
 
 void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string url)
@@ -599,7 +600,7 @@ void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string url)
         plexItem->SetProperty("watchedepisodes", plexItem->GetVideoInfoTag()->m_playCount);
         plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - plexItem->GetVideoInfoTag()->m_playCount);
         
-        plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->HasVideoInfoTag() && plexItem->GetVideoInfoTag()->m_playCount > 0);
+        plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->GetVideoInfoTag()->m_playCount >= plexItem->GetVideoInfoTag()->m_iEpisode);
         
         items.Add(plexItem);
       }
@@ -607,6 +608,7 @@ void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string url)
     }
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   }
+  items.SetProperty("library.filter", "true");
 }
 
 void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string url)

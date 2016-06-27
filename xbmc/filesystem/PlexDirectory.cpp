@@ -191,7 +191,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           CURL curl(servers[i].GetUrl());
           curl.SetProtocol(servers[i].GetScheme());
           CPlexClient::GetInstance().GetLocalTvshows(items,curl.GetFileName() + Base64::Decode(contents[0].section) + "/all");
-          items.SetContent("movies");
+          items.SetContent("tvshows");
           items.SetPath("");
         }
         std::string label = basePath;
