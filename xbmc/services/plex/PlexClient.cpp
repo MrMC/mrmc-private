@@ -163,6 +163,9 @@ void CPlexClient::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode
 void CPlexClient::SetWatched(CFileItem* item)
 {
   std::string url = URIUtils::GetParentPath(item->GetPath());
+  if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
+      StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
+      url = Base64::Decode(URIUtils::GetFileName(item->GetPath()));
   std::string id  = item->GetVideoInfoTag()->m_strPlexId;
   CURL url2(url);
   url2.SetProtocol("http");
@@ -175,6 +178,9 @@ void CPlexClient::SetWatched(CFileItem* item)
 void CPlexClient::SetUnWatched(CFileItem* item)
 {
   std::string url = URIUtils::GetParentPath(item->GetPath());
+  if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
+      StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
+    url = Base64::Decode(URIUtils::GetFileName(item->GetPath()));
   std::string id  = item->GetVideoInfoTag()->m_strPlexId;
   CURL url2(url);
   url2.SetProtocol("http");
