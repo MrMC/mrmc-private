@@ -110,8 +110,29 @@ bool CRecentlyAddedJob::UpdateVideo()
   // if plex is enabled, get recently added TVSHOWS and MOVIES
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
   {
-//    CPlexClient::GetInstance().GetLocalRecentlyAddedEpisodes(*m_RecentlyAddedTV);
-//    CPlexClient::GetInstance().GetLocalRecentlyAddedMovies(*m_RecentlyAddedMovies);
+    CFileItemList* temp = new CFileItemList;
+    
+    CPlexClient::GetInstance().GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedTV, true);
+    CPlexClient::GetInstance().GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedMovies, false);
+    m_RecentlyAddedTV->Sort(SortByDateAdded, SortOrderDescending);
+    m_RecentlyAddedMovies->Sort(SortByDateAdded, SortOrderDescending);
+    
+    for (int i = 0; i < m_RecentlyAddedTV->Size() && i < NUM_ITEMS; i++)
+    {
+      CFileItemPtr item = m_RecentlyAddedTV->Get(i);
+      temp->Add(item);
+    }
+    m_RecentlyAddedTV->ClearItems();
+    m_RecentlyAddedTV->Append(*temp);
+    
+    temp->ClearItems();
+    for (int i = 0; i < m_RecentlyAddedMovies->Size() && i < NUM_ITEMS; i++)
+    {
+      CFileItemPtr item = m_RecentlyAddedMovies->Get(i);
+      temp->Add(item);
+    }
+    m_RecentlyAddedMovies->ClearItems();
+    m_RecentlyAddedMovies->Append(*temp);
   }
   
 #if defined(TARGET_DARWIN_TVOS)

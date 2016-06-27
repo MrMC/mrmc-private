@@ -617,7 +617,7 @@ void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string url)
   }
 }
 
-void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url)
+void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
 {
   CURL url2(url);
   std::string strXML;
@@ -625,7 +625,7 @@ void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std:
   url2.SetProtocol("http");
   
   url2.SetFileName(url2.GetFileName() + "recentlyAdded");
-  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&X-Plex-Container-Start=0&X-Plex-Container-Size=10");
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
   
   http.Get(url2.Get(), strXML);
   
@@ -641,19 +641,15 @@ void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std:
   }
 }
 
-void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url)
-{
-  // /library/sections/2/recentlyAdded?X-Plex-Container-Start=0&X-Plex-Container-Size=10
-  
-  std::string seasonsXmlPath;// = StringUtils::Format("%s/library/sections/1/recentlyAdded?X-Plex-Container-Start=0&X-Plex-Container-Size=10", m_strUrl.c_str());
-  
+void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
+{  
   CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
   url2.SetProtocol("http");
   
   url2.SetFileName(url2.GetFileName() + "recentlyAdded");
-  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&X-Plex-Container-Start=0&X-Plex-Container-Size=10");
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
   
   http.Get(url2.Get(), strXML);
   
@@ -666,6 +662,35 @@ void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::s
     GetVideoItems(items,url2,rootXmlNode, MediaTypePlexMovie);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
+  }
+}
+
+void CPlexClient::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
+{
+  //look through all plex servers and pull content data for "movie" type
+  std::vector<PlexServer> servers;
+  std::vector<SectionsContent> contents;
+  CPlexServices::GetInstance().GetServers(servers);
+  for (int i = 0; i < (int)servers.size(); i++)
+  {
+    if (tvShow)
+      contents = servers[i].GetTvContent();
+    else
+      contents = servers[i].GetMovieContent();
+    for (int c = 0; c < (int)contents.size(); c++)
+    {
+      CURL curl(servers[i].GetUrl());
+      curl.SetProtocol("http");
+      curl.SetFileName(curl.GetFileName() + contents[c].section + "/");
+      
+      if (tvShow)
+        GetLocalRecentlyAddedEpisodes(items,curl.Get(), 25);
+      else
+      {
+        GetLocalRecentlyAddedMovies(items,curl.Get(), 25);
+      }
+      
+    }
   }
 }
 
