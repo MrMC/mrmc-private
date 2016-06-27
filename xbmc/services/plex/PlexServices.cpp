@@ -41,7 +41,7 @@
 #include "utils/JSONVariantParser.h"
 #include "utils/XMLUtils.h"
 
-#include "PlexClient.h"
+#include "PlexUtils.h"
 #include "PlexServer.h"
 
 using namespace ANNOUNCEMENT;

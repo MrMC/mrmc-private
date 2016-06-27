@@ -52,7 +52,7 @@
 #include "pvr/recordings/PVRRecording.h"
 #include "ContextMenuManager.h"
 
-#include "services/plex/PlexClient.h"
+#include "services/plex/PlexUtils.h"
 
 #include <utility>
 

@@ -69,7 +69,7 @@
 #include "utils/Variant.h"
 #include "video/VideoLibraryQueue.h"
 #include "video/VideoInfoTag.h"
-#include "services/plex/PlexClient.h"
+#include "services/plex/PlexUtils.h"
 
 #define CONTROL_BTNVIEWASICONS       2
 #define CONTROL_BTNSORTBY            3
@@ -1595,9 +1595,9 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       if (item->IsPlex())
       {
         if (button == CONTEXT_BUTTON_MARK_WATCHED)
-          CPlexClient::SetWatched(item.get());
+          CPlexUtils::SetWatched(item.get());
         else
-          CPlexClient::SetUnWatched(item.get());
+          CPlexUtils::SetUnWatched(item.get());
         item->GetVideoInfoTag()->m_playCount = (button == CONTEXT_BUTTON_MARK_WATCHED);
         item->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_playCount > 0);
         return true;

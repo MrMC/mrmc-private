@@ -33,7 +33,7 @@
 #include "music/MusicThumbLoader.h"
 #include "video/VideoThumbLoader.h"
 #include "settings/Settings.h"
-#include "services/plex/PlexClient.h"
+#include "services/plex/PlexUtils.h"
 
 #if defined(TARGET_DARWIN_TVOS)
   #include "platform/darwin/DarwinUtils.h"
@@ -112,8 +112,8 @@ bool CRecentlyAddedJob::UpdateVideo()
   {
     CFileItemList* temp = new CFileItemList;
     
-    CPlexClient::GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedTV, true);
-    CPlexClient::GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedMovies, false);
+    CPlexUtils::GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedTV, true);
+    CPlexUtils::GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedMovies, false);
     m_RecentlyAddedTV->Sort(SortByDateAdded, SortOrderDescending);
     m_RecentlyAddedMovies->Sort(SortByDateAdded, SortOrderDescending);
     

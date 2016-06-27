@@ -18,7 +18,7 @@
  *
  */
 
-#include "PlexClient.h"
+#include "PlexUtils.h"
 #include "PlexServices.h"
 #include "utils/Base64.h"
 #include "utils/StringUtils.h"
@@ -31,7 +31,7 @@
 
 #include "video/VideoInfoTag.h"
 
-TiXmlDocument CPlexClient::GetPlexXML(std::string url, std::string filter)
+TiXmlDocument CPlexUtils::GetPlexXML(std::string url, std::string filter)
 {
   CURL url2(url);
   std::string strXML;
@@ -49,7 +49,7 @@ TiXmlDocument CPlexClient::GetPlexXML(std::string url, std::string filter)
   return xml;
 }
 
-void CPlexClient::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode)
+void CPlexUtils::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode)
 {
   // looks like plex is sending only one studio?
   std::vector<std::string> studios;
@@ -129,7 +129,7 @@ void CPlexClient::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode
   item.GetVideoInfoTag()->m_cast = roles;
 }
 
-void CPlexClient::SetWatched(CFileItem* item)
+void CPlexUtils::SetWatched(CFileItem* item)
 {
   std::string url = URIUtils::GetParentPath(item->GetPath());
   if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
@@ -144,7 +144,7 @@ void CPlexClient::SetWatched(CFileItem* item)
   http.Get(url2.Get(), strXML);
 }
 
-void CPlexClient::SetUnWatched(CFileItem* item)
+void CPlexUtils::SetUnWatched(CFileItem* item)
 {
   std::string url = URIUtils::GetParentPath(item->GetPath());
   if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
@@ -159,7 +159,7 @@ void CPlexClient::SetUnWatched(CFileItem* item)
   http.Get(url2.Get(), strXML);
 }
 
-void CPlexClient::SetOffset(CFileItem item, int offsetSeconds)
+void CPlexUtils::SetOffset(CFileItem item, int offsetSeconds)
 {
   std::string url = URIUtils::GetParentPath(item.GetPath());
   std::string id  = item.GetVideoInfoTag()->m_strPlexId;
@@ -171,7 +171,7 @@ void CPlexClient::SetOffset(CFileItem item, int offsetSeconds)
   http.Get(url2.Get(), strXML);
 }
 
-void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
+void CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
 {
   const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
   while (videoNode)
@@ -313,7 +313,7 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
   items.SetProperty("library.filter", "true");
 }
 
-void CPlexClient::GetLocalMovies(CFileItemList &items, std::string url, std::string filter)
+void CPlexUtils::GetLocalMovies(CFileItemList &items, std::string url, std::string filter)
 {
   CURL url2(url);
   TiXmlDocument xml = GetPlexXML(url);
@@ -325,7 +325,7 @@ void CPlexClient::GetLocalMovies(CFileItemList &items, std::string url, std::str
   }
 }
 
-void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string url)
+void CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
 {
   std::string value;
   TiXmlDocument xml = GetPlexXML(url);
@@ -389,7 +389,7 @@ void CPlexClient::GetLocalTvshows(CFileItemList &items, std::string url)
   items.SetProperty("library.filter", "true");
 }
 
-void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string url)
+void CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
 {
   TiXmlDocument xml = GetPlexXML(url);
   std::string value;
@@ -448,7 +448,7 @@ void CPlexClient::GetLocalSeasons(CFileItemList &items, const std::string url)
   items.SetProperty("library.filter", "true");
 }
 
-void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string url)
+void CPlexUtils::GetLocalEpisodes(CFileItemList &items, const std::string url)
 {
   CURL url2(url);
   TiXmlDocument xml = GetPlexXML(url);
@@ -462,7 +462,7 @@ void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string url)
   }
 }
 
-void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
+void CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
 {
   CURL url2(url);
   std::string strXML;
@@ -486,7 +486,7 @@ void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std:
   }
 }
 
-void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
+void CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
 {  
   CURL url2(url);
   std::string strXML;
@@ -510,7 +510,7 @@ void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::s
   }
 }
 
-void CPlexClient::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
+void CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
 {
   //look through all plex servers and pull recently added for each library section
   std::vector<PlexServer> servers;
@@ -539,7 +539,7 @@ void CPlexClient::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool t
   }
 }
 
-void CPlexClient::GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
+void CPlexUtils::GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
 {
   TiXmlDocument xml = GetPlexXML(url,filter);
   

@@ -24,7 +24,7 @@
 #include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
 
-class CPlexClient
+class CPlexUtils
 {
 public:
   static void SetWatched(CFileItem* item);
