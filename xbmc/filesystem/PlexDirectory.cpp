@@ -212,25 +212,20 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         filter = "actor";
       else if (path == "studios")
         filter = "studio";
-//      else if (path == "titles")
-//        filter = "all";
       
       if (path == "titles" || path == "filter")
       {
-//        CPlexClient::GetInstance().GetLocalMovies(items, Base64::Decode(section));
         CPlexClient::GetInstance().GetLocalTvshows(items,Base64::Decode(section));
         items.SetLabel("Titles");
         items.SetContent("tvshows");
       }
       else if (path == "shows")
       {
-        //        CPlexClient::GetInstance().GetLocalMovies(items, Base64::Decode(section));
         CPlexClient::GetInstance().GetLocalSeasons(items,Base64::Decode(section));
         items.SetContent("seasons");
       }
       else if (path == "seasons")
       {
-        //        CPlexClient::GetInstance().GetLocalMovies(items, Base64::Decode(section));
         CPlexClient::GetInstance().GetLocalEpisodes(items,Base64::Decode(section));
         items.SetContent("episodes");
       }
