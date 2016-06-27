@@ -46,22 +46,6 @@ CPlexClient& CPlexClient::GetInstance()
   return sPlexClient;
 }
 
-//void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string strDirectory)
-//{
-//  if (StringUtils::StartsWithNoCase(strDirectory, "videodb://recentlyaddedepisodes/"))
-//  {
-//    GetLocalRecentlyAddedEpisodes(items);
-//    items.SetContent("episodes");
-//    bResult = true;
-//  }
-//  else if (StringUtils::StartsWithNoCase(strDirectory, "videodb://recentlyaddedmovies/"))
-//  {
-//    GetLocalRecentlyAddedMovies(items);
-//    items.SetContent("movies");
-//    bResult = true;
-//  }
-//}
-
 TiXmlDocument CPlexClient::GetPlexXML(std::string url, std::string filter)
 {
   CURL url2(url);
@@ -255,9 +239,18 @@ void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* ro
       plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(videoNode, "grandparentTitle");
       plexItem->GetVideoInfoTag()->m_iSeason = atoi(XMLUtils::GetAttribute(videoNode, "parentIndex").c_str());
       plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(videoNode, "index").c_str());
-      url.SetFileName(XMLUtils::GetAttribute(videoNode, "parentThumb"));
-      plexItem->SetArt("tvshow.poster", url.Get());
+      
+      value = XMLUtils::GetAttribute(videoNode, "thumb");
+      if (!value.empty() && (value[0] == '/'))
+        StringUtils::TrimLeft(value, "/");
+      url.SetFileName(value);
       plexItem->SetArt("thumb", url.Get());
+
+      value = XMLUtils::GetAttribute(videoNode, "parentThumb");
+      if (!value.empty() && (value[0] == '/'))
+        StringUtils::TrimLeft(value, "/");
+      url.SetFileName(value);
+      plexItem->SetArt("tvshow.poster", url.Get());
       plexItem->SetArt("tvshow.thumb", url.Get());
       plexItem->SetIconImage(url.Get());
     }
@@ -625,15 +618,17 @@ void CPlexClient::GetLocalEpisodes(CFileItemList &items, const std::string url)
   }
 }
 
-void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items)
+void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url)
 {
-  // /library/sections/2/recentlyAdded?X-Plex-Container-Start=0&X-Plex-Container-Size=10
-  
-  std::string seasonsXmlPath; // = StringUtils::Format("%s/library/sections/2/recentlyAdded?X-Plex-Container-Start=0&X-Plex-Container-Size=10", m_strUrl.c_str());
-  
-  XFILE::CCurlFile http;
+  CURL url2(url);
   std::string strXML;
-  http.Get(seasonsXmlPath, strXML);
+  XFILE::CCurlFile http;
+  url2.SetProtocol("http");
+  
+  url2.SetFileName(url2.GetFileName() + "recentlyAdded");
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&X-Plex-Container-Start=0&X-Plex-Container-Size=10");
+  
+  http.Get(url2.Get(), strXML);
   
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
@@ -641,21 +636,27 @@ void CPlexClient::GetLocalRecentlyAddedEpisodes(CFileItemList &items)
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-//    GetVideoItems(items,rootXmlNode, MediaTypePlexEpisode);
-//    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
+    GetVideoItems(items,url2,rootXmlNode, MediaTypePlexEpisode);
+    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
 }
 
-void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items)
+void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url)
 {
   // /library/sections/2/recentlyAdded?X-Plex-Container-Start=0&X-Plex-Container-Size=10
   
   std::string seasonsXmlPath;// = StringUtils::Format("%s/library/sections/1/recentlyAdded?X-Plex-Container-Start=0&X-Plex-Container-Size=10", m_strUrl.c_str());
   
-  XFILE::CCurlFile http;
+  CURL url2(url);
   std::string strXML;
-  http.Get(seasonsXmlPath, strXML);
+  XFILE::CCurlFile http;
+  url2.SetProtocol("http");
+  
+  url2.SetFileName(url2.GetFileName() + "recentlyAdded");
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&X-Plex-Container-Start=0&X-Plex-Container-Size=10");
+  
+  http.Get(url2.Get(), strXML);
   
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
@@ -663,8 +664,8 @@ void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items)
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-//    GetVideoItems(items,rootXmlNode, MediaTypePlexMovie);
-    //    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
+    GetVideoItems(items,url2,rootXmlNode, MediaTypePlexMovie);
+    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
 }

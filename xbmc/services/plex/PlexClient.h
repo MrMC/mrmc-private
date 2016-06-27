@@ -33,8 +33,8 @@ public:
   void SetWatched(CFileItem* item);
   void SetUnWatched(CFileItem* item);
   void SetOffset(CFileItem item, int offsetSeconds);
-  void GetLocalRecentlyAddedEpisodes(CFileItemList &items);
-  void GetLocalRecentlyAddedMovies(CFileItemList &items);
+  void GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url);
+  void GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url);
   
 
   void GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");

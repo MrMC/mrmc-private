@@ -67,7 +67,10 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         CFileItemPtr pItem(new CFileItem("MrMC - Movies"));
         pItem->m_bIsFolder = true;
         pItem->m_bIsShareOrDrive = false;
-        pItem->SetPath("videodb://movies/" + basePath + "/");
+        if (URIUtils::GetFileName(basePath) == "recentlyaddedmovies")
+          pItem->SetPath("videodb://recentlyaddedmovies/");
+        else
+          pItem->SetPath("videodb://movies/" + basePath + "/");
         pItem->SetLabel("MrMC - Movies");
         items.Add(pItem);
       }
@@ -106,7 +109,10 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           items.SetPath("");
         }
         std::string label = basePath;
-        StringUtils::ToCapitalize(label);
+        if (URIUtils::GetFileName(basePath) == "recentlyaddedmovies")
+          label = "Recently added movies";
+        else
+          StringUtils::ToCapitalize(label);
         items.SetLabel(label);
       }
     }
@@ -136,6 +142,12 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.SetLabel("Titles");
         items.SetContent("movies");
       }
+      if (path == "recentlyaddedmovies")
+      {
+        CPlexClient::GetInstance().GetLocalRecentlyAddedMovies(items, Base64::Decode(section));
+        items.SetLabel("Recently added movies");
+        items.SetContent("movies");
+      }
       else
       {
         CPlexClient::GetInstance().GetLocalFilter(items, Base64::Decode(section), "plex://movies/filter/", filter);
@@ -156,7 +168,10 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         CFileItemPtr pItem(new CFileItem("MrMC - TvShows"));
         pItem->m_bIsFolder = true;
         pItem->m_bIsShareOrDrive = false;
-        pItem->SetPath("videodb://tvshows/" + basePath + "/");
+        if (URIUtils::GetFileName(basePath) == "recentlyaddedepisodes")
+          pItem->SetPath("videodb://recentlyaddedepisodes/");
+        else
+          pItem->SetPath("videodb://tvshows/" + basePath + "/");
         pItem->SetLabel("MrMC - TvShows");
         items.Add(pItem);
       }
@@ -195,7 +210,10 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           items.SetPath("");
         }
         std::string label = basePath;
-        StringUtils::ToCapitalize(label);
+        if (URIUtils::GetFileName(basePath) == "recentlyaddedepisodes")
+          label = "Recently added episodes";
+        else
+          StringUtils::ToCapitalize(label);
         items.SetLabel(label);
       }
     }
@@ -227,6 +245,12 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       else if (path == "seasons")
       {
         CPlexClient::GetInstance().GetLocalEpisodes(items,Base64::Decode(section));
+        items.SetContent("episodes");
+      }
+      if (path == "recentlyaddedepisodes")
+      {
+        CPlexClient::GetInstance().GetLocalRecentlyAddedEpisodes(items, Base64::Decode(section));
+        items.SetLabel("Recently added episodes");
         items.SetContent("episodes");
       }
       else

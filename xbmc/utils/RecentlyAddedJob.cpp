@@ -110,8 +110,8 @@ bool CRecentlyAddedJob::UpdateVideo()
   // if plex is enabled, get recently added TVSHOWS and MOVIES
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
   {
-    CPlexClient::GetInstance().GetLocalRecentlyAddedEpisodes(*m_RecentlyAddedTV);
-    CPlexClient::GetInstance().GetLocalRecentlyAddedMovies(*m_RecentlyAddedMovies);
+//    CPlexClient::GetInstance().GetLocalRecentlyAddedEpisodes(*m_RecentlyAddedTV);
+//    CPlexClient::GetInstance().GetLocalRecentlyAddedMovies(*m_RecentlyAddedMovies);
   }
   
 #if defined(TARGET_DARWIN_TVOS)

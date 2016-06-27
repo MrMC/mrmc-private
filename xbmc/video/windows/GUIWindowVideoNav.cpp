@@ -1301,6 +1301,18 @@ std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
       return "plex://tvshows/" + lower + "/";
     return "videodb://tvshows/" + lower + "/";
   }
+  else if (lower == "recentlyaddedmovies")
+  {
+    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+      return "plex://movies/recentlyaddedmovies/";
+    return "videodb://recentlyaddedmovies/";
+  }
+  else if (lower == "recentlyaddedepisodes")
+  {
+    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+      return "plex://tvshows/recentlyaddedepisodes/";
+    return "videodb://recentlyaddedepisodes/";
+  }
   else if (lower == "tvshowtags")
     return "videodb://tvshows/tags/";
   else if (lower == "tvshows")
@@ -1323,10 +1335,6 @@ std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
     return "videodb://musicvideos/tags/";
   else if (lower == "musicvideos")
     return "videodb://musicvideos/";
-  else if (lower == "recentlyaddedmovies")
-    return "videodb://recentlyaddedmovies/";
-  else if (lower == "recentlyaddedepisodes")
-    return "videodb://recentlyaddedepisodes/";
   else if (lower == "recentlyaddedmusicvideos")
     return "videodb://recentlyaddedmusicvideos/";
   else if (lower == "files")
