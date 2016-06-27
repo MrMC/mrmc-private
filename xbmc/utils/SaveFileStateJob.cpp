@@ -44,6 +44,13 @@ bool CSaveFileStateJob::DoWork()
   {
    //    do some plex shit but do not write to our DB
     CPlexClient::GetInstance().SetOffset(m_item, m_bookmark.timeInSeconds);
+    
+    // this is supposed to mark the listing with watched icon... id doesnt :(
+    m_item.SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, true);
+    CUtil::DeleteVideoDatabaseDirectoryCache();
+    CFileItemPtr msgItem(new CFileItem(m_item));
+    CGUIMessage message(GUI_MSG_NOTIFY_ALL, g_windowManager.GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, 1, msgItem); // 1 to update the listing as well
+    g_windowManager.SendThreadMessage(message);
     return true;
   }
   

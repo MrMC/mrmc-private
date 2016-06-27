@@ -65,40 +65,38 @@ void CPlexClient::HandleMedia(CFileItemList &items, bool &bResult , std::string 
 
 void CPlexClient::SetWatched(CFileItem* item)
 {
-  // http://localhost:32400/:/scrobble?identifier=com.plexapp.plugins.library&amp;key=
-  
-//  std::string scrobbleUrl = StringUtils::Format("%s/:/scrobble?identifier=com.plexapp.plugins.library&key=%s", m_strUrl.c_str(), id.c_str());
-  
-  CURL url2(item->GetVideoInfoTag()->m_strPath);
+  std::string url = URIUtils::GetParentPath(item->GetPath());
+  std::string id  = item->GetVideoInfoTag()->m_strPlexId;
+  CURL url2(url);
   url2.SetProtocol("http");
+  url2.SetFileName(StringUtils::Format(":/scrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
   XFILE::CCurlFile http;
   std::string strXML;
-  std::string scrobbleUrl = url2.Get();
   http.Get(url2.Get(), strXML);
-  
-  std::string response;
-  http.Get(scrobbleUrl, response);
-  std::string response2;
 }
 
 void CPlexClient::SetUnWatched(CFileItem* item)
 {
-//  //http://localhost:32400/:/unscrobble?identifier=com.plexapp.plugins.library&amp;key=
-//    std::string unscrobbleUrl = StringUtils::Format("%s/:/unscrobble?identifier=com.plexapp.plugins.library&key=%s", m_strUrl.c_str(), id.c_str());
-//  XFILE::CCurlFile http;
-//  std::string response;
-//  http.Get(unscrobbleUrl, response);
-//  std::string response2;
+  std::string url = URIUtils::GetParentPath(item->GetPath());
+  std::string id  = item->GetVideoInfoTag()->m_strPlexId;
+  CURL url2(url);
+  url2.SetProtocol("http");
+  url2.SetFileName(StringUtils::Format(":/unscrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
+  XFILE::CCurlFile http;
+  std::string strXML;
+  http.Get(url2.Get(), strXML);
 }
 
 void CPlexClient::SetOffset(CFileItem item, int offsetSeconds)
 {
-  // looks like this needs proper server communication using headers, maybe plexTalk.cpp that has all the server communication shit?
-  // item.GetVideoInfoTag()->m_strPlexId has ratingKey
-  // offsetSeconds is time, time in milliseconds
-  // https://www.reddit.com/r/PleX/comments/476a1x/making_an_android_plex_app_what_can_icant_i_do/?
-  //192.168.1.200:32400/:/progress?key=418&identifier=com.plexapp.plugins.library&time=7765&state=stopped
-  //  http://192.168.1.200:32400/:/timeline?ratingKey=65&key=/library/metadata/65&state=stopped&playQueueItemID=3&time=3010&duration=8050153
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  std::string id  = item.GetVideoInfoTag()->m_strPlexId;
+  CURL url2(url);
+  url2.SetProtocol("http");
+  url2.SetFileName(StringUtils::Format(":/progress?key=%s&identifier=com.plexapp.plugins.library&time=%i&state=stopped", id.c_str(), offsetSeconds*1000));
+  XFILE::CCurlFile http;
+  std::string strXML;
+  http.Get(url2.Get(), strXML);
 }
 
 void CPlexClient::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
