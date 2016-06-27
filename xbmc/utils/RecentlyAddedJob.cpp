@@ -112,8 +112,8 @@ bool CRecentlyAddedJob::UpdateVideo()
   {
     CFileItemList* temp = new CFileItemList;
     
-    CPlexClient::GetInstance().GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedTV, true);
-    CPlexClient::GetInstance().GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedMovies, false);
+    CPlexClient::GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedTV, true);
+    CPlexClient::GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedMovies, false);
     m_RecentlyAddedTV->Sort(SortByDateAdded, SortOrderDescending);
     m_RecentlyAddedMovies->Sort(SortByDateAdded, SortOrderDescending);
     

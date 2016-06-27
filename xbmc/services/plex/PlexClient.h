@@ -27,26 +27,21 @@
 class CPlexClient
 {
 public:
-  CPlexClient();
-  ~CPlexClient();
-  static CPlexClient &GetInstance();
-  void SetWatched(CFileItem* item);
-  void SetUnWatched(CFileItem* item);
-  void SetOffset(CFileItem item, int offsetSeconds);
-  void GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
-  void GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
-  void GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
+  static void SetWatched(CFileItem* item);
+  static void SetUnWatched(CFileItem* item);
+  static void SetOffset(CFileItem item, int offsetSeconds);
+  static void GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
+  static void GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
+  static void GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
 
-  void GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");
-  void GetLocalTvshows(CFileItemList &items, std::string url);
-  void GetLocalSeasons(CFileItemList &items, const std::string url);
-  void GetLocalEpisodes(CFileItemList &items, const std::string url);
-  void GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
+  static void GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");
+  static void GetLocalTvshows(CFileItemList &items, std::string url);
+  static void GetLocalSeasons(CFileItemList &items, const std::string url);
+  static void GetLocalEpisodes(CFileItemList &items, const std::string url);
+  static void GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
 
 private:
-  // private construction, and no assignements; use the provided singleton methods
-  void GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
-  void GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode);
-  TiXmlDocument GetPlexXML(std::string url, std::string filter = "");
-  
+  static void GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
+  static void GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode);
+  static TiXmlDocument GetPlexXML(std::string url, std::string filter = "");
 };

@@ -50,7 +50,7 @@ bool CSaveFileStateJob::DoWork()
     g_windowManager.SendThreadMessage(message);
     
     //    notify Plex Server where we stopped playback
-    CPlexClient::GetInstance().SetOffset(m_item, m_bookmark.timeInSeconds);
+    CPlexClient::SetOffset(m_item, m_bookmark.timeInSeconds);
     return true;
   }
   

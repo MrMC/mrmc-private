@@ -31,20 +31,6 @@
 
 #include "video/VideoInfoTag.h"
 
-CPlexClient::CPlexClient()
-{
-}
-
-CPlexClient::~CPlexClient()
-{
-}
-
-CPlexClient& CPlexClient::GetInstance()
-{
-  static CPlexClient sPlexClient;
-  return sPlexClient;
-}
-
 TiXmlDocument CPlexClient::GetPlexXML(std::string url, std::string filter)
 {
   CURL url2(url);

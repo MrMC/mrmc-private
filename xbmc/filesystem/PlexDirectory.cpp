@@ -104,7 +104,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(servers[i].GetUrl());
           curl.SetProtocol(servers[i].GetScheme());
-          CPlexClient::GetInstance().GetLocalMovies(items,curl.GetFileName() + Base64::Decode(contents[0].section) + "/all");
+          CPlexClient::GetLocalMovies(items,curl.GetFileName() + Base64::Decode(contents[0].section) + "/all");
           items.SetContent("movies");
           items.SetPath("");
         }
@@ -138,19 +138,19 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       
       if (path == "titles" || path == "filter")
       {
-        CPlexClient::GetInstance().GetLocalMovies(items, Base64::Decode(section));
+        CPlexClient::GetLocalMovies(items, Base64::Decode(section));
         items.SetLabel("Titles");
         items.SetContent("movies");
       }
       if (path == "recentlyaddedmovies")
       {
-        CPlexClient::GetInstance().GetLocalRecentlyAddedMovies(items, Base64::Decode(section));
+        CPlexClient::GetLocalRecentlyAddedMovies(items, Base64::Decode(section));
         items.SetLabel("Recently added movies");
         items.SetContent("movies");
       }
       else
       {
-        CPlexClient::GetInstance().GetLocalFilter(items, Base64::Decode(section), "plex://movies/filter/", filter);
+        CPlexClient::GetLocalFilter(items, Base64::Decode(section), "plex://movies/filter/", filter);
         StringUtils::ToCapitalize(path);
         items.SetLabel(path);
         items.SetContent("movies");
@@ -205,7 +205,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(servers[i].GetUrl());
           curl.SetProtocol(servers[i].GetScheme());
-          CPlexClient::GetInstance().GetLocalTvshows(items,curl.GetFileName() + Base64::Decode(contents[0].section) + "/all");
+          CPlexClient::GetLocalTvshows(items,curl.GetFileName() + Base64::Decode(contents[0].section) + "/all");
           items.SetContent("tvshows");
           items.SetPath("");
         }
@@ -233,29 +233,29 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       
       if (path == "titles" || path == "filter")
       {
-        CPlexClient::GetInstance().GetLocalTvshows(items,Base64::Decode(section));
+        CPlexClient::GetLocalTvshows(items,Base64::Decode(section));
         items.SetLabel("Titles");
         items.SetContent("tvshows");
       }
       else if (path == "shows")
       {
-        CPlexClient::GetInstance().GetLocalSeasons(items,Base64::Decode(section));
+        CPlexClient::GetLocalSeasons(items,Base64::Decode(section));
         items.SetContent("seasons");
       }
       else if (path == "seasons")
       {
-        CPlexClient::GetInstance().GetLocalEpisodes(items,Base64::Decode(section));
+        CPlexClient::GetLocalEpisodes(items,Base64::Decode(section));
         items.SetContent("episodes");
       }
       if (path == "recentlyaddedepisodes")
       {
-        CPlexClient::GetInstance().GetLocalRecentlyAddedEpisodes(items, Base64::Decode(section));
+        CPlexClient::GetLocalRecentlyAddedEpisodes(items, Base64::Decode(section));
         items.SetLabel("Recently added episodes");
         items.SetContent("episodes");
       }
       else
       {
-        CPlexClient::GetInstance().GetLocalFilter(items, Base64::Decode(section), "plex://tvshows/filter/", filter);
+        CPlexClient::GetLocalFilter(items, Base64::Decode(section), "plex://tvshows/filter/", filter);
         StringUtils::ToCapitalize(path);
         items.SetLabel(path);
         items.SetContent("tvshows");
