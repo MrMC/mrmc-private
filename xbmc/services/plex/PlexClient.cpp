@@ -667,7 +667,7 @@ void CPlexClient::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::s
 
 void CPlexClient::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
 {
-  //look through all plex servers and pull content data for "movie" type
+  //look through all plex servers and pull recently added for each library section
   std::vector<PlexServer> servers;
   std::vector<SectionsContent> contents;
   CPlexServices::GetInstance().GetServers(servers);
