@@ -24,9 +24,6 @@
 
 struct SectionsContent
 {
-  /*
-   <Directory type="movie" title="Movies" agent="com.plexapp.agents.imdb" scanner="Plex Movie Scanner" language="en" uuid="ba486c42-7de0-4472-b4b7-58ff40ffb54a" updatedAt="1465148433" host="94.203.11.95" address="94.203.11.95" port="21499" serverName="Ametovic-Qnap" serverVersion="0.9.16.6.1993-5089475" machineIdentifier="d44a733a35eabd1c67339602de0f8e5f4f9e1063" path="/library/sections/1" key="http://94.203.11.95:21499/library/sections/1" art="http://94.203.11.95:21499/:/resources/movie-fanart.jpg" unique="0" local="0" owned="1" accessToken="zYyEu9uEqdCF94bWzKRb"/>
-   */
   int         port;
   std::string type;
   std::string title;
