@@ -22,6 +22,7 @@
 #include <string>
 #include "FileItem.h"
 #include "utils/XBMCTinyXML.h"
+#include "utils/XMLUtils.h"
 
 class CPlexClient
 {
@@ -29,14 +30,13 @@ public:
   CPlexClient();
   ~CPlexClient();
   static CPlexClient &GetInstance();
-  void HandleMedia(CFileItemList &items,bool &bResult, std::string strDirectory);
   void SetWatched(CFileItem* item);
   void SetUnWatched(CFileItem* item);
   void SetOffset(CFileItem item, int offsetSeconds);
   void GetLocalRecentlyAddedEpisodes(CFileItemList &items);
   void GetLocalRecentlyAddedMovies(CFileItemList &items);
   
-  void GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
+
   void GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");
   void GetLocalTvshows(CFileItemList &items, std::string url);
   void GetLocalSeasons(CFileItemList &items, const std::string url);
@@ -45,5 +45,7 @@ public:
 
 private:
   // private construction, and no assignements; use the provided singleton methods
-  std::string m_strUrl;
+  void GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
+  TiXmlDocument GetPlexXML(std::string url, std::string filter = "");
+  
 };
