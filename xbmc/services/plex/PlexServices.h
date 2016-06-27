@@ -23,13 +23,13 @@
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
 #include "interfaces/IAnnouncer.h"
-#include "PlexServer.h"
+#include "PlexClient.h"
 
 namespace SOCKETS
 {
   class CUDPSocket;
 }
-class PlexServer;
+class CPlexClient;
 
 class CPlexServices
 : public CThread
@@ -42,7 +42,7 @@ public:
   void Start();
   void Stop();
   bool IsActive();
-  void GetServers(std::vector<PlexServer> &servers) const {servers = m_servers; }
+  void GetServers(std::vector<CPlexClient> &servers) const {servers = m_clients; }
   // ISetting callbacks
   virtual void OnSettingChanged(const CSetting *setting) override;
 
@@ -64,8 +64,8 @@ private:
   bool          FetchPlexToken();
   bool          FetchMyPlexServers();
   void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
-  PlexServer*   GetServer(std::string uuid);
-  bool          AddServer(PlexServer server);
+  CPlexClient*  GetClient(std::string uuid);
+  bool          AddClient(CPlexClient server);
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
@@ -79,5 +79,5 @@ private:
   bool              m_autoGDM;
   std::string       m_localHost;
   std::string       m_localPort;
-  std::vector<PlexServer> m_servers;
+  std::vector<CPlexClient> m_clients;
 };

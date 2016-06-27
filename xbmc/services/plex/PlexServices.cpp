@@ -42,7 +42,7 @@
 #include "utils/XMLUtils.h"
 
 #include "PlexUtils.h"
-#include "PlexServer.h"
+#include "PlexClient.h"
 
 using namespace ANNOUNCEMENT;
 
@@ -90,7 +90,7 @@ void CPlexServices::Stop()
   {
     StopThread();
   }
-  m_servers.clear();
+  m_clients.clear();
 }
 
 bool CPlexServices::IsActive()
@@ -224,14 +224,14 @@ void CPlexServices::Process()
           std::string buf(buffer, packetSize);
           if (buf.find("200 OK") != std::string::npos)
           {
-            PlexServer newServer(buf, sender.Address());
-            if (AddServer(newServer))
+            CPlexClient newClient(buf, sender.Address());
+            if (AddClient(newClient))
             {
               CLog::Log(LOGNOTICE, "CPlexServices: Server found via GDM %s", sender.Address());
             }
-            else if (GetServer(newServer.m_uuid))
+            else if (GetClient(newClient.m_uuid))
             {
-              GetServer(newServer.m_uuid)->ParseData(buf, sender.Address());
+              GetClient(newClient.m_uuid)->ParseData(buf, sender.Address());
               CLog::Log(LOGDEBUG, "CPlexServices: Server updated via GDM %s", sender.Address());
             }
           }
@@ -311,18 +311,17 @@ bool CPlexServices::FetchMyPlexServers()
       const TiXmlElement* ServerNode = MediaContainer->FirstChildElement("Server");
       while (ServerNode)
       {
-        PlexServer newServer(ServerNode);
+        CPlexClient newClient(ServerNode);
 
-        if (AddServer(newServer))
+        if (AddClient(newClient))
         {
-          CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", newServer.GetServerName().c_str());
-          //CLog::Log(LOGNOTICE, "CPlexServices: New server found via GDM %s", data.c_str());
+          CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", newClient.GetServerName().c_str());
           rtn = true;
         }
-        else if (GetServer(newServer.m_uuid))
+        else if (GetClient(newClient.m_uuid))
         {
-          //GetServer(newServer.m_uuid)->ParseData(data, host);
-          CLog::Log(LOGDEBUG, "CPlexServices: Server updated via plex.tv %s", newServer.GetServerName().c_str());
+          //GetClient(newClient.m_uuid)->ParseData(data, host);
+          CLog::Log(LOGDEBUG, "CPlexServices: Server updated via plex.tv %s", newClient.GetServerName().c_str());
         }
 
         ServerNode = ServerNode->NextSiblingElement("Server");
@@ -344,9 +343,9 @@ void CPlexServices::SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket)
     CLog::Log(LOGERROR, "CPlexServices: discover send failed");
 }
 
-PlexServer* CPlexServices::GetServer(std::string uuid)
+CPlexClient* CPlexServices::GetClient(std::string uuid)
 {
-  for (std::vector<PlexServer>::iterator s_it = m_servers.begin(); s_it != m_servers.end(); ++s_it)
+  for (std::vector<CPlexClient>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
   {
     if (s_it->GetUuid() == uuid)
         return &(*s_it);
@@ -354,16 +353,16 @@ PlexServer* CPlexServices::GetServer(std::string uuid)
   return nullptr;
 }
 
-bool CPlexServices::AddServer(PlexServer server)
+bool CPlexServices::AddClient(CPlexClient client)
 {
-  // do not add existing servers
-  for (std::vector<PlexServer>::iterator s_it = m_servers.begin(); s_it != m_servers.end(); ++s_it)
+  // do not add existing clients
+  for (std::vector<CPlexClient>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
   {
-    if (s_it->GetUuid() == server.GetUuid())
+    if (s_it->GetUuid() == client.GetUuid())
     return false;
   }
-  server.ParseSections();
-  m_servers.push_back(server);
+  client.ParseSections();
+  m_clients.push_back(client);
 
   CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
   g_windowManager.SendThreadMessage(msg);

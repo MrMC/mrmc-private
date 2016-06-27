@@ -18,7 +18,7 @@
  *
  */
 
-#include "PlexServer.h"
+#include "PlexClient.h"
 
 #include "URL.h"
 #include "utils/log.h"
@@ -30,13 +30,13 @@
 #include <sstream>
 
 
-PlexServer::PlexServer(std::string data, std::string ip)
+CPlexClient::CPlexClient(std::string data, std::string ip)
 {
   m_local = true;
   ParseData(data, ip);
 }
 
-PlexServer::PlexServer(const TiXmlElement* ServerNode)
+CPlexClient::CPlexClient(const TiXmlElement* ServerNode)
 {
   m_local = false;
   m_uuid = XMLUtils::GetAttribute(ServerNode, "machineIdentifier");
@@ -59,7 +59,7 @@ PlexServer::PlexServer(const TiXmlElement* ServerNode)
   GetIdentity();
 }
 
-void PlexServer::ParseData(std::string data, std::string ip)
+void CPlexClient::ParseData(std::string data, std::string ip)
 {
   int port = 0;
   std::istringstream f(data);
@@ -96,24 +96,24 @@ void PlexServer::ParseData(std::string data, std::string ip)
   m_url = url.Get();
 }
 
-std::string PlexServer::GetUrl()
+std::string CPlexClient::GetUrl()
 {
   return m_url;
 }
 
-std::string PlexServer::GetHost()
+std::string CPlexClient::GetHost()
 {
   CURL url(m_url);
   return url.GetHostName();
 }
 
-int PlexServer::GetPort()
+int CPlexClient::GetPort()
 {
   CURL url(m_url);
   return url.GetPort();
 }
 
-void PlexServer::GetIdentity()
+void CPlexClient::GetIdentity()
 {
   XFILE::CCurlFile plex;
   CURL curl(m_url);
@@ -121,11 +121,11 @@ void PlexServer::GetIdentity()
   std::string strResponse;
   if (plex.Get(curl.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "PlexServer::GetIdentity() %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "CPlexClient::GetIdentity() %s", strResponse.c_str());
   }
 }
 
-void PlexServer::ParseSections()
+void CPlexClient::ParseSections()
 {
   XFILE::CCurlFile plex;
 
@@ -134,7 +134,7 @@ void PlexServer::ParseSections()
   std::string strResponse;
   if (plex.Get(curl.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "PlexServer::ParseSections() %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "CPlexClient::ParseSections() %s", strResponse.c_str());
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
     

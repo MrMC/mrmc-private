@@ -512,19 +512,19 @@ void CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::st
 
 void CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
 {
-  //look through all plex servers and pull recently added for each library section
-  std::vector<PlexServer> servers;
+  //look through all plex clients and pull recently added for each library section
+  std::vector<CPlexClient> clients;
   std::vector<SectionsContent> contents;
-  CPlexServices::GetInstance().GetServers(servers);
-  for (int i = 0; i < (int)servers.size(); i++)
+  CPlexServices::GetInstance().GetServers(clients);
+  for (int i = 0; i < (int)clients.size(); i++)
   {
     if (tvShow)
-      contents = servers[i].GetTvContent();
+      contents = clients[i].GetTvContent();
     else
-      contents = servers[i].GetMovieContent();
+      contents = clients[i].GetMovieContent();
     for (int c = 0; c < (int)contents.size(); c++)
     {
-      CURL curl(servers[i].GetUrl());
+      CURL curl(clients[i].GetUrl());
       curl.SetProtocol("http");
       curl.SetFileName(curl.GetFileName() + contents[c].section + "/");
       

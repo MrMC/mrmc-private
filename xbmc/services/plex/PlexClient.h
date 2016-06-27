@@ -44,13 +44,13 @@ struct SectionsContent
   std::string art;
   };
 
-class PlexServer
+class CPlexClient
 {
   friend class CPlexServices;
 
 public:
-  PlexServer(std::string data, std::string ip);
-  PlexServer(const TiXmlElement* ServerNode);
+  CPlexClient(std::string data, std::string ip);
+  CPlexClient(const TiXmlElement* ServerNode);
 
   const std::string &GetContentType() const { return m_contentType; }
   const std::string &GetServerName() const { return m_serverName; }
