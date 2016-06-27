@@ -118,19 +118,15 @@ bool CRecentlyAddedJob::UpdateVideo()
     m_RecentlyAddedMovies->Sort(SortByDateAdded, SortOrderDescending);
     
     for (int i = 0; i < m_RecentlyAddedTV->Size() && i < NUM_ITEMS; i++)
-    {
-      CFileItemPtr item = m_RecentlyAddedTV->Get(i);
-      temp->Add(item);
-    }
+      temp->Add(m_RecentlyAddedTV->Get(i));
+    
     m_RecentlyAddedTV->ClearItems();
     m_RecentlyAddedTV->Append(*temp);
     
     temp->ClearItems();
     for (int i = 0; i < m_RecentlyAddedMovies->Size() && i < NUM_ITEMS; i++)
-    {
-      CFileItemPtr item = m_RecentlyAddedMovies->Get(i);
-      temp->Add(item);
-    }
+      temp->Add(m_RecentlyAddedMovies->Get(i));
+    
     m_RecentlyAddedMovies->ClearItems();
     m_RecentlyAddedMovies->Append(*temp);
   }
