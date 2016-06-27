@@ -981,11 +981,13 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
       VIDEO::SScanSettings settings;
       GetScraperForItem(item.get(), info, settings);
 
-      if ((info && info->Content() == CONTENT_TVSHOWS) || item->GetVideoContentType() == PLEX_CONTENT_EPISODES || item->GetVideoContentType() == PLEX_CONTENT_TVSHOW)
+      if ((info && info->Content() == CONTENT_TVSHOWS) ||
+           item->GetVideoContentType() == SERVICE_CONTENT_TVSHOW ||
+           item->GetVideoContentType() == SERVICE_CONTENT_EPISODES)
         buttons.Add(CONTEXT_BUTTON_INFO, item->m_bIsFolder ? 20351 : 20352);
       else if (info && info->Content() == CONTENT_MUSICVIDEOS)
         buttons.Add(CONTEXT_BUTTON_INFO,20393);
-      else if ((info && info->Content() == CONTENT_MOVIES) || item->GetVideoContentType() == PLEX_CONTENT_MOVIE)
+      else if ((info && info->Content() == CONTENT_MOVIES) || item->GetVideoContentType() == SERVICE_CONTENT_MOVIE)
         buttons.Add(CONTEXT_BUTTON_INFO, 13346);
 
       // can we update the database?
@@ -1027,8 +1029,8 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
         {
           if (g_application.IsVideoScanning())
             buttons.Add(CONTEXT_BUTTON_STOP_SCANNING, 13353);
-          // no scan for new content on plex lib
-          if (item->GetVideoContentType() != PLEX_CONTENT_TVSHOW)
+          // no scan for new content on server lib
+          if (item->GetVideoContentType() != SERVICE_CONTENT_TVSHOW)
             buttons.Add(CONTEXT_BUTTON_SCAN, 13349);
         }
 

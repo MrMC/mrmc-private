@@ -71,7 +71,7 @@ void CVideoInfoTag::Reset()
   m_iSeason = -1;
   m_iEpisode = -1;
   m_strUniqueId.clear();
-  m_strPlexId.clear();
+  m_strServiceId.clear();
   m_iSpecialSortSeason = -1;
   m_iSpecialSortEpisode = -1;
   m_fRating = 0.0f;

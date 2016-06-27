@@ -1076,9 +1076,22 @@ bool CFileItem::IsLiveTV() const
   return URIUtils::IsLiveTV(m_strPath);
 }
 
-bool CFileItem::IsPlex() const
+bool CFileItem::IsServiceBased() const
 {
-  return GetVideoContentType() == PLEX_CONTENT_MOVIE || GetVideoContentType() == PLEX_CONTENT_EPISODES || GetVideoContentType() == PLEX_CONTENT_TVSHOW || GetVideoContentType() == PLEX_CONTENT_SEASON;
+  bool rtn = false;
+  int contentType = GetVideoContentType();
+  switch(contentType)
+  {
+    case SERVICE_CONTENT_MOVIE:
+    case SERVICE_CONTENT_EPISODES:
+    case SERVICE_CONTENT_TVSHOW:
+    case SERVICE_CONTENT_SEASON:
+      rtn = true;
+      break;
+    default:
+      rtn = false;
+  }
+  return rtn;
 }
 
 bool CFileItem::IsHD() const
@@ -1344,10 +1357,10 @@ bool CFileItem::IsSamePath(const CFileItem *item) const
   }
   if (HasVideoInfoTag() && item->HasVideoInfoTag())
   {
-    if (item->IsPlex())
+    if (item->IsServiceBased())
     {
-      if (!m_videoInfoTag->m_strPlexId.empty() && !item->m_videoInfoTag->m_strPlexId.empty())
-        return (m_videoInfoTag->m_strPlexId == item->m_videoInfoTag->m_strPlexId);
+      if (!m_videoInfoTag->m_strServiceId.empty() && !item->m_videoInfoTag->m_strServiceId.empty())
+        return (m_videoInfoTag->m_strServiceId == item->m_videoInfoTag->m_strServiceId);
     }
     if (m_videoInfoTag->m_iDbId != -1 && item->m_videoInfoTag->m_iDbId != -1)
       return ((m_videoInfoTag->m_iDbId == item->m_videoInfoTag->m_iDbId) &&
@@ -3300,14 +3313,14 @@ int CFileItem::GetVideoContentType() const
     return VIDEODB_CONTENT_EPISODES;
   if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypeMusicVideo)
     return VIDEODB_CONTENT_MUSICVIDEOS;
-  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypePlexMovie)
-    return PLEX_CONTENT_MOVIE;
-  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypePlexTvShow)
-    return PLEX_CONTENT_TVSHOW;
-  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypePlexEpisode)
-    return PLEX_CONTENT_EPISODES;
-  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypePlexSeason)
-    return PLEX_CONTENT_SEASON;
+  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypeServiceMovie)
+    return SERVICE_CONTENT_MOVIE;
+  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypeServiceTvShow)
+    return SERVICE_CONTENT_TVSHOW;
+  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypeServiceEpisode)
+    return SERVICE_CONTENT_EPISODES;
+  if (HasVideoInfoTag() && GetVideoInfoTag()->m_type == MediaTypeServiceSeason)
+    return SERVICE_CONTENT_SEASON;
   CVideoDatabaseDirectory dir;
   VIDEODATABASEDIRECTORY::CQueryParams params;
   dir.GetQueryParams(m_strPath, params);

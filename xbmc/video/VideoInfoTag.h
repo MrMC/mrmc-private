@@ -150,7 +150,7 @@ public:
   std::string m_strSetOverview;
   std::vector<std::string> m_tags;
   std::string m_strFile;
-  std::string m_strPlexFile;
+  std::string m_strServiceFile;
   std::string m_strPath;
   std::string m_strIMDBNumber;
   std::string m_strMPAARating;
@@ -173,7 +173,7 @@ public:
   int m_iSeason;
   int m_iEpisode;
   std::string m_strUniqueId;
-  std::string m_strPlexId;
+  std::string m_strServiceId;
   int m_iDbId;
   int m_iFileId;
   int m_iSpecialSortSeason;

@@ -136,7 +136,7 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& movies, CFileItemList& tv)
                                               item->GetVideoInfoTag()->m_iSeason,
                                               item->GetVideoInfoTag()->m_iEpisode);
       
-      if (item->IsPlex())
+      if (item->IsServiceBased())
       {
         seasonThumb = item->GetArt("tvshow.poster");
         fileName = URIUtils::GetFileName(seasonThumb);

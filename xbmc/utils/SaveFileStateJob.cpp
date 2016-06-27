@@ -40,7 +40,7 @@
 bool CSaveFileStateJob::DoWork()
 {
   // if its plex item, skip database update for it
-  if (m_item.IsPlex())
+  if (m_item.IsServiceBased())
   {
     m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
     
@@ -51,7 +51,7 @@ bool CSaveFileStateJob::DoWork()
     CGUIMessage message(GUI_MSG_NOTIFY_ALL, g_windowManager.GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, 0, msgItem);
     g_windowManager.SendThreadMessage(message);
     
-    //    notify Plex Server where we stopped playback
+    // notify Plex Server where we stopped playback
     CPlexUtils::SetOffset(m_item, m_bookmark.timeInSeconds);
     return true;
   }

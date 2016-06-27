@@ -1592,7 +1592,7 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
   case CONTEXT_BUTTON_MARK_UNWATCHED:
     {
       CFileItemPtr item = m_vecItems->Get(itemNumber);
-      if (item->IsPlex())
+      if (item->IsServiceBased())
       {
         if (button == CONTEXT_BUTTON_MARK_WATCHED)
           CPlexUtils::SetWatched(item.get());

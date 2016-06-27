@@ -230,8 +230,8 @@ void CGUIDialogSubtitles::OnInitWindow()
   CGUIWindow::OnInitWindow();
   
   std::string file;
-  if (g_application.CurrentFileItem().IsPlex())
-    file = g_application.CurrentFileItem().GetVideoInfoTag()->m_strPlexFile;
+  if (g_application.CurrentFileItem().IsServiceBased())
+    file = g_application.CurrentFileItem().GetVideoInfoTag()->m_strServiceFile;
   else
     file = g_application.CurrentFileItem().GetPath();
   SET_CONTROL_LABEL(CONTROL_FILENAME, URIUtils::GetFileName(file));
