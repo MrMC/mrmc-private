@@ -684,10 +684,10 @@ void CPlexClient::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool t
       curl.SetFileName(curl.GetFileName() + contents[c].section + "/");
       
       if (tvShow)
-        GetLocalRecentlyAddedEpisodes(items,curl.Get(), 25);
+        GetLocalRecentlyAddedEpisodes(items,curl.Get(), 10);
       else
       {
-        GetLocalRecentlyAddedMovies(items,curl.Get(), 25);
+        GetLocalRecentlyAddedMovies(items,curl.Get(), 10);
       }
       
     }
