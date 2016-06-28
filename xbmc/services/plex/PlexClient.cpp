@@ -42,10 +42,10 @@ static bool IsInSubNet(std::string address)
 {
   CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
   in_addr_t localMask = ntohl(inet_addr(iface->GetCurrentNetmask().c_str()));
-  in_addr_t localRouter = ntohl(inet_addr(iface->GetCurrentDefaultGateway().c_str()));
+  in_addr_t testAddress = ntohl(inet_addr(address.c_str()));
   in_addr_t localAddress = ntohl(inet_addr(iface->GetCurrentIPAddress().c_str()));
 
-  in_addr_t temp1 = localRouter & localMask;
+  in_addr_t temp1 = testAddress & localMask;
   in_addr_t temp2 = localAddress & localMask;
   return temp1 == temp2;
 }
