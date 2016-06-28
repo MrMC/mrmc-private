@@ -291,19 +291,22 @@ bool CPlexServices::FetchMyPlexServers()
       const TiXmlElement* DeviceNode = MediaContainer->FirstChildElement("Device");
       while (DeviceNode)
       {
-        CPlexClient newClient(DeviceNode);
-
-        if (AddClient(newClient))
+        std::string provides = XMLUtils::GetAttribute(DeviceNode, "provides");
+        if (provides == "server")
         {
-          CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", newClient.GetServerName().c_str());
-          rtn = true;
-        }
-        else if (GetClient(newClient.m_uuid))
-        {
-          //GetClient(newClient.m_uuid)->ParseData(data, host);
-          CLog::Log(LOGDEBUG, "CPlexServices: Server updated via plex.tv %s", newClient.GetServerName().c_str());
-        }
+          CPlexClient newClient(DeviceNode);
 
+          if (AddClient(newClient))
+          {
+            CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", newClient.GetServerName().c_str());
+            rtn = true;
+          }
+          else if (GetClient(newClient.m_uuid))
+          {
+            //GetClient(newClient.m_uuid)->ParseData(data, host);
+            CLog::Log(LOGDEBUG, "CPlexServices: Server updated via plex.tv %s", newClient.GetServerName().c_str());
+          }
+        }
         DeviceNode = DeviceNode->NextSiblingElement("Device");
       }
       

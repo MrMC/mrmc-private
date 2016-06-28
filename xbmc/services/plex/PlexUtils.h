@@ -32,6 +32,7 @@ namespace XFILE
 class CPlexUtils
 {
 public:
+  static bool GetIdentity(std::string url);
   static void GetDefaultHeaders(XFILE::CCurlFile &curl);
 
   static void SetWatched(CFileItem &item);

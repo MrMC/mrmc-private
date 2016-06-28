@@ -19,6 +19,7 @@
  */
 
 #include "PlexClient.h"
+#include "PlexUtils.h"
 
 #include "Application.h"
 #include "URL.h"
@@ -32,14 +33,9 @@
 #include <sstream>
 
 
-CPlexClient::CPlexClient(std::string data, std::string ip)
+static bool IsInSubNet(std::string address, std::string port)
 {
-  m_local = true;
-  ParseData(data, ip);
-}
-
-static bool IsInSubNet(std::string address)
-{
+  bool rtn = false;
   CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
   in_addr_t localMask = ntohl(inet_addr(iface->GetCurrentNetmask().c_str()));
   in_addr_t testAddress = ntohl(inet_addr(address.c_str()));
@@ -47,7 +43,20 @@ static bool IsInSubNet(std::string address)
 
   in_addr_t temp1 = testAddress & localMask;
   in_addr_t temp2 = localAddress & localMask;
-  return temp1 == temp2;
+  if (temp1 == temp2)
+  {
+    // we are on the same subnet
+    // now make sure it is a plex server
+    std::string url = "http://" + address + ":" + port;
+    rtn = CPlexUtils::GetIdentity(url);
+  }
+  return rtn;
+}
+
+CPlexClient::CPlexClient(std::string data, std::string ip)
+{
+  m_local = true;
+  ParseData(data, ip);
 }
 
 CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
@@ -65,7 +74,7 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
     port = XMLUtils::GetAttribute(ConnectionNode, "port");
     address = XMLUtils::GetAttribute(ConnectionNode, "address");
     m_scheme = XMLUtils::GetAttribute(ConnectionNode, "protocol");
-    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(address))
+    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(address, port))
       break;
 
     ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
@@ -78,7 +87,6 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
   url.SetProtocolOptions("&X-Plex-Token=" + m_authToken);
 
   m_url = url.Get();
-  GetIdentity();
 }
 
 void CPlexClient::ParseData(std::string data, std::string ip)
@@ -129,18 +137,6 @@ int CPlexClient::GetPort()
 {
   CURL url(m_url);
   return url.GetPort();
-}
-
-void CPlexClient::GetIdentity()
-{
-  XFILE::CCurlFile plex;
-  CURL curl(m_url);
-  curl.SetFileName(curl.GetFileName() + "identity");
-  std::string strResponse;
-  if (plex.Get(curl.Get(), strResponse))
-  {
-    CLog::Log(LOGDEBUG, "CPlexClient::GetIdentity() %s", strResponse.c_str());
-  }
 }
 
 void CPlexClient::ParseSections()

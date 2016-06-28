@@ -36,7 +36,25 @@
 
 #include "video/VideoInfoTag.h"
 
-static int m_ProgressSec = 0;
+static int g_progressSec = 0;
+
+bool CPlexUtils::GetIdentity(std::string url)
+{
+  // all (local and remote) plex server respond to identity
+  XFILE::CCurlFile plex;
+  plex.SetTimeout(1);
+
+  CURL curl(url);
+  curl.SetFileName(curl.GetFileName() + "identity");
+  std::string strResponse;
+  if (plex.Get(curl.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "CPlexClient::GetIdentity() %s", strResponse.c_str());
+    return true;
+  }
+
+  return false;
+}
 
 void CPlexUtils::GetDefaultHeaders(XFILE::CCurlFile &curl)
 {
@@ -214,12 +232,14 @@ void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
   plex.Get(url2.Get(), strXML);
+
+  g_progressSec = 0;
 }
 
 void CPlexUtils::ReportProgress(CFileItem &item, double currentTime)
 {
   // we get called from
-  if (m_ProgressSec == 0 || m_ProgressSec > 120)
+  if (g_progressSec == 0 || g_progressSec > 120)
   {
     std::string url   = URIUtils::GetParentPath(item.GetPath());
     std::string id    = item.GetVideoInfoTag()->m_strServiceId;
@@ -238,9 +258,9 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentTime)
     std::string strXML;
     XFILE::CCurlFile plex;
     CPlexUtils::GetDefaultHeaders(plex);
-    m_ProgressSec = 1;
+    g_progressSec = 1;
   }
-  m_ProgressSec++;
+  g_progressSec++;
 }
 
 bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
