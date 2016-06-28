@@ -586,11 +586,13 @@ std::string CURL::GetWithoutUserDetails(bool redact) const
                         + m_strHostName.length()
                         + m_strFileName.length()
                         + m_strOptions.length()
-                        + m_strProtocolOptions.length()
                         + 10;
 
   if (redact)
+  {
     sizeneed += sizeof("USERNAME:PASSWORD@");
+    sizeneed += sizeof("&X-Plex-Token=PLEXTOKEN");
+  }
 
   strURL.reserve(sizeneed);
 
@@ -636,8 +638,23 @@ std::string CURL::GetWithoutUserDetails(bool redact) const
 
   if( m_strOptions.length() > 0 )
     strURL += m_strOptions;
+
   if( m_strProtocolOptions.length() > 0 )
-    strURL += "|"+m_strProtocolOptions;
+  {
+    // never show plex authTokens in log
+    std::string redactedKey = "X-Plex-Token";
+    if (redact && m_protocolOptions.HasOption(redactedKey))
+    {
+      CUrlOptions redactedProtocolOptions = m_protocolOptions;
+      redactedProtocolOptions.RemoveOption(redactedKey);
+      redactedProtocolOptions.AddOption(redactedKey, "PLEXTOKEN");
+      strURL += "|&" + redactedProtocolOptions.GetOptionsString(false);
+    }
+    else
+    {
+      strURL += "|" + m_strProtocolOptions;
+    }
+  }
 
   return strURL;
 }
