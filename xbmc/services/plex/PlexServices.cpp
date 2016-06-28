@@ -249,25 +249,7 @@ bool CPlexServices::FetchPlexToken()
 {
   bool rtn = false;
   XFILE::CCurlFile plex;
-  //plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
-  //plex.SetRequestHeader("Content-Length", "0");
-  plex.SetRequestHeader("X-Plex-Client-Identifier", m_client_uuid);
-  plex.SetRequestHeader("X-Plex-Product", "MrMC");
-  plex.SetRequestHeader("X-Plex-Version", CSysInfo::GetVersion());
-  plex.SetRequestHeader("X-Plex-Provides", "player");
-  std::string hostname;
-  g_application.getNetwork().GetHostName(hostname);
-  StringUtils::TrimRight(hostname, ".local");
-  plex.SetRequestHeader("X-Plex-Device-Name", hostname);
-#if defined(TARGET_DARWIN_IOS)
-  plex.SetRequestHeader("X-Plex-Device", "iOS");
-#elif defined(TARGET_DARWIN_TVOS)
-  plex.SetRequestHeader("X-Plex-Device", "tvOS");
-#elif defined(TARGET_DARWIN_OSX)
-  plex.SetRequestHeader("X-Plex-Device", "MacOS");
-#elif defined(TARGET_ANDROID)
-  plex.SetRequestHeader("X-Plex-Device", "FireOS");
-#endif
+  AddDefaultHeaders(plex);
 
   CURL url("https://plex.tv/users/sign_in.json");
   url.SetUserName(m_myPlexUser);
@@ -294,6 +276,7 @@ bool CPlexServices::FetchMyPlexServers()
 {
   bool rtn = false;
   XFILE::CCurlFile plex;
+  AddDefaultHeaders(plex);
   if (!m_myPlexToken.empty())
     plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
 
@@ -331,6 +314,28 @@ bool CPlexServices::FetchMyPlexServers()
   }
 
   return rtn;
+}
+
+void CPlexServices::AddDefaultHeaders(XFILE::CCurlFile &curl)
+{
+  //plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
+  //plex.SetRequestHeader("Content-Length", "0");
+
+  //std::string userAgent;
+  //userAgent = "MrMCMediaPlayer 2.4.0 (MrMC-OSX 10.11.5)";
+  //userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.52 Safari/537.17";
+  curl.SetUserAgent(CSysInfo::GetUserAgent());
+
+  curl.SetRequestHeader("X-Plex-Client-Identifier", m_client_uuid);
+  curl.SetRequestHeader("X-Plex-Product", "MrMC");
+  curl.SetRequestHeader("X-Plex-Version", CSysInfo::GetVersionShort());
+  //curl.SetRequestHeader("X-Plex-Provides", "player");
+  std::string hostname;
+  g_application.getNetwork().GetHostName(hostname);
+  StringUtils::TrimRight(hostname, ".local");
+  curl.SetRequestHeader("X-Plex-Device", CSysInfo::GetModelName());
+  curl.SetRequestHeader("X-Plex-Device-Name", hostname);
+  curl.SetRequestHeader("X-Plex-Platform", CSysInfo::GetOsName());
 }
 
 void CPlexServices::SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket)

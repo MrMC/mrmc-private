@@ -29,6 +29,10 @@ namespace SOCKETS
 {
   class CUDPSocket;
 }
+namespace XFILE
+{
+  class CCurlFile;
+}
 class CPlexClient;
 
 class CPlexServices
@@ -43,6 +47,7 @@ public:
   void Stop();
   bool IsActive();
   void GetServers(std::vector<CPlexClient> &servers) const {servers = m_clients; }
+
   // ISetting callbacks
   virtual void OnSettingChanged(const CSetting *setting) override;
 
@@ -55,14 +60,14 @@ private:
   CPlexServices(const CPlexServices&);
   virtual ~CPlexServices();
 
+  void          ApplyUserSettings();
+
   // IRunnable entry point for thread
   virtual void  Process() override;
 
-  bool          InitConnection();
-  void          ApplyUserSettings();
-
   bool          FetchPlexToken();
   bool          FetchMyPlexServers();
+  void          AddDefaultHeaders(XFILE::CCurlFile &curl);
   void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
   CPlexClient*  GetClient(std::string uuid);
   bool          AddClient(CPlexClient server);
