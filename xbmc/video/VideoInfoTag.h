@@ -150,7 +150,6 @@ public:
   std::string m_strSetOverview;
   std::vector<std::string> m_tags;
   std::string m_strFile;
-  std::string m_strServiceFile;
   std::string m_strPath;
   std::string m_strIMDBNumber;
   std::string m_strMPAARating;
@@ -173,7 +172,6 @@ public:
   int m_iSeason;
   int m_iEpisode;
   std::string m_strUniqueId;
-  std::string m_strServiceId;
   int m_iDbId;
   int m_iFileId;
   int m_iSpecialSortSeason;
@@ -191,6 +189,9 @@ public:
   CDateTime m_dateAdded;
   MediaType m_type;
   int m_duration; ///< duration in seconds
+  // for service items
+  std::string m_strServiceId;
+  std::string m_strServiceFile;
 
 private:
   /* \brief Parse our native XML format for video info.
