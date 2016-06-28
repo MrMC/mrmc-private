@@ -46,6 +46,7 @@ public:
   static bool GetLocalSeasons(CFileItemList &items, const std::string url);
   static bool GetLocalEpisodes(CFileItemList &items, const std::string url);
   static bool GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
+  static void ReportProgress(CFileItemPtr item);
 
 private:
   static bool GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);

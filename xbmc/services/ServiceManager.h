@@ -76,4 +76,12 @@ public:
       recentlyAdded.Append(temp);
     }
   }
+  
+  static void UpdateFileProgressState(CFileItemPtr item)
+  {
+    if(item->HasProperty("PlexItem"))
+    {
+      CPlexUtils::ReportProgress(item);
+    }
+  }
 };

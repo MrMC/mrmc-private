@@ -35,6 +35,8 @@
 
 #include "video/VideoInfoTag.h"
 
+static int m_ProgressSec = 0;
+
 void CPlexUtils::GetDefaultHeaders(XFILE::CCurlFile &curl)
 {
   //plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
@@ -209,6 +211,31 @@ void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
   plex.Get(url2.Get(), strXML);
+}
+
+void CPlexUtils::ReportProgress(CFileItemPtr item)
+{
+  if (m_ProgressSec == 0 || m_ProgressSec > 120)
+  {
+    std::string url   = URIUtils::GetParentPath(item->GetPath());
+    std::string id    = item->GetVideoInfoTag()->m_strServiceId;
+    int totalSeconds  = item->GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
+    int offsetSeconds = item->GetVideoInfoTag()->m_resumePoint.timeInSeconds;
+    
+    std::string filename = StringUtils::Format(":/timeline?ratingKey=%s&",id.c_str());
+    filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=playing&time=%i&duration=%i",
+               id.c_str(), offsetSeconds * 1000, totalSeconds * 1000);
+    
+    CURL url2(url);
+    url2.SetProtocol("http");
+    url2.SetFileName(filename.c_str());
+    
+    std::string strXML;
+    XFILE::CCurlFile plex;
+    CPlexUtils::GetDefaultHeaders(plex);
+    m_ProgressSec = 1;
+  }
+  m_ProgressSec++;
 }
 
 bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
