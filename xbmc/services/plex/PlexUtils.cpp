@@ -195,18 +195,19 @@ void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
 {
   std::string url = URIUtils::GetParentPath(item.GetPath());
   std::string id  = item.GetVideoInfoTag()->m_strServiceId;
-  
+  int totalSeconds= item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
+
   std::string filename = StringUtils::Format(":/timeline?ratingKey=%s&",id.c_str());
-  filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=stopped&time=%i&duration=%i",id.c_str(), offsetSeconds*1000 ,int(item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds) *1000);
+  filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=stopped&time=%i&duration=%i",
+    id.c_str(), offsetSeconds * 1000, totalSeconds * 1000);
+
   CURL url2(url);
   url2.SetProtocol("http");
   url2.SetFileName(filename.c_str());
-  // we need to identify our player using same UUID used when we logged in :)
-  std::string uuid = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID);
-  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&X-Plex-Client-Identifier=" + uuid);
-  
+
   std::string strXML;
   XFILE::CCurlFile plex;
+  CPlexUtils::GetDefaultHeaders(plex);
   plex.Get(url2.Get(), strXML);
 }
 
