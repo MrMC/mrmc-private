@@ -298,7 +298,7 @@ bool CPlexServices::FetchMyPlexServers()
     plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
 
   std::string strResponse;
-  CURL url("https://plex.tv/pms/servers");
+  CURL url("https://plex.tv/api/servers");
   if (plex.Get(url.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
