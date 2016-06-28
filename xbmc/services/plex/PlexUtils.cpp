@@ -61,15 +61,10 @@ void CPlexUtils::GetDefaultHeaders(XFILE::CCurlFile &curl)
   //plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
   //plex.SetRequestHeader("Content-Length", "0");
 
-  //std::string userAgent;
-  //userAgent = "MrMCMediaPlayer 2.4.0 (MrMC-OSX 10.11.5)";
-  //userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.52 Safari/537.17";
   curl.SetUserAgent(CSysInfo::GetUserAgent());
-
   curl.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
   curl.SetRequestHeader("X-Plex-Product", "MrMC");
   curl.SetRequestHeader("X-Plex-Version", CSysInfo::GetVersionShort());
-  //curl.SetRequestHeader("X-Plex-Provides", "player");
   std::string hostname;
   g_application.getNetwork().GetHostName(hostname);
   StringUtils::TrimRight(hostname, ".local");
