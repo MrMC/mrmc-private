@@ -37,6 +37,7 @@ public:
   static void SetWatched(CFileItem &item);
   static void SetUnWatched(CFileItem &item);
   static void SetOffset(CFileItem &item, int offsetSeconds);
+  static void ReportProgress(CFileItem &item, double currentTime);
   static bool GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
   static bool GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
   static bool GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
@@ -46,7 +47,6 @@ public:
   static bool GetLocalSeasons(CFileItemList &items, const std::string url);
   static bool GetLocalEpisodes(CFileItemList &items, const std::string url);
   static bool GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
-  static void ReportProgress(CFileItemPtr item);
 
 private:
   static bool GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);

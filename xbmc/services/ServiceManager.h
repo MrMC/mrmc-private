@@ -49,6 +49,14 @@ public:
     }
   }
 
+  static void UpdateFileProgressState(CFileItem &item, double currentTime)
+  {
+    if (item.HasProperty("PlexItem"))
+    {
+      CPlexUtils::ReportProgress(item, currentTime);
+    }
+  }
+
   static void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit)
   {
     if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, true))
@@ -74,14 +82,6 @@ public:
       
       recentlyAdded.ClearItems();
       recentlyAdded.Append(temp);
-    }
-  }
-  
-  static void UpdateFileProgressState(CFileItemPtr item)
-  {
-    if(item->HasProperty("PlexItem"))
-    {
-      CPlexUtils::ReportProgress(item);
     }
   }
 };

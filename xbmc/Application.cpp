@@ -3747,8 +3747,8 @@ void CApplication::UpdateFileState()
           m_progressTrackingVideoResumeBookmark.timeInSeconds = 0.0f;
         }
         
-        if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
-          CServiceManager::UpdateFileProgressState(m_progressTrackingItem);
+        if (m_progressTrackingItem->IsServiceBased())
+          CServiceManager::UpdateFileProgressState(*m_progressTrackingItem.get(), GetTime());
       }
     }
   }

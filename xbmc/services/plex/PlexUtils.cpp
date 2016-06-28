@@ -25,6 +25,7 @@
 #include "URL.h"
 #include "network/Network.h"
 #include "utils/Base64.h"
+#include "utils/Log.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/URIUtils.h"
@@ -199,6 +200,8 @@ void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
   std::string id  = item.GetVideoInfoTag()->m_strServiceId;
   int totalSeconds= item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
 
+  //CLog::Log(LOGDEBUG, "CPlexUtils::SetOffset %d secs", offsetSeconds);
+  // stopped
   std::string filename = StringUtils::Format(":/timeline?ratingKey=%s&",id.c_str());
   filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=stopped&time=%i&duration=%i",
     id.c_str(), offsetSeconds * 1000, totalSeconds * 1000);
@@ -213,18 +216,20 @@ void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
   plex.Get(url2.Get(), strXML);
 }
 
-void CPlexUtils::ReportProgress(CFileItemPtr item)
+void CPlexUtils::ReportProgress(CFileItem &item, double currentTime)
 {
+  // we get called from
   if (m_ProgressSec == 0 || m_ProgressSec > 120)
   {
-    std::string url   = URIUtils::GetParentPath(item->GetPath());
-    std::string id    = item->GetVideoInfoTag()->m_strServiceId;
-    int totalSeconds  = item->GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
-    int offsetSeconds = item->GetVideoInfoTag()->m_resumePoint.timeInSeconds;
+    std::string url   = URIUtils::GetParentPath(item.GetPath());
+    std::string id    = item.GetVideoInfoTag()->m_strServiceId;
+    int totalSeconds  = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
     
+    //CLog::Log(LOGDEBUG, "CPlexUtils::ReportProgress %f secs", currentTime);
+    // playing
     std::string filename = StringUtils::Format(":/timeline?ratingKey=%s&",id.c_str());
     filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=playing&time=%i&duration=%i",
-               id.c_str(), offsetSeconds * 1000, totalSeconds * 1000);
+               id.c_str(), (int)(currentTime * 1000), totalSeconds * 1000);
     
     CURL url2(url);
     url2.SetProtocol("http");
