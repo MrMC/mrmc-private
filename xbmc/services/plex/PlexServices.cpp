@@ -278,7 +278,7 @@ bool CPlexServices::FetchMyPlexServers()
     plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
 
   std::string strResponse;
-  CURL url("https://plex.tv/api/servers");
+  CURL url("https://plex.tv/api/resources");
   if (plex.Get(url.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
@@ -288,10 +288,10 @@ bool CPlexServices::FetchMyPlexServers()
     TiXmlElement* MediaContainer = xml.RootElement();
     if (MediaContainer)
     {
-      const TiXmlElement* ServerNode = MediaContainer->FirstChildElement("Server");
-      while (ServerNode)
+      const TiXmlElement* DeviceNode = MediaContainer->FirstChildElement("Device");
+      while (DeviceNode)
       {
-        CPlexClient newClient(ServerNode);
+        CPlexClient newClient(DeviceNode);
 
         if (AddClient(newClient))
         {
@@ -304,7 +304,7 @@ bool CPlexServices::FetchMyPlexServers()
           CLog::Log(LOGDEBUG, "CPlexServices: Server updated via plex.tv %s", newClient.GetServerName().c_str());
         }
 
-        ServerNode = ServerNode->NextSiblingElement("Server");
+        DeviceNode = DeviceNode->NextSiblingElement("Device");
       }
       
     }

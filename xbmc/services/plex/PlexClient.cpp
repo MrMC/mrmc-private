@@ -20,11 +20,13 @@
 
 #include "PlexClient.h"
 
+#include "Application.h"
 #include "URL.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "filesystem/CurlFile.h"
+#include "network/Network.h"
 
 #include <string>
 #include <sstream>
@@ -36,22 +38,42 @@ CPlexClient::CPlexClient(std::string data, std::string ip)
   ParseData(data, ip);
 }
 
-CPlexClient::CPlexClient(const TiXmlElement* ServerNode)
+static bool IsInSubNet(std::string address)
+{
+  CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
+  in_addr_t localMask = ntohl(inet_addr(iface->GetCurrentNetmask().c_str()));
+  in_addr_t localRouter = ntohl(inet_addr(iface->GetCurrentDefaultGateway().c_str()));
+  in_addr_t localAddress = ntohl(inet_addr(iface->GetCurrentIPAddress().c_str()));
+
+  in_addr_t temp1 = localRouter & localMask;
+  in_addr_t temp2 = localAddress & localMask;
+  return temp1 == temp2;
+}
+
+CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
 {
   m_local = false;
-  m_uuid = XMLUtils::GetAttribute(ServerNode, "machineIdentifier");
-  m_serverName = XMLUtils::GetAttribute(ServerNode, "name");
-  m_updated = atol(XMLUtils::GetAttribute(ServerNode, "updatedAt").c_str());
-  m_version = XMLUtils::GetAttribute(ServerNode, "updatedAt");
-  m_authToken = XMLUtils::GetAttribute(ServerNode, "accessToken");
-  m_scheme = XMLUtils::GetAttribute(ServerNode, "scheme");
-  if (m_scheme.empty())
-    m_scheme = "http";
+  m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
+  m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
+  m_authToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
+
+  std::string port;
+  std::string address;
+  const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
+  while (ConnectionNode)
+  {
+    port = XMLUtils::GetAttribute(ConnectionNode, "port");
+    address = XMLUtils::GetAttribute(ConnectionNode, "address");
+    m_scheme = XMLUtils::GetAttribute(ConnectionNode, "protocol");
+    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(address))
+      break;
+
+    ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
+  }
 
   CURL url;
-  url.SetHostName(XMLUtils::GetAttribute(ServerNode, "address"));
-  int port = atoi(XMLUtils::GetAttribute(ServerNode, "port").c_str());
-  url.SetPort(port);
+  url.SetHostName(address);
+  url.SetPort(atoi(port.c_str()));
   url.SetProtocol(m_scheme);
   url.SetProtocolOptions("&X-Plex-Token=" + m_authToken);
 
@@ -81,10 +103,6 @@ void CPlexClient::ParseData(std::string data, std::string ip)
         m_serverName = val;
       else if (name == "Port")
         port = atoi(val.c_str());
-      else if (name == "Updated-At")
-        m_updated = atol(val.c_str());
-      else if (name == "Version")
-        m_version = val;
     }
   }
 
@@ -145,9 +163,10 @@ void CPlexClient::ParseSections()
       while (DirectoryNode)
       {
         SectionsContent content;
+        content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
         content.type = XMLUtils::GetAttribute(DirectoryNode, "type");
         content.title = XMLUtils::GetAttribute(DirectoryNode, "title");
-        content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
+        content.updatedAt = XMLUtils::GetAttribute(DirectoryNode, "updatedAt");
         std::string key = XMLUtils::GetAttribute(DirectoryNode, "key");
         content.section = "library/sections/" + key;
         std::string art = XMLUtils::GetAttribute(DirectoryNode, "art");

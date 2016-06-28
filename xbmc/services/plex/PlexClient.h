@@ -24,7 +24,7 @@
 
 struct SectionsContent
 {
-  int         port;
+  int port;
   std::string type;
   std::string title;
   std::string agent;
@@ -33,9 +33,8 @@ struct SectionsContent
   std::string uuid;
   std::string updatedAt;
   std::string address;
-  std::string serverName;
-  std::string serverVersion;
-  std::string machineIdentifier;
+  //std::string serverName;
+  //std::string serverVersion;
   std::string path;
   std::string section;
   std::string art;
@@ -47,13 +46,11 @@ class CPlexClient
 
 public:
   CPlexClient(std::string data, std::string ip);
-  CPlexClient(const TiXmlElement* ServerNode);
+  CPlexClient(const TiXmlElement* DeviceNode);
 
   const std::string &GetContentType() const { return m_contentType; }
   const std::string &GetServerName() const { return m_serverName; }
-  int64_t GetUpdated() const { return m_updated; }
   const std::string &GetUuid() const { return m_uuid; }
-  const std::string &GetVersion() const { return m_version; }
   const std::string &GetAuthToken() const { return m_authToken; }
   const std::string &GetScheme() const { return m_scheme; }
   void  SetAuthToken(std::string token) { m_authToken = token; }
@@ -73,8 +70,6 @@ protected:
   void ParseSections();
 
 private:
-  std::string m_sDiscovery;
-
   bool        m_local;
   std::string m_contentType;
   std::string m_uuid;
@@ -82,8 +77,6 @@ private:
   std::string m_url;
   std::string m_authToken;
   std::string m_scheme;
-  int64_t     m_updated;
-  std::string m_version;
   std::vector<SectionsContent> m_movieSectionsContents;
   std::vector<SectionsContent> m_showSectionsContents;
 };
