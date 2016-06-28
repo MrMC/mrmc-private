@@ -20,16 +20,42 @@
 
 #include "PlexUtils.h"
 #include "PlexServices.h"
-#include "utils/Base64.h"
-#include "utils/StringUtils.h"
-#include "utils/URIUtils.h"
-#include "utils/XMLUtils.h"
+#include "Application.h"
 #include "Util.h"
 #include "URL.h"
+#include "network/Network.h"
+#include "utils/Base64.h"
+#include "utils/StringUtils.h"
+#include "utils/SystemInfo.h"
+#include "utils/URIUtils.h"
+#include "utils/XMLUtils.h"
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
+#include "settings/Settings.h"
 
 #include "video/VideoInfoTag.h"
+
+void CPlexUtils::GetDefaultHeaders(XFILE::CCurlFile &curl)
+{
+  //plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
+  //plex.SetRequestHeader("Content-Length", "0");
+
+  //std::string userAgent;
+  //userAgent = "MrMCMediaPlayer 2.4.0 (MrMC-OSX 10.11.5)";
+  //userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.52 Safari/537.17";
+  curl.SetUserAgent(CSysInfo::GetUserAgent());
+
+  curl.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
+  curl.SetRequestHeader("X-Plex-Product", "MrMC");
+  curl.SetRequestHeader("X-Plex-Version", CSysInfo::GetVersionShort());
+  //curl.SetRequestHeader("X-Plex-Provides", "player");
+  std::string hostname;
+  g_application.getNetwork().GetHostName(hostname);
+  StringUtils::TrimRight(hostname, ".local");
+  curl.SetRequestHeader("X-Plex-Device", CSysInfo::GetModelName());
+  curl.SetRequestHeader("X-Plex-Device-Name", hostname);
+  curl.SetRequestHeader("X-Plex-Platform", CSysInfo::GetOsName());
+}
 
 TiXmlDocument CPlexUtils::GetPlexXML(std::string url, std::string filter)
 {
@@ -129,54 +155,66 @@ void CPlexUtils::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode)
   item.GetVideoInfoTag()->m_cast = roles;
 }
 
-void CPlexUtils::SetWatched(CFileItem* item)
-{
-  std::string url = URIUtils::GetParentPath(item->GetPath());
-  if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
-      StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
-      url = Base64::Decode(URIUtils::GetFileName(item->GetPath()));
-  std::string id  = item->GetVideoInfoTag()->m_strServiceId;
-  CURL url2(url);
-  url2.SetProtocol("http");
-  url2.SetFileName(StringUtils::Format(":/scrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
-  XFILE::CCurlFile http;
-  std::string strXML;
-  http.Get(url2.Get(), strXML);
-}
-
-void CPlexUtils::SetUnWatched(CFileItem* item)
-{
-  std::string url = URIUtils::GetParentPath(item->GetPath());
-  if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
-      StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
-    url = Base64::Decode(URIUtils::GetFileName(item->GetPath()));
-  std::string id  = item->GetVideoInfoTag()->m_strServiceId;
-  CURL url2(url);
-  url2.SetProtocol("http");
-  url2.SetFileName(StringUtils::Format(":/unscrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
-  XFILE::CCurlFile http;
-  std::string strXML;
-  http.Get(url2.Get(), strXML);
-}
-
-void CPlexUtils::SetOffset(CFileItem item, int offsetSeconds)
+void CPlexUtils::SetWatched(CFileItem &item)
 {
   std::string url = URIUtils::GetParentPath(item.GetPath());
-  std::string id  = item.GetVideoInfoTag()->m_strServiceId;
+  if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
+      StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
+      url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+
   CURL url2(url);
   url2.SetProtocol("http");
-  url2.SetFileName(StringUtils::Format(":/progress?key=%s&identifier=com.plexapp.plugins.library&time=%i&state=stopped", id.c_str(), offsetSeconds*1000));
-  XFILE::CCurlFile http;
+  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  url2.SetFileName(StringUtils::Format(":/scrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
+
+  XFILE::CCurlFile plex;
+  CPlexUtils::GetDefaultHeaders(plex);
   std::string strXML;
-  http.Get(url2.Get(), strXML);
+  plex.Get(url2.Get(), strXML);
 }
 
-void CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
+void CPlexUtils::SetUnWatched(CFileItem &item)
 {
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
+      StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
+    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+
+  CURL url2(url);
+  url2.SetProtocol("http");
+  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  url2.SetFileName(StringUtils::Format(":/unscrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
+
+  XFILE::CCurlFile plex;
+  CPlexUtils::GetDefaultHeaders(plex);
+  std::string strXML;
+  plex.Get(url2.Get(), strXML);
+}
+
+void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
+{
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  CURL url2(url);
+  url2.SetProtocol("http");
+  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  url2.SetFileName(StringUtils::Format(":/progress?key=%s&identifier=com.plexapp.plugins.library&time=%i&state=stopped", id.c_str(), offsetSeconds*1000));
+
+  XFILE::CCurlFile plex;
+  CPlexUtils::GetDefaultHeaders(plex);
+  std::string strXML;
+  plex.Get(url2.Get(), strXML);
+}
+
+bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)
+{
+  bool rtn = false;
   const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
   while (videoNode)
   {
+    rtn = true;
     CFileItemPtr plexItem(new CFileItem());
+    plexItem->SetProperty("PlexItem", true);
+
     std::string fanart;
     std::string value;
     // if we have season means we are listing episodes, we need to get the fanart from rootXmlNode.
@@ -311,22 +349,28 @@ void CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
   items.SetProperty("library.filter", "true");
+
+  return rtn;
 }
 
-void CPlexUtils::GetLocalMovies(CFileItemList &items, std::string url, std::string filter)
+bool CPlexUtils::GetLocalMovies(CFileItemList &items, std::string url, std::string filter)
 {
+  bool rtn = false;
   CURL url2(url);
   TiXmlDocument xml = GetPlexXML(url);
 
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    GetVideoItems(items, url2, rootXmlNode, MediaTypeServiceMovie);
+    rtn = GetVideoItems(items, url2, rootXmlNode, MediaTypeServiceMovie);
   }
+
+  return rtn;
 }
 
-void CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
+bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
 {
+  bool rtn = false;
   std::string value;
   TiXmlDocument xml = GetPlexXML(url);
   
@@ -336,9 +380,11 @@ void CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
     const TiXmlElement* directoryNode = rootXmlNode->FirstChildElement("Directory");
     while (directoryNode)
     {
+      rtn = true;
       CFileItemPtr plexItem(new CFileItem());
       // set m_bIsFolder to true to indicate we are tvshow list
       plexItem->m_bIsFolder = true;
+      plexItem->SetProperty("PlexItem", true);
       plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
       CURL url1(url);
       url1.SetProtocol("http");
@@ -387,10 +433,13 @@ void CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
     }
   }
   items.SetProperty("library.filter", "true");
+
+  return rtn;
 }
 
-void CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
+bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
 {
+  bool rtn = false;
   TiXmlDocument xml = GetPlexXML(url);
   std::string value;
   
@@ -403,8 +452,10 @@ void CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
       // only get the seasons listing, the one with "ratingKey"
       if (((TiXmlElement*) directoryNode)->Attribute("ratingKey"))
       {
+        rtn = true;
         CFileItemPtr plexItem(new CFileItem());
         plexItem->m_bIsFolder = true;
+        plexItem->SetProperty("PlexItem", true);
         plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
         CURL url1(url);
         url1.SetProtocol("http");
@@ -446,10 +497,14 @@ void CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   }
   items.SetProperty("library.filter", "true");
+
+  return rtn;
 }
 
-void CPlexUtils::GetLocalEpisodes(CFileItemList &items, const std::string url)
+bool CPlexUtils::GetLocalEpisodes(CFileItemList &items, const std::string url)
 {
+  bool rtn = false;
+
   CURL url2(url);
   TiXmlDocument xml = GetPlexXML(url);
   
@@ -457,13 +512,17 @@ void CPlexUtils::GetLocalEpisodes(CFileItemList &items, const std::string url)
   if (rootXmlNode)
   {
     int season = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentIndex").c_str());
-    GetVideoItems(items,url2,rootXmlNode, MediaTypeServiceEpisode, season);
+    rtn = GetVideoItems(items,url2,rootXmlNode, MediaTypeServiceEpisode, season);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   }
+
+  return rtn;
 }
 
-void CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
+bool CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
 {
+  bool rtn = false;
+
   CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
@@ -480,14 +539,18 @@ void CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    GetVideoItems(items,url2,rootXmlNode, MediaTypeServiceEpisode);
+    rtn = GetVideoItems(items, url2,rootXmlNode, MediaTypeServiceEpisode);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
+
+  return rtn;
 }
 
-void CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
+bool CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
 {  
+  bool rtn = false;
+
   CURL url2(url);
   url2.SetProtocol("http");
   
@@ -504,43 +567,51 @@ void CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::st
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    GetVideoItems(items,url2,rootXmlNode, MediaTypeServiceMovie);
+    rtn = GetVideoItems(items, url2,rootXmlNode, MediaTypeServiceMovie);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
+
+  return rtn;
 }
 
-void CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
+bool CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
 {
-  //look through all plex clients and pull recently added for each library section
-  std::vector<CPlexClient> clients;
-  std::vector<SectionsContent> contents;
-  CPlexServices::GetInstance().GetServers(clients);
-  for (int i = 0; i < (int)clients.size(); i++)
+  bool rtn = false;
+
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
   {
-    if (tvShow)
-      contents = clients[i].GetTvContent();
-    else
-      contents = clients[i].GetMovieContent();
-    for (int c = 0; c < (int)contents.size(); c++)
+    //look through all plex clients and pull recently added for each library section
+    std::vector<CPlexClient> clients;
+    std::vector<SectionsContent> contents;
+    CPlexServices::GetInstance().GetClients(clients);
+    for (int i = 0; i < (int)clients.size(); i++)
     {
-      CURL curl(clients[i].GetUrl());
-      curl.SetProtocol("http");
-      curl.SetFileName(curl.GetFileName() + contents[c].section + "/");
-      
       if (tvShow)
-        GetLocalRecentlyAddedEpisodes(items,curl.Get(), 10);
+        contents = clients[i].GetTvContent();
       else
+        contents = clients[i].GetMovieContent();
+      for (int c = 0; c < (int)contents.size(); c++)
       {
-        GetLocalRecentlyAddedMovies(items,curl.Get(), 10);
+        CURL curl(clients[i].GetUrl());
+        curl.SetProtocol("http");
+        curl.SetFileName(curl.GetFileName() + contents[c].section + "/");
+
+        if (tvShow)
+          rtn = GetLocalRecentlyAddedEpisodes(items, curl.Get(), 10);
+        else
+          rtn = GetLocalRecentlyAddedMovies(items, curl.Get(), 10);
       }
-      
     }
   }
+
+  return rtn;
 }
 
-void CPlexUtils::GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
+bool CPlexUtils::GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
 {
+  bool rtn = false;
+
   TiXmlDocument xml = GetPlexXML(url,filter);
   
   TiXmlElement* rootXmlNode = xml.RootElement();
@@ -549,19 +620,24 @@ void CPlexUtils::GetLocalFilter(CFileItemList &items, std::string url, std::stri
     const TiXmlElement* directoryNode = rootXmlNode->FirstChildElement("Directory");
     while (directoryNode)
     {
+      rtn = true;
       std::string title = XMLUtils::GetAttribute(directoryNode, "title");
       std::string key = XMLUtils::GetAttribute(directoryNode, "key");
       CFileItemPtr pItem(new CFileItem(title));
       pItem->m_bIsFolder = true;
       pItem->m_bIsShareOrDrive = false;
-      CURL url3(url);
-      url3.SetProtocol("http");
-      url3.SetFileName(url3.GetFileName() + "all?" + filter + "=" + key);
-      pItem->SetPath(parentPath + Base64::Encode(url3.Get()));
+      pItem->SetProperty("PlexItem", true);
+
+      CURL plex(url);
+      plex.SetProtocol("http");
+      plex.SetFileName(plex.GetFileName() + "all?" + filter + "=" + key);
+      pItem->SetPath(parentPath + Base64::Encode(plex.Get()));
       pItem->SetLabel(title);
       pItem->SetProperty("SkipLocalArt", true);
       items.Add(pItem);
       directoryNode = directoryNode->NextSiblingElement("Directory");
     }
   }
+
+  return rtn;
 }

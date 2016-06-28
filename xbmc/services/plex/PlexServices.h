@@ -29,10 +29,6 @@ namespace SOCKETS
 {
   class CUDPSocket;
 }
-namespace XFILE
-{
-  class CCurlFile;
-}
 class CPlexClient;
 
 class CPlexServices
@@ -46,13 +42,13 @@ public:
   void Start();
   void Stop();
   bool IsActive();
-  void GetServers(std::vector<CPlexClient> &servers) const {servers = m_clients; }
+  void GetClients(std::vector<CPlexClient> &clients) const {clients = m_clients; }
 
-  // ISetting callbacks
+  // ISettingCallback
   virtual void OnSettingChanged(const CSetting *setting) override;
 
   // IAnnouncer callbacks
-  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)override;
+  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
 
 private:
   // private construction, and no assignements; use the provided singleton methods
@@ -67,15 +63,12 @@ private:
 
   bool          FetchPlexToken();
   bool          FetchMyPlexServers();
-  void          AddDefaultHeaders(XFILE::CCurlFile &curl);
   void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
   CPlexClient*  GetClient(std::string uuid);
   bool          AddClient(CPlexClient server);
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
-
-  std::string       m_client_uuid;
 
   bool              m_myPlexEnabled;
   std::string       m_myPlexUser;

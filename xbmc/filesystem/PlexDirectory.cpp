@@ -76,7 +76,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       }
       //look through all plex clients and pull content data for "movie" type
       std::vector<CPlexClient> clients;
-      CPlexServices::GetInstance().GetServers(clients);
+      CPlexServices::GetInstance().GetClients(clients);
       for (int i = 0; i < (int)clients.size(); i++)
       {
         std::vector<SectionsContent> contents = clients[i].GetMovieContent();
@@ -177,7 +177,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       }
       //look through all plex servers and pull content data for "show" type
       std::vector<CPlexClient> clients;
-      CPlexServices::GetInstance().GetServers(clients);
+      CPlexServices::GetInstance().GetClients(clients);
       for (int i = 0; i < (int)clients.size(); i++)
       {
         std::vector<SectionsContent> contents = clients[i].GetTvContent();

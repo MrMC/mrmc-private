@@ -52,8 +52,6 @@
 #include "pvr/recordings/PVRRecording.h"
 #include "ContextMenuManager.h"
 
-#include "services/plex/PlexUtils.h"
-
 #include <utility>
 
 using namespace XFILE;

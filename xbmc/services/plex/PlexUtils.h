@@ -24,24 +24,31 @@
 #include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
 
+namespace XFILE
+{
+  class CCurlFile;
+}
+
 class CPlexUtils
 {
 public:
-  static void SetWatched(CFileItem* item);
-  static void SetUnWatched(CFileItem* item);
-  static void SetOffset(CFileItem item, int offsetSeconds);
-  static void GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
-  static void GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
-  static void GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
+  static void GetDefaultHeaders(XFILE::CCurlFile &curl);
 
-  static void GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");
-  static void GetLocalTvshows(CFileItemList &items, std::string url);
-  static void GetLocalSeasons(CFileItemList &items, const std::string url);
-  static void GetLocalEpisodes(CFileItemList &items, const std::string url);
-  static void GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
+  static void SetWatched(CFileItem &item);
+  static void SetUnWatched(CFileItem &item);
+  static void SetOffset(CFileItem &item, int offsetSeconds);
+  static bool GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
+  static bool GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
+  static bool GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
+
+  static bool GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");
+  static bool GetLocalTvshows(CFileItemList &items, std::string url);
+  static bool GetLocalSeasons(CFileItemList &items, const std::string url);
+  static bool GetLocalEpisodes(CFileItemList &items, const std::string url);
+  static bool GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
 
 private:
-  static void GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
+  static bool GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
   static void GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode);
   static TiXmlDocument GetPlexXML(std::string url, std::string filter = "");
 };

@@ -33,7 +33,7 @@
 #include "music/MusicThumbLoader.h"
 #include "video/VideoThumbLoader.h"
 #include "settings/Settings.h"
-#include "services/plex/PlexUtils.h"
+#include "services/ServiceManager.h"
 
 #if defined(TARGET_DARWIN_TVOS)
   #include "platform/darwin/DarwinUtils.h"
@@ -107,30 +107,10 @@ bool CRecentlyAddedJob::UpdateVideo()
     }
   }
   
-  // if plex is enabled, get recently added TVSHOWS and MOVIES
-  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
-  {
-    CFileItemList* temp = new CFileItemList;
-    
-    CPlexUtils::GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedTV, true);
-    CPlexUtils::GetAllRecentlyAddedMoviesAndShows(*m_RecentlyAddedMovies, false);
-    m_RecentlyAddedTV->Sort(SortByDateAdded, SortOrderDescending);
-    m_RecentlyAddedMovies->Sort(SortByDateAdded, SortOrderDescending);
-    
-    for (int i = 0; i < m_RecentlyAddedTV->Size() && i < NUM_ITEMS; i++)
-      temp->Add(m_RecentlyAddedTV->Get(i));
-    
-    m_RecentlyAddedTV->ClearItems();
-    m_RecentlyAddedTV->Append(*temp);
-    
-    temp->ClearItems();
-    for (int i = 0; i < m_RecentlyAddedMovies->Size() && i < NUM_ITEMS; i++)
-      temp->Add(m_RecentlyAddedMovies->Get(i));
-    
-    m_RecentlyAddedMovies->ClearItems();
-    m_RecentlyAddedMovies->Append(*temp);
-  }
-  
+  // get recently added TVSHOWS and MOVIES from any enabled service
+  CServiceManager::GetAllRecentlyAddedShows(*m_RecentlyAddedTV, NUM_ITEMS);
+  CServiceManager::GetAllRecentlyAddedMovies(*m_RecentlyAddedMovies, NUM_ITEMS);
+
 #if defined(TARGET_DARWIN_TVOS)
   // send recently added Movies and TvShows to TopShelf
   CTVOSTopShelf::GetInstance().SetTopShelfItems(*m_RecentlyAddedMovies,*m_RecentlyAddedTV);

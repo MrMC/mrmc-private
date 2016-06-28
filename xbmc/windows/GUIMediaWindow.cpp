@@ -58,6 +58,7 @@
 #include "profiles/ProfilesManager.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
+#include "services/ServiceManager.h"
 #include "storage/MediaManager.h"
 #include "threads/SystemClock.h"
 #include "utils/FileUtils.h"
@@ -69,7 +70,6 @@
 #include "utils/Variant.h"
 #include "video/VideoLibraryQueue.h"
 #include "video/VideoInfoTag.h"
-#include "services/plex/PlexUtils.h"
 
 #define CONTROL_BTNVIEWASICONS       2
 #define CONTROL_BTNSORTBY            3
@@ -1595,9 +1595,9 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       if (item->IsServiceBased())
       {
         if (button == CONTEXT_BUTTON_MARK_WATCHED)
-          CPlexUtils::SetWatched(item.get());
+          CServiceManager::SetWatched(*item.get());
         else
-          CPlexUtils::SetUnWatched(item.get());
+          CServiceManager::SetUnWatched(*item.get());
         item->GetVideoInfoTag()->m_playCount = (button == CONTEXT_BUTTON_MARK_WATCHED);
         item->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_playCount > 0);
         return true;

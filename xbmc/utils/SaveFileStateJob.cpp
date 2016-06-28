@@ -35,7 +35,7 @@
 #include "GUIUserMessages.h"
 #include "music/MusicDatabase.h"
 #include "cores/AudioEngine/DSPAddons/ActiveAEDSP.h"
-#include "services/plex/PlexUtils.h"
+#include "services/ServiceManager.h"
 
 bool CSaveFileStateJob::DoWork()
 {
@@ -51,8 +51,8 @@ bool CSaveFileStateJob::DoWork()
     CGUIMessage message(GUI_MSG_NOTIFY_ALL, g_windowManager.GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, 0, msgItem);
     g_windowManager.SendThreadMessage(message);
     
-    // notify Plex Server where we stopped playback
-    CPlexUtils::SetOffset(m_item, m_bookmark.timeInSeconds);
+    // notify service content handler where we stopped playback
+    CServiceManager::SetResumePoint(m_item);
     return true;
   }
   
