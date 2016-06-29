@@ -98,6 +98,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
   if (setting == nullptr)
     return;
 
+  bool startThread = false;
   const std::string& settingId = setting->GetId();
   if (settingId == CSettings::SETTING_SERVICES_PLEXSIGNIN)
   {
@@ -119,9 +120,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
             // change prompt to 'sign-out'
             CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1241));
             CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-in ok");
-            // have to call this directly as we are changing a label and it will not trigger a OnSettingChanged
-            SetUserSettings();
-            OnSettingChanged(setting);
+            startThread = true;
           }
           else
           {
@@ -135,7 +134,6 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
           m_myPlexUser.clear();
           m_myPlexPass.clear();
           m_myPlexToken.clear();
-          SetUserSettings();
         }
       }
     }
@@ -148,10 +146,13 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       m_myPlexToken.clear();
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1240));
       CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
-      SetUserSettings();
-      // have to call this directly as we are changing a label and it will not trigger a OnSettingChanged
-      OnSettingChanged(setting);
     }
+    SetUserSettings();
+    if (startThread)
+      Start();
+    else
+      Stop();
+    
   }
 }
 
@@ -169,15 +170,16 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
   if (setting == NULL)
     return;
 
-  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
-  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
-  // start or stop the service
-  if (!m_myPlexToken.empty() || static_cast<const CSettingBool*>(setting)->GetValue())
-    Start();
-  else
-    Stop();
-
-  CSettings::GetInstance().Save();
+  const std::string& settingId = setting->GetId();
+  if (settingId == CSettings::SETTING_SERVICES_PLEXGDMSERVER)
+  {
+    m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
+    // start or stop the service
+    if (m_useGDMServer)
+      Start();
+    else
+      Stop();
+  }
 }
 
 void CPlexServices::SetUserSettings()
@@ -190,12 +192,12 @@ void CPlexServices::SetUserSettings()
 
 void CPlexServices::GetUserSettings()
 {
+  // false is disabled, true is auto
+  m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
+  
   m_myPlexUser = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER);
   m_myPlexPass = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
   m_myPlexToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
-
-  // false is disabled, true is auto
-  m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
 }
 
 void CPlexServices::Process()
@@ -406,6 +408,10 @@ bool CPlexServices::AddClient(CPlexClient client)
 
   CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
   g_windowManager.SendThreadMessage(msg);
+  
+  // announce that we have a plex client and that recently added should be updated
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
 
   return true;
 }

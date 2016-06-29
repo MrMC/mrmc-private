@@ -2526,9 +2526,9 @@
         <setting id="plex.signin" type="string" label="1238" help="1239">
           <level>0</level>
           <default>fillme</default>
-          <control type="button" format="action" />
+          <control type="button" format="action" delayed="true"/>
         </setting>
-        <setting id="plex.gdmserver" type="integer" label="1242" help="1243">
+        <setting id="plex.gdmserver" type="boolean" label="1242" help="1243">
           <level>0</level>
           <default>false</default>
           <control type="toggle" />
