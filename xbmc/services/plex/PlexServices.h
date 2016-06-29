@@ -69,6 +69,7 @@ private:
   void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
   CPlexClient*  GetClient(std::string uuid);
   bool          AddClient(CPlexClient server);
+  bool          GetMyHomeUsers();
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
