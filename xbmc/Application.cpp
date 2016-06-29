@@ -88,7 +88,7 @@
 #include "settings/DisplaySettings.h"
 #include "settings/MediaSettings.h"
 #include "settings/SkinSettings.h"
-#include "services/ServiceManager.h"
+#include "services/ServicesManager.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/CPUInfo.h"
 #include "utils/SeekHandler.h"
@@ -3748,7 +3748,7 @@ void CApplication::UpdateFileState()
         }
 
         if (m_progressTrackingItem->IsServiceBased())
-          CServiceManager::GetInstance().UpdateFileProgressState(*m_progressTrackingItem.get(), GetTime());
+          CServicesManager::GetInstance().UpdateFileProgressState(*m_progressTrackingItem.get(), GetTime());
       }
     }
   }

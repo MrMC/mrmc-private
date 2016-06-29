@@ -98,7 +98,7 @@
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "cores/VideoRenderers/BaseRenderer.h"
 #include "interfaces/info/InfoExpression.h"
-#include "services/ServiceManager.h"
+#include "services/ServicesManager.h"
 
 #if defined(TARGET_DARWIN_OSX)
 #include "platform/darwin/osx/smc.h"
@@ -2465,7 +2465,7 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
     bReturn = g_application.IsMusicScanning();
   }
   else if (condition == LIBRARY_HASSERVICES)
-    bReturn = CServiceManager::GetInstance().HasServices();
+    bReturn = CServicesManager::GetInstance().HasServices();
   else if (condition == SYSTEM_PLATFORM_LINUX)
 #if defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
     bReturn = true;

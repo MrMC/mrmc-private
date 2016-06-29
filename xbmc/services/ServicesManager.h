@@ -22,10 +22,10 @@
 class CFileItem;
 class CFileItemList;
 
-class CServiceManager
+class CServicesManager
 {
 public:
-  static CServiceManager &GetInstance();
+  static CServicesManager &GetInstance();
 
   bool HasServices();
   void SetWatched(CFileItem &item);
@@ -37,7 +37,7 @@ public:
 
 private:
   // private construction, and no assignements; use the provided singleton methods
-  CServiceManager();
-  CServiceManager(const CServiceManager&);
-  virtual ~CServiceManager();
+  CServicesManager();
+  CServicesManager(const CServicesManager&);
+  virtual ~CServicesManager();
 };

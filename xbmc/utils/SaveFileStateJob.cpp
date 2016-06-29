@@ -35,7 +35,7 @@
 #include "GUIUserMessages.h"
 #include "music/MusicDatabase.h"
 #include "cores/AudioEngine/DSPAddons/ActiveAEDSP.h"
-#include "services/ServiceManager.h"
+#include "services/ServicesManager.h"
 
 bool CSaveFileStateJob::DoWork()
 {
@@ -52,7 +52,7 @@ bool CSaveFileStateJob::DoWork()
     g_windowManager.SendThreadMessage(message);
 
     // notify service content handler where we stopped playback
-    CServiceManager::GetInstance().SetResumePoint(m_item);
+    CServicesManager::GetInstance().SetResumePoint(m_item);
     return true;
   }
 

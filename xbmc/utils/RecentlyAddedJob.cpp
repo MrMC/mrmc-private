@@ -33,7 +33,7 @@
 #include "music/MusicThumbLoader.h"
 #include "video/VideoThumbLoader.h"
 #include "settings/Settings.h"
-#include "services/ServiceManager.h"
+#include "services/ServicesManager.h"
 
 #if defined(TARGET_DARWIN_TVOS)
   #include "platform/darwin/DarwinUtils.h"
@@ -108,8 +108,8 @@ bool CRecentlyAddedJob::UpdateVideo()
   }
 
   // get recently added TVSHOWS and MOVIES from any enabled service
-  CServiceManager::GetInstance().GetAllRecentlyAddedShows(*m_RecentlyAddedTV, NUM_ITEMS);
-  CServiceManager::GetInstance().GetAllRecentlyAddedMovies(*m_RecentlyAddedMovies, NUM_ITEMS);
+  CServicesManager::GetInstance().GetAllRecentlyAddedShows(*m_RecentlyAddedTV, NUM_ITEMS);
+  CServicesManager::GetInstance().GetAllRecentlyAddedMovies(*m_RecentlyAddedMovies, NUM_ITEMS);
 
 #if defined(TARGET_DARWIN_TVOS)
   // send recently added Movies and TvShows to TopShelf

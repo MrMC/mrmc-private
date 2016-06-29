@@ -18,32 +18,32 @@
  *
  */
 
-#include "services/ServiceManager.h"
+#include "services/ServicesManager.h"
 
 #include "services/plex/PlexUtils.h"
 #include "video/VideoInfoTag.h"
 
-CServiceManager::CServiceManager()
+CServicesManager::CServicesManager()
 {
 }
 
-CServiceManager::~CServiceManager()
+CServicesManager::~CServicesManager()
 {
 }
 
-CServiceManager& CServiceManager::GetInstance()
+CServicesManager& CServicesManager::GetInstance()
 {
-  static CServiceManager sServicesManager;
+  static CServicesManager sServicesManager;
   return sServicesManager;
 }
 
 
-bool CServiceManager::HasServices()
+bool CServicesManager::HasServices()
 {
   return CPlexUtils::HasClients();
 }
 
-void CServiceManager::SetWatched(CFileItem &item)
+void CServicesManager::SetWatched(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))
   {
@@ -51,7 +51,7 @@ void CServiceManager::SetWatched(CFileItem &item)
   }
 }
 
-void CServiceManager::SetUnWatched(CFileItem &item)
+void CServicesManager::SetUnWatched(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))
   {
@@ -59,7 +59,7 @@ void CServiceManager::SetUnWatched(CFileItem &item)
   }
 }
 
-void CServiceManager::SetResumePoint(CFileItem &item)
+void CServicesManager::SetResumePoint(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))
   {
@@ -67,7 +67,7 @@ void CServiceManager::SetResumePoint(CFileItem &item)
   }
 }
 
-void CServiceManager::UpdateFileProgressState(CFileItem &item, double currentTime)
+void CServicesManager::UpdateFileProgressState(CFileItem &item, double currentTime)
 {
   if (item.HasProperty("PlexItem"))
   {
@@ -75,7 +75,7 @@ void CServiceManager::UpdateFileProgressState(CFileItem &item, double currentTim
   }
 }
 
-void CServiceManager::GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit)
+void CServicesManager::GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit)
 {
   if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, false))
   {
@@ -89,7 +89,7 @@ void CServiceManager::GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, in
   }
 }
 
-void CServiceManager::GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit)
+void CServicesManager::GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit)
 {
   if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, true))
   {
