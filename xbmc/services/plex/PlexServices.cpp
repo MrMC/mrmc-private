@@ -456,7 +456,7 @@ bool CPlexServices::GetMyHomeUsers()
           plexUser->SetProperty("uuid", XMLUtils::GetAttribute(UserNode, "uuid"));
           plexUser->SetProperty("id", XMLUtils::GetAttribute(UserNode, "id"));
           plexUser->SetLabel(XMLUtils::GetAttribute(UserNode, "title"));
-          plexUser->SetArt("thumb", XMLUtils::GetAttribute(UserNode, "thumb"));
+          plexUser->SetIconImage(XMLUtils::GetAttribute(UserNode, "thumb"));
           plexUsers.Add(plexUser);
           UserNode = UserNode->NextSiblingElement("User");
         }
@@ -471,6 +471,7 @@ bool CPlexServices::GetMyHomeUsers()
     dialog->SetHeading("Choose User");
     dialog->SetItems(plexUsers);
     dialog->SetMultiSelection(false);
+    dialog->SetUseDetails(true);
     dialog->Open();
     
     if (!dialog->IsConfirmed())
