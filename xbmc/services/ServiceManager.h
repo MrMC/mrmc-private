@@ -19,74 +19,25 @@
  *
  */
 
-#include "services/plex/PlexUtils.h"
-#include "video/VideoInfoTag.h"
+class CFileItem;
+class CFileItemList;
 
 class CServiceManager
 {
 public:
-  static bool HasServices()
-  {
-    return CPlexUtils::HasClients();
-  }
+  static CServiceManager &GetInstance();
 
-  static void SetWatched(CFileItem &item)
-  {
-    if (item.HasProperty("PlexItem"))
-    {
-      CPlexUtils::SetWatched(item);
-    }
-  }
+  bool HasServices();
+  void SetWatched(CFileItem &item);
+  void SetUnWatched(CFileItem &item);
+  void SetResumePoint(CFileItem &item);
+  void UpdateFileProgressState(CFileItem &item, double currentTime);
+  void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit);
+  void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit);
 
-  static void SetUnWatched(CFileItem &item)
-  {
-    if (item.HasProperty("PlexItem"))
-    {
-      CPlexUtils::SetUnWatched(item);
-    }
-  }
-
-  static void SetResumePoint(CFileItem &item)
-  {
-    if (item.HasProperty("PlexItem"))
-    {
-      CPlexUtils::SetOffset(item, item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
-    }
-  }
-
-  static void UpdateFileProgressState(CFileItem &item, double currentTime)
-  {
-    if (item.HasProperty("PlexItem"))
-    {
-      CPlexUtils::ReportProgress(item, currentTime);
-    }
-  }
-
-  static void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit)
-  {
-    if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, false))
-    {
-      CFileItemList temp;
-      recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
-      for (int i = 0; i < recentlyAdded.Size() && i < itemLimit; i++)
-        temp.Add(recentlyAdded.Get(i));
-
-      recentlyAdded.ClearItems();
-      recentlyAdded.Append(temp);
-    }
-  }
-
-  static void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit)
-  {
-    if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, true))
-    {
-      CFileItemList temp;
-      recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
-      for (int i = 0; i < recentlyAdded.Size() && i < itemLimit; i++)
-        temp.Add(recentlyAdded.Get(i));
-
-      recentlyAdded.ClearItems();
-      recentlyAdded.Append(temp);
-    }
-  }
+private:
+  // private construction, and no assignements; use the provided singleton methods
+  CServiceManager();
+  CServiceManager(const CServiceManager&);
+  virtual ~CServiceManager();
 };

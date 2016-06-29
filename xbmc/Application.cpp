@@ -3748,7 +3748,7 @@ void CApplication::UpdateFileState()
         }
 
         if (m_progressTrackingItem->IsServiceBased())
-          CServiceManager::UpdateFileProgressState(*m_progressTrackingItem.get(), GetTime());
+          CServiceManager::GetInstance().UpdateFileProgressState(*m_progressTrackingItem.get(), GetTime());
       }
     }
   }

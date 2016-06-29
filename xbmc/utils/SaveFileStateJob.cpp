@@ -52,7 +52,7 @@ bool CSaveFileStateJob::DoWork()
     g_windowManager.SendThreadMessage(message);
 
     // notify service content handler where we stopped playback
-    CServiceManager::SetResumePoint(m_item);
+    CServiceManager::GetInstance().SetResumePoint(m_item);
     return true;
   }
 

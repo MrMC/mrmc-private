@@ -108,8 +108,8 @@ bool CRecentlyAddedJob::UpdateVideo()
   }
 
   // get recently added TVSHOWS and MOVIES from any enabled service
-  CServiceManager::GetAllRecentlyAddedShows(*m_RecentlyAddedTV, NUM_ITEMS);
-  CServiceManager::GetAllRecentlyAddedMovies(*m_RecentlyAddedMovies, NUM_ITEMS);
+  CServiceManager::GetInstance().GetAllRecentlyAddedShows(*m_RecentlyAddedTV, NUM_ITEMS);
+  CServiceManager::GetInstance().GetAllRecentlyAddedMovies(*m_RecentlyAddedMovies, NUM_ITEMS);
 
 #if defined(TARGET_DARWIN_TVOS)
   // send recently added Movies and TvShows to TopShelf

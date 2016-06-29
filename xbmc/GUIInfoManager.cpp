@@ -2465,7 +2465,7 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
     bReturn = g_application.IsMusicScanning();
   }
   else if (condition == LIBRARY_HASSERVICES)
-    bReturn = CServiceManager::HasServices();
+    bReturn = CServiceManager::GetInstance().HasServices();
   else if (condition == SYSTEM_PLATFORM_LINUX)
 #if defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
     bReturn = true;

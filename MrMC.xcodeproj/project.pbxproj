@@ -1708,6 +1708,9 @@
 		F55BD3161D1DB4F00072FE3A /* PlexDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3141D1DB4F00072FE3A /* PlexDirectory.cpp */; };
 		F55BD3171D1DB4F00072FE3A /* PlexDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3141D1DB4F00072FE3A /* PlexDirectory.cpp */; };
 		F55BD3181D1DB4F00072FE3A /* PlexDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD3141D1DB4F00072FE3A /* PlexDirectory.cpp */; };
+		F55BD31C1D246E240072FE3A /* ServiceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD31B1D246E240072FE3A /* ServiceManager.cpp */; };
+		F55BD31D1D246E240072FE3A /* ServiceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD31B1D246E240072FE3A /* ServiceManager.cpp */; };
+		F55BD31E1D246E240072FE3A /* ServiceManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD31B1D246E240072FE3A /* ServiceManager.cpp */; };
 		F5632F911CB9473A002027D9 /* Autorun.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5632F8F1CB9473A002027D9 /* Autorun.cpp */; };
 		F5632F921CB94787002027D9 /* ActiveAEDSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B723651C7C9A51006432AE /* ActiveAEDSP.cpp */; };
 		F5632F931CB9478B002027D9 /* ActiveAEDSPAddon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B723671C7C9A51006432AE /* ActiveAEDSPAddon.cpp */; };
@@ -5104,6 +5107,7 @@
 		F55BD3141D1DB4F00072FE3A /* PlexDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlexDirectory.cpp; sourceTree = "<group>"; };
 		F55BD3151D1DB4F00072FE3A /* PlexDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlexDirectory.h; sourceTree = "<group>"; };
 		F55BD3191D22423D0072FE3A /* ServiceManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ServiceManager.h; sourceTree = "<group>"; };
+		F55BD31B1D246E240072FE3A /* ServiceManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ServiceManager.cpp; sourceTree = "<group>"; };
 		F5632F8F1CB9473A002027D9 /* Autorun.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Autorun.cpp; sourceTree = "<group>"; };
 		F5632F901CB9473A002027D9 /* Autorun.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Autorun.h; sourceTree = "<group>"; };
 		F5632F971CB947FB002027D9 /* cddb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cddb.cpp; sourceTree = "<group>"; };
@@ -8966,6 +8970,7 @@
 		F58BF96D1CD83FAF005BB003 /* services */ = {
 			isa = PBXGroup;
 			children = (
+				F55BD31B1D246E240072FE3A /* ServiceManager.cpp */,
 				F55BD3191D22423D0072FE3A /* ServiceManager.h */,
 				F55BD2FF1D0A14ED0072FE3A /* plex */,
 				F58BF96E1CD83FAF005BB003 /* lighteffects */,
@@ -10746,6 +10751,7 @@
 				7C87B2CE162CE39600EF897D /* PlayerController.cpp in Sources */,
 				F52CC5F01713AAA200113454 /* DirectoryNodeGrouped.cpp in Sources */,
 				F52CC6AA1713BD2B00113454 /* DirectoryNodeGrouped.cpp in Sources */,
+				F55BD31C1D246E240072FE3A /* ServiceManager.cpp in Sources */,
 				F5B722EE1C7C894F006432AE /* AddonBuiltins.cpp in Sources */,
 				DFECFADF172D9C5100A43CF7 /* GUIControlSettings.cpp in Sources */,
 				DFECFB09172D9CAB00A43CF7 /* SettingAddon.cpp in Sources */,
@@ -11619,6 +11625,7 @@
 				18FD1CAA1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
 				E4991431174E604300741B6D /* DarwinStorageProvider.cpp in Sources */,
 				F5B7232B1C7C9616006432AE /* DVDDemuxCDDA.cpp in Sources */,
+				F55BD31D1D246E240072FE3A /* ServiceManager.cpp in Sources */,
 				E4991432174E604300741B6D /* AutorunMediaJob.cpp in Sources */,
 				F5B723E81C7C9FBD006432AE /* Visualisation.cpp in Sources */,
 				399442721A8DD920006C39E9 /* VideoLibraryJob.cpp in Sources */,
@@ -12049,6 +12056,7 @@
 				F5D13EFE1BAF0B6D0075A95C /* DVDVideoPPFFmpeg.cpp in Sources */,
 				F5D13EFF1BAF0B6D0075A95C /* DVDDemux.cpp in Sources */,
 				F5D13F001BAF0B6D0075A95C /* DVDDemuxBXA.cpp in Sources */,
+				F55BD31E1D246E240072FE3A /* ServiceManager.cpp in Sources */,
 				F5D13F021BAF0B6D0075A95C /* DVDDemuxFFmpeg.cpp in Sources */,
 				F5D13F031BAF0B6D0075A95C /* DVDDemuxPVRClient.cpp in Sources */,
 				F51063441BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */,

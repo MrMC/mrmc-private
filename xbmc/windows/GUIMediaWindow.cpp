@@ -1595,9 +1595,9 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       if (item->IsServiceBased())
       {
         if (button == CONTEXT_BUTTON_MARK_WATCHED)
-          CServiceManager::SetWatched(*item.get());
+          CServiceManager::GetInstance().SetWatched(*item.get());
         else
-          CServiceManager::SetUnWatched(*item.get());
+          CServiceManager::GetInstance().SetUnWatched(*item.get());
         item->GetVideoInfoTag()->m_playCount = (button == CONTEXT_BUTTON_MARK_WATCHED);
         item->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_playCount > 0);
         return true;
