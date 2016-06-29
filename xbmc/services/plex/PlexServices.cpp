@@ -256,7 +256,7 @@ bool CPlexServices::FetchPlexToken()
   std::string strPostData;
   if (plex.Post(url.Get(), strPostData, strResponse))
   {
-    CLog::Log(LOGDEBUG, "CPlexServices: myPlex %s", strResponse.c_str());
+    //CLog::Log(LOGDEBUG, "CPlexServices: myPlex %s", strResponse.c_str());
 
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -281,7 +281,7 @@ bool CPlexServices::FetchMyPlexServers()
   CURL url("https://plex.tv/api/resources");
   if (plex.Get(url.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
+    //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
 

@@ -49,7 +49,7 @@ bool CPlexUtils::GetIdentity(std::string url)
   std::string strResponse;
   if (plex.Get(curl.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "CPlexClient::GetIdentity() %s", strResponse.c_str());
+    //CLog::Log(LOGDEBUG, "CPlexClient::GetIdentity() %s", strResponse.c_str());
     return true;
   }
 

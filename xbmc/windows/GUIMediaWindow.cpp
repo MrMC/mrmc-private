@@ -645,9 +645,9 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
 
   std::string strParentPath = m_history.GetParentPath();
 
-  CLog::Log(LOGDEBUG,"CGUIMediaWindow::GetDirectory (%s)",
-            CURL::GetRedacted(strDirectory).c_str());
-  CLog::Log(LOGDEBUG,"  ParentPath = [%s]", CURL::GetRedacted(strParentPath).c_str());
+  //CLog::Log(LOGDEBUG,"CGUIMediaWindow::GetDirectory (%s)",
+  //          CURL::GetRedacted(strDirectory).c_str());
+  //CLog::Log(LOGDEBUG,"  ParentPath = [%s]", CURL::GetRedacted(strParentPath).c_str());
 
   // see if we can load a previously cached folder
   CFileItemList cachedItems(strDirectory);

@@ -148,7 +148,7 @@ void CPlexClient::ParseSections()
   std::string strResponse;
   if (plex.Get(curl.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "CPlexClient::ParseSections() %s", strResponse.c_str());
+    //CLog::Log(LOGDEBUG, "CPlexClient::ParseSections() %s", strResponse.c_str());
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
     
