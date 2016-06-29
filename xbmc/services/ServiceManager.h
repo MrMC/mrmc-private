@@ -19,35 +19,74 @@
  *
  */
 
+#include "services/plex/PlexUtils.h"
+#include "video/VideoInfoTag.h"
+
 class CServiceManager
 {
 public:
   static bool HasServices()
   {
-    return false;
+    return CPlexUtils::HasClients();
   }
 
   static void SetWatched(CFileItem &item)
   {
+    if (item.HasProperty("PlexItem"))
+    {
+      CPlexUtils::SetWatched(item);
+    }
   }
 
   static void SetUnWatched(CFileItem &item)
   {
+    if (item.HasProperty("PlexItem"))
+    {
+      CPlexUtils::SetUnWatched(item);
+    }
   }
 
   static void SetResumePoint(CFileItem &item)
   {
+    if (item.HasProperty("PlexItem"))
+    {
+      CPlexUtils::SetOffset(item, item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
+    }
   }
 
   static void UpdateFileProgressState(CFileItem &item, double currentTime)
   {
+    if (item.HasProperty("PlexItem"))
+    {
+      CPlexUtils::ReportProgress(item, currentTime);
+    }
   }
 
   static void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit)
   {
+    if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, false))
+    {
+      CFileItemList temp;
+      recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
+      for (int i = 0; i < recentlyAdded.Size() && i < itemLimit; i++)
+        temp.Add(recentlyAdded.Get(i));
+
+      recentlyAdded.ClearItems();
+      recentlyAdded.Append(temp);
+    }
   }
 
   static void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit)
   {
+    if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, true))
+    {
+      CFileItemList temp;
+      recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
+      for (int i = 0; i < recentlyAdded.Size() && i < itemLimit; i++)
+        temp.Add(recentlyAdded.Get(i));
+
+      recentlyAdded.ClearItems();
+      recentlyAdded.Append(temp);
+    }
   }
 };
