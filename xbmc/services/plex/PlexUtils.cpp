@@ -258,6 +258,7 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentTime)
     std::string strXML;
     XFILE::CCurlFile plex;
     CPlexUtils::GetDefaultHeaders(plex);
+    plex.Get(url2.Get(), strXML);
     g_progressSec = 1;
   }
   g_progressSec++;
