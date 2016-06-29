@@ -419,6 +419,7 @@ public:
   
   // plex services
   static const std::string SETTING_SERVICES_PLEXSIGNIN;
+  static const std::string SETTING_SERVICES_PLEXUSERS;
   static const std::string SETTING_SERVICES_PLEXGDMSERVER;
   static const std::string SETTING_SERVICES_PLEXMYPLEXUSER;
   static const std::string SETTING_SERVICES_PLEXMYPLEXPASS;

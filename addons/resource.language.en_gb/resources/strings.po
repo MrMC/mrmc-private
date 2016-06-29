@@ -4301,7 +4301,17 @@ msgctxt "#1243"
 msgid "Choice of GDM Plex Server discovery"
 msgstr ""
 
-#empty strings from id 1244 to 1258
+#: system/settings/settings.xml
+msgctxt "#1244"
+msgid "Plex Home User"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1245"
+msgid "Change the Plex Home User"
+msgstr ""
+
+#empty strings from id 1246 to 1258
 
 #: system/settings/settings.xml
 msgctxt "#1259"

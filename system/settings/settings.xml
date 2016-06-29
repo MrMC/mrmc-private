@@ -2528,6 +2528,14 @@
           <default>fillme</default>
           <control type="button" format="action" delayed="true"/>
         </setting>
+        <setting id="plex.users" type="string" label="1244" help="1245">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="button" format="action" delayed="true"/>
+        </setting>
         <setting id="plex.gdmserver" type="boolean" label="1242" help="1243">
           <level>0</level>
           <default>false</default>

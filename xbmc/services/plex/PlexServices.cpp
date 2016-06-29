@@ -156,6 +156,18 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       Stop();
     
   }
+  else if (settingId == CSettings::SETTING_SERVICES_PLEXUSERS)
+  {
+    // user must be in 'sign-in' state so check for 'sign-out' label
+    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == g_localizeStrings.Get(1241))
+    {
+      std::string homeUserName;
+      if (GetMyHomeUsers(homeUserName))
+      {
+        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXUSERS, homeUserName);
+      }
+    }
+  }
 }
 
 void CPlexServices::OnSettingChanged(const CSetting *setting)
@@ -314,7 +326,8 @@ bool CPlexServices::FetchPlexToken()
     CVariant user = reply["user"];
     m_myPlexToken = user["authentication_token"].asString();
 
-    GetMyHomeUsers();
+    std::string homeUserName;
+    GetMyHomeUsers(homeUserName);
 
     rtn = true;
   }
@@ -421,7 +434,7 @@ bool CPlexServices::AddClient(CPlexClient client)
   return true;
 }
 
-bool CPlexServices::GetMyHomeUsers()
+bool CPlexServices::GetMyHomeUsers(std::string &homeusername)
 {
   bool rtn = false;
 
@@ -505,9 +518,11 @@ bool CPlexServices::GetMyHomeUsers()
     if (userContainer)
     {
       std::string token = XMLUtils::GetAttribute(userContainer, "authToken");
+      homeusername = XMLUtils::GetAttribute(userContainer, "username");
       // each user gets its own token
       if (!token.empty())
         m_myPlexToken = token;
+      rtn = true;
     }
   }
   else
