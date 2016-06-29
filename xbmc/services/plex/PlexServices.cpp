@@ -26,6 +26,8 @@
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderCapture.h"
 #include "dialogs/GUIDialogKaiToast.h"
+#include "dialogs/GUIDialogSelect.h"
+#include "dialogs/GUIDialogNumeric.h"
 #include "filesystem/CurlFile.h"
 #include "guilib/LocalizeStrings.h"
 #include "guilib/GUIWindowManager.h"
@@ -311,6 +313,9 @@ bool CPlexServices::FetchPlexToken()
 
     CVariant user = reply["user"];
     m_myPlexToken = user["authentication_token"].asString();
+
+    GetMyHomeUsers();
+
     rtn = true;
   }
   else
@@ -414,4 +419,101 @@ bool CPlexServices::AddClient(CPlexClient client)
   ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
 
   return true;
+}
+
+bool CPlexServices::GetMyHomeUsers()
+{
+  bool rtn = false;
+
+  XFILE::CCurlFile plex;
+  CPlexUtils::GetDefaultHeaders(plex);
+  if (!m_myPlexToken.empty())
+    plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
+
+  std::string strResponse;
+  CURL url("https://plex.tv/api/home/users");
+  if (plex.Get(url.Get(), strResponse))
+  {
+    //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
+
+    TiXmlDocument xml;
+    CFileItemList plexUsers;
+    xml.Parse(strResponse.c_str());
+
+    TiXmlElement* MediaContainer = xml.RootElement();
+    if (MediaContainer)
+    {
+      std::string users = XMLUtils::GetAttribute(MediaContainer, "size");
+      if (atoi(users.c_str()) > 1)
+      {
+        const TiXmlElement* UserNode = MediaContainer->FirstChildElement("User");
+        while (UserNode)
+        {
+          CFileItemPtr plexUser(new CFileItem());
+          // set m_bIsFolder to true to indicate we are tvshow list
+          plexUser->m_bIsFolder = true;
+          plexUser->SetProperty("title", XMLUtils::GetAttribute(UserNode, "title"));
+          plexUser->SetProperty("uuid", XMLUtils::GetAttribute(UserNode, "uuid"));
+          plexUser->SetProperty("id", XMLUtils::GetAttribute(UserNode, "id"));
+          plexUser->SetLabel(XMLUtils::GetAttribute(UserNode, "title"));
+          plexUser->SetIconImage(XMLUtils::GetAttribute(UserNode, "thumb"));
+          plexUsers.Add(plexUser);
+          UserNode = UserNode->NextSiblingElement("User");
+        }
+      }
+    }
+    CGUIDialogSelect *dialog = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
+    if (dialog == NULL)
+      return false;
+
+    dialog->Reset();
+    dialog->SetHeading("Choose User");
+    dialog->SetItems(plexUsers);
+    dialog->SetMultiSelection(false);
+    dialog->SetUseDetails(true);
+    dialog->Open();
+
+    if (!dialog->IsConfirmed())
+      return false;
+
+    const CFileItemPtr item = dialog->GetSelectedItem();
+
+    if (item == NULL || !item->HasProperty("uuid"))
+      return false;
+
+    std::string pin;
+    if( !CGUIDialogNumeric::ShowAndGetNumber(pin, "Enter pin") )
+      return false;
+
+    XFILE::CCurlFile plex;
+    CPlexUtils::GetDefaultHeaders(plex);
+    if (!m_myPlexToken.empty())
+      plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
+
+    std::string strResponse;
+    std::string strPostData;
+    std::string uuid = item->GetProperty("uuid").asString();
+    CURL url("https://plex.tv/api/v2/home/users/" + uuid + "/switch?pin=" + pin);
+
+    CPlexUtils::GetDefaultHeaders(plex);
+    plex.Post(url.Get(), strPostData, strResponse);
+
+    TiXmlDocument xml1;
+    xml1.Parse(strResponse.c_str());
+
+    TiXmlElement* userContainer = xml1.RootElement();
+    if (userContainer)
+    {
+      std::string token = XMLUtils::GetAttribute(userContainer, "authToken");
+      // each user gets its own token
+      if (!token.empty())
+        m_myPlexToken = token;
+    }
+  }
+  else
+  {
+    CLog::Log(LOGDEBUG, "CPlexServices:FetchMyPlexServers failed %s", strResponse.c_str());
+  }
+
+  return rtn;
 }
