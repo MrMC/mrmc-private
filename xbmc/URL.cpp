@@ -624,6 +624,9 @@ std::string CURL::GetWithoutUserDetails(bool redact) const
     if (URIUtils::HasEncodedHostname(*this))
       strHostName = Encode(strHostName);
 
+    if (URIUtils::HasRedactedHostname(*this))
+      strHostName = "HOSTNAME";
+
     if ( HasPort() )
     {
       protectIPv6(strHostName);
