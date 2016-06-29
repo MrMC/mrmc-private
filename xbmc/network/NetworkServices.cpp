@@ -492,7 +492,7 @@ void CNetworkServices::Start()
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_LIGHTEFFECTSENABLE) && !StartLightEffectServices())
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
 
-  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE) && !StartPlexServices())
+  if (!StartPlexServices())
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
 
   // note - airtunesserver has to start before airplay server (ios7 client detection bug)

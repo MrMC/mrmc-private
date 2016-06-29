@@ -42,9 +42,11 @@ public:
   void Start();
   void Stop();
   bool IsActive();
+  bool HasClients() const { return !m_clients.empty(); }
   void GetClients(std::vector<CPlexClient> &clients) const {clients = m_clients; }
 
   // ISettingCallback
+  virtual void OnSettingAction(const CSetting *setting) override;
   virtual void OnSettingChanged(const CSetting *setting) override;
 
   // IAnnouncer callbacks
@@ -70,12 +72,9 @@ private:
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
 
-  bool              m_myPlexEnabled;
   std::string       m_myPlexUser;
   std::string       m_myPlexPass;
   std::string       m_myPlexToken;
-  bool              m_autoGDM;
-  std::string       m_localHost;
-  std::string       m_localPort;
+  bool              m_useGDMServer;
   std::vector<CPlexClient> m_clients;
 };

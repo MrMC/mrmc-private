@@ -25,6 +25,11 @@
 class CServiceManager
 {
 public:
+  static bool HasServices()
+  {
+    return CPlexUtils::HasClients();
+  }
+
   static void SetWatched(CFileItem &item)
   {
     if (item.HasProperty("PlexItem"))

@@ -34,10 +34,12 @@
 #include "network/Socket.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
+#include "profiles/dialogs/GUIDialogLockSettings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 
 #include "utils/JSONVariantParser.h"
+#include "utils/Variant.h"
 #include "utils/XMLUtils.h"
 
 #include "PlexUtils.h"
@@ -51,7 +53,6 @@ using namespace ANNOUNCEMENT;
 
 CPlexServices::CPlexServices()
 : CThread("PlexServices")
-, m_myPlexEnabled(false)
 {
 }
 
@@ -70,21 +71,16 @@ CPlexServices& CPlexServices::GetInstance()
 void CPlexServices::Start()
 {
   CSingleLock lock(m_critical);
-  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE) && !IsRunning())
-  {
-    if (IsRunning())
-      StopThread();
-    CThread::Create();
-  }
+  if (IsRunning())
+    StopThread();
+  CThread::Create();
 }
 
 void CPlexServices::Stop()
 {
   CSingleLock lock(m_critical);
   if (IsRunning())
-  {
     StopThread();
-  }
   m_clients.clear();
 }
 
@@ -97,25 +93,79 @@ void CPlexServices::Announce(AnnouncementFlag flag, const char *sender, const ch
 {
 }
 
+void CPlexServices::OnSettingAction(const CSetting *setting)
+{
+  if (setting == nullptr)
+    return;
+
+  const std::string& settingId = setting->GetId();
+  if (settingId == CSettings::SETTING_SERVICES_PLEXSIGNIN)
+  {
+    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == g_localizeStrings.Get(1240))
+    {
+      // prompt is 'sign-in'
+      std::string user;
+      std::string pass;
+      std::string module;
+      bool saveDetails = false;
+      if (CGUIDialogLockSettings::ShowAndGetUserAndPassword(user, pass, module, &saveDetails, true))
+      {
+        if (!user.empty() && !pass.empty())
+        {
+          m_myPlexUser = user;
+          m_myPlexPass = pass;
+          if (FetchPlexToken())
+          {
+            // change prompt to 'sign-out'
+            CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1241));
+            // have to call this directly as we are changing a label and it will not trigger a OnSettingChanged
+            OnSettingChanged(setting);
+          }
+        }
+        else
+        {
+          // opps, nuke'em all
+          m_myPlexUser.clear();
+          m_myPlexPass.clear();
+          m_myPlexToken.clear();
+        }
+      }
+    }
+    else
+    {
+      // prompt is 'sign-out'
+      // clear user/pass/auth and change prompt to 'sign-in'
+      m_myPlexUser.clear();
+      m_myPlexPass.clear();
+      m_myPlexToken.clear();
+      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1240));
+      // have to call this directly as we are changing a label and it will not trigger a OnSettingChanged
+      OnSettingChanged(setting);
+    }
+    // save changes
+    CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER, m_myPlexUser);
+    CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS, m_myPlexPass);
+    CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH, m_myPlexToken);
+  }
+}
+
 void CPlexServices::OnSettingChanged(const CSetting *setting)
 {
   // All Plex settings so far
   /*
-   static const std::string SETTING_SERVICES_PLEXENABLE;
-   static const std::string SETTING_SERVICES_PLEXMYPLEX;
+   static const std::string SETTING_SERVICES_PLEXSIGNIN;
+   static const std::string SETTING_SERVICES_PLEXGDMSERVER;
    static const std::string SETTING_SERVICES_PLEXMYPLEXUSER;
    static const std::string SETTING_SERVICES_PLEXMYPLEXPASS;
-   static const std::string SETTING_SERVICES_PLEXSERVER;
-   static const std::string SETTING_SERVICES_PLEXSERVERPORT;
-   static const std::string SETTING_SERVICES_PLEXSERVERHOST;
+   static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
    */
 
   if (setting == NULL)
     return;
 
   const std::string &settingId = setting->GetId();
-  if (settingId == CSettings::SETTING_SERVICES_PLEXENABLE ||
-      settingId == CSettings::SETTING_SERVICES_PLEXSERVER)
+  if (!m_myPlexToken.empty() ||
+      settingId == CSettings::SETTING_SERVICES_PLEXGDMSERVER)
   {
     ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
     ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
@@ -131,37 +181,26 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
 
 void CPlexServices::ApplyUserSettings()
 {
-  // myPlex on/off and user/pass below
-  m_myPlexEnabled = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXMYPLEX);
   m_myPlexUser = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER);
   m_myPlexPass = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
+  m_myPlexToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
   // end of Plex settings
 
-  // 0 is disabled, 1 is auto, 2 is manual using host/port
-  m_autoGDM  = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXSERVER) == 1;
-  m_localHost = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERHOST);
-  m_localPort = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSERVERPORT);
+  // 0 is disabled, 1 is auto
+  m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
 }
 
 void CPlexServices::Process()
 {
-  bool hasPlexToken = false;
   bool hasPlexServers = false;
   ApplyUserSettings();
 
   CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
   if (iface)
   {
-    if (m_myPlexEnabled)
-    {
-      hasPlexToken = FetchPlexToken();
-      if (hasPlexToken)
-        hasPlexServers = FetchMyPlexServers();
-    }
-
     SOCKETS::CUDPSocket *socket = nullptr;
     SOCKETS::CSocketListener listener;
-    if (m_autoGDM)
+    if (m_useGDMServer)
     {
       socket = SOCKETS::CSocketFactory::CreateUDPSocket();
       if (socket)
@@ -187,6 +226,10 @@ void CPlexServices::Process()
         CLog::Log(LOGERROR, "CPlexServices: Could not create socket for GDM");
     }
 
+    // try plex.tv
+    if (!m_myPlexToken.empty() && !hasPlexServers)
+      hasPlexServers = FetchMyPlexServers();
+
     CStopWatch idleTimer;
     idleTimer.StartZero();
     while (!m_bStop)
@@ -194,14 +237,9 @@ void CPlexServices::Process()
       // recheck services every N seconds
       if (idleTimer.GetElapsedMilliseconds() > 5000)
       {
-        // check plex.tv
-        if (m_myPlexEnabled && (!hasPlexToken || !hasPlexServers))
-        {
-          if (!hasPlexToken)
-            hasPlexToken = FetchPlexToken();
-          if (hasPlexToken && !hasPlexServers)
-            hasPlexServers = FetchMyPlexServers();
-        }
+        // try plex.tv
+        if (!m_myPlexToken.empty() && !hasPlexServers)
+          hasPlexServers = FetchMyPlexServers();
 
         // check GDM
         if (socket)
@@ -234,7 +272,7 @@ void CPlexServices::Process()
           }
         }
       }
-      usleep(50 * 1000);
+      usleep(250 * 1000);
     }
 
     if (socket)
@@ -305,6 +343,7 @@ bool CPlexServices::FetchMyPlexServers()
           {
             //GetClient(newClient.m_uuid)->ParseData(data, host);
             CLog::Log(LOGDEBUG, "CPlexServices: Server updated via plex.tv %s", newClient.GetServerName().c_str());
+            rtn = true;
           }
         }
         DeviceNode = DeviceNode->NextSiblingElement("Device");

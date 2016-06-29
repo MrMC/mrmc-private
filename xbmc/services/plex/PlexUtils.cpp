@@ -38,6 +38,11 @@
 
 static int g_progressSec = 0;
 
+bool CPlexUtils::HasClients()
+{
+  return CPlexServices::GetInstance().HasClients();
+}
+
 bool CPlexUtils::GetIdentity(std::string url)
 {
   // all (local and remote) plex server respond to identity
@@ -632,7 +637,7 @@ bool CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tv
 {
   bool rtn = false;
 
-  if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+  if (CPlexServices::GetInstance().HasClients())
   {
     //look through all plex clients and pull recently added for each library section
     std::vector<CPlexClient> clients;

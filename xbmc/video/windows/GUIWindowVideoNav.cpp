@@ -51,6 +51,7 @@
 #include "video/dialogs/GUIDialogVideoInfo.h"
 #include "pvr/recordings/PVRRecording.h"
 #include "ContextMenuManager.h"
+#include "services/ServiceManager.h"
 
 #include <utility>
 
@@ -1282,7 +1283,7 @@ std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
       lower == "moviestudios")
   {
     StringUtils::Replace(lower, "movie", "");
-    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+    if (CServiceManager::HasServices())
       return "plex://movies/" + lower + "/";
     return "videodb://movies/" + lower + "/";
   } 
@@ -1297,19 +1298,19 @@ std::string CGUIWindowVideoNav::GetStartFolder(const std::string &dir)
            lower == "tvshowstudios")
   {
     StringUtils::Replace(lower, "tvshow", "");
-    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+    if (CServiceManager::HasServices())
       return "plex://tvshows/" + lower + "/";
     return "videodb://tvshows/" + lower + "/";
   }
   else if (lower == "recentlyaddedmovies")
   {
-    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+    if (CServiceManager::HasServices())
       return "plex://movies/recentlyaddedmovies/";
     return "videodb://recentlyaddedmovies/";
   }
   else if (lower == "recentlyaddedepisodes")
   {
-    if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+    if (CServiceManager::HasServices())
       return "plex://tvshows/recentlyaddedepisodes/";
     return "videodb://recentlyaddedepisodes/";
   }

@@ -469,13 +469,11 @@ const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICB = "services.li
 const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER = "services.lighteffectsstaticscreensaver";
 
 // plex services
-const std::string CSettings::SETTING_SERVICES_PLEXENABLE = "plex.enabled";
-const std::string CSettings::SETTING_SERVICES_PLEXMYPLEX = "plex.myplex";
+const std::string CSettings::SETTING_SERVICES_PLEXSIGNIN = "plex.signin";
+const std::string CSettings::SETTING_SERVICES_PLEXGDMSERVER = "plex.gdmserver";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXUSER = "plex.myplexusername";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXPASS = "plex.myplexpassword";
-const std::string CSettings::SETTING_SERVICES_PLEXSERVER = "plex.server";
-const std::string CSettings::SETTING_SERVICES_PLEXSERVERPORT = "plex.serverport";
-const std::string CSettings::SETTING_SERVICES_PLEXSERVERHOST = "plex.serverhost";
+const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH = "plex.myplexauthtoken";
 
 CSettings::CSettings()
   : m_initialized(false)
@@ -1338,13 +1336,11 @@ void CSettings::InitializeISettingCallbacks()
   m_settingsManager->RegisterCallback(&CLightEffectServices::GetInstance(), settingSet);
   
   settingSet.clear();
-  settingSet.insert(CSettings::SETTING_SERVICES_PLEXENABLE);
-  settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEX);
+  settingSet.insert(CSettings::SETTING_SERVICES_PLEXSIGNIN);
+  settingSet.insert(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
-  settingSet.insert(CSettings::SETTING_SERVICES_PLEXSERVER);
-  settingSet.insert(CSettings::SETTING_SERVICES_PLEXSERVERPORT);
-  settingSet.insert(CSettings::SETTING_SERVICES_PLEXSERVERHOST);
+  settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
   m_settingsManager->RegisterCallback(&CPlexServices::GetInstance(), settingSet);
 }
 

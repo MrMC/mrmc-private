@@ -98,6 +98,7 @@
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "cores/VideoRenderers/BaseRenderer.h"
 #include "interfaces/info/InfoExpression.h"
+#include "services/ServiceManager.h"
 
 #if defined(TARGET_DARWIN_OSX)
 #include "platform/darwin/osx/smc.h"
@@ -2464,7 +2465,7 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
     bReturn = g_application.IsMusicScanning();
   }
   else if (condition == LIBRARY_HASPLEX)
-    bReturn = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE);
+    bReturn = CServiceManager::HasServices();
   
   else if (condition == SYSTEM_PLATFORM_LINUX)
 #if defined(TARGET_LINUX) || defined(TARGET_FREEBSD)

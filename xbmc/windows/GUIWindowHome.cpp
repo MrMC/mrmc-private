@@ -35,6 +35,7 @@
 #include "settings/Settings.h"
 #include "playlists/PlayList.h"
 #include "messaging/ApplicationMessenger.h"
+#include "services/ServiceManager.h"
 
 #define CONTROL_RECENTLYADDEDMOVIES      8000
 #define CONTROL_RECENTLYADDEDTVSHOWS     8001
@@ -106,7 +107,7 @@ void CGUIWindowHome::OnInitWindow()
   // this is a temporary solution until remote announcements can be delivered
   if (StringUtils::EqualsNoCase(g_advancedSettings.m_databaseVideo.type, "mysql") ||
       StringUtils::EqualsNoCase(g_advancedSettings.m_databaseMusic.type, "mysql") ||
-      CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXENABLE))
+      CServiceManager::HasServices())
     m_updateRA = (Audio | Video | Totals);
   AddRecentlyAddedJobs( m_updateRA );
   

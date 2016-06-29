@@ -418,13 +418,11 @@ public:
   static const std::string SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER;
   
   // plex services
-  static const std::string SETTING_SERVICES_PLEXENABLE;
-  static const std::string SETTING_SERVICES_PLEXMYPLEX;
+  static const std::string SETTING_SERVICES_PLEXSIGNIN;
+  static const std::string SETTING_SERVICES_PLEXGDMSERVER;
   static const std::string SETTING_SERVICES_PLEXMYPLEXUSER;
   static const std::string SETTING_SERVICES_PLEXMYPLEXPASS;
-  static const std::string SETTING_SERVICES_PLEXSERVER;
-  static const std::string SETTING_SERVICES_PLEXSERVERPORT;
-  static const std::string SETTING_SERVICES_PLEXSERVERHOST;
+  static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
 
   /*!
    \brief Creates a new settings wrapper around a new settings manager.
