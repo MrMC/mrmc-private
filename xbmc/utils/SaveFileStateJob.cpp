@@ -35,12 +35,12 @@
 #include "GUIUserMessages.h"
 #include "music/MusicDatabase.h"
 #include "cores/AudioEngine/DSPAddons/ActiveAEDSP.h"
-#include "services/ServiceManager.h"
+#include "services/ServicesManager.h"
 
 bool CSaveFileStateJob::DoWork()
 {
   // if its serivces item, skip database update for it
-  if (m_item.IsServiceBased())
+  if (m_item.IsMediaServiceBased())
   {
     m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
 
@@ -52,7 +52,7 @@ bool CSaveFileStateJob::DoWork()
     g_windowManager.SendThreadMessage(message);
 
     // notify service content handler where we stopped playback
-    CServiceManager::SetResumePoint(m_item);
+    CServicesManager::GetInstance().SetResumePoint(m_item);
     return true;
   }
 
