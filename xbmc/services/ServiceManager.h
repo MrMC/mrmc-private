@@ -59,7 +59,7 @@ public:
 
   static void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit)
   {
-    if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, true))
+    if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, false))
     {
       CFileItemList temp;
       recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
