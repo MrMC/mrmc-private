@@ -58,7 +58,8 @@ private:
   CPlexServices(const CPlexServices&);
   virtual ~CPlexServices();
 
-  void          ApplyUserSettings();
+  void          SetUserSettings();
+  void          GetUserSettings();
 
   // IRunnable entry point for thread
   virtual void  Process() override;

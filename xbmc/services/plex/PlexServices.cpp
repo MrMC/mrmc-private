@@ -118,7 +118,9 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
           {
             // change prompt to 'sign-out'
             CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1241));
+            CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-in ok");
             // have to call this directly as we are changing a label and it will not trigger a OnSettingChanged
+            SetUserSettings();
             OnSettingChanged(setting);
           }
           else
@@ -129,9 +131,11 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
         else
         {
           // opps, nuke'em all
+          CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction user/pass are empty");
           m_myPlexUser.clear();
           m_myPlexPass.clear();
           m_myPlexToken.clear();
+          SetUserSettings();
         }
       }
     }
@@ -143,13 +147,11 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       m_myPlexPass.clear();
       m_myPlexToken.clear();
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1240));
+      CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
+      SetUserSettings();
       // have to call this directly as we are changing a label and it will not trigger a OnSettingChanged
       OnSettingChanged(setting);
     }
-    // save changes
-    CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER, m_myPlexUser);
-    CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS, m_myPlexPass);
-    CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH, m_myPlexToken);
   }
 }
 
@@ -178,12 +180,19 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
   CSettings::GetInstance().Save();
 }
 
-void CPlexServices::ApplyUserSettings()
+void CPlexServices::SetUserSettings()
+{
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER, m_myPlexUser);
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS, m_myPlexPass);
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH, m_myPlexToken);
+  CSettings::GetInstance().Save();
+}
+
+void CPlexServices::GetUserSettings()
 {
   m_myPlexUser = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER);
   m_myPlexPass = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
   m_myPlexToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
-  // end of Plex settings
 
   // false is disabled, true is auto
   m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
@@ -192,7 +201,7 @@ void CPlexServices::ApplyUserSettings()
 void CPlexServices::Process()
 {
   bool hasPlexServers = false;
-  ApplyUserSettings();
+  GetUserSettings();
 
   CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
   if (iface)
