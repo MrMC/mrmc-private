@@ -121,6 +121,10 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
             // have to call this directly as we are changing a label and it will not trigger a OnSettingChanged
             OnSettingChanged(setting);
           }
+          else
+          {
+            CLog::Log(LOGERROR, "CPlexServices: Could not get authToken");
+          }
         }
         else
         {
@@ -181,7 +185,7 @@ void CPlexServices::ApplyUserSettings()
   m_myPlexToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
   // end of Plex settings
 
-  // 0 is disabled, 1 is auto
+  // false is disabled, true is auto
   m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
 }
 
@@ -298,6 +302,10 @@ bool CPlexServices::FetchPlexToken()
     m_myPlexToken = user["authentication_token"].asString();
     rtn = true;
   }
+  else
+  {
+    CLog::Log(LOGERROR, "CPlexServices:FetchPlexToken failed %s", strResponse.c_str());
+  }
 
   return rtn;
 }
@@ -305,6 +313,7 @@ bool CPlexServices::FetchPlexToken()
 bool CPlexServices::FetchMyPlexServers()
 {
   bool rtn = false;
+
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
   if (!m_myPlexToken.empty())
@@ -315,6 +324,7 @@ bool CPlexServices::FetchMyPlexServers()
   if (plex.Get(url.Get(), strResponse))
   {
     //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
+
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
 
@@ -343,8 +353,11 @@ bool CPlexServices::FetchMyPlexServers()
         }
         DeviceNode = DeviceNode->NextSiblingElement("Device");
       }
-      
     }
+  }
+  else
+  {
+    CLog::Log(LOGDEBUG, "CPlexServices:FetchMyPlexServers failed %s", strResponse.c_str());
   }
 
   return rtn;
@@ -365,7 +378,7 @@ CPlexClient* CPlexServices::GetClient(std::string uuid)
   for (std::vector<CPlexClient>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
   {
     if (s_it->GetUuid() == uuid)
-        return &(*s_it);
+      return &(*s_it);
   }
   return nullptr;
 }
@@ -378,6 +391,7 @@ bool CPlexServices::AddClient(CPlexClient client)
     if (s_it->GetUuid() == client.GetUuid())
     return false;
   }
+
   client.ParseSections();
   m_clients.push_back(client);
 
