@@ -163,18 +163,13 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
   if (setting == NULL)
     return;
 
-  const std::string &settingId = setting->GetId();
-  if (!m_myPlexToken.empty() ||
-      settingId == CSettings::SETTING_SERVICES_PLEXGDMSERVER)
-  {
-    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
-    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
-    // start or stop the service
-    if (static_cast<const CSettingBool*>(setting)->GetValue())
-      Start();
-    else
-      Stop();
-  }
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
+  // start or stop the service
+  if (!m_myPlexToken.empty() || static_cast<const CSettingBool*>(setting)->GetValue())
+    Start();
+  else
+    Stop();
 
   CSettings::GetInstance().Save();
 }
