@@ -83,5 +83,6 @@ private:
   bool              m_useGDMServer;
   std::string       m_signInByPinId;
   std::string       m_signInByPinCode;
+  std::string       m_myHomeUser;
   std::vector<CPlexClient> m_clients;
 };

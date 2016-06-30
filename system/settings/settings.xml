@@ -2526,7 +2526,7 @@
         <setting id="plex.signin" type="string" label="1238" help="1239">
           <level>0</level>
           <default>fillme</default>
-          <control type="button" format="action" delayed="true"/>
+          <control type="button" format="action"/>
         </setting>
         <setting id="plex.users" type="string" label="1244" help="1245">
           <level>0</level>
@@ -2536,7 +2536,7 @@
           </constraints>
           <dependencies>
             <dependency type="enable">
-              <condition on="property" name="PlexSignedIn" />
+              <condition on="property" operator="!is" name="plexsignedin" />
             </dependency>
           </dependencies>
           <control type="button" format="action" delayed="true"/>

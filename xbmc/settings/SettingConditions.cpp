@@ -295,7 +295,7 @@ void CSettingConditions::Initialize()
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("aesettingvisible",              CAEFactory::IsSettingVisible));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("codecoptionvisible",            CDVDVideoCodec::IsSettingVisible));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("enablemysqlgui",                CAdvancedSettings::IsSettingVisible));
-  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("plexisgnedin",                  PlexSignedIn));
+  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("plexsignedin",                  PlexSignedIn));
 }
 
 bool CSettingConditions::Check(const std::string &condition, const std::string &value /* = "" */, const CSetting *setting /* = NULL */)

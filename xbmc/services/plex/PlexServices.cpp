@@ -123,6 +123,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
           {
             // change prompt to 'sign-out'
             CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1241));
+            CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSERS, m_myHomeUser);
             CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-in ok");
             startThread = true;
           }
@@ -153,6 +154,9 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
     }
     SetUserSettings();
+    const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSERS);
+    ((CSettingBool*)userSetting)->SetEnabled(startThread);
+
     if (startThread)
       Start();
     else
@@ -167,7 +171,8 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       std::string homeUserName;
       if (GetMyHomeUsers(homeUserName))
       {
-        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSERS, homeUserName);
+        m_myHomeUser = homeUserName;
+        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSERS, m_myHomeUser);
         SetUserSettings();
         m_clients.clear();
         Start();
@@ -359,7 +364,8 @@ bool CPlexServices::FetchPlexToken()
     m_myPlexToken = user["authentication_token"].asString();
 
     std::string homeUserName;
-    GetMyHomeUsers(homeUserName);
+    if (GetMyHomeUsers(homeUserName))
+      m_myHomeUser = homeUserName;
 
     rtn = true;
   }
