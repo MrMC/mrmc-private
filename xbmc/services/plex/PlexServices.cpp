@@ -156,7 +156,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       Stop();
     
   }
-  else if (settingId == CSettings::SETTING_SERVICES_PLEXUSERS)
+  else if (settingId == CSettings::SETTING_SERVICES_PLEXHOMEUSERS)
   {
     // user must be in 'sign-in' state so check for 'sign-out' label
     if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == g_localizeStrings.Get(1241))
@@ -164,7 +164,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       std::string homeUserName;
       if (GetMyHomeUsers(homeUserName))
       {
-        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXUSERS, homeUserName);
+        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSERS, homeUserName);
         SetUserSettings();
         m_clients.clear();
         Start();
@@ -437,7 +437,7 @@ bool CPlexServices::AddClient(CPlexClient client)
   return true;
 }
 
-bool CPlexServices::GetMyHomeUsers(std::string &homeusername)
+bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
 {
   bool rtn = false;
 
@@ -506,13 +506,12 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeusername)
     if (!m_myPlexToken.empty())
       plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
 
-    std::string strResponse;
-    std::string strPostData;
     std::string uuid = item->GetProperty("uuid").asString();
     CURL url("https://plex.tv/api/v2/home/users/" + uuid + "/switch?pin=" + pin);
 
     CPlexUtils::GetDefaultHeaders(plex);
-    plex.Post(url.Get(), strPostData, strResponse);
+    std::string strResponse;
+    plex.Post(url.Get(), "", strResponse);
 
     TiXmlDocument xml1;
     xml1.Parse(strResponse.c_str());
@@ -521,11 +520,11 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeusername)
     if (userContainer)
     {
       std::string token = XMLUtils::GetAttribute(userContainer, "authToken");
-      homeusername = XMLUtils::GetAttribute(userContainer, "title");
+      homeUserName = XMLUtils::GetAttribute(userContainer, "title");
       // each user gets its own token
       if (!token.empty())
         m_myPlexToken = token;
-      rtn = true;
+      rtn = !homeUserName.empty();
     }
   }
   else

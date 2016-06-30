@@ -470,7 +470,7 @@ const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER = "s
 
 // plex services
 const std::string CSettings::SETTING_SERVICES_PLEXSIGNIN = "plex.signin";
-const std::string CSettings::SETTING_SERVICES_PLEXUSERS  = "plex.users";
+const std::string CSettings::SETTING_SERVICES_PLEXHOMEUSERS  = "plex.users";
 const std::string CSettings::SETTING_SERVICES_PLEXGDMSERVER = "plex.gdmserver";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXUSER = "plex.myplexusername";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXPASS = "plex.myplexpassword";
@@ -1338,7 +1338,7 @@ void CSettings::InitializeISettingCallbacks()
   
   settingSet.clear();
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXSIGNIN);
-  settingSet.insert(CSettings::SETTING_SERVICES_PLEXUSERS);
+  settingSet.insert(CSettings::SETTING_SERVICES_PLEXHOMEUSERS);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
