@@ -165,6 +165,9 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       if (GetMyHomeUsers(homeUserName))
       {
         CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXUSERS, homeUserName);
+        SetUserSettings();
+        m_clients.clear();
+        Start();
       }
     }
   }
@@ -518,7 +521,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeusername)
     if (userContainer)
     {
       std::string token = XMLUtils::GetAttribute(userContainer, "authToken");
-      homeusername = XMLUtils::GetAttribute(userContainer, "username");
+      homeusername = XMLUtils::GetAttribute(userContainer, "title");
       // each user gets its own token
       if (!token.empty())
         m_myPlexToken = token;
