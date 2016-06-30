@@ -104,7 +104,8 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(clients[i].GetUrl());
           curl.SetProtocol(clients[i].GetScheme());
-          CPlexUtils::GetLocalMovies(items,curl.GetFileName() + Base64::Decode(contents[0].section) + "/all");
+          curl.SetFileName(contents[0].section + "/all");
+          CPlexUtils::GetLocalMovies(items,curl.Get());
           items.SetContent("movies");
           items.SetPath("");
         }
@@ -205,7 +206,8 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(clients[i].GetUrl());
           curl.SetProtocol(clients[i].GetScheme());
-          CPlexUtils::GetLocalTvshows(items,curl.GetFileName() + Base64::Decode(contents[0].section) + "/all");
+          curl.SetFileName(contents[0].section + "/all");
+          CPlexUtils::GetLocalTvshows(items,curl.Get());
           items.SetContent("tvshows");
           items.SetPath("");
         }
