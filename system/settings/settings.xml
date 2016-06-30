@@ -2534,6 +2534,11 @@
           <constraints>
             <allowempty>true</allowempty>
           </constraints>
+          <dependencies>
+            <dependency type="enable">
+              <condition on="property" name="PlexSignedIn" />
+            </dependency>
+          </dependencies>
           <control type="button" format="action" delayed="true"/>
         </setting>
         <setting id="plex.gdmserver" type="boolean" label="1242" help="1243">

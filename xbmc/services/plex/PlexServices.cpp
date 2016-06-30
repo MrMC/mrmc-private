@@ -149,11 +149,10 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       m_myPlexPass.clear();
       m_myPlexToken.clear();
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1240));
+      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSERS, "");
       CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
     }
     SetUserSettings();
-    const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSERS);
-    ((CSettingBool*)userSetting)->SetEnabled(startThread);
     if (startThread)
       Start();
     else

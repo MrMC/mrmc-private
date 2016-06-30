@@ -35,6 +35,7 @@
 #include "peripherals/Peripherals.h"
 #include "profiles/ProfilesManager.h"
 #include "pvr/PVRManager.h"
+#include "settings/Settings.h"
 #include "settings/SettingAddon.h"
 #if defined(HAS_LIBAMCODEC)
 #include "utils/AMLUtils.h"
@@ -87,6 +88,11 @@ bool IsFullscreen(const std::string &condition, const std::string &value, const 
 bool IsMasterUser(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
 {
   return g_passwordManager.bMasterUser;
+}
+
+bool PlexSignedIn(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
+{
+  return CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == g_localizeStrings.Get(1240);
 }
 
 bool IsUsingTTFSubtitles(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
@@ -288,7 +294,8 @@ void CSettingConditions::Initialize()
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("profilelockmode",               ProfileLockMode));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("aesettingvisible",              CAEFactory::IsSettingVisible));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("codecoptionvisible",            CDVDVideoCodec::IsSettingVisible));
-  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("enablemysqlgui",  CAdvancedSettings::IsSettingVisible));
+  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("enablemysqlgui",                CAdvancedSettings::IsSettingVisible));
+  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("plexisgnedin",                  PlexSignedIn));
 }
 
 bool CSettingConditions::Check(const std::string &condition, const std::string &value /* = "" */, const CSetting *setting /* = NULL */)
