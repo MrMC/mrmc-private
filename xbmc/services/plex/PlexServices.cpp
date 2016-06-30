@@ -618,6 +618,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
           plexUser->SetProperty("title", XMLUtils::GetAttribute(UserNode, "title"));
           plexUser->SetProperty("uuid", XMLUtils::GetAttribute(UserNode, "uuid"));
           plexUser->SetProperty("id", XMLUtils::GetAttribute(UserNode, "id"));
+          plexUser->SetProperty("protected", XMLUtils::GetAttribute(UserNode, "protected"));
           plexUser->SetLabel(XMLUtils::GetAttribute(UserNode, "title"));
           plexUser->SetIconImage(XMLUtils::GetAttribute(UserNode, "thumb"));
           plexUsers.Add(plexUser);
@@ -644,17 +645,22 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
     if (item == NULL || !item->HasProperty("uuid"))
       return false;
 
-    std::string pin;
-    if( !CGUIDialogNumeric::ShowAndGetNumber(pin, "Enter pin") )
-      return false;
-
+    std::string pinUrl = "/switch";
+    if (item->GetProperty("protected").asBoolean())
+    {
+      std::string pin;
+      if( !CGUIDialogNumeric::ShowAndGetNumber(pin, "Enter pin") )
+        return false;
+      pinUrl = "/switch?pin=" + pin;
+    }
+    
     XFILE::CCurlFile plex;
     CPlexUtils::GetDefaultHeaders(plex);
     if (!m_myPlexToken.empty())
       plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
 
     std::string uuid = item->GetProperty("uuid").asString();
-    CURL url("https://plex.tv/api/v2/home/users/" + uuid + "/switch?pin=" + pin);
+    CURL url("https://plex.tv/api/v2/home/users/" + uuid + pinUrl);
 
     CPlexUtils::GetDefaultHeaders(plex);
     std::string strResponse;
