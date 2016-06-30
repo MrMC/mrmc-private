@@ -152,6 +152,8 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
     }
     SetUserSettings();
+    const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSERS);
+    ((CSettingBool*)userSetting)->SetEnabled(startThread);
     if (startThread)
       Start();
     else
