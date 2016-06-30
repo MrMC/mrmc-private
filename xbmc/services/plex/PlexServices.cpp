@@ -47,6 +47,8 @@
 #include "PlexUtils.h"
 #include "PlexClient.h"
 
+#include <regex>
+
 using namespace ANNOUNCEMENT;
 
 #define NS_PLEX_MEDIA_SERVER_PORT 32414
@@ -222,6 +224,32 @@ void CPlexServices::Process()
   bool hasPlexServers = false;
   GetUserSettings();
 
+  // testing sign-in by Pin
+  if (false)
+  {
+    // fetch a ping request code (should show it to user)
+    FetchSignInPin();
+
+    CStopWatch dieTimer;
+    dieTimer.StartZero();
+
+    CEvent m_wakeEvent;
+    m_wakeEvent.Set();
+    while (!m_bStop)
+    {
+      // wait for user to run and enter pin code
+      // at https://plex.tv/pin
+      if (WaitForSignInByPin())
+        break;
+
+      if (dieTimer.GetElapsedSeconds() > 60 * 5)
+        break;
+
+      m_wakeEvent.WaitMSec(2 * 1000);
+      m_wakeEvent.Reset();
+    }
+  }
+
   CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
   if (iface)
   {
@@ -390,6 +418,124 @@ bool CPlexServices::FetchMyPlexServers()
   else
   {
     CLog::Log(LOGDEBUG, "CPlexServices:FetchMyPlexServers failed %s", strResponse.c_str());
+  }
+
+  return rtn;
+}
+
+bool CPlexServices::FetchSignInPin()
+{
+  // on return, show user m_signInByPinCode so they can enter it at https://plex.tv/pin
+
+  bool rtn = false;
+
+  std::string id;
+  std::string code;
+  std::string clientid;
+  CDateTime   expiresAt;
+
+  XFILE::CCurlFile plex;
+  // use a lower default timeout
+  plex.SetTimeout(3);
+  plex.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
+
+  CURL url("https://plex.tv/pins.xml");
+
+  std::string strResponse;
+  if (plex.Post(url.Get(), "", strResponse))
+  {
+    CLog::Log(LOGDEBUG, "CPlexServices:FetchSignInPin %s", strResponse.c_str());
+    /*
+    <pin>
+      <client-identifier>a36023fe-930c-4f07-9dbb-88ac8cb91ccf</client-identifier>
+      <code>5YFG</code>
+      <expires-at type="datetime">2016-06-30T03:56:36Z</expires-at>
+      <id type="integer">28975394</id>
+      <user-id type="integer" nil="true"/>
+      <auth-token type="NilClass" nil="true"/>
+      <auth_token nil="true"></auth_token>
+    </pin>
+    */
+
+    TiXmlDocument xml;
+    xml.Parse(strResponse.c_str());
+
+    TiXmlElement* pinNode = xml.RootElement();
+    if (pinNode)
+    {
+      for (TiXmlElement *elem = pinNode->FirstChildElement(); elem; elem = elem->NextSiblingElement())
+      {
+        if (elem->GetText() == nullptr)
+          continue;
+
+        if (elem->ValueStr() == "id")
+          id = elem->GetText();
+        else if (elem->ValueStr() == "code")
+          code = elem->GetText();
+        else if (elem->ValueStr() == "client-identifier")
+          clientid = elem->GetText();
+        else if (elem->ValueStr() == "expires-at")
+        {
+          std::string date = elem->GetText();
+          date = std::regex_replace(date, std::regex("T"), " ");
+          date = std::regex_replace(date, std::regex("Z"), "");
+          expiresAt.SetFromDBDateTime(date);
+        }
+      }
+      m_signInByPinId = id;
+      m_signInByPinCode = code;
+      rtn = !m_signInByPinId.empty() && !m_signInByPinCode.empty();
+    }
+  }
+  else
+  {
+    CLog::Log(LOGERROR, "CPlexServices:FetchSignInPin failed %s", strResponse.c_str());
+  }
+
+  return rtn;
+}
+
+bool CPlexServices::WaitForSignInByPin()
+{
+  // repeat called until we timeout or get authToken
+  bool rtn = false;
+
+  std::string authToken;
+
+  XFILE::CCurlFile plex;
+  plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
+  plex.SetRequestHeader("Content-Length", "0");
+  plex.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
+
+  std::string path = "https://plex.tv/pins/" + m_signInByPinId + ".xml";
+  CURL url(path);
+
+  std::string strResponse;
+  if (plex.Get(url.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "CPlexServices:WaitForSignInByPin %s", strResponse.c_str());
+
+    TiXmlDocument xml;
+    xml.Parse(strResponse.c_str());
+
+    TiXmlElement* pinNode = xml.RootElement();
+    if (pinNode)
+    {
+      for (TiXmlElement *elem = pinNode->FirstChildElement(); elem; elem = elem->NextSiblingElement())
+      {
+        if (elem->GetText() == nullptr)
+          continue;
+
+        if (elem->ValueStr() == "auth_token")
+          authToken = elem->GetText();
+      }
+      m_myPlexToken = authToken;
+      rtn = !m_myPlexToken.empty();
+    }
+  }
+  else
+  {
+    CLog::Log(LOGERROR, "CPlexServices:WaitForSignInByPin failed %s", strResponse.c_str());
   }
 
   return rtn;
