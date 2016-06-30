@@ -21,7 +21,44 @@
 #include "services/ServicesManager.h"
 
 #include "services/plex/PlexUtils.h"
+#include "utils/JobManager.h"
 #include "video/VideoInfoTag.h"
+
+class CServicesManagerJob: public CJob
+{
+public:
+  CServicesManagerJob(CFileItem &item, double currentTime, std::string strFunction)
+  :m_item(*new CFileItem(item)),
+  m_function(strFunction),
+  m_currentTime(currentTime)
+  {
+  }
+  virtual ~CServicesManagerJob()
+  {
+    
+  }
+  virtual bool DoWork()
+  {
+    if (m_function == "SetWatched")
+      CPlexUtils::SetWatched(m_item);
+    else if (m_function == "SetUnWatched")
+      CPlexUtils::SetWatched(m_item);
+    else if (m_function == "SetResume")
+      CPlexUtils::SetOffset(m_item, m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
+    else if (m_function == "SetProgress")
+      CPlexUtils::ReportProgress(m_item, m_currentTime);
+    return true;
+  }
+  virtual bool operator==(const CJob *job) const
+  {
+    return true;
+  }
+private:
+  CFileItem      &m_item;
+  std::string    m_function;
+  double         m_currentTime;
+};
+
 
 CServicesManager::CServicesManager()
 {
@@ -47,7 +84,7 @@ void CServicesManager::SetWatched(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))
   {
-    CPlexUtils::SetWatched(item);
+    AddJob(new CServicesManagerJob(item, 0, "SetWatched"));
   }
 }
 
@@ -55,7 +92,7 @@ void CServicesManager::SetUnWatched(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))
   {
-    CPlexUtils::SetUnWatched(item);
+    AddJob(new CServicesManagerJob(item, 0, "SetUnWatched"));
   }
 }
 
@@ -63,7 +100,7 @@ void CServicesManager::SetResumePoint(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))
   {
-    CPlexUtils::SetOffset(item, item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
+    AddJob(new CServicesManagerJob(item, 0, "SetResume"));
   }
 }
 
@@ -71,7 +108,7 @@ void CServicesManager::UpdateFileProgressState(CFileItem &item, double currentTi
 {
   if (item.HasProperty("PlexItem"))
   {
-    CPlexUtils::ReportProgress(item, currentTime);
+    AddJob(new CServicesManagerJob(item, currentTime, "SetProgress"));
   }
 }
 

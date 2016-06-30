@@ -19,10 +19,12 @@
  *
  */
 
+#include "utils/JobManager.h"
+
 class CFileItem;
 class CFileItemList;
 
-class CServicesManager
+class CServicesManager: public CJobQueue
 {
 public:
   static CServicesManager &GetInstance();
