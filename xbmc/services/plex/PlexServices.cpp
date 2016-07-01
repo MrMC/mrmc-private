@@ -377,7 +377,7 @@ bool CPlexServices::FetchMyPlexServers()
   CURL url("https://plex.tv/api/resources");
   if (plex.Get(url.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
+    //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
 
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
