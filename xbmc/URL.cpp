@@ -37,6 +37,8 @@
 
 using namespace ADDON;
 
+CUrlOptions CURL::m_protocolOptionsRedacted;
+
 CURL::CURL(const std::string& strURL1)
 {
   Parse(strURL1);
@@ -586,13 +588,11 @@ std::string CURL::GetWithoutUserDetails(bool redact) const
                         + m_strHostName.length()
                         + m_strFileName.length()
                         + m_strOptions.length()
+                        + m_strProtocolOptions.length()
                         + 10;
 
   if (redact)
-  {
     sizeneed += sizeof("USERNAME:PASSWORD@");
-    sizeneed += sizeof("&X-Plex-Token=PLEXTOKEN");
-  }
 
   strURL.reserve(sizeneed);
 
@@ -644,19 +644,10 @@ std::string CURL::GetWithoutUserDetails(bool redact) const
 
   if( m_strProtocolOptions.length() > 0 )
   {
-    // never show plex authTokens in log
-    std::string redactedKey = "X-Plex-Token";
-    if (redact && m_protocolOptions.HasOption(redactedKey))
-    {
-      CUrlOptions redactedProtocolOptions = m_protocolOptions;
-      redactedProtocolOptions.RemoveOption(redactedKey);
-      redactedProtocolOptions.AddOption(redactedKey, "PLEXTOKEN");
-      strURL += "|&" + redactedProtocolOptions.GetOptionsString(false);
-    }
+    if (redact && CheckForRedactedProtocolOptions())
+      strURL += ReplaceRedactedProtocolOptions();
     else
-    {
       strURL += "|" + m_strProtocolOptions;
-    }
   }
 
   return strURL;
@@ -875,7 +866,7 @@ void CURL::RemoveOption(const std::string &key)
 void CURL::GetProtocolOptions(std::map<std::string, std::string> &options) const
 {
   CUrlOptions::UrlOptions optionsMap = m_protocolOptions.GetOptions();
-  for (CUrlOptions::UrlOptions::const_iterator option = optionsMap.begin(); option != optionsMap.end(); option++)
+  for (CUrlOptions::UrlOptions::const_iterator option = optionsMap.begin(); option != optionsMap.end(); ++option)
     options[option->first] = option->second.asString();
 }
 
@@ -913,4 +904,49 @@ void CURL::RemoveProtocolOption(const std::string &key)
 {
   m_protocolOptions.RemoveOption(key);
   m_strProtocolOptions = m_protocolOptions.GetOptionsString(false);
+}
+
+bool CURL::CheckForRedactedProtocolOptions() const
+{
+  CUrlOptions::UrlOptions optionsMap = m_protocolOptions.GetOptions();
+  for (CUrlOptions::UrlOptions::const_iterator option = optionsMap.begin(); option != optionsMap.end(); ++option)
+  {
+    if (HasProtocolOptionsRedacted(option->first))
+      return true;
+  }
+
+  return false;
+}
+
+std::string CURL::ReplaceRedactedProtocolOptions() const
+{
+  // search for a redated protocol option by key
+  // when found, replace with a redacted version.
+  std::string strRedactedProtocolOptions;
+  CUrlOptions::UrlOptions optionsMap = m_protocolOptions.GetOptions();
+  CUrlOptions redactedProtocolOptions = m_protocolOptions;
+  for (CUrlOptions::UrlOptions::const_iterator option = optionsMap.begin(); option != optionsMap.end(); ++option)
+  {
+    if (HasProtocolOptionsRedacted(option->first))
+    {
+      redactedProtocolOptions.RemoveOption(option->first);
+      CVariant valueObj;
+      if (m_protocolOptionsRedacted.GetOption(option->first, valueObj))
+      {
+        redactedProtocolOptions.AddOption(option->first, valueObj.asString());
+        strRedactedProtocolOptions += "|&" + redactedProtocolOptions.GetOptionsString(false);
+      }
+    }
+  }
+  return strRedactedProtocolOptions;
+}
+
+bool CURL::HasProtocolOptionsRedacted(const std::string &key)
+{
+  return m_protocolOptionsRedacted.HasOption(key);
+}
+
+void CURL::SetProtocolOptionsRedacted(const std::string &key, const std::string &value)
+{
+  m_protocolOptionsRedacted.AddOption(key, value);
 }

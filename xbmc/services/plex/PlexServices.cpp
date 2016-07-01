@@ -58,6 +58,10 @@ using namespace ANNOUNCEMENT;
 CPlexServices::CPlexServices()
 : CThread("PlexServices")
 {
+  // register our redacted protocol options with CURL
+  // we do not want these exposed in mrmc.log.
+  if (!CURL::HasProtocolOptionsRedacted("X-Plex-Token"))
+    CURL::SetProtocolOptionsRedacted("X-Plex-Token", "PLEXTOKEN");
 }
 
 CPlexServices::~CPlexServices()
