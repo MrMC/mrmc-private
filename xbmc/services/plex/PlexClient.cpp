@@ -183,7 +183,7 @@ void CPlexClient::ParseSections()
           content.art = content.section + "/resources/" + URIUtils::GetFileName(art);
         if (content.type == "movie")
           m_movieSectionsContents.push_back(content);
-        else
+        else if (content.type == "show")
           m_showSectionsContents.push_back(content);
         DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
       }
