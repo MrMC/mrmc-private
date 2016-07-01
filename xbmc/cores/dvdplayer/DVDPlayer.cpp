@@ -770,7 +770,8 @@ bool CDVDPlayer::OpenInputStream()
   m_pInputStream = CDVDFactoryInputStream::CreateInputStream(this, m_filename, m_mimetype, m_item.ContentLookup());
   if(m_pInputStream == NULL)
   {
-    CLog::Log(LOGERROR, "CDVDPlayer::OpenInputStream - unable to create input stream for [%s]", m_filename.c_str());
+    CLog::Log(LOGERROR, "CDVDPlayer::OpenInputStream - unable to create input stream for [%s]",
+      CURL::GetRedacted(m_filename.c_str()).c_str());
     return false;
   }
   else
@@ -778,7 +779,8 @@ bool CDVDPlayer::OpenInputStream()
 
   if (!m_pInputStream->Open(m_filename.c_str(), m_mimetype, m_item.ContentLookup()))
   {
-    CLog::Log(LOGERROR, "CDVDPlayer::OpenInputStream - error opening [%s]", m_filename.c_str());
+    CLog::Log(LOGERROR, "CDVDPlayer::OpenInputStream - error opening [%s]",
+      CURL::GetRedacted(m_filename.c_str()).c_str());
     return false;
   }
 
