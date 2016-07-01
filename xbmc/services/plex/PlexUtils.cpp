@@ -63,8 +63,8 @@ bool CPlexUtils::GetIdentity(std::string url)
 
 void CPlexUtils::GetDefaultHeaders(XFILE::CCurlFile &curl)
 {
-  //plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
-  //plex.SetRequestHeader("Content-Length", "0");
+  curl.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
+  curl.SetRequestHeader("Content-Length", "0");
 
   curl.SetUserAgent(CSysInfo::GetUserAgent());
   curl.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));

@@ -64,7 +64,7 @@ private:
   // IRunnable entry point for thread
   virtual void  Process() override;
 
-  bool          FetchPlexToken();
+  bool          FetchPlexToken(std::string user, std::string pass);
   bool          FetchMyPlexServers();
   bool          FetchSignInPin();
   bool          WaitForSignInByPin();
@@ -77,9 +77,7 @@ private:
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
 
-  std::string       m_myPlexUser;
-  std::string       m_myPlexPass;
-  std::string       m_myPlexToken;
+  std::string       m_authToken;
   bool              m_useGDMServer;
   std::string       m_signInByPinId;
   std::string       m_signInByPinCode;

@@ -3705,7 +3705,7 @@ msgstr ""
 
 #: lighteffects
 msgctxt "#857"
-msgid "LightEffects"
+msgid "LightEffects client"
 msgstr ""
 
 #: lighteffects
@@ -4263,7 +4263,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1236"
-msgid "Plex Client"
+msgid "Plex client"
 msgstr ""
 
 #: system/settings/settings.xml
@@ -4325,7 +4325,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1261"
-msgid "MySQL"
+msgid "MySQL client"
 msgstr ""
 
 #: system/settings/settings.xml

@@ -117,13 +117,11 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       {
         if (!user.empty() && !pass.empty())
         {
-          m_myPlexUser = user;
-          m_myPlexPass = pass;
-          if (FetchPlexToken())
+          if (FetchPlexToken(user, pass))
           {
             // change prompt to 'sign-out'
             CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1241));
-            CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSERS, m_myHomeUser);
+            CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER, m_myHomeUser);
             CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-in ok");
             startThread = true;
           }
@@ -136,9 +134,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
         {
           // opps, nuke'em all
           CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction user/pass are empty");
-          m_myPlexUser.clear();
-          m_myPlexPass.clear();
-          m_myPlexToken.clear();
+          m_authToken.clear();
         }
       }
     }
@@ -146,15 +142,13 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
     {
       // prompt is 'sign-out'
       // clear user/pass/auth and change prompt to 'sign-in'
-      m_myPlexUser.clear();
-      m_myPlexPass.clear();
-      m_myPlexToken.clear();
+      m_authToken.clear();
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1240));
-      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSERS, "");
+      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER, "");
       CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
     }
     SetUserSettings();
-    const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSERS);
+    const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSER);
     ((CSettingBool*)userSetting)->SetEnabled(startThread);
 
     if (startThread)
@@ -163,7 +157,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       Stop();
     
   }
-  else if (settingId == CSettings::SETTING_SERVICES_PLEXHOMEUSERS)
+  else if (settingId == CSettings::SETTING_SERVICES_PLEXHOMEUSER)
   {
     // user must be in 'sign-in' state so check for 'sign-out' label
     if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == g_localizeStrings.Get(1241))
@@ -172,7 +166,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       if (GetMyHomeUsers(homeUserName))
       {
         m_myHomeUser = homeUserName;
-        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSERS, m_myHomeUser);
+        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER, m_myHomeUser);
         SetUserSettings();
         m_clients.clear();
         Start();
@@ -187,8 +181,6 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
   /*
    static const std::string SETTING_SERVICES_PLEXSIGNIN;
    static const std::string SETTING_SERVICES_PLEXGDMSERVER;
-   static const std::string SETTING_SERVICES_PLEXMYPLEXUSER;
-   static const std::string SETTING_SERVICES_PLEXMYPLEXPASS;
    static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
    */
 
@@ -209,9 +201,7 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
 
 void CPlexServices::SetUserSettings()
 {
-  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER, m_myPlexUser);
-  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS, m_myPlexPass);
-  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH, m_myPlexToken);
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH, m_authToken);
   CSettings::GetInstance().Save();
 }
 
@@ -219,10 +209,7 @@ void CPlexServices::GetUserSettings()
 {
   // false is disabled, true is auto
   m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
-  
-  m_myPlexUser = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXUSER);
-  m_myPlexPass = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXPASS);
-  m_myPlexToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
+  m_authToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
 }
 
 void CPlexServices::Process()
@@ -288,7 +275,7 @@ void CPlexServices::Process()
     }
 
     // try plex.tv
-    if (!m_myPlexToken.empty() && !hasPlexServers)
+    if (!m_authToken.empty() && !hasPlexServers)
       hasPlexServers = FetchMyPlexServers();
 
     CStopWatch idleTimer;
@@ -299,7 +286,7 @@ void CPlexServices::Process()
       if (idleTimer.GetElapsedMilliseconds() > 5000)
       {
         // try plex.tv
-        if (!m_myPlexToken.empty() && !hasPlexServers)
+        if (!m_authToken.empty() && !hasPlexServers)
           hasPlexServers = FetchMyPlexServers();
 
         // check GDM
@@ -341,15 +328,15 @@ void CPlexServices::Process()
   }
 }
 
-bool CPlexServices::FetchPlexToken()
+bool CPlexServices::FetchPlexToken(std::string user, std::string pass)
 {
   bool rtn = false;
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
 
   CURL url("https://plex.tv/users/sign_in.json");
-  url.SetUserName(m_myPlexUser);
-  url.SetPassword(m_myPlexPass);
+  url.SetUserName(user);
+  url.SetPassword(pass);
 
   std::string strResponse;
   std::string strPostData;
@@ -361,7 +348,7 @@ bool CPlexServices::FetchPlexToken()
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
 
     CVariant user = reply["user"];
-    m_myPlexToken = user["authentication_token"].asString();
+    m_authToken = user["authentication_token"].asString();
 
     std::string homeUserName;
     if (GetMyHomeUsers(homeUserName))
@@ -383,14 +370,14 @@ bool CPlexServices::FetchMyPlexServers()
 
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
-  if (!m_myPlexToken.empty())
-    plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
+  if (!m_authToken.empty())
+    plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
   CURL url("https://plex.tv/api/resources");
   if (plex.Get(url.Get(), strResponse))
   {
-    //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
 
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
@@ -507,8 +494,6 @@ bool CPlexServices::WaitForSignInByPin()
   // repeat called until we timeout or get authToken
   bool rtn = false;
 
-  std::string authToken;
-
   XFILE::CCurlFile plex;
   plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
   plex.SetRequestHeader("Content-Length", "0");
@@ -534,10 +519,9 @@ bool CPlexServices::WaitForSignInByPin()
           continue;
 
         if (elem->ValueStr() == "auth_token")
-          authToken = elem->GetText();
+          m_authToken = elem->GetText();
       }
-      m_myPlexToken = authToken;
-      rtn = !m_myPlexToken.empty();
+      rtn = !m_authToken.empty();
     }
   }
   else
@@ -596,8 +580,8 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
 
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
-  if (!m_myPlexToken.empty())
-    plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
+  if (!m_authToken.empty())
+    plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
   CURL url("https://plex.tv/api/home/users");
@@ -662,8 +646,8 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
     
     XFILE::CCurlFile plex;
     CPlexUtils::GetDefaultHeaders(plex);
-    if (!m_myPlexToken.empty())
-      plex.SetRequestHeader("X-Plex-Token", m_myPlexToken);
+    if (!m_authToken.empty())
+      plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
     std::string uuid = item->GetProperty("uuid").asString();
     CURL url("https://plex.tv/api/v2/home/users/" + uuid + pinUrl);
@@ -678,12 +662,9 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
     TiXmlElement* userContainer = xml1.RootElement();
     if (userContainer)
     {
-      std::string token = XMLUtils::GetAttribute(userContainer, "authToken");
+      m_authToken = XMLUtils::GetAttribute(userContainer, "authToken");
       homeUserName = XMLUtils::GetAttribute(userContainer, "title");
-      // each user gets its own token
-      if (!token.empty())
-        m_myPlexToken = token;
-      rtn = !homeUserName.empty();
+      rtn = !homeUserName.empty() && !m_authToken.empty();
     }
   }
   else

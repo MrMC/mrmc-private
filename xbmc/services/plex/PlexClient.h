@@ -51,15 +51,11 @@ public:
   const std::string &GetContentType() const { return m_contentType; }
   const std::string &GetServerName() const { return m_serverName; }
   const std::string &GetUuid() const { return m_uuid; }
-  const std::string &GetAuthToken() const { return m_authToken; }
   const std::string &GetScheme() const { return m_scheme; }
-  void  SetAuthToken(std::string token) { m_authToken = token; }
   const std::vector<SectionsContent> &GetTvContent() const { return m_showSectionsContents; }
   const std::vector<SectionsContent> &GetMovieContent() const { return m_movieSectionsContents; }
-  
 
   const bool &IsLocal() const { return m_local; }
-
   std::string GetHost();
   int         GetPort();
   std::string GetUrl();
@@ -74,7 +70,7 @@ private:
   std::string m_uuid;
   std::string m_serverName;
   std::string m_url;
-  std::string m_authToken;
+  std::string m_accessToken;
   std::string m_scheme;
   std::vector<SectionsContent> m_movieSectionsContents;
   std::vector<SectionsContent> m_showSectionsContents;
