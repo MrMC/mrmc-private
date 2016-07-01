@@ -619,7 +619,12 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
           UserNode = UserNode->NextSiblingElement("User");
         }
       }
+      else
+      {
+        return false;
+      }
     }
+
     CGUIDialogSelect *dialog = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
     if (dialog == NULL)
       return false;
@@ -673,7 +678,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
   }
   else
   {
-    CLog::Log(LOGDEBUG, "CPlexServices:FetchMyPlexServers failed %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "CPlexServices:GetMyHomeUsers failed %s", strResponse.c_str());
   }
 
   return rtn;
