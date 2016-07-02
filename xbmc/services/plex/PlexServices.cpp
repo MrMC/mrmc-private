@@ -109,6 +109,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
     return;
 
   bool startThread = false;
+  std::string strMessage;
   std::string strSignIn = g_localizeStrings.Get(1240);
   std::string strSignOut = g_localizeStrings.Get(1241);
   const std::string& settingId = setting->GetId();
@@ -135,7 +136,8 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
           }
           else
           {
-            CLog::Log(LOGERROR, "CPlexServices: Could not get authToken via manual sign-in");
+            strMessage = "Could not get authToken via manual sign-in";
+            CLog::Log(LOGERROR, "CPlexServices: %s", strMessage.c_str());
           }
         }
         else
@@ -180,7 +182,8 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       }
       else
       {
-        CLog::Log(LOGERROR, "CPlexServices: Could not get authToken via pin request sign-in");
+        std::string strMessage = "Could not get authToken via pin request sign-in";
+        CLog::Log(LOGERROR, "CPlexServices: %s", strMessage.c_str());
       }
     }
     else
@@ -194,12 +197,15 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
     }
     SetUserSettings();
 
-    //const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSER);
-    //((CSettingBool*)userSetting)->SetEnabled(startThread);
+
     if (startThread)
       Start();
     else
+    {
+      if (!strMessage.empty())
+        CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
       Stop();
+    }
   }
   else if (settingId == CSettings::SETTING_SERVICES_PLEXHOMEUSER)
   {
@@ -377,6 +383,8 @@ bool CPlexServices::FetchPlexToken(std::string user, std::string pass)
   }
   else
   {
+    std::string strMessage = "Could not connect to retreive PlexToken";
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
     CLog::Log(LOGERROR, "CPlexServices:FetchPlexToken failed %s", strResponse.c_str());
   }
 
@@ -430,6 +438,8 @@ bool CPlexServices::FetchMyPlexServers()
   }
   else
   {
+    std::string strMessage = "Error getting Plex servers";
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
     CLog::Log(LOGDEBUG, "CPlexServices:FetchMyPlexServers failed %s", strResponse.c_str());
   }
 
@@ -455,6 +465,7 @@ bool CPlexServices::GetSignInPinCode()
   CURL url(NS_PLEXTV_URL + "/pins.xml");
 
   std::string strResponse;
+  std::string strMessage;
   if (plex.Post(url.Get(), "", strResponse))
   {
     //CLog::Log(LOGDEBUG, "CPlexServices:FetchSignInPin %s", strResponse.c_str());
@@ -498,6 +509,7 @@ bool CPlexServices::GetSignInPinCode()
       }
       m_signInByPinId = id;
       m_signInByPinCode = code;
+      strMessage = "Failed to get ID or Code";
       rtn = !m_signInByPinId.empty() && !m_signInByPinCode.empty();
     }
 
@@ -543,6 +555,7 @@ bool CPlexServices::GetSignInPinCode()
 
     if (m_authToken.empty())
     {
+      strMessage = "Error extracting AuthToken";
       CLog::Log(LOGERROR, "CPlexServices:FetchSignInPin failed to get authToken");
       rtn = false;
     }
@@ -560,9 +573,11 @@ bool CPlexServices::GetSignInPinCode()
   }
   else
   {
+    strMessage = "Could not connect to retreive AuthToken";
     CLog::Log(LOGERROR, "CPlexServices:FetchSignInPin failed %s", strResponse.c_str());
   }
-
+  if (!rtn)
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
   return rtn;
 }
 
@@ -570,7 +585,7 @@ bool CPlexServices::GetSignInByPinReply()
 {
   // repeat called until we timeout or get authToken
   bool rtn = false;
-
+  std::string strMessage;
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
 
@@ -603,7 +618,6 @@ bool CPlexServices::GetSignInByPinReply()
   {
     CLog::Log(LOGERROR, "CPlexServices:WaitForSignInByPin failed %s", strResponse.c_str());
   }
-
   return rtn;
 }
 
@@ -653,6 +667,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
 {
   bool rtn = false;
 
+  std::string strMessage;
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
   if (!m_authToken.empty())
@@ -753,11 +768,18 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
       homeUserName = XMLUtils::GetAttribute(userContainer, "title");
       rtn = !homeUserName.empty() && !m_authToken.empty();
     }
+    else
+    {
+      strMessage = "Couldn't get home users";
+    }
   }
   else
   {
+    strMessage = "Could not connect to retreive Home users";
     CLog::Log(LOGDEBUG, "CPlexServices:GetMyHomeUsers failed %s", strResponse.c_str());
   }
 
+  if (!rtn)
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
   return rtn;
 }
