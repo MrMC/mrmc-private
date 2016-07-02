@@ -516,7 +516,7 @@ bool CPlexServices::GetSignInPinCode()
     pingTimer.StartZero();
 
     m_authToken.clear();
-    while (!m_bStop && !waitPinReplyDialog->IsCanceled())
+    while (!waitPinReplyDialog->IsCanceled())
     {
       waitPinReplyDialog->SetPercentage(int(float(dieTimer.GetElapsedSeconds())/float(timeToDie)*100));
 
