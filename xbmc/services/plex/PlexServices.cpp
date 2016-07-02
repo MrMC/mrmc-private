@@ -669,7 +669,14 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
     if (MediaContainer)
     {
       std::string users = XMLUtils::GetAttribute(MediaContainer, "size");
-      if (atoi(users.c_str()) > 1)
+      if (atoi(users.c_str()) == 1)
+      {
+        // if we only have one user show the name of it
+        const TiXmlElement* UserNode = MediaContainer->FirstChildElement("User");
+        homeUserName = XMLUtils::GetAttribute(UserNode, "title");
+        return true;
+      }
+      else if (atoi(users.c_str()) > 1)
       {
         const TiXmlElement* UserNode = MediaContainer->FirstChildElement("User");
         while (UserNode)
