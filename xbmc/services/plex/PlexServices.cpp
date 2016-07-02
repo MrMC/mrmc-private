@@ -204,7 +204,8 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
   else if (settingId == CSettings::SETTING_SERVICES_PLEXHOMEUSER)
   {
     // user must be in 'sign-in' state so check for 'sign-out' label
-    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == strSignOut)
+    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == strSignOut ||
+        CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNINPIN) == strSignOut)
     {
       std::string homeUserName;
       if (GetMyHomeUsers(homeUserName))
