@@ -120,7 +120,7 @@ void CPlexServices::Start()
 {
   CSingleLock lock(m_critical);
   if (IsRunning())
-    StopThread();
+    Stop();
   CThread::Create();
 }
 
@@ -128,7 +128,11 @@ void CPlexServices::Stop()
 {
   CSingleLock lock(m_critical);
   if (IsRunning())
+  {
+    m_bStop = true;
+    m_processSleep.Set();
     StopThread();
+  }
 
   CSingleLock lock2(m_criticalClients);
   m_clients.clear();
@@ -364,15 +368,15 @@ void CPlexServices::Process()
       gdmTimer.Reset();
     }
 
-    if (checkUpdatesTimer.GetElapsedSeconds() > 60 * 10)
+    if (checkUpdatesTimer.GetElapsedSeconds() > (60 * 10))
     {
       if (!IsProcessing())
         AddJob(new CPlexServiceJob(0, "CheckForUpdates"));
+      checkUpdatesTimer.Reset();
     }
 
-    // do not sleep too long or we can delay shutdown
-    // this should be a CEvent wait
-    usleep(250 * 1000);
+    m_processSleep.WaitMSec(250);
+    m_processSleep.Reset();
   }
 
   if (m_gdmListener)

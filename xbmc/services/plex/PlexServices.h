@@ -82,6 +82,7 @@ private:
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
+  CEvent            m_processSleep;
 
   std::string       m_authToken;
   bool              m_useGDMServer;
