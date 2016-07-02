@@ -532,13 +532,19 @@ bool CPlexServices::GetSignInPinCode()
       }
 
       if (dieTimer.GetElapsedSeconds() > timeToDie)
+      {
+        rtn = false;
         break;
+      }
       waitPinReplyDialog->Progress();
     }
     waitPinReplyDialog->Close();
 
     if (m_authToken.empty())
+    {
       CLog::Log(LOGERROR, "CPlexServices:FetchSignInPin failed to get authToken");
+      rtn = false;
+    }
     else
     {
       std::string homeUserName;
