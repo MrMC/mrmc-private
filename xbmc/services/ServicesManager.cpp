@@ -139,3 +139,24 @@ void CServicesManager::GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, in
     recentlyAdded.Append(temp);
   }
 }
+
+void CServicesManager::RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler)
+{
+  if (mediaServicesHandler == nullptr)
+    return;
+
+  CExclusiveLock lock(m_mediaServicesCritical);
+  if (find(m_mediaServicesHandlers.begin(), m_mediaServicesHandlers.end(), mediaServicesHandler) == m_mediaServicesHandlers.end())
+    m_mediaServicesHandlers.push_back(mediaServicesHandler);
+}
+
+void CServicesManager::UnregisterSettingsHandler(IMediaServicesHandler *mediaServicesHandler)
+{
+  if (mediaServicesHandler == NULL)
+    return;
+
+  CExclusiveLock lock(m_mediaServicesCritical);
+  MediaServicesHandlers::iterator it = find(m_mediaServicesHandlers.begin(), m_mediaServicesHandlers.end(), mediaServicesHandler);
+  if (it != m_mediaServicesHandlers.end())
+    m_mediaServicesHandlers.erase(it);
+}

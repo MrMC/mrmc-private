@@ -19,10 +19,31 @@
  *
  */
 
-#include "utils/JobManager.h"
+#include <map>
 
+#include "utils/JobManager.h"
+#include "threads/SharedSection.h"
+#include "filesystem/IDirectory.h"
+
+class CURL;
 class CFileItem;
 class CFileItemList;
+
+class IMediaServicesHandler: public XFILE::IDirectory
+{
+public:
+  virtual ~IMediaServicesHandler() { }
+
+  virtual void SetWatched(CFileItem &item) { }
+  virtual void SetUnWatched(CFileItem &item) { }
+  virtual void SetResumePoint(CFileItem &item) { }
+  virtual void UpdateFileProgressState(CFileItem &item, double currentTime) { }
+  virtual void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit) { }
+  virtual void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit){ }
+
+  virtual bool GetDirectory(const CURL& url, CFileItemList &items);
+  virtual XFILE::DIR_CACHE_TYPE GetCacheType(const CURL& url);
+};
 
 class CServicesManager: public CJobQueue
 {
@@ -37,9 +58,20 @@ public:
   void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit);
   void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit);
 
+  bool GetDirectory(const CURL& url, CFileItemList &items);
+  XFILE::DIR_CACHE_TYPE GetCacheType(const CURL& url);
+
+  void RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler);
+  void UnregisterSettingsHandler(IMediaServicesHandler *mediaServicesHandler);
+
 private:
   // private construction, and no assignements; use the provided singleton methods
   CServicesManager();
   CServicesManager(const CServicesManager&);
   virtual ~CServicesManager();
+
+
+  typedef std::vector<IMediaServicesHandler*> MediaServicesHandlers;
+  MediaServicesHandlers m_mediaServicesHandlers;
+  CSharedSection m_mediaServicesCritical;
 };
