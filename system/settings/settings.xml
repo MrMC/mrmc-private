@@ -2149,6 +2149,21 @@
         <setting id="plex.signin" type="string" label="1238" help="1239">
           <level>0</level>
           <default>fillme</default>
+          <dependencies>
+            <dependency type="enable">
+              <condition on="property" name="plexsignin" setting="plex.signinpin" />
+            </dependency>
+          </dependencies>
+          <control type="button" format="action"/>
+        </setting>
+        <setting id="plex.signinpin" type="string" label="1246" help="1247">
+          <level>0</level>
+          <default>fillme</default>
+          <dependencies>
+            <dependency type="enable">
+              <condition on="property" name="plexsigninpin" setting="plex.signin" />
+            </dependency>
+          </dependencies>
           <control type="button" format="action"/>
         </setting>
         <setting id="plex.homeuser" type="string" label="1244" help="1245">
@@ -2159,10 +2174,13 @@
           </constraints>
           <dependencies>
             <dependency type="enable">
-              <condition on="property" operator="!is" name="plexsignedin" />
+              <or>
+                <condition on="property" name="plexhomeuser" setting="plex.signin" />
+                <condition on="property" name="plexhomeuser" setting="plex.signinpin" />
+              </or>
             </dependency>
           </dependencies>
-          <control type="button" format="action" delayed="true"/>
+          <control type="button" format="action"/>
         </setting>
         <setting id="plex.gdmserver" type="boolean" label="1242" help="1243">
           <level>0</level>

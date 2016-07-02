@@ -66,8 +66,8 @@ private:
 
   bool          FetchPlexToken(std::string user, std::string pass);
   bool          FetchMyPlexServers();
-  bool          FetchSignInPin();
-  bool          WaitForSignInByPin();
+  bool          GetSignInPinCode();
+  bool          GetSignInByPinReply();
 
   void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
   CPlexClient*  GetClient(std::string uuid);

@@ -4273,12 +4273,12 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1238"
-msgid "Plex.TV Sign-in"
+msgid "Plex.TV Manual Sign-in"
 msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#1239"
-msgid "Plex.TV Sign-in"
+msgid "Plex.TV Manual Sign-in"
 msgstr ""
 
 #: system/settings/settings.xml
@@ -4311,7 +4311,27 @@ msgctxt "#1245"
 msgid "Change the Plex Home User"
 msgstr ""
 
-#empty strings from id 1246 to 1258
+#: system/settings/settings.xml
+msgctxt "#1246"
+msgid "Plex.TV Pin Request Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1247"
+msgid "Plex.TV Pin Request Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1248"
+msgid "From your computer, go to this url"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1249"
+msgid "https://plex.tv/pin and enter this code -> "
+msgstr ""
+
+#empty strings from id 1250 to 1258
 
 #: system/settings/settings.xml
 msgctxt "#1259"

@@ -470,6 +470,7 @@ const std::string CSettings::SETTING_SERVICES_LIGHTEFFECTSSTATICSCREENSAVER = "s
 
 // plex services
 const std::string CSettings::SETTING_SERVICES_PLEXSIGNIN = "plex.signin";
+const std::string CSettings::SETTING_SERVICES_PLEXSIGNINPIN = "plex.signinpin";
 const std::string CSettings::SETTING_SERVICES_PLEXHOMEUSER  = "plex.homeuser";
 const std::string CSettings::SETTING_SERVICES_PLEXGDMSERVER = "plex.gdmserver";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH = "plex.myplexauthtoken";
@@ -997,6 +998,9 @@ void CSettings::InitializeDefaults()
 
   if (g_application.IsStandAlone())
     ((CSettingInt*)m_settingsManager->GetSetting(CSettings::SETTING_POWERMANAGEMENT_SHUTDOWNSTATE))->SetDefault(POWERSTATE_SHUTDOWN);
+
+  ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_SERVICES_PLEXSIGNIN))->SetDefault(g_localizeStrings.Get(1240));
+  ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_SERVICES_PLEXSIGNINPIN))->SetDefault(g_localizeStrings.Get(1240));
 }
 
 void CSettings::InitializeOptionFillers()
@@ -1336,6 +1340,7 @@ void CSettings::InitializeISettingCallbacks()
   
   settingSet.clear();
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXSIGNIN);
+  settingSet.insert(CSettings::SETTING_SERVICES_PLEXSIGNINPIN);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXHOMEUSER);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);

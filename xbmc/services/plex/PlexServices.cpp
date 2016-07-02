@@ -28,6 +28,7 @@
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogSelect.h"
 #include "dialogs/GUIDialogNumeric.h"
+#include "dialogs/GUIDialogProgress.h"
 #include "filesystem/CurlFile.h"
 #include "guilib/LocalizeStrings.h"
 #include "guilib/GUIWindowManager.h"
@@ -107,10 +108,12 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
     return;
 
   bool startThread = false;
+  std::string strSignIn = g_localizeStrings.Get(1240);
+  std::string strSignOut = g_localizeStrings.Get(1241);
   const std::string& settingId = setting->GetId();
   if (settingId == CSettings::SETTING_SERVICES_PLEXSIGNIN)
   {
-    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == g_localizeStrings.Get(1240))
+    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == strSignIn)
     {
       // prompt is 'sign-in'
       std::string user;
@@ -124,14 +127,14 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
           if (FetchPlexToken(user, pass))
           {
             // change prompt to 'sign-out'
-            CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1241));
+            CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, strSignOut);
             CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER, m_myHomeUser);
-            CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-in ok");
+            CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction manual sign-in ok");
             startThread = true;
           }
           else
           {
-            CLog::Log(LOGERROR, "CPlexServices: Could not get authToken");
+            CLog::Log(LOGERROR, "CPlexServices: Could not get authToken via manual sign-in");
           }
         }
         else
@@ -145,15 +148,16 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
     else
     {
       // prompt is 'sign-out'
-      // clear user/pass/auth and change prompt to 'sign-in'
+      // clear authToken and change prompt to 'sign-in'
       m_authToken.clear();
-      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, g_localizeStrings.Get(1240));
+      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, strSignIn);
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER, "");
       CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
     }
     SetUserSettings();
-    const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSER);
-    ((CSettingBool*)userSetting)->SetEnabled(startThread);
+
+    //const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSER);
+    //((CSettingBool*)userSetting)->SetEnabled(startThread);
 
     if (startThread)
       Start();
@@ -161,10 +165,45 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       Stop();
     
   }
+  else if (settingId == CSettings::SETTING_SERVICES_PLEXSIGNINPIN)
+  {
+    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNINPIN) == strSignIn)
+    {
+      if (GetSignInPinCode())
+      {
+        // change prompt to 'sign-out'
+        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNINPIN, strSignOut);
+        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER, m_myHomeUser);
+        CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction pin sign-in ok");
+        startThread = true;
+      }
+      else
+      {
+        CLog::Log(LOGERROR, "CPlexServices: Could not get authToken via pin request sign-in");
+      }
+    }
+    else
+    {
+      // prompt is 'sign-out'
+      // clear authToken and change prompt to 'sign-in'
+      m_authToken.clear();
+      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNINPIN, strSignIn);
+      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER, "");
+      CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
+    }
+    SetUserSettings();
+
+    //const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSER);
+    //((CSettingBool*)userSetting)->SetEnabled(startThread);
+    if (startThread)
+      Start();
+    else
+      Stop();
+  }
   else if (settingId == CSettings::SETTING_SERVICES_PLEXHOMEUSER)
   {
     // user must be in 'sign-in' state so check for 'sign-out' label
-    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == g_localizeStrings.Get(1241))
+    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == strSignOut)
     {
       std::string homeUserName;
       if (GetMyHomeUsers(homeUserName))
@@ -220,32 +259,6 @@ void CPlexServices::Process()
 {
   bool hasPlexServers = false;
   GetUserSettings();
-
-  // testing sign-in by Pin
-  if (false)
-  {
-    // fetch a ping request code (should show it to user)
-    FetchSignInPin();
-
-    CStopWatch dieTimer;
-    dieTimer.StartZero();
-
-    CEvent m_wakeEvent;
-    m_wakeEvent.Set();
-    while (!m_bStop)
-    {
-      // wait for user to run and enter pin code
-      // at https://plex.tv/pin
-      if (WaitForSignInByPin())
-        break;
-
-      if (dieTimer.GetElapsedSeconds() > 60 * 5)
-        break;
-
-      m_wakeEvent.WaitMSec(2 * 1000);
-      m_wakeEvent.Reset();
-    }
-  }
 
   CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
   if (iface)
@@ -421,7 +434,7 @@ bool CPlexServices::FetchMyPlexServers()
   return rtn;
 }
 
-bool CPlexServices::FetchSignInPin()
+bool CPlexServices::GetSignInPinCode()
 {
   // on return, show user m_signInByPinCode so they can enter it at https://plex.tv/pin
 
@@ -484,6 +497,54 @@ bool CPlexServices::FetchSignInPin()
       m_signInByPinCode = code;
       rtn = !m_signInByPinId.empty() && !m_signInByPinCode.empty();
     }
+
+    CGUIDialogProgress *waitPinReplyDialog;
+    waitPinReplyDialog = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
+    waitPinReplyDialog->SetHeading(g_localizeStrings.Get(1246));
+    waitPinReplyDialog->SetLine(0, g_localizeStrings.Get(1248));
+    std::string prompt = g_localizeStrings.Get(1249) + code;
+    waitPinReplyDialog->SetLine(1, prompt);
+
+    waitPinReplyDialog->Open();
+    waitPinReplyDialog->ShowProgressBar(false);
+
+    CStopWatch dieTimer;
+    dieTimer.StartZero();
+    int timeToDie = 60 * 5;
+
+    CStopWatch pingTimer;
+    pingTimer.StartZero();
+
+    m_authToken.clear();
+    while (!m_bStop && !waitPinReplyDialog->IsCanceled())
+    {
+      waitPinReplyDialog->SetPercentage(int(float(dieTimer.GetElapsedSeconds())/float(timeToDie)*100));
+
+      if (pingTimer.GetElapsedSeconds() > 1)
+      {
+        // wait for user to run and enter pin code
+        // at https://plex.tv/pin
+        if (GetSignInByPinReply())
+          break;
+        pingTimer.Reset();
+      }
+
+      if (dieTimer.GetElapsedSeconds() > timeToDie)
+        break;
+      waitPinReplyDialog->Progress();
+    }
+    waitPinReplyDialog->Close();
+
+    if (m_authToken.empty())
+      CLog::Log(LOGERROR, "CPlexServices:FetchSignInPin failed to get authToken");
+    else
+    {
+      std::string homeUserName;
+      if (GetMyHomeUsers(homeUserName))
+        m_myHomeUser = homeUserName;
+
+      rtn = true;
+    }
   }
   else
   {
@@ -493,7 +554,7 @@ bool CPlexServices::FetchSignInPin()
   return rtn;
 }
 
-bool CPlexServices::WaitForSignInByPin()
+bool CPlexServices::GetSignInByPinReply()
 {
   // repeat called until we timeout or get authToken
   bool rtn = false;
@@ -652,7 +713,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
         return false;
       pinUrl = "/switch?pin=" + pin;
     }
-    
+
     XFILE::CCurlFile plex;
     CPlexUtils::GetDefaultHeaders(plex);
     if (!m_authToken.empty())

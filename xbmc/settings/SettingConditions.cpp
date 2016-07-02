@@ -90,9 +90,51 @@ bool IsMasterUser(const std::string &condition, const std::string &value, const 
   return g_passwordManager.bMasterUser;
 }
 
-bool PlexSignedIn(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
+bool PlexSignInEnable(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
 {
-  return CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == g_localizeStrings.Get(1240);
+  // if signed in by pin, disable manual sign-in
+  std::string strSignIn = g_localizeStrings.Get(1240);
+  std::string strSignOut = g_localizeStrings.Get(1241);
+  bool enable = true;
+
+  if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == strSignIn &&
+      CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNINPIN) == strSignIn)
+  {
+    enable = true;
+  }
+  else if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNINPIN) == strSignOut)
+  {
+    enable = false;
+  }
+  return enable;
+}
+
+bool PlexSignInPinEnable(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
+{
+  // if signed in manually, disable pin sign-in
+  std::string strSignIn = g_localizeStrings.Get(1240);
+  std::string strSignOut = g_localizeStrings.Get(1241);
+  bool enable = true;
+
+  if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == strSignIn &&
+      CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNINPIN) == strSignIn)
+  {
+    enable = true;
+  }
+  else if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == strSignOut)
+  {
+    enable = false;
+  }
+  return enable;
+}
+
+bool PlexHomeUserEnable(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
+{
+  // what this, we are signed in when settings string says sign-out
+  std::string strSignOut = g_localizeStrings.Get(1241);
+  bool enable = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNIN) == strSignOut;
+  enable = enable || CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXSIGNINPIN) == strSignOut;
+  return enable;
 }
 
 bool IsUsingTTFSubtitles(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
@@ -295,7 +337,9 @@ void CSettingConditions::Initialize()
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("aesettingvisible",              CAEFactory::IsSettingVisible));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("codecoptionvisible",            CDVDVideoCodec::IsSettingVisible));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("enablemysqlgui",                CAdvancedSettings::IsSettingVisible));
-  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("plexsignedin",                  PlexSignedIn));
+  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("plexsignin",                    PlexSignInEnable));
+  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("plexsigninpin",                 PlexSignInPinEnable));
+  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("plexhomeuser",                  PlexHomeUserEnable));
 }
 
 bool CSettingConditions::Check(const std::string &condition, const std::string &value /* = "" */, const CSetting *setting /* = NULL */)
