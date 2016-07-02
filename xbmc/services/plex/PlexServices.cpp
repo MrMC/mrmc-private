@@ -52,9 +52,10 @@
 
 using namespace ANNOUNCEMENT;
 
-#define NS_PLEX_MEDIA_SERVER_PORT 32414
-#define NS_BROADCAST_ADDR "239.0.0.250"
-#define NS_SEARCH_MSG "M-SEARCH * HTTP/1.1\r\n"
+static const int NS_PLEX_MEDIA_SERVER_PORT(32414);
+static const std::string NS_BROADCAST_ADDR("239.0.0.250");
+static const std::string NS_SEARCH_MSG("M-SEARCH * HTTP/1.1\r\n");
+static const std::string NS_PLEXTV_URL("https://plex.tv");
 
 CPlexServices::CPlexServices()
 : CThread("PlexServices")
@@ -351,7 +352,7 @@ bool CPlexServices::FetchPlexToken(std::string user, std::string pass)
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
 
-  CURL url("https://plex.tv/users/sign_in.json");
+  CURL url(NS_PLEXTV_URL + "/users/sign_in.json");
   url.SetUserName(user);
   url.SetPassword(pass);
 
@@ -391,7 +392,7 @@ bool CPlexServices::FetchMyPlexServers()
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
-  CURL url("https://plex.tv/api/resources");
+  CURL url(NS_PLEXTV_URL + "/api/resources");
   if (plex.Get(url.Get(), strResponse))
   {
     //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
@@ -450,7 +451,7 @@ bool CPlexServices::GetSignInPinCode()
   plex.SetTimeout(3);
   CPlexUtils::GetDefaultHeaders(plex);
 
-  CURL url("https://plex.tv/pins.xml");
+  CURL url(NS_PLEXTV_URL + "/pins.xml");
 
   std::string strResponse;
   if (plex.Post(url.Get(), "", strResponse))
@@ -563,7 +564,7 @@ bool CPlexServices::GetSignInByPinReply()
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
 
-  std::string path = "https://plex.tv/pins/" + m_signInByPinId + ".xml";
+  std::string path = NS_PLEXTV_URL + "/pins/" + m_signInByPinId + ".xml";
   CURL url(path);
 
   std::string strResponse;
@@ -599,7 +600,7 @@ bool CPlexServices::GetSignInByPinReply()
 void CPlexServices::SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket)
 {
   SOCKETS::CAddress discoverAddress;
-  discoverAddress.SetAddress(NS_BROADCAST_ADDR, NS_PLEX_MEDIA_SERVER_PORT);
+  discoverAddress.SetAddress(NS_BROADCAST_ADDR.c_str(), NS_PLEX_MEDIA_SERVER_PORT);
   std::string discoverMessage = NS_SEARCH_MSG;
   int packetSize = socket->SendTo(discoverAddress, discoverMessage.length(), discoverMessage.c_str());
   if (packetSize < 0)
@@ -648,7 +649,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
-  CURL url("https://plex.tv/api/home/users");
+  CURL url(NS_PLEXTV_URL + "/api/home/users");
   if (plex.Get(url.Get(), strResponse))
   {
     //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
@@ -719,7 +720,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
       plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
     std::string uuid = item->GetProperty("uuid").asString();
-    CURL url("https://plex.tv/api/v2/home/users/" + uuid + pinUrl);
+    CURL url(NS_PLEXTV_URL + "/api/v2/home/users/" + uuid + pinUrl);
 
     CPlexUtils::GetDefaultHeaders(plex);
     std::string strResponse;
