@@ -20,9 +20,10 @@
  */
 
 #include <string>
+
 #include "utils/XMLUtils.h"
 
-struct SectionsContent
+struct PlexSectionsContent
 {
   int port;
   std::string type;
@@ -38,7 +39,7 @@ struct SectionsContent
   std::string path;
   std::string section;
   std::string art;
-  };
+};
 
 class CPlexClient
 {
@@ -47,13 +48,14 @@ class CPlexClient
 public:
   CPlexClient(std::string data, std::string ip);
   CPlexClient(const TiXmlElement* DeviceNode);
+ ~CPlexClient();
 
   const std::string &GetContentType() const { return m_contentType; }
-  const std::string &GetServerName() const { return m_serverName; }
-  const std::string &GetUuid() const { return m_uuid; }
-  const std::string &GetScheme() const { return m_scheme; }
-  const std::vector<SectionsContent> &GetTvContent() const { return m_showSectionsContents; }
-  const std::vector<SectionsContent> &GetMovieContent() const { return m_movieSectionsContents; }
+  const std::string &GetServerName() const  { return m_serverName; }
+  const std::string &GetUuid() const        { return m_uuid; }
+  const std::string &GetScheme() const      { return m_scheme; }
+  const std::vector<PlexSectionsContent> &GetTvContent() const    { return m_showSectionsContents; }
+  const std::vector<PlexSectionsContent> &GetMovieContent() const { return m_movieSectionsContents; }
 
   const bool &IsLocal() const { return m_local; }
   std::string GetHost();
@@ -62,7 +64,8 @@ public:
 
 protected:
   void ParseData(std::string data, std::string ip);
-  void ParseSections();
+  bool ParseSections();
+  void SetVanished() { m_alive = false; };
 
 private:
   bool        m_local;
@@ -72,6 +75,7 @@ private:
   std::string m_url;
   std::string m_accessToken;
   std::string m_scheme;
-  std::vector<SectionsContent> m_movieSectionsContents;
-  std::vector<SectionsContent> m_showSectionsContents;
+  std::atomic<bool> m_alive;
+  std::vector<PlexSectionsContent> m_movieSectionsContents;
+  std::vector<PlexSectionsContent> m_showSectionsContents;
 };

@@ -23,15 +23,14 @@
 
 #include "Application.h"
 #include "URL.h"
+#include "filesystem/CurlFile.h"
+#include "network/Network.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
-#include "filesystem/CurlFile.h"
-#include "network/Network.h"
 
 #include <string>
 #include <sstream>
-
 
 static bool IsInSubNet(std::string address, std::string port)
 {
@@ -56,12 +55,14 @@ static bool IsInSubNet(std::string address, std::string port)
 CPlexClient::CPlexClient(std::string data, std::string ip)
 {
   m_local = true;
+  m_alive = true;
   ParseData(data, ip);
 }
 
 CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
 {
   m_local = false;
+  m_alive = true;
   m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
   m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
   m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
@@ -99,6 +100,11 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
 
   m_url = url.Get();
 }
+
+CPlexClient::~CPlexClient()
+{
+}
+
 
 void CPlexClient::ParseData(std::string data, std::string ip)
 {
@@ -150,9 +156,11 @@ int CPlexClient::GetPort()
   return url.GetPort();
 }
 
-void CPlexClient::ParseSections()
+bool CPlexClient::ParseSections()
 {
+  bool rtn = false;
   XFILE::CCurlFile plex;
+  plex.SetTimeout(10);
 
   CURL curl(m_url);
   curl.SetFileName(curl.GetFileName() + "library/sections");
@@ -162,14 +170,14 @@ void CPlexClient::ParseSections()
     //CLog::Log(LOGDEBUG, "CPlexClient::ParseSections() %s", strResponse.c_str());
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
-    
+
     TiXmlElement* MediaContainer = xml.RootElement();
     if (MediaContainer)
     {
       const TiXmlElement* DirectoryNode = MediaContainer->FirstChildElement("Directory");
       while (DirectoryNode)
       {
-        SectionsContent content;
+        PlexSectionsContent content;
         content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
         content.type = XMLUtils::GetAttribute(DirectoryNode, "type");
         content.title = XMLUtils::GetAttribute(DirectoryNode, "title");
@@ -187,7 +195,19 @@ void CPlexClient::ParseSections()
           m_showSectionsContents.push_back(content);
         DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
       }
+      rtn = true;
     }
   }
+  else
+  {
+    // 401's are attempts to access a local server that is also in PMS
+    // and these require an access token. Only local servers that are
+    // not is PMS can be accessed via GDM.
+    if (plex.GetResponseCode() != 401)
+      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections failed %s", strResponse.c_str());
+    rtn = false;
+  }
+
+  return rtn;
 }
 

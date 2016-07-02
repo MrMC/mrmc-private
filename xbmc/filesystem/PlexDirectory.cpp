@@ -75,23 +75,23 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.Add(pItem);
       }
       //look through all plex clients and pull content data for "movie" type
-      std::vector<CPlexClient> clients;
+      std::vector<CPlexClientPtr> clients;
       CPlexServices::GetInstance().GetClients(clients);
       for (int i = 0; i < (int)clients.size(); i++)
       {
-        std::vector<SectionsContent> contents = clients[i].GetMovieContent();
+        std::vector<PlexSectionsContent> contents = clients[i]->GetMovieContent();
         if (contents.size() > 1 || ((hasMovies || clients.size() > 1) && contents.size() == 1))
         {
           for (int c = 0; c < (int)contents.size(); c++)
           {
-            std::string title = StringUtils::Format("Plex - %s - %s",clients[i].GetServerName().c_str(),contents[c].title.c_str());
-            std::string host = clients[i].GetUrl();
+            std::string title = StringUtils::Format("Plex - %s - %s",clients[i]->GetServerName().c_str(),contents[c].title.c_str());
+            std::string host = clients[i]->GetUrl();
             URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
             // have to do it this way because raw url has authToken as protocol option
-            CURL curl(clients[i].GetUrl());
+            CURL curl(clients[i]->GetUrl());
             curl.SetProtocol("http");
             std::string filename = StringUtils::Format("%s/%s", contents[c].section.c_str(), (basePath == "titles"? "all":""));
             curl.SetFileName(filename);
@@ -102,8 +102,8 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         }
         else if (contents.size() == 1)
         {
-          CURL curl(clients[i].GetUrl());
-          curl.SetProtocol(clients[i].GetScheme());
+          CURL curl(clients[i]->GetUrl());
+          curl.SetProtocol(clients[i]->GetScheme());
           curl.SetFileName(contents[0].section + "/all");
           CPlexUtils::GetLocalMovies(items,curl.Get());
           items.SetContent("movies");
@@ -177,23 +177,23 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.Add(pItem);
       }
       //look through all plex servers and pull content data for "show" type
-      std::vector<CPlexClient> clients;
+      std::vector<CPlexClientPtr> clients;
       CPlexServices::GetInstance().GetClients(clients);
       for (int i = 0; i < (int)clients.size(); i++)
       {
-        std::vector<SectionsContent> contents = clients[i].GetTvContent();
+        std::vector<PlexSectionsContent> contents = clients[i]->GetTvContent();
         if (contents.size() > 1 || ((hasTvShows || clients.size() > 1) && contents.size() == 1))
         {
           for (int c = 0; c < (int)contents.size(); c++)
           {
-            std::string title = StringUtils::Format("Plex - %s - %s",clients[i].GetServerName().c_str(),contents[c].title.c_str());
-            std::string host = clients[i].GetUrl();
+            std::string title = StringUtils::Format("Plex - %s - %s",clients[i]->GetServerName().c_str(),contents[c].title.c_str());
+            std::string host = clients[i]->GetUrl();
             URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
             // have to do it this way because raw url has authToken as protocol option
-            CURL curl(clients[i].GetUrl());
+            CURL curl(clients[i]->GetUrl());
             curl.SetProtocol("http");
             std::string filename = StringUtils::Format("%s/%s", contents[c].section.c_str(), (basePath == "titles"? "all":""));
             curl.SetFileName(filename);
@@ -204,8 +204,8 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         }
         else if (contents.size() == 1)
         {
-          CURL curl(clients[i].GetUrl());
-          curl.SetProtocol(clients[i].GetScheme());
+          CURL curl(clients[i]->GetUrl());
+          curl.SetProtocol(clients[i]->GetScheme());
           curl.SetFileName(contents[0].section + "/all");
           CPlexUtils::GetLocalTvshows(items,curl.Get());
           items.SetContent("tvshows");

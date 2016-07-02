@@ -40,6 +40,7 @@
 #include "profiles/dialogs/GUIDialogLockSettings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
+#include "utils/JobManager.h"
 
 #include "utils/JSONVariantParser.h"
 #include "utils/Variant.h"
@@ -57,19 +58,56 @@ static const std::string NS_BROADCAST_ADDR("239.0.0.250");
 static const std::string NS_SEARCH_MSG("M-SEARCH * HTTP/1.1\r\n");
 static const std::string NS_PLEXTV_URL("https://plex.tv");
 
+class CPlexServiceJob: public CJob
+{
+public:
+  CPlexServiceJob(double currentTime, std::string strFunction)
+  : m_function(strFunction)
+  , m_currentTime(currentTime)
+  {
+  }
+  virtual ~CPlexServiceJob()
+  {
+  }
+  virtual bool DoWork()
+  {
+    if (m_function == "CheckForUpdates")
+    {
+      CLog::Log(LOGNOTICE, "CPlexServiceJob: CheckForUpdates");
+    }
+    return true;
+  }
+  virtual bool operator==(const CJob *job) const
+  {
+    return true;
+  }
+private:
+  std::string    m_function;
+  double         m_currentTime;
+};
+
+
 CPlexServices::CPlexServices()
 : CThread("PlexServices")
+, m_gdmListener(nullptr)
 {
   // register our redacted protocol options with CURL
   // we do not want these exposed in mrmc.log.
   if (!CURL::HasProtocolOptionsRedacted("X-Plex-Token"))
     CURL::SetProtocolOptionsRedacted("X-Plex-Token", "PLEXTOKEN");
+
+  CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CPlexServices::~CPlexServices()
 {
+  CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
+
   if (IsRunning())
     Stop();
+
+  CancelJobs();
+  SAFE_DELETE(m_gdmListener);
 }
 
 CPlexServices& CPlexServices::GetInstance()
@@ -91,6 +129,8 @@ void CPlexServices::Stop()
   CSingleLock lock(m_critical);
   if (IsRunning())
     StopThread();
+
+  CSingleLock lock2(m_criticalClients);
   m_clients.clear();
 }
 
@@ -99,8 +139,32 @@ bool CPlexServices::IsActive()
   return IsRunning();
 }
 
+bool CPlexServices::HasClients() const
+{
+  CSingleLock lock(m_criticalClients);
+  return !m_clients.empty();
+}
+
+void CPlexServices::GetClients(std::vector<CPlexClientPtr> &clients) const
+{
+  CSingleLock lock(m_criticalClients);
+  clients = m_clients;
+}
+
 void CPlexServices::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
 {
+  if ((flag & Player) && strcmp(sender, "xbmc") == 0)
+  {
+    if (strcmp(message, "OnPlay") == 0)
+    {
+    }
+    else if (strcmp(message, "OnPause") == 0)
+    {
+    }
+    else if (strcmp(message, "OnStop") == 0)
+    {
+    }
+  }
 }
 
 void CPlexServices::OnSettingAction(const CSetting *setting)
@@ -126,7 +190,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       {
         if (!user.empty() && !pass.empty())
         {
-          if (FetchPlexToken(user, pass))
+          if (GetPlexToken(user, pass))
           {
             // change prompt to 'sign-out'
             CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXSIGNIN, strSignOut);
@@ -158,9 +222,6 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
       CLog::Log(LOGDEBUG, "CPlexServices:OnSettingAction sign-out ok");
     }
     SetUserSettings();
-
-    //const CSetting *userSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_PLEXHOMEUSER);
-    //((CSettingBool*)userSetting)->SetEnabled(startThread);
 
     if (startThread)
       Start();
@@ -219,6 +280,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
         m_myHomeUser = homeUserName;
         CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER, m_myHomeUser);
         SetUserSettings();
+        CSingleLock lock(m_criticalClients);
         m_clients.clear();
         Start();
       }
@@ -230,10 +292,12 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
 {
   // All Plex settings so far
   /*
-   static const std::string SETTING_SERVICES_PLEXSIGNIN;
-   static const std::string SETTING_SERVICES_PLEXGDMSERVER;
-   static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
-   */
+  static const std::string SETTING_SERVICES_PLEXSIGNIN;
+  static const std::string SETTING_SERVICES_PLEXSIGNINPIN;
+  static const std::string SETTING_SERVICES_PLEXHOMEUSER;
+  static const std::string SETTING_SERVICES_PLEXGDMSERVER;
+  static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
+  */
 
   if (setting == NULL)
     return;
@@ -265,95 +329,57 @@ void CPlexServices::GetUserSettings()
 
 void CPlexServices::Process()
 {
-  bool hasPlexServers = false;
   GetUserSettings();
 
-  CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
-  if (iface)
+  // try plex.tv first
+  if (!m_authToken.empty())
+    GetMyPlexServers();
+  // the via GDM
+  CheckForGDMServers();
+
+  CStopWatch gdmTimer, plextvTimer, checkUpdatesTimer;
+  gdmTimer.StartZero();
+  plextvTimer.StartZero();
+  checkUpdatesTimer.StartZero();
+  int plextvTimeoutSeconds = 5;
+  while (!m_bStop)
   {
-    SOCKETS::CUDPSocket *socket = nullptr;
-    SOCKETS::CSocketListener listener;
-    if (m_useGDMServer)
+    // check for services every N seconds
+    if (plextvTimer.GetElapsedSeconds() > plextvTimeoutSeconds)
     {
-      socket = SOCKETS::CSocketFactory::CreateUDPSocket();
-      if (socket)
+      // try plex.tv
+      if (!m_authToken.empty())
       {
-        SOCKETS::CAddress my_addr;
-        my_addr.SetAddress(iface->GetCurrentIPAddress().c_str());
-        if (!socket->Bind(my_addr, NS_PLEX_MEDIA_SERVER_PORT, 0))
-        {
-          CLog::Log(LOGERROR, "CPlexServices: Could not listen on port %d", NS_PLEX_MEDIA_SERVER_PORT);
-          SAFE_DELETE(socket);
-        }
-
-        if (socket)
-        {
-          socket->SetBroadCast(true);
-          // add our socket to the 'select' listener
-          listener.AddSocket(socket);
-          // do an initial broadcast to get things rolling
-          SendDiscoverBroadcast(socket);
-        }
+        // if we get back servers, then
+        // reduce the initial polling time
+        if (GetMyPlexServers())
+          plextvTimeoutSeconds = 60 * 10;
       }
-      else
-        CLog::Log(LOGERROR, "CPlexServices: Could not create socket for GDM");
+      plextvTimer.Reset();
     }
 
-    // try plex.tv
-    if (!m_authToken.empty() && !hasPlexServers)
-      hasPlexServers = FetchMyPlexServers();
-
-    CStopWatch idleTimer;
-    idleTimer.StartZero();
-    while (!m_bStop)
+    if (gdmTimer.GetElapsedSeconds() > 5)
     {
-      // recheck services every N seconds
-      if (idleTimer.GetElapsedMilliseconds() > 5000)
-      {
-        // try plex.tv
-        if (!m_authToken.empty() && !hasPlexServers)
-          hasPlexServers = FetchMyPlexServers();
-
-        // check GDM
-        if (socket)
-          SendDiscoverBroadcast(socket);
-
-        idleTimer.Reset();
-      }
-
-      // listen for GDM reply until we timeout
-      if (socket && listener.Listen(250))
-      {
-        char buffer[1024] = {0};
-        SOCKETS::CAddress sender;
-        int packetSize = socket->Read(sender, 1024, buffer);
-        if (packetSize > -1)
-        {
-          std::string buf(buffer, packetSize);
-          if (buf.find("200 OK") != std::string::npos)
-          {
-            CPlexClient newClient(buf, sender.Address());
-            if (AddClient(newClient))
-            {
-              CLog::Log(LOGNOTICE, "CPlexServices: Server found via GDM %s", sender.Address());
-            }
-            else if (GetClient(newClient.m_uuid))
-            {
-              GetClient(newClient.m_uuid)->ParseData(buf, sender.Address());
-              CLog::Log(LOGDEBUG, "CPlexServices: Server updated via GDM %s", sender.Address());
-            }
-          }
-        }
-      }
-      usleep(250 * 1000);
+      CheckForGDMServers();
+      gdmTimer.Reset();
     }
 
-    if (socket)
-      SAFE_DELETE(socket);
+    if (checkUpdatesTimer.GetElapsedSeconds() > 60 * 10)
+    {
+      if (!IsProcessing())
+        AddJob(new CPlexServiceJob(0, "CheckForUpdates"));
+    }
+
+    // do not sleep too long or we can delay shutdown
+    // this should be a CEvent wait
+    usleep(250 * 1000);
   }
+
+  if (m_gdmListener)
+    SAFE_DELETE(m_gdmListener);
 }
 
-bool CPlexServices::FetchPlexToken(std::string user, std::string pass)
+bool CPlexServices::GetPlexToken(std::string user, std::string pass)
 {
   bool rtn = false;
   XFILE::CCurlFile plex;
@@ -391,9 +417,11 @@ bool CPlexServices::FetchPlexToken(std::string user, std::string pass)
   return rtn;
 }
 
-bool CPlexServices::FetchMyPlexServers()
+bool CPlexServices::GetMyPlexServers()
 {
   bool rtn = false;
+
+  std::vector<CPlexClientPtr> clientsFound;
 
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
@@ -418,19 +446,10 @@ bool CPlexServices::FetchMyPlexServers()
         std::string provides = XMLUtils::GetAttribute(DeviceNode, "provides");
         if (provides == "server")
         {
-          CPlexClient newClient(DeviceNode);
-
-          if (AddClient(newClient))
-          {
-            CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", newClient.GetServerName().c_str());
-            rtn = true;
-          }
-          else if (GetClient(newClient.m_uuid))
-          {
-            //GetClient(newClient.m_uuid)->ParseData(data, host);
-            CLog::Log(LOGDEBUG, "CPlexServices: Server updated via plex.tv %s", newClient.GetServerName().c_str());
-            rtn = true;
-          }
+          CPlexClientPtr newClient(new CPlexClient(DeviceNode));
+          clientsFound.push_back(newClient);
+          // always return true if we find anything
+          rtn = true;
         }
         DeviceNode = DeviceNode->NextSiblingElement("Device");
       }
@@ -441,6 +460,29 @@ bool CPlexServices::FetchMyPlexServers()
     std::string strMessage = "Error getting Plex servers";
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
     CLog::Log(LOGDEBUG, "CPlexServices:FetchMyPlexServers failed %s", strResponse.c_str());
+  }
+
+  std::vector<CPlexClientPtr> lostClients;
+  if (clientsFound.size())
+  {
+    for (std::vector<CPlexClientPtr>::iterator s_it = clientsFound.begin(); s_it != clientsFound.end(); ++s_it)
+    {
+      if (AddClient(*s_it))
+      {
+        // new client
+        CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", (*s_it)->GetServerName().c_str());
+      }
+      else if (GetClient((*s_it)->GetUuid()) == nullptr)
+      {
+        // lost client
+        lostClients.push_back(*s_it);
+        CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", (*s_it)->GetServerName().c_str());
+      }
+    }
+  }
+  if (lostClients.size())
+  {
+    // do something here
   }
 
   return rtn;
@@ -621,46 +663,111 @@ bool CPlexServices::GetSignInByPinReply()
   return rtn;
 }
 
-void CPlexServices::SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket)
+void CPlexServices::CheckForGDMServers()
 {
-  SOCKETS::CAddress discoverAddress;
-  discoverAddress.SetAddress(NS_BROADCAST_ADDR.c_str(), NS_PLEX_MEDIA_SERVER_PORT);
-  std::string discoverMessage = NS_SEARCH_MSG;
-  int packetSize = socket->SendTo(discoverAddress, discoverMessage.length(), discoverMessage.c_str());
-  if (packetSize < 0)
-    CLog::Log(LOGERROR, "CPlexServices: discover send failed");
+  if (m_useGDMServer)
+  {
+    if (!m_gdmListener)
+    {
+      SOCKETS::CUDPSocket *socket = SOCKETS::CSocketFactory::CreateUDPSocket();
+      if (socket)
+      {
+        SOCKETS::CAddress my_addr;
+        CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
+        my_addr.SetAddress(iface->GetCurrentIPAddress().c_str());
+        if (!socket->Bind(my_addr, NS_PLEX_MEDIA_SERVER_PORT, 0))
+        {
+          CLog::Log(LOGERROR, "CPlexServices:CheckforGDMServers Could not listen on port %d", NS_PLEX_MEDIA_SERVER_PORT);
+          SAFE_DELETE(m_gdmListener);
+          m_useGDMServer = false;
+          return;
+        }
+
+        if (socket)
+        {
+          socket->SetBroadCast(true);
+          // create and add our socket to the 'select' listener
+          m_gdmListener = new SOCKETS::CSocketListener();
+          m_gdmListener->AddSocket(socket);
+        }
+      }
+      else
+      {
+        CLog::Log(LOGERROR, "CPlexServices:CheckforGDMServers Could not create socket for GDM");
+        m_useGDMServer = false;
+        return;
+      }
+    }
+
+    SOCKETS::CUDPSocket *socket = (SOCKETS::CUDPSocket*)m_gdmListener->GetFirstSocket();
+    if (socket)
+    {
+      SOCKETS::CAddress discoverAddress;
+      discoverAddress.SetAddress(NS_BROADCAST_ADDR.c_str(), NS_PLEX_MEDIA_SERVER_PORT);
+      std::string discoverMessage = NS_SEARCH_MSG;
+      int packetSize = socket->SendTo(discoverAddress, discoverMessage.length(), discoverMessage.c_str());
+      if (packetSize < 0)
+        CLog::Log(LOGERROR, "CPlexServices:CPlexServices:CheckforGDMServers discover send failed");
+    }
+
+    // listen for GDM reply until we timeout
+    if (socket && m_gdmListener->Listen(250))
+    {
+      char buffer[1024] = {0};
+      SOCKETS::CAddress sender;
+      int packetSize = socket->Read(sender, 1024, buffer);
+      if (packetSize > -1)
+      {
+        std::string buf(buffer, packetSize);
+        if (buf.find("200 OK") != std::string::npos)
+        {
+          CPlexClientPtr newClient(new CPlexClient(buf, sender.Address()));
+          if (AddClient(newClient))
+          {
+            CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server found via GDM %s", sender.Address());
+          }
+        }
+      }
+    }
+  }
 }
 
-CPlexClient* CPlexServices::GetClient(std::string uuid)
+CPlexClientPtr CPlexServices::GetClient(std::string uuid)
 {
-  for (std::vector<CPlexClient>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
+  CSingleLock lock(m_criticalClients);
+  for (std::vector<CPlexClientPtr>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
   {
-    if (s_it->GetUuid() == uuid)
-      return &(*s_it);
+    if ((*s_it)->GetUuid() == uuid)
+      return *s_it;
   }
   return nullptr;
 }
 
-bool CPlexServices::AddClient(CPlexClient client)
+bool CPlexServices::AddClient(CPlexClientPtr client)
 {
+  CSingleLock lock(m_criticalClients);
   // do not add existing clients
-  for (std::vector<CPlexClient>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
+  for (std::vector<CPlexClientPtr>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
   {
-    if (s_it->GetUuid() == client.GetUuid())
+    if ((*s_it)->GetUuid() == client->GetUuid())
     return false;
   }
 
-  client.ParseSections();
-  m_clients.push_back(client);
+  if (client->ParseSections())
+  {
+    m_clients.push_back(client);
 
-  CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
-  g_windowManager.SendThreadMessage(msg);
-  
-  // announce that we have a plex client and that recently added should be updated
-  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
-  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+    g_windowManager.SendThreadMessage(msg);
 
-  return true;
+    // announce that we have a plex client and that recently added should be updated
+    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
+
+    return true;
+  }
+
+  return false;
 }
 
 bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)

@@ -19,22 +19,27 @@
  *
  */
 
+#include "PlexClient.h"
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
 #include "interfaces/IAnnouncer.h"
-#include "PlexClient.h"
+#include "utils/JobManager.h"
 
 namespace SOCKETS
 {
   class CUDPSocket;
+  class CSocketListener;
 }
 class CPlexClient;
+
+typedef std::shared_ptr<CPlexClient> CPlexClientPtr;
 
 class CPlexServices
 : public CThread
 , public ISettingCallback
 , public ANNOUNCEMENT::IAnnouncer
+, public CJobQueue
 {
 public:
   static CPlexServices &GetInstance();
@@ -42,8 +47,8 @@ public:
   void Start();
   void Stop();
   bool IsActive();
-  bool HasClients() const { return !m_clients.empty(); }
-  void GetClients(std::vector<CPlexClient> &clients) const {clients = m_clients; }
+  bool HasClients() const;
+  void GetClients(std::vector<CPlexClientPtr> &clients) const;
 
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
@@ -58,29 +63,33 @@ private:
   CPlexServices(const CPlexServices&);
   virtual ~CPlexServices();
 
-  void          SetUserSettings();
-  void          GetUserSettings();
+  void              SetUserSettings();
+  void              GetUserSettings();
 
   // IRunnable entry point for thread
-  virtual void  Process() override;
+  virtual void      Process() override;
 
-  bool          FetchPlexToken(std::string user, std::string pass);
-  bool          FetchMyPlexServers();
-  bool          GetSignInPinCode();
-  bool          GetSignInByPinReply();
+  bool              GetPlexToken(std::string user, std::string pass);
+  bool              GetMyPlexServers();
+  bool              GetSignInPinCode();
+  bool              GetSignInByPinReply();
 
-  void          SendDiscoverBroadcast(SOCKETS::CUDPSocket *socket);
-  CPlexClient*  GetClient(std::string uuid);
-  bool          AddClient(CPlexClient server);
-  bool          GetMyHomeUsers(std::string &homeusername);
+  void              CheckForGDMServers();
+
+  CPlexClientPtr    GetClient(std::string uuid);
+  bool              AddClient(CPlexClientPtr server);
+  bool              GetMyHomeUsers(std::string &homeusername);
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;
 
   std::string       m_authToken;
   bool              m_useGDMServer;
+  SOCKETS::CSocketListener *m_gdmListener;
   std::string       m_signInByPinId;
   std::string       m_signInByPinCode;
   std::string       m_myHomeUser;
-  std::vector<CPlexClient> m_clients;
+
+  CCriticalSection  m_criticalClients;
+  std::vector<CPlexClientPtr> m_clients;
 };

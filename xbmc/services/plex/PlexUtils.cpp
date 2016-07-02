@@ -647,19 +647,19 @@ bool CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tv
   if (CPlexServices::GetInstance().HasClients())
   {
     //look through all plex clients and pull recently added for each library section
-    std::vector<CPlexClient> clients;
-    std::vector<SectionsContent> contents;
+    std::vector<CPlexClientPtr> clients;
+    std::vector<PlexSectionsContent> contents;
     CPlexServices::GetInstance().GetClients(clients);
     for (int i = 0; i < (int)clients.size(); i++)
     {
       if (tvShow)
-        contents = clients[i].GetTvContent();
+        contents = clients[i]->GetTvContent();
       else
-        contents = clients[i].GetMovieContent();
+        contents = clients[i]->GetMovieContent();
       for (int c = 0; c < (int)contents.size(); c++)
       {
-        CURL curl(clients[i].GetUrl());
-        curl.SetProtocol("http");
+        CURL curl(clients[i]->GetUrl());
+        curl.SetProtocol(clients[i]->GetScheme());
         curl.SetFileName(curl.GetFileName() + contents[c].section + "/");
 
         if (tvShow)
