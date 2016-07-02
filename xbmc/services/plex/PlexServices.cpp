@@ -550,9 +550,12 @@ bool CPlexServices::GetSignInPinCode()
     {
       std::string homeUserName;
       if (GetMyHomeUsers(homeUserName))
+      {
         m_myHomeUser = homeUserName;
-
-      rtn = true;
+        rtn = true;
+      }
+      else
+        rtn = false;
     }
   }
   else
