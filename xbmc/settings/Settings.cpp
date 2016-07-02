@@ -998,9 +998,6 @@ void CSettings::InitializeDefaults()
 
   if (g_application.IsStandAlone())
     ((CSettingInt*)m_settingsManager->GetSetting(CSettings::SETTING_POWERMANAGEMENT_SHUTDOWNSTATE))->SetDefault(POWERSTATE_SHUTDOWN);
-
-  ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_SERVICES_PLEXSIGNIN))->SetDefault(g_localizeStrings.Get(1240));
-  ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_SERVICES_PLEXSIGNINPIN))->SetDefault(g_localizeStrings.Get(1240));
 }
 
 void CSettings::InitializeOptionFillers()

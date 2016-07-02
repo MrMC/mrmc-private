@@ -2148,7 +2148,7 @@
       <group id="1">
         <setting id="plex.signin" type="string" label="1238" help="1239">
           <level>0</level>
-          <default>fillme</default>
+          <default>Sign-in</default>
           <dependencies>
             <dependency type="enable">
               <condition on="property" name="plexsignin" setting="plex.signinpin" />
@@ -2158,7 +2158,7 @@
         </setting>
         <setting id="plex.signinpin" type="string" label="1246" help="1247">
           <level>0</level>
-          <default>fillme</default>
+          <default>Sign-in</default>
           <dependencies>
             <dependency type="enable">
               <condition on="property" name="plexsigninpin" setting="plex.signin" />
