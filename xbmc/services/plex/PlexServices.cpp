@@ -368,12 +368,14 @@ void CPlexServices::Process()
       gdmTimer.Reset();
     }
 
+#if 0
     if (checkUpdatesTimer.GetElapsedSeconds() > (60 * 10))
     {
       if (!IsProcessing())
         AddJob(new CPlexServiceJob(0, "CheckForUpdates"));
       checkUpdatesTimer.Reset();
     }
+#endif
 
     m_processSleep.WaitMSec(250);
     m_processSleep.Reset();
