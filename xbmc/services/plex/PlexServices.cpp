@@ -448,14 +448,15 @@ bool CPlexServices::GetSignInPinCode()
   XFILE::CCurlFile plex;
   // use a lower default timeout
   plex.SetTimeout(3);
-  plex.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
+  CPlexUtils::GetDefaultHeaders(plex);
 
   CURL url("https://plex.tv/pins.xml");
 
   std::string strResponse;
   if (plex.Post(url.Get(), "", strResponse))
   {
-    CLog::Log(LOGDEBUG, "CPlexServices:FetchSignInPin %s", strResponse.c_str());
+    //CLog::Log(LOGDEBUG, "CPlexServices:FetchSignInPin %s", strResponse.c_str());
+
     /*
     <pin>
       <client-identifier>a36023fe-930c-4f07-9dbb-88ac8cb91ccf</client-identifier>
@@ -560,9 +561,7 @@ bool CPlexServices::GetSignInByPinReply()
   bool rtn = false;
 
   XFILE::CCurlFile plex;
-  plex.SetRequestHeader("Content-Type", "application/xml; charset=utf-8");
-  plex.SetRequestHeader("Content-Length", "0");
-  plex.SetRequestHeader("X-Plex-Client-Identifier", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
+  CPlexUtils::GetDefaultHeaders(plex);
 
   std::string path = "https://plex.tv/pins/" + m_signInByPinId + ".xml";
   CURL url(path);
@@ -570,7 +569,7 @@ bool CPlexServices::GetSignInByPinReply()
   std::string strResponse;
   if (plex.Get(url.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "CPlexServices:WaitForSignInByPin %s", strResponse.c_str());
+    //CLog::Log(LOGDEBUG, "CPlexServices:WaitForSignInByPin %s", strResponse.c_str());
 
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
