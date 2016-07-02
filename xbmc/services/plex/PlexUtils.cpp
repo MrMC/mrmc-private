@@ -188,7 +188,7 @@ void CPlexUtils::SetWatched(CFileItem &item)
   std::string id = item.GetVideoInfoTag()->m_strServiceId;
   url2.SetFileName(StringUtils::Format(":/scrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
 
-  CLog::Log(LOGDEBUG, "CPlexUtils::SetWatched ID = %s", id.c_str());
+  //CLog::Log(LOGDEBUG, "CPlexUtils::SetWatched ID = %s", id.c_str());
   
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
@@ -208,7 +208,7 @@ void CPlexUtils::SetUnWatched(CFileItem &item)
   std::string id = item.GetVideoInfoTag()->m_strServiceId;
   url2.SetFileName(StringUtils::Format(":/unscrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
 
-  CLog::Log(LOGDEBUG, "CPlexUtils::SetUnWatched ID = %s", id.c_str());
+  //CLog::Log(LOGDEBUG, "CPlexUtils::SetUnWatched ID = %s", id.c_str());
   
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
@@ -227,7 +227,7 @@ void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
   filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=stopped&time=%i&duration=%i",
     id.c_str(), offsetSeconds * 1000, totalSeconds * 1000);
 
-  CLog::Log(LOGDEBUG, "CPlexUtils::SetOffset %d secs", offsetSeconds);
+  //CLog::Log(LOGDEBUG, "CPlexUtils::SetOffset %d secs", offsetSeconds);
   
   CURL url2(url);
   url2.SetProtocol("http");
@@ -255,7 +255,7 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentTime)
     filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=playing&time=%i&duration=%i",
                id.c_str(), (int)(currentTime * 1000), totalSeconds * 1000);
     
-    CLog::Log(LOGDEBUG, "CPlexUtils::ReportProgress %f secs for ID= %s", currentTime, id.c_str());
+    //CLog::Log(LOGDEBUG, "CPlexUtils::ReportProgress %f secs for ID= %s", currentTime, id.c_str());
     
     CURL url2(url);
     url2.SetProtocol("http");
