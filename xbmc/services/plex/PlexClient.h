@@ -22,11 +22,13 @@
 #include <string>
 
 #include "utils/XMLUtils.h"
+#include "threads/CriticalSection.h"
 
 enum PlexSectionParsing
 {
   newSection,
-  needUpdate,
+  checkSection,
+  updateSection,
 };
 
 struct PlexSectionsContent
@@ -47,6 +49,9 @@ struct PlexSectionsContent
   std::string art;
 };
 
+typedef std::vector<PlexSectionsContent> PlexSectionsContentVector;
+
+
 class CPlexClient
 {
   friend class CPlexServices;
@@ -61,10 +66,10 @@ public:
   const std::string &GetServerName() const  { return m_serverName; }
   const std::string &GetUuid() const        { return m_uuid; }
   const std::string &GetScheme() const      { return m_scheme; }
-  const std::vector<PlexSectionsContent> &GetTvContent() const    { return m_showSectionsContents; }
-  const std::vector<PlexSectionsContent> &GetMovieContent() const { return m_movieSectionsContents; }
-
   const bool &IsLocal() const { return m_local; }
+
+  const PlexSectionsContentVector GetTvContent() const;
+  const PlexSectionsContentVector GetMovieContent() const;
   std::string GetHost();
   int         GetPort();
   std::string GetUrl();
@@ -83,6 +88,8 @@ private:
   std::string m_scheme;
   std::atomic<bool> m_alive;
   std::atomic<bool> m_needUpdate;
+  CCriticalSection  m_criticalMovies;
+  CCriticalSection  m_criticalTVShow;
   std::vector<PlexSectionsContent> m_movieSectionsContents;
   std::vector<PlexSectionsContent> m_showSectionsContents;
 };

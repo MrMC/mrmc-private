@@ -92,15 +92,20 @@ private:
 CPlexServices::CPlexServices()
 : CThread("PlexServices")
 , m_gdmListener(nullptr)
+, m_playState(PlexServicePlayerState::stopped)
 {
   // register our redacted protocol options with CURL
   // we do not want these exposed in mrmc.log.
   if (!CURL::HasProtocolOptionsRedacted("X-Plex-Token"))
     CURL::SetProtocolOptionsRedacted("X-Plex-Token", "PLEXTOKEN");
+
+  CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CPlexServices::~CPlexServices()
 {
+  CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
+
   if (IsRunning())
     Stop();
 
@@ -274,6 +279,19 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
   }
 }
 
+void CPlexServices::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
+{
+  if ((flag & Player) && strcmp(sender, "xbmc") == 0)
+  {
+    if (strcmp(message, "OnPlay") == 0)
+      m_playState = PlexServicePlayerState::playing;
+    else if (strcmp(message, "OnPause") == 0)
+      m_playState = PlexServicePlayerState::paused;
+    else if (strcmp(message, "OnStop") == 0)
+      m_playState = PlexServicePlayerState::stopped;
+  }
+}
+
 void CPlexServices::OnSettingChanged(const CSetting *setting)
 {
   // All Plex settings so far
@@ -308,9 +326,9 @@ void CPlexServices::SetUserSettings()
 
 void CPlexServices::GetUserSettings()
 {
-  // false is disabled, true is auto
-  m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
   m_authToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
+  m_updateMins  = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXUPDATEMINS);
+  m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
 }
 
 void CPlexServices::Process()
@@ -336,31 +354,52 @@ void CPlexServices::Process()
       // try plex.tv
       if (!m_authToken.empty())
       {
-        // if we get back servers, then
-        // reduce the initial polling time
-        if (GetMyPlexServers())
-          plextvTimeoutSeconds = 60 * 10;
+        if (m_playState != PlexServicePlayerState::playing)
+        {
+          // if we get back servers, then
+          // reduce the initial polling time
+          if (GetMyPlexServers())
+            plextvTimeoutSeconds = 60 * m_updateMins;
+          }
       }
       plextvTimer.Reset();
     }
 
     if (gdmTimer.GetElapsedSeconds() > 5)
     {
-      CheckForGDMServers();
+      if (m_playState != PlexServicePlayerState::playing)
+        CheckForGDMServers();
       gdmTimer.Reset();
     }
 
-    if (checkUpdatesTimer.GetElapsedSeconds() > (60 * 1))
+    if (checkUpdatesTimer.GetElapsedSeconds() > (60 * m_updateMins))
     {
       //if (!IsProcessing())
       //  AddJob(new CPlexServiceJob(0, "CheckForUpdates"));
       // move this to CPlexServiceJob
-      for (size_t c = 0; c < m_clients.size(); c++)
+      CSingleLock lock(m_criticalClients);
+      bool clearDirCache = false;
+      for (size_t c = 0; c < m_clients.size(); ++c)
       {
-        m_clients[c]->ParseSections(PlexSectionParsing::needUpdate);
+        m_clients[c]->ParseSections(PlexSectionParsing::checkSection);
         if (m_clients[c]->NeedUpdate())
-          g_directoryCache.Clear();
+        {
+          m_clients[c]->ParseSections(PlexSectionParsing::updateSection);
+          clearDirCache = true;
+        }
       }
+      if (clearDirCache)
+      {
+        g_directoryCache.Clear();
+        if (m_playState != PlexServicePlayerState::playing)
+        {
+          CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+          g_windowManager.SendThreadMessage(msg);
+          //std::string strMessage = "Updating";
+          //CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Plex Services", strMessage, 3000, false);
+        }
+      }
+
       checkUpdatesTimer.Reset();
     }
 

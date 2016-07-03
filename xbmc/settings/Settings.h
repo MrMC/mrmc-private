@@ -422,6 +422,7 @@ public:
   static const std::string SETTING_SERVICES_PLEXSIGNINPIN;
   static const std::string SETTING_SERVICES_PLEXHOMEUSER;
   static const std::string SETTING_SERVICES_PLEXGDMSERVER;
+  static const std::string SETTING_SERVICES_PLEXUPDATEMINS;
   static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
 
   /*!

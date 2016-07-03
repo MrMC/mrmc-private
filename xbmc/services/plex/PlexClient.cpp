@@ -145,6 +145,18 @@ int CPlexClient::GetPort()
   return url.GetPort();
 }
 
+const PlexSectionsContentVector CPlexClient::GetTvContent() const
+{
+  CSingleLock lock(m_criticalTVShow);
+  return m_showSectionsContents;
+}
+
+const PlexSectionsContentVector CPlexClient::GetMovieContent() const
+{
+  CSingleLock lock(m_criticalMovies);
+  return m_movieSectionsContents;
+}
+
 bool CPlexClient::ParseSections(PlexSectionParsing parser)
 {
   bool rtn = false;
@@ -160,6 +172,18 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
     if (parser == PlexSectionParsing::newSection)
       CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %d, %s", parser, strResponse.c_str());
 #endif
+    if (parser == PlexSectionParsing::updateSection)
+    {
+      {
+        CSingleLock lock(m_criticalMovies);
+        m_movieSectionsContents.clear();
+      }
+      {
+        CSingleLock lock(m_criticalTVShow);
+        m_showSectionsContents.clear();
+      }
+      m_needUpdate = false;
+    }
 
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
@@ -185,8 +209,9 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
           content.art = content.section + "/resources/" + URIUtils::GetFileName(art);
         if (content.type == "movie")
         {
-          if (parser == PlexSectionParsing::needUpdate)
+          if (parser == PlexSectionParsing::checkSection)
           {
+            CSingleLock lock(m_criticalMovies);
             for (size_t c = 0; c < m_movieSectionsContents.size(); c++)
             {
               if (m_movieSectionsContents[c].uuid == content.uuid)
@@ -204,13 +229,15 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
           }
           else
           {
+            CSingleLock lock(m_criticalMovies);
             m_movieSectionsContents.push_back(content);
           }
         }
         else if (content.type == "show")
         {
-          if (parser == PlexSectionParsing::needUpdate)
+          if (parser == PlexSectionParsing::checkSection)
           {
+            CSingleLock lock(m_criticalTVShow);
             for (size_t c = 0; c < m_showSectionsContents.size(); c++)
             {
               if (m_showSectionsContents[c].uuid == content.uuid)
@@ -228,6 +255,7 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
           }
           else
           {
+            CSingleLock lock(m_criticalTVShow);
             m_showSectionsContents.push_back(content);
           }
         }

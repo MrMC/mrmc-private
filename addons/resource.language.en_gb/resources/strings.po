@@ -4331,7 +4331,18 @@ msgctxt "#1249"
 msgid "https://plex.tv/pin and enter this code -> "
 msgstr ""
 
-#empty strings from id 1250 to 1258
+#: system/settings/settings.xml
+msgctxt "#1250"
+msgid "Plex Library update interval (mins)"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#1251"
+msgid "Amount of time (in mins) that Plex servers are checked for updates"
+msgstr ""
+
+
+#empty strings from id 1252 to 1258
 
 #: system/settings/settings.xml
 msgctxt "#1259"

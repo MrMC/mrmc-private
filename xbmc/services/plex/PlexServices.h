@@ -23,6 +23,7 @@
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
+#include "interfaces/IAnnouncer.h"
 #include "utils/JobManager.h"
 
 namespace SOCKETS
@@ -30,14 +31,22 @@ namespace SOCKETS
   class CUDPSocket;
   class CSocketListener;
 }
-class CPlexClient;
 
+enum PlexServicePlayerState
+{
+  paused = 0,
+  playing = 1,
+  stopped = 2,
+};
+
+class CPlexClient;
 typedef std::shared_ptr<CPlexClient> CPlexClientPtr;
 
 class CPlexServices
 : public CThread
-, public ISettingCallback
 , public CJobQueue
+, public ISettingCallback
+, public ANNOUNCEMENT::IAnnouncer
 {
 public:
   static CPlexServices &GetInstance();
@@ -51,6 +60,9 @@ public:
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
   virtual void OnSettingChanged(const CSetting *setting) override;
+
+  // IAnnouncer callbacks
+  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
 
 private:
   // private construction, and no assignements; use the provided singleton methods
@@ -85,7 +97,9 @@ private:
   std::string       m_signInByPinId;
   std::string       m_signInByPinCode;
   std::string       m_myHomeUser;
+  int               m_updateMins;
 
+  PlexServicePlayerState m_playState;
   CCriticalSection  m_criticalClients;
   std::vector<CPlexClientPtr> m_clients;
 };

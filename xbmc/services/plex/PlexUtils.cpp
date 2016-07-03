@@ -103,7 +103,7 @@ void CPlexUtils::ReportToServer(std::string url, std::string filename)
   CURL url2(url);
   url2.SetProtocol("http");
   url2.SetFileName(filename.c_str());
-  
+
   std::string strXML;
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
@@ -239,7 +239,7 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentTime)
     std::string status = "playing";
     if(g_playbackPaused)
       status = "paused";
-    
+
     std::string url   = URIUtils::GetParentPath(item.GetPath());
     std::string id    = item.GetVideoInfoTag()->m_strServiceId;
     int totalSeconds  = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;

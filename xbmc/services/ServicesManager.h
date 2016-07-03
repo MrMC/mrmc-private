@@ -47,9 +47,9 @@ public:
   virtual XFILE::DIR_CACHE_TYPE GetCacheType(const CURL& url);
 };
 
-class CServicesManager:
-public CJobQueue,
-public ANNOUNCEMENT::IAnnouncer
+class CServicesManager
+: public CJobQueue
+, public ANNOUNCEMENT::IAnnouncer
 {
 public:
   static CServicesManager &GetInstance();

@@ -2187,6 +2187,18 @@
           <default>false</default>
           <control type="toggle" />
         </setting>
+        <setting id="plex.updatetime" type="integer" label="1250" help="1251">
+          <level>0</level>
+          <default>10</default>
+          <constraints>
+            <minimum>10</minimum>
+            <step>10</step>
+            <maximum>300</maximum>
+          </constraints>
+          <control type="spinner" format="string">
+            <formatlabel>14044</formatlabel>
+          </control>
+        </setting>
         <setting id="plex.myplexauthtoken" type="string" label="" help="">
           <level>0</level>
           <default></default>

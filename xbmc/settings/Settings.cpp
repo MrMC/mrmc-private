@@ -473,6 +473,7 @@ const std::string CSettings::SETTING_SERVICES_PLEXSIGNIN = "plex.signin";
 const std::string CSettings::SETTING_SERVICES_PLEXSIGNINPIN = "plex.signinpin";
 const std::string CSettings::SETTING_SERVICES_PLEXHOMEUSER  = "plex.homeuser";
 const std::string CSettings::SETTING_SERVICES_PLEXGDMSERVER = "plex.gdmserver";
+const std::string CSettings::SETTING_SERVICES_PLEXUPDATEMINS = "plex.updatetime";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH = "plex.myplexauthtoken";
 
 CSettings::CSettings()
@@ -1340,6 +1341,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXSIGNINPIN);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXHOMEUSER);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
+  settingSet.insert(CSettings::SETTING_SERVICES_PLEXUPDATEMINS);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
   m_settingsManager->RegisterCallback(&CPlexServices::GetInstance(), settingSet);
 }
