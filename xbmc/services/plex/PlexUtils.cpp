@@ -414,6 +414,7 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
   items.SetProperty("library.filter", "true");
+  items.SetProperty("PlexItem", true);
 
   return rtn;
 }
@@ -478,18 +479,20 @@ bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
       
       time_t addedTime = atoi(XMLUtils::GetAttribute(directoryNode, "addedAt").c_str());
       CDateTime aTime(addedTime);
+      int watchedEpisodes = atoi(XMLUtils::GetAttribute(directoryNode, "viewedLeafCount").c_str());
+      int iSeasons        = atoi(XMLUtils::GetAttribute(directoryNode, "childCount").c_str());
       plexItem->GetVideoInfoTag()->m_dateAdded = aTime;
-      plexItem->GetVideoInfoTag()->m_iSeason = atoi(XMLUtils::GetAttribute(directoryNode, "childCount").c_str());
+      plexItem->GetVideoInfoTag()->m_iSeason = iSeasons;
       plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(directoryNode, "leafCount").c_str());
-      plexItem->GetVideoInfoTag()->m_playCount = atoi(XMLUtils::GetAttribute(directoryNode, "viewedLeafCount").c_str());
+      plexItem->GetVideoInfoTag()->m_playCount = (int)watchedEpisodes >= plexItem->GetVideoInfoTag()->m_iEpisode;
       
-      plexItem->SetProperty("totalseasons", XMLUtils::GetAttribute(directoryNode, "childCount"));
+      plexItem->SetProperty("totalseasons", iSeasons);
       plexItem->SetProperty("totalepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
       plexItem->SetProperty("numepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
-      plexItem->SetProperty("watchedepisodes", plexItem->GetVideoInfoTag()->m_playCount);
-      plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - plexItem->GetVideoInfoTag()->m_playCount);
+      plexItem->SetProperty("watchedepisodes", watchedEpisodes);
+      plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - watchedEpisodes);
       
-      plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->GetVideoInfoTag()->m_playCount >= plexItem->GetVideoInfoTag()->m_iEpisode);
+      plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, watchedEpisodes >= plexItem->GetVideoInfoTag()->m_iEpisode);
       
       GetVideoDetails(*plexItem, directoryNode);
       
@@ -498,6 +501,7 @@ bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
     }
   }
   items.SetProperty("library.filter", "true");
+  items.GetVideoInfoTag()->m_type = MediaTypeServiceTvShow;
 
   return rtn;
 }
@@ -544,16 +548,19 @@ bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
           StringUtils::TrimLeft(value, "/");
         url1.SetFileName(value);
         plexItem->SetArt("thumb", url1.Get());
+        int watchedEpisodes = atoi(XMLUtils::GetAttribute(directoryNode, "viewedLeafCount").c_str());
+        int iSeason = atoi(XMLUtils::GetAttribute(directoryNode, "index").c_str());
+        plexItem->GetVideoInfoTag()->m_iSeason = iSeason;
         plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(directoryNode, "leafCount").c_str());
-        plexItem->GetVideoInfoTag()->m_playCount = atoi(XMLUtils::GetAttribute(directoryNode, "viewedLeafCount").c_str());
+        plexItem->GetVideoInfoTag()->m_playCount = (int)watchedEpisodes >= plexItem->GetVideoInfoTag()->m_iEpisode;
         
-        plexItem->SetProperty("totalseasons", XMLUtils::GetAttribute(directoryNode, "childCount"));
+//        plexItem->SetProperty("totalseasons", iSeason);
         plexItem->SetProperty("totalepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
         plexItem->SetProperty("numepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
-        plexItem->SetProperty("watchedepisodes", plexItem->GetVideoInfoTag()->m_playCount);
-        plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - plexItem->GetVideoInfoTag()->m_playCount);
+        plexItem->SetProperty("watchedepisodes", watchedEpisodes);
+        plexItem->SetProperty("unwatchedepisodes", plexItem->GetVideoInfoTag()->m_iEpisode - watchedEpisodes);
         
-        plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, plexItem->GetVideoInfoTag()->m_playCount >= plexItem->GetVideoInfoTag()->m_iEpisode);
+        plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, watchedEpisodes >= plexItem->GetVideoInfoTag()->m_iEpisode);
         
         items.Add(plexItem);
       }
@@ -562,6 +569,7 @@ bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   }
   items.SetProperty("library.filter", "true");
+  items.SetProperty("PlexItem", true);
 
   return rtn;
 }
