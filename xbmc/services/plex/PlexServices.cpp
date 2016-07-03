@@ -31,6 +31,7 @@
 #include "dialogs/GUIDialogNumeric.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "filesystem/CurlFile.h"
+#include "filesystem/DirectoryCache.h"
 #include "guilib/LocalizeStrings.h"
 #include "guilib/GUIWindowManager.h"
 #include "interfaces/AnnouncementManager.h"
@@ -358,10 +359,7 @@ void CPlexServices::Process()
       {
         m_clients[c]->ParseSections(PlexSectionParsing::needUpdate);
         if (m_clients[c]->NeedUpdate())
-        {
-          CUtil::DeleteVideoDatabaseDirectoryCache();
-          CUtil::DeleteMusicDatabaseDirectoryCache();
-        }
+          g_directoryCache.Clear();
       }
       checkUpdatesTimer.Reset();
     }
