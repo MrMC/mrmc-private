@@ -307,7 +307,7 @@ void CGUIWindowHome::PlayRecentlyAddedItem(CFileItem itemPtr)
       choices.Add(SELECT_ACTION_RESUME, resumeString);
       choices.Add(SELECT_ACTION_PLAY, 12021);   // Start from beginning
       int value = CGUIDialogContextMenu::ShowAndGetChoice(choices);
-      if (value == 2)
+      if (value == SELECT_ACTION_RESUME)
         itemPtr.m_lStartOffset = STARTOFFSET_RESUME;
       if (value > -1)
         g_application.PlayFile(itemPtr);
