@@ -36,6 +36,7 @@
 #include "playlists/PlayList.h"
 #include "messaging/ApplicationMessenger.h"
 #include "services/ServicesManager.h"
+#include "video/windows/GUIWindowVideoBase.h"
 
 #define CONTROL_RECENTLYADDEDMOVIES      8000
 #define CONTROL_RECENTLYADDEDTVSHOWS     8001
@@ -299,8 +300,17 @@ void CGUIWindowHome::PlayRecentlyAddedItem(CFileItem itemPtr)
   }
   else
   {
-    g_playlistPlayer.ClearPlaylist(PLAYLIST_VIDEO);
-    g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
-    g_application.PlayMedia(itemPtr, PLAYLIST_VIDEO);
+    std::string resumeString = CGUIWindowVideoBase::GetResumeString(itemPtr);
+    if (!resumeString.empty())
+    {
+      CContextButtons choices;
+      choices.Add(SELECT_ACTION_RESUME, resumeString);
+      choices.Add(SELECT_ACTION_PLAY, 12021);   // Start from beginning
+      int value = CGUIDialogContextMenu::ShowAndGetChoice(choices);
+      if (value == 2)
+        itemPtr.m_lStartOffset = STARTOFFSET_RESUME;
+      if (value > -1)
+        g_application.PlayFile(itemPtr);
+    }
   }
 }
