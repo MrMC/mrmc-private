@@ -23,6 +23,12 @@
 
 #include "utils/XMLUtils.h"
 
+enum PlexSectionParsing
+{
+  newSection,
+  needUpdate,
+};
+
 struct PlexSectionsContent
 {
   int port;
@@ -50,6 +56,7 @@ public:
   CPlexClient(const TiXmlElement* DeviceNode);
  ~CPlexClient();
 
+  const bool NeedUpdate() const             { return m_needUpdate; }
   const std::string &GetContentType() const { return m_contentType; }
   const std::string &GetServerName() const  { return m_serverName; }
   const std::string &GetUuid() const        { return m_uuid; }
@@ -63,8 +70,8 @@ public:
   std::string GetUrl();
 
 protected:
-  bool ParseSections();
-  void SetVanished() { m_alive = false; };
+  bool        ParseSections(PlexSectionParsing parser);
+  void        SetVanished() { m_alive = false; };
 
 private:
   bool        m_local;
@@ -75,6 +82,7 @@ private:
   std::string m_accessToken;
   std::string m_scheme;
   std::atomic<bool> m_alive;
+  std::atomic<bool> m_needUpdate;
   std::vector<PlexSectionsContent> m_movieSectionsContents;
   std::vector<PlexSectionsContent> m_showSectionsContents;
 };

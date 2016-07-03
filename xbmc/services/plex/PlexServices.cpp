@@ -22,6 +22,7 @@
 
 #include "Application.h"
 #include "URL.h"
+#include "Util.h"
 #include "GUIUserMessages.h"
 #include "cores/VideoRenderers/RenderManager.h"
 #include "cores/VideoRenderers/RenderCapture.h"
@@ -368,14 +369,22 @@ void CPlexServices::Process()
       gdmTimer.Reset();
     }
 
-#if 0
-    if (checkUpdatesTimer.GetElapsedSeconds() > (60 * 10))
+    if (checkUpdatesTimer.GetElapsedSeconds() > (60 * 1))
     {
-      if (!IsProcessing())
-        AddJob(new CPlexServiceJob(0, "CheckForUpdates"));
+      //if (!IsProcessing())
+      //  AddJob(new CPlexServiceJob(0, "CheckForUpdates"));
+      // move this to CPlexServiceJob
+      for (size_t c = 0; c < m_clients.size(); c++)
+      {
+        m_clients[c]->ParseSections(PlexSectionParsing::needUpdate);
+        if (m_clients[c]->NeedUpdate())
+        {
+          CUtil::DeleteVideoDatabaseDirectoryCache();
+          CUtil::DeleteMusicDatabaseDirectoryCache();
+        }
+      }
       checkUpdatesTimer.Reset();
     }
-#endif
 
     m_processSleep.WaitMSec(250);
     m_processSleep.Reset();
@@ -435,7 +444,7 @@ bool CPlexServices::GetMyPlexServers()
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
-  CURL url(NS_PLEXTV_URL + "/api/resources");
+  CURL url(NS_PLEXTV_URL + "/pms/resources");
   if (plex.Get(url.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
@@ -760,7 +769,7 @@ bool CPlexServices::AddClient(CPlexClientPtr client)
     return false;
   }
 
-  if (client->ParseSections())
+  if (client->ParseSections(PlexSectionParsing::newSection))
   {
     m_clients.push_back(client);
 
@@ -788,7 +797,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
-  CURL url(NS_PLEXTV_URL + "/api/home/users");
+  CURL url(NS_PLEXTV_URL + "/pms/home/users");
   if (plex.Get(url.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
@@ -868,7 +877,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
       plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
     std::string uuid = item->GetProperty("uuid").asString();
-    CURL url(NS_PLEXTV_URL + "/api/v2/home/users/" + uuid + pinUrl);
+    CURL url(NS_PLEXTV_URL + "/pms/v2/home/users/" + uuid + pinUrl);
 
     CPlexUtils::GetDefaultHeaders(plex);
     std::string strResponse;

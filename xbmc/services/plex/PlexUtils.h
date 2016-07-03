@@ -24,7 +24,7 @@
 #include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
 
-//#define PLEX_DEBUG_VERBOSE
+#define PLEX_DEBUG_VERBOSE
 
 namespace XFILE
 {

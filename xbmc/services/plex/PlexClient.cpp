@@ -57,6 +57,7 @@ CPlexClient::CPlexClient(std::string data, std::string ip)
   m_local = true;
   m_alive = true;
   m_scheme = "http";
+  m_needUpdate = false;
   int port = 32400;
   std::string s;
   std::istringstream f(data);
@@ -92,6 +93,7 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
 {
   m_local = false;
   m_alive = true;
+  m_needUpdate = false;
   m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
   m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
   m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
@@ -143,7 +145,7 @@ int CPlexClient::GetPort()
   return url.GetPort();
 }
 
-bool CPlexClient::ParseSections()
+bool CPlexClient::ParseSections(PlexSectionParsing parser)
 {
   bool rtn = false;
   XFILE::CCurlFile plex;
@@ -155,7 +157,8 @@ bool CPlexClient::ParseSections()
   if (plex.Get(curl.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "CPlexClient::ParseSections() %s", strResponse.c_str());
+    if (parser == PlexSectionParsing::newSection)
+      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %d, %s", parser, strResponse.c_str());
 #endif
 
     TiXmlDocument xml;
@@ -168,6 +171,7 @@ bool CPlexClient::ParseSections()
       while (DirectoryNode)
       {
         PlexSectionsContent content;
+        content.uuid = XMLUtils::GetAttribute(DirectoryNode, "uuid");
         content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
         content.type = XMLUtils::GetAttribute(DirectoryNode, "type");
         content.title = XMLUtils::GetAttribute(DirectoryNode, "title");
@@ -180,9 +184,53 @@ bool CPlexClient::ParseSections()
         else
           content.art = content.section + "/resources/" + URIUtils::GetFileName(art);
         if (content.type == "movie")
-          m_movieSectionsContents.push_back(content);
+        {
+          if (parser == PlexSectionParsing::needUpdate)
+          {
+            for (size_t c = 0; c < m_movieSectionsContents.size(); c++)
+            {
+              if (m_movieSectionsContents[c].uuid == content.uuid)
+              {
+                if (m_movieSectionsContents[c].updatedAt != content.updatedAt)
+                {
+#if defined(PLEX_DEBUG_VERBOSE)
+                  CLog::Log(LOGDEBUG, "CPlexClient::ParseSections need update on %s:%s",
+                    m_serverName.c_str(), content.title.c_str());
+#endif
+                  m_needUpdate = true;
+                }
+              }
+            }
+          }
+          else
+          {
+            m_movieSectionsContents.push_back(content);
+          }
+        }
         else if (content.type == "show")
-          m_showSectionsContents.push_back(content);
+        {
+          if (parser == PlexSectionParsing::needUpdate)
+          {
+            for (size_t c = 0; c < m_showSectionsContents.size(); c++)
+            {
+              if (m_showSectionsContents[c].uuid == content.uuid)
+              {
+                if (m_showSectionsContents[c].updatedAt != content.updatedAt)
+                {
+#if defined(PLEX_DEBUG_VERBOSE)
+                  CLog::Log(LOGDEBUG, "CPlexClient::ParseSections need update on %s:%s",
+                    m_serverName.c_str(), content.title.c_str());
+#endif
+                  m_needUpdate = true;
+                }
+              }
+            }
+          }
+          else
+          {
+            m_showSectionsContents.push_back(content);
+          }
+        }
         DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
       }
       rtn = true;
@@ -200,4 +248,3 @@ bool CPlexClient::ParseSections()
 
   return rtn;
 }
-
