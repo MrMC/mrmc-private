@@ -63,7 +63,6 @@ public:
   std::string GetUrl();
 
 protected:
-  void ParseData(std::string data, std::string ip);
   bool ParseSections();
   void SetVanished() { m_alive = false; };
 

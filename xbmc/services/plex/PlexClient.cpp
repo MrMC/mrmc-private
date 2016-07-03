@@ -56,61 +56,10 @@ CPlexClient::CPlexClient(std::string data, std::string ip)
 {
   m_local = true;
   m_alive = true;
-  ParseData(data, ip);
-}
-
-CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
-{
-  m_local = false;
-  m_alive = true;
-  m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
-  m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
-  m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
-
-  std::string port;
-  std::string address;
-  const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
-  while (ConnectionNode)
-  {
-    /*
-    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "0")
-    {
-      port = XMLUtils::GetAttribute(ConnectionNode, "port");
-      address = XMLUtils::GetAttribute(ConnectionNode, "address");
-      m_scheme = XMLUtils::GetAttribute(ConnectionNode, "protocol");
-    }
-    */
-    port = XMLUtils::GetAttribute(ConnectionNode, "port");
-    address = XMLUtils::GetAttribute(ConnectionNode, "address");
-    m_scheme = XMLUtils::GetAttribute(ConnectionNode, "protocol");
-    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(address, port))
-    {
-      m_local = TRUE;
-      break;
-    }
-
-    ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
-  }
-
-  CURL url;
-  url.SetHostName(address);
-  url.SetPort(atoi(port.c_str()));
-  url.SetProtocol(m_scheme);
-  url.SetProtocolOptions("&X-Plex-Token=" + m_accessToken);
-
-  m_url = url.Get();
-}
-
-CPlexClient::~CPlexClient()
-{
-}
-
-
-void CPlexClient::ParseData(std::string data, std::string ip)
-{
-  int port = 0;
-  std::istringstream f(data);
+  m_scheme = "http";
+  int port = 32400;
   std::string s;
+  std::istringstream f(data);
   while (std::getline(f, s))
   {
     int pos = s.find(':');
@@ -134,9 +83,47 @@ void CPlexClient::ParseData(std::string data, std::string ip)
   CURL url;
   url.SetHostName(ip);
   url.SetPort(port);
-  url.SetProtocol("http");
+  url.SetProtocol(m_scheme);
 
   m_url = url.Get();
+}
+
+CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
+{
+  m_local = false;
+  m_alive = true;
+  m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
+  m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
+  m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
+
+  std::string port;
+  std::string address;
+  const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
+  while (ConnectionNode)
+  {
+    port = XMLUtils::GetAttribute(ConnectionNode, "port");
+    address = XMLUtils::GetAttribute(ConnectionNode, "address");
+    m_scheme = XMLUtils::GetAttribute(ConnectionNode, "protocol");
+    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(address, port))
+    {
+      m_local = TRUE;
+      break;
+    }
+
+    ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
+  }
+
+  CURL url;
+  url.SetHostName(address);
+  url.SetPort(atoi(port.c_str()));
+  url.SetProtocol(m_scheme);
+  url.SetProtocolOptions("&X-Plex-Token=" + m_accessToken);
+
+  m_url = url.Get();
+}
+
+CPlexClient::~CPlexClient()
+{
 }
 
 std::string CPlexClient::GetUrl()
