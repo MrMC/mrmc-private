@@ -438,8 +438,9 @@ bool CPlexServices::GetMyPlexServers()
   CURL url(NS_PLEXTV_URL + "/api/resources");
   if (plex.Get(url.Get(), strResponse))
   {
-    //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
-
+#if defined(PLEX_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CPlexServices:GetMyPlexServers %s", strResponse.c_str());
+#endif
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
 
@@ -790,7 +791,9 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
   CURL url(NS_PLEXTV_URL + "/api/home/users");
   if (plex.Get(url.Get(), strResponse))
   {
-    //CLog::Log(LOGDEBUG, "CPlexServices: servers %s", strResponse.c_str());
+#if defined(PLEX_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CPlexServices:GetMyHomeUsers %s", strResponse.c_str());
+#endif
 
     TiXmlDocument xml;
     CFileItemList plexUsers;

@@ -167,7 +167,10 @@ bool CPlexClient::ParseSections()
   std::string strResponse;
   if (plex.Get(curl.Get(), strResponse))
   {
-    //CLog::Log(LOGDEBUG, "CPlexClient::ParseSections() %s", strResponse.c_str());
+#if defined(PLEX_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CPlexClient::ParseSections() %s", strResponse.c_str());
+#endif
+
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
 
