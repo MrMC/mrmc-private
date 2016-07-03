@@ -96,14 +96,10 @@ CPlexServices::CPlexServices()
   // we do not want these exposed in mrmc.log.
   if (!CURL::HasProtocolOptionsRedacted("X-Plex-Token"))
     CURL::SetProtocolOptionsRedacted("X-Plex-Token", "PLEXTOKEN");
-
-  CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CPlexServices::~CPlexServices()
 {
-  CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
-
   if (IsRunning())
     Stop();
 
@@ -154,22 +150,6 @@ void CPlexServices::GetClients(std::vector<CPlexClientPtr> &clients) const
 {
   CSingleLock lock(m_criticalClients);
   clients = m_clients;
-}
-
-void CPlexServices::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
-{
-  if ((flag & Player) && strcmp(sender, "xbmc") == 0)
-  {
-    if (strcmp(message, "OnPlay") == 0)
-    {
-    }
-    else if (strcmp(message, "OnPause") == 0)
-    {
-    }
-    else if (strcmp(message, "OnStop") == 0)
-    {
-    }
-  }
 }
 
 void CPlexServices::OnSettingAction(const CSetting *setting)

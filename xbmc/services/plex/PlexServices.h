@@ -23,7 +23,6 @@
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
-#include "interfaces/IAnnouncer.h"
 #include "utils/JobManager.h"
 
 namespace SOCKETS
@@ -38,7 +37,6 @@ typedef std::shared_ptr<CPlexClient> CPlexClientPtr;
 class CPlexServices
 : public CThread
 , public ISettingCallback
-, public ANNOUNCEMENT::IAnnouncer
 , public CJobQueue
 {
 public:
@@ -53,9 +51,6 @@ public:
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
   virtual void OnSettingChanged(const CSetting *setting) override;
-
-  // IAnnouncer callbacks
-  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
 
 private:
   // private construction, and no assignements; use the provided singleton methods

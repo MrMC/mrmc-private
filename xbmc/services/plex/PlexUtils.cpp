@@ -36,7 +36,9 @@
 
 #include "video/VideoInfoTag.h"
 
-static int g_progressSec = 0;
+static int  g_progressSec = 0;
+static int  g_pausedSec = 0;
+static bool g_playbackPaused = false;
 
 bool CPlexUtils::HasClients()
 {
@@ -94,6 +96,18 @@ TiXmlDocument CPlexUtils::GetPlexXML(std::string url, std::string filter)
   xml.Parse(strXML.c_str());
   
   return xml;
+}
+
+void CPlexUtils::ReportToServer(std::string url, std::string filename)
+{
+  CURL url2(url);
+  url2.SetProtocol("http");
+  url2.SetFileName(filename.c_str());
+  
+  std::string strXML;
+  XFILE::CCurlFile plex;
+  CPlexUtils::GetDefaultHeaders(plex);
+  plex.Get(url2.Get(), strXML);
 }
 
 void CPlexUtils::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode)
@@ -178,48 +192,32 @@ void CPlexUtils::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode)
 
 void CPlexUtils::SetWatched(CFileItem &item)
 {
+  std::string id = item.GetVideoInfoTag()->m_strServiceId;
   std::string url = URIUtils::GetParentPath(item.GetPath());
   if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
       StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
       url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
 
-  CURL url2(url);
-  url2.SetProtocol("http");
-  std::string id = item.GetVideoInfoTag()->m_strServiceId;
-  url2.SetFileName(StringUtils::Format(":/scrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
-
-  //CLog::Log(LOGDEBUG, "CPlexUtils::SetWatched ID = %s", id.c_str());
-  
-  XFILE::CCurlFile plex;
-  CPlexUtils::GetDefaultHeaders(plex);
-  std::string strXML;
-  plex.Get(url2.Get(), strXML);
+  std::string filename = StringUtils::Format(":/scrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str());
+  ReportToServer(url, filename);
 }
 
 void CPlexUtils::SetUnWatched(CFileItem &item)
 {
+  std::string id = item.GetVideoInfoTag()->m_strServiceId;
   std::string url = URIUtils::GetParentPath(item.GetPath());
   if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
       StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
     url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
 
-  CURL url2(url);
-  url2.SetProtocol("http");
-  std::string id = item.GetVideoInfoTag()->m_strServiceId;
-  url2.SetFileName(StringUtils::Format(":/unscrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str()));
-
-  //CLog::Log(LOGDEBUG, "CPlexUtils::SetUnWatched ID = %s", id.c_str());
-  
-  XFILE::CCurlFile plex;
-  CPlexUtils::GetDefaultHeaders(plex);
-  std::string strXML;
-  plex.Get(url2.Get(), strXML);
+  std::string filename = StringUtils::Format(":/unscrobble?identifier=com.plexapp.plugins.library&key=%s", id.c_str());
+  ReportToServer(url, filename);
 }
 
 void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
 {
-  std::string url = URIUtils::GetParentPath(item.GetPath());
   std::string id  = item.GetVideoInfoTag()->m_strServiceId;
+  std::string url = URIUtils::GetParentPath(item.GetPath());
   int totalSeconds= item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
 
   // stopped
@@ -229,45 +227,39 @@ void CPlexUtils::SetOffset(CFileItem &item, int offsetSeconds)
 
   //CLog::Log(LOGDEBUG, "CPlexUtils::SetOffset %d secs", offsetSeconds);
   
-  CURL url2(url);
-  url2.SetProtocol("http");
-  url2.SetFileName(filename.c_str());
-
-  std::string strXML;
-  XFILE::CCurlFile plex;
-  CPlexUtils::GetDefaultHeaders(plex);
-  plex.Get(url2.Get(), strXML);
-
-  g_progressSec = 0;
+  ReportToServer(url, filename);
 }
 
 void CPlexUtils::ReportProgress(CFileItem &item, double currentTime)
 {
-  // we get called from
-  if (g_progressSec == 0 || g_progressSec > 120)
+  // we get called from Application.cpp every 500ms
+  if ((g_playbackPaused && (g_pausedSec == 0 || g_pausedSec > 60)) ||
+      (g_progressSec == 0 || g_progressSec > 120))
   {
+    std::string status = "playing";
+    if(g_playbackPaused)
+      status = "paused";
+    
     std::string url   = URIUtils::GetParentPath(item.GetPath());
     std::string id    = item.GetVideoInfoTag()->m_strServiceId;
     int totalSeconds  = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
     
-    // playing
     std::string filename = StringUtils::Format(":/timeline?ratingKey=%s&",id.c_str());
-    filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=playing&time=%i&duration=%i",
-               id.c_str(), (int)(currentTime * 1000), totalSeconds * 1000);
+    filename = filename + "key=%2Flibrary%2Fmetadata%2F" + StringUtils::Format("%s&state=%s&time=%i&duration=%i",
+                                                                               id.c_str(), status.c_str(),
+                                                                               (int)(currentTime * 1000), totalSeconds * 1000);
     
-    //CLog::Log(LOGDEBUG, "CPlexUtils::ReportProgress %f secs for ID= %s", currentTime, id.c_str());
-    
-    CURL url2(url);
-    url2.SetProtocol("http");
-    url2.SetFileName(filename.c_str());
-    
-    std::string strXML;
-    XFILE::CCurlFile plex;
-    CPlexUtils::GetDefaultHeaders(plex);
-    plex.Get(url2.Get(), strXML);
-    g_progressSec = 1;
+    ReportToServer(url, filename);
   }
+  g_pausedSec++;
   g_progressSec++;
+}
+
+void CPlexUtils::TogglePaused(bool paused)
+{
+  g_progressSec = 0;
+  g_pausedSec = 0;
+  g_playbackPaused = paused;
 }
 
 bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* rootXmlNode, std::string type, int season /* = -1 */)

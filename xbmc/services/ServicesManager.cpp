@@ -20,9 +20,12 @@
 
 #include "services/ServicesManager.h"
 
+#include "interfaces/AnnouncementManager.h"
 #include "services/plex/PlexUtils.h"
 #include "utils/JobManager.h"
 #include "video/VideoInfoTag.h"
+
+using namespace ANNOUNCEMENT;
 
 class CServicesManagerJob: public CJob
 {
@@ -62,10 +65,12 @@ private:
 
 CServicesManager::CServicesManager()
 {
+  CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CServicesManager::~CServicesManager()
 {
+  CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
 }
 
 CServicesManager& CServicesManager::GetInstance()
@@ -74,6 +79,24 @@ CServicesManager& CServicesManager::GetInstance()
   return sServicesManager;
 }
 
+void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
+{
+  if ((flag & Player) && strcmp(sender, "xbmc") == 0)
+  {
+    if (strcmp(message, "OnPlay") == 0)
+    {
+      CPlexUtils::TogglePaused(false);
+    }
+    else if (strcmp(message, "OnPause") == 0)
+    {
+      CPlexUtils::TogglePaused(true);
+    }
+    else if (strcmp(message, "OnStop") == 0)
+    {
+      CPlexUtils::TogglePaused(false);
+    }
+  }
+}
 
 bool CServicesManager::HasServices()
 {

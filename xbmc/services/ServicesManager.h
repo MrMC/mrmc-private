@@ -24,6 +24,8 @@
 #include "utils/JobManager.h"
 #include "threads/SharedSection.h"
 #include "filesystem/IDirectory.h"
+#include "interfaces/IAnnouncer.h"
+
 
 class CURL;
 class CFileItem;
@@ -45,7 +47,9 @@ public:
   virtual XFILE::DIR_CACHE_TYPE GetCacheType(const CURL& url);
 };
 
-class CServicesManager: public CJobQueue
+class CServicesManager:
+public CJobQueue,
+public ANNOUNCEMENT::IAnnouncer
 {
 public:
   static CServicesManager &GetInstance();
@@ -63,6 +67,9 @@ public:
 
   void RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler);
   void UnregisterSettingsHandler(IMediaServicesHandler *mediaServicesHandler);
+  
+  // IAnnouncer callbacks
+  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
 
 private:
   // private construction, and no assignements; use the provided singleton methods
