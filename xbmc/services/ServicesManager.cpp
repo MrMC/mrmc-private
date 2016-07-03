@@ -42,7 +42,7 @@ public:
     if (m_function == "SetWatched")
       CPlexUtils::SetWatched(m_item);
     else if (m_function == "SetUnWatched")
-      CPlexUtils::SetWatched(m_item);
+      CPlexUtils::SetUnWatched(m_item);
     else if (m_function == "SetResume")
       CPlexUtils::SetOffset(m_item, m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
     else if (m_function == "SetProgress")
