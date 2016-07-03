@@ -3296,23 +3296,7 @@ PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
       {
         const CVideoInfoTag *tag = item.GetVideoInfoTag();
 
-        // keep an eye on this, might fuck with playback
-        std::string resumeString = CGUIWindowVideoBase::GetResumeString(item);
-        if (!resumeString.empty())
-        {
-          CContextButtons choices;
-          choices.Add(SELECT_ACTION_RESUME, resumeString);
-          choices.Add(SELECT_ACTION_PLAY, 12021);   // Start from beginning
-          int value = CGUIDialogContextMenu::ShowAndGetChoice(choices);
-          if (value < 0)
-            return PLAYBACK_FAIL;
-          if (value == SELECT_ACTION_RESUME)
-          {
-            options.starttime = tag->m_resumePoint.timeInSeconds;
-            options.state = tag->m_resumePoint.playerState;
-          }
-        }
-        else if (tag->m_iBookmarkId > 0)
+        if (tag->m_iBookmarkId > 0)
         {
           CBookmark bookmark;
           dbs.GetBookMarkForEpisode(*tag, bookmark);
