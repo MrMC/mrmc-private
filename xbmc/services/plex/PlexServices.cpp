@@ -842,7 +842,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
-  CURL url(NS_PLEXTV_URL + "/pms/home/users");
+  CURL url(NS_PLEXTV_URL + "/api/home/users");
   if (plex.Get(url.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
@@ -921,8 +921,8 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
     if (MyPlexSignedIn())
       plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
-    std::string uuid = item->GetProperty("uuid").asString();
-    CURL url(NS_PLEXTV_URL + "/pms/v2/home/users/" + uuid + pinUrl);
+    std::string id = item->GetProperty("id").asString();
+    CURL url(NS_PLEXTV_URL + "/api/home/users/" + id + pinUrl);
 
     CPlexUtils::GetDefaultHeaders(plex);
     std::string strResponse;
