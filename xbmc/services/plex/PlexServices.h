@@ -72,6 +72,7 @@ private:
 
   void              SetUserSettings();
   void              GetUserSettings();
+  bool              MyPlexSignedIn();
 
   // IRunnable entry point for thread
   virtual void      Process() override;

@@ -214,7 +214,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
     }
     SetUserSettings();
 
-    if (startThread)
+    if (startThread || m_useGDMServer)
       Start();
     else
       Stop();
@@ -250,7 +250,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
     SetUserSettings();
 
 
-    if (startThread)
+    if (startThread || m_useGDMServer)
       Start();
     else
     {
@@ -311,7 +311,7 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
   {
     m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
     // start or stop the service
-    if (m_useGDMServer)
+    if (m_useGDMServer || MyPlexSignedIn())
       Start();
     else
       Stop();
@@ -331,12 +331,19 @@ void CPlexServices::GetUserSettings()
   m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
 }
 
+bool CPlexServices::MyPlexSignedIn()
+{
+  return !m_authToken.empty();
+}
+
 void CPlexServices::Process()
 {
   GetUserSettings();
 
+  SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
+
   // try plex.tv first
-  if (!m_authToken.empty())
+  if (MyPlexSignedIn())
   {
     bool includeHttps = true;
     GetMyPlexServers(includeHttps);
@@ -357,7 +364,7 @@ void CPlexServices::Process()
     if (plextvTimer.GetElapsedSeconds() > plextvTimeoutSeconds)
     {
       // try plex.tv
-      if (!m_authToken.empty())
+      if (MyPlexSignedIn())
       {
         if (m_playState != PlexServicePlayerState::playing)
         {
@@ -416,7 +423,15 @@ void CPlexServices::Process()
   }
 
   if (m_gdmListener)
+  {
+    // before deleting listener, fetch and delete any sockets it uses.
+    SOCKETS::CUDPSocket *socket = (SOCKETS::CUDPSocket*)m_gdmListener->GetFirstSocket();
+    // we should not have to do the close,
+    // delete 'should' do it.
+    socket->Close();
+    SAFE_DELETE(socket);
     SAFE_DELETE(m_gdmListener);
+  }
 }
 
 bool CPlexServices::GetPlexToken(std::string user, std::string pass)
@@ -465,7 +480,7 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
 
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
-  if (!m_authToken.empty())
+  if (MyPlexSignedIn())
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
@@ -823,7 +838,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
   std::string strMessage;
   XFILE::CCurlFile plex;
   CPlexUtils::GetDefaultHeaders(plex);
-  if (!m_authToken.empty())
+  if (MyPlexSignedIn())
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
@@ -903,7 +918,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
 
     XFILE::CCurlFile plex;
     CPlexUtils::GetDefaultHeaders(plex);
-    if (!m_authToken.empty())
+    if (MyPlexSignedIn())
       plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
     std::string uuid = item->GetProperty("uuid").asString();
