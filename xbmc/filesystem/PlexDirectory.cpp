@@ -143,7 +143,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.SetLabel("Titles");
         items.SetContent("movies");
       }
-      if (path == "recentlyaddedmovies")
+      else if (path == "recentlyaddedmovies")
       {
         CPlexUtils::GetLocalRecentlyAddedMovies(items, Base64::Decode(section));
         items.SetLabel("Recently added movies");
@@ -236,20 +236,20 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       if (path == "titles" || path == "filter")
       {
         CPlexUtils::GetLocalTvshows(items,Base64::Decode(section));
-        items.SetLabel("Titles");
+        items.SetLabel("Title");
         items.SetContent("tvshows");
       }
       else if (path == "shows")
       {
         CPlexUtils::GetLocalSeasons(items,Base64::Decode(section));
-        items.SetContent("seasons");
+        items.SetContent("tvshows");
       }
       else if (path == "seasons")
       {
         CPlexUtils::GetLocalEpisodes(items,Base64::Decode(section));
         items.SetContent("episodes");
       }
-      if (path == "recentlyaddedepisodes")
+      else if (path == "recentlyaddedepisodes")
       {
         CPlexUtils::GetLocalRecentlyAddedEpisodes(items, Base64::Decode(section));
         items.SetLabel("Recently added episodes");

@@ -3253,11 +3253,9 @@ bool CGUIInfoManager::GetMultiInfoBool(const GUIInfo &info, int contextWindow, c
       case VIDEOPLAYER_CONTENT:
         {
           std::string strContent="files";
-          if (m_currentFile->HasVideoInfoTag() && (m_currentFile->GetVideoInfoTag()->m_type == MediaTypeMovie ||
-                                                   m_currentFile->GetVideoInfoTag()->m_type == MediaTypeServiceMovie))
+          if (m_currentFile->HasVideoInfoTag() && m_currentFile->GetVideoInfoTag()->m_type == MediaTypeMovie)
             strContent = "movies";
-          if (m_currentFile->HasVideoInfoTag() && (m_currentFile->GetVideoInfoTag()->m_type == MediaTypeEpisode ||
-                                                   m_currentFile->GetVideoInfoTag()->m_type == MediaTypeServiceEpisode))
+          if (m_currentFile->HasVideoInfoTag() && m_currentFile->GetVideoInfoTag()->m_type == MediaTypeEpisode)
             strContent = "episodes";
           if (m_currentFile->HasVideoInfoTag() && m_currentFile->GetVideoInfoTag()->m_type == MediaTypeMusicVideo)
             strContent = "musicvideos";

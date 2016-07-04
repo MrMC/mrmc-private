@@ -420,7 +420,7 @@ bool CPlexUtils::GetLocalMovies(CFileItemList &items, std::string url, std::stri
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    rtn = GetVideoItems(items, url2, rootXmlNode, MediaTypeServiceMovie);
+    rtn = GetVideoItems(items, url2, rootXmlNode, MediaTypeMovie);
   }
 
   return rtn;
@@ -448,7 +448,7 @@ bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
       url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
       plexItem->SetPath("plex://tvshows/shows/" + Base64::Encode(url1.Get()));
       plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
-      plexItem->GetVideoInfoTag()->m_type = MediaTypeServiceTvShow;
+      plexItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
       plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
       plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(directoryNode, "tagline"));
       plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(directoryNode, "summary"));
@@ -485,6 +485,10 @@ bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
       
       plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, watchedEpisodes >= plexItem->GetVideoInfoTag()->m_iEpisode);
       
+      CDateTime firstAired;
+      firstAired.SetFromDBDate(XMLUtils::GetAttribute(directoryNode, "originallyAvailableAt"));
+      plexItem->GetVideoInfoTag()->m_firstAired = firstAired;
+      
       GetVideoDetails(*plexItem, directoryNode);
       
       items.Add(plexItem);
@@ -492,7 +496,7 @@ bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
     }
   }
   items.SetProperty("library.filter", "true");
-  items.GetVideoInfoTag()->m_type = MediaTypeServiceTvShow;
+  items.GetVideoInfoTag()->m_type = MediaTypeTvShow;
 
   return rtn;
 }
@@ -521,12 +525,13 @@ bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
         url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
         plexItem->SetPath("plex://tvshows/seasons/" + Base64::Encode(url1.Get()));
         plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
-        plexItem->GetVideoInfoTag()->m_type = MediaTypeServiceSeason;
+        plexItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
         plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
         // we get these from rootXmlNode, where all show info is
         plexItem->GetVideoInfoTag()->m_strShowTitle = XMLUtils::GetAttribute(rootXmlNode, "parentTitle");
         plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(rootXmlNode, "tagline"));
         plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(rootXmlNode, "summary"));
+        plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentYear").c_str());
         value = XMLUtils::GetAttribute(rootXmlNode, "art");
         if (!value.empty() && (value[0] == '/'))
           StringUtils::TrimLeft(value, "/");
@@ -556,8 +561,9 @@ bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
       }
       directoryNode = directoryNode->NextSiblingElement("Directory");
     }
-    items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   }
+
+  items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   items.SetProperty("library.filter", "true");
   items.SetProperty("PlexItem", true);
 
@@ -575,7 +581,7 @@ bool CPlexUtils::GetLocalEpisodes(CFileItemList &items, const std::string url)
   if (rootXmlNode)
   {
     int season = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentIndex").c_str());
-    rtn = GetVideoItems(items,url2,rootXmlNode, MediaTypeServiceEpisode, season);
+    rtn = GetVideoItems(items,url2,rootXmlNode, MediaTypeEpisode, season);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   }
 
@@ -601,7 +607,7 @@ bool CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    rtn = GetVideoItems(items, url2,rootXmlNode, MediaTypeServiceEpisode);
+    rtn = GetVideoItems(items, url2,rootXmlNode, MediaTypeEpisode);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
@@ -628,7 +634,7 @@ bool CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::st
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    rtn = GetVideoItems(items, url2,rootXmlNode, MediaTypeServiceMovie);
+    rtn = GetVideoItems(items, url2,rootXmlNode, MediaTypeMovie);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
