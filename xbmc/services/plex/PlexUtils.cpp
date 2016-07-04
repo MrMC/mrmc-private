@@ -307,6 +307,8 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
       plexItem->SetArt("tvshow.poster", url.Get());
       plexItem->SetArt("tvshow.thumb", url.Get());
       plexItem->SetIconImage(url.Get());
+      std::string seasonEpisode = StringUtils::Format("S%02iE%02i", plexItem->GetVideoInfoTag()->m_iSeason, plexItem->GetVideoInfoTag()->m_iEpisode);
+      plexItem->SetProperty("SeasonEpisode", seasonEpisode);
     }
     else
     {

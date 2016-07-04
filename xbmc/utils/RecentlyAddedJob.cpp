@@ -101,6 +101,8 @@ bool CRecentlyAddedJob::UpdateVideo()
   for (int i = 0; i < m_RecentlyAddedTV->Size(); i++)
   {
     CFileItemPtr item = m_RecentlyAddedTV->Get(i);
+    std::string seasonEpisode = StringUtils::Format("S%02iE%02i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
+    item->SetProperty("SeasonEpisode", seasonEpisode);
     if (!item->HasArt("thumb"))
     {
       loader.LoadItem(item.get());
