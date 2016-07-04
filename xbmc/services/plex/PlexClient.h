@@ -85,6 +85,7 @@ private:
   std::string m_serverName;
   std::string m_url;
   std::string m_accessToken;
+  std::string m_httpsRequired;
   std::string m_scheme;
   std::atomic<bool> m_alive;
   std::atomic<bool> m_needUpdate;

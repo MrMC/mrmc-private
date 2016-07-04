@@ -92,7 +92,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             pItem->m_bIsShareOrDrive = true;
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(clients[i]->GetUrl());
-            curl.SetProtocol("http");
+            curl.SetProtocol(clients[i]->GetScheme());
             std::string filename = StringUtils::Format("%s/%s", contents[c].section.c_str(), (basePath == "titles"? "all":""));
             curl.SetFileName(filename);
             pItem->SetPath("plex://movies/" + basePath + "/" + Base64::Encode(curl.Get()));
@@ -194,7 +194,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             pItem->m_bIsShareOrDrive = true;
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(clients[i]->GetUrl());
-            curl.SetProtocol("http");
+            curl.SetProtocol(clients[i]->GetScheme());
             std::string filename = StringUtils::Format("%s/%s", contents[c].section.c_str(), (basePath == "titles"? "all":""));
             curl.SetFileName(filename);
             pItem->SetPath("plex://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));

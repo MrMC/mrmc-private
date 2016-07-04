@@ -337,7 +337,12 @@ void CPlexServices::Process()
 
   // try plex.tv first
   if (!m_authToken.empty())
-    GetMyPlexServers();
+  {
+    bool includeHttps = true;
+    GetMyPlexServers(includeHttps);
+    includeHttps = false;
+    GetMyPlexServers(includeHttps);
+  }
   // the via GDM
   CheckForGDMServers();
 
@@ -358,7 +363,10 @@ void CPlexServices::Process()
         {
           // if we get back servers, then
           // reduce the initial polling time
-          if (GetMyPlexServers())
+          bool foundSomething = false;
+          foundSomething = GetMyPlexServers(true);
+          foundSomething = foundSomething || GetMyPlexServers(false);
+          if (foundSomething)
             plextvTimeoutSeconds = 60 * m_updateMins;
           }
       }
@@ -449,7 +457,7 @@ bool CPlexServices::GetPlexToken(std::string user, std::string pass)
   return rtn;
 }
 
-bool CPlexServices::GetMyPlexServers()
+bool CPlexServices::GetMyPlexServers(bool includeHttps)
 {
   bool rtn = false;
 
@@ -461,11 +469,16 @@ bool CPlexServices::GetMyPlexServers()
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
 
   std::string strResponse;
-  CURL url(NS_PLEXTV_URL + "/pms/resources");
+  CURL url(NS_PLEXTV_URL);
+  if (includeHttps)
+    url.SetFileName("pms/resources?includeHttps=1");
+  else
+    url.SetFileName("pms/resources?includeHttps=0");
+
   if (plex.Get(url.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "CPlexServices:GetMyPlexServers %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "CPlexServices:GetMyPlexServers %d, %s", includeHttps, strResponse.c_str());
 #endif
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());

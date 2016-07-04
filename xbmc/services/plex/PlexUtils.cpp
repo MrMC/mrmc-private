@@ -85,7 +85,6 @@ TiXmlDocument CPlexUtils::GetPlexXML(std::string url, std::string filter)
   CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
-  url2.SetProtocol("http");
   
   if (!filter.empty())
     url2.SetFileName(url2.GetFileName() + filter);
@@ -101,7 +100,6 @@ TiXmlDocument CPlexUtils::GetPlexXML(std::string url, std::string filter)
 void CPlexUtils::ReportToServer(std::string url, std::string filename)
 {
   CURL url2(url);
-  url2.SetProtocol("http");
   url2.SetFileName(filename.c_str());
 
   std::string strXML;
@@ -445,7 +443,6 @@ bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
       plexItem->SetProperty("PlexItem", true);
       plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
       CURL url1(url);
-      url1.SetProtocol("http");
       url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
       plexItem->SetPath("plex://tvshows/shows/" + Base64::Encode(url1.Get()));
       plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
@@ -519,7 +516,6 @@ bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
         plexItem->SetProperty("PlexItem", true);
         plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
         CURL url1(url);
-        url1.SetProtocol("http");
         url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
         plexItem->SetPath("plex://tvshows/seasons/" + Base64::Encode(url1.Get()));
         plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
@@ -591,7 +587,6 @@ bool CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::
   CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
-  url2.SetProtocol("http");
   
   url2.SetFileName(url2.GetFileName() + "recentlyAdded");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
@@ -617,7 +612,6 @@ bool CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::st
   bool rtn = false;
 
   CURL url2(url);
-  url2.SetProtocol("http");
   
   url2.SetFileName(url2.GetFileName() + "recentlyAdded");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
@@ -694,7 +688,6 @@ bool CPlexUtils::GetLocalFilter(CFileItemList &items, std::string url, std::stri
       pItem->SetProperty("PlexItem", true);
 
       CURL plex(url);
-      plex.SetProtocol("http");
       plex.SetFileName(plex.GetFileName() + "all?" + filter + "=" + key);
       pItem->SetPath(parentPath + Base64::Encode(plex.Get()));
       pItem->SetLabel(title);

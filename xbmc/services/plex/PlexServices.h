@@ -77,7 +77,7 @@ private:
   virtual void      Process() override;
 
   bool              GetPlexToken(std::string user, std::string pass);
-  bool              GetMyPlexServers();
+  bool              GetMyPlexServers(bool includeHttps);
   bool              GetSignInPinCode();
   bool              GetSignInByPinReply();
 

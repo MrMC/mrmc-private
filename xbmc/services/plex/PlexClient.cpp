@@ -46,7 +46,7 @@ static bool IsInSubNet(std::string address, std::string port)
   {
     // we are on the same subnet
     // now make sure it is a plex server
-    std::string url = "http://" + address + ":" + port;
+    std::string url = "https://" + address + ":" + port;
     rtn = CPlexUtils::GetIdentity(url);
   }
   return rtn;
@@ -97,6 +97,7 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
   m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
   m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
   m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
+  m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
 
   std::string port;
   std::string address;
