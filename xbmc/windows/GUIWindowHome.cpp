@@ -289,7 +289,7 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
   return CGUIWindow::OnMessage(message);
 }
 
-void CGUIWindowHome::PlayRecentlyAddedItem(CFileItem itemPtr)
+bool CGUIWindowHome::PlayRecentlyAddedItem(CFileItem itemPtr)
 {
   // play media
   if (itemPtr.IsAudio())
@@ -307,10 +307,12 @@ void CGUIWindowHome::PlayRecentlyAddedItem(CFileItem itemPtr)
       choices.Add(SELECT_ACTION_RESUME, resumeString);
       choices.Add(SELECT_ACTION_PLAY, 12021);   // Start from beginning
       int value = CGUIDialogContextMenu::ShowAndGetChoice(choices);
+      if (value < 0)
+        return false;
       if (value == SELECT_ACTION_RESUME)
         itemPtr.m_lStartOffset = STARTOFFSET_RESUME;
-      if (value > -1)
-        g_application.PlayFile(itemPtr);
     }
+    g_application.PlayFile(itemPtr);
   }
+  return true;
 }
