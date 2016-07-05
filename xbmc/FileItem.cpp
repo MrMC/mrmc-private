@@ -45,6 +45,7 @@
 #include "pvr/channels/PVRRadioRDSInfoTag.h"
 #include "pvr/recordings/PVRRecording.h"
 #include "pvr/timers/PVRTimerInfoTag.h"
+#include "services/ServicesManager.h"
 #include "video/VideoInfoTag.h"
 #include "threads/SingleLock.h"
 #include "music/tags/MusicInfoTag.h"
@@ -1076,9 +1077,9 @@ bool CFileItem::IsLiveTV() const
   return URIUtils::IsLiveTV(m_strPath);
 }
 
-bool CFileItem::IsServiceBased() const
+bool CFileItem::IsMediaServiceBased() const
 {
-  return GetProperty("PlexItem").asBoolean();
+  return CServicesManager::GetInstance().IsMediaServicesItem(*this);
 }
 
 bool CFileItem::IsHD() const
@@ -1344,7 +1345,7 @@ bool CFileItem::IsSamePath(const CFileItem *item) const
   }
   if (HasVideoInfoTag() && item->HasVideoInfoTag())
   {
-    if (item->IsServiceBased())
+    if (item->IsMediaServiceBased())
     {
       if (!m_videoInfoTag->m_strServiceId.empty() && !item->m_videoInfoTag->m_strServiceId.empty())
         return (m_videoInfoTag->m_strServiceId == item->m_videoInfoTag->m_strServiceId);

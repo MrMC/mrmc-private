@@ -68,6 +68,7 @@ public:
   const std::string &GetOwned() const       { return m_owned; }
   const std::string &GetScheme() const      { return m_scheme; }
   const bool &IsLocal() const { return m_local; }
+  std::string LookUpUuid(const std::string path) const;
 
   const PlexSectionsContentVector GetTvContent() const;
   const PlexSectionsContentVector GetMovieContent() const;

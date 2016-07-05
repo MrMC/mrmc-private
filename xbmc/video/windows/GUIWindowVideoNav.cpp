@@ -252,7 +252,16 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
       else if (iControl == CONTROL_UPDATE_LIBRARY)
       {
         if (!g_application.IsVideoScanning())
-          OnScan("");
+        {
+          if (m_vecItems->IsVideoDb())
+          {
+            OnScan("");
+          }
+          else if (CServicesManager::GetInstance().IsMediaServicesItem(*m_vecItems))
+          {
+            CServicesManager::GetInstance().UpdateMediaServicesLibray(*m_vecItems);
+          }
+        }
         else
           g_application.StopVideoScan();
         return true;
@@ -269,11 +278,11 @@ bool CGUIWindowVideoNav::OnMessage(CGUIMessage& message)
 
 SelectFirstUnwatchedItem CGUIWindowVideoNav::GetSettingSelectFirstUnwatchedItem()
 {
-  if (m_vecItems->IsVideoDb() || m_vecItems->GetProperty("PlexItem").asBoolean())
+  if (m_vecItems->IsVideoDb() || m_vecItems->IsMediaServiceBased())
   {
     NODE_TYPE nodeType = CVideoDatabaseDirectory::GetDirectoryChildType(m_vecItems->GetPath());
 
-    if (nodeType == NODE_TYPE_SEASONS || nodeType == NODE_TYPE_EPISODES || m_vecItems->GetProperty("PlexItem").asBoolean())
+    if (nodeType == NODE_TYPE_SEASONS || nodeType == NODE_TYPE_EPISODES || m_vecItems->IsMediaServiceBased())
     {
       int iValue = CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOLIBRARY_TVSHOWSSELECTFIRSTUNWATCHEDITEM);
       if (iValue >= SelectFirstUnwatchedItem::NEVER && iValue <= SelectFirstUnwatchedItem::ALWAYS)
@@ -977,7 +986,7 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
     if (!item->IsParentFolder())
     {
       ADDON::ScraperPtr info;
-      if (item->IsServiceBased())
+      if (item->IsMediaServiceBased())
       {
         if (item->GetVideoInfoTag()->m_type == MediaTypeTvShow)
           buttons.Add(CONTEXT_BUTTON_INFO, 20351);
@@ -1009,7 +1018,7 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
             !StringUtils::StartsWith(item->GetPath(), "newplaylist://") &&
             !StringUtils::StartsWith(item->GetPath(), "newtag://"))
         {
-          if (item->m_bIsFolder && !item->IsServiceBased())
+          if (item->m_bIsFolder && !item->IsMediaServiceBased())
           {
             // Have both options for folders since we don't know whether all childs are watched/unwatched
             buttons.Add(CONTEXT_BUTTON_MARK_UNWATCHED, 16104); //Mark as UnWatched
@@ -1039,7 +1048,7 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
           if (g_application.IsVideoScanning())
             buttons.Add(CONTEXT_BUTTON_STOP_SCANNING, 13353);
           // no scan for new content on server lib
-          if (!item->IsServiceBased())
+          if (!item->IsMediaServiceBased())
             buttons.Add(CONTEXT_BUTTON_SCAN, 13349);
         }
 
@@ -1064,7 +1073,7 @@ void CGUIWindowVideoNav::GetContextButtons(int itemNumber, CContextButtons &butt
         }
         // add "Set/Change content" to folders
         if (item->m_bIsFolder && !item->IsVideoDb() && !item->IsPlayList() && !item->IsSmartPlayList() && !item->IsLibraryFolder() && !item->IsLiveTV() && !item->IsPlugin() && !item->IsAddonsPath() && !URIUtils::IsUPnP(item->GetPath()) &&
-            !item->IsServiceBased())
+            !item->IsMediaServiceBased())
         {
           if (info && info->Content() != CONTENT_NONE)
             buttons.Add(CONTEXT_BUTTON_SET_CONTENT, 20442);

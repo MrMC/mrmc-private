@@ -55,6 +55,9 @@ public:
   static CServicesManager &GetInstance();
 
   bool HasServices();
+  bool IsMediaServicesItem(const CFileItem &item);
+  bool UpdateMediaServicesLibray(const CFileItem &item);
+
   void SetWatched(CFileItem &item);
   void SetUnWatched(CFileItem &item);
   void SetResumePoint(CFileItem &item);

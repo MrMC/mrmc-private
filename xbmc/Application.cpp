@@ -3258,7 +3258,7 @@ PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
 
       if( item.m_lStartOffset == STARTOFFSET_RESUME )
       {
-        if (item.IsServiceBased())
+        if (item.IsMediaServiceBased())
         {
           CBookmark bookmark = item.GetVideoInfoTag()->m_resumePoint;
           options.starttime = bookmark.timeInSeconds;
@@ -3740,7 +3740,7 @@ void CApplication::UpdateFileState()
           m_progressTrackingVideoResumeBookmark.timeInSeconds = 0.0f;
         }
 
-        if (m_progressTrackingItem->IsServiceBased())
+        if (m_progressTrackingItem->IsMediaServiceBased())
           CServicesManager::GetInstance().UpdateFileProgressState(*m_progressTrackingItem.get(), GetTime());
       }
     }

@@ -103,6 +103,20 @@ bool CServicesManager::HasServices()
   return CPlexUtils::HasClients();
 }
 
+bool CServicesManager::IsMediaServicesItem(const CFileItem &item)
+{
+  return item.GetProperty("MediaServicesItem").asBoolean();
+}
+
+bool CServicesManager::UpdateMediaServicesLibray(const CFileItem &item)
+{
+  if (item.HasProperty("PlexItem"))
+  {
+    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Other, "plex", "UpdateLibrary");
+  }
+  return true;
+}
+
 void CServicesManager::SetWatched(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))

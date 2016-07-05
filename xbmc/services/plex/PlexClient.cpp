@@ -149,6 +149,31 @@ int CPlexClient::GetPort()
   return url.GetPort();
 }
 
+std::string CPlexClient::LookUpUuid(const std::string path) const
+{
+  std::string uuid;
+
+  CURL url(path);
+  {
+    CSingleLock lock(m_criticalMovies);
+    for (const auto &contents : m_movieSectionsContents)
+    {
+      if (contents.section == url.GetFileName())
+        return m_uuid;
+    }
+  }
+  {
+    CSingleLock lock(m_criticalTVShow);
+    for (const auto &contents : m_showSectionsContents)
+    {
+      if (contents.section == url.GetFileName())
+        return m_uuid;
+    }
+  }
+
+  return uuid;
+}
+
 const PlexSectionsContentVector CPlexClient::GetTvContent() const
 {
   CSingleLock lock(m_criticalTVShow);
@@ -216,11 +241,11 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
           if (parser == PlexSectionParsing::checkSection)
           {
             CSingleLock lock(m_criticalMovies);
-            for (size_t c = 0; c < m_movieSectionsContents.size(); c++)
+            for (const auto &contents : m_movieSectionsContents)
             {
-              if (m_movieSectionsContents[c].uuid == content.uuid)
+              if (contents.uuid == content.uuid)
               {
-                if (m_movieSectionsContents[c].updatedAt != content.updatedAt)
+                if (contents.updatedAt != content.updatedAt)
                 {
 #if defined(PLEX_DEBUG_VERBOSE)
                   CLog::Log(LOGDEBUG, "CPlexClient::ParseSections need update on %s:%s",
@@ -242,11 +267,11 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
           if (parser == PlexSectionParsing::checkSection)
           {
             CSingleLock lock(m_criticalTVShow);
-            for (size_t c = 0; c < m_showSectionsContents.size(); c++)
+            for (const auto &contents : m_showSectionsContents)
             {
-              if (m_showSectionsContents[c].uuid == content.uuid)
+              if (contents.uuid == content.uuid)
               {
-                if (m_showSectionsContents[c].updatedAt != content.updatedAt)
+                if (contents.updatedAt != content.updatedAt)
                 {
 #if defined(PLEX_DEBUG_VERBOSE)
                   CLog::Log(LOGDEBUG, "CPlexClient::ParseSections need update on %s:%s",

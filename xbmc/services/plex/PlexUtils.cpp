@@ -269,6 +269,7 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
     rtn = true;
     CFileItemPtr plexItem(new CFileItem());
     plexItem->SetProperty("PlexItem", true);
+    plexItem->SetProperty("MediaServicesItem", true);
 
     std::string fanart;
     std::string value;
@@ -406,6 +407,7 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
   items.SetProperty("library.filter", "true");
+  items.SetProperty("MediaServicesItem", true);
   items.SetProperty("PlexItem", true);
 
   return rtn;
@@ -443,6 +445,7 @@ bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
       // set m_bIsFolder to true to indicate we are tvshow list
       plexItem->m_bIsFolder = true;
       plexItem->SetProperty("PlexItem", true);
+      plexItem->SetProperty("MediaServicesItem", true);
       plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
       CURL url1(url);
       url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
@@ -520,6 +523,7 @@ bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
         CFileItemPtr plexItem(new CFileItem());
         plexItem->m_bIsFolder = true;
         plexItem->SetProperty("PlexItem", true);
+        plexItem->SetProperty("MediaServicesItem", true);
         plexItem->SetLabel(XMLUtils::GetAttribute(directoryNode, "title"));
         CURL url1(url);
         url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
@@ -566,6 +570,7 @@ bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
   items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
   items.SetProperty("library.filter", "true");
   items.SetProperty("PlexItem", true);
+  items.SetProperty("MediaServicesItem", true);
 
   return rtn;
 }
@@ -668,6 +673,13 @@ bool CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tv
           rtn = GetLocalRecentlyAddedEpisodes(items, curl.Get(), 10);
         else
           rtn = GetLocalRecentlyAddedMovies(items, curl.Get(), 10);
+
+        for (int item = 0; item < items.Size(); ++item)
+        {
+          items[item]->SetProperty("PlexItem", true);
+          items[item]->SetProperty("MediaServicesItem", true);
+          items[item]->SetProperty("MediaServicesClientID", clients[i]->GetUuid());
+        }
       }
     }
   }
@@ -694,6 +706,7 @@ bool CPlexUtils::GetLocalFilter(CFileItemList &items, std::string url, std::stri
       pItem->m_bIsFolder = true;
       pItem->m_bIsShareOrDrive = false;
       pItem->SetProperty("PlexItem", true);
+      pItem->SetProperty("MediaServicesItem", true);
 
       CURL plex(url);
       plex.SetFileName(plex.GetFileName() + "all?" + filter + "=" + key);

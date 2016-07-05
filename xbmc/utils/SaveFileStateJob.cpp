@@ -40,7 +40,7 @@
 bool CSaveFileStateJob::DoWork()
 {
   // if its serivces item, skip database update for it
-  if (m_item.IsServiceBased())
+  if (m_item.IsMediaServiceBased())
   {
     m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
 

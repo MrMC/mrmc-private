@@ -92,6 +92,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
+            pItem->SetProperty("MediaServicesClientID", clients[i]->GetUuid());
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(clients[i]->GetUrl());
             curl.SetProtocol(clients[i]->GetScheme());
@@ -196,6 +197,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
+            pItem->SetProperty("MediaServicesClientID", clients[i]->GetUuid());
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(clients[i]->GetUrl());
             curl.SetProtocol(clients[i]->GetScheme());
@@ -214,6 +216,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           CPlexUtils::GetLocalTvshows(items,curl.Get());
           items.SetContent("tvshows");
           items.SetPath("");
+          items.SetProperty("MediaServicesClientID", clients[i]->GetUuid());
         }
         std::string label = basePath;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedepisodes")
@@ -271,6 +274,14 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   }
   return false;
 }
+
+DIR_CACHE_TYPE CPlexDirectory::GetCacheType(const CURL& url) const
+{
+  if (CPlexServices::GetInstance().CacheClients())
+    return DIR_CACHE_ALWAYS;
+  else
+    return DIR_CACHE_NEVER;
+};
 
 std::string CPlexDirectory::TranslatePath(const CURL &url)
 {

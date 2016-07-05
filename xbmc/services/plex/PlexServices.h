@@ -48,6 +48,8 @@ class CPlexServices
 , public ISettingCallback
 , public ANNOUNCEMENT::IAnnouncer
 {
+  friend class CPlexServiceJob;
+
 public:
   static CPlexServices &GetInstance();
 
@@ -56,6 +58,7 @@ public:
   bool IsActive();
   bool HasClients() const;
   void GetClients(std::vector<CPlexClientPtr> &clients) const;
+  bool CacheClients();
 
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
@@ -63,6 +66,9 @@ public:
 
   // IAnnouncer callbacks
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
+
+protected:
+  void              UpdateLibraries();
 
 private:
   // private construction, and no assignements; use the provided singleton methods

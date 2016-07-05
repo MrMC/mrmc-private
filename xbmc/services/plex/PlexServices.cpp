@@ -73,9 +73,10 @@ public:
   }
   virtual bool DoWork()
   {
-    if (m_function == "CheckForUpdates")
+    if (m_function == "UpdateLibraries")
     {
-      CLog::Log(LOGNOTICE, "CPlexServiceJob: CheckForUpdates");
+      CLog::Log(LOGNOTICE, "CPlexServiceJob: UpdateLibraries");
+      CPlexServices::GetInstance().UpdateLibraries();
     }
     return true;
   }
@@ -92,6 +93,7 @@ private:
 CPlexServices::CPlexServices()
 : CThread("PlexServices")
 , m_gdmListener(nullptr)
+, m_updateMins(0)
 , m_playState(PlexServicePlayerState::stopped)
 {
   // register our redacted protocol options with CURL
@@ -157,6 +159,11 @@ void CPlexServices::GetClients(std::vector<CPlexClientPtr> &clients) const
 {
   CSingleLock lock(m_criticalClients);
   clients = m_clients;
+}
+
+bool CPlexServices::CacheClients()
+{
+  return m_updateMins != 0;
 }
 
 void CPlexServices::OnSettingAction(const CSetting *setting)
@@ -282,7 +289,7 @@ void CPlexServices::OnSettingAction(const CSetting *setting)
 
 void CPlexServices::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
 {
-  if ((flag & Player) && strcmp(sender, "xbmc") == 0)
+  if ((flag & AnnouncementFlag::Player) && strcmp(sender, "xbmc") == 0)
   {
     if (strcmp(message, "OnPlay") == 0)
       m_playState = PlexServicePlayerState::playing;
@@ -290,6 +297,13 @@ void CPlexServices::Announce(AnnouncementFlag flag, const char *sender, const ch
       m_playState = PlexServicePlayerState::paused;
     else if (strcmp(message, "OnStop") == 0)
       m_playState = PlexServicePlayerState::stopped;
+  }
+  else if ((flag & AnnouncementFlag::Other) && strcmp(sender, "plex") == 0)
+  {
+    if (strcmp(message, "UpdateLibrary") == 0)
+    {
+      AddJob(new CPlexServiceJob(0, "UpdateLibraries"));
+    }
   }
 }
 
@@ -334,6 +348,30 @@ void CPlexServices::GetUserSettings()
   m_authToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
   m_updateMins  = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXUPDATEMINS);
   m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
+}
+
+void CPlexServices::UpdateLibraries()
+{
+  CSingleLock lock(m_criticalClients);
+  bool clearDirCache = false;
+  for (size_t c = 0; c < m_clients.size(); ++c)
+  {
+    m_clients[c]->ParseSections(PlexSectionParsing::checkSection);
+    if (m_clients[c]->NeedUpdate())
+    {
+      m_clients[c]->ParseSections(PlexSectionParsing::updateSection);
+      clearDirCache = true;
+    }
+  }
+  if (clearDirCache)
+  {
+    g_directoryCache.Clear();
+    if (m_playState != PlexServicePlayerState::playing)
+    {
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+      g_windowManager.SendThreadMessage(msg);
+    }
+  }
 }
 
 bool CPlexServices::MyPlexSignedIn()
@@ -394,32 +432,7 @@ void CPlexServices::Process()
 
     if (m_updateMins > 0 && (checkUpdatesTimer.GetElapsedSeconds() > (60 * m_updateMins)))
     {
-      //if (!IsProcessing())
-      //  AddJob(new CPlexServiceJob(0, "CheckForUpdates"));
-      // move this to CPlexServiceJob
-      CSingleLock lock(m_criticalClients);
-      bool clearDirCache = false;
-      for (size_t c = 0; c < m_clients.size(); ++c)
-      {
-        m_clients[c]->ParseSections(PlexSectionParsing::checkSection);
-        if (m_clients[c]->NeedUpdate())
-        {
-          m_clients[c]->ParseSections(PlexSectionParsing::updateSection);
-          clearDirCache = true;
-        }
-      }
-      if (clearDirCache)
-      {
-        g_directoryCache.Clear();
-        if (m_playState != PlexServicePlayerState::playing)
-        {
-          CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
-          g_windowManager.SendThreadMessage(msg);
-          //std::string strMessage = "Updating";
-          //CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Plex Services", strMessage, 3000, false);
-        }
-      }
-
+      UpdateLibraries();
       checkUpdatesTimer.Reset();
     }
 
