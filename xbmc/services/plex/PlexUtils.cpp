@@ -32,6 +32,7 @@
 #include "utils/XMLUtils.h"
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
+#include "filesystem/ZipFile.h"
 #include "settings/Settings.h"
 
 #include "video/VideoInfoTag.h"
@@ -89,15 +90,30 @@ void CPlexUtils::SetPlexItemProperties(CFileItem &item, const std::string uuid)
 
 TiXmlDocument CPlexUtils::GetPlexXML(std::string url, std::string filter)
 {
-  CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
+  http.SetRequestHeader("Accept-Encoding", "gzip");
   
+  CURL url2(url);
+  // this is key to get back gzip encoded content
+  url2.SetProtocolOption("seekable", "0");
   if (!filter.empty())
     url2.SetFileName(url2.GetFileName() + filter);
   
   http.Get(url2.Get(), strXML);
-  
+
+  if (http.GetContentEncoding() == "gzip")
+  {
+    std::string buffer;
+    if (XFILE::CZipFile::DecompressGzip(strXML, buffer))
+      strXML = std::move(buffer);
+    else
+    {
+      TiXmlDocument xml;
+      return xml;
+    }
+  }
+
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
   
@@ -607,12 +623,23 @@ bool CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::
   CURL url2(url);
   std::string strXML;
   XFILE::CCurlFile http;
-  
+  http.SetRequestHeader("Accept-Encoding", "gzip");
+
   url2.SetFileName(url2.GetFileName() + "recentlyAdded");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
-  
+  // this is key to get back gzip encoded content
+  url2.SetProtocolOption("seekable", "0");
+
   http.Get(url2.Get(), strXML);
-  
+  if (http.GetContentEncoding() == "gzip")
+  {
+    std::string buffer;
+    if (XFILE::CZipFile::DecompressGzip(strXML, buffer))
+      strXML = std::move(buffer);
+    else
+      return false;
+  }
+
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
   
@@ -632,13 +659,24 @@ bool CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::st
   bool rtn = false;
 
   CURL url2(url);
-  
-  url2.SetFileName(url2.GetFileName() + "recentlyAdded");
+    url2.SetFileName(url2.GetFileName() + "recentlyAdded");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
-  
+  // this is key to get back gzip encoded content
+  url2.SetProtocolOption("seekable", "0");
+
   std::string strXML;
   XFILE::CCurlFile http;
+  http.SetRequestHeader("Accept-Encoding", "gzip");
+
   http.Get(url2.Get(), strXML);
+  if (http.GetContentEncoding() == "gzip")
+  {
+    std::string buffer;
+    if (XFILE::CZipFile::DecompressGzip(strXML, buffer))
+      strXML = std::move(buffer);
+    else
+      return false;
+  }
   
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
