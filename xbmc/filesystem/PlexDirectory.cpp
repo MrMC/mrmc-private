@@ -92,9 +92,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
-            pItem->SetProperty("PlexItem", true);
-            pItem->SetProperty("MediaServicesItem", true);
-            pItem->SetProperty("MediaServicesClientID", clients[i]->GetUuid());
+            CPlexUtils::SetPlexItemProperties(*pItem, clients[i]->GetUuid());
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(clients[i]->GetUrl());
             curl.SetProtocol(clients[i]->GetScheme());
@@ -113,15 +111,9 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           CPlexUtils::GetLocalMovies(items, curl.Get());
           items.SetContent("movies");
           items.SetPath("");
-          items.SetProperty("PlexItem", true);
-          items.SetProperty("MediaServicesItem", true);
-          items.SetProperty("MediaServicesClientID", clients[i]->GetUuid());
+          CPlexUtils::SetPlexItemProperties(items, clients[i]->GetUuid());
           for (int item = 0; item < items.Size(); ++item)
-          {
-            items[item]->SetProperty("PlexItem", true);
-            items[item]->SetProperty("MediaServicesItem", true);
-            items[item]->SetProperty("MediaServicesClientID", clients[i]->GetUuid());
-          }
+            CPlexUtils::SetPlexItemProperties(*items[item], clients[i]->GetUuid());
         }
         std::string label = basePath;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedmovies")
@@ -208,8 +200,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
-            pItem->SetProperty("MediaServicesItem", true);
-            pItem->SetProperty("MediaServicesClientID", clients[i]->GetUuid());
+            CPlexUtils::SetPlexItemProperties(*pItem, clients[i]->GetUuid());
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(clients[i]->GetUrl());
             curl.SetProtocol(clients[i]->GetScheme());
@@ -228,15 +219,9 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           CPlexUtils::GetLocalTvshows(items, curl.Get());
           items.SetContent("tvshows");
           items.SetPath("");
-          items.SetProperty("PlexItem", true);
-          items.SetProperty("MediaServicesItem", true);
-          items.SetProperty("MediaServicesClientID", clients[i]->GetUuid());
+          CPlexUtils::SetPlexItemProperties(items, clients[i]->GetUuid());
           for (int item = 0; item < items.Size(); ++item)
-          {
-            items[item]->SetProperty("PlexItem", true);
-            items[item]->SetProperty("MediaServicesItem", true);
-            items[item]->SetProperty("MediaServicesClientID", clients[i]->GetUuid());
-          }
+            CPlexUtils::SetPlexItemProperties(*items[item], clients[i]->GetUuid());
         }
         std::string label = basePath;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedepisodes")

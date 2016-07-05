@@ -80,6 +80,13 @@ void CPlexUtils::GetDefaultHeaders(XFILE::CCurlFile &curl)
   curl.SetRequestHeader("X-Plex-Platform", CSysInfo::GetOsName());
 }
 
+void CPlexUtils::SetPlexItemProperties(CFileItem &item, const std::string uuid)
+{
+  item.SetProperty("PlexItem", true);
+  item.SetProperty("MediaServicesItem", true);
+  item.SetProperty("MediaServicesClientID", uuid);
+}
+
 TiXmlDocument CPlexUtils::GetPlexXML(std::string url, std::string filter)
 {
   CURL url2(url);
@@ -675,13 +682,11 @@ bool CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tv
           rtn = GetLocalRecentlyAddedMovies(items, curl.Get(), 10);
 
         for (int item = 0; item < items.Size(); ++item)
-        {
-          items[item]->SetProperty("PlexItem", true);
-          items[item]->SetProperty("MediaServicesItem", true);
-          items[item]->SetProperty("MediaServicesClientID", clients[i]->GetUuid());
-        }
+          CPlexUtils::SetPlexItemProperties(*items[item], clients[i]->GetUuid());
       }
     }
+    items.SetProperty("PlexItem", true);
+    items.SetProperty("MediaServicesItem", true);
   }
 
   return rtn;
