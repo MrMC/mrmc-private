@@ -100,6 +100,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(filename);
             pItem->SetPath("plex://movies/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
+            pItem->SetProperty("MediaServicesItem", true);
             items.Add(pItem);
           }
         }
@@ -205,6 +206,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(filename);
             pItem->SetPath("plex://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
+            pItem->SetProperty("MediaServicesItem", true);
             items.Add(pItem);
           }
         }
