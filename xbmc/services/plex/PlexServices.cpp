@@ -139,6 +139,7 @@ void CPlexServices::Stop()
 
   CSingleLock lock2(m_criticalClients);
   m_clients.clear();
+  g_directoryCache.Clear();
 }
 
 bool CPlexServices::IsActive()
