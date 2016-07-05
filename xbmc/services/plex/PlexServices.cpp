@@ -78,6 +78,15 @@ public:
       CLog::Log(LOGNOTICE, "CPlexServiceJob: UpdateLibraries");
       CPlexServices::GetInstance().UpdateLibraries();
     }
+    else if (m_function == "FoundNewClient")
+    {
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+      g_windowManager.SendThreadMessage(msg);
+
+      // announce that we have a plex client and that recently added should be updated
+      ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+      ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
+    }
     return true;
   }
   virtual bool operator==(const CJob *job) const
@@ -579,14 +588,7 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
   }
 
   if (rtn)
-  {
-    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
-    g_windowManager.SendThreadMessage(msg);
-
-    // announce that we have a plex client and that recently added should be updated
-    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
-    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
-  }
+    AddJob(new CPlexServiceJob(0, "FoundNewClient"));
 
   return rtn;
 }
@@ -834,14 +836,7 @@ void CPlexServices::CheckForGDMServers()
       }
     }
     if (foundNewClient)
-    {
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
-      g_windowManager.SendThreadMessage(msg);
-
-      // announce that we have a plex client and that recently added should be updated
-      ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
-      ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
-    }
+      AddJob(new CPlexServiceJob(0, "FoundNewClient"));
   }
 }
 
