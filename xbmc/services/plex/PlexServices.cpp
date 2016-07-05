@@ -882,6 +882,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
           plexUser->SetProperty("protected", XMLUtils::GetAttribute(UserNode, "protected"));
           plexUser->SetLabel(XMLUtils::GetAttribute(UserNode, "title"));
           plexUser->SetIconImage(XMLUtils::GetAttribute(UserNode, "thumb"));
+          plexUser->SetArt("thumb", XMLUtils::GetAttribute(UserNode, "thumb"));
           plexUsers.Add(plexUser);
           UserNode = UserNode->NextSiblingElement("User");
         }
