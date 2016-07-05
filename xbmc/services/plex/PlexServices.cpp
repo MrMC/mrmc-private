@@ -333,7 +333,21 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
   }
   else if (settingId == CSettings::SETTING_SERVICES_PLEXUPDATEMINS)
   {
+    int oldUpdateMins = m_updateMins;
     m_updateMins = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXUPDATEMINS);
+    if (IsRunning())
+    {
+      if (oldUpdateMins > 0 && m_updateMins == 0)
+      {
+        // switch to no caching
+        g_directoryCache.Clear();
+      }
+      if (m_playState != PlexServicePlayerState::playing)
+      {
+        CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+        g_windowManager.SendThreadMessage(msg);
+      }
+    }
   }
 }
 
@@ -564,6 +578,16 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
     // do something here
   }
 
+  if (rtn)
+  {
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+    g_windowManager.SendThreadMessage(msg);
+
+    // announce that we have a plex client and that recently added should be updated
+    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
+  }
+
   return rtn;
 }
 
@@ -789,6 +813,7 @@ void CPlexServices::CheckForGDMServers()
         CLog::Log(LOGERROR, "CPlexServices:CPlexServices:CheckforGDMServers discover send failed");
     }
 
+    bool foundNewClient = false;
     // listen for GDM reply until we timeout
     if (socket && m_gdmListener->Listen(250))
     {
@@ -807,6 +832,15 @@ void CPlexServices::CheckForGDMServers()
           }
         }
       }
+    }
+    if (foundNewClient)
+    {
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+      g_windowManager.SendThreadMessage(msg);
+
+      // announce that we have a plex client and that recently added should be updated
+      ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+      ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
     }
   }
 }
@@ -835,14 +869,6 @@ bool CPlexServices::AddClient(CPlexClientPtr client)
   if (client->ParseSections(PlexSectionParsing::newSection))
   {
     m_clients.push_back(client);
-
-    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
-    g_windowManager.SendThreadMessage(msg);
-
-    // announce that we have a plex client and that recently added should be updated
-    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
-    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
-
     return true;
   }
 
