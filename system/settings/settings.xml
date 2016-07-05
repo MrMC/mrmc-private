@@ -2191,7 +2191,7 @@
           <level>0</level>
           <default>10</default>
           <constraints>
-            <minimum>10</minimum>
+            <minimum label="351">0</minimum>
             <step>10</step>
             <maximum>300</maximum>
           </constraints>

@@ -316,6 +316,10 @@ void CPlexServices::OnSettingChanged(const CSetting *setting)
     else
       Stop();
   }
+  else if (settingId == CSettings::SETTING_SERVICES_PLEXUPDATEMINS)
+  {
+    m_updateMins = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_PLEXUPDATEMINS);
+  }
 }
 
 void CPlexServices::SetUserSettings()
@@ -374,8 +378,8 @@ void CPlexServices::Process()
           foundSomething = GetMyPlexServers(true);
           //foundSomething = foundSomething || GetMyPlexServers(false);
           if (foundSomething)
-            plextvTimeoutSeconds = 60 * m_updateMins;
-          }
+            plextvTimeoutSeconds = 60 * 15;
+        }
       }
       plextvTimer.Reset();
     }
@@ -387,7 +391,7 @@ void CPlexServices::Process()
       gdmTimer.Reset();
     }
 
-    if (checkUpdatesTimer.GetElapsedSeconds() > (60 * m_updateMins))
+    if (m_updateMins > 0 && (checkUpdatesTimer.GetElapsedSeconds() > (60 * m_updateMins)))
     {
       //if (!IsProcessing())
       //  AddJob(new CPlexServiceJob(0, "CheckForUpdates"));
