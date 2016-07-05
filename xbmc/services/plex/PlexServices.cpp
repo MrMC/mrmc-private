@@ -76,7 +76,7 @@ public:
     if (m_function == "UpdateLibraries")
     {
       CLog::Log(LOGNOTICE, "CPlexServiceJob: UpdateLibraries");
-      CPlexServices::GetInstance().UpdateLibraries();
+      CPlexServices::GetInstance().UpdateLibraries(true);
     }
     else if (m_function == "FoundNewClient")
     {
@@ -373,14 +373,14 @@ void CPlexServices::GetUserSettings()
   m_useGDMServer = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_PLEXGDMSERVER);
 }
 
-void CPlexServices::UpdateLibraries()
+void CPlexServices::UpdateLibraries(bool forced)
 {
   CSingleLock lock(m_criticalClients);
   bool clearDirCache = false;
   for (size_t c = 0; c < m_clients.size(); ++c)
   {
     m_clients[c]->ParseSections(PlexSectionParsing::checkSection);
-    if (m_clients[c]->NeedUpdate())
+    if (forced || m_clients[c]->NeedUpdate())
     {
       m_clients[c]->ParseSections(PlexSectionParsing::updateSection);
       clearDirCache = true;
@@ -455,7 +455,7 @@ void CPlexServices::Process()
 
     if (m_updateMins > 0 && (checkUpdatesTimer.GetElapsedSeconds() > (60 * m_updateMins)))
     {
-      UpdateLibraries();
+      UpdateLibraries(false);
       checkUpdatesTimer.Reset();
     }
 

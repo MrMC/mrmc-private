@@ -198,7 +198,7 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
   if (plex.Get(curl.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
-    if (parser == PlexSectionParsing::newSection)
+    if (parser == PlexSectionParsing::newSection || parser == PlexSectionParsing::checkSection)
       CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %d, %s", parser, strResponse.c_str());
 #endif
     if (parser == PlexSectionParsing::updateSection)
