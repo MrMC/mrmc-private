@@ -908,7 +908,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
 
     const CFileItemPtr item = dialog->GetSelectedItem();
 
-    if (item == NULL || !item->HasProperty("uuid"))
+    if (item == NULL || !item->HasProperty("id"))
       return false;
 
     std::string pinUrl = "/switch";
