@@ -56,6 +56,7 @@ CPlexClient::CPlexClient(std::string data, std::string ip)
 {
   m_local = true;
   m_alive = true;
+  m_owned = true;
   m_scheme = "http";
   m_needUpdate = false;
   int port = 32400;
@@ -95,10 +96,12 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
   m_alive = true;
   m_needUpdate = false;
   m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
+  m_owned = XMLUtils::GetAttribute(DeviceNode, "owned");
   m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
   m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
   m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
 
+  std::string owned;
   std::string port;
   std::string address;
   const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");

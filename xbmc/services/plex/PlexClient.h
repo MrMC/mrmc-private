@@ -65,6 +65,7 @@ public:
   const std::string &GetContentType() const { return m_contentType; }
   const std::string &GetServerName() const  { return m_serverName; }
   const std::string &GetUuid() const        { return m_uuid; }
+  const std::string &GetOwned() const       { return m_owned; }
   const std::string &GetScheme() const      { return m_scheme; }
   const bool &IsLocal() const { return m_local; }
 
@@ -82,6 +83,7 @@ private:
   bool        m_local;
   std::string m_contentType;
   std::string m_uuid;
+  std::string m_owned;
   std::string m_serverName;
   std::string m_url;
   std::string m_accessToken;
