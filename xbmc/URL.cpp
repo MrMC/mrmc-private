@@ -646,8 +646,6 @@ std::string CURL::GetWithoutUserDetails(bool redact) const
   {
     if (redact && CheckForRedactedProtocolOptions())
       strURL += ReplaceRedactedProtocolOptions();
-    else
-      strURL += "|" + m_strProtocolOptions;
   }
 
   return strURL;
