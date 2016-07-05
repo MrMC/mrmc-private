@@ -347,8 +347,8 @@ void CPlexServices::Process()
   {
     bool includeHttps = true;
     GetMyPlexServers(includeHttps);
-    includeHttps = false;
-    GetMyPlexServers(includeHttps);
+    //includeHttps = false;
+    //GetMyPlexServers(includeHttps);
   }
   // the via GDM
   CheckForGDMServers();
@@ -372,7 +372,7 @@ void CPlexServices::Process()
           // reduce the initial polling time
           bool foundSomething = false;
           foundSomething = GetMyPlexServers(true);
-          foundSomething = foundSomething || GetMyPlexServers(false);
+          //foundSomething = foundSomething || GetMyPlexServers(false);
           if (foundSomething)
             plextvTimeoutSeconds = 60 * m_updateMins;
           }
