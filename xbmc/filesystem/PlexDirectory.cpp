@@ -285,7 +285,7 @@ DIR_CACHE_TYPE CPlexDirectory::GetCacheType(const CURL& url) const
   if (CPlexServices::GetInstance().CacheClients())
     return DIR_CACHE_ALWAYS;
   else
-    return DIR_CACHE_ONCE;
+    return DIR_CACHE_NEVER;
 };
 
 std::string CPlexDirectory::TranslatePath(const CURL &url)
