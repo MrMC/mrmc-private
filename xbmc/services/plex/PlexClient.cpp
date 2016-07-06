@@ -18,6 +18,8 @@
  *
  */
 
+#include <atomic>
+
 #include "PlexClient.h"
 #include "PlexUtils.h"
 
@@ -112,7 +114,7 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
     m_scheme = XMLUtils::GetAttribute(ConnectionNode, "protocol");
     if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(address, port))
     {
-      m_local = TRUE;
+      m_local = true;
       break;
     }
 

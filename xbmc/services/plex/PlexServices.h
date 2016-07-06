@@ -19,6 +19,9 @@
  *
  */
 
+#include <atomic>
+#include <memory>
+
 #include "PlexClient.h"
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
