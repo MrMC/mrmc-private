@@ -637,6 +637,8 @@ bool CPlexUtils::GetPlexRecentlyAddedEpisodes(CFileItemList &items, const std::s
     else
       return false;
   }
+  // remove the seakable option as we propigate the url
+  url2.RemoveProtocolOption("seekable");
 
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
@@ -644,7 +646,7 @@ bool CPlexUtils::GetPlexRecentlyAddedEpisodes(CFileItemList &items, const std::s
   TiXmlElement* rootXmlNode = xml.RootElement();
   if (rootXmlNode)
   {
-    rtn = GetVideoItems(items, url2,rootXmlNode, MediaTypeEpisode);
+    rtn = GetVideoItems(items, url2, rootXmlNode, MediaTypeEpisode);
     items.SetLabel(XMLUtils::GetAttribute(rootXmlNode, "title2"));
     items.Sort(SortByDateAdded, SortOrderDescending);
   }
@@ -675,6 +677,8 @@ bool CPlexUtils::GetPlexRecentlyAddedMovies(CFileItemList &items, const std::str
     else
       return false;
   }
+  // remove the seakable option as we propigate the url
+  url2.RemoveProtocolOption("seekable");
 
   TiXmlDocument xml;
   xml.Parse(strXML.c_str());
