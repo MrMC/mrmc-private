@@ -25,7 +25,7 @@
 #include "URL.h"
 #include "network/Network.h"
 #include "utils/Base64.h"
-#include "utils/Log.h"
+#include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/URIUtils.h"
