@@ -412,6 +412,9 @@ void CPlexServices::Process()
   {
     if (g_application.getNetwork().IsConnected())
       break;
+
+    m_processSleep.WaitMSec(250);
+    m_processSleep.Reset();
   }
 
   // try plex.tv first
