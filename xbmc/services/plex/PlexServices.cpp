@@ -408,6 +408,12 @@ void CPlexServices::Process()
 
   SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
 
+  while (!m_bStop)
+  {
+    if (g_application.getNetwork().IsConnected())
+      break;
+  }
+
   // try plex.tv first
   if (MyPlexSignedIn())
   {
