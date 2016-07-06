@@ -44,15 +44,15 @@ public:
   static void SetOffset(CFileItem &item, int offsetSeconds);
   static void ReportProgress(CFileItem &item, double currentTime);
   static void TogglePaused(const bool paused);
-  static bool GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
-  static bool GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
-  static bool GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
+  static bool GetPlexRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
+  static bool GetPlexRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
+  static bool GetAllPlexRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
 
-  static bool GetLocalMovies(CFileItemList &items, std::string url, std::string filter = "");
-  static bool GetLocalTvshows(CFileItemList &items, std::string url);
-  static bool GetLocalSeasons(CFileItemList &items, const std::string url);
-  static bool GetLocalEpisodes(CFileItemList &items, const std::string url);
-  static bool GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
+  static bool GetPlexMovies(CFileItemList &items, std::string url, std::string filter = "");
+  static bool GetPlexTvshows(CFileItemList &items, std::string url);
+  static bool GetPlexSeasons(CFileItemList &items, const std::string url);
+  static bool GetPlexEpisodes(CFileItemList &items, const std::string url);
+  static bool GetPlexFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
 
 private:
   static void ReportToServer(std::string url, std::string filename);

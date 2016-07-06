@@ -150,7 +150,7 @@ void CServicesManager::UpdateFileProgressState(CFileItem &item, double currentTi
 
 void CServicesManager::GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit)
 {
-  if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, false))
+  if (CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(recentlyAdded, false))
   {
     CFileItemList temp;
     recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
@@ -164,7 +164,7 @@ void CServicesManager::GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, i
 
 void CServicesManager::GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit)
 {
-  if (CPlexUtils::GetAllRecentlyAddedMoviesAndShows(recentlyAdded, true))
+  if (CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(recentlyAdded, true))
   {
     CFileItemList temp;
     recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);

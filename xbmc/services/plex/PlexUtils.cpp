@@ -434,7 +434,7 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
   return rtn;
 }
 
-bool CPlexUtils::GetLocalMovies(CFileItemList &items, std::string url, std::string filter)
+bool CPlexUtils::GetPlexMovies(CFileItemList &items, std::string url, std::string filter)
 {
   bool rtn = false;
   CURL url2(url);
@@ -449,7 +449,7 @@ bool CPlexUtils::GetLocalMovies(CFileItemList &items, std::string url, std::stri
   return rtn;
 }
 
-bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
+bool CPlexUtils::GetPlexTvshows(CFileItemList &items, std::string url)
 {
   bool rtn = false;
   std::string value;
@@ -525,7 +525,7 @@ bool CPlexUtils::GetLocalTvshows(CFileItemList &items, std::string url)
   return rtn;
 }
 
-bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
+bool CPlexUtils::GetPlexSeasons(CFileItemList &items, const std::string url)
 {
   bool rtn = false;
   TiXmlDocument xml = GetPlexXML(url);
@@ -596,7 +596,7 @@ bool CPlexUtils::GetLocalSeasons(CFileItemList &items, const std::string url)
   return rtn;
 }
 
-bool CPlexUtils::GetLocalEpisodes(CFileItemList &items, const std::string url)
+bool CPlexUtils::GetPlexEpisodes(CFileItemList &items, const std::string url)
 {
   bool rtn = false;
 
@@ -614,7 +614,7 @@ bool CPlexUtils::GetLocalEpisodes(CFileItemList &items, const std::string url)
   return rtn;
 }
 
-bool CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
+bool CPlexUtils::GetPlexRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
 {
   bool rtn = false;
 
@@ -652,7 +652,7 @@ bool CPlexUtils::GetLocalRecentlyAddedEpisodes(CFileItemList &items, const std::
   return rtn;
 }
 
-bool CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
+bool CPlexUtils::GetPlexRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
 {
   bool rtn = false;
 
@@ -690,7 +690,7 @@ bool CPlexUtils::GetLocalRecentlyAddedMovies(CFileItemList &items, const std::st
   return rtn;
 }
 
-bool CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
+bool CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
 {
   bool rtn = false;
 
@@ -713,9 +713,9 @@ bool CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tv
         curl.SetFileName(curl.GetFileName() + contents[c].section + "/");
 
         if (tvShow)
-          rtn = GetLocalRecentlyAddedEpisodes(items, curl.Get(), 10);
+          rtn = GetPlexRecentlyAddedEpisodes(items, curl.Get(), 10);
         else
-          rtn = GetLocalRecentlyAddedMovies(items, curl.Get(), 10);
+          rtn = GetPlexRecentlyAddedMovies(items, curl.Get(), 10);
 
         for (int item = 0; item < items.Size(); ++item)
           CPlexUtils::SetPlexItemProperties(*items[item], clients[i]->GetUuid());
@@ -728,7 +728,7 @@ bool CPlexUtils::GetAllRecentlyAddedMoviesAndShows(CFileItemList &items, bool tv
   return rtn;
 }
 
-bool CPlexUtils::GetLocalFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
+bool CPlexUtils::GetPlexFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
 {
   bool rtn = false;
 
