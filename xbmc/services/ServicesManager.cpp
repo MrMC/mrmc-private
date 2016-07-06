@@ -18,6 +18,8 @@
  *
  */
 
+#include <algorithm>
+
 #include "services/ServicesManager.h"
 
 #include "interfaces/AnnouncementManager.h"
@@ -182,7 +184,7 @@ void CServicesManager::RegisterMediaServicesHandler(IMediaServicesHandler *media
     return;
 
   CExclusiveLock lock(m_mediaServicesCritical);
-  if (find(m_mediaServicesHandlers.begin(), m_mediaServicesHandlers.end(), mediaServicesHandler) == m_mediaServicesHandlers.end())
+  if (std::find(m_mediaServicesHandlers.begin(), m_mediaServicesHandlers.end(), mediaServicesHandler) == m_mediaServicesHandlers.end())
     m_mediaServicesHandlers.push_back(mediaServicesHandler);
 }
 
@@ -192,7 +194,7 @@ void CServicesManager::UnregisterSettingsHandler(IMediaServicesHandler *mediaSer
     return;
 
   CExclusiveLock lock(m_mediaServicesCritical);
-  MediaServicesHandlers::iterator it = find(m_mediaServicesHandlers.begin(), m_mediaServicesHandlers.end(), mediaServicesHandler);
+  MediaServicesHandlers::iterator it = std::find(m_mediaServicesHandlers.begin(), m_mediaServicesHandlers.end(), mediaServicesHandler);
   if (it != m_mediaServicesHandlers.end())
     m_mediaServicesHandlers.erase(it);
 }
