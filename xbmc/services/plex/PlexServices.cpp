@@ -536,6 +536,8 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
   std::vector<CPlexClientPtr> clientsFound;
 
   XFILE::CCurlFile plex;
+  plex.SetBufferSize(32768*10);
+
   CPlexUtils::GetDefaultHeaders(plex);
   if (MyPlexSignedIn())
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
@@ -892,6 +894,7 @@ bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
 
   std::string strMessage;
   XFILE::CCurlFile plex;
+  plex.SetBufferSize(32768*10);
   CPlexUtils::GetDefaultHeaders(plex);
   if (MyPlexSignedIn())
     plex.SetRequestHeader("X-Plex-Token", m_authToken);
