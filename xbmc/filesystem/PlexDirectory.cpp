@@ -63,14 +63,15 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       if (hasMovies)
       {
         //add local Movies
-        CFileItemPtr pItem(new CFileItem("MrMC - Movies"));
+        std::string title = StringUtils::Format("MrMC - %s", g_localizeStrings.Get(342).c_str());
+        CFileItemPtr pItem(new CFileItem(title));
         pItem->m_bIsFolder = true;
         pItem->m_bIsShareOrDrive = false;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedmovies")
           pItem->SetPath("videodb://recentlyaddedmovies/");
         else
           pItem->SetPath("videodb://movies/" + basePath + "/");
-        pItem->SetLabel("MrMC - Movies");
+        pItem->SetLabel(title);
         items.Add(pItem);
       }
       //look through all plex clients and pull content data for "movie" type
@@ -171,14 +172,15 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       if (hasTvShows)
       {
         //add local Shows
-        CFileItemPtr pItem(new CFileItem("MrMC - TvShows"));
+        std::string title = StringUtils::Format("MrMC - %s", g_localizeStrings.Get(20343).c_str());
+        CFileItemPtr pItem(new CFileItem(title));
         pItem->m_bIsFolder = true;
         pItem->m_bIsShareOrDrive = false;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedepisodes")
           pItem->SetPath("videodb://recentlyaddedepisodes/");
         else
           pItem->SetPath("videodb://tvshows/" + basePath + "/");
-        pItem->SetLabel("MrMC - TvShows");
+        pItem->SetLabel(title);
         items.Add(pItem);
       }
       //look through all plex servers and pull content data for "show" type
