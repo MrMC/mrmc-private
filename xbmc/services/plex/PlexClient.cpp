@@ -152,6 +152,18 @@ int CPlexClient::GetPort()
   return url.GetPort();
 }
 
+const PlexSectionsContentVector CPlexClient::GetTvContent() const
+{
+  CSingleLock lock(m_criticalTVShow);
+  return m_showSectionsContents;
+}
+
+const PlexSectionsContentVector CPlexClient::GetMovieContent() const
+{
+  CSingleLock lock(m_criticalMovies);
+  return m_movieSectionsContents;
+}
+
 bool CPlexClient::IsMe(const CURL& url)
 {
   CURL real_url(url);
@@ -207,18 +219,6 @@ std::string CPlexClient::LookUpUuid(const std::string path) const
   }
 
   return uuid;
-}
-
-const PlexSectionsContentVector CPlexClient::GetTvContent() const
-{
-  CSingleLock lock(m_criticalTVShow);
-  return m_showSectionsContents;
-}
-
-const PlexSectionsContentVector CPlexClient::GetMovieContent() const
-{
-  CSingleLock lock(m_criticalMovies);
-  return m_movieSectionsContents;
 }
 
 bool CPlexClient::ParseSections(PlexSectionParsing parser)

@@ -69,16 +69,16 @@ public:
   const std::string &GetOwned() const       { return m_owned; }
   const std::string &GetScheme() const      { return m_scheme; }
   const bool &IsLocal() const { return m_local; }
-  std::string LookUpUuid(const std::string path) const;
 
   const PlexSectionsContentVector GetTvContent() const;
   const PlexSectionsContentVector GetMovieContent() const;
   std::string GetHost();
   int         GetPort();
   std::string GetUrl();
-  bool        IsMe(const CURL& url);
 
 protected:
+  bool        IsMe(const CURL& url);
+  std::string LookUpUuid(const std::string path) const;
   bool        ParseSections(PlexSectionParsing parser);
   void        SetVanished() { m_alive = false; };
 
