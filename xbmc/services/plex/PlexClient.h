@@ -21,6 +21,7 @@
 
 #include <string>
 
+#include "URL.h"
 #include "utils/XMLUtils.h"
 #include "threads/CriticalSection.h"
 
@@ -75,6 +76,7 @@ public:
   std::string GetHost();
   int         GetPort();
   std::string GetUrl();
+  bool        IsMe(const CURL& url);
 
 protected:
   bool        ParseSections(PlexSectionParsing parser);

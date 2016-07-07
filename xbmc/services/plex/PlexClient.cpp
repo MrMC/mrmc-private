@@ -30,6 +30,7 @@
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
+#include "utils/Base64.h"
 
 #include <string>
 #include <sstream>
@@ -149,6 +150,38 @@ int CPlexClient::GetPort()
 {
   CURL url(m_url);
   return url.GetPort();
+}
+
+bool CPlexClient::IsMe(const CURL& url)
+{
+  CURL real_url(url);
+  if (real_url.GetProtocol() == "plex")
+    real_url = CURL(Base64::Decode(URIUtils::GetFileName(real_url)));
+
+  if (GetHost() == real_url.GetHostName())
+  {
+    if (!real_url.GetFileName().empty())
+    {
+      {
+        CSingleLock lock(m_criticalMovies);
+        for (const auto &contents : m_movieSectionsContents)
+        {
+          if (real_url.GetFileName().find(contents.section) != std::string::npos)
+            return true;
+        }
+      }
+      {
+        CSingleLock lock(m_criticalTVShow);
+        for (const auto &contents : m_showSectionsContents)
+        {
+          if (real_url.GetFileName().find(contents.section) != std::string::npos)
+            return true;
+        }
+      }
+    }
+  }
+
+  return false;
 }
 
 std::string CPlexClient::LookUpUuid(const std::string path) const

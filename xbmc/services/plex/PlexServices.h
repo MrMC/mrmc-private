@@ -23,6 +23,7 @@
 #include <memory>
 
 #include "PlexClient.h"
+#include "URL.h"
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
@@ -61,7 +62,7 @@ public:
   bool IsActive();
   bool HasClients() const;
   void GetClients(std::vector<CPlexClientPtr> &clients) const;
-  bool CacheClients();
+  bool CacheClient(const CURL &url);
 
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
