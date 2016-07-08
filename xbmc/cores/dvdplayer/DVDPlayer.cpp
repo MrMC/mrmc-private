@@ -4684,7 +4684,7 @@ int CDVDPlayer::AddSubtitleFile(const std::string& filename, const std::string& 
   if (m_item.IsMediaServiceBased())
   {
     s.language = language;
-    s.name     = "(External)";
+    s.name     = g_localizeStrings.Get(21602);
     s.flags    = CDemuxStream::FLAG_NONE;
   }
   else
