@@ -20,6 +20,7 @@
 
 #include <algorithm>
 
+#include "Application.h"
 #include "services/ServicesManager.h"
 
 #include "interfaces/AnnouncementManager.h"
@@ -87,6 +88,11 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
     if (strcmp(message, "OnPlay") == 0)
     {
       CPlexUtils::TogglePaused(false);
+      if(g_application.m_pPlayer->GetSubtitleCount() < 1)
+      {
+        CFileItem item = g_application.CurrentFileItem();
+        CPlexUtils::GetItemSubtiles(item);
+      }
     }
     else if (strcmp(message, "OnPause") == 0)
     {
@@ -176,11 +182,6 @@ void CServicesManager::GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, in
     recentlyAdded.ClearItems();
     recentlyAdded.Append(temp);
   }
-}
-
-void CServicesManager::GetSubtitles(CFileItem &item)
-{
-  CPlexUtils::GetItemSubtiles(item);
 }
 
 void CServicesManager::RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler)

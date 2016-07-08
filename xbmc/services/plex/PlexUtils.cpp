@@ -34,6 +34,8 @@
 #include "filesystem/CurlFile.h"
 #include "filesystem/ZipFile.h"
 #include "settings/Settings.h"
+#include "cores/dvdplayer/DVDPlayer.h"
+#include "guilib/LocalizeStrings.h"
 
 #include "video/VideoInfoTag.h"
 
@@ -817,7 +819,6 @@ bool CPlexUtils::GetItemSubtiles(CFileItem &item)
         const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
         if (partNode)
         {
-          int i = 1;
           std::string subFile;
           const TiXmlElement* streamNode = partNode->FirstChildElement("Stream");
           while (streamNode)
@@ -825,15 +826,18 @@ bool CPlexUtils::GetItemSubtiles(CFileItem &item)
             if (XMLUtils::GetAttribute(streamNode, "streamType") == "3")
             {
               CURL plex(url);
-              std::string key = StringUtils::Format("subtitle:%i", i);
-              std::string keyLanguage = StringUtils::Format("subtitle:%i_language", i);
               std::string filename = StringUtils::Format("library/streams/%s.%s",
                                                          XMLUtils::GetAttribute(streamNode, "id").c_str(),
                                                          XMLUtils::GetAttribute(streamNode, "format").c_str());
               plex.SetFileName(filename);
-              item.SetProperty(key, plex.Get());
-              item.SetProperty(keyLanguage, XMLUtils::GetAttribute(streamNode, "languageCode"));
-              i++;
+              SPlayerSubtitleStreamInfo s;
+              s.file = plex.Get();
+              s.language = XMLUtils::GetAttribute(streamNode, "languageCode");
+              s.name     = g_localizeStrings.Get(21602);
+              if (g_application.m_pPlayer)
+              {
+                g_application.m_pPlayer->AddSubtitle(s);
+              }
             }
             streamNode = streamNode->NextSiblingElement("Stream");
           }
