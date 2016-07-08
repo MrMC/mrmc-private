@@ -414,17 +414,29 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
       plexItem->GetVideoInfoTag()->m_resumePoint = m_bookmark;
       plexItem->m_lStartOffset = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
 
+      int part = 1;
+      std::string filePath;
       const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
-      if (partNode)
+      while(partNode)
       {
+        if (part == 2)
+          filePath = "stack://" + filePath;
         std::string key = ((TiXmlElement*) partNode)->Attribute("key");
         if (!key.empty() && (key[0] == '/'))
           StringUtils::TrimLeft(key, "/");
         url.SetFileName(key);
-        plexItem->SetPath(url.Get());
-        plexItem->GetVideoInfoTag()->m_strFileNameAndPath = url.Get();
         plexItem->GetVideoInfoTag()->m_strServiceFile = XMLUtils::GetAttribute(partNode, "file");
+        std::string propertyKey = StringUtils::Format("stack:%i_time", part);
+        plexItem->SetProperty(propertyKey, atoi(XMLUtils::GetAttribute(partNode, "duration").c_str())/1000 );
+        if(part > 1)
+          filePath = filePath + " , " + url.Get();
+        else
+          filePath = url.Get();
+        part ++;
+        partNode = partNode->NextSiblingElement("Part");
       }
+      plexItem->SetPath(filePath);
+      plexItem->GetVideoInfoTag()->m_strFileNameAndPath = filePath;
     }
 
     videoNode = videoNode->NextSiblingElement("Video");
