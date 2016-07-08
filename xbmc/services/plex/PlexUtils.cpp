@@ -765,3 +765,76 @@ bool CPlexUtils::GetPlexFilter(CFileItemList &items, std::string url, std::strin
 
   return rtn;
 }
+
+bool CPlexUtils::GetItemSubtiles(CFileItem &item)
+{
+  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
+      StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
+    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+  
+  std::string filename = StringUtils::Format("library/metadata/%s", id.c_str());
+  
+  CURL url2(url);
+  std::string strXML;
+  XFILE::CCurlFile http;
+  http.SetRequestHeader("Accept-Encoding", "gzip");
+  
+  url2.SetFileName(filename);
+  // this is key to get back gzip encoded content
+  url2.SetProtocolOption("seekable", "0");
+  
+  http.Get(url2.Get(), strXML);
+  if (http.GetContentEncoding() == "gzip")
+  {
+    std::string buffer;
+    if (XFILE::CZipFile::DecompressGzip(strXML, buffer))
+      strXML = std::move(buffer);
+    else
+      return false;
+  }
+  // remove the seakable option as we propigate the url
+  url2.RemoveProtocolOption("seekable");
+  
+  TiXmlDocument xml;
+  xml.Parse(strXML.c_str());
+  
+  TiXmlElement* rootXmlNode = xml.RootElement();
+  if (rootXmlNode)
+  {
+    const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
+    if(videoNode)
+    {
+      const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
+      if (mediaNode)
+      {
+        const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
+        if (partNode)
+        {
+          int i = 1;
+          std::string subFile;
+          const TiXmlElement* streamNode = partNode->FirstChildElement("Stream");
+          while (streamNode)
+          {
+            if (XMLUtils::GetAttribute(streamNode, "streamType") == "3")
+            {
+              CURL plex(url);
+              std::string key = StringUtils::Format("subtitle:%i", i);
+              std::string keyLanguage = StringUtils::Format("subtitle:%i_language", i);
+              std::string filename = StringUtils::Format("library/streams/%s.%s",
+                                                         XMLUtils::GetAttribute(streamNode, "id").c_str(),
+                                                         XMLUtils::GetAttribute(streamNode, "format").c_str());
+              plex.SetFileName(filename);
+              item.SetProperty(key, plex.Get());
+              item.SetProperty(keyLanguage, XMLUtils::GetAttribute(streamNode, "languageCode"));
+              i++;
+            }
+            streamNode = streamNode->NextSiblingElement("Stream");
+          }
+        }
+      }
+    }
+  }
+  return true;
+}

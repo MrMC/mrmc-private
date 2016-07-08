@@ -178,6 +178,11 @@ void CServicesManager::GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, in
   }
 }
 
+void CServicesManager::GetSubtitles(CFileItem &item)
+{
+  CPlexUtils::GetItemSubtiles(item);
+}
+
 void CServicesManager::RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler)
 {
   if (mediaServicesHandler == nullptr)

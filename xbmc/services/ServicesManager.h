@@ -64,6 +64,7 @@ public:
   void UpdateFileProgressState(CFileItem &item, double currentTime);
   void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit);
   void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit);
+  void GetSubtitles(CFileItem &item);
 
   bool GetDirectory(const CURL& url, CFileItemList &items);
   XFILE::DIR_CACHE_TYPE GetCacheType(const CURL& url);

@@ -69,6 +69,7 @@
 #include "LangInfo.h"
 #include "URL.h"
 #include "video/VideoReferenceClock.h"
+#include "services/ServicesManager.h"
 
 #ifdef HAS_OMXPLAYER
 #include "cores/omxplayer/OMXPlayerAudio.h"
@@ -783,7 +784,10 @@ bool CDVDPlayer::OpenInputStream()
       CURL::GetRedacted(m_filename.c_str()).c_str());
     return false;
   }
-
+  if (m_item.IsMediaServiceBased())
+  {
+    CServicesManager::GetInstance().GetSubtitles(m_item);
+  }
   // find any available external subtitles for non dvd files
   if (!m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD)
   &&  !m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER)
@@ -811,7 +815,9 @@ bool CDVDPlayer::OpenInputStream()
       {
         if ( !CUtil::IsVobSub(filenames, filenames[i] ) )
         {
-          AddSubtitleFile(filenames[i]);
+          std::string key = StringUtils::Format("subtitle:%i_language", i+1);
+          std::string language = m_item.GetProperty(key).asString();
+          AddSubtitleFile(filenames[i], "", language);
         }
       }
     } // end loop over all subtitle files
@@ -4625,7 +4631,7 @@ void CDVDPlayer::GetAudioStreamInfo(int index, SPlayerAudioStreamInfo &info)
   info.audioCodecName = s.codec;
 }
 
-int CDVDPlayer::AddSubtitleFile(const std::string& filename, const std::string& subfilename)
+int CDVDPlayer::AddSubtitleFile(const std::string& filename, const std::string& subfilename, const std::string language)
 {
   std::string ext = URIUtils::GetExtension(filename);
   std::string vobsubfile = subfilename;
@@ -4675,13 +4681,21 @@ int CDVDPlayer::AddSubtitleFile(const std::string& filename, const std::string& 
   s.type     = STREAM_SUBTITLE;
   s.id       = 0;
   s.filename = filename;
-  ExternalStreamInfo info;
-  CUtil::GetExternalStreamDetailsFromFilename(m_filename, filename, info);
-  s.name = info.name;
-  s.language = info.language;
-  if (static_cast<CDemuxStream::EFlags>(info.flag) != CDemuxStream::FLAG_NONE)
-    s.flags = static_cast<CDemuxStream::EFlags>(info.flag);
-
+  if (m_item.IsMediaServiceBased())
+  {
+    s.language = language;
+    s.name     = "(External)";
+    s.flags    = CDemuxStream::FLAG_NONE;
+  }
+  else
+  {
+    ExternalStreamInfo info;
+    CUtil::GetExternalStreamDetailsFromFilename(m_filename, filename, info);
+    s.name = info.name;
+    s.language = info.language;
+    if (static_cast<CDemuxStream::EFlags>(info.flag) != CDemuxStream::FLAG_NONE)
+      s.flags = static_cast<CDemuxStream::EFlags>(info.flag);
+  }
   m_SelectionStreams.Update(s);
   return m_SelectionStreams.IndexOf(STREAM_SUBTITLE, s.source, s.id);
 }
