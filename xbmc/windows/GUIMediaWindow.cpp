@@ -1598,6 +1598,8 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
           CServicesManager::GetInstance().SetWatched(*item.get());
         else
           CServicesManager::GetInstance().SetUnWatched(*item.get());
+        // set resume point to 0
+        item->GetVideoInfoTag()->m_resumePoint.timeInSeconds = 0;
         item->GetVideoInfoTag()->m_playCount = (button == CONTEXT_BUTTON_MARK_WATCHED);
         item->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item->HasVideoInfoTag() && item->GetVideoInfoTag()->m_playCount > 0);
         return true;
