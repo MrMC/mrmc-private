@@ -49,11 +49,13 @@ bool CPlexUtils::HasClients()
 bool CPlexUtils::GetIdentity(std::string url)
 {
   // all (local and remote) plex server respond to identity
+  // over http
   XFILE::CCurlFile plex;
   plex.SetTimeout(1);
 
   CURL curl(url);
   curl.SetFileName(curl.GetFileName() + "identity");
+  curl.SetProtocol("http");
   std::string strResponse;
   if (plex.Get(curl.Get(), strResponse))
   {
