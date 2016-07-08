@@ -43,16 +43,21 @@ bool CSaveFileStateJob::DoWork()
   if (m_item.IsMediaServiceBased())
   {
     m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
-
-    if (m_bookmark.timeInSeconds > m_item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds * 0.9)
+    if (m_bookmark.timeInSeconds < 0 || m_bookmark.timeInSeconds > m_item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds * 0.9)
+    {
       m_item.GetVideoInfoTag()->m_playCount++;
-
+      m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = 0;
+      CServicesManager::GetInstance().SetWatched(m_item);
+    }
+    else
+    {
+      // notify service content handler where we stopped playback
+      CServicesManager::GetInstance().SetResumePoint(m_item);
+    }
+    m_item.SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, m_item.HasVideoInfoTag() && m_item.GetVideoInfoTag()->m_playCount > 0);
     CFileItemPtr msgItem(new CFileItem(m_item));
     CGUIMessage message(GUI_MSG_NOTIFY_ALL, g_windowManager.GetActiveWindow(), 0, GUI_MSG_UPDATE_ITEM, 0, msgItem);
     g_windowManager.SendThreadMessage(message);
-
-    // notify service content handler where we stopped playback
-    CServicesManager::GetInstance().SetResumePoint(m_item);
     return true;
   }
 
