@@ -312,7 +312,9 @@ void CPlexServices::Announce(AnnouncementFlag flag, const char *sender, const ch
     else if (strcmp(message, "OnPause") == 0)
       m_playState = PlexServicePlayerState::paused;
     else if (strcmp(message, "OnStop") == 0)
+    {
       m_playState = PlexServicePlayerState::stopped;
+    }
   }
   else if ((flag & AnnouncementFlag::Other) && strcmp(sender, "plex") == 0)
   {

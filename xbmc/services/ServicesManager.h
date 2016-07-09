@@ -36,10 +36,9 @@ class IMediaServicesHandler: public XFILE::IDirectory
 public:
   virtual ~IMediaServicesHandler() { }
 
-  virtual void SetWatched(CFileItem &item) { }
-  virtual void SetUnWatched(CFileItem &item) { }
-  virtual void SetResumePoint(CFileItem &item) { }
-  virtual void UpdateFileProgressState(CFileItem &item, double currentTime) { }
+  virtual void SetItemWatched(CFileItem &item) { }
+  virtual void SetItemUnWatched(CFileItem &item) { }
+  virtual void UpdateItemState(CFileItem &item, double currentTime) { }
   virtual void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit) { }
   virtual void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit){ }
 
@@ -58,13 +57,11 @@ public:
   bool IsMediaServicesItem(const CFileItem &item);
   bool UpdateMediaServicesLibray(const CFileItem &item);
 
-  void SetWatched(CFileItem &item);
-  void SetUnWatched(CFileItem &item);
-  void SetResumePoint(CFileItem &item);
-  void UpdateFileProgressState(CFileItem &item, double currentTime);
+  void SetItemWatched(CFileItem &item);
+  void SetItemUnWatched(CFileItem &item);
+  void UpdateItemState(CFileItem &item, double currentTime);
   void GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit);
   void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit);
-  void GetSubtitles(CFileItem &item);
 
   bool GetDirectory(const CURL& url, CFileItemList &items);
   XFILE::DIR_CACHE_TYPE GetCacheType(const CURL& url);

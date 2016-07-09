@@ -20,9 +20,9 @@
 
 #include <algorithm>
 
-#include "Application.h"
 #include "services/ServicesManager.h"
 
+#include "Application.h"
 #include "interfaces/AnnouncementManager.h"
 #include "services/plex/PlexUtils.h"
 #include "utils/JobManager.h"
@@ -48,8 +48,6 @@ public:
       CPlexUtils::SetWatched(m_item);
     else if (m_function == "SetUnWatched")
       CPlexUtils::SetUnWatched(m_item);
-    else if (m_function == "SetResume")
-      CPlexUtils::SetOffset(m_item, m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
     else if (m_function == "SetProgress")
       CPlexUtils::ReportProgress(m_item, m_currentTime);
     return true;
@@ -83,11 +81,12 @@ CServicesManager& CServicesManager::GetInstance()
 
 void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
 {
+  //CLog::Log(LOGDEBUG, "CServicesManager::Announce [%s], [%s], [%s]", ANNOUNCEMENT::AnnouncementFlagToString(flag), sender, message);
   if ((flag & Player) && strcmp(sender, "xbmc") == 0)
   {
     if (strcmp(message, "OnPlay") == 0)
     {
-      CPlexUtils::TogglePaused(false);
+      CPlexUtils::SetPlayState(PlexUtilsPlayerState::playing);
       if(g_application.m_pPlayer->GetSubtitleCount() < 1)
       {
         CFileItem item = g_application.CurrentFileItem();
@@ -96,11 +95,11 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
     }
     else if (strcmp(message, "OnPause") == 0)
     {
-      CPlexUtils::TogglePaused(true);
+      CPlexUtils::SetPlayState(PlexUtilsPlayerState::paused);
     }
     else if (strcmp(message, "OnStop") == 0)
     {
-      CPlexUtils::TogglePaused(false);
+      CPlexUtils::SetPlayState(PlexUtilsPlayerState::stopped);
     }
   }
 }
@@ -124,7 +123,7 @@ bool CServicesManager::UpdateMediaServicesLibray(const CFileItem &item)
   return true;
 }
 
-void CServicesManager::SetWatched(CFileItem &item)
+void CServicesManager::SetItemWatched(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))
   {
@@ -132,7 +131,7 @@ void CServicesManager::SetWatched(CFileItem &item)
   }
 }
 
-void CServicesManager::SetUnWatched(CFileItem &item)
+void CServicesManager::SetItemUnWatched(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))
   {
@@ -140,15 +139,7 @@ void CServicesManager::SetUnWatched(CFileItem &item)
   }
 }
 
-void CServicesManager::SetResumePoint(CFileItem &item)
-{
-  if (item.HasProperty("PlexItem"))
-  {
-    AddJob(new CServicesManagerJob(item, 0, "SetResume"));
-  }
-}
-
-void CServicesManager::UpdateFileProgressState(CFileItem &item, double currentTime)
+void CServicesManager::UpdateItemState(CFileItem &item, double currentTime)
 {
   if (item.HasProperty("PlexItem"))
   {

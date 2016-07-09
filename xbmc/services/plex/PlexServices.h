@@ -36,11 +36,11 @@ namespace SOCKETS
   class CSocketListener;
 }
 
-enum PlexServicePlayerState
+enum class PlexServicePlayerState
 {
-  paused = 0,
-  playing = 1,
-  stopped = 2,
+  paused = 1,
+  playing = 2,
+  stopped = 3,
 };
 
 class CPlexClient;
