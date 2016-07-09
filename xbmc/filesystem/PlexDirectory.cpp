@@ -84,7 +84,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           for (const auto &content : contents)
           {
-            std::string owned = (client->GetOwned() == "1") ? "M":"S";
+            std::string owned = (client->GetOwned() == "1") ? "O":"S";
             std::string title = StringUtils::Format("Plex(%s) - %s - %s",
               owned.c_str(), client->GetServerName().c_str(), content.title.c_str());
             std::string host = client->GetUrl();
@@ -193,7 +193,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           for (const auto &content : contents)
           {
-            std::string owned = (client->GetOwned() == "1") ? "M":"S";
+            std::string owned = (client->GetOwned() == "1") ? "O":"S";
             std::string title = StringUtils::Format("Plex(%s) - %s - %s",
               owned.c_str(), client->GetServerName().c_str(), content.title.c_str());
             std::string host = client->GetUrl();
