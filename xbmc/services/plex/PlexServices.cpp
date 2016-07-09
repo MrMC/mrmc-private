@@ -104,6 +104,7 @@ CPlexServices::CPlexServices()
 , m_gdmListener(nullptr)
 , m_updateMins(0)
 , m_playState(PlexServicePlayerState::stopped)
+, m_hasClients(false)
 {
   // register our redacted protocol options with CURL
   // we do not want these exposed in mrmc.log.
@@ -160,7 +161,7 @@ bool CPlexServices::IsActive()
 
 bool CPlexServices::HasClients() const
 {
-  return !m_clients.empty();
+  return m_hasClients;
 }
 
 void CPlexServices::GetClients(std::vector<CPlexClientPtr> &clients) const
@@ -608,7 +609,8 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
   }
   if (!lostClients.empty())
   {
-    // do something here
+    for (const auto &client : lostClients)
+      RemoveClient(client);
   }
 
   if (rtn)
@@ -888,10 +890,26 @@ bool CPlexServices::AddClient(CPlexClientPtr newClient)
   if (newClient->ParseSections(PlexSectionParsing::newSection))
   {
     m_clients.push_back(newClient);
+    m_hasClients = !m_clients.empty();
     return true;
   }
 
   return false;
+}
+
+bool CPlexServices::RemoveClient(CPlexClientPtr lostClient)
+{
+  bool rtn = false;
+  CSingleLock lock(m_criticalClients);
+  std::vector<CPlexClientPtr>::iterator client = std::find(m_clients.begin(), m_clients.end(), lostClient);
+  if (client != m_clients.end())
+  {
+    m_clients.erase(client);
+    m_hasClients = !m_clients.empty();
+    rtn = true;
+  }
+
+  return rtn;
 }
 
 bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)

@@ -96,6 +96,7 @@ private:
 
   CPlexClientPtr    GetClient(std::string uuid);
   bool              AddClient(CPlexClientPtr server);
+  bool              RemoveClient(CPlexClientPtr newClient);
   bool              GetMyHomeUsers(std::string &homeusername);
 
   std::atomic<bool> m_active;
@@ -112,5 +113,6 @@ private:
 
   PlexServicePlayerState m_playState;
   CCriticalSection  m_criticalClients;
+  std::atomic<bool> m_hasClients;
   std::vector<CPlexClientPtr> m_clients;
 };
