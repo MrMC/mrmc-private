@@ -160,7 +160,6 @@ bool CPlexServices::IsActive()
 
 bool CPlexServices::HasClients() const
 {
-  CSingleLock lock(m_criticalClients);
   return !m_clients.empty();
 }
 
