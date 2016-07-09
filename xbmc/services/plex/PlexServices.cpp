@@ -148,9 +148,9 @@ void CPlexServices::Stop()
     StopThread();
   }
 
+  g_directoryCache.Clear();
   CSingleLock lock2(m_criticalClients);
   m_clients.clear();
-  g_directoryCache.Clear();
 }
 
 bool CPlexServices::IsActive()
@@ -385,12 +385,12 @@ void CPlexServices::UpdateLibraries(bool forced)
 {
   CSingleLock lock(m_criticalClients);
   bool clearDirCache = false;
-  for (size_t c = 0; c < m_clients.size(); ++c)
+  for (const auto &client : m_clients)
   {
-    m_clients[c]->ParseSections(PlexSectionParsing::checkSection);
-    if (forced || m_clients[c]->NeedUpdate())
+    client->ParseSections(PlexSectionParsing::checkSection);
+    if (forced || client->NeedUpdate())
     {
-      m_clients[c]->ParseSections(PlexSectionParsing::updateSection);
+      client->ParseSections(PlexSectionParsing::updateSection);
       clearDirCache = true;
     }
   }
@@ -586,18 +586,18 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
   std::vector<CPlexClientPtr> lostClients;
   if (clientsFound.size())
   {
-    for (std::vector<CPlexClientPtr>::iterator s_it = clientsFound.begin(); s_it != clientsFound.end(); ++s_it)
+    for (const auto &client : clientsFound)
     {
-      if (AddClient(*s_it))
+      if (AddClient(client))
       {
         // new client
-        CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", (*s_it)->GetServerName().c_str());
+        CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", client->GetServerName().c_str());
       }
-      else if (GetClient((*s_it)->GetUuid()) == nullptr)
+      else if (GetClient(client->GetUuid()) == nullptr)
       {
         // lost client
-        lostClients.push_back(*s_it);
-        CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", (*s_it)->GetServerName().c_str());
+        lostClients.push_back(client);
+        CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", client->GetServerName().c_str());
       }
     }
   }
@@ -862,27 +862,27 @@ void CPlexServices::CheckForGDMServers()
 CPlexClientPtr CPlexServices::GetClient(std::string uuid)
 {
   CSingleLock lock(m_criticalClients);
-  for (std::vector<CPlexClientPtr>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
+  for (const auto &client : m_clients)
   {
-    if ((*s_it)->GetUuid() == uuid)
-      return *s_it;
+    if (client->GetUuid() == uuid)
+      return client;
   }
   return nullptr;
 }
 
-bool CPlexServices::AddClient(CPlexClientPtr client)
+bool CPlexServices::AddClient(CPlexClientPtr newClient)
 {
   CSingleLock lock(m_criticalClients);
-  // do not add existing clients
-  for (std::vector<CPlexClientPtr>::iterator s_it = m_clients.begin(); s_it != m_clients.end(); ++s_it)
+  for (const auto &client : m_clients)
   {
-    if ((*s_it)->GetUuid() == client->GetUuid())
+    // do not add existing clients
+    if (client->GetUuid() == newClient->GetUuid())
     return false;
   }
 
-  if (client->ParseSections(PlexSectionParsing::newSection))
+  if (newClient->ParseSections(PlexSectionParsing::newSection))
   {
-    m_clients.push_back(client);
+    m_clients.push_back(newClient);
     return true;
   }
 

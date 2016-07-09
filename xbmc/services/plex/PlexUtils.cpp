@@ -715,19 +715,19 @@ bool CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(CFileItemList &items, boo
   {
     //look through all plex clients and pull recently added for each library section
     std::vector<CPlexClientPtr> clients;
-    std::vector<PlexSectionsContent> contents;
     CPlexServices::GetInstance().GetClients(clients);
-    for (int i = 0; i < (int)clients.size(); i++)
+    for (const auto &client : clients)
     {
+      std::vector<PlexSectionsContent> contents;
       if (tvShow)
-        contents = clients[i]->GetTvContent();
+        contents = client->GetTvContent();
       else
-        contents = clients[i]->GetMovieContent();
-      for (int c = 0; c < (int)contents.size(); c++)
+        contents = client->GetMovieContent();
+      for (const auto &content : contents)
       {
-        CURL curl(clients[i]->GetUrl());
-        curl.SetProtocol(clients[i]->GetScheme());
-        curl.SetFileName(curl.GetFileName() + contents[c].section + "/");
+        CURL curl(client->GetUrl());
+        curl.SetProtocol(client->GetScheme());
+        curl.SetFileName(curl.GetFileName() + content.section + "/");
 
         if (tvShow)
           rtn = GetPlexRecentlyAddedEpisodes(items, curl.Get(), 10);
@@ -735,7 +735,7 @@ bool CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(CFileItemList &items, boo
           rtn = GetPlexRecentlyAddedMovies(items, curl.Get(), 10);
 
         for (int item = 0; item < items.Size(); ++item)
-          CPlexUtils::SetPlexItemProperties(*items[item], clients[i]->GetUuid());
+          CPlexUtils::SetPlexItemProperties(*items[item], client->GetUuid());
       }
     }
     items.SetProperty("PlexItem", true);

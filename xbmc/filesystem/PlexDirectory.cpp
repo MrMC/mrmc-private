@@ -77,26 +77,26 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       //look through all plex clients and pull content data for "movie" type
       std::vector<CPlexClientPtr> clients;
       CPlexServices::GetInstance().GetClients(clients);
-      for (int i = 0; i < (int)clients.size(); i++)
+      for (const auto &client : clients)
       {
-        std::vector<PlexSectionsContent> contents = clients[i]->GetMovieContent();
+        std::vector<PlexSectionsContent> contents = client->GetMovieContent();
         if (contents.size() > 1 || ((hasMovies || clients.size() > 1) && contents.size() == 1))
         {
-          for (int c = 0; c < (int)contents.size(); c++)
+          for (const auto &content : contents)
           {
-            std::string owned = (clients[i]->GetOwned() == "1") ? "M":"S";
+            std::string owned = (client->GetOwned() == "1") ? "M":"S";
             std::string title = StringUtils::Format("Plex(%s) - %s - %s",
-              owned.c_str(), clients[i]->GetServerName().c_str(), contents[c].title.c_str());
-            std::string host = clients[i]->GetUrl();
+              owned.c_str(), client->GetServerName().c_str(), content.title.c_str());
+            std::string host = client->GetUrl();
             URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
-            CPlexUtils::SetPlexItemProperties(*pItem, clients[i]->GetUuid());
+            CPlexUtils::SetPlexItemProperties(*pItem, client->GetUuid());
             // have to do it this way because raw url has authToken as protocol option
-            CURL curl(clients[i]->GetUrl());
-            curl.SetProtocol(clients[i]->GetScheme());
-            std::string filename = StringUtils::Format("%s/%s", contents[c].section.c_str(), (basePath == "titles"? "all":""));
+            CURL curl(client->GetUrl());
+            curl.SetProtocol(client->GetScheme());
+            std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), (basePath == "titles"? "all":""));
             curl.SetFileName(filename);
             pItem->SetPath("plex://movies/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
@@ -105,15 +105,15 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         }
         else if (contents.size() == 1)
         {
-          CURL curl(clients[i]->GetUrl());
-          curl.SetProtocol(clients[i]->GetScheme());
+          CURL curl(client->GetUrl());
+          curl.SetProtocol(client->GetScheme());
           curl.SetFileName(contents[0].section + "/all");
           CPlexUtils::GetPlexMovies(items, curl.Get());
           items.SetContent("movies");
           items.SetPath("");
-          CPlexUtils::SetPlexItemProperties(items, clients[i]->GetUuid());
+          CPlexUtils::SetPlexItemProperties(items, client->GetUuid());
           for (int item = 0; item < items.Size(); ++item)
-            CPlexUtils::SetPlexItemProperties(*items[item], clients[i]->GetUuid());
+            CPlexUtils::SetPlexItemProperties(*items[item], client->GetUuid());
         }
         std::string label = basePath;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedmovies")
@@ -186,26 +186,26 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       //look through all plex servers and pull content data for "show" type
       std::vector<CPlexClientPtr> clients;
       CPlexServices::GetInstance().GetClients(clients);
-      for (int i = 0; i < (int)clients.size(); i++)
+      for (const auto &client : clients)
       {
-        std::vector<PlexSectionsContent> contents = clients[i]->GetTvContent();
+        std::vector<PlexSectionsContent> contents = client->GetTvContent();
         if (contents.size() > 1 || ((hasTvShows || clients.size() > 1) && contents.size() == 1))
         {
-          for (int c = 0; c < (int)contents.size(); c++)
+          for (const auto &content : contents)
           {
-            std::string owned = (clients[i]->GetOwned() == "1") ? "M":"S";
+            std::string owned = (client->GetOwned() == "1") ? "M":"S";
             std::string title = StringUtils::Format("Plex(%s) - %s - %s",
-              owned.c_str(), clients[i]->GetServerName().c_str(), contents[c].title.c_str());
-            std::string host = clients[i]->GetUrl();
+              owned.c_str(), client->GetServerName().c_str(), content.title.c_str());
+            std::string host = client->GetUrl();
             URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
-            CPlexUtils::SetPlexItemProperties(*pItem, clients[i]->GetUuid());
+            CPlexUtils::SetPlexItemProperties(*pItem, client->GetUuid());
             // have to do it this way because raw url has authToken as protocol option
-            CURL curl(clients[i]->GetUrl());
-            curl.SetProtocol(clients[i]->GetScheme());
-            std::string filename = StringUtils::Format("%s/%s", contents[c].section.c_str(), (basePath == "titles"? "all":""));
+            CURL curl(client->GetUrl());
+            curl.SetProtocol(client->GetScheme());
+            std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), (basePath == "titles"? "all":""));
             curl.SetFileName(filename);
             pItem->SetPath("plex://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
@@ -214,15 +214,15 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         }
         else if (contents.size() == 1)
         {
-          CURL curl(clients[i]->GetUrl());
-          curl.SetProtocol(clients[i]->GetScheme());
+          CURL curl(client->GetUrl());
+          curl.SetProtocol(client->GetScheme());
           curl.SetFileName(contents[0].section + "/all");
           CPlexUtils::GetPlexTvshows(items, curl.Get());
           items.SetContent("tvshows");
           items.SetPath("");
-          CPlexUtils::SetPlexItemProperties(items, clients[i]->GetUuid());
+          CPlexUtils::SetPlexItemProperties(items, client->GetUuid());
           for (int item = 0; item < items.Size(); ++item)
-            CPlexUtils::SetPlexItemProperties(*items[item], clients[i]->GetUuid());
+            CPlexUtils::SetPlexItemProperties(*items[item], client->GetUuid());
         }
         std::string label = basePath;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedepisodes")
