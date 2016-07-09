@@ -37,9 +37,8 @@ namespace StringHasher
     hash_t ret{basis};
     while(*str)
     {
-      ret ^= *str;
+      ret ^= *str++;
       ret *= prime;
-      str++;
     }
     return ret;
   }
