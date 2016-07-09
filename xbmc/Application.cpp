@@ -3045,23 +3045,37 @@ PlayBackRet CApplication::PlayStack(const CFileItem& item, bool bRestart)
   // case 2: all other stacks
   else
   {
-    LoadVideoSettings(item);
-    
-    // see if we have the info in the database
-    // TODO: If user changes the time speed (FPS via framerate conversion stuff)
-    //       then these times will be wrong.
-    //       Also, this is really just a hack for the slow load up times we have
-    //       A much better solution is a fast reader of FPS and fileLength
-    //       that we can use on a file to get it's time.
     std::vector<int> times;
     bool haveTimes(false);
-    CVideoDatabase dbs;
-    if (dbs.Open())
+    if(item.IsMediaServiceBased())
     {
-      haveTimes = dbs.GetStackTimes(item.GetPath(), times);
-      dbs.Close();
+      std::string key("stack:1_time");
+      int totalTime = 0;
+      for(unsigned s = 1; item.HasProperty(key); key = StringUtils::Format("stack:%u_time", ++s))
+      {
+        totalTime = totalTime + item.GetProperty(key).asInteger();
+        times.push_back(totalTime);
+      }
+      haveTimes = true;
     }
-
+    else
+    {
+      LoadVideoSettings(item);
+      
+      // see if we have the info in the database
+      // TODO: If user changes the time speed (FPS via framerate conversion stuff)
+      //       then these times will be wrong.
+      //       Also, this is really just a hack for the slow load up times we have
+      //       A much better solution is a fast reader of FPS and fileLength
+      //       that we can use on a file to get it's time.
+      
+      CVideoDatabase dbs;
+      if (dbs.Open())
+      {
+        haveTimes = dbs.GetStackTimes(item.GetPath(), times);
+        dbs.Close();
+      }
+    }
 
     // calculate the total time of the stack
     CStackDirectory dir;
@@ -3090,7 +3104,7 @@ PlayBackRet CApplication::PlayStack(const CFileItem& item, bool bRestart)
 
     if (!haveTimes || item.m_lStartOffset == STARTOFFSET_RESUME )
     {  // have our times now, so update the dB
-      if (dbs.Open())
+      if (!item.IsMediaServiceBased() && dbs.Open())
       {
         if (!haveTimes && !times.empty())
           dbs.SetStackTimes(item.GetPath(), times);
@@ -3109,7 +3123,11 @@ PlayBackRet CApplication::PlayStack(const CFileItem& item, bool bRestart)
         }
         dbs.Close();
       }
+      else
+        if (item.m_lStartOffset == STARTOFFSET_RESUME)
+          seconds = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds;
     }
+
 
     *m_itemCurrentFile = item;
     m_currentStackPosition = 0;

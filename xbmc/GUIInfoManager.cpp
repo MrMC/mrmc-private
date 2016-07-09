@@ -4718,7 +4718,7 @@ void CGUIInfoManager::SetCurrentMovie(CFileItem &item)
   *m_currentFile = item;
 
   /* also call GetMovieInfo() when a VideoInfoTag is already present or additional info won't be present in the tag */
-  if (!m_currentFile->HasPVRChannelInfoTag())
+  if (!m_currentFile->HasPVRChannelInfoTag() && !item.IsMediaServiceBased())
   {
     CVideoDatabase dbs;
     if (dbs.Open())
