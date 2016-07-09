@@ -781,12 +781,11 @@ bool CPlexUtils::GetPlexFilter(CFileItemList &items, std::string url, std::strin
 
 bool CPlexUtils::GetItemSubtiles(CFileItem &item)
 {
-  std::string id = item.GetVideoInfoTag()->m_strServiceId;
   std::string url = URIUtils::GetParentPath(item.GetPath());
-  if (StringUtils::StartsWithNoCase(url, "plex://tvshows/shows/") ||
-      StringUtils::StartsWithNoCase(url, "plex://tvshows/seasons/"))
+  if (StringUtils::StartsWithNoCase(url, "plex://"))
     url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
   
+  std::string id = item.GetVideoInfoTag()->m_strServiceId;
   std::string filename = StringUtils::Format("library/metadata/%s", id.c_str());
   
   CURL url2(url);
@@ -833,13 +832,12 @@ bool CPlexUtils::GetItemSubtiles(CFileItem &item)
             {
               CURL plex(url);
               std::string filename = StringUtils::Format("library/streams/%s.%s",
-                                                         XMLUtils::GetAttribute(streamNode, "id").c_str(),
-                                                         XMLUtils::GetAttribute(streamNode, "format").c_str());
+                XMLUtils::GetAttribute(streamNode, "id").c_str(), XMLUtils::GetAttribute(streamNode, "format").c_str());
               plex.SetFileName(filename);
               SPlayerSubtitleStreamInfo s;
               s.file = plex.Get();
+              s.name = g_localizeStrings.Get(21602);
               s.language = XMLUtils::GetAttribute(streamNode, "languageCode");
-              s.name     = g_localizeStrings.Get(21602);
               if (g_application.m_pPlayer)
               {
                 g_application.m_pPlayer->AddSubtitle(s);
