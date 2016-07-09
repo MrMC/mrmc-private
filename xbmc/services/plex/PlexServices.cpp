@@ -578,13 +578,18 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
   }
   else
   {
+    // 401 Unauthorized
+    //if (plex.GetResponseCode() == 401)
+    //  m_authToken.clear();
+
     std::string strMessage = "Error getting Plex servers";
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
     CLog::Log(LOGDEBUG, "CPlexServices:FetchMyPlexServers failed %s", strResponse.c_str());
+    return false;
   }
 
   std::vector<CPlexClientPtr> lostClients;
-  if (clientsFound.size())
+  if (!clientsFound.empty())
   {
     for (const auto &client : clientsFound)
     {
@@ -601,7 +606,7 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
       }
     }
   }
-  if (lostClients.size())
+  if (!lostClients.empty())
   {
     // do something here
   }
