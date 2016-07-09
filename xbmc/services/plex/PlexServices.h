@@ -95,8 +95,8 @@ private:
   void              CheckForGDMServers();
 
   CPlexClientPtr    GetClient(std::string uuid);
-  bool              AddClient(CPlexClientPtr server);
-  bool              RemoveClient(CPlexClientPtr newClient);
+  bool              AddClient(CPlexClientPtr foundClient);
+  bool              RemoveClient(CPlexClientPtr lostClient);
   bool              GetMyHomeUsers(std::string &homeusername);
 
   std::atomic<bool> m_active;

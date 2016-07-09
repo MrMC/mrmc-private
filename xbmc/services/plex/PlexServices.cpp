@@ -877,19 +877,19 @@ CPlexClientPtr CPlexServices::GetClient(std::string uuid)
   return nullptr;
 }
 
-bool CPlexServices::AddClient(CPlexClientPtr newClient)
+bool CPlexServices::AddClient(CPlexClientPtr foundClient)
 {
   CSingleLock lock(m_criticalClients);
   for (const auto &client : m_clients)
   {
     // do not add existing clients
-    if (client->GetUuid() == newClient->GetUuid())
+    if (client->GetUuid() == foundClient->GetUuid())
     return false;
   }
 
-  if (newClient->ParseSections(PlexSectionParsing::newSection))
+  if (foundClient->ParseSections(PlexSectionParsing::newSection))
   {
-    m_clients.push_back(newClient);
+    m_clients.push_back(foundClient);
     m_hasClients = !m_clients.empty();
     return true;
   }
