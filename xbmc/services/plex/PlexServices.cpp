@@ -923,7 +923,8 @@ bool CPlexServices::RemoveClient(CPlexClientPtr lostClient)
   if (client != m_clients.end())
   {
     // client is gone, remove it from any gui lists here.
-    CFileItemPtr rootItem = (*client)->GetRootItem();
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+    g_windowManager.SendThreadMessage(msg);
 
     m_clients.erase(client);
     m_hasClients = !m_clients.empty();
@@ -946,6 +947,8 @@ bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
       (*client)->SetPresence(updateClient->GetPresence());
       // update any gui lists here.
       CFileItemPtr rootItem = (*client)->GetRootItem();
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, rootItem);
+      g_windowManager.SendThreadMessage(msg);
     }
     rtn = true;
   }
