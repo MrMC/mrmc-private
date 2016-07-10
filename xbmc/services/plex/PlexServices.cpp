@@ -917,40 +917,44 @@ bool CPlexServices::AddClient(CPlexClientPtr foundClient)
 
 bool CPlexServices::RemoveClient(CPlexClientPtr lostClient)
 {
-  bool rtn = false;
   CSingleLock lock(m_criticalClients);
-  std::vector<CPlexClientPtr>::iterator client = std::find(m_clients.begin(), m_clients.end(), lostClient);
-  if (client != m_clients.end())
+  for (const auto &client : m_clients)
   {
-    // client is gone, remove it from any gui lists here.
-    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
-    g_windowManager.SendThreadMessage(msg);
+    if (client->GetUuid() == lostClient->GetUuid())
+    {
+      // this is silly but can not figure out how to erase
+      // just given 'client' :)
+      m_clients.erase(std::find(m_clients.begin(), m_clients.end(), client));
+      m_hasClients = !m_clients.empty();
 
-    m_clients.erase(client);
-    m_hasClients = !m_clients.empty();
-    rtn = true;
+      // client is gone, remove it from any gui lists here.
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+      g_windowManager.SendThreadMessage(msg);
+      return true;
+    }
   }
-
-  return rtn;
+  return false;
 }
 
 bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
 {
   bool rtn = false;
   CSingleLock lock(m_criticalClients);
-  std::vector<CPlexClientPtr>::iterator client = std::find(m_clients.begin(), m_clients.end(), updateClient);
-  if (client != m_clients.end())
+  for (const auto &client : m_clients)
   {
-    // client needs updating
-    if ((*client)->GetPresence() != updateClient->GetPresence())
+    if (client->GetUuid() == updateClient->GetUuid())
     {
-      (*client)->SetPresence(updateClient->GetPresence());
-      // update any gui lists here.
-      CFileItemPtr rootItem = (*client)->GetRootItem();
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, rootItem);
-      g_windowManager.SendThreadMessage(msg);
+      // client needs updating
+      if (client->GetPresence() != updateClient->GetPresence())
+      {
+        client->SetPresence(updateClient->GetPresence());
+        // update any gui lists here.
+        CFileItemPtr rootItem = client->GetRootItem();
+        CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, rootItem);
+        g_windowManager.SendThreadMessage(msg);
+      }
+      rtn = true;
     }
-    rtn = true;
   }
 
   return rtn;
