@@ -619,15 +619,14 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
         UpdateClient(client);
       }
     }
+    AddJob(new CPlexServiceJob(0, "FoundNewClient"));
   }
+
   if (!lostClients.empty())
   {
     for (const auto &lostclient : lostClients)
       RemoveClient(lostclient);
   }
-
-  if (rtn)
-    AddJob(new CPlexServiceJob(0, "FoundNewClient"));
 
   return rtn;
 }
@@ -892,6 +891,7 @@ CPlexClientPtr CPlexServices::GetClient(std::string uuid)
     if (client->GetUuid() == uuid)
       return client;
   }
+
   return nullptr;
 }
 
@@ -902,7 +902,7 @@ bool CPlexServices::AddClient(CPlexClientPtr foundClient)
   {
     // do not add existing clients
     if (client->GetUuid() == foundClient->GetUuid())
-    return false;
+      return false;
   }
 
   if (foundClient->ParseSections(PlexSectionParsing::newSection))
@@ -933,12 +933,12 @@ bool CPlexServices::RemoveClient(CPlexClientPtr lostClient)
       return true;
     }
   }
+
   return false;
 }
 
 bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
 {
-  bool rtn = false;
   CSingleLock lock(m_criticalClients);
   for (const auto &client : m_clients)
   {
@@ -952,12 +952,14 @@ bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
         CFileItemPtr rootItem = client->GetRootItem();
         CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, rootItem);
         g_windowManager.SendThreadMessage(msg);
+        return true;
       }
-      rtn = true;
+      // no need to look further but an update was not needed
+      return false;
     }
   }
 
-  return rtn;
+  return false;
 }
 
 bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
