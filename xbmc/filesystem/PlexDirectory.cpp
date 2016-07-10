@@ -100,6 +100,11 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(filename);
             pItem->SetPath("plex://movies/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
+            std::string value = content.thumb;
+            if (!value.empty() && (value[0] == '/'))
+              StringUtils::TrimLeft(value, "/");
+            curl.SetFileName(value);
+            pItem->SetIconImage(curl.Get());
             items.Add(pItem);
           }
         }
@@ -209,6 +214,11 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(filename);
             pItem->SetPath("plex://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
+            std::string value = content.thumb;
+            if (!value.empty() && (value[0] == '/'))
+              StringUtils::TrimLeft(value, "/");
+            curl.SetFileName(value);
+            pItem->SetIconImage(curl.Get());
             items.Add(pItem);
           }
         }

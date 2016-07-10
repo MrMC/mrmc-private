@@ -48,6 +48,7 @@ struct PlexSectionsContent
   std::string path;
   std::string section;
   std::string art;
+  std::string thumb;
 };
 
 typedef std::vector<PlexSectionsContent> PlexSectionsContentVector;

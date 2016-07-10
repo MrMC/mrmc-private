@@ -267,6 +267,7 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
         content.updatedAt = XMLUtils::GetAttribute(DirectoryNode, "updatedAt");
         std::string key = XMLUtils::GetAttribute(DirectoryNode, "key");
         content.section = "library/sections/" + key;
+        content.thumb = XMLUtils::GetAttribute(DirectoryNode, "composite");
         std::string art = XMLUtils::GetAttribute(DirectoryNode, "art");
         if (m_local)
           content.art = art;
