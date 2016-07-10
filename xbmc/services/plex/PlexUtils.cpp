@@ -34,8 +34,6 @@
 #include "filesystem/CurlFile.h"
 #include "filesystem/ZipFile.h"
 #include "settings/Settings.h"
-#include "cores/dvdplayer/DVDPlayer.h"
-#include "guilib/LocalizeStrings.h"
 
 #include "video/VideoInfoTag.h"
 
@@ -824,24 +822,25 @@ bool CPlexUtils::GetItemSubtiles(CFileItem &item)
         const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
         if (partNode)
         {
+          int iPart = 1;
           std::string subFile;
           const TiXmlElement* streamNode = partNode->FirstChildElement("Stream");
           while (streamNode)
           {
-            if (XMLUtils::GetAttribute(streamNode, "streamType") == "3")
+            // "codecID" indicates that subtitle file is internal, we ignore it as our player will pick that up anyway
+            bool internalSubtitle = streamNode->Attribute("codecID");
+            
+            if (!internalSubtitle && XMLUtils::GetAttribute(streamNode, "streamType") == "3")
             {
               CURL plex(url);
               std::string filename = StringUtils::Format("library/streams/%s.%s",
                 XMLUtils::GetAttribute(streamNode, "id").c_str(), XMLUtils::GetAttribute(streamNode, "format").c_str());
               plex.SetFileName(filename);
-              SPlayerSubtitleStreamInfo s;
-              s.file = plex.Get();
-              s.name = g_localizeStrings.Get(21602);
-              s.language = XMLUtils::GetAttribute(streamNode, "languageCode");
-              if (g_application.m_pPlayer)
-              {
-                g_application.m_pPlayer->AddSubtitle(s);
-              }
+              std::string propertyKey = StringUtils::Format("subtitle:%i", iPart);
+              std::string propertyLangKey = StringUtils::Format("subtitle:%i_language", iPart);
+              item.SetProperty(propertyKey, plex.Get());
+              item.SetProperty(propertyLangKey, XMLUtils::GetAttribute(streamNode, "languageCode"));
+              iPart ++;
             }
             streamNode = streamNode->NextSiblingElement("Stream");
           }
