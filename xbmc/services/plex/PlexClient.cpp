@@ -58,8 +58,8 @@ static bool IsInSubNet(std::string address, std::string port)
 CPlexClient::CPlexClient(std::string data, std::string ip)
 {
   m_local = true;
-  m_alive = true;
   m_owned = true;
+  m_presence = true;
   m_scheme = "http";
   m_needUpdate = false;
   int port = 32400;
@@ -96,10 +96,10 @@ CPlexClient::CPlexClient(std::string data, std::string ip)
 CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
 {
   m_local = false;
-  m_alive = true;
   m_needUpdate = false;
   m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
   m_owned = XMLUtils::GetAttribute(DeviceNode, "owned");
+  m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
   m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
   m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
   m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
@@ -164,6 +164,43 @@ const PlexSectionsContentVector CPlexClient::GetMovieContent() const
   return m_movieSectionsContents;
 }
 
+const std::string CPlexClient::FormatContentTitle(const std::string contentTitle) const
+{
+  std::string owned = (GetOwned() == "1") ? "O":"S";
+  std::string title = StringUtils::Format("Plex(%s) - %s - %s %s",
+              owned.c_str(), GetServerName().c_str(), contentTitle.c_str(), GetPresence()? "":"(off-line)");
+  return title;
+}
+
+std::string CPlexClient::FindSectionTitle(const std::string &path)
+{
+  CURL real_url(path);
+  if (real_url.GetProtocol() == "plex")
+    real_url = CURL(Base64::Decode(URIUtils::GetFileName(real_url)));
+
+  if (!real_url.GetFileName().empty())
+  {
+    {
+      CSingleLock lock(m_criticalMovies);
+      for (const auto &contents : m_movieSectionsContents)
+      {
+        if (real_url.GetFileName().find(contents.section) != std::string::npos)
+          return contents.title;
+      }
+    }
+    {
+      CSingleLock lock(m_criticalTVShow);
+      for (const auto &contents : m_showSectionsContents)
+      {
+        if (real_url.GetFileName().find(contents.section) != std::string::npos)
+          return contents.title;
+      }
+    }
+  }
+
+  return "";
+}
+
 bool CPlexClient::IsMe(const CURL& url)
 {
   CURL real_url(url);
@@ -194,6 +231,15 @@ bool CPlexClient::IsMe(const CURL& url)
   }
 
   return false;
+}
+
+bool CPlexClient::IsSameClientHostName(const CURL& url)
+{
+  CURL real_url(url);
+  if (real_url.GetProtocol() == "plex")
+    real_url = CURL(Base64::Decode(URIUtils::GetFileName(real_url)));
+
+  return GetHost() == real_url.GetHostName();
 }
 
 std::string CPlexClient::LookUpUuid(const std::string path) const
@@ -267,6 +313,7 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
         content.updatedAt = XMLUtils::GetAttribute(DirectoryNode, "updatedAt");
         std::string key = XMLUtils::GetAttribute(DirectoryNode, "key");
         content.section = "library/sections/" + key;
+        content.thumb = XMLUtils::GetAttribute(DirectoryNode, "composite");
         std::string art = XMLUtils::GetAttribute(DirectoryNode, "art");
         if (m_local)
           content.art = art;
@@ -340,4 +387,12 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
   }
 
   return rtn;
+}
+
+void CPlexClient::SetPresence(bool presence)
+{
+  if (m_presence != presence)
+  {
+    m_presence = presence;
+  }
 }

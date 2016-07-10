@@ -63,6 +63,7 @@ public:
   bool HasClients() const;
   void GetClients(std::vector<CPlexClientPtr> &clients) const;
   bool CacheClient(const CURL &url);
+  CPlexClientPtr FindClient(const std::string &path);
 
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
@@ -97,6 +98,7 @@ private:
   CPlexClientPtr    GetClient(std::string uuid);
   bool              AddClient(CPlexClientPtr foundClient);
   bool              RemoveClient(CPlexClientPtr lostClient);
+  bool              UpdateClient(CPlexClientPtr updateClient);
   bool              GetMyHomeUsers(std::string &homeusername);
 
   std::atomic<bool> m_active;

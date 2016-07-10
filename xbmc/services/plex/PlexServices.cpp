@@ -183,6 +183,19 @@ bool CPlexServices::CacheClient(const CURL& url)
   return m_updateMins != 0;
 }
 
+CPlexClientPtr CPlexServices::FindClient(const std::string &path)
+{
+  CURL url(path);
+  CSingleLock lock(m_criticalClients);
+  for (const auto &client : m_clients)
+  {
+    if (client->IsSameClientHostName(url))
+      return client;
+  }
+
+  return nullptr;
+}
+
 void CPlexServices::OnSettingAction(const CSetting *setting)
 {
   if (setting == nullptr)
@@ -613,16 +626,20 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
         lostClients.push_back(client);
         CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", client->GetServerName().c_str());
       }
+      else
+      {
+        // client exists, update any changes
+        UpdateClient(client);
+      }
     }
-  }
-  if (!lostClients.empty())
-  {
-    for (const auto &client : lostClients)
-      RemoveClient(client);
+    AddJob(new CPlexServiceJob(0, "FoundNewClient"));
   }
 
-  if (rtn)
-    AddJob(new CPlexServiceJob(0, "FoundNewClient"));
+  if (!lostClients.empty())
+  {
+    for (const auto &lostclient : lostClients)
+      RemoveClient(lostclient);
+  }
 
   return rtn;
 }
@@ -866,6 +883,11 @@ void CPlexServices::CheckForGDMServers()
           {
             CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server found via GDM %s", sender.Address());
           }
+          else
+          {
+            // client exists, update any changes
+            UpdateClient(newClient);
+          }
         }
       }
     }
@@ -882,6 +904,7 @@ CPlexClientPtr CPlexServices::GetClient(std::string uuid)
     if (client->GetUuid() == uuid)
       return client;
   }
+
   return nullptr;
 }
 
@@ -892,7 +915,7 @@ bool CPlexServices::AddClient(CPlexClientPtr foundClient)
   {
     // do not add existing clients
     if (client->GetUuid() == foundClient->GetUuid())
-    return false;
+      return false;
   }
 
   if (foundClient->ParseSections(PlexSectionParsing::newSection))
@@ -907,17 +930,57 @@ bool CPlexServices::AddClient(CPlexClientPtr foundClient)
 
 bool CPlexServices::RemoveClient(CPlexClientPtr lostClient)
 {
-  bool rtn = false;
   CSingleLock lock(m_criticalClients);
-  std::vector<CPlexClientPtr>::iterator client = std::find(m_clients.begin(), m_clients.end(), lostClient);
-  if (client != m_clients.end())
+  for (const auto &client : m_clients)
   {
-    m_clients.erase(client);
-    m_hasClients = !m_clients.empty();
-    rtn = true;
+    if (client->GetUuid() == lostClient->GetUuid())
+    {
+      // this is silly but can not figure out how to erase
+      // just given 'client' :)
+      m_clients.erase(std::find(m_clients.begin(), m_clients.end(), client));
+      m_hasClients = !m_clients.empty();
+
+      // client is gone, remove it from any gui lists here.
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+      g_windowManager.SendThreadMessage(msg);
+      return true;
+    }
   }
 
-  return rtn;
+  return false;
+}
+
+bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
+{
+  CSingleLock lock(m_criticalClients);
+  for (const auto &client : m_clients)
+  {
+    if (client->GetUuid() == updateClient->GetUuid())
+    {
+      // client needs updating
+      if (client->GetPresence() != updateClient->GetPresence())
+      {
+        client->SetPresence(updateClient->GetPresence());
+        // update any gui lists here.
+        for (const auto &item : client->GetSectionItems())
+        {
+          std::string title = client->FindSectionTitle(item->GetPath());
+          if (!title.empty())
+          {
+            item->SetLabel(client->FormatContentTitle(title));
+            CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
+            g_windowManager.SendThreadMessage(msg);
+          }
+        }
+
+        return true;
+      }
+      // no need to look further but an update was not needed
+      return false;
+    }
+  }
+
+  return false;
 }
 
 bool CPlexServices::GetMyHomeUsers(std::string &homeUserName)
