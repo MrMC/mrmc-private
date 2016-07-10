@@ -613,12 +613,17 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
         lostClients.push_back(client);
         CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", client->GetServerName().c_str());
       }
+      else
+      {
+        // client exists, update any changes
+        UpdateClient(client);
+      }
     }
   }
   if (!lostClients.empty())
   {
-    for (const auto &client : lostClients)
-      RemoveClient(client);
+    for (const auto &lostclient : lostClients)
+      RemoveClient(lostclient);
   }
 
   if (rtn)
@@ -866,6 +871,11 @@ void CPlexServices::CheckForGDMServers()
           {
             CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server found via GDM %s", sender.Address());
           }
+          else
+          {
+            // client exists, update any changes
+            UpdateClient(newClient);
+          }
         }
       }
     }
@@ -912,8 +922,31 @@ bool CPlexServices::RemoveClient(CPlexClientPtr lostClient)
   std::vector<CPlexClientPtr>::iterator client = std::find(m_clients.begin(), m_clients.end(), lostClient);
   if (client != m_clients.end())
   {
+    // client is gone, remove it from any gui lists here.
+    CFileItemPtr rootItem = (*client)->GetRootItem();
+
     m_clients.erase(client);
     m_hasClients = !m_clients.empty();
+    rtn = true;
+  }
+
+  return rtn;
+}
+
+bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
+{
+  bool rtn = false;
+  CSingleLock lock(m_criticalClients);
+  std::vector<CPlexClientPtr>::iterator client = std::find(m_clients.begin(), m_clients.end(), updateClient);
+  if (client != m_clients.end())
+  {
+    // client needs updating
+    if ((*client)->GetPresence() != updateClient->GetPresence())
+    {
+      (*client)->SetPresence(updateClient->GetPresence());
+      // update any gui lists here.
+      CFileItemPtr rootItem = (*client)->GetRootItem();
+    }
     rtn = true;
   }
 

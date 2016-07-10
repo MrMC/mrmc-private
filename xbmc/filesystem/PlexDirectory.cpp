@@ -106,6 +106,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(value);
             pItem->SetIconImage(curl.Get());
             items.Add(pItem);
+            client->SetRootItem(pItem);
           }
         }
         else if (contents.size() == 1)
@@ -220,6 +221,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(value);
             pItem->SetIconImage(curl.Get());
             items.Add(pItem);
+            client->SetRootItem(pItem);
           }
         }
         else if (contents.size() == 1)

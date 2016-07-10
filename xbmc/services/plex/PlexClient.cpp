@@ -58,8 +58,8 @@ static bool IsInSubNet(std::string address, std::string port)
 CPlexClient::CPlexClient(std::string data, std::string ip)
 {
   m_local = true;
-  m_alive = true;
   m_owned = true;
+  m_presence = true;
   m_scheme = "http";
   m_needUpdate = false;
   int port = 32400;
@@ -96,10 +96,10 @@ CPlexClient::CPlexClient(std::string data, std::string ip)
 CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
 {
   m_local = false;
-  m_alive = true;
   m_needUpdate = false;
   m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
   m_owned = XMLUtils::GetAttribute(DeviceNode, "owned");
+  m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
   m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
   m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
   m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
@@ -341,4 +341,12 @@ bool CPlexClient::ParseSections(PlexSectionParsing parser)
   }
 
   return rtn;
+}
+
+void CPlexClient::SetPresence(bool presence)
+{
+  if (m_presence != presence)
+  {
+    m_presence = presence;
+  }
 }
