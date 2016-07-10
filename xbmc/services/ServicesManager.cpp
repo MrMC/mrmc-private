@@ -22,7 +22,6 @@
 
 #include "services/ServicesManager.h"
 
-#include "Application.h"
 #include "interfaces/AnnouncementManager.h"
 #include "services/plex/PlexUtils.h"
 #include "utils/JobManager.h"
@@ -100,11 +99,6 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
     {
       case "OnPlay"_mkhash:
         CPlexUtils::SetPlayState(PlexUtilsPlayerState::playing);
-        if(g_application.m_pPlayer->GetSubtitleCount() < 1)
-        {
-          CFileItem item = g_application.CurrentFileItem();
-          CPlexUtils::GetItemSubtiles(item);
-        }
         break;
       case "OnPause"_mkhash:
         CPlexUtils::SetPlayState(PlexUtilsPlayerState::paused);
@@ -187,6 +181,12 @@ void CServicesManager::GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, in
     recentlyAdded.ClearItems();
     recentlyAdded.Append(temp);
   }
+}
+
+void CServicesManager::GetSubtitles(CFileItem &item)
+{
+  if (item.HasProperty("PlexItem"))
+    CPlexUtils::GetItemSubtiles(item);
 }
 
 void CServicesManager::RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler)
