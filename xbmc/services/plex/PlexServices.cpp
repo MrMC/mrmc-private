@@ -952,7 +952,7 @@ bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
         std::vector<CFileItemPtr> items = client->GetRootItems();
         for (const auto &item : items)
         {
-          if (item->GetProperty("client_uuid") == client->GetUuid())
+          if (item->GetProperty("MediaServicesClientID") == client->GetUuid())
           {
             item->SetLabel(client->FormatContentTitle(item->GetLabel()));
             CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);

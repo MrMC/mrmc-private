@@ -104,7 +104,6 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
               StringUtils::TrimLeft(value, "/");
             curl.SetFileName(value);
             pItem->SetIconImage(curl.Get());
-            pItem->SetProperty("client_uuid", client->GetUuid());
             items.Add(pItem);
             client->SetRootItem(pItem);
           }
@@ -219,7 +218,6 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
               StringUtils::TrimLeft(value, "/");
             curl.SetFileName(value);
             pItem->SetIconImage(curl.Get());
-            pItem->SetProperty("client_uuid", client->GetUuid());
             items.Add(pItem);
             client->SetRootItem(pItem);
           }
