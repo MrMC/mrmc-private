@@ -183,6 +183,18 @@ bool CPlexServices::CacheClient(const CURL& url)
   return m_updateMins != 0;
 }
 
+CPlexClientPtr CPlexServices::FindClient(const CURL& url)
+{
+  CSingleLock lock(m_criticalClients);
+  for (const auto &client : m_clients)
+  {
+    if (client->IsMe(url))
+      return client;
+  }
+
+  return nullptr;
+}
+
 void CPlexServices::OnSettingAction(const CSetting *setting)
 {
   if (setting == nullptr)
