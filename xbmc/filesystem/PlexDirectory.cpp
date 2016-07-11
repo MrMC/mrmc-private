@@ -127,6 +127,9 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
     }
     else
     {
+      if (!CPlexServices::GetInstance().FindClient(strUrl)->GetPresence())
+        return false;
+
       std::string path = URIUtils::GetParentPath(strUrl);
       URIUtils::RemoveSlashAtEnd(path);
       path = URIUtils::GetFileName(path);
@@ -244,6 +247,9 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
     }
     else
     {
+      if (!CPlexServices::GetInstance().FindClient(strUrl)->GetPresence())
+        return false;
+
       std::string path = URIUtils::GetParentPath(strUrl);
       URIUtils::RemoveSlashAtEnd(path);
       path = URIUtils::GetFileName(path);
