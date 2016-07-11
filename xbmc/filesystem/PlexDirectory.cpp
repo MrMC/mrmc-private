@@ -42,12 +42,6 @@ CPlexDirectory::~CPlexDirectory()
 
 bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
-  CVideoDatabase database;
-  database.Open();
-  bool hasMovies = database.HasContent(VIDEODB_CONTENT_MOVIES);
-  bool hasTvShows = database.HasContent(VIDEODB_CONTENT_TVSHOWS);
-  database.Close();
-
   items.ClearItems();
   std::string strUrl = url.Get();
   std::string section = URIUtils::GetFileName(strUrl);
@@ -60,6 +54,11 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   {
     if (section.empty())
     {
+      CVideoDatabase database;
+      database.Open();
+      bool hasMovies = database.HasContent(VIDEODB_CONTENT_MOVIES);
+      database.Close();
+
       if (hasMovies)
       {
         //add local Movies
@@ -172,6 +171,11 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   {
     if (section.empty())
     {
+      CVideoDatabase database;
+      database.Open();
+      bool hasTvShows = database.HasContent(VIDEODB_CONTENT_TVSHOWS);
+      database.Close();
+
       if (hasTvShows)
       {
         //add local Shows
