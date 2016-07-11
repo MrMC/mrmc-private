@@ -949,10 +949,17 @@ bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
       {
         client->SetPresence(updateClient->GetPresence());
         // update any gui lists here.
-        CFileItemPtr rootItem = client->GetRootItem();
-        rootItem->SetLabel(rootItem->GetLabel() + " (off-line)");
-        CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, rootItem);
-        g_windowManager.SendThreadMessage(msg);
+        std::vector<CFileItemPtr> items = client->GetRootItems();
+        for (const auto &item : items)
+        {
+          if (item->GetProperty("client_uuid") == client->GetUuid())
+          {
+            item->SetLabel(client->FormatContentTitle(item->GetLabel()));
+            CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
+            g_windowManager.SendThreadMessage(msg);
+          }
+        }
+
         return true;
       }
       // no need to look further but an update was not needed

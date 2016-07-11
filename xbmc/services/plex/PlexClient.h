@@ -74,8 +74,9 @@ public:
   const std::string &GetScheme() const      { return m_scheme; }
   const bool &IsLocal() const { return m_local; }
 
-  void  SetRootItem(CFileItemPtr root)      { m_root_item = root; };
-  CFileItemPtr GetRootItem()                { return m_root_item;};
+  void  SetRootItem(CFileItemPtr root)      { m_root_items.push_back(root); };
+  std::vector<CFileItemPtr> GetRootItems()   { return m_root_items;};
+  void ClearRootItems() { m_root_items.clear();};
 
   const PlexSectionsContentVector GetTvContent() const;
   const PlexSectionsContentVector GetMovieContent() const;
@@ -103,7 +104,7 @@ private:
   std::string m_scheme;
   std::atomic<bool> m_presence;
   std::atomic<bool> m_needUpdate;
-  CFileItemPtr m_root_item;
+  std::vector<CFileItemPtr> m_root_items;
   CCriticalSection  m_criticalMovies;
   CCriticalSection  m_criticalTVShow;
   std::vector<PlexSectionsContent> m_movieSectionsContents;
