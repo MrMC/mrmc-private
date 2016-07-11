@@ -72,15 +72,16 @@ public:
   const std::string &GetOwned() const       { return m_owned; }
   bool GetPresence() const                  { return m_presence; }
   const std::string &GetScheme() const      { return m_scheme; }
-  const bool &IsLocal() const { return m_local; }
+  const bool &IsLocal() const               { return m_local; }
 
-  void  SetRootItem(CFileItemPtr root)      { m_root_items.push_back(root); };
-  std::vector<CFileItemPtr> GetRootItems()   { return m_root_items;};
-  void ClearRootItems() { m_root_items.clear();};
+  void  AddSectionItem(CFileItemPtr root)   { m_section_items.push_back(root); };
+  std::vector<CFileItemPtr> GetSectionItems()  { return m_section_items; };
+  void ClearSectionItems()                  { m_section_items.clear(); };
 
   const PlexSectionsContentVector GetTvContent() const;
   const PlexSectionsContentVector GetMovieContent() const;
   const std::string FormatContentTitle(const std::string contentTitle) const;
+  std::string FindSectionTitle(const std::string &path);
 
   std::string GetHost();
   int         GetPort();
@@ -104,7 +105,7 @@ private:
   std::string m_scheme;
   std::atomic<bool> m_presence;
   std::atomic<bool> m_needUpdate;
-  std::vector<CFileItemPtr> m_root_items;
+  std::vector<CFileItemPtr> m_section_items;
   CCriticalSection  m_criticalMovies;
   CCriticalSection  m_criticalTVShow;
   std::vector<PlexSectionsContent> m_movieSectionsContents;

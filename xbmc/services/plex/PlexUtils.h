@@ -30,6 +30,9 @@ namespace XFILE
 {
   class CCurlFile;
 }
+class CPlexClient;
+typedef std::shared_ptr<CPlexClient> CPlexClientPtr;
+
 
 enum class PlexUtilsPlayerState
 {
@@ -44,7 +47,7 @@ public:
   static bool HasClients();
   static bool GetIdentity(std::string url);
   static void GetDefaultHeaders(XFILE::CCurlFile &curl);
-  static void SetPlexItemProperties(CFileItem &item, const std::string uuid);
+  static void SetPlexItemProperties(CFileItem &item, const CPlexClientPtr &client);
 
   static void SetWatched(CFileItem &item);
   static void SetUnWatched(CFileItem &item);

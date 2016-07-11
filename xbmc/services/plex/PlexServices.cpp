@@ -949,12 +949,12 @@ bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
       {
         client->SetPresence(updateClient->GetPresence());
         // update any gui lists here.
-        std::vector<CFileItemPtr> items = client->GetRootItems();
-        for (const auto &item : items)
+        for (const auto &item : client->GetSectionItems())
         {
-          if (item->GetProperty("MediaServicesClientID") == client->GetUuid())
+          std::string title = client->FindSectionTitle(item->GetPath());
+          if (!title.empty())
           {
-            item->SetLabel(client->FormatContentTitle(item->GetLabel()));
+            item->SetLabel(client->FormatContentTitle(title));
             CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
             g_windowManager.SendThreadMessage(msg);
           }
