@@ -833,8 +833,15 @@ bool CPlexUtils::GetItemSubtiles(CFileItem &item)
             if (!internalSubtitle && XMLUtils::GetAttribute(streamNode, "streamType") == "3")
             {
               CURL plex(url);
-              std::string filename = StringUtils::Format("library/streams/%s.%s",
-                XMLUtils::GetAttribute(streamNode, "id").c_str(), XMLUtils::GetAttribute(streamNode, "format").c_str());
+              std::string filename;
+              std::string id    = XMLUtils::GetAttribute(streamNode, "id");
+              std::string ext   = XMLUtils::GetAttribute(streamNode, "format");
+              std::string codec = XMLUtils::GetAttribute(streamNode, "codec");
+              
+              if(ext.empty() && codec.empty())
+                filename = StringUtils::Format("library/streams/%s",id.c_str());
+              else
+                filename = StringUtils::Format("library/streams/%s.%s",id.c_str(), ext.empty()? codec.c_str():ext.c_str());
               plex.SetFileName(filename);
               std::string propertyKey = StringUtils::Format("subtitle:%i", iPart);
               std::string propertyLangKey = StringUtils::Format("subtitle:%i_language", iPart);
