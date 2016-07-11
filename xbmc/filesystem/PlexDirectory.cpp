@@ -87,8 +87,6 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             std::string owned = (client->GetOwned() == "1") ? "O":"S";
             std::string title = StringUtils::Format("Plex(%s) - %s - %s %s",
               owned.c_str(), client->GetServerName().c_str(), content.title.c_str(), client->GetPresence()? "":"(off-line)");
-            std::string host = client->GetUrl();
-            URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
@@ -202,8 +200,6 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             std::string owned = (client->GetOwned() == "1") ? "O":"S";
             std::string title = StringUtils::Format("Plex(%s) - %s - %s %s",
               owned.c_str(), client->GetServerName().c_str(), content.title.c_str(), client->GetPresence()? "":"(off-line)");
-            std::string host = client->GetUrl();
-            URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
