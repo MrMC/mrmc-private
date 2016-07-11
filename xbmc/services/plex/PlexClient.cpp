@@ -233,6 +233,15 @@ bool CPlexClient::IsMe(const CURL& url)
   return false;
 }
 
+bool CPlexClient::IsSameClientHostName(const CURL& url)
+{
+  CURL real_url(url);
+  if (real_url.GetProtocol() == "plex")
+    real_url = CURL(Base64::Decode(URIUtils::GetFileName(real_url)));
+
+  return GetHost() == real_url.GetHostName();
+}
+
 std::string CPlexClient::LookUpUuid(const std::string path) const
 {
   std::string uuid;

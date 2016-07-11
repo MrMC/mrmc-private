@@ -189,7 +189,7 @@ CPlexClientPtr CPlexServices::FindClient(const std::string &path)
   CSingleLock lock(m_criticalClients);
   for (const auto &client : m_clients)
   {
-    if (client->IsMe(url))
+    if (client->IsSameClientHostName(url))
       return client;
   }
 
