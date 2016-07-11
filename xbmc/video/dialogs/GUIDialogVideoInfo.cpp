@@ -405,7 +405,11 @@ void CGUIDialogVideoInfo::Update()
   else
     CONTROL_DISABLE(CONTROL_BTN_RESUME);
 
-  CONTROL_ENABLE(CONTROL_BTN_PLAY);
+  if (m_movieItem->IsMediaServiceBased() &&
+      (m_movieItem->GetVideoInfoTag()->m_type == MediaTypeTvShow))
+    CONTROL_DISABLE(CONTROL_BTN_PLAY);
+  else
+    CONTROL_ENABLE(CONTROL_BTN_PLAY);
 
   // update the thumbnail
   const CGUIControl* pControl = GetControl(CONTROL_IMAGE);

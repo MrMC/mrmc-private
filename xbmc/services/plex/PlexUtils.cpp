@@ -208,6 +208,8 @@ void CPlexUtils::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode)
     {
       SActorInfo role;
       role.strName = XMLUtils::GetAttribute(roleNode, "tag");
+      role.strRole = XMLUtils::GetAttribute(roleNode, "role");
+      role.thumb = XMLUtils::GetAttribute(roleNode, "thumb");
       roles.push_back(role);
       roleNode = roleNode->NextSiblingElement("Role");
     }
@@ -347,6 +349,7 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
     plexItem->SetLabel(title);
     plexItem->GetVideoInfoTag()->m_strTitle = title;
     plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(videoNode, "ratingKey");
+    plexItem->SetProperty("PlexShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
     plexItem->GetVideoInfoTag()->m_type = type;
     plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(videoNode, "tagline"));
     plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(videoNode, "summary"));
@@ -481,6 +484,7 @@ bool CPlexUtils::GetPlexTvshows(CFileItemList &items, std::string url)
       url1.SetFileName("library/metadata/" + XMLUtils::GetAttribute(directoryNode, "ratingKey") + "/children");
       plexItem->SetPath("plex://tvshows/shows/" + Base64::Encode(url1.Get()));
       plexItem->GetVideoInfoTag()->m_strServiceId = XMLUtils::GetAttribute(directoryNode, "ratingKey");
+      plexItem->SetProperty("PlexShowKey", XMLUtils::GetAttribute(directoryNode, "ratingKey"));
       plexItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
       plexItem->GetVideoInfoTag()->m_strTitle = XMLUtils::GetAttribute(directoryNode, "title");
       plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(directoryNode, "tagline"));
@@ -566,6 +570,7 @@ bool CPlexUtils::GetPlexSeasons(CFileItemList &items, const std::string url)
         plexItem->GetVideoInfoTag()->SetPlotOutline(XMLUtils::GetAttribute(rootXmlNode, "tagline"));
         plexItem->GetVideoInfoTag()->SetPlot(XMLUtils::GetAttribute(rootXmlNode, "summary"));
         plexItem->GetVideoInfoTag()->m_iYear = atoi(XMLUtils::GetAttribute(rootXmlNode, "parentYear").c_str());
+        plexItem->SetProperty("PlexShowKey", XMLUtils::GetAttribute(rootXmlNode, "key"));
         value = XMLUtils::GetAttribute(rootXmlNode, "art");
         if (!value.empty() && (value[0] == '/'))
           StringUtils::TrimLeft(value, "/");
@@ -853,6 +858,58 @@ bool CPlexUtils::GetItemSubtiles(CFileItem &item)
           }
         }
       }
+    }
+  }
+  return true;
+}
+
+bool CPlexUtils::GetMoreItemInfo(CFileItem &item)
+{
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  if (StringUtils::StartsWithNoCase(url, "plex://"))
+    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+  
+  std::string id = item.GetVideoInfoTag()->m_strServiceId;
+  std::string childElement = "Video";
+  if (item.HasProperty("PlexShowKey"))
+  {
+    id = item.GetProperty("PlexShowKey").asString();
+    childElement = "Directory";
+  }
+  std::string filename = StringUtils::Format("library/metadata/%s", id.c_str());
+  
+  CURL url2(url);
+  std::string strXML;
+  XFILE::CCurlFile http;
+  http.SetRequestHeader("Accept-Encoding", "gzip");
+  
+  url2.SetFileName(filename);
+  // this is key to get back gzip encoded content
+  url2.SetProtocolOption("seekable", "0");
+  
+  http.Get(url2.Get(), strXML);
+  if (http.GetContentEncoding() == "gzip")
+  {
+    std::string buffer;
+    if (XFILE::CZipFile::DecompressGzip(strXML, buffer))
+      strXML = std::move(buffer);
+    else
+      return false;
+  }
+  // remove the seakable option as we propigate the url
+  url2.RemoveProtocolOption("seekable");
+  
+  TiXmlDocument xml;
+  xml.Parse(strXML.c_str());
+  
+  TiXmlElement* rootXmlNode = xml.RootElement();
+  
+  if (rootXmlNode)
+  {
+    const TiXmlElement* videoNode = rootXmlNode->FirstChildElement(childElement);
+    if(videoNode)
+    {
+      GetVideoDetails(item, videoNode);
     }
   }
   return true;

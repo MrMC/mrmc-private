@@ -189,6 +189,12 @@ void CServicesManager::GetSubtitles(CFileItem &item)
     CPlexUtils::GetItemSubtiles(item);
 }
 
+void CServicesManager::GetMoreInfo(CFileItem &item)
+{
+  if (item.HasProperty("PlexItem"))
+    CPlexUtils::GetMoreItemInfo(item);
+}
+
 void CServicesManager::RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler)
 {
   if (mediaServicesHandler == nullptr)
