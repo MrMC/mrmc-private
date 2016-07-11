@@ -164,6 +164,14 @@ const PlexSectionsContentVector CPlexClient::GetMovieContent() const
   return m_movieSectionsContents;
 }
 
+const std::string CPlexClient::FormatContentTitle(const std::string contentTitle) const
+{
+  std::string owned = (GetOwned() == "1") ? "O":"S";
+  std::string title = StringUtils::Format("Plex(%s) - %s - %s %s",
+              owned.c_str(), GetServerName().c_str(), contentTitle.c_str(), GetPresence()? "":"(off-line)");
+  return title;
+}
+
 bool CPlexClient::IsMe(const CURL& url)
 {
   CURL real_url(url);

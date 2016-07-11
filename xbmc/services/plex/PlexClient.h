@@ -79,6 +79,8 @@ public:
 
   const PlexSectionsContentVector GetTvContent() const;
   const PlexSectionsContentVector GetMovieContent() const;
+  const std::string FormatContentTitle(const std::string contentTitle) const;
+
   std::string GetHost();
   int         GetPort();
   std::string GetUrl();
