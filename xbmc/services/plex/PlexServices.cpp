@@ -950,6 +950,7 @@ bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
         client->SetPresence(updateClient->GetPresence());
         // update any gui lists here.
         CFileItemPtr rootItem = client->GetRootItem();
+        rootItem->SetLabel(rootItem->GetLabel() + " (off-line)");
         CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, rootItem);
         g_windowManager.SendThreadMessage(msg);
         return true;
