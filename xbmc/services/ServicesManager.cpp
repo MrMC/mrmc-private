@@ -21,7 +21,7 @@
 #include <algorithm>
 
 #include "services/ServicesManager.h"
-
+#include "Application.h"
 #include "interfaces/AnnouncementManager.h"
 #include "services/plex/PlexUtils.h"
 #include "utils/JobManager.h"
@@ -104,8 +104,12 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
         CPlexUtils::SetPlayState(PlexUtilsPlayerState::paused);
         break;
       case "OnStop"_mkhash:
+      {
+        CFileItem item = g_application.CurrentFileItem();
         CPlexUtils::SetPlayState(PlexUtilsPlayerState::stopped);
+        AddJob(new CServicesManagerJob(item, item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, "SetProgress"));
         break;
+      }
       default:
         break;
     }
