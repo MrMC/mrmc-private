@@ -85,8 +85,8 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           for (const auto &content : contents)
           {
             std::string owned = (client->GetOwned() == "1") ? "O":"S";
-            std::string title = StringUtils::Format("Plex(%s) - %s - %s",
-              owned.c_str(), client->GetServerName().c_str(), content.title.c_str());
+            std::string title = StringUtils::Format("Plex(%s) - %s - %s %s",
+              owned.c_str(), client->GetServerName().c_str(), content.title.c_str(), client->GetPresence()? "":"(off-line)");
             std::string host = client->GetUrl();
             URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
@@ -200,8 +200,8 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           for (const auto &content : contents)
           {
             std::string owned = (client->GetOwned() == "1") ? "O":"S";
-            std::string title = StringUtils::Format("Plex(%s) - %s - %s",
-              owned.c_str(), client->GetServerName().c_str(), content.title.c_str());
+            std::string title = StringUtils::Format("Plex(%s) - %s - %s %s",
+              owned.c_str(), client->GetServerName().c_str(), content.title.c_str(), client->GetPresence()? "":"(off-line)");
             std::string host = client->GetUrl();
             URIUtils::RemoveSlashAtEnd(host);
             CFileItemPtr pItem(new CFileItem(title));
