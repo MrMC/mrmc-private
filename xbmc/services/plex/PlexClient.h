@@ -98,7 +98,6 @@ public:
   std::string GetUrl();
 
 protected:
-  bool        IsMe(const CURL& url);
   bool        IsSameClientHostName(const CURL& url);
   std::string LookUpUuid(const std::string path) const;
   bool        ParseSections(PlexSectionParsing parser);

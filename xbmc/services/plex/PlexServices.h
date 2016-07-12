@@ -62,7 +62,6 @@ public:
   bool IsActive();
   bool HasClients() const;
   void GetClients(std::vector<CPlexClientPtr> &clients) const;
-  bool CacheClient(const CURL &url);
   CPlexClientPtr FindClient(const std::string &path);
 
   // ISettingCallback

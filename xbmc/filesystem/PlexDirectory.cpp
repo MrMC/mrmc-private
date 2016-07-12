@@ -22,7 +22,6 @@
 #include "FileItem.h"
 #include "URL.h"
 #include "filesystem/Directory.h"
-#include "filesystem/PlexFile.h"
 #include "services/plex/PlexUtils.h"
 #include "services/plex/PlexServices.h"
 #include "utils/Base64.h"
@@ -303,13 +302,4 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 DIR_CACHE_TYPE CPlexDirectory::GetCacheType(const CURL& url) const
 {
   return DIR_CACHE_NEVER;
-}
-
-std::string CPlexDirectory::TranslatePath(const CURL &url)
-{
-  std::string translatedPath;
-  if (!CPlexFile::TranslatePath(url, translatedPath))
-    return "";
-
-  return translatedPath;
 }

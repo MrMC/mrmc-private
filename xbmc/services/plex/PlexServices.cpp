@@ -171,18 +171,6 @@ void CPlexServices::GetClients(std::vector<CPlexClientPtr> &clients) const
   clients = m_clients;
 }
 
-bool CPlexServices::CacheClient(const CURL& url)
-{
-  CSingleLock lock(m_criticalClients);
-  for (const auto &client : m_clients)
-  {
-    if (client->IsLocal() && client->IsMe(url))
-      return false;
-  }
-
-  return m_updateMins != 0;
-}
-
 CPlexClientPtr CPlexServices::FindClient(const std::string &path)
 {
   CURL url(path);
