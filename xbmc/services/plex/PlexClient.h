@@ -32,6 +32,14 @@ enum PlexSectionParsing
   updateSection,
 };
 
+struct PlexConnection
+{
+  std::string port;
+  std::string address;
+  std::string protocol;
+  int external;
+};
+
 struct PlexSectionsContent
 {
   int port;
@@ -61,9 +69,11 @@ class CPlexClient
   friend class CPlexServices;
 
 public:
-  CPlexClient(std::string data, std::string ip);
-  CPlexClient(const TiXmlElement* DeviceNode);
+  CPlexClient();
  ~CPlexClient();
+
+  bool Init(const TiXmlElement* DeviceNode);
+  bool Init(std::string data, std::string ip);
 
   const bool NeedUpdate() const             { return m_needUpdate; }
   const std::string &GetContentType() const { return m_contentType; }
@@ -71,7 +81,7 @@ public:
   const std::string &GetUuid() const        { return m_uuid; }
   const std::string &GetOwned() const       { return m_owned; }
   bool GetPresence() const                  { return m_presence; }
-  const std::string &GetScheme() const      { return m_scheme; }
+  const std::string &GetProtocol() const    { return m_protocol; }
   const bool &IsLocal() const               { return m_local; }
 
   void  AddSectionItem(CFileItemPtr root)   { m_section_items.push_back(root); };
@@ -103,7 +113,7 @@ private:
   std::string m_url;
   std::string m_accessToken;
   std::string m_httpsRequired;
-  std::string m_scheme;
+  std::string m_protocol;
   std::atomic<bool> m_presence;
   std::atomic<bool> m_needUpdate;
   std::vector<CFileItemPtr> m_section_items;

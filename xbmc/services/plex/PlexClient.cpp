@@ -50,18 +50,26 @@ static bool IsInSubNet(CURL url)
   {
     // we are on the same subnet
     // now make sure it is a plex server
-    rtn = CPlexUtils::GetIdentity(url);
+    rtn = CPlexUtils::GetIdentity(url, 1);
   }
   return rtn;
 }
 
-CPlexClient::CPlexClient(std::string data, std::string ip)
+CPlexClient::CPlexClient()
 {
   m_local = true;
   m_owned = true;
   m_presence = true;
-  m_scheme = "http";
+  m_protocol = "http";
   m_needUpdate = false;
+}
+
+CPlexClient::~CPlexClient()
+{
+}
+
+bool CPlexClient::Init(std::string data, std::string ip)
+{
   int port = 32400;
   std::string s;
   std::istringstream f(data);
@@ -88,50 +96,67 @@ CPlexClient::CPlexClient(std::string data, std::string ip)
   CURL url;
   url.SetHostName(ip);
   url.SetPort(port);
-  url.SetProtocol(m_scheme);
+  url.SetProtocol(m_protocol);
 
   m_url = url.Get();
+
+  return true;
 }
 
-CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
+bool CPlexClient::Init(const TiXmlElement* DeviceNode)
 {
-  m_local = false;
-  m_needUpdate = false;
+  m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
+  if (!m_presence)
+    return false;
+
   m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
   m_owned = XMLUtils::GetAttribute(DeviceNode, "owned");
-  m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
   m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
   m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
   m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
 
-  CURL url;
-  std::string owned;
-  std::string port;
-  std::string address;
+  std::vector<PlexConnection> connections;
   const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
   while (ConnectionNode)
   {
-    port = XMLUtils::GetAttribute(ConnectionNode, "port");
-    address = XMLUtils::GetAttribute(ConnectionNode, "address");
-    m_scheme = XMLUtils::GetAttribute(ConnectionNode, "protocol");
-    url.SetHostName(address);
-    url.SetPort(atoi(port.c_str()));
-    url.SetProtocol(m_scheme);
-    url.SetProtocolOptions("&X-Plex-Token=" + m_accessToken);
-    
-    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(url))
-    {
-      m_local = true;
-      break;
-    }
+    PlexConnection connection;
+    connection.port = XMLUtils::GetAttribute(ConnectionNode, "port");
+    connection.address = XMLUtils::GetAttribute(ConnectionNode, "address");
+    connection.protocol = XMLUtils::GetAttribute(ConnectionNode, "protocol");
+    connection.external = XMLUtils::GetAttribute(ConnectionNode, "local") == "0" ? 1 : 0;
+    connections.push_back(connection);
+
     ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
   }
 
-  m_url = url.Get();
-}
+  CURL url;
+  bool foundConnection = false;
+  if (!connections.empty())
+  {
+    // sort so that all external=0 are first. These are the local connections.
+    std::sort(connections.begin(), connections.end(),
+      [] (PlexConnection const& a, PlexConnection const& b) { return a.external < b.external; });
 
-CPlexClient::~CPlexClient()
-{
+    for (const auto &connection : connections)
+    {
+      url.SetHostName(connection.address);
+      url.SetPort(atoi(connection.port.c_str()));
+      url.SetProtocol(connection.protocol);
+      url.SetProtocolOptions("&X-Plex-Token=" + m_accessToken);
+      int timeout = connection.external ? 5 : 1;
+      if (CPlexUtils::GetIdentity(url, timeout))
+      {
+        foundConnection = true;
+        m_protocol = url.GetProtocol();
+        m_local = (connection.external == 0);
+        break;
+      }
+    }
+  }
+
+  m_url = url.Get();
+
+  return foundConnection;
 }
 
 std::string CPlexClient::GetUrl()

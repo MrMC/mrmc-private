@@ -91,7 +91,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CPlexUtils::SetPlexItemProperties(*pItem, client);
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
-            curl.SetProtocol(client->GetScheme());
+            curl.SetProtocol(client->GetProtocol());
             std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), (basePath == "titles"? "all":""));
             curl.SetFileName(filename);
             pItem->SetPath("plex://movies/" + basePath + "/" + Base64::Encode(curl.Get()));
@@ -108,7 +108,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         else if (contents.size() == 1)
         {
           CURL curl(client->GetUrl());
-          curl.SetProtocol(client->GetScheme());
+          curl.SetProtocol(client->GetProtocol());
           curl.SetFileName(contents[0].section + "/all");
           CPlexUtils::GetPlexMovies(items, curl.Get());
           items.SetContent("movies");
@@ -212,7 +212,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CPlexUtils::SetPlexItemProperties(*pItem, client);
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
-            curl.SetProtocol(client->GetScheme());
+            curl.SetProtocol(client->GetProtocol());
             std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), (basePath == "titles"? "all":""));
             curl.SetFileName(filename);
             pItem->SetPath("plex://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));
@@ -229,7 +229,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         else if (contents.size() == 1)
         {
           CURL curl(client->GetUrl());
-          curl.SetProtocol(client->GetScheme());
+          curl.SetProtocol(client->GetProtocol());
           curl.SetFileName(contents[0].section + "/all");
           CPlexUtils::GetPlexTvshows(items, curl.Get());
           items.SetContent("tvshows");

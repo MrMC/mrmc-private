@@ -589,10 +589,13 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
         std::string provides = XMLUtils::GetAttribute(DeviceNode, "provides");
         if (provides == "server")
         {
-          CPlexClientPtr newClient(new CPlexClient(DeviceNode));
-          clientsFound.push_back(newClient);
-          // always return true if we find anything
-          rtn = true;
+          CPlexClientPtr client(new CPlexClient());
+          if (client->Init(DeviceNode))
+          {
+            clientsFound.push_back(client);
+            // always return true if we find anything
+            rtn = true;
+          }
         }
         DeviceNode = DeviceNode->NextSiblingElement("Device");
       }
@@ -878,20 +881,23 @@ void CPlexServices::CheckForGDMServers()
         std::string buf(buffer, packetSize);
         if (buf.find("200 OK") != std::string::npos)
         {
-          CPlexClientPtr client(new CPlexClient(buf, sender.Address()));
-          if (AddClient(client))
+          CPlexClientPtr client(new CPlexClient());
+          if (client->Init(buf, sender.Address()))
           {
-            CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server found via GDM %s", client->GetServerName().c_str());
-          }
-          else if (GetClient(client->GetUuid()) == nullptr)
-          {
-            // lost client
-            CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server was lost %s", client->GetServerName().c_str());
-          }
-          else if (UpdateClient(client))
-          {
-            // client exists and something changed
-            CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers presence changed %s", client->GetServerName().c_str());
+            if (AddClient(client))
+            {
+              CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server found via GDM %s", client->GetServerName().c_str());
+            }
+            else if (GetClient(client->GetUuid()) == nullptr)
+            {
+              // lost client
+              CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server was lost %s", client->GetServerName().c_str());
+            }
+            else if (UpdateClient(client))
+            {
+              // client exists and something changed
+              CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers presence changed %s", client->GetServerName().c_str());
+            }
           }
         }
       }

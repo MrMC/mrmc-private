@@ -45,12 +45,12 @@ bool CPlexUtils::HasClients()
   return CPlexServices::GetInstance().HasClients();
 }
 
-bool CPlexUtils::GetIdentity(CURL url)
+bool CPlexUtils::GetIdentity(CURL url, int timeout)
 {
   // all (local and remote) plex server respond to identity
   // over http
   XFILE::CCurlFile plex;
-  plex.SetTimeout(1);
+  plex.SetTimeout(timeout);
 
   url.SetFileName(url.GetFileName() + "identity");
   std::string strResponse;
@@ -727,7 +727,7 @@ bool CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(CFileItemList &items, boo
       for (const auto &content : contents)
       {
         CURL curl(client->GetUrl());
-        curl.SetProtocol(client->GetScheme());
+        curl.SetProtocol(client->GetProtocol());
         curl.SetFileName(curl.GetFileName() + content.section + "/");
 
         if (tvShow)
