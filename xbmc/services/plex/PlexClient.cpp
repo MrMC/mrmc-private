@@ -70,7 +70,11 @@ CPlexClient::~CPlexClient()
 
 bool CPlexClient::Init(std::string data, std::string ip)
 {
+  m_url = "";
+
   int port = 32400;
+  m_protocol = "http";
+
   std::string s;
   std::istringstream f(data);
   while (std::getline(f, s))
@@ -97,14 +101,15 @@ bool CPlexClient::Init(std::string data, std::string ip)
   url.SetHostName(ip);
   url.SetPort(port);
   url.SetProtocol(m_protocol);
+  if (CPlexUtils::GetIdentity(url, 2))
+    m_url = url.Get();
 
-  m_url = url.Get();
-
-  return true;
+  return !m_url.empty();
 }
 
 bool CPlexClient::Init(const TiXmlElement* DeviceNode)
 {
+  m_url = "";
   m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
   if (!m_presence)
     return false;
@@ -130,7 +135,6 @@ bool CPlexClient::Init(const TiXmlElement* DeviceNode)
   }
 
   CURL url;
-  bool foundConnection = false;
   if (!connections.empty())
   {
     // sort so that all external=0 are first. These are the local connections.
@@ -146,7 +150,7 @@ bool CPlexClient::Init(const TiXmlElement* DeviceNode)
       int timeout = connection.external ? 5 : 1;
       if (CPlexUtils::GetIdentity(url, timeout))
       {
-        foundConnection = true;
+        m_url = url.Get();
         m_protocol = url.GetProtocol();
         m_local = (connection.external == 0);
         break;
@@ -154,9 +158,7 @@ bool CPlexClient::Init(const TiXmlElement* DeviceNode)
     }
   }
 
-  m_url = url.Get();
-
-  return foundConnection;
+  return !m_url.empty();
 }
 
 std::string CPlexClient::GetUrl()
