@@ -112,7 +112,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           curl.SetFileName(contents[0].section + "/all");
           CPlexUtils::GetPlexMovies(items, curl.Get());
           items.SetContent("movies");
-          items.SetPath("");
+          items.SetPath("plex://movies/");
           CPlexUtils::SetPlexItemProperties(items, client);
           for (int item = 0; item < items.Size(); ++item)
             CPlexUtils::SetPlexItemProperties(*items[item], client);
@@ -233,7 +233,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           curl.SetFileName(contents[0].section + "/all");
           CPlexUtils::GetPlexTvshows(items, curl.Get());
           items.SetContent("tvshows");
-          items.SetPath("");
+          items.SetPath("plex://tvshows/");
           CPlexUtils::SetPlexItemProperties(items, client);
           for (int item = 0; item < items.Size(); ++item)
             CPlexUtils::SetPlexItemProperties(*items[item], client);
