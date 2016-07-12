@@ -626,10 +626,10 @@ bool CPlexServices::GetMyPlexServers(bool includeHttps)
         lostClients.push_back(client);
         CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", client->GetServerName().c_str());
       }
-      else
+      else if (UpdateClient(client))
       {
-        // client exists, update any changes
-        UpdateClient(client);
+        // client exists and something changed
+        CLog::Log(LOGNOTICE, "CPlexServices: Server presence changed %s", client->GetServerName().c_str());
       }
     }
     AddJob(new CPlexServiceJob(0, "FoundNewClient"));
@@ -878,15 +878,20 @@ void CPlexServices::CheckForGDMServers()
         std::string buf(buffer, packetSize);
         if (buf.find("200 OK") != std::string::npos)
         {
-          CPlexClientPtr newClient(new CPlexClient(buf, sender.Address()));
-          if (AddClient(newClient))
+          CPlexClientPtr client(new CPlexClient(buf, sender.Address()));
+          if (AddClient(client))
           {
-            CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server found via GDM %s", sender.Address());
+            CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server found via GDM %s", client->GetServerName().c_str());
           }
-          else
+          else if (GetClient(client->GetUuid()) == nullptr)
           {
-            // client exists, update any changes
-            UpdateClient(newClient);
+            // lost client
+            CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server was lost %s", client->GetServerName().c_str());
+          }
+          else if (UpdateClient(client))
+          {
+            // client exists and something changed
+            CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers presence changed %s", client->GetServerName().c_str());
           }
         }
       }
@@ -972,8 +977,6 @@ bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
             g_windowManager.SendThreadMessage(msg);
           }
         }
-        CLog::Log(LOGNOTICE, "CPlexServices:UpdateClient presence changed %s", client->GetServerName().c_str());
-
         return true;
       }
       // no need to look further but an update was not needed
