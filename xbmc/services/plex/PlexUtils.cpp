@@ -45,18 +45,16 @@ bool CPlexUtils::HasClients()
   return CPlexServices::GetInstance().HasClients();
 }
 
-bool CPlexUtils::GetIdentity(std::string url)
+bool CPlexUtils::GetIdentity(CURL url)
 {
   // all (local and remote) plex server respond to identity
   // over http
   XFILE::CCurlFile plex;
   plex.SetTimeout(1);
 
-  CURL curl(url);
-  curl.SetFileName(curl.GetFileName() + "identity");
-  curl.SetProtocol("http");
+  url.SetFileName(url.GetFileName() + "identity");
   std::string strResponse;
-  if (plex.Get(curl.Get(), strResponse))
+  if (plex.Get(url.Get(), strResponse))
   {
     //CLog::Log(LOGDEBUG, "CPlexClient::GetIdentity() %s", strResponse.c_str());
     return true;

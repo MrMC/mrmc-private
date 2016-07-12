@@ -45,7 +45,7 @@ class CPlexUtils
 {
 public:
   static bool HasClients();
-  static bool GetIdentity(std::string url);
+  static bool GetIdentity(CURL url);
   static void GetDefaultHeaders(XFILE::CCurlFile &curl);
   static void SetPlexItemProperties(CFileItem &item, const CPlexClientPtr &client);
 

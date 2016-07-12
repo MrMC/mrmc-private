@@ -36,12 +36,12 @@
 #include <string>
 #include <sstream>
 
-static bool IsInSubNet(std::string address, std::string port)
+static bool IsInSubNet(CURL url)
 {
   bool rtn = false;
   CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
   in_addr_t localMask = ntohl(inet_addr(iface->GetCurrentNetmask().c_str()));
-  in_addr_t testAddress = ntohl(inet_addr(address.c_str()));
+  in_addr_t testAddress = ntohl(inet_addr(url.GetHostName().c_str()));
   in_addr_t localAddress = ntohl(inet_addr(iface->GetCurrentIPAddress().c_str()));
 
   in_addr_t temp1 = testAddress & localMask;
@@ -50,7 +50,6 @@ static bool IsInSubNet(std::string address, std::string port)
   {
     // we are on the same subnet
     // now make sure it is a plex server
-    std::string url = "https://" + address + ":" + port;
     rtn = CPlexUtils::GetIdentity(url);
   }
   return rtn;
@@ -105,6 +104,7 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
   m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
   m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
 
+  CURL url;
   std::string owned;
   std::string port;
   std::string address;
@@ -114,20 +114,18 @@ CPlexClient::CPlexClient(const TiXmlElement* DeviceNode)
     port = XMLUtils::GetAttribute(ConnectionNode, "port");
     address = XMLUtils::GetAttribute(ConnectionNode, "address");
     m_scheme = XMLUtils::GetAttribute(ConnectionNode, "protocol");
-    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(address, port))
+    url.SetHostName(address);
+    url.SetPort(atoi(port.c_str()));
+    url.SetProtocol(m_scheme);
+    url.SetProtocolOptions("&X-Plex-Token=" + m_accessToken);
+    
+    if (XMLUtils::GetAttribute(ConnectionNode, "local") == "1" && IsInSubNet(url))
     {
       m_local = true;
       break;
     }
-
     ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
   }
-
-  CURL url;
-  url.SetHostName(address);
-  url.SetPort(atoi(port.c_str()));
-  url.SetProtocol(m_scheme);
-  url.SetProtocolOptions("&X-Plex-Token=" + m_accessToken);
 
   m_url = url.Get();
 }
