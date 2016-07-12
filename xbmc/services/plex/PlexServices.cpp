@@ -923,13 +923,8 @@ bool CPlexServices::AddClient(CPlexClientPtr foundClient)
       return false;
   }
 
-  if (!foundClient->GetPresence())
-  {
-    // if not present, just remember the client and do not try to parse
-    m_clients.push_back(foundClient);
-    return true;
-  }
-  else if (foundClient->ParseSections(PlexSectionParsing::newSection))
+  // only add new clients that are present
+  if (foundClient->GetPresence() && foundClient->ParseSections(PlexSectionParsing::newSection))
   {
     m_clients.push_back(foundClient);
     m_hasClients = !m_clients.empty();
