@@ -19,6 +19,7 @@
  */
 
 #include <atomic>
+#include <memory>
 
 #include "PlexClient.h"
 #include "PlexUtils.h"
