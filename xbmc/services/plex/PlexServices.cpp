@@ -972,6 +972,7 @@ bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
             g_windowManager.SendThreadMessage(msg);
           }
         }
+        CLog::Log(LOGNOTICE, "CPlexServices:UpdateClient presence changed %s", client->GetServerName().c_str());
 
         return true;
       }
