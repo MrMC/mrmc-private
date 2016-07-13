@@ -588,10 +588,13 @@ void CGUIDialogVideoInfo::Play(bool resume)
     g_windowManager.ActivateWindow(WINDOW_VIDEO_NAV,strPath);
     return;
   }
-
-  CFileItem movie(*m_movieItem->GetVideoInfoTag());
-  if (m_movieItem->GetVideoInfoTag()->m_strFileNameAndPath.empty())
-    movie.SetPath(m_movieItem->GetPath());
+  
+// not sure why we have this below, we recreate the Item and in the process loose all the info we set.
+// disabled for now, lets see if this has any downside. Plex client works fine now  
+//  CFileItem movie(*m_movieItem->GetVideoInfoTag());
+//  if (m_movieItem->GetVideoInfoTag()->m_strFileNameAndPath.empty())
+//    movie.SetPath(m_movieItem->GetPath());
+  CFileItem movie(*m_movieItem);
   CGUIWindowVideoNav* pWindow = (CGUIWindowVideoNav*)g_windowManager.GetWindow(WINDOW_VIDEO_NAV);
   if (pWindow)
   {
