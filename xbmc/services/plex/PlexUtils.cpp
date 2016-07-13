@@ -493,6 +493,12 @@ bool CPlexUtils::GetPlexTvshows(CFileItemList &items, std::string url)
       url1.SetFileName(value);
       plexItem->SetArt("thumb", url1.Get());
 
+      value = XMLUtils::GetAttribute(directoryNode, "banner");
+      if (!value.empty() && (value[0] == '/'))
+        StringUtils::TrimLeft(value, "/");
+      url1.SetFileName(value);
+      plexItem->SetArt("banner", url1.Get());
+      
       value = XMLUtils::GetAttribute(directoryNode, "art");
       if (!value.empty() && (value[0] == '/'))
         StringUtils::TrimLeft(value, "/");
@@ -574,6 +580,13 @@ bool CPlexUtils::GetPlexSeasons(CFileItemList &items, const std::string url)
           StringUtils::TrimLeft(value, "/");
         url1.SetFileName(value);
         plexItem->SetArt("fanart", url1.Get());
+        
+        value = XMLUtils::GetAttribute(rootXmlNode, "banner");
+        if (!value.empty() && (value[0] == '/'))
+          StringUtils::TrimLeft(value, "/");
+        url1.SetFileName(value);
+        plexItem->SetArt("banner", url1.Get());
+        
         /// -------
         value = XMLUtils::GetAttribute(directoryNode, "thumb");
         if (!value.empty() && (value[0] == '/'))
