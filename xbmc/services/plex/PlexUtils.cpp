@@ -869,7 +869,7 @@ bool CPlexUtils::GetMoreItemInfo(CFileItem &item)
   
   std::string id = item.GetVideoInfoTag()->m_strServiceId;
   std::string childElement = "Video";
-  if (item.HasProperty("PlexShowKey"))
+  if (item.HasProperty("PlexShowKey") && item.GetVideoInfoTag()->m_type != MediaTypeMovie)
   {
     id = item.GetProperty("PlexShowKey").asString();
     childElement = "Directory";
