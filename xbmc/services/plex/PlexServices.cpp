@@ -437,13 +437,14 @@ void CPlexServices::Process()
     m_processSleep.Reset();
   }
 
+  int plextvTimeoutSeconds = 5;
+
   // try plex.tv first
   if (MyPlexSignedIn())
   {
     bool includeHttps = true;
     GetMyPlexServers(includeHttps);
-    //includeHttps = false;
-    //GetMyPlexServers(includeHttps);
+    plextvTimeoutSeconds = 60 * 15;
   }
   // the via GDM
   CheckForGDMServers();
@@ -452,7 +453,6 @@ void CPlexServices::Process()
   gdmTimer.StartZero();
   plextvTimer.StartZero();
   checkUpdatesTimer.StartZero();
-  int plextvTimeoutSeconds = 5;
   while (!m_bStop)
   {
     // check for services every N seconds
