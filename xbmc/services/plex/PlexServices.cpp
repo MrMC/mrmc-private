@@ -428,7 +428,9 @@ void CPlexServices::Process()
 
   while (!m_bStop)
   {
-    if (g_application.getNetwork().IsConnected())
+    CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
+    in_addr_t router = ntohl(inet_addr(iface->GetCurrentDefaultGateway().c_str()));
+    if (g_application.getNetwork().IsConnected() && g_application.getNetwork().PingHost(router, 0, 1000))
       break;
 
     m_processSleep.WaitMSec(250);
