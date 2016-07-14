@@ -965,7 +965,7 @@ bool CPlexUtils::GetMoreResolutions(CFileItem &item)
       }
     }
     if (resolutionList.size() < 2)
-      return false;
+      return true;
     
     int button = CGUIDialogContextMenu::ShowAndGetChoice(choices);
     if (button > -1)
