@@ -64,10 +64,13 @@ public:
   static bool GetPlexFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
   static bool GetItemSubtiles(CFileItem &item);
   static bool GetMoreItemInfo(CFileItem &item);
+  static bool GetMoreResolutions(CFileItem &item);
 
 private:
   static void ReportToServer(std::string url, std::string filename);
   static bool GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, int season = -1);
   static void GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode);
+  static void GetMediaDetals(CFileItem &item, CURL url, const TiXmlElement* videoNode, std::string id = "0");
   static TiXmlDocument GetPlexXML(std::string url, std::string filter = "");
+  static void RemoveSubtitleProperties(CFileItem &item);
 };

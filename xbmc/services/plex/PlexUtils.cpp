@@ -21,6 +21,7 @@
 #include "PlexUtils.h"
 #include "PlexServices.h"
 #include "Application.h"
+#include "ContextMenuManager.h"
 #include "Util.h"
 #include "URL.h"
 #include "network/Network.h"
@@ -38,6 +39,7 @@
 #include "video/VideoInfoTag.h"
 
 static int  g_progressSec = 0;
+static CFileItem m_curItem = *new CFileItem;
 static PlexUtilsPlayerState g_playbackState = PlexUtilsPlayerState::stopped;
 
 bool CPlexUtils::HasClients()
@@ -215,6 +217,91 @@ void CPlexUtils::GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode)
   item.GetVideoInfoTag()->m_cast = roles;
 }
 
+void CPlexUtils::GetMediaDetals(CFileItem &item, CURL url, const TiXmlElement* mediaNode, std::string id)
+{
+  if (mediaNode && (id == "0" || XMLUtils::GetAttribute(mediaNode, "id") == id))
+  {
+    CStreamDetails details;
+    CStreamDetailVideo *p = new CStreamDetailVideo();
+    p->m_strCodec = XMLUtils::GetAttribute(mediaNode, "videoCodec");
+    p->m_fAspect = atof(XMLUtils::GetAttribute(mediaNode, "aspectRatio").c_str());
+    p->m_iWidth = atoi(XMLUtils::GetAttribute(mediaNode, "width").c_str());
+    p->m_iHeight = atoi(XMLUtils::GetAttribute(mediaNode, "height").c_str());
+    p->m_iDuration = atoi(XMLUtils::GetAttribute(mediaNode, "videoCodec").c_str());
+    details.AddStream(p);
+    
+    CStreamDetailAudio *a = new CStreamDetailAudio();
+    a->m_strCodec = XMLUtils::GetAttribute(mediaNode, "audioCodec");
+    a->m_iChannels = atoi(XMLUtils::GetAttribute(mediaNode, "audioChannels").c_str());
+    a->m_strLanguage = XMLUtils::GetAttribute(mediaNode, "audioChannels");
+    details.AddStream(a);
+    
+    std::string label = StringUtils::Format("%sp, %.2f Mbps", XMLUtils::GetAttribute(mediaNode, "videoResolution").c_str(),
+                                            atof(XMLUtils::GetAttribute(mediaNode, "bitrate").c_str())/1000);
+    item.SetProperty("PlexResolutionChoice", label);
+    item.SetProperty("PlexMediaID", XMLUtils::GetAttribute(mediaNode, "id"));
+    item.GetVideoInfoTag()->m_streamDetails = details;
+    
+    /// plex has duration in milliseconds
+    item.GetVideoInfoTag()->m_duration = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
+    
+    int part = 1;
+    std::string filePath;
+    const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
+    while(partNode)
+    {
+      int iPart = 1;
+      std::string subFile;
+      const TiXmlElement* streamNode = partNode->FirstChildElement("Stream");
+      while (streamNode)
+      {
+        // "codecID" indicates that subtitle file is internal, we ignore it as our player will pick that up anyway
+        bool internalSubtitle = streamNode->Attribute("codecID");
+        
+        if (!internalSubtitle && XMLUtils::GetAttribute(streamNode, "streamType") == "3")
+        {
+          CURL plex(url);
+          std::string filename;
+          std::string id    = XMLUtils::GetAttribute(streamNode, "id");
+          std::string ext   = XMLUtils::GetAttribute(streamNode, "format");
+          std::string codec = XMLUtils::GetAttribute(streamNode, "codec");
+          
+          if(ext.empty() && codec.empty())
+            filename = StringUtils::Format("library/streams/%s",id.c_str());
+          else
+            filename = StringUtils::Format("library/streams/%s.%s",id.c_str(), ext.empty()? codec.c_str():ext.c_str());
+          plex.SetFileName(filename);
+          std::string propertyKey = StringUtils::Format("subtitle:%i", iPart);
+          std::string propertyLangKey = StringUtils::Format("subtitle:%i_language", iPart);
+          item.SetProperty(propertyKey, plex.Get());
+          item.SetProperty(propertyLangKey, XMLUtils::GetAttribute(streamNode, "languageCode"));
+          iPart ++;
+        }
+        streamNode = streamNode->NextSiblingElement("Stream");
+      }
+      
+      if (part == 2)
+        filePath = "stack://" + filePath;
+      std::string key = ((TiXmlElement*) partNode)->Attribute("key");
+      if (!key.empty() && (key[0] == '/'))
+        StringUtils::TrimLeft(key, "/");
+      url.SetFileName(key);
+      item.GetVideoInfoTag()->m_strServiceFile = XMLUtils::GetAttribute(partNode, "file");
+      std::string propertyKey = StringUtils::Format("stack:%i_time", part);
+      item.SetProperty(propertyKey, atoi(XMLUtils::GetAttribute(partNode, "duration").c_str())/1000 );
+      if(part > 1)
+        filePath = filePath + " , " + url.Get();
+      else
+        filePath = url.Get();
+      part ++;
+      partNode = partNode->NextSiblingElement("Part");
+    }
+    item.SetPath(filePath);
+    item.GetVideoInfoTag()->m_strFileNameAndPath = filePath;
+  }
+
+}
+
 void CPlexUtils::SetWatched(CFileItem &item)
 {
   std::string id = item.GetVideoInfoTag()->m_strServiceId;
@@ -378,62 +465,17 @@ bool CPlexUtils::GetVideoItems(CFileItemList &items, CURL url, TiXmlElement* roo
 
     GetVideoDetails(*plexItem, videoNode);
 
+    CBookmark m_bookmark;
+    m_bookmark.timeInSeconds = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
+    m_bookmark.totalTimeInSeconds = atoi(XMLUtils::GetAttribute(videoNode, "duration").c_str())/1000;
+    plexItem->GetVideoInfoTag()->m_resumePoint = m_bookmark;
+    plexItem->m_lStartOffset = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
+
     const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
-    if (mediaNode)
-    {
-      CStreamDetails details;
-      CStreamDetailVideo *p = new CStreamDetailVideo();
-      p->m_strCodec = XMLUtils::GetAttribute(mediaNode, "videoCodec");
-      p->m_fAspect = atof(XMLUtils::GetAttribute(mediaNode, "aspectRatio").c_str());
-      p->m_iWidth = atoi(XMLUtils::GetAttribute(mediaNode, "width").c_str());
-      p->m_iHeight = atoi(XMLUtils::GetAttribute(mediaNode, "height").c_str());
-      p->m_iDuration = atoi(XMLUtils::GetAttribute(mediaNode, "videoCodec").c_str());
-      details.AddStream(p);
+    GetMediaDetals(*plexItem, url, mediaNode);
 
-      CStreamDetailAudio *a = new CStreamDetailAudio();
-      a->m_strCodec = XMLUtils::GetAttribute(mediaNode, "audioCodec");
-      a->m_iChannels = atoi(XMLUtils::GetAttribute(mediaNode, "audioChannels").c_str());
-      a->m_strLanguage = XMLUtils::GetAttribute(mediaNode, "audioChannels");
-      details.AddStream(a);
-
-      plexItem->GetVideoInfoTag()->m_streamDetails = details;
-
-      /// plex has duration in milliseconds
-      plexItem->GetVideoInfoTag()->m_duration = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
-
-      CBookmark m_bookmark;
-      m_bookmark.timeInSeconds = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
-      m_bookmark.totalTimeInSeconds = atoi(XMLUtils::GetAttribute(mediaNode, "duration").c_str())/1000;
-      plexItem->GetVideoInfoTag()->m_resumePoint = m_bookmark;
-      plexItem->m_lStartOffset = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
-
-      int part = 1;
-      std::string filePath;
-      const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
-      while(partNode)
-      {
-        if (part == 2)
-          filePath = "stack://" + filePath;
-        std::string key = ((TiXmlElement*) partNode)->Attribute("key");
-        if (!key.empty() && (key[0] == '/'))
-          StringUtils::TrimLeft(key, "/");
-        url.SetFileName(key);
-        plexItem->GetVideoInfoTag()->m_strServiceFile = XMLUtils::GetAttribute(partNode, "file");
-        std::string propertyKey = StringUtils::Format("stack:%i_time", part);
-        plexItem->SetProperty(propertyKey, atoi(XMLUtils::GetAttribute(partNode, "duration").c_str())/1000 );
-        if(part > 1)
-          filePath = filePath + " , " + url.Get();
-        else
-          filePath = url.Get();
-        part ++;
-        partNode = partNode->NextSiblingElement("Part");
-      }
-      plexItem->SetPath(filePath);
-      plexItem->GetVideoInfoTag()->m_strFileNameAndPath = filePath;
-    }
-
-    videoNode = videoNode->NextSiblingElement("Video");
     items.Add(plexItem);
+    videoNode = videoNode->NextSiblingElement("Video");
   }
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
@@ -833,41 +875,10 @@ bool CPlexUtils::GetItemSubtiles(CFileItem &item)
     if(videoNode)
     {
       const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
-      if (mediaNode)
+      while (mediaNode)
       {
-        const TiXmlElement* partNode = mediaNode->FirstChildElement("Part");
-        if (partNode)
-        {
-          int iPart = 1;
-          std::string subFile;
-          const TiXmlElement* streamNode = partNode->FirstChildElement("Stream");
-          while (streamNode)
-          {
-            // "codecID" indicates that subtitle file is internal, we ignore it as our player will pick that up anyway
-            bool internalSubtitle = streamNode->Attribute("codecID");
-            
-            if (!internalSubtitle && XMLUtils::GetAttribute(streamNode, "streamType") == "3")
-            {
-              CURL plex(url);
-              std::string filename;
-              std::string id    = XMLUtils::GetAttribute(streamNode, "id");
-              std::string ext   = XMLUtils::GetAttribute(streamNode, "format");
-              std::string codec = XMLUtils::GetAttribute(streamNode, "codec");
-              
-              if(ext.empty() && codec.empty())
-                filename = StringUtils::Format("library/streams/%s",id.c_str());
-              else
-                filename = StringUtils::Format("library/streams/%s.%s",id.c_str(), ext.empty()? codec.c_str():ext.c_str());
-              plex.SetFileName(filename);
-              std::string propertyKey = StringUtils::Format("subtitle:%i", iPart);
-              std::string propertyLangKey = StringUtils::Format("subtitle:%i_language", iPart);
-              item.SetProperty(propertyKey, plex.Get());
-              item.SetProperty(propertyLangKey, XMLUtils::GetAttribute(streamNode, "languageCode"));
-              iPart ++;
-            }
-            streamNode = streamNode->NextSiblingElement("Stream");
-          }
-        }
+        GetMediaDetals(item, url2, mediaNode, item.GetProperty("PlexMediaID").asString());
+        mediaNode = mediaNode->NextSiblingElement("Media");
       }
     }
   }
@@ -924,4 +935,56 @@ bool CPlexUtils::GetMoreItemInfo(CFileItem &item)
     }
   }
   return true;
+}
+
+bool CPlexUtils::GetMoreResolutions(CFileItem &item)
+{
+  std::string url = item.GetVideoInfoTag()->m_strFileNameAndPath;
+  std::string id  = item.GetVideoInfoTag()->m_strServiceId;
+  CURL url2(url);
+  url2.SetFileName("library/metadata/" + id);
+  CContextButtons choices;
+  std::vector<CFileItem> resolutionList;
+  TiXmlDocument xml = GetPlexXML(url2.Get());
+  
+  RemoveSubtitleProperties(item);
+  TiXmlElement* rootXmlNode = xml.RootElement();
+  if (rootXmlNode)
+  {
+    const TiXmlElement* videoNode = rootXmlNode->FirstChildElement("Video");
+    if (videoNode)
+    {
+      const TiXmlElement* mediaNode = videoNode->FirstChildElement("Media");
+      while (mediaNode)
+      {
+        CFileItem mediaItem(item);
+        GetMediaDetals(mediaItem, url2, mediaNode);
+        resolutionList.push_back(mediaItem);
+        choices.Add(resolutionList.size(), mediaItem.GetProperty("PlexResolutionChoice").c_str());
+        mediaNode = mediaNode->NextSiblingElement("Media");
+      }
+    }
+    if (resolutionList.size() < 2)
+      return false;
+    
+    int button = CGUIDialogContextMenu::ShowAndGetChoice(choices);
+    if (button > -1)
+    {
+      m_curItem = resolutionList[button-1];
+      item.UpdateInfo(m_curItem, false);
+      item.SetPath(m_curItem.GetPath());
+      return true;
+    }
+  }
+  return false;
+}
+
+void CPlexUtils::RemoveSubtitleProperties(CFileItem &item)
+{
+  std::string key("subtitle:1");
+  for(unsigned s = 1; item.HasProperty(key); key = StringUtils::Format("subtitle:%u", ++s))
+  {
+    item.ClearProperty(key);
+    item.ClearProperty(StringUtils::Format("subtitle:%i_language", s));
+  }
 }

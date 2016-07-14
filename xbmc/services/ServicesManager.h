@@ -64,6 +64,7 @@ public:
   void GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, int itemLimit);
   void GetSubtitles(CFileItem &item);
   void GetMoreInfo(CFileItem &item);
+  bool GetResolutions(CFileItem &item);
 
   bool GetDirectory(const CURL& url, CFileItemList &items);
   XFILE::DIR_CACHE_TYPE GetCacheType(const CURL& url);

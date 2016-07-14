@@ -199,6 +199,13 @@ void CServicesManager::GetMoreInfo(CFileItem &item)
     CPlexUtils::GetMoreItemInfo(item);
 }
 
+bool CServicesManager::GetResolutions(CFileItem &item)
+{
+  if (item.HasProperty("PlexItem"))
+    return CPlexUtils::GetMoreResolutions(item);
+  return false;
+}
+
 void CServicesManager::RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler)
 {
   if (mediaServicesHandler == nullptr)
