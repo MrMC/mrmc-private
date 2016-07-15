@@ -10,7 +10,7 @@
       <posy>0</posy>
       <width>1280</width>
       <height>720</height>
-      <texture>MNTVSkin.jpg</texture>
+      <texture>MNSkinFiles/MNBackgroundBlur.png</texture>
     </control>
     <control type="image">
       <visible>system.getbool(mn.vertical)</visible>
@@ -26,10 +26,40 @@
           <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
           <effect type="zoom" end="90" center="640,360" time="200" />
         </animation>
-        <visible>Control.IsVisible(50)</visible>
-        <include>VisibleFadeEffect</include>
-        <include>ContentPanelBackgrounds</include>
-        <control type="list" id="50">
+        <control type="image">
+          <posx>64</posx>
+          <posy>34</posy>
+          <width>1152</width>
+          <height>95</height>
+          <texture>MNSkinFiles/BannerArea.png</texture>
+        </control> 
+        <control type="label">
+            <posy>62</posy>
+            <posx>100</posx>
+            <width>500</width>
+            <height>40</height>
+            <font>OnDemand36B</font>
+            <textcolor>black</textcolor>
+            <scroll>false</scroll>
+            <align>left</align>
+            <aligny>center</aligny>
+            <label>On Demand</label>
+        </control>
+        <control type="image">
+          <posx>64</posx>
+          <posy>150</posy>
+          <width>1152</width>
+          <height>536</height>
+          <texture>MNSkinFiles/ListArea.png</texture>
+        </control> 
+        <control type="image">
+          <posx>565</posx>
+          <posy>171</posy>
+          <width>626</width>
+          <height>495</height>
+          <texture>MNSkinFiles/ContentArea.png</texture>
+        </control>  
+        <control type="list" id="1050">
             <posx>70</posx>
             <posy>78</posy>
             <width>690</width>
@@ -41,7 +71,6 @@
             <viewtype label="535">list</viewtype>
             <pagecontrol>60</pagecontrol>
             <scrolltime>200</scrolltime>
-            <visible>![Window.IsVisible(VideoLibrary) + Container.Content(TVShows) + !Skin.HasSetting(TVShowsUsePosters)]</visible>
             <itemlayout height="40" width="580">
                 <control type="image">
                     <posx>0</posx>
@@ -206,6 +235,95 @@
                 </control>
             </focusedlayout>
         </control>
+        <!-- below panel for section items -->
+        <control type="panel" id="50">
+            <posx>573</posx>
+            <posy>180</posy>
+            <width>610</width>
+            <height>480</height>
+            <onleft>50</onleft>
+            <onright>50</onright>
+            <onup>50</onup>
+            <ondown>50</ondown>
+            <viewtype label="">list</viewtype>
+            <pagecontrol>61</pagecontrol>
+            <scrolltime>200</scrolltime>
+            <orientation>vertical</orientation>
+            <itemlayout height="95" width="152">
+                <control type="image">
+                    <description>Item Thumb</description>
+                    <posx>5</posx>
+                    <posy>5</posy>
+                    <width>142</width>
+                    <height>76</height>
+                    <texture>DefaultVideo.png</texture>
+                </control>
+                <control type="image">
+                    <description>Item Thumb</description>
+                    <posx>5</posx>
+                    <posy>5</posy>
+                    <width>142</width>
+                    <height>76</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture>$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <posx>5</posx>
+                    <posy>5</posy>
+                    <width>142</width>
+                    <height>76</height>
+                    <texture>MNSkinFiles/PanelItem.png</texture>
+                </control>
+                <control type="label">
+                    <posx>76</posx>
+                    <posy>83</posy>
+                    <width>132</width>
+                    <height>15</height>
+                    <font>OnDemand12B</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <textcolor>black</textcolor>
+                    <label>$INFO[ListItem.Label] - $INFO[ListItem.Duration]</label>
+                </control>
+            </itemlayout>
+            <focusedlayout height="95" width="152">
+                <control type="image">
+                    <description>Item Thumb</description>
+                    <posx>5</posx>
+                    <posy>5</posy>
+                    <width>142</width>
+                    <height>76</height>
+                    <texture>DefaultVideo.png</texture>
+                </control>
+                <control type="image">
+                    <description>Item Thumb</description>
+                    <posx>5</posx>
+                    <posy>5</posy>
+                    <width>142</width>
+                    <height>76</height>
+                    <aspectratio>keep</aspectratio>
+                    <texture>$INFO[ListItem.Art(thumb)]</texture>
+                </control>
+                <control type="image">
+                    <posx>5</posx>
+                    <posy>5</posy>
+                    <width>142</width>
+                    <height>76</height>
+                    <texture>MNSkinFiles/PanelItem.png</texture>
+                </control>
+                <control type="label">
+                    <posx>76</posx>
+                    <posy>83</posy>
+                    <width>132</width>
+                    <height>15</height>
+                    <font>OnDemand12B</font>
+                    <align>center</align>
+                    <aligny>center</aligny>
+                    <textcolor>blue</textcolor>
+                    <label>$INFO[ListItem.Label] - $INFO[ListItem.Duration]</label>
+                </control>
+            </focusedlayout>
+        </control>
         <control type="scrollbar" id="60">
             <posx>760</posx>
             <posy>85</posy>
@@ -247,75 +365,6 @@
                 <texture diffuse="diffuse_mirror3.png" flipy="true" background="true">$INFO[Container(50).ListItem.Icon]</texture>
             </control>
         </control>
-    </control>
-    <control type="group">
-        <posx>60</posx>
-        <posy>0</posy>
-        <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-          <effect type="slide" start="0,0" end="250,210" time="0" />
-          <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
-        </animation>
-        <control type="image">
-            <posx>0</posx>
-            <posy>0</posy>
-            <width>220</width>
-            <height>50</height>
-            <texture border="0,0,32,0">header.png</texture>
-        </control>
-        <control type="image">
-            <posx>-265</posx>
-            <posy>0</posy>
-            <width>300</width>
-            <height>50</height>
-            <texture border="0,0,32,0">header.png</texture>
-        </control>
-        <control type="image">
-            <posx>-33</posx>
-            <posy>0</posy>
-            <width>35</width>
-            <height>35</height>
-            <aspectratio>keep</aspectratio>
-            <texture>icon_video.png</texture>
-        </control>
-        <control type="label">
-            <posy>5</posy>
-            <posx>150</posx>
-            <width>1060</width>
-            <height>28</height>
-            <font>font13</font>
-            <textcolor>white</textcolor>
-            <scroll>false</scroll>
-            <align>right</align>
-            <aligny>center</aligny>
-            <label>On Demand</label>
-        </control>
-    </control>
-    <control type="group">
-      <posx>260r</posx>
-      <posy>0</posy>
-      <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-        <effect type="slide" start="0,0" end="-230,240" time="0" />
-        <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
-      </animation>
-      <control type="image">
-          <posx>0</posx>
-          <posy>0</posy>
-          <width>440</width>
-          <height>35</height>
-          <texture flipx="true" border="32,0,0,0">header.png</texture>
-      </control>
-      <control type="label">
-          <posx>30</posx>
-          <posy>0</posy>
-          <width>400</width>
-          <height>28</height>
-          <align>left</align>
-          <aligny>center</aligny>
-          <font>font12</font>
-          <textcolor>white</textcolor>
-          <shadowcolor>black</shadowcolor>
-          <label>[COLOR=grey]$INFO[System.Date][/COLOR] | $INFO[System.Time]</label>
-      </control>
     </control>
     <control type="group">
         <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">

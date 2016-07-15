@@ -1,6 +1,6 @@
 <window>
 	<allowoverlay>no</allowoverlay>
-	<defaultcontrol always="true">9000</defaultcontrol>
+	<defaultcontrol always="true">9016</defaultcontrol>
 	<coordinates>
 		<system>1</system>
 		<posx>0</posx>
@@ -16,14 +16,14 @@
 						<posy>0</posy>
 						<width>1280</width>
 						<height>720</height>
-						<texture>MNTVSkin.jpg</texture>
+						<texture>MNSkinFiles/MNBackground.png</texture>
 				</control>
 				<control type="image">
 						<posx>0</posx>
-						<posy>90r</posy>
+						<posy>0</posy>
 						<width>1280</width>
-						<height>90</height>
-						<texture>floor.png</texture>
+						<height>112</height>
+						<texture>MNSkinFiles/grey_top.png</texture>
 				</control>		
 			</control>
 
@@ -35,7 +35,7 @@
 					<height>720</height>
 					<texture>MNTV-Plus-Vertical.png</texture>
 			</control>	
-			<control type="group">
+<!-- 			<control type="group">
 					<posx>260r</posx>
 					<posy>0</posy>
 					<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
@@ -61,6 +61,63 @@
 							<shadowcolor>black</shadowcolor>
 							<label>[COLOR=grey]$INFO[System.Date][/COLOR] | $INFO[System.Time]</label>
 					</control>
+			</control> -->
+			<control type="button" id="9016">
+				<description>Settings</description>
+				<posx>390</posx>
+				<posy>30</posy>
+				<width>170</width>
+				<height>50</height>
+				<label>Settings</label>
+				<font>HomeScreen24B</font>
+				<onfocus>-</onfocus>
+				<texturefocus>-</texturefocus>
+				<texturenofocus>-</texturenofocus>
+				<onleft>90102</onleft>
+				<onright>90101</onright>
+				<onup>9016</onup>
+				<ondown>9016</ondown>
+				<align>center</align>
+				<focusedcolor>blue</focusedcolor>
+				<pulseonselect>true</pulseonselect>
+			</control>
+			<control type="button" id="90101">
+				<description>Play</description>
+				<posx>540</posx>
+				<posy>30</posy>
+				<width>170</width>
+				<height>50</height>
+				<label>Play</label>
+				<font>HomeScreen24B</font>
+				<onfocus>-</onfocus>
+				<texturefocus>-</texturefocus>
+				<texturenofocus>-</texturenofocus>
+				<onleft>9016</onleft>
+				<onright>90102</onright>
+				<onup>90101</onup>
+				<ondown>90101</ondown>
+				<align>center</align>
+				<focusedcolor>blue</focusedcolor>
+				<pulseonselect>true</pulseonselect>
+			</control>
+			<control type="button" id="90102">
+				<description>On-Demand</description>
+				<posx>690</posx>
+				<posy>30</posy>
+				<width>170</width>
+				<height>50</height>
+				<label>On-Demand</label>
+				<font>HomeScreen24B</font>
+				<onfocus>-</onfocus>
+				<texturefocus>-</texturefocus>
+				<texturenofocus>-</texturenofocus>
+				<onleft>90101</onleft>
+				<onright>9016</onright>
+				<onup>90102</onup>
+				<ondown>90102</ondown>
+				<align>center</align>
+				<focusedcolor>blue</focusedcolor>
+				<pulseonselect>true</pulseonselect>
 			</control>
 			<control type="group">
 				<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
@@ -206,6 +263,7 @@
 			<control type="group">
 				<posy>400</posy>
 				<visible>!Control.isVisible(90200)</visible>
+				<visible>false</visible>
 				<control type="group" id="9001">
 					<posx>0</posx>
 					<posy>70</posy>

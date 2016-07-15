@@ -1,6 +1,23 @@
 <fonts>
 	<fontset id="Default" idloc="31390" unicode="true"> 
-	<!-- Normal Fonts -->
+
+	<!-- MN Fonts -->
+		<font>
+			<name>OnDemand36B</name>
+			<filename>Trebuchet-MS-Bold.ttf</filename>
+			<size>36</size>
+		</font>
+	 	<font>
+			<name>HomeScreen24B</name>
+			<filename>Trebuchet-MS-Bold.ttf</filename>
+			<size>24</size>
+		</font>
+		<font>
+			<name>OnDemand12B</name>
+			<filename>Trebuchet-MS-Bold.ttf</filename>
+			<size>12</size>
+		</font>
+	<!-- Normal Fonts -->Trebuchet-MS.ttf
 	 	<font>
 			<name>font10</name>
 			<filename>Roboto-Regular.ttf</filename>

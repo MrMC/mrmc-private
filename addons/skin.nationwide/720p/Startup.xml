@@ -4,7 +4,7 @@
 	<controls>
 		<control type="button" id="10">
 			<description>trigger</description>
-			<onfocus>ReplaceWindow(10200)</onfocus>
+			<onfocus>ReplaceWindow(mnhome)</onfocus>
 			<texturenofocus>-</texturenofocus>
 			<texturefocus>-</texturefocus>
 		</control>
