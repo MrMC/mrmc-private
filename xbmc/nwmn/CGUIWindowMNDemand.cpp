@@ -35,7 +35,7 @@
 #include "settings/MediaSettings.h"
 #include "messaging/ApplicationMessenger.h"
 
-#define ONDEMAND_ITEM_LIST          50
+#define ONDEMAND_ITEM_LIST          1050
 #define ONDEMAND_CATEGORY_LIST      50
 
 PlayerSettings* CGUIWindowMNDemand::m_PlayerInfo = NULL;
@@ -122,15 +122,34 @@ void CGUIWindowMNDemand::FillAssets()
     CFileItemPtr pItem = CFileItemPtr(new CFileItem(m_OnDemand.items[i].title));
     pItem->SetPath(m_OnDemand.items[i].video_url.c_str());
     pItem->SetArt("thumb", m_OnDemand.items[i].thumb_localpath);
-    CVideoInfoTag* setInfo = pItem->GetVideoInfoTag();
-    setInfo->m_strPath = pItem->GetPath();
-    setInfo->m_strTitle = pItem->GetLabel();
+    pItem->GetVideoInfoTag()->m_strPath = pItem->GetPath();
+    pItem->GetVideoInfoTag()->m_strTitle = pItem->GetLabel();
     stackItems.Add(pItem);
   }
-  CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_ITEM_LIST, 0, 0, &stackItems);
+  
+  /// hack to display both lists, needs to be removed
+  CFileItemList fakeListItems;
+  for (int i = 0; i < 20; i++)
+  {
+    std::string label = StringUtils::Format("test Clip %i", i);
+    CFileItemPtr pItem = CFileItemPtr(new CFileItem(label));
+    pItem->SetPath("some path");
+    pItem->SetArt("thumb", "some thumb path");
+    pItem->GetVideoInfoTag()->m_strPath = pItem->GetPath();
+    pItem->GetVideoInfoTag()->m_strTitle = label;
+    pItem->GetVideoInfoTag()->m_duration = 3600; //seconds
+    fakeListItems.Add(pItem);
+  }
+  
+
+  CGUIMessage msg0(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_ITEM_LIST, 0, 0, &fakeListItems);
+  OnMessage(msg0);
+  //// ----------------- end of hack ----------------------
+  
+  CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_CATEGORY_LIST, 0, 0, &stackItems);
   OnMessage(msg);
 
-  CGUIMessage msg1(GUI_MSG_SETFOCUS, GetID(), ONDEMAND_ITEM_LIST);
+  CGUIMessage msg1(GUI_MSG_SETFOCUS, GetID(), ONDEMAND_CATEGORY_LIST);
   OnMessage(msg1);
 }
 

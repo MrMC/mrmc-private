@@ -13,6 +13,11 @@
 			<size>24</size>
 		</font>
 		<font>
+			<name>OnDemand20B</name>
+			<filename>Trebuchet-MS-Bold.ttf</filename>
+			<size>20</size>
+		</font>
+		<font>
 			<name>OnDemand12B</name>
 			<filename>Trebuchet-MS-Bold.ttf</filename>
 			<size>12</size>
