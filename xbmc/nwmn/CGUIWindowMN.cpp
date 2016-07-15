@@ -223,15 +223,19 @@ void CGUIWindowMN::OnInitWindow()
   // below needs to be called once we run the update, it disables buttons in skin
   //DisableButtonsOnRefresh(true)
   
+  if (!m_PlayerManager)
+  {
+    m_PlayerManager = new CPlayerManagerMN();
+    m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
+    m_PlayerManager->Startup();
+  }
+  
   CGUIWindow::OnInitWindow();
 }
 
 void CGUIWindowMN::OnWindowLoaded()
 {
   CGUIWindow::OnWindowLoaded();
-  m_PlayerManager = new CPlayerManagerMN();
-  m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
-  m_PlayerManager->Startup();
 }
 
 void CGUIWindowMN::OnWindowUnload()
