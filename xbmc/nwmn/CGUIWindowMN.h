@@ -23,34 +23,41 @@
 #include <string>
 
 #include "cores/IPlayerCallback.h"
-#include "guilib/GUIDialog.h"
+#include "guilib/GUIWindow.h"
 #include "MNMedia.h"
+#include "threads/Thread.h"
 
 class  CPlayerManagerMN;
 struct MNMediaAsset;
 
-class CGUIDialogMNDemand : public CGUIDialog
+class CGUIWindowMN : public CGUIWindow, public CThread
 {
 public:
-  CGUIDialogMNDemand();
-  virtual ~CGUIDialogMNDemand();
+  CGUIWindowMN();
+  virtual ~CGUIWindowMN();
 
   virtual bool  OnMessage(CGUIMessage& message);
   virtual void  OnInitWindow();
+  virtual void  OnWindowLoaded();
   virtual void  OnWindowUnload();
-  virtual bool  OnAction(const CAction& action);
-  void          FillAssets();
-  static  void  SetInfo(PlayerSettings *playerInfo, const float version);
-  void          SetControlLabel(int id, const char *format, int info);
-  static  CGUIDialogMNDemand* GetDialogMNDemand();
-  static void   GetDialogMNCategory(MNCategory &category);
-  static void   SetDialogMNCategory(const MNCategory &category);
 
+  static void   Refresh();
+  void          SendReport();
+  void          DisableButtonsOnRefresh(bool disable);
 
 protected:
-  static float       m_Version;
-  static PlayerSettings *m_PlayerInfo;
-  static CGUIDialogMNDemand *m_MNDemand;
-  static CCriticalSection m_PlayerInfo_lock;
-  static MNCategory  m_OnDemand;
+  virtual void  Process(unsigned int currentTime, CDirtyRegionList &dirtyregions);
+  static  void  PlayerCallBack(const void *ctx, bool status);
+  static  void  PlaybackCallBack(const void *ctx, int msg, MNMediaAsset &asset);
+  virtual bool  OnAction(const CAction &action);
+  virtual void  Process();
+  virtual void  OnStartup();
+  void          TestServers();
+  void          SetResolution(const std::string &strResolution);
+
+  bool          m_RefreshRunning;
+  bool          m_AboutUp;
+  bool          m_testServersPopup;
+  bool          m_testServers;
+  CPlayerManagerMN *m_PlayerManager;
 };

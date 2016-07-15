@@ -19,7 +19,7 @@
 
 #include "system.h"
 
-#include "GUIDialogMNDemand.h"
+#include "CGUIWindowMNDemand.h"
 //#include "PlayerManagerRed.h"
 
 #include "GUIInfoManager.h"
@@ -35,28 +35,28 @@
 #include "settings/MediaSettings.h"
 #include "messaging/ApplicationMessenger.h"
 
-#define ONDEMAND_LIST      50
+#define ONDEMAND_ITEM_LIST          50
+#define ONDEMAND_CATEGORY_LIST      50
 
+PlayerSettings* CGUIWindowMNDemand::m_PlayerInfo = NULL;
+float CGUIWindowMNDemand::m_Version;
+CGUIWindowMNDemand *CGUIWindowMNDemand::m_MNDemand = NULL;
+CCriticalSection CGUIWindowMNDemand::m_PlayerInfo_lock;
+MNCategory CGUIWindowMNDemand::m_OnDemand;
 
-PlayerSettings* CGUIDialogMNDemand::m_PlayerInfo = NULL;
-float CGUIDialogMNDemand::m_Version;
-CGUIDialogMNDemand *CGUIDialogMNDemand::m_MNDemand = NULL;
-CCriticalSection CGUIDialogMNDemand::m_PlayerInfo_lock;
-MNCategory CGUIDialogMNDemand::m_OnDemand;
-
-CGUIDialogMNDemand::CGUIDialogMNDemand()
-: CGUIDialog(WINDOW_DIALOG_MN_DEMAND, "DialogNationWideOndemand.xml")
+CGUIWindowMNDemand::CGUIWindowMNDemand()
+: CGUIWindow(WINDOW_MEMBERNET_DEMAND, "DialogNationWideOndemand.xml")
 {
   m_loadType = KEEP_IN_MEMORY;
   m_MNDemand = this;
 }
 
-CGUIDialogMNDemand::~CGUIDialogMNDemand()
+CGUIWindowMNDemand::~CGUIWindowMNDemand()
 {
   m_MNDemand = NULL;
 }
 
-bool CGUIDialogMNDemand::OnMessage(CGUIMessage& message)
+bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
 {
   switch ( message.GetMessage() )
   {
@@ -65,9 +65,9 @@ bool CGUIDialogMNDemand::OnMessage(CGUIMessage& message)
       int iControl = message.GetSenderId();
       bool selectAction = (message.GetParam1() == ACTION_SELECT_ITEM ||
                            message.GetParam1() == ACTION_MOUSE_LEFT_CLICK);
-      if (selectAction && iControl == ONDEMAND_LIST)
+      if (selectAction && iControl == ONDEMAND_ITEM_LIST)
       {
-        CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_LIST);
+        CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_ITEM_LIST);
         OnMessage(msg);
         int listItem = msg.GetParam1();
 
@@ -94,28 +94,28 @@ bool CGUIDialogMNDemand::OnMessage(CGUIMessage& message)
       return true;
     }
   }
-  return CGUIDialog::OnMessage(message);
+  return CGUIWindow::OnMessage(message);
 }
 
-void CGUIDialogMNDemand::OnInitWindow()
+void CGUIWindowMNDemand::OnInitWindow()
 {
   CGUIWindow::OnInitWindow();
 }
 
-void CGUIDialogMNDemand::OnWindowUnload()
+void CGUIWindowMNDemand::OnWindowUnload()
 {
 }
 
-void CGUIDialogMNDemand::SetInfo(PlayerSettings *playerInfo, const float version)
+void CGUIWindowMNDemand::SetInfo(PlayerSettings *playerInfo, const float version)
 {
 //  CSingleLock lock(m_PlayerInfo_lock);
   m_PlayerInfo = playerInfo;
   m_Version    = version;
 }
 
-void CGUIDialogMNDemand::FillAssets()
+void CGUIWindowMNDemand::FillAssets()
 {
-  SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_LIST);
+  SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_ITEM_LIST);
   CFileItemList stackItems;
   for (size_t i = 0; i < m_OnDemand.items.size(); i++)
   {
@@ -127,20 +127,20 @@ void CGUIDialogMNDemand::FillAssets()
     setInfo->m_strTitle = pItem->GetLabel();
     stackItems.Add(pItem);
   }
-  CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_LIST, 0, 0, &stackItems);
+  CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_ITEM_LIST, 0, 0, &stackItems);
   OnMessage(msg);
 
-  CGUIMessage msg1(GUI_MSG_SETFOCUS, GetID(), ONDEMAND_LIST);
+  CGUIMessage msg1(GUI_MSG_SETFOCUS, GetID(), ONDEMAND_ITEM_LIST);
   OnMessage(msg1);
 }
 
-void CGUIDialogMNDemand::SetControlLabel(int id, const char *format, int info)
+void CGUIWindowMNDemand::SetControlLabel(int id, const char *format, int info)
 {
   std::string tmpStr = StringUtils::Format(format, g_infoManager.GetLabel(info).c_str());
   SET_CONTROL_LABEL(id, tmpStr);
 }
 
-bool CGUIDialogMNDemand::OnAction(const CAction& action)
+bool CGUIWindowMNDemand::OnAction(const CAction& action)
 {
   if (action.GetID() == ACTION_PREVIOUS_MENU ||
       action.GetID() == ACTION_NAV_BACK)
@@ -148,23 +148,23 @@ bool CGUIDialogMNDemand::OnAction(const CAction& action)
     if (g_application.m_pPlayer->IsPlaying())
       KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP, 0);
     else
-      Close();
+      g_windowManager.PreviousWindow();
     return true;
   }
-  return CGUIDialog::OnAction(action);
+  return CGUIWindow::OnAction(action);
 }
 
-CGUIDialogMNDemand* CGUIDialogMNDemand::GetDialogMNDemand()
+CGUIWindowMNDemand* CGUIWindowMNDemand::GetDialogMNDemand()
 {
   return m_MNDemand;
 }
 
-void CGUIDialogMNDemand::GetDialogMNCategory(MNCategory &category)
+void CGUIWindowMNDemand::GetDialogMNCategory(MNCategory &category)
 {
   category = m_OnDemand;
 }
 
-void CGUIDialogMNDemand::SetDialogMNCategory(const MNCategory &category)
+void CGUIWindowMNDemand::SetDialogMNCategory(const MNCategory &category)
 {
   m_OnDemand = category;
 }

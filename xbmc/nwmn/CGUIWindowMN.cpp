@@ -19,8 +19,8 @@
 
 #include "system.h"
 
-#include "GUIDialogMN.h"
-#include "GUIDialogMNDemand.h"
+#include "CGUIWindowMN.h"
+#include "CGUIWindowMNDemand.h"
 #include "PlayerManagerMN.h"
 #include "network/Network.h"
 #include "UtilitiesMN.h"
@@ -56,8 +56,8 @@
 
 
 
-CGUIDialogMN::CGUIDialogMN()
-: CGUIDialog(WINDOW_DIALOG_MN, "DialogNationWide.xml")
+CGUIWindowMN::CGUIWindowMN()
+: CGUIWindow(WINDOW_MEMBERNET, "DialogNationWide.xml")
 , CThread("MNwindow")
 , m_RefreshRunning(false)
 , m_AboutUp(false)
@@ -68,13 +68,13 @@ CGUIDialogMN::CGUIDialogMN()
   m_loadType = KEEP_IN_MEMORY;
 }
 
-CGUIDialogMN::~CGUIDialogMN()
+CGUIWindowMN::~CGUIWindowMN()
 {
   StopThread();
   Close();
 }
 
-bool CGUIDialogMN::OnMessage(CGUIMessage& message)
+bool CGUIWindowMN::OnMessage(CGUIMessage& message)
 {
   if  (message.GetMessage() == GUI_MSG_CLICKED)
   {
@@ -170,8 +170,8 @@ bool CGUIDialogMN::OnMessage(CGUIMessage& message)
       OnMessage(msg);
       
       //fill in on demand window here
-      CGUIDialogMNDemand::SetDialogMNCategory(m_PlayerManager->GetOndemand());
-      g_windowManager.ActivateWindow(WINDOW_DIALOG_MN_DEMAND);
+      CGUIWindowMNDemand::SetDialogMNCategory(m_PlayerManager->GetOndemand());
+      g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
       return true;
     }
     
@@ -179,15 +179,15 @@ bool CGUIDialogMN::OnMessage(CGUIMessage& message)
   else if (message.GetMessage() == GUI_MSG_WINDOW_DEINIT)
   {
     // below prevents window from exiting into home
-    // CGUIDialog::OnMessage(message);
+    // CGUIWindow::OnMessage(message);
     return true;
   }
 
-  return CGUIDialog::OnMessage(message);
+  return CGUIWindow::OnMessage(message);
 }
 
 
-bool CGUIDialogMN::OnAction(const CAction &action)
+bool CGUIWindowMN::OnAction(const CAction &action)
 {
 
   if (action.GetButtonCode() == KEY_BUTTON_BACK || action.GetID() == ACTION_PREVIOUS_MENU || action.GetID() == ACTION_NAV_BACK)
@@ -214,43 +214,46 @@ bool CGUIDialogMN::OnAction(const CAction &action)
     }
   }
   
-  return CGUIDialog::OnAction(action);
+  return CGUIWindow::OnAction(action);
 
 }
 
-void CGUIDialogMN::OnInitWindow()
+void CGUIWindowMN::OnInitWindow()
 {
-   // below needs to be called once we run the update, it disables buttons in skin
-   //DisableButtonsOnRefresh(true);
-
-   m_PlayerManager = new CPlayerManagerMN();
-   m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
-   m_PlayerManager->Startup();
+  // below needs to be called once we run the update, it disables buttons in skin
+  //DisableButtonsOnRefresh(true)
   
-   CGUIWindow::OnInitWindow();
-
+  CGUIWindow::OnInitWindow();
 }
 
-void CGUIDialogMN::OnWindowUnload()
+void CGUIWindowMN::OnWindowLoaded()
+{
+  CGUIWindow::OnWindowLoaded();
+  m_PlayerManager = new CPlayerManagerMN();
+  m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
+  m_PlayerManager->Startup();
+}
+
+void CGUIWindowMN::OnWindowUnload()
 {
   m_PlayerManager = NULL;
   SAFE_DELETE(m_PlayerManager);
 }
 
-void CGUIDialogMN::Refresh()
+void CGUIWindowMN::Refresh()
 {
-  CLog::Log(LOGDEBUG, "**MN** - CGUIDialogMN::Refresh()");
+  CLog::Log(LOGDEBUG, "**MN** - CGUIWindowMN::Refresh()");
   CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
   if (MNPlayerManager)
     MNPlayerManager->Startup();
 }
 
-void CGUIDialogMN::OnStartup()
+void CGUIWindowMN::OnStartup()
 {
   
 }
 
-void  CGUIDialogMN::Process()
+void  CGUIWindowMN::Process()
 {
   while (!m_bStop)
   {
@@ -265,19 +268,19 @@ void  CGUIDialogMN::Process()
   }
 }
 
-void CGUIDialogMN::Process(unsigned int currentTime, CDirtyRegionList &dirtyregions)
+void CGUIWindowMN::Process(unsigned int currentTime, CDirtyRegionList &dirtyregions)
 {
-  CGUIDialog::Process(currentTime, dirtyregions);
+  CGUIWindow::Process(currentTime, dirtyregions);
 }
 
-void CGUIDialogMN::PlayerCallBack(const void *ctx, bool status)
+void CGUIWindowMN::PlayerCallBack(const void *ctx, bool status)
 {
-  CLog::Log(LOGDEBUG, "**MN** - CGUIDialogMN::PlayerCallBack() player running" );
-  CGUIDialogMN *dlog = (CGUIDialogMN*)ctx;
+  CLog::Log(LOGDEBUG, "**MN** - CGUIWindowMN::PlayerCallBack() player running" );
+  CGUIWindowMN *dlog = (CGUIWindowMN*)ctx;
   dlog->m_RefreshRunning = false;
 
   
-  CGUIWindow *pWindow = (CGUIWindow*)g_windowManager.GetWindow(WINDOW_DIALOG_MN);
+  CGUIWindow *pWindow = (CGUIWindow*)g_windowManager.GetWindow(WINDOW_MEMBERNET);
   if (pWindow && 0)
   {
     CDateTime NextUpdateTime;
@@ -290,16 +293,16 @@ void CGUIDialogMN::PlayerCallBack(const void *ctx, bool status)
     pWindow->SetProperty("line2", StringUtils::Format("dl end: %s", end.GetAsDBDateTime().c_str()));
     pWindow->SetProperty("line3", StringUtils::Format("update: %s", NextUpdateTime.GetAsDBDateTime().c_str()));
 
-    CLog::Log(LOGDEBUG, "**MN** - CGUIDialogMN::Process %s", NextDownloadTime.GetAsDBDateTime().c_str());
+    CLog::Log(LOGDEBUG, "**MN** - CGUIWindowMN::Process %s", NextDownloadTime.GetAsDBDateTime().c_str());
   }
 }
 
-void CGUIDialogMN::PlaybackCallBack(const void *ctx, int msg, MNMediaAsset &asset)
+void CGUIWindowMN::PlaybackCallBack(const void *ctx, int msg, MNMediaAsset &asset)
 {
-  CLog::Log(LOGDEBUG, "**MN** - CGUIDialogMN::PlaybackCallBack(): playing \'%s\'", asset.title.c_str());
+  CLog::Log(LOGDEBUG, "**MN** - CGUIWindowMN::PlaybackCallBack(): playing \'%s\'", asset.title.c_str());
 }
 
-void CGUIDialogMN::DisableButtonsOnRefresh(bool disable)
+void CGUIWindowMN::DisableButtonsOnRefresh(bool disable)
 {
   if (disable)
   {
@@ -316,7 +319,7 @@ void CGUIDialogMN::DisableButtonsOnRefresh(bool disable)
 }
 
 
-void CGUIDialogMN::TestServers()
+void CGUIWindowMN::TestServers()
 {
   SET_CONTROL_LABEL(GOOGLESERVER, "'www.google.com' --> testing");
   SET_CONTROL_LABEL(NWSEREVER, "'www.nationwidemember.com' --> testing");
@@ -339,7 +342,7 @@ void CGUIDialogMN::TestServers()
   */
 }
 
-void CGUIDialogMN::SetResolution(const std::string &strResolution)
+void CGUIWindowMN::SetResolution(const std::string &strResolution)
 {
   // format: SWWWWWHHHHHRRR.RRRRRP, where,
   //  S = screen, W = width, H = height, R = refresh, P = interlace

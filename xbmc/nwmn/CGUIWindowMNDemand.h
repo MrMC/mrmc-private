@@ -23,40 +23,34 @@
 #include <string>
 
 #include "cores/IPlayerCallback.h"
-#include "guilib/GUIDialog.h"
+#include "guilib/GUIWindow.h"
 #include "MNMedia.h"
-#include "threads/Thread.h"
 
 class  CPlayerManagerMN;
 struct MNMediaAsset;
 
-class CGUIDialogMN : public CGUIDialog, public CThread
+class CGUIWindowMNDemand : public CGUIWindow
 {
 public:
-  CGUIDialogMN();
-  virtual ~CGUIDialogMN();
+  CGUIWindowMNDemand();
+  virtual ~CGUIWindowMNDemand();
 
   virtual bool  OnMessage(CGUIMessage& message);
   virtual void  OnInitWindow();
   virtual void  OnWindowUnload();
+  virtual bool  OnAction(const CAction& action);
+  void          FillAssets();
+  static  void  SetInfo(PlayerSettings *playerInfo, const float version);
+  void          SetControlLabel(int id, const char *format, int info);
+  static  CGUIWindowMNDemand* GetDialogMNDemand();
+  static void   GetDialogMNCategory(MNCategory &category);
+  static void   SetDialogMNCategory(const MNCategory &category);
 
-  static void   Refresh();
-  void          SendReport();
-  void          DisableButtonsOnRefresh(bool disable);
 
 protected:
-  virtual void  Process(unsigned int currentTime, CDirtyRegionList &dirtyregions);
-  static  void  PlayerCallBack(const void *ctx, bool status);
-  static  void  PlaybackCallBack(const void *ctx, int msg, MNMediaAsset &asset);
-  virtual bool  OnAction(const CAction &action);
-  virtual void  Process();
-  virtual void  OnStartup();
-  void          TestServers();
-  void          SetResolution(const std::string &strResolution);
-
-  bool          m_RefreshRunning;
-  bool          m_AboutUp;
-  bool          m_testServersPopup;
-  bool          m_testServers;
-  CPlayerManagerMN *m_PlayerManager;
+  static float       m_Version;
+  static PlayerSettings *m_PlayerInfo;
+  static CGUIWindowMNDemand *m_MNDemand;
+  static CCriticalSection m_PlayerInfo_lock;
+  static MNCategory  m_OnDemand;
 };
