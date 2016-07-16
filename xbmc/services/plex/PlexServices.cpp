@@ -659,19 +659,9 @@ bool CPlexServices::GetSignInPinCode()
   std::string strMessage;
   if (plex.Post(url.Get(), "", strResponse))
   {
-    //CLog::Log(LOGDEBUG, "CPlexServices:FetchSignInPin %s", strResponse.c_str());
-
-    /*
-    <pin>
-      <client-identifier>a36023fe-930c-4f07-9dbb-88ac8cb91ccf</client-identifier>
-      <code>5YFG</code>
-      <expires-at type="datetime">2016-06-30T03:56:36Z</expires-at>
-      <id type="integer">28975394</id>
-      <user-id type="integer" nil="true"/>
-      <auth-token type="NilClass" nil="true"/>
-      <auth_token nil="true"></auth_token>
-    </pin>
-    */
+#if defined(PLEX_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CPlexServices:FetchSignInPin %s", strResponse.c_str());
+#endif
 
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
@@ -786,8 +776,9 @@ bool CPlexServices::GetSignInByPinReply()
   std::string strResponse;
   if (plex.Get(url.Get(), strResponse))
   {
-    //CLog::Log(LOGDEBUG, "CPlexServices:WaitForSignInByPin %s", strResponse.c_str());
-
+#if defined(PLEX_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CPlexServices:WaitForSignInByPin %s", strResponse.c_str());
+#endif
     TiXmlDocument xml;
     xml.Parse(strResponse.c_str());
 

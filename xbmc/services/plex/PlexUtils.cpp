@@ -50,7 +50,6 @@ bool CPlexUtils::HasClients()
 bool CPlexUtils::GetIdentity(CURL url, int timeout)
 {
   // all (local and remote) plex server respond to identity
-  // over http
   XFILE::CCurlFile plex;
   plex.SetTimeout(timeout);
 
@@ -58,7 +57,9 @@ bool CPlexUtils::GetIdentity(CURL url, int timeout)
   std::string strResponse;
   if (plex.Get(url.Get(), strResponse))
   {
-    //CLog::Log(LOGDEBUG, "CPlexClient::GetIdentity() %s", strResponse.c_str());
+#if defined(PLEX_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CPlexClient::GetIdentity() %s", strResponse.c_str());
+#endif
     return true;
   }
 
@@ -648,7 +649,6 @@ bool CPlexUtils::GetPlexSeasons(CFileItemList &items, const std::string url)
         plexItem->GetVideoInfoTag()->m_iEpisode = atoi(XMLUtils::GetAttribute(directoryNode, "leafCount").c_str());
         plexItem->GetVideoInfoTag()->m_playCount = (int)watchedEpisodes >= plexItem->GetVideoInfoTag()->m_iEpisode;
 
-//        plexItem->SetProperty("totalseasons", iSeason);
         plexItem->SetProperty("totalepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
         plexItem->SetProperty("numepisodes", plexItem->GetVideoInfoTag()->m_iEpisode);
         plexItem->SetProperty("watchedepisodes", watchedEpisodes);
