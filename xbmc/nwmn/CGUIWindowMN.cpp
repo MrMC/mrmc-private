@@ -212,6 +212,8 @@ bool CGUIWindowMN::OnAction(const CAction &action)
       m_PlayerManager->StopPlaying();
       return true;
     }
+    // this return blocks any other "back/esc" action, prevents us closing MN main screen
+    return true;
   }
   
   return CGUIWindow::OnAction(action);

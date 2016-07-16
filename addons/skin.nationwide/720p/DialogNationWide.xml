@@ -8,117 +8,196 @@
 	</coordinates>
 	<controls>
 		<control type="group" id="90500">
-			
+			<!-- Horizontal layout -->
 			<control type="group">
 				<visible>!system.getbool(mn.vertical)</visible>
 				<control type="image">
-						<posx>0</posx>
-						<posy>0</posy>
-						<width>1280</width>
-						<height>720</height>
-						<texture>MNSkinFiles/MNBackground.png</texture>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>720</height>
+					<texture>MNSkinFiles/MNBackground.png</texture>
 				</control>
 				<control type="image">
-						<posx>0</posx>
-						<posy>0</posy>
-						<width>1280</width>
-						<height>112</height>
-						<texture>MNSkinFiles/grey_top.png</texture>
-				</control>		
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>1280</width>
+					<height>112</height>
+					<texture>MNSkinFiles/grey_top.png</texture>
+				</control>
+				<control type="button" id="9016">
+					<description>Settings</description>
+					<posx>390</posx>
+					<posy>0</posy>
+					<width>170</width>
+					<height>112</height>
+					<label>Settings</label>
+					<font>HomeScreen24B</font>
+					<onfocus>-</onfocus>
+					<texturefocus>-</texturefocus>
+					<texturenofocus>-</texturenofocus>
+					<onleft>90102</onleft>
+					<onright>90101</onright>
+					<onup condition="!system.getbool(mn.vertical)">90134</onup>
+					<onup condition="system.getbool(mn.vertical)">90144</onup>
+					<ondown>90103</ondown>
+					<align>center</align>
+					<focusedcolor>blue</focusedcolor>
+					<pulseonselect>true</pulseonselect>
+				</control>
+				<control type="group">
+					<visible>!Control.isVisible(90200) + [Control.HasFocus(9016) | Control.HasFocus(90103) | Control.HasFocus(90105) | Control.HasFocus(90126) | Control.HasFocus(90134) | Control.HasFocus(90144)]</visible>
+					<control type="button" id="90103">
+						<description>Media Content Update</description>
+						<posx>365</posx>
+						<posy>112</posy>
+						<width>220</width>
+						<height>50</height>
+						<label>Media Content Update</label>
+						<font>HomeScreen18B</font>
+						<onfocus>-</onfocus>
+						<texturefocus>MNSkinFiles/grey_top.png</texturefocus>
+						<texturenofocus>MNSkinFiles/grey_top.png</texturenofocus>
+						<onleft>90102</onleft>
+						<onright>90101</onright>
+						<onup>9016</onup>
+						<ondown>90105</ondown>
+						<align>center</align>
+						<focusedcolor>blue</focusedcolor>
+						<pulseonselect>true</pulseonselect>
+					</control>
+					<control type="button" id="90105">
+						<description>About</description>
+						<posx>365</posx>
+						<posy>162</posy>
+						<width>220</width>
+						<height>50</height>
+						<label>About</label>
+						<font>HomeScreen18B</font>
+						<onfocus>-</onfocus>
+						<texturefocus>MNSkinFiles/grey_top.png</texturefocus>
+						<texturenofocus>MNSkinFiles/grey_top.png</texturenofocus>
+						<onleft>90102</onleft>
+						<onright>90101</onright>
+						<onup>90103</onup>
+						<ondown>90126</ondown>
+						<align>center</align>
+						<focusedcolor>blue</focusedcolor>
+						<pulseonselect>true</pulseonselect>
+					</control>
+					<control type="button" id="90126">
+						<description>Network Test</description>
+						<posx>365</posx>
+						<posy>212</posy>
+						<width>220</width>
+						<height>50</height>
+						<label>Network Test</label>
+						<font>HomeScreen18B</font>
+						<onfocus>-</onfocus>
+						<texturefocus>MNSkinFiles/grey_top.png</texturefocus>
+						<texturenofocus>MNSkinFiles/grey_top.png</texturenofocus>
+						<onleft>90102</onleft>
+						<onright>90101</onright>
+						<onup>90105</onup>
+						<ondown>90134</ondown>
+						<ondown condition="!system.getbool(mn.vertical)">90134</ondown>
+						<ondown condition="system.getbool(mn.vertical)">90144</ondown>
+						<align>center</align>
+						<focusedcolor>blue</focusedcolor>
+						<pulseonselect>true</pulseonselect>
+					</control>
+					<control type="button" id="90134">
+						<description>Set Vertical</description>
+						<visible>!system.getbool(mn.vertical)</visible>
+						<posx>365</posx>
+						<posy>262</posy>
+						<width>220</width>
+						<height>50</height>
+						<label>Vertical</label>
+						<font>HomeScreen18B</font>
+						<onfocus>-</onfocus>
+						<texturefocus>MNSkinFiles/grey_top.png</texturefocus>
+						<texturenofocus>MNSkinFiles/grey_top.png</texturenofocus>
+						<onleft>90102</onleft>
+						<onright>90101</onright>
+						<onup>90126</onup>
+						<ondown>9016</ondown>
+						<align>center</align>
+						<focusedcolor>blue</focusedcolor>
+						<pulseonselect>true</pulseonselect>
+					</control>
+					<control type="button" id="90134">
+						<description>Set Horizontal</description>
+						<visible>system.getbool(mn.vertical)</visible>
+						<posx>365</posx>
+						<posy>262</posy>
+						<width>220</width>
+						<height>50</height>
+						<label>Horizontal</label>
+						<font>HomeScreen18B</font>
+						<onfocus>-</onfocus>
+						<texturefocus>MNSkinFiles/grey_top.png</texturefocus>
+						<texturenofocus>MNSkinFiles/grey_top.png</texturenofocus>
+						<onleft>90102</onleft>
+						<onright>90101</onright>
+						<onup>90126</onup>
+						<ondown>9016</ondown>
+						<align>center</align>
+						<focusedcolor>blue</focusedcolor>
+						<pulseonselect>true</pulseonselect>
+					</control>	
+				</control>	
+				<control type="button" id="90101">
+					<description>Play</description>
+					<posx>540</posx>
+					<posy>0</posy>
+					<width>170</width>
+					<height>112</height>
+					<label>Play</label>
+					<font>HomeScreen24B</font>
+					<onfocus>-</onfocus>
+					<texturefocus>-</texturefocus>
+					<texturenofocus>-</texturenofocus>
+					<onleft>9016</onleft>
+					<onright>90102</onright>
+					<onup>90101</onup>
+					<ondown>90101</ondown>
+					<align>center</align>
+					<focusedcolor>blue</focusedcolor>
+					<pulseonselect>true</pulseonselect>
+				</control>
+				<control type="button" id="90102">
+					<description>On-Demand</description>
+					<posx>690</posx>
+					<posy>0</posy>
+					<width>170</width>
+					<height>112</height>
+					<label>On-Demand</label>
+					<font>HomeScreen24B</font>
+					<onfocus>-</onfocus>
+					<texturefocus>-</texturefocus>
+					<texturenofocus>-</texturenofocus>
+					<onleft>90101</onleft>
+					<onright>9016</onright>
+					<onup>90102</onup>
+					<ondown>90102</ondown>
+					<align>center</align>
+					<focusedcolor>blue</focusedcolor>
+					<pulseonselect>true</pulseonselect>
+				</control>	
 			</control>
-
-			<control type="image">
+			<!-- Vertical layout -->
+			<control type="group">
+				<control type="image">
 					<visible>system.getbool(mn.vertical)</visible>
 					<posx>0</posx>
 					<posy>0</posy>
 					<width>1280</width>
 					<height>720</height>
 					<texture>MNTV-Plus-Vertical.png</texture>
-			</control>	
-<!-- 			<control type="group">
-					<posx>260r</posx>
-					<posy>0</posy>
-					<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-						<effect type="slide" start="0,0" end="-230,240" time="0" />
-						<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
-					</animation>
-					<control type="image">
-							<posx>0</posx>
-							<posy>0</posy>
-							<width>440</width>
-							<height>35</height>
-							<texture flipx="true" border="32,0,0,0">header.png</texture>
-					</control>
-					<control type="label">
-							<posx>30</posx>
-							<posy>0</posy>
-							<width>400</width>
-							<height>28</height>
-							<align>left</align>
-							<aligny>center</aligny>
-							<font>font12</font>
-							<textcolor>white</textcolor>
-							<shadowcolor>black</shadowcolor>
-							<label>[COLOR=grey]$INFO[System.Date][/COLOR] | $INFO[System.Time]</label>
-					</control>
-			</control> -->
-			<control type="button" id="9016">
-				<description>Settings</description>
-				<posx>390</posx>
-				<posy>30</posy>
-				<width>170</width>
-				<height>50</height>
-				<label>Settings</label>
-				<font>HomeScreen24B</font>
-				<onfocus>-</onfocus>
-				<texturefocus>-</texturefocus>
-				<texturenofocus>-</texturenofocus>
-				<onleft>90102</onleft>
-				<onright>90101</onright>
-				<onup>9016</onup>
-				<ondown>9016</ondown>
-				<align>center</align>
-				<focusedcolor>blue</focusedcolor>
-				<pulseonselect>true</pulseonselect>
+				</control>
 			</control>
-			<control type="button" id="90101">
-				<description>Play</description>
-				<posx>540</posx>
-				<posy>30</posy>
-				<width>170</width>
-				<height>50</height>
-				<label>Play</label>
-				<font>HomeScreen24B</font>
-				<onfocus>-</onfocus>
-				<texturefocus>-</texturefocus>
-				<texturenofocus>-</texturenofocus>
-				<onleft>9016</onleft>
-				<onright>90102</onright>
-				<onup>90101</onup>
-				<ondown>90101</ondown>
-				<align>center</align>
-				<focusedcolor>blue</focusedcolor>
-				<pulseonselect>true</pulseonselect>
-			</control>
-			<control type="button" id="90102">
-				<description>On-Demand</description>
-				<posx>690</posx>
-				<posy>30</posy>
-				<width>170</width>
-				<height>50</height>
-				<label>On-Demand</label>
-				<font>HomeScreen24B</font>
-				<onfocus>-</onfocus>
-				<texturefocus>-</texturefocus>
-				<texturenofocus>-</texturenofocus>
-				<onleft>90101</onleft>
-				<onright>9016</onright>
-				<onup>90102</onup>
-				<ondown>90102</ondown>
-				<align>center</align>
-				<focusedcolor>blue</focusedcolor>
-				<pulseonselect>true</pulseonselect>
-			</control>
+			<!-- Network test -->
 			<control type="group">
 				<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 					<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
@@ -126,52 +205,6 @@
 				</animation>
 				<animation effect="slide" start="0,-100" end="0,0"  time="400" tween="quadratic" easing="out">Visible</animation>
 				<animation effect="slide" start="0,0" end="0,-100"  time="400" tween="quadratic" easing="out">Hidden</animation>
-				<control type="group">
-					<visible>Control.HasFocus(90104) | Control.HasFocus(90114) | Control.HasFocus(90124) | Control.HasFocus(90134)| Control.HasFocus(90144)</visible>
-					<control type="grouplist" id="90100">
-						<posx>520</posx>
-						<posy>470</posy>
-						<width>250</width>
-						<height>105</height>
-						<align>center</align>
-						<onup>90104</onup>
-						<ondown>90104</ondown>
-						<onleft>90106</onleft>
-						<onright>90104</onright>        	
-						<itemgap>0</itemgap>
-						<orientation>Vertical</orientation>         
-						<control type="button" id="90134">
-							<include>ButtonHomeSubCommonValues</include>
-							<visible>!system.getbool(mn.vertical)</visible>
-							<label>Vertical</label>
-						</control>    			
-						<control type="button" id="90144">
-							<include>ButtonHomeSubCommonValues</include>
-							<visible>system.getbool(mn.vertical)</visible>
-							<label>Horizontal</label>
-						</control>
-					</control>
-				</control>  
-				<control type="grouplist" id="90136">
-					<animation effect="slide" start="0,-100" end="0,0"  time="400" tween="quadratic" easing="out">Visible</animation>
-					<animation effect="slide" start="0,0" end="0,-100" time="400" tween="quadratic" easing="out">Hidden</animation>
-					<visible>Control.HasFocus(90106) | Control.HasFocus(90116) | Control.HasFocus(90126)</visible>
-					<posx>520</posx>
-					<posy>470</posy>
-					<width>250</width>
-					<height>105</height>
-					<align>center</align>
-					<onup>90106</onup>
-					<ondown>90106</ondown>
-					<onleft>90103</onleft>
-					<onright>90104</onright>          
-					<itemgap>0</itemgap>    
-					<control type="button" id="90126">
-						<include>ButtonHomeSubCommonValues</include>
-						<label>Test</label>
-						<onclick>-</onclick>
-					</control>
-				</control>
 				<control type="group" id="90145">
 					<posx>50</posx>
 					<posy>515</posy>
@@ -187,479 +220,184 @@
 						<description>background image</description>
 						<posx>-30</posx>
 						<posy>-10</posy>
-						<width>420</width>
+						<width>480</width>
 						<height>240</height>
-						<texture border="40">DialogBack.png</texture>
-					</control>
-					<control type="image">
-						<description>Dialog Header image</description>
-						<posx>-30</posx>
-						<posy>6</posy>
-						<width>350</width>
-						<height>40</height>
-						<texture>dialogheader.png</texture>
+						<texture>MNSkinFiles/grey_top.png</texture>
 					</control>
 					<control type="label">
 						<description>header label</description>
-						<posx>-30</posx>
+						<posx>105</posx>
 						<posy>10</posy>
-						<width>350</width>
+						<width>200</width>
 						<height>30</height>
-						<font>font13_title</font>
+						<font>OnDemand20B</font>
 						<label>Network Test Results</label>
 						<align>center</align>
 						<aligny>center</aligny>
-						<textcolor>selected</textcolor>
-						<shadowcolor>black</shadowcolor>
+						<textcolor>blue</textcolor>
 					</control>
 					<control type="grouplist" id="90146">
 						<posx>5</posx>
-						<posy>50</posy>          
+						<posy>40</posy>          
 						<align>center</align>       
 						<itemgap>0</itemgap> 
 						<control type="label" id="90147">
-								<width>380</width>
-								<height>28</height>
-								<align>left</align>
-								<aligny>center</aligny>
-								<font>font12</font>
-								<textcolor>white</textcolor>
-								<shadowcolor>black</shadowcolor>
-								<label>'www.google.com' --> testing</label>
+							<width>440</width>
+							<height>28</height>
+							<align>left</align>
+							<aligny>center</aligny>
+							<font>OnDemand18B</font>
+							<textcolor>white</textcolor>
+							<label>'www.google.com' --> testing</label>
 						</control> 
 						<control type="label" id="90148">
-								<width>380</width>
-								<height>28</height>
-								<align>left</align>
-								<aligny>center</aligny>
-								<font>font12</font>
-								<textcolor>white</textcolor>
-								<shadowcolor>black</shadowcolor>
-								<label>'www.nationwidemember.com' --> testing</label>
+							<width>440</width>
+							<height>28</height>
+							<align>left</align>
+							<aligny>center</aligny>
+							<font>OnDemand18B</font>
+							<textcolor>white</textcolor>
+							<label>'www.nationwidemember.com' --> testing</label>
 						</control>  
 						<control type="label" id="90149">
-								<width>380</width>
-								<height>28</height>
-								<align>left</align>
-								<aligny>center</aligny>
-								<font>font12</font>
-								<textcolor>white</textcolor>
-								<shadowcolor>black</shadowcolor>
-								<label>'proxy.membernettv.com' --> testing</label>
-						</control> 
-<!-- 						<control type="label" id="90150">
-								<width>380</width>
-								<height>28</height>
-								<align>left</align>
-								<aligny>center</aligny>
-								<font>font12</font>
-								<textcolor>white</textcolor>
-								<shadowcolor>black</shadowcolor>
-								<label>Checking file download</label>
-						</control>   -->        
+							<width>440</width>
+							<height>28</height>
+							<align>left</align>
+							<aligny>center</aligny>
+							<font>OnDemand18B</font>
+							<textcolor>white</textcolor>
+							<label>'proxy.membernettv.com' --> testing</label>
+						</control>        
 					</control>
 				</control>
 			</control>
-			<control type="group">
-				<posy>400</posy>
-				<visible>!Control.isVisible(90200)</visible>
-				<visible>false</visible>
-				<control type="group" id="9001">
-					<posx>0</posx>
-					<posy>70</posy>
-					<onup>9000</onup>
-					<ondown>9002</ondown>
-					<control type="grouplist" id="9010">
-						<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-							<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
-							<effect type="slide" start="0,0" end="-490,-352" time="0" />
-						</animation>
-						<include>HomeSubMenuCommonValues</include>
-						<onleft>9010</onleft>
-						<onright>9010</onright>
-						<visible>Container(9000).HasFocus(7)</visible>
-						<control type="image">
-							<width>35</width>
-							<height>35</height>
-							<texture border="0,0,0,3" flipx="true">HomeSubEnd.png</texture>
-						</control>
-						<control type="button" id="90101">
-							<include>ButtonHomeSubCommonValues</include>
-							<label>Playlist</label>
-						</control>
-						<control type="button" id="90102">
-							<include>ButtonHomeSubCommonValues</include>
-							<label>On Demand</label>
-						</control>
-						<control type="image">
-							<width>35</width>
-							<height>35</height>
-							<texture border="0,0,0,3">HomeSubEnd.png</texture>
-						</control>
-					</control>
-					<!-- HORIZONTAL -->
-					<control type="group">
-						<visible>!system.getbool(mn.vertical)</visible>
-						<control type="grouplist" id="9016">
-							<include>HomeSubMenuCommonValues</include>
-							<onleft>9016</onleft>
-							<onright>9016</onright>
-							<visible>Container(9000).HasFocus(4)</visible>
-							<control type="image">
-								<width>35</width>
-								<height>35</height>
-								<texture border="0,0,0,3" flipx="true">HomeSubEnd.png</texture>
-							</control>
-							<control type="button" id="90103">
-								<height>35</height>
-								<width>220</width>
-								<textwidth>235</textwidth>
-								<align>center</align>
-								<aligny>center</aligny>
-								<font>font12</font>
-								<textcolor>grey2</textcolor>
-								<focusedcolor>white</focusedcolor>
-								<texturefocus border="5">HomeSubFO.png</texturefocus>
-								<texturenofocus border="5">HomeSubNF.png</texturenofocus>
-								<pulseonselect>false</pulseonselect>
-								<label>Media Content Update</label>
-							</control>
-							<control type="button" id="90105">
-								<include>ButtonHomeSubCommonValues</include>
-								<label>About</label>
-							</control>
-							<control type="button" id="90106">
-								<include>ButtonHomeSubCommonValues</include>
-								<ondown>90126</ondown>
-								<label>Network</label>
-							</control>    					
-							<control type="button" id="90104">
-								<include>ButtonHomeSubCommonValues</include>
-								<ondown condition="!system.getbool(mn.vertical)">90134</ondown>
-								<ondown condition="system.getbool(mn.vertical)">90144</ondown>
-								<label>Display Setup</label>
-							</control>
-							<control type="image">
-								<width>35</width>
-								<height>35</height>
-								<texture border="0,0,0,3">HomeSubEnd.png</texture>
-							</control>
-						</control>	
-					</control>
-					<!-- END HORIZONTAL -->
-					<!-- VERTICAL -->
-					<control type="group">
-						<visible>system.getbool(mn.vertical)</visible>
-						<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-							<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
-							<effect type="slide" start="0,0" end="-100,178" time="0" />
-						</animation>
-						<control type="grouplist" id="9016">
-							<posx>150</posx>
-							<posy>0</posy>
-							<width>650</width>
-							<height>35</height>
-							<align>center</align>
-							<onup>9000</onup>
-							<ondown>9002</ondown>
-							<itemgap>0</itemgap>
-							<orientation>Horizontal</orientation>
-							<animation effect="slide" start="0,-40" end="0,0" delay="200" time="200" tween="quadratic" easing="out">Visible</animation>
-							<animation effect="slide" start="0,0" end="0,-40" time="200" tween="quadratic" easing="out">Hidden</animation>
-							<onleft>9016</onleft>
-							<onright>9016</onright>
-							<visible>Container(9000).HasFocus(4)</visible>
-							<control type="image">
-								<width>35</width>
-								<height>35</height>
-								<texture border="0,0,0,3" flipx="true">HomeSubEnd.png</texture>
-							</control>
-							<control type="button" id="90103">
-								<posy>-100</posy>
-								<height>35</height>
-								<width>220</width>
-								<textwidth>235</textwidth>
-								<align>center</align>
-								<aligny>center</aligny>
-								<font>font12</font>
-								<textcolor>grey2</textcolor>
-								<focusedcolor>white</focusedcolor>
-								<texturefocus border="5">HomeSubFO.png</texturefocus>
-								<texturenofocus border="5">HomeSubNF.png</texturenofocus>
-								<pulseonselect>false</pulseonselect>
-								<label>Media Content Update</label>
-							</control>
-							<control type="button" id="90105">
-								<include>ButtonHomeSubCommonValues</include>
-								<label>About</label>
-							</control>
-							<control type="button" id="90106">
-								<include>ButtonHomeSubCommonValues</include>
-								<ondown>90126</ondown>
-								<label>Network</label>
-							</control>    					
-							<control type="button" id="90104">
-								<include>ButtonHomeSubCommonValues</include>
-								<ondown condition="!system.getbool(mn.vertical)">90134</ondown>
-								<ondown condition="system.getbool(mn.vertical)">90144</ondown>
-								<label>Display Setup</label>
-							</control>
-							<control type="image">
-								<width>35</width>
-								<height>35</height>
-								<texture border="0,0,0,3">HomeSubEnd.png</texture>
-							</control>
-						</control>
-					</control>	
-				</control>
-				<!-- END VERTICAL -->
-				<control type="group">
-					<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-						<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
-						<effect type="slide" start="0,0" end="-200,142" time="0" />
-					</animation>
-					<control type="image">
-						<posx>-100</posx>
-						<posy>0</posy>
-						<width>1480</width>
-						<height>75</height>
-						<texture border="0,6,0,6">HomeBack.png</texture>
-					</control>
-					<control type="image">
-						<posx>0</posx>
-						<posy>5</posy>
-						<width>1280</width>
-						<height>6</height>
-						<texture>HomeOverlay1.png</texture>
-					</control>
-
-					<control type="fixedlist" id="9000">
-						<posx>-20</posx>
-						<posy>5</posy>
-						<width>1500</width>
-						<height>60</height>
-						<onleft>9000</onleft>
-						<onright>9000</onright>
-						<ondown>9001</ondown>
-						<pagecontrol>-</pagecontrol>
-						<scrolltime>300</scrolltime>
-						<focusposition>1</focusposition>
-						<movement>1</movement>
-						<orientation>Horizontal</orientation>
-						<itemlayout height="60" width="350">
-							<control type="label">
-								<posx>160</posx>
-								<posy>0</posy>
-								<width>340</width>
-								<height>60</height>
-								<font>font30_title</font>
-								<textcolor>grey3</textcolor>
-								<align>center</align>
-								<aligny>center</aligny>
-								<label>$INFO[ListItem.Label]</label>
-							</control>
-						</itemlayout>
-						<focusedlayout height="60" width="350">
-							<control type="label">
-								<posx>160</posx>
-								<posy>0</posy>
-								<width>340</width>
-								<height>60</height>
-								<font>font30_title</font>
-								<textcolor>grey3</textcolor>
-								<align>center</align>
-								<aligny>center</aligny>
-								<label>$INFO[ListItem.Label]</label>
-							</control>
-							<control type="label">
-								<posx>160</posx>
-								<posy>0</posy>
-								<width>340</width>
-								<height>60</height>
-								<font>font30_title</font>
-								<textcolor>blue</textcolor>
-								<align>center</align>
-								<aligny>center</aligny>
-								<label>$INFO[ListItem.Label]</label>
-								<visible>Control.HasFocus(9000)</visible>
-								<include>VisibleFadeEffect</include>
-							</control>
-						</focusedlayout>
-						<content>
-							<item id="7">
-								<label>MEMBERNET TV PLUS</label>
-								<onclick>-</onclick>
-								<icon>-</icon>
-								<thumb>-</thumb>
-							</item>
-							<item id="4">
-								<label>SETTINGS</label>
-								<onclick>-</onclick>
-								<icon>-</icon>
-								<thumb>-</thumb>
-							</item>
-						</content>
-					</control>
-					<control type="image">
-						<posx>0</posx>
-						<posy>6</posy>
-						<width>128</width>
-						<height>50</height>
-						<texture>SideFade.png</texture>
-					</control>
-					<control type="image">
-						<posx>128r</posx>
-						<posy>6</posy>
-						<width>128</width>
-						<height>60</height>
-						<texture flipx="true">SideFade.png</texture>
-					</control>
-				</control>
-			</control>	
 		</control>
+		<!-- About popup -->
 		<control type="group" id="90200">
-			<posx>0</posx>
-			<posy>0</posy>
+			<posx>340</posx>
+			<posy>200</posy>
 			<animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
 				<effect type="slide" start="0,0" end="-250,-50" time="0" />
 				<effect type="rotate" center="auto" start="-90" end="-90" time="0" />
 			</animation>
 			<visible>false</visible>
 			<control type="image">
-				<description>About</description>
 				<posx>0</posx>
 				<posy>0</posy>
-				<width>1280</width>
-				<height>720</height>
-				<texture>about.png</texture>
+				<width>600</width>
+				<height>420</height>
+				<texture>MNSkinFiles/grey_top.png</texture>
 			</control>
 			<control type="label">
-				<posx>270</posx>
-				<posy>140</posy>
-				<width>150</width>
+				<posx>10</posx>
+				<posy>10</posy>
+				<width>580</width>
 				<height>60</height>
-				<font>font30_title</font>
-				<textcolor>white</textcolor>
+				<font>OnDemand36B</font>
+				<textcolor>blue</textcolor>
 				<align>center</align>
-				<aligny>center</aligny>
-				<label>About</label>
-			</control>
-			<control type="label">
-				<posx>460</posx>
-				<posy>100</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font30_title</font>
-				<textcolor>black</textcolor>
-				<align>left</align>
 				<aligny>center</aligny>
 				<label>MemberNet TV Information</label>
 			</control>
-			<control type="label" id="90210">
-				<posx>460</posx>
-				<posy>150</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label" id="90211">
-				<posx>460</posx>
-				<posy>190</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label" id="90212">
-				<posx>460</posx>
-				<posy>230</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label" id="90213">
-				<posx>460</posx>
-				<posy>270</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label" id="90214">
-				<posx>460</posx>
-				<posy>310</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label" id="90215">
-				<posx>460</posx>
-				<posy>350</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label" id="90216">
-				<posx>460</posx>
-				<posy>390</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label" id="90217">
-				<posx>460</posx>
-				<posy>430</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label" id="90218">
-				<posx>460</posx>
-				<posy>470</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
-			<control type="label"id="90219">
-				<posx>460</posx>
-				<posy>510</posy>
-				<width>800</width>
-				<height>60</height>
-				<font>font24_title</font>
-				<textcolor>white</textcolor>
-				<align>left</align>
-				<aligny>center</aligny>
-			</control>
+			<control type="group">
+				<posx>10</posx>
+				<control type="label" id="90210">
+					<posy>80</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label" id="90211">
+					<posy>110</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label" id="90212">
+					<posy>140</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label" id="90213">
+					<posy>170</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label" id="90214">
+					<posy>200</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label" id="90215">
+					<posy>230</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label" id="90216">
+					<posy>260</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label" id="90217">
+					<posy>290</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label" id="90218">
+					<posy>320</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+				<control type="label"id="90219">
+					<posy>350</posy>
+					<width>580</width>
+					<height>30</height>
+					<font>OnDemand24B</font>
+					<textcolor>white</textcolor>
+					<align>left</align>
+					<aligny>center</aligny>
+				</control>
+			</control>	
 		</control>
+		<!-- Video player -->		
 		<control type="group">
 			<visible>Player.HasVideo</visible>
 			<control type="image">
-				<description>red-background</description>
+				<description>background</description>
 				<posx>0</posx>
 				<posy>0</posy>
 				<width>1280</width>
