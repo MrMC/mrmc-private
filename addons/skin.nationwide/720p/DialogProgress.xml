@@ -17,16 +17,16 @@
   			<posy>0</posy>
   			<width>610</width>
   			<height>240</height>
-  			<texture border="40">DialogBack.png</texture>
+  			<texture border="40">MNSkinFiles/grey_top.png</texture>
   		</control>
-  		<control type="image">
+<!--   		<control type="image">
   			<description>Dialog Header image</description>
   			<posx>40</posx>
   			<posy>16</posy>
   			<width>530</width>
   			<height>40</height>
   			<texture>dialogheader.png</texture>
-  		</control>
+  		</control> -->
   		<control type="label" id="1">
   			<description>fake heading label</description>
   			<posx>0</posx>
@@ -42,14 +42,13 @@
   			<posy>20</posy>
   			<width>530</width>
   			<height>30</height>
-  			<font>font13_title</font>
+  			<font>OnDemand24B</font>
   			<label>$INFO[Control.GetLabel(1)] $INFO[System.Progressbar,- ,%]</label>
   			<align>center</align>
   			<aligny>center</aligny>
-  			<textcolor>selected</textcolor>
-  			<shadowcolor>black</shadowcolor>
+  			<textcolor>blue</textcolor>
   		</control>
-  		<control type="button">
+<!--   		<control type="button">
   			<description>Close Window button</description>
   			<posx>520</posx>
   			<posy>15</posy>
@@ -65,7 +64,7 @@
   			<onup>10</onup>
   			<ondown>10</ondown>
   			<visible>system.getbool(input.enablemouse)</visible>
-  		</control>
+  		</control> -->
   		<control type="label" id="2">
   			<description>dialog line 1</description>
   			<posx>30</posx>
@@ -76,7 +75,7 @@
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
-  			<font>font13</font>
+  			<font>OnDemand20B</font>
   		</control>
   		<control type="label" id="3">
   			<description>dialog line 2</description>
@@ -88,7 +87,7 @@
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
-  			<font>font13</font>
+  			<font>OnDemand20B</font>
   		</control>
   		<control type="label" id="4">
   			<description>dialog line 3</description>
@@ -100,7 +99,7 @@
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
-  			<font>font13</font>
+  			<font>OnDemand20B</font>
   		</control>
   		<control type="progress">
   			<description>Progressbar</description>
@@ -117,9 +116,15 @@
   			<width>200</width>
   			<height>40</height>
   			<label>222</label>
-  			<font>font12_title</font>
+  			<font>OnDemand16B</font>
   			<textcolor>white</textcolor>
-  			<focusedcolor>white</focusedcolor>
+        <focusedcolor>blue</focusedcolor>
+        <onfocus>-</onfocus>
+<!--         <texturefocus border="5">MNSkinFiles/grey_top.png</texturefocus>
+        <texturenofocus border="5">MNSkinFiles/grey_top.png</texturenofocus> -->
+        <texturefocus>dialogheader.png</texturefocus>
+        <texturenofocus>dialogheader.png</texturenofocus>
+        <pulseonselect>true</pulseonselect>
   			<align>center</align>
   			<onleft>10</onleft>
   			<onright>10</onright>
