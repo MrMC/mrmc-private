@@ -235,9 +235,16 @@ void CPlexUtils::GetMediaDetals(CFileItem &item, CURL url, const TiXmlElement* m
     a->m_iChannels = atoi(XMLUtils::GetAttribute(mediaNode, "audioChannels").c_str());
     a->m_strLanguage = XMLUtils::GetAttribute(mediaNode, "audioChannels");
     details.AddStream(a);
-    
-    std::string label = StringUtils::Format("%sp, %.2f Mbps", XMLUtils::GetAttribute(mediaNode, "videoResolution").c_str(),
-                                            atof(XMLUtils::GetAttribute(mediaNode, "bitrate").c_str())/1000);
+
+    std::string label;
+    std::string resolution = XMLUtils::GetAttribute(mediaNode, "videoResolution");
+    StringUtils::ToUpper(resolution);
+    float bitrate = atof(XMLUtils::GetAttribute(mediaNode, "bitrate").c_str())/1000;
+    if(resolution.empty())
+      label = StringUtils::Format("%.2f Mbps", bitrate);
+    else
+      label = StringUtils::Format("%s, %.2f Mbps",resolution.c_str(),bitrate);
+
     item.SetProperty("PlexResolutionChoice", label);
     item.SetProperty("PlexMediaID", XMLUtils::GetAttribute(mediaNode, "id"));
     item.GetVideoInfoTag()->m_streamDetails = details;
