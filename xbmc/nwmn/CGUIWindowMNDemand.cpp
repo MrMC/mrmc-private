@@ -81,6 +81,19 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
         g_playlistPlayer.Add(PLAYLIST_VIDEO, (CFileItemPtr) &item);
         return true;
       }
+      else if (selectAction && iControl == ONDEMAND_CATEGORY_LIST)
+      {
+        CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_CATEGORY_LIST);
+        OnMessage(msg);
+        
+        int item = msg.GetParam1();
+        // populate ONDEMAND_ITEM_LIST here, item is the actual clicked item in the ONDEMAND_CATEGORY_LIST
+        // ONDEMAND_ITEM_LIST needs to be pre populated on windowInit by using first item in the ONDEMAND_CATEGORY_LIST
+        // we handle any subsequent selection here
+        //        if (item >= 0 && item < someFancyItemList->Size())
+        //          PopulateMe();
+        return true;
+      }
     }
     case GUI_MSG_WINDOW_DEINIT:
     {
