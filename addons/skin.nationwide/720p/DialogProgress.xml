@@ -120,8 +120,6 @@
   			<textcolor>white</textcolor>
         <focusedcolor>blue</focusedcolor>
         <onfocus>-</onfocus>
-<!--         <texturefocus border="5">MNSkinFiles/grey_top.png</texturefocus>
-        <texturenofocus border="5">MNSkinFiles/grey_top.png</texturenofocus> -->
         <texturefocus>dialogheader.png</texturefocus>
         <texturenofocus>dialogheader.png</texturenofocus>
         <pulseonselect>true</pulseonselect>

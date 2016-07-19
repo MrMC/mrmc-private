@@ -152,6 +152,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       OnMessage(msg);
       CSettings::GetInstance().SetBool(CSettings::MN_VERTICAL, true);
       CSettings::GetInstance().Save();
+      SET_CONTROL_FOCUS(SETHORIZONTAL,0);
       
       return true;
     }
@@ -161,6 +162,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       OnMessage(msg);
       CSettings::GetInstance().SetBool(CSettings::MN_VERTICAL, false);
       CSettings::GetInstance().Save();
+      SET_CONTROL_FOCUS(SETVERTICAL,0);
       
       return true;
     }
