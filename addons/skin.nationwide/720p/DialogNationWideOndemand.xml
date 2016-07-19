@@ -18,7 +18,7 @@
           <posy>0</posy>
           <width>1280</width>
           <height>720</height>
-          <texture>MNTV-Plus-Vertical.png</texture>
+          <texture>MNSkinFiles/VerticalOnDemandMN.png</texture>
         </control>	
         <control type="group">
     	   <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
