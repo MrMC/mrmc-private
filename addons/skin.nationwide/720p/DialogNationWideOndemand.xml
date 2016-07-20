@@ -19,13 +19,10 @@
           <width>1280</width>
           <height>720</height>
           <texture>MNSkinFiles/VerticalOnDemandMN.png</texture>
-        </control>	
+        </control>
+        <!-- Horizontal Layout -->
         <control type="group">
-    	   <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-              <effect type="slide" start="0,0" end="-250,190" time="0" />
-              <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
-              <effect type="zoom" end="90" center="640,360" time="200" />
-            </animation>
+            <visible>!system.getbool(mn.vertical)</visible>
             <control type="image">
               <posx>64</posx>
               <posy>34</posy>
@@ -51,13 +48,6 @@
               <width>1152</width>
               <height>536</height>
               <texture>MNSkinFiles/ListArea.png</texture>
-            </control> 
-            <control type="image">
-              <posx>565</posx>
-              <posy>171</posy>
-              <width>626</width>
-              <height>495</height>
-              <texture>MNSkinFiles/ContentArea.png</texture>
             </control>  
             <control type="list" id="50">
                 <posx>90</posx>
@@ -113,7 +103,111 @@
                     </control>
                 </focusedlayout>
             </control>
-            <!-- below panel for section items -->
+        </control>
+        <!-- Vertical Layout -->
+        <control type="group">
+            <visible>system.getbool(mn.vertical)</visible>
+            <control type="image">
+              <posx>963</posx>
+              <posy>61.5</posy>
+              <width>60</width>
+              <height>596</height>
+              <texture>MNSkinFiles/verticalBannerArea.png</texture>
+            </control> 
+            <control type="image">
+              <posx>60</posx>
+              <posy>55</posy>
+              <width>970</width>
+              <height>609</height>
+              <texture>MNSkinFiles/verticalListArea.png</texture>
+            </control>
+            <control type="group">
+                <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
+                  <effect type="slide" start="0,0" end="46,227" time="0" />
+                  <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
+                </animation>
+                <control type="label">
+                    <posy>62</posy>
+                    <posx>100</posx>
+                    <width>500</width>
+                    <height>40</height>
+                    <font>OnDemand36B</font>
+                    <textcolor>black</textcolor>
+                    <scroll>false</scroll>
+                    <align>left</align>
+                    <aligny>center</aligny>
+                    <label>On Demand</label>
+                </control>
+                <control type="panel" id="50">
+                    <posx>90</posx>
+                    <posy>135</posy>
+                    <width>620</width>
+                    <height>250</height>
+                    <onleft>1050</onleft>
+                    <onright>1050</onright>
+                    <onup>50</onup>
+                    <ondown>50</ondown>
+                    <viewtype label="535">list</viewtype>
+                    <scrolltime>200</scrolltime>
+                    <orientation>vertical</orientation>
+                    <itemlayout height="50.2" width="300">
+                        <control type="image">
+                            <posx>0</posx>
+                            <posy>0</posy>
+                            <width>295</width>
+                            <height>42</height>
+                            <texture>MNSkinFiles/verticalSelectionArea.png</texture>
+                        </control>
+                        <control type="label">
+                            <posx>10</posx>
+                            <posy>5</posy>
+                            <width>426</width>
+                            <height>30</height>
+                            <font>OnDemand20B</font>
+                            <textcolor>black</textcolor>
+                            <selectedcolor>black</selectedcolor>
+                            <align>left</align>
+                            <aligny>center</aligny>
+                            <label>$INFO[ListItem.Label]</label>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout height="50.2" width="300">
+                        <control type="image">
+                            <posx>0</posx>
+                            <posy>0</posy>
+                            <width>295</width>
+                            <height>42</height>
+                            <texture>MNSkinFiles/SelectionArea.png</texture>
+                        </control>
+                        <control type="label">
+                            <posx>10</posx>
+                            <posy>5</posy>
+                            <width>426</width>
+                            <height>30</height>
+                            <font>OnDemand20B</font>
+                            <textcolor>blue</textcolor>
+                            <selectedcolor>white</selectedcolor>
+                            <align>left</align>
+                            <aligny>center</aligny>
+                            <label>$INFO[ListItem.Label]</label>
+                        </control>
+                    </focusedlayout>
+                </control>
+            </control>   
+        </control>        
+        <!-- below panel for section items -->
+        <control type="group">
+            <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
+              <effect type="slide" start="0,0" end="-210,-213" time="0" />
+              <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
+            </animation>
+            <control type="image">
+              <posx>565</posx>
+              <posy>171</posy>
+              <width>626</width>
+              <height>495</height>
+              <texture>MNSkinFiles/ContentArea.png</texture>
+            </control> 
             <control type="panel" id="1050">
                 <posx>573</posx>
                 <posy>180</posy>
