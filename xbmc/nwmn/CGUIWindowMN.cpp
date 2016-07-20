@@ -172,7 +172,8 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       OnMessage(msg);
       
       //fill in on demand window here
-      CGUIWindowMNDemand::SetDialogMNCategory(m_PlayerManager->GetOndemand());
+      MNCategory hack;
+      CGUIWindowMNDemand::SetDialogMNCategory(hack);
       g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
       return true;
     }
@@ -227,12 +228,12 @@ void CGUIWindowMN::OnInitWindow()
   // below needs to be called once we run the update, it disables buttons in skin
   //DisableButtonsOnRefresh(true)
   
-  if (!m_PlayerManager)
-  {
-    m_PlayerManager = new CPlayerManagerMN();
-    m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
-    m_PlayerManager->Startup();
-  }
+//  if (!m_PlayerManager)
+//  {
+//    m_PlayerManager = new CPlayerManagerMN();
+//    m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
+//    m_PlayerManager->Startup();
+//  }
   
   CGUIWindow::OnInitWindow();
 }
