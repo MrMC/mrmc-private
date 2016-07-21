@@ -45,7 +45,7 @@
 					<pulseonselect>true</pulseonselect>
 				</control>
 				<control type="group">
-					<visible>!Control.isVisible(90200) +  !Window.IsVisible(progressdialog) + [Control.HasFocus(9016) | Control.HasFocus(90103) | Control.HasFocus(90105) | Control.HasFocus(90126) | Control.HasFocus(90134) | Control.HasFocus(90144)]</visible>
+					<visible>!Control.isVisible(90145) + !Control.isVisible(90200) +  !Window.IsVisible(progressdialog) + [Control.HasFocus(9016) | Control.HasFocus(90103) | Control.HasFocus(90105) | Control.HasFocus(90126) | Control.HasFocus(90134) | Control.HasFocus(90144)]</visible>
 					<control type="button" id="90103">
 						<description>Media Content Update</description>
 						<posx>365</posx>
@@ -204,7 +204,7 @@
 						<pulseonselect>true</pulseonselect>
 					</control>
 					<control type="group">
-						<visible>!Control.isVisible(90200) +  !Window.IsVisible(progressdialog) + [Control.HasFocus(9016) | Control.HasFocus(90103) | Control.HasFocus(90105) | Control.HasFocus(90126) | Control.HasFocus(90134) | Control.HasFocus(90144)]</visible>
+						<visible>!Control.isVisible(90145) + !Control.isVisible(90200) +  !Window.IsVisible(progressdialog) + [Control.HasFocus(9016) | Control.HasFocus(90103) | Control.HasFocus(90105) | Control.HasFocus(90126) | Control.HasFocus(90134) | Control.HasFocus(90144)]</visible>
 						<control type="button" id="90103">
 							<description>Media Content Update</description>
 							<posx>365</posx>
