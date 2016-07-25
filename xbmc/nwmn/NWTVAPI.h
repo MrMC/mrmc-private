@@ -140,12 +140,32 @@ typedef struct NWMachine {
   NWMachineApple_software apple_software;
 } NWMachine;
 
+typedef struct NWPlayList {
+  std::string id;
+  std::string name;
+  std::string type;
+  std::string updated_date;
+  std::string layout;
+  std::string member_id;
+  std::string member_name;
+  std::string nmg_managed;
+} NWPlayList;
 
-
+typedef struct NWPlayLists {
+  std::string apiKey;
+  std::string apiSecret;
+  // reply
+  //std::string page;
+  //std::string perPage;
+  //std::string total;
+  //std::string total_pages;
+  std::vector<NWPlayList> playlist;
+} NWPlayLists;
 
 bool TVAPI_DoActivate(NWActivate &activate);
 bool TVAPI_GetStatus(NWStatus &status);
 bool TVAPI_GetMachine(NWMachine &machine);
+bool TVAPI_GetPlaylists(NWPlayLists &playlists);
 
 
 

@@ -250,6 +250,10 @@ void CGUIWindowMN::OnInitWindow()
   machine.apiSecret = activate.apiSecret;
   TVAPI_GetMachine(machine);
   
+  NWPlayLists playlists;
+  playlists.apiKey = activate.apiKey;
+  playlists.apiSecret = activate.apiSecret;
+  TVAPI_GetPlaylists(playlists);
   
   CGUIWindow::OnInitWindow();
 }

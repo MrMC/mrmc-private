@@ -180,13 +180,87 @@ bool TVAPI_GetMachine(NWMachine &machine)
     machine.apple_software.id     = apple_software["id"].asString();
     machine.apple_software.version = apple_software["version"].asString();
     machine.apple_software.url    = apple_software["url"].asString();
+
+    return true;
   }
 
   return false;
 }
 
+bool TVAPI_GetPlaylists(NWPlayLists &playlists)
+{
+  XFILE::CCurlFile nwmn;
+  nwmn.SetTimeout(30);
 
+  std::string sub_url;
+  sub_url = kTVAPI_URLBASE + "playlist";
+  sub_url += "?_page=" + std::to_string(1) + "&_perPage=25";
 
+  CURL nwmn_machine(sub_url);
+  nwmn_machine.SetProtocolOption("seekable", "0");
+  nwmn_machine.SetProtocolOption("auth", "basic");
+  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
+  nwmn_machine.SetUserName(playlists.apiKey);
+  nwmn_machine.SetPassword(playlists.apiSecret);
+  std::string strResponse;
+
+  if (nwmn.Get(nwmn_machine.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+
+    CVariant reply;
+    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+
+    int page = 1;
+    int total = reply["total"].asInteger();
+    int sub_total = 0;
+    playlists.playlist.clear();
+    while(true)
+    {
+      int curPage = reply["page"].asInteger();
+      int perPage = reply["perPage"].asInteger();
+
+      CVariant results(CVariant::VariantTypeArray);
+      results = reply["results"];
+      for (size_t i = 0; i < results.size(); i++, sub_total++)
+      {
+        NWPlayList playlist;
+        playlist.id = results[i]["id"].asString();
+        playlist.name = results[i]["name"].asString();
+        playlist.type = results[i]["type"].asString();
+        playlist.updated_date = results[i]["updated_date"].asString();
+        playlist.layout = results[i]["layout"].asString();
+        playlist.member_id = results[i]["member_id"].asString();
+        playlist.member_name = results[i]["member_name"].asString();
+        playlist.nmg_managed = results[i]["nmg_managed"].asString();
+        playlists.playlist.push_back(playlist);
+
+        CLog::Log(LOGDEBUG, "testNationwide5_0 %d, %s", sub_total, playlist.name.c_str());
+      }
+      
+      CLog::Log(LOGDEBUG, "page = %d, perPage = %d, sub_total = %d, total = %d", curPage, perPage, sub_total, total);
+
+      if (sub_total < total)
+      {
+        sub_url = kTVAPI_URLBASE + "playlist";
+        sub_url += "?_page=" + std::to_string(++page) + "&_perPage=25";
+        nwmn_machine = CURL(sub_url);
+        if (nwmn.Get(nwmn_machine.Get(), strResponse))
+        {
+          reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+          continue;
+        }
+      }
+
+      // if we get here, we are done
+      break;
+    }
+    
+    return true;
+  }
+
+  return false;
+}
 
 
 
