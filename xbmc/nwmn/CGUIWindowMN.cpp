@@ -38,6 +38,8 @@
 #include "settings/SkinSettings.h"
 #include "settings/Settings.h"
 
+#include "NWTVAPI.h"
+
 
 #define PLAYLIST          90101
 #define ONDEMAND          90102
@@ -234,6 +236,20 @@ void CGUIWindowMN::OnInitWindow()
 //    m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
 //    m_PlayerManager->Startup();
 //  }
+  NWActivate activate;
+  activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
+  activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
+  
+  NWStatus status;
+  status.apiKey = activate.apiKey;
+  status.apiSecret = activate.apiSecret;
+  TVAPI_GetStatus(status);
+
+  NWMachine machine;
+  machine.apiKey = activate.apiKey;
+  machine.apiSecret = activate.apiSecret;
+  TVAPI_GetMachine(machine);
+  
   
   CGUIWindow::OnInitWindow();
 }
@@ -332,7 +348,7 @@ void CGUIWindowMN::TestServers()
 {
   SET_CONTROL_LABEL(GOOGLESERVER, "'www.google.com' --> testing");
   SET_CONTROL_LABEL(NWSEREVER, "'www.nationwidemember.com' --> testing");
-  //SET_CONTROL_LABEL(PROXYMNSERVER, "'proxy.membernettv.com' --> testing");
+  SET_CONTROL_LABEL(PROXYMNSERVER, "");
   
   if (PingMNServer("http://www.google.com"))
     SET_CONTROL_LABEL(GOOGLESERVER, "'www.google.com' is reachable");

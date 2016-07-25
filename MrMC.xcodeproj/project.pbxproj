@@ -2163,6 +2163,9 @@
 		F5CC230E18150118006B5E91 /* AESinkFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC230A18150118006B5E91 /* AESinkFactory.cpp */; };
 		F5CC234718150277006B5E91 /* AESinkNULL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC234518150277006B5E91 /* AESinkNULL.cpp */; };
 		F5CC234918150277006B5E91 /* AESinkNULL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC234518150277006B5E91 /* AESinkNULL.cpp */; };
+		F5CC390E1D469279005402C7 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC390C1D469279005402C7 /* NWTVAPI.cpp */; };
+		F5CC390F1D469279005402C7 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC390C1D469279005402C7 /* NWTVAPI.cpp */; };
+		F5CC39101D469279005402C7 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC390C1D469279005402C7 /* NWTVAPI.cpp */; };
 		F5CEE60913D3C89700225F72 /* DVDOverlayCodecTX3G.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CEE60713D3C89700225F72 /* DVDOverlayCodecTX3G.cpp */; };
 		F5D0E1151BA667600070EE9C /* MCRuntimeLibContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */; };
 		F5D0E1161BA667650070EE9C /* MCRuntimeLibStartupLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp */; };
@@ -5504,6 +5507,8 @@
 		F5CC230B18150118006B5E91 /* AESinkFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AESinkFactory.h; sourceTree = "<group>"; };
 		F5CC234518150277006B5E91 /* AESinkNULL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AESinkNULL.cpp; path = Sinks/AESinkNULL.cpp; sourceTree = "<group>"; };
 		F5CC234618150277006B5E91 /* AESinkNULL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AESinkNULL.h; path = Sinks/AESinkNULL.h; sourceTree = "<group>"; };
+		F5CC390C1D469279005402C7 /* NWTVAPI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWTVAPI.cpp; sourceTree = "<group>"; };
+		F5CC390D1D469279005402C7 /* NWTVAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWTVAPI.h; sourceTree = "<group>"; };
 		F5CEE60713D3C89700225F72 /* DVDOverlayCodecTX3G.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDOverlayCodecTX3G.cpp; sourceTree = "<group>"; };
 		F5CEE60813D3C89700225F72 /* DVDOverlayCodecTX3G.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDOverlayCodecTX3G.h; sourceTree = "<group>"; };
 		F5D0E1171BA88FCC0070EE9C /* cocoa_monitor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cocoa_monitor.mm; sourceTree = "<group>"; };
@@ -5719,6 +5724,8 @@
 				183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */,
 				183588D41CB76FC900D84C73 /* MNJSONOperations.h */,
 				183588D51CB76FC900D84C73 /* MNMedia.h */,
+				F5CC390C1D469279005402C7 /* NWTVAPI.cpp */,
+				F5CC390D1D469279005402C7 /* NWTVAPI.h */,
 				183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */,
 				183588D71CB76FC900D84C73 /* PlayerManagerMN.h */,
 				183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */,
@@ -10111,6 +10118,7 @@
 				E3E91FFF0D8C61DF002BF43D /* Socket.cpp in Sources */,
 				E3E920020D8C622A002BF43D /* EventClient.cpp in Sources */,
 				E38A06CE0D95AA5500FF8227 /* GUIDialogKaiToast.cpp in Sources */,
+				F5CC390E1D469279005402C7 /* NWTVAPI.cpp in Sources */,
 				E3B53E7C0D97B08100021A96 /* DVDSubtitleParserMicroDVD.cpp in Sources */,
 				E36C29DF0DA72429001F0C9D /* Artist.cpp in Sources */,
 				E36C29E00DA72429001F0C9D /* Album.cpp in Sources */,
@@ -11264,6 +11272,7 @@
 				F5B723121C7C894F006432AE /* PlayerBuiltins.cpp in Sources */,
 				E499132B174E5DAD00741B6D /* TextureBundleXPR.cpp in Sources */,
 				E499132D174E5DAD00741B6D /* TextureGL.cpp in Sources */,
+				F5CC390F1D469279005402C7 /* NWTVAPI.cpp in Sources */,
 				E499132E174E5DAD00741B6D /* TextureManager.cpp in Sources */,
 				E499132F174E5DAD00741B6D /* VisibleEffect.cpp in Sources */,
 				E4991330174E5DAD00741B6D /* XBTF.cpp in Sources */,
@@ -12359,6 +12368,7 @@
 				F5D1407C1BAF0B6D0075A95C /* ProgressJob.cpp in Sources */,
 				F5D1407D1BAF0B6D0075A95C /* NetworkLinux.cpp in Sources */,
 				F5D1407E1BAF0B6D0075A95C /* ZeroconfBrowserOSX.cpp in Sources */,
+				F5CC39101D469279005402C7 /* NWTVAPI.cpp in Sources */,
 				F5D1407F1BAF0B6D0075A95C /* ZeroconfOSX.cpp in Sources */,
 				F5B723051C7C894F006432AE /* GUIControlBuiltins.cpp in Sources */,
 				F5D140801BAF0B6D0075A95C /* UPnP.cpp in Sources */,
