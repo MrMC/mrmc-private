@@ -159,13 +159,90 @@ typedef struct NWPlayLists {
   //std::string perPage;
   //std::string total;
   //std::string total_pages;
-  std::vector<NWPlayList> playlist;
+  std::vector<NWPlayList> playlists;
 } NWPlayLists;
+
+typedef struct NWCategory {
+  std::string id;
+  std::string name;
+} NWCategory;
+
+typedef struct NWSmartPlaylists {
+  std::string apiKey;
+  std::string apiSecret;
+  // reply
+  std::string id;
+  std::string name;
+  std::string type;
+  std::string layout;
+  std::string member_id;
+  std::string nmg_managed;
+  std::string updated_date;
+  std::vector<NWCategory> categories;
+} NWSmartPlaylists;
+
+typedef struct NWSmartPlaylistsFile {
+  std::string id;
+} NWSmartPlaylistsFile;
+
+typedef struct NWCustomPlaylists {
+  std::string apiKey;
+  std::string apiSecret;
+  // reply
+  std::string id;
+  std::string name;
+  std::string type;
+  std::string layout;
+  std::string member_id;
+  std::string nmg_managed;
+  std::vector<NWSmartPlaylistsFile> files;
+} NWCustomPlaylists;
+
+typedef struct NWPlaylistFile{
+  std::string rez;
+  std::string path;
+  std::string size;
+  std::string width;
+  std::string height;
+  std::string etag;
+  std::string mime_type;
+  std::string created_date;
+  std::string updated_date;
+} NWPlaylistFile;
+
+typedef struct NWPlaylistItem{
+  std::string id;
+  std::string name;
+  std::string tv_category_id;
+  std::string description;
+  std::string created_date;
+  std::string updated_date;
+  std::string completion_date;
+  std::string theatricalrelease;
+  std::string dvdrelease;
+  std::string download;
+  std::string availability_to;
+  std::string availability_from;
+  std::vector<NWPlaylistFile> files;
+} NWPlaylistItem;
+
+typedef struct NWPlaylistItems {
+  std::string apiKey;
+  std::string apiSecret;
+  // reply
+  std::string id;
+  std::string name;
+  std::string type;
+  std::vector<NWPlaylistItem> items;
+} NWPlaylistItems;
 
 bool TVAPI_DoActivate(NWActivate &activate);
 bool TVAPI_GetStatus(NWStatus &status);
 bool TVAPI_GetMachine(NWMachine &machine);
 bool TVAPI_GetPlaylists(NWPlayLists &playlists);
+bool TVAPI_GetSmartPlaylists(NWSmartPlaylists &smartPlaylists, std::string id);
+bool TVAPI_GetCustomPlaylists(NWCustomPlaylists &customPlaylists, std::string id);
+bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string id);
 
 
 

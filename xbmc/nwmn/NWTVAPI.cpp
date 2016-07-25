@@ -214,7 +214,7 @@ bool TVAPI_GetPlaylists(NWPlayLists &playlists)
     int page = 1;
     int total = reply["total"].asInteger();
     int sub_total = 0;
-    playlists.playlist.clear();
+    playlists.playlists.clear();
     while(true)
     {
       int curPage = reply["page"].asInteger();
@@ -224,16 +224,18 @@ bool TVAPI_GetPlaylists(NWPlayLists &playlists)
       results = reply["results"];
       for (size_t i = 0; i < results.size(); i++, sub_total++)
       {
+        CVariant result = results[i];
+
         NWPlayList playlist;
-        playlist.id = results[i]["id"].asString();
-        playlist.name = results[i]["name"].asString();
-        playlist.type = results[i]["type"].asString();
-        playlist.updated_date = results[i]["updated_date"].asString();
-        playlist.layout = results[i]["layout"].asString();
-        playlist.member_id = results[i]["member_id"].asString();
-        playlist.member_name = results[i]["member_name"].asString();
-        playlist.nmg_managed = results[i]["nmg_managed"].asString();
-        playlists.playlist.push_back(playlist);
+        playlist.id = result["id"].asString();
+        playlist.name = result["name"].asString();
+        playlist.type = result["type"].asString();
+        playlist.updated_date = result["updated_date"].asString();
+        playlist.layout = result["layout"].asString();
+        playlist.member_id = result["member_id"].asString();
+        playlist.member_name = result["member_name"].asString();
+        playlist.nmg_managed = result["nmg_managed"].asString();
+        playlists.playlists.push_back(playlist);
 
         CLog::Log(LOGDEBUG, "testNationwide5_0 %d, %s", sub_total, playlist.name.c_str());
       }
@@ -262,7 +264,187 @@ bool TVAPI_GetPlaylists(NWPlayLists &playlists)
   return false;
 }
 
+bool TVAPI_GetSmartPlaylists(NWSmartPlaylists &smartPlaylists, std::string id)
+{
+  XFILE::CCurlFile nwmn;
+  nwmn.SetTimeout(30);
 
+  std::string url;
+  url = kTVAPI_URLBASE + "playlist/" + id;
 
+  CURL nwmn_machine(url);
+  nwmn_machine.SetProtocolOption("seekable", "0");
+  nwmn_machine.SetProtocolOption("auth", "basic");
+  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
+  nwmn_machine.SetUserName(smartPlaylists.apiKey);
+  nwmn_machine.SetPassword(smartPlaylists.apiSecret);
+  std::string strResponse;
+
+  if (nwmn.Get(nwmn_machine.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+
+    CVariant reply;
+    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+
+    smartPlaylists.id = reply["id"].asString();
+    smartPlaylists.name = reply["name"].asString();
+    smartPlaylists.type = reply["type"].asString();
+    smartPlaylists.layout = reply["layout"].asString();
+    smartPlaylists.member_id = reply["member_id"].asString();
+    smartPlaylists.nmg_managed = reply["nmg_managed"].asString();
+    smartPlaylists.updated_date = reply["updated_date"].asString();
+
+    CVariant results(CVariant::VariantTypeArray);
+    results = reply["results"];
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+      NWCategory category;
+      category.id = results[i]["id"].asString();
+      category.name = results[i]["name"].asString();
+      smartPlaylists.categories.push_back(category);
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+bool TVAPI_GetCustomPlaylists(NWCustomPlaylists &customPlaylists, std::string id)
+{
+  XFILE::CCurlFile nwmn;
+  nwmn.SetTimeout(30);
+
+  std::string url;
+  url = kTVAPI_URLBASE + "playlist/" + id;
+
+  CURL nwmn_machine(url);
+  nwmn_machine.SetProtocolOption("seekable", "0");
+  nwmn_machine.SetProtocolOption("auth", "basic");
+  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
+  nwmn_machine.SetUserName(customPlaylists.apiKey);
+  nwmn_machine.SetPassword(customPlaylists.apiSecret);
+  std::string strResponse;
+
+  if (nwmn.Get(nwmn_machine.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+
+    CVariant reply;
+    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+
+    customPlaylists.id = reply["id"].asString();
+    customPlaylists.name = reply["name"].asString();
+    customPlaylists.type = reply["type"].asString();
+    customPlaylists.layout = reply["layout"].asString();
+    customPlaylists.member_id = reply["member_id"].asString();
+    customPlaylists.nmg_managed = reply["nmg_managed"].asString();
+    //customPlaylists.updated_date = reply["updated_date"].asString();
+
+    CVariant results(CVariant::VariantTypeArray);
+    results = reply["results"];
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+      NWSmartPlaylistsFile file;
+      file.id = results[i]["id"].asString();
+      customPlaylists.files.push_back(file);
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string id)
+{
+  XFILE::CCurlFile nwmn;
+  nwmn.SetTimeout(30);
+
+  std::string url;
+  url = kTVAPI_URLBASE + "playlist/" + id + "/files";
+
+  CURL nwmn_machine(url);
+  nwmn_machine.SetProtocolOption("seekable", "0");
+  nwmn_machine.SetProtocolOption("auth", "basic");
+  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
+  nwmn_machine.SetUserName(playlistItems.apiKey);
+  nwmn_machine.SetPassword(playlistItems.apiSecret);
+  std::string strResponse;
+
+  if (nwmn.Get(nwmn_machine.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+
+    CVariant reply;
+    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+
+    CVariant playlist = reply["playlist"];
+    playlistItems.id = playlist["id"].asString();
+    playlistItems.name = playlist["name"].asString();
+    playlistItems.type = playlist["type"].asString();
+
+    CVariant results(CVariant::VariantTypeArray);
+    results = reply["results"];
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+      CVariant result = results[i];
+
+      NWPlaylistItem item;
+      item.id = result["id"].asString();
+      item.name = result["name"].asString();
+      item.tv_category_id = result["tv_category_id"].asString();
+      item.description = result["description"].asString();
+      item.created_date = result["created_date"].asString();
+      item.updated_date = result["updated_date"].asString();
+      item.completion_date = result["completion_date"].asString();
+      item.theatricalrelease = result["theatricalrelease"].asString();
+      item.dvdrelease = result["dvdrelease"].asString();
+      item.download = result["download"].asString();
+      CVariant availability = result["availability"];
+      item.availability_to = availability["to"].asString();
+      item.availability_from = availability["from"].asString();
+
+      CVariant file720 = result["files"]["720"];
+      if (file720.isObject())
+      {
+        NWPlaylistFile file;
+        file.rez = "720";
+        file.path = file720["path"].asString();
+        file.size = file720["size"].asString();
+        file.width = file720["width"].asString();
+        file.height = file720["height"].asString();
+        file.etag = file720["etag"].asString();
+        file.mime_type = file720["mime_type"].asString();
+        file.created_date = file720["created_date"].asString();
+        file.updated_date = file720["updated_date"].asString();
+        item.files.push_back(file);
+      }
+
+      CVariant file1080 = result["files"]["1080"];
+      if (file1080.isObject())
+      {
+        NWPlaylistFile file;
+        file.rez = "1080";
+        file.path = file1080["path"].asString();
+        file.size = file1080["size"].asString();
+        file.width = file1080["width"].asString();
+        file.height = file1080["height"].asString();
+        file.etag = file1080["etag"].asString();
+        file.mime_type = file1080["mime_type"].asString();
+        file.created_date = file1080["created_date"].asString();
+        file.updated_date = file1080["updated_date"].asString();
+        item.files.push_back(file);
+      }
+
+      playlistItems.items.push_back(item);
+    }
+
+    return true;
+  }
+
+  return false;
+}
 
 

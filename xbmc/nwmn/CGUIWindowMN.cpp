@@ -255,6 +255,22 @@ void CGUIWindowMN::OnInitWindow()
   playlists.apiSecret = activate.apiSecret;
   TVAPI_GetPlaylists(playlists);
   
+  NWSmartPlaylists smartPlaylists;
+  smartPlaylists.apiKey = activate.apiKey;
+  smartPlaylists.apiSecret = activate.apiSecret;
+  TVAPI_GetSmartPlaylists(smartPlaylists, machine.playlist_id);
+
+  NWCustomPlaylists customPlaylists;
+  customPlaylists.apiKey = activate.apiKey;
+  customPlaylists.apiSecret = activate.apiSecret;
+  TVAPI_GetCustomPlaylists(customPlaylists, machine.playlist_id);
+
+  NWPlaylistItems playlistItems;
+  playlistItems.apiKey = activate.apiKey;
+  playlistItems.apiSecret = activate.apiSecret;
+  TVAPI_GetPlaylistItems(playlistItems, machine.playlist_id);
+
+
   CGUIWindow::OnInitWindow();
 }
 
