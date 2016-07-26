@@ -40,7 +40,7 @@ bool TVAPI_DoActivate(NWActivate &activate)
   std::string strResponse;
   if (nwmn.Post(nwmn_activate.Get(), "", strResponse))
   {
-    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "TVAPI_DoActivate %s", strResponse.c_str());
     //{"message":"Operation Successful","key":"\/3\/NKO6ZFdRgum7fZkMi","secret":"ewuDiXOIgZP7l9\/Rxt\/LDQbmAI1zJe0PQ5VZYnuy"}
 
     CVariant reply;
@@ -74,7 +74,7 @@ bool TVAPI_GetStatus(NWStatus &status)
 
   if (nwmn.Get(nwmn_status.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "TVAPI_GetStatus %s", strResponse.c_str());
     //{"key":"fGyb157LNrPsP4DOVin1","unique_id":"My Application Id","activation_date":"2016-07-08 14:19:51","status":"1","status_text":"Active","machine_id":"1757"}
 
     CVariant reply;
@@ -107,7 +107,7 @@ bool TVAPI_GetMachine(NWMachine &machine)
 
   if (nwmn.Get(nwmn_machine.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "TVAPI_GetMachine %s", strResponse.c_str());
     //{"id":"1757","member":"1560","machine_name":"jww-test","description":"Description from JSON","playlist_id":"1096","status":null,"vendor":"0","hardware":"0","timezone":"America\/Puerto_Rico","serial_number":"421232123212321232124","warranty_number":"0","video_format":"720","allow_new_content":"1","allow_software_update":"1","update_interval":"daily","update_time":"2400","location":{"id":"83400001","name":"All Maytag","address":"401 S. Broadway","address2":"","zip_code":"73034","state":"OK","city":"Edmond","phone":"(405) 359-9274","fax":"(405) 359-0022"},"network":{"macaddress":"","macaddress_wireless":"","dhcp":"1","ipaddress":"","subnet":"","router":"","dns_1":"","dns_2":""},"settings":{"network":"1","pairing":"1","about":"1","hdmibrightness":"1","tvresolution":"1","updatesoftware":"0","language":"1","legal":"1"},"menu":{"membernettv":"1","vendorcommercials":"0","hdcontent":"1","membercommercials":"0","movietrailers":"1","promotionalcampaigns":"1","nationwidebroadcasts":"0","imaginationwidehd":"1","primemediacommercialfactory":"1"},"membernet_software":{"id":"20","version":"MNTV 2.1","cfbundleversion":"2.1.1","url":"http:\/\/test.nationwidemember.com\/resources\/tv\/versions\/membernet_2_1.tar.gz"},"apple_software":{"id":"20","version":"MNTV 2.1","url":"http:\/\/test.nationwidemember.com\/resources\/tv\/versions\/membernet_2_1.tar.gz"}}
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -187,14 +187,14 @@ bool TVAPI_GetMachine(NWMachine &machine)
   return false;
 }
 
-bool TVAPI_GetPlaylists(NWPlayLists &playlists)
+bool TVAPI_GetPlaylists(NWPlaylists &playlists)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
 
   std::string sub_url;
   sub_url = kTVAPI_URLBASE + "playlist";
-  sub_url += "?_page=" + std::to_string(1) + "&_perPage=25";
+  sub_url += "?_page=" + std::to_string(1) + "&_perPage=50";
 
   CURL nwmn_machine(sub_url);
   nwmn_machine.SetProtocolOption("seekable", "0");
@@ -206,7 +206,7 @@ bool TVAPI_GetPlaylists(NWPlayLists &playlists)
 
   if (nwmn.Get(nwmn_machine.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists %s", strResponse.c_str());
 
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -226,7 +226,7 @@ bool TVAPI_GetPlaylists(NWPlayLists &playlists)
       {
         CVariant result = results[i];
 
-        NWPlayList playlist;
+        NWPlaylistPlaylist playlist;
         playlist.id = result["id"].asString();
         playlist.name = result["name"].asString();
         playlist.type = result["type"].asString();
@@ -237,10 +237,10 @@ bool TVAPI_GetPlaylists(NWPlayLists &playlists)
         playlist.nmg_managed = result["nmg_managed"].asString();
         playlists.playlists.push_back(playlist);
 
-        CLog::Log(LOGDEBUG, "testNationwide5_0 %d, %s", sub_total, playlist.name.c_str());
+        CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists %d, %s", sub_total, playlist.name.c_str());
       }
       
-      CLog::Log(LOGDEBUG, "page = %d, perPage = %d, sub_total = %d, total = %d", curPage, perPage, sub_total, total);
+      CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists page = %d, perPage = %d, sub_total = %d, total = %d", curPage, perPage, sub_total, total);
 
       if (sub_total < total)
       {
@@ -264,45 +264,57 @@ bool TVAPI_GetPlaylists(NWPlayLists &playlists)
   return false;
 }
 
-bool TVAPI_GetSmartPlaylists(NWSmartPlaylists &smartPlaylists, std::string id)
+bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
 
   std::string url;
-  url = kTVAPI_URLBASE + "playlist/" + id;
+  url = kTVAPI_URLBASE + "playlist/" + playlist_id;
 
   CURL nwmn_machine(url);
   nwmn_machine.SetProtocolOption("seekable", "0");
   nwmn_machine.SetProtocolOption("auth", "basic");
   nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
-  nwmn_machine.SetUserName(smartPlaylists.apiKey);
-  nwmn_machine.SetPassword(smartPlaylists.apiSecret);
+  nwmn_machine.SetUserName(playlist.apiKey);
+  nwmn_machine.SetPassword(playlist.apiSecret);
   std::string strResponse;
 
   if (nwmn.Get(nwmn_machine.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "TVAPI_GetPlaylist %s", strResponse.c_str());
 
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
 
-    smartPlaylists.id = reply["id"].asString();
-    smartPlaylists.name = reply["name"].asString();
-    smartPlaylists.type = reply["type"].asString();
-    smartPlaylists.layout = reply["layout"].asString();
-    smartPlaylists.member_id = reply["member_id"].asString();
-    smartPlaylists.nmg_managed = reply["nmg_managed"].asString();
-    smartPlaylists.updated_date = reply["updated_date"].asString();
+    playlist.id = reply["id"].asString();
+    playlist.name = reply["name"].asString();
+    playlist.type = reply["type"].asString();
+    playlist.layout = reply["layout"].asString();
+    playlist.member_id = reply["member_id"].asString();
+    playlist.nmg_managed = reply["nmg_managed"].asString();
+    playlist.updated_date = reply["updated_date"].asString();
 
     CVariant results(CVariant::VariantTypeArray);
     results = reply["results"];
-    for (size_t i = 0; i < results.size(); ++i)
+    if (playlist.type == "smart")
     {
-      NWCategory category;
-      category.id = results[i]["id"].asString();
-      category.name = results[i]["name"].asString();
-      smartPlaylists.categories.push_back(category);
+      for (size_t i = 0; i < results.size(); ++i)
+      {
+        NWCategoryId category;
+        category.id = results[i]["id"].asString();
+        category.name = results[i]["name"].asString();
+        playlist.categories.push_back(category);
+      }
+    }
+    else if (playlist.type == "custom")
+    {
+      for (size_t i = 0; i < results.size(); ++i)
+      {
+        NWFileId file;
+        file.id = results[i]["id"].asString();
+        playlist.files.push_back(file);
+      }
     }
 
     return true;
@@ -311,59 +323,13 @@ bool TVAPI_GetSmartPlaylists(NWSmartPlaylists &smartPlaylists, std::string id)
   return false;
 }
 
-bool TVAPI_GetCustomPlaylists(NWCustomPlaylists &customPlaylists, std::string id)
+bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist_id)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
 
   std::string url;
-  url = kTVAPI_URLBASE + "playlist/" + id;
-
-  CURL nwmn_machine(url);
-  nwmn_machine.SetProtocolOption("seekable", "0");
-  nwmn_machine.SetProtocolOption("auth", "basic");
-  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
-  nwmn_machine.SetUserName(customPlaylists.apiKey);
-  nwmn_machine.SetPassword(customPlaylists.apiSecret);
-  std::string strResponse;
-
-  if (nwmn.Get(nwmn_machine.Get(), strResponse))
-  {
-    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
-
-    CVariant reply;
-    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
-
-    customPlaylists.id = reply["id"].asString();
-    customPlaylists.name = reply["name"].asString();
-    customPlaylists.type = reply["type"].asString();
-    customPlaylists.layout = reply["layout"].asString();
-    customPlaylists.member_id = reply["member_id"].asString();
-    customPlaylists.nmg_managed = reply["nmg_managed"].asString();
-    //customPlaylists.updated_date = reply["updated_date"].asString();
-
-    CVariant results(CVariant::VariantTypeArray);
-    results = reply["results"];
-    for (size_t i = 0; i < results.size(); ++i)
-    {
-      NWSmartPlaylistsFile file;
-      file.id = results[i]["id"].asString();
-      customPlaylists.files.push_back(file);
-    }
-
-    return true;
-  }
-
-  return false;
-}
-
-bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string id)
-{
-  XFILE::CCurlFile nwmn;
-  nwmn.SetTimeout(30);
-
-  std::string url;
-  url = kTVAPI_URLBASE + "playlist/" + id + "/files";
+  url = kTVAPI_URLBASE + "playlist/" + playlist_id + "/files";
 
   CURL nwmn_machine(url);
   nwmn_machine.SetProtocolOption("seekable", "0");
@@ -375,7 +341,7 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string id)
 
   if (nwmn.Get(nwmn_machine.Get(), strResponse))
   {
-    CLog::Log(LOGDEBUG, "testNationwide5_0 %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "TVAPI_GetPlaylistItems %s", strResponse.c_str());
 
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -406,38 +372,28 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string id)
       item.availability_to = availability["to"].asString();
       item.availability_from = availability["from"].asString();
 
-      CVariant file720 = result["files"]["720"];
-      if (file720.isObject())
+      CVariant files = result["files"];
+      if (files.isObject())
       {
-        NWPlaylistFile file;
-        file.rez = "720";
-        file.path = file720["path"].asString();
-        file.size = file720["size"].asString();
-        file.width = file720["width"].asString();
-        file.height = file720["height"].asString();
-        file.etag = file720["etag"].asString();
-        file.mime_type = file720["mime_type"].asString();
-        file.created_date = file720["created_date"].asString();
-        file.updated_date = file720["updated_date"].asString();
-        item.files.push_back(file);
+        for (CVariant::const_iterator_map it = files.begin_map(); it != files.end_map(); ++it)
+        {
+          CVariant fileobj = it->second;
+          if (fileobj.isObject())
+          {
+            NWPlaylistFile file;
+            file.rez = it->first;
+            file.path = fileobj["path"].asString();
+            file.size = fileobj["size"].asString();
+            file.width = fileobj["width"].asString();
+            file.height = fileobj["height"].asString();
+            file.etag = fileobj["etag"].asString();
+            file.mime_type = fileobj["mime_type"].asString();
+            file.created_date = fileobj["created_date"].asString();
+            file.updated_date = fileobj["updated_date"].asString();
+            item.files.push_back(file);
+          }
+        }
       }
-
-      CVariant file1080 = result["files"]["1080"];
-      if (file1080.isObject())
-      {
-        NWPlaylistFile file;
-        file.rez = "1080";
-        file.path = file1080["path"].asString();
-        file.size = file1080["size"].asString();
-        file.width = file1080["width"].asString();
-        file.height = file1080["height"].asString();
-        file.etag = file1080["etag"].asString();
-        file.mime_type = file1080["mime_type"].asString();
-        file.created_date = file1080["created_date"].asString();
-        file.updated_date = file1080["updated_date"].asString();
-        item.files.push_back(file);
-      }
-
       playlistItems.items.push_back(item);
     }
 

@@ -35,6 +35,7 @@ const std::string kTVAPI_Status_Restarting = "Restarting";
 
 const std::string kTVAPI_URLBASE = "http://test.nationwidemember.com/tv-api/1/";
 
+// ---------------------------------------------
 typedef struct NWActivate {
   std::string code;
   std::string application_id;
@@ -43,6 +44,7 @@ typedef struct NWActivate {
   std::string apiSecret;
 } NWActivate;
 
+// ---------------------------------------------
 typedef struct NWStatus {
   std::string apiKey;
   std::string apiSecret;
@@ -55,6 +57,7 @@ typedef struct NWStatus {
   std::string activation_date;
 } NWStatus;
 
+// ---------------------------------------------
 typedef struct NWMachineLocation {
     std::string id;
     std::string name;
@@ -133,14 +136,15 @@ typedef struct NWMachine {
   std::string allow_software_update;
   std::string update_time;
   NWMachineLocation location;
-  NWMachineNetwork network;
+  NWMachineNetwork  network;
   NWMachineSettings settings;
-  NWMachineMenu menu;
+  NWMachineMenu     menu;
   NWMachineMembernet_software  membernet_software;
   NWMachineApple_software apple_software;
 } NWMachine;
 
-typedef struct NWPlayList {
+// ---------------------------------------------
+typedef struct NWPlaylistPlaylist {
   std::string id;
   std::string name;
   std::string type;
@@ -149,9 +153,9 @@ typedef struct NWPlayList {
   std::string member_id;
   std::string member_name;
   std::string nmg_managed;
-} NWPlayList;
+} NWPlaylistPlaylist;
 
-typedef struct NWPlayLists {
+typedef struct NWPlaylists {
   std::string apiKey;
   std::string apiSecret;
   // reply
@@ -159,15 +163,20 @@ typedef struct NWPlayLists {
   //std::string perPage;
   //std::string total;
   //std::string total_pages;
-  std::vector<NWPlayList> playlists;
-} NWPlayLists;
+  std::vector<NWPlaylistPlaylist> playlists;
+} NWPlaylists;
 
-typedef struct NWCategory {
+// ---------------------------------------------
+typedef struct NWCategoryId {
   std::string id;
   std::string name;
-} NWCategory;
+} NWCategoryId;
 
-typedef struct NWSmartPlaylists {
+typedef struct NWFileId {
+  std::string id;
+} NWFileId;
+
+typedef struct NWPlaylist {
   std::string apiKey;
   std::string apiSecret;
   // reply
@@ -178,27 +187,12 @@ typedef struct NWSmartPlaylists {
   std::string member_id;
   std::string nmg_managed;
   std::string updated_date;
-  std::vector<NWCategory> categories;
-} NWSmartPlaylists;
+  std::vector<NWFileId> files;
+  std::vector<NWCategoryId> categories;
+} NWPlaylist;
 
-typedef struct NWSmartPlaylistsFile {
-  std::string id;
-} NWSmartPlaylistsFile;
-
-typedef struct NWCustomPlaylists {
-  std::string apiKey;
-  std::string apiSecret;
-  // reply
-  std::string id;
-  std::string name;
-  std::string type;
-  std::string layout;
-  std::string member_id;
-  std::string nmg_managed;
-  std::vector<NWSmartPlaylistsFile> files;
-} NWCustomPlaylists;
-
-typedef struct NWPlaylistFile{
+// ---------------------------------------------
+typedef struct NWPlaylistFile {
   std::string rez;
   std::string path;
   std::string size;
@@ -210,7 +204,7 @@ typedef struct NWPlaylistFile{
   std::string updated_date;
 } NWPlaylistFile;
 
-typedef struct NWPlaylistItem{
+typedef struct NWPlaylistItem {
   std::string id;
   std::string name;
   std::string tv_category_id;
@@ -236,13 +230,15 @@ typedef struct NWPlaylistItems {
   std::vector<NWPlaylistItem> items;
 } NWPlaylistItems;
 
+// ---------------------------------------------
+// ---------------------------------------------
 bool TVAPI_DoActivate(NWActivate &activate);
 bool TVAPI_GetStatus(NWStatus &status);
 bool TVAPI_GetMachine(NWMachine &machine);
-bool TVAPI_GetPlaylists(NWPlayLists &playlists);
-bool TVAPI_GetSmartPlaylists(NWSmartPlaylists &smartPlaylists, std::string id);
-bool TVAPI_GetCustomPlaylists(NWCustomPlaylists &customPlaylists, std::string id);
-bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string id);
+bool TVAPI_GetPlaylists(NWPlaylists &playlists);
+
+bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id);
+bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist_id);
 
 
 
