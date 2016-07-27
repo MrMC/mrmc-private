@@ -415,15 +415,15 @@ bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
   const NWPlaylist &playlist, const NWPlaylistItems &playlistItems)
 {
   // convert server structures to player structure
-
-  mediaPlayList = *new NWMediaPlaylist;
   mediaPlayList.id = std::stoi(playlist.id);
   mediaPlayList.name = playlist.name;
   mediaPlayList.type = playlist.type;
   // format is "2013-08-22"
   mediaPlayList.updated_date.SetFromDBDate(playlist.updated_date);
   mediaPlayList.max_rez = 1080;
-  
+  mediaPlayList.groups.clear();
+  mediaPlayList.play_order.clear();
+
   for (auto catagory : playlist.categories)
   {
     NWGroup group;
