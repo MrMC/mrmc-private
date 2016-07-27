@@ -295,24 +295,26 @@ bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id)
     playlist.nmg_managed = reply["nmg_managed"].asString();
     playlist.updated_date = reply["updated_date"].asString();
 
-    CVariant results(CVariant::VariantTypeArray);
-    results = reply["results"];
     if (playlist.type == "smart")
     {
-      for (size_t i = 0; i < results.size(); ++i)
+      CVariant categories(CVariant::VariantTypeArray);
+      categories = reply["categories"];
+      for (size_t i = 0; i < categories.size(); ++i)
       {
         NWCategoryId category;
-        category.id = results[i]["id"].asString();
-        category.name = results[i]["name"].asString();
+        category.id = categories[i]["id"].asString();
+        category.name = categories[i]["name"].asString();
         playlist.categories.push_back(category);
       }
     }
     else if (playlist.type == "custom")
     {
-      for (size_t i = 0; i < results.size(); ++i)
+      CVariant files(CVariant::VariantTypeArray);
+      files = reply["files"];
+      for (size_t i = 0; i < files.size(); ++i)
       {
         NWFileId file;
-        file.id = results[i]["id"].asString();
+        file.id = files[i]["id"].asString();
         playlist.files.push_back(file);
       }
     }
@@ -393,6 +395,12 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
             item.files.push_back(file);
           }
         }
+        // sort from low rez to high rez
+        std::sort(item.files.begin(), item.files.end(),
+          [] (NWPlaylistFile const& a, NWPlaylistFile const& b)
+          {
+            return std::stoi(a.rez) < std::stoi(b.rez);
+          });
       }
       playlistItems.items.push_back(item);
     }
@@ -403,4 +411,58 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
   return false;
 }
 
+bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
+  const NWPlaylist &playlist, const NWPlaylistItems &playlistItems)
+{
+  // convert server structures to player structure
 
+  mediaPlayList.id = std::stoi(playlist.id);
+  mediaPlayList.name = playlist.name;
+  mediaPlayList.type = playlist.type;
+  //mediaPlayList.updated_date = playlist.updated_date;
+  mediaPlayList.max_rez = 720;
+  
+  for (auto catagory : playlist.categories)
+  {
+    NWGroup group;
+    group.id = std::stoi(catagory.id);
+    group.name = catagory.name;
+    group.next_asset_index = 0;
+    for (auto item : playlistItems.items)
+    {
+      if (item.tv_category_id == catagory.id)
+      {
+        NWAsset asset;
+        asset.id = std::stoi(item.id);
+        asset.name = item.name;
+        asset.group_id = std::stoi(item.tv_category_id);
+
+        for (auto file : item.files)
+        {
+          // item.files is pre-sorted low to high rez
+          // take anything up to max rez, never take higher than max_rez
+          if (std::stoi(file.rez) <= mediaPlayList.max_rez)
+          {
+            asset.id = std::stoi(item.id);
+            asset.rez = std::stoi(file.rez);
+            asset.video_url = file.path;
+            asset.video_md5 = file.etag;
+            asset.video_size = std::stoi(file.size);
+            //asset.thumb_url;
+            //asset.thumb_md5;
+            //asset.thumb_size;
+            //asset.available_to = item.availability_to;
+            //asset.available_from = item.availability_from;
+            asset.valid = false;
+          }
+        }
+        // if we got an good asset, save it.
+        if (!asset.video_url.empty())
+          group.assets.push_back(asset);
+      }
+    }
+    mediaPlayList.groups.push_back(group);
+  }
+
+  return false;
+}

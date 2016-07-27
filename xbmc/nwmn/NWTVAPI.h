@@ -230,6 +230,43 @@ typedef struct NWPlaylistItems {
   std::vector<NWPlaylistItem> items;
 } NWPlaylistItems;
 
+typedef struct NWAsset {
+  int id;
+  int group_id;
+  int rez;
+  std::string name;
+  std::string video_url;
+  std::string video_md5;
+  int         video_size;
+  std::string video_localpath;
+  std::string thumb_url;
+  std::string thumb_md5;
+  int         thumb_size;
+  std::string thumb_localpath;
+  CDateTime   available_to;
+  CDateTime   available_from;
+  
+  std::string uuid;       // changes all the time, not to be used as identifier
+  std::string time_played;// ditto
+  bool        valid;
+} NWAsset;
+
+typedef struct NWGroup {
+  int id;
+  std::string name;
+  int next_asset_index;
+  std::vector<NWAsset> assets;
+} NWGroup;
+
+typedef struct NWMediaPlaylist {
+  int id;
+  std::string name;
+  std::string type;
+  int max_rez;
+  CDateTime updated_date;
+  std::vector<NWGroup> groups;
+} NWMediaPlaylist;
+
 // ---------------------------------------------
 // ---------------------------------------------
 bool TVAPI_DoActivate(NWActivate &activate);
@@ -240,5 +277,7 @@ bool TVAPI_GetPlaylists(NWPlaylists &playlists);
 bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id);
 bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist_id);
 
+bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
+  const NWPlaylist &playlist, const NWPlaylistItems &playlistItems);
 
 

@@ -260,6 +260,8 @@ void CGUIWindowMN::OnInitWindow()
   playlistItems.apiSecret = activate.apiSecret;
   TVAPI_GetPlaylistItems(playlistItems, machine.playlist_id);
 
+  NWMediaPlaylist mediaPlayList;
+  TVAPI_CreateMediaPlaylist(mediaPlayList, playlist, playlistItems);
 
   CGUIWindow::OnInitWindow();
 }
