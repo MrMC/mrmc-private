@@ -420,8 +420,9 @@ bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
   mediaPlayList.id = std::stoi(playlist.id);
   mediaPlayList.name = playlist.name;
   mediaPlayList.type = playlist.type;
-  //mediaPlayList.updated_date = playlist.updated_date;
-  mediaPlayList.max_rez = 720;
+  // format is "2013-08-22"
+  mediaPlayList.updated_date.SetFromDBDate(playlist.updated_date);
+  mediaPlayList.max_rez = 1080;
   
   for (auto catagory : playlist.categories)
   {
@@ -429,40 +430,60 @@ bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
     group.id = std::stoi(catagory.id);
     group.name = catagory.name;
     group.next_asset_index = 0;
-    for (auto item : playlistItems.items)
-    {
-      if (item.tv_category_id == catagory.id)
-      {
-        NWAsset asset;
-        asset.id = std::stoi(item.id);
-        asset.name = item.name;
-        asset.group_id = std::stoi(item.tv_category_id);
+    // always remember original group play order
+    // this determines group play order. ie.
+    // pick 1st group, play asset, pick next group, play asset, do all groups
+    // cycle back, pick 1st group, play next asset...
+    mediaPlayList.play_order.push_back(group.id);
 
-        for (auto file : item.files)
+    // check if we already have handled this group
+    auto it = std::find_if(mediaPlayList.groups.begin(), mediaPlayList.groups.end(),
+      [group](const NWGroup &existingGroup) { return existingGroup.id == group.id; });
+    if (it == mediaPlayList.groups.end())
+    {
+      // not present, pull out assets assigned to this group
+      for (auto item : playlistItems.items)
+      {
+        if (item.tv_category_id == catagory.id)
         {
-          // item.files is pre-sorted low to high rez
-          // take anything up to max rez, never take higher than max_rez
-          if (std::stoi(file.rez) <= mediaPlayList.max_rez)
+          NWAsset asset;
+          asset.id = std::stoi(item.id);
+          asset.name = item.name;
+          asset.group_id = std::stoi(item.tv_category_id);
+          asset.valid = false;
+
+          // tries to find a good content match to player capabilities
+          // for example, if player is connected to 720 display,
+          // get 720 content, unless 720 content is missing, then take the
+          // next highest. Needs work :)
+          for (auto file : item.files)
           {
-            asset.id = std::stoi(item.id);
-            asset.rez = std::stoi(file.rez);
-            asset.video_url = file.path;
-            asset.video_md5 = file.etag;
-            asset.video_size = std::stoi(file.size);
-            //asset.thumb_url;
-            //asset.thumb_md5;
-            //asset.thumb_size;
-            //asset.available_to = item.availability_to;
-            //asset.available_from = item.availability_from;
-            asset.valid = false;
+            // item.files is pre-sorted low to high rez
+            // take anything up to max rez, never take higher than max_rez
+            if (std::stoi(file.rez) <= mediaPlayList.max_rez)
+            {
+              asset.id = std::stoi(item.id);
+              asset.rez = std::stoi(file.rez);
+              asset.video_url = file.path;
+              asset.video_md5 = file.etag;
+              asset.video_size = std::stoi(file.size);
+              //asset.thumb_url;
+              //asset.thumb_md5;
+              //asset.thumb_size;
+              // format is "2013-02-27 01:00:00"
+              asset.available_to.SetFromDBDateTime(item.availability_to);
+              asset.available_from.SetFromDBDateTime(item.availability_from);
+            }
           }
+          // if we got an complete asset, save it.
+          if (!asset.video_url.empty())
+            group.assets.push_back(asset);
         }
-        // if we got an good asset, save it.
-        if (!asset.video_url.empty())
-          group.assets.push_back(asset);
       }
+      // add the new group regardless of it there are assets present
+      // player will skip over this group if there are no assets.
+      mediaPlayList.groups.push_back(group);
     }
-    mediaPlayList.groups.push_back(group);
   }
 
   return false;

@@ -264,6 +264,7 @@ typedef struct NWMediaPlaylist {
   std::string type;
   int max_rez;
   CDateTime updated_date;
+  std::vector<int> play_order;
   std::vector<NWGroup> groups;
 } NWMediaPlaylist;
 
