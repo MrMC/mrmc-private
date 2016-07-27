@@ -65,6 +65,7 @@ CGUIWindowMN::CGUIWindowMN()
 , m_AboutUp(false)
 , m_testServersPopup(false)
 , m_PlayerManager(NULL)
+, m_MediaPlayList(*new NWMediaPlaylist)
 {
   Create();
   m_loadType = KEEP_IN_MEMORY;
@@ -174,8 +175,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       OnMessage(msg);
       
       //fill in on demand window here
-      MNCategory hack;
-      CGUIWindowMNDemand::SetDialogMNCategory(hack);
+      CGUIWindowMNDemand::SetDialogMNPlaylist(m_MediaPlayList);
       g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
       return true;
     }
@@ -260,8 +260,7 @@ void CGUIWindowMN::OnInitWindow()
   playlistItems.apiSecret = activate.apiSecret;
   TVAPI_GetPlaylistItems(playlistItems, machine.playlist_id);
 
-  NWMediaPlaylist mediaPlayList;
-  TVAPI_CreateMediaPlaylist(mediaPlayList, playlist, playlistItems);
+  TVAPI_CreateMediaPlaylist(m_MediaPlayList, playlist, playlistItems);
 
   CGUIWindow::OnInitWindow();
 }

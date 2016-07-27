@@ -416,6 +416,7 @@ bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
 {
   // convert server structures to player structure
 
+  mediaPlayList = *new NWMediaPlaylist;
   mediaPlayList.id = std::stoi(playlist.id);
   mediaPlayList.name = playlist.name;
   mediaPlayList.type = playlist.type;

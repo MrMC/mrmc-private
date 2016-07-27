@@ -25,6 +25,7 @@
 #include "cores/IPlayerCallback.h"
 #include "guilib/GUIWindow.h"
 #include "MNMedia.h"
+#include "NWTVAPI.h"
 
 class  CPlayerManagerMN;
 struct MNMediaAsset;
@@ -43,8 +44,8 @@ public:
   static  void  SetInfo(PlayerSettings *playerInfo, const float version);
   void          SetControlLabel(int id, const char *format, int info);
   static  CGUIWindowMNDemand* GetDialogMNDemand();
-  static void   GetDialogMNCategory(MNCategory &category);
-  static void   SetDialogMNCategory(const MNCategory &category);
+  static void   GetDialogMNPlaylist(NWMediaPlaylist &mediaPlayList);
+  static void   SetDialogMNPlaylist(const NWMediaPlaylist mediaPlayList);
 
 
 protected:
@@ -53,4 +54,6 @@ protected:
   static CGUIWindowMNDemand *m_MNDemand;
   static CCriticalSection m_PlayerInfo_lock;
   static MNCategory  m_OnDemand;
+  static NWMediaPlaylist m_MediaPlayList;
+  void SetCategoryItems(const int category);
 };

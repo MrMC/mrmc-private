@@ -25,6 +25,7 @@
 #include "cores/IPlayerCallback.h"
 #include "guilib/GUIWindow.h"
 #include "MNMedia.h"
+#include "NWTVAPI.h"
 #include "threads/Thread.h"
 
 class  CPlayerManagerMN;
@@ -60,4 +61,5 @@ protected:
   bool          m_testServersPopup;
   bool          m_testServers;
   CPlayerManagerMN *m_PlayerManager;
+  NWMediaPlaylist m_MediaPlayList;
 };
