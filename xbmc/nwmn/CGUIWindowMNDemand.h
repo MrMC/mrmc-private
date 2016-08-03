@@ -55,5 +55,5 @@ protected:
   static CCriticalSection m_PlayerInfo_lock;
   static MNCategory  m_OnDemand;
   static NWMediaPlaylist m_MediaPlayList;
-  void SetCategoryItems(const int category);
+  void SetCategoryItems();
 };

@@ -127,75 +127,23 @@ void CGUIWindowMNDemand::OnWindowUnload()
 
 void CGUIWindowMNDemand::SetInfo(PlayerSettings *playerInfo, const float version)
 {
-//  CSingleLock lock(m_PlayerInfo_lock);
   m_PlayerInfo = playerInfo;
   m_Version    = version;
 }
 
 void CGUIWindowMNDemand::FillAssets()
 {
-  if (1)
+  SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_CATEGORY_LIST);
+  CFileItemList stackItems;
+  for (size_t i = 0; i < m_MediaPlayList.groups.size(); i++)
   {
-    SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_CATEGORY_LIST);
-    CFileItemList stackItems;
-    for (size_t i = 0; i < m_MediaPlayList.groups.size(); i++)
-    {
-      CFileItemPtr pItem = CFileItemPtr(new CFileItem(m_MediaPlayList.groups[i].name));
-//      pItem->SetPath(m_OnDemand.items[i].video_url.c_str());
-//      pItem->SetArt("thumb", m_OnDemand.items[i].thumb_localpath);
-//      pItem->GetVideoInfoTag()->m_strPath = pItem->GetPath();
-//      pItem->GetVideoInfoTag()->m_strTitle = pItem->GetLabel();
-      stackItems.Add(pItem);
-    }
-    CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_CATEGORY_LIST, 0, 0, &stackItems);
-    OnMessage(msg);
+    CFileItemPtr pItem = CFileItemPtr(new CFileItem(m_MediaPlayList.groups[i].name));
+    stackItems.Add(pItem);
   }
-  else
-  {
-    /// hack to display both lists, needs to be removed
-    SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_CATEGORY_LIST);
-    CFileItemList stackItems;
-    for (int i = 0; i < 20; i++)
-    {
-      std::string label = StringUtils::Format("test Category %i", i);
-      CFileItemPtr pItem = CFileItemPtr(new CFileItem(label));
-      pItem->SetPath("some path");
-      pItem->SetArt("thumb", "some thumb path");
-      pItem->GetVideoInfoTag()->m_strPath = pItem->GetPath();
-      pItem->GetVideoInfoTag()->m_strTitle = label;
-      stackItems.Add(pItem);
-    }
-    CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_CATEGORY_LIST, 0, 0, &stackItems);
-    OnMessage(msg);
-    
-    SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_ITEM_LIST);
-    CFileItemList fakeListItems;
-    for (int i = 0; i < 20; i++)
-    {
-      std::string label = StringUtils::Format("test Clip %i", i);
-      CFileItemPtr pItem = CFileItemPtr(new CFileItem(label));
-      pItem->SetPath("some path");
-      pItem->SetArt("thumb", "some thumb path");
-      pItem->GetVideoInfoTag()->m_strPath = pItem->GetPath();
-      pItem->GetVideoInfoTag()->m_strTitle = label;
-      pItem->GetVideoInfoTag()->m_duration = 3600; //seconds
-      fakeListItems.Add(pItem);
-    }
-    
-
-    CGUIMessage msg0(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_ITEM_LIST, 0, 0, &fakeListItems);
-    OnMessage(msg0);
-    //// ----------------- end of hack ----------------------
-  }
-
-  CGUIMessage msg1(GUI_MSG_SETFOCUS, GetID(), ONDEMAND_CATEGORY_LIST);
-  OnMessage(msg1);
-  
-  CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_CATEGORY_LIST);
+  CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_CATEGORY_LIST, 0, 0, &stackItems);
   OnMessage(msg);
-  
-  int item = msg.GetParam1();
-  SetCategoryItems(item);
+
+  SetCategoryItems();
 }
 
 void CGUIWindowMNDemand::SetControlLabel(int id, const char *format, int info)
@@ -218,13 +166,7 @@ bool CGUIWindowMNDemand::OnAction(const CAction& action)
   else if (GetFocusedControlID() == ONDEMAND_CATEGORY_LIST)
   {
     bool ret = CGUIWindow::OnAction(action);
-    
-    CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_CATEGORY_LIST);
-    OnMessage(msg);
-    
-    int item = msg.GetParam1();
-    SetCategoryItems(item);
-    
+    SetCategoryItems();
     return ret;
   }
   return CGUIWindow::OnAction(action);
@@ -245,8 +187,13 @@ void CGUIWindowMNDemand::SetDialogMNPlaylist(const NWMediaPlaylist mediaPlayList
   m_MediaPlayList = mediaPlayList;
 }
 
-void CGUIWindowMNDemand::SetCategoryItems(const int category)
+void CGUIWindowMNDemand::SetCategoryItems()
 {
+  CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_CATEGORY_LIST);
+  OnMessage(msg);
+  
+  int category = msg.GetParam1();
+  
   SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_ITEM_LIST);
   CFileItemList ListItems;
   NWGroup group = m_MediaPlayList.groups[category];
@@ -266,10 +213,8 @@ void CGUIWindowMNDemand::SetCategoryItems(const int category)
     pItem->SetArt("thumb", thumb);
     pItem->GetVideoInfoTag()->m_strPath = pItem->GetPath();
     pItem->GetVideoInfoTag()->m_strTitle = asset.name;
-    //          pItem->GetVideoInfoTag()->m_duration = 3600; //seconds
     ListItems.Add(pItem);
   }
-  CGUIMessage msg0(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_ITEM_LIST, 0, 0, &ListItems);
-  OnMessage(msg0);
-
+  CGUIMessage msg1(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_ITEM_LIST, 0, 0, &ListItems);
+  OnMessage(msg1);
 }
