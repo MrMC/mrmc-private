@@ -382,17 +382,20 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
           CVariant fileobj = it->second;
           if (fileobj.isObject())
           {
-            NWPlaylistFile file;
-            file.rez = it->first;
-            file.path = fileobj["path"].asString();
-            file.size = fileobj["size"].asString();
-            file.width = fileobj["width"].asString();
-            file.height = fileobj["height"].asString();
-            file.etag = fileobj["etag"].asString();
-            file.mime_type = fileobj["mime_type"].asString();
-            file.created_date = fileobj["created_date"].asString();
-            file.updated_date = fileobj["updated_date"].asString();
-            item.files.push_back(file);
+            if (it->first == "720" || it->first == "1080" || it->first == "4k")
+            {
+              NWPlaylistFile file;
+              file.rez = it->first;
+              file.path = fileobj["path"].asString();
+              file.size = fileobj["size"].asString();
+              file.width = fileobj["width"].asString();
+              file.height = fileobj["height"].asString();
+              file.etag = fileobj["etag"].asString();
+              file.mime_type = fileobj["mime_type"].asString();
+              file.created_date = fileobj["created_date"].asString();
+              file.updated_date = fileobj["updated_date"].asString();
+              item.files.push_back(file);
+            }
           }
         }
         // sort from low rez to high rez
