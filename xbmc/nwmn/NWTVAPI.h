@@ -193,7 +193,7 @@ typedef struct NWPlaylist {
 
 // ---------------------------------------------
 typedef struct NWPlaylistFile {
-  std::string rez;
+  std::string type;
   std::string path;
   std::string size;
   std::string width;
@@ -217,6 +217,8 @@ typedef struct NWPlaylistItem {
   std::string download;
   std::string availability_to;
   std::string availability_from;
+  NWPlaylistFile thumb;
+  NWPlaylistFile poster;
   std::vector<NWPlaylistFile> files;
 } NWPlaylistItem;
 

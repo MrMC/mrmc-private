@@ -385,7 +385,7 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
             if (it->first == "720" || it->first == "1080" || it->first == "4k")
             {
               NWPlaylistFile file;
-              file.rez = it->first;
+              file.type = it->first;
               file.path = fileobj["path"].asString();
               file.size = fileobj["size"].asString();
               file.width = fileobj["width"].asString();
@@ -402,8 +402,45 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
         std::sort(item.files.begin(), item.files.end(),
           [] (NWPlaylistFile const& a, NWPlaylistFile const& b)
           {
-            return std::stoi(a.rez) < std::stoi(b.rez);
+            return std::stoi(a.type) < std::stoi(b.type);
           });
+
+        // now find the 'thumb'
+        for (CVariant::const_iterator_map it = files.begin_map(); it != files.end_map(); ++it)
+        {
+          CVariant fileobj = it->second;
+          if (fileobj.isObject() && it->first == "thumb")
+          {
+            item.thumb.type = it->first;
+            item.thumb.path = fileobj["path"].asString();
+            item.thumb.size = fileobj["size"].asString();
+            item.thumb.width = fileobj["width"].asString();
+            item.thumb.height = fileobj["height"].asString();
+            item.thumb.etag = fileobj["etag"].asString();
+            item.thumb.mime_type = fileobj["mime_type"].asString();
+            item.thumb.created_date = fileobj["created_date"].asString();
+            item.thumb.updated_date = fileobj["updated_date"].asString();
+          }
+        }
+
+        // and find the 'poster'
+        for (CVariant::const_iterator_map it = files.begin_map(); it != files.end_map(); ++it)
+        {
+          CVariant fileobj = it->second;
+          if (fileobj.isObject() && it->first == "thumb")
+          {
+            item.poster.type = it->first;
+            item.poster.path = fileobj["path"].asString();
+            item.poster.size = fileobj["size"].asString();
+            item.poster.width = fileobj["width"].asString();
+            item.poster.height = fileobj["height"].asString();
+            item.poster.etag = fileobj["etag"].asString();
+            item.poster.mime_type = fileobj["mime_type"].asString();
+            item.poster.created_date = fileobj["created_date"].asString();
+            item.poster.updated_date = fileobj["updated_date"].asString();
+          }
+        }
+
       }
       playlistItems.items.push_back(item);
     }
@@ -463,16 +500,13 @@ bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
           {
             // item.files is pre-sorted low to high rez
             // take anything up to max rez, never take higher than max_rez
-            if (std::stoi(file.rez) <= mediaPlayList.max_rez)
+            if (std::stoi(file.type) <= mediaPlayList.max_rez)
             {
               asset.id = std::stoi(item.id);
-              asset.rez = std::stoi(file.rez);
+              asset.rez = std::stoi(file.type);
               asset.video_url = file.path;
               asset.video_md5 = file.etag;
               asset.video_size = std::stoi(file.size);
-              //asset.thumb_url;
-              //asset.thumb_md5;
-              //asset.thumb_size;
               // format is "2013-02-27 01:00:00"
               asset.available_to.SetFromDBDateTime(item.availability_to);
               asset.available_from.SetFromDBDateTime(item.availability_from);
@@ -480,7 +514,14 @@ bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
           }
           // if we got an complete asset, save it.
           if (!asset.video_url.empty())
+          {
+            // bring over thumb references
+            asset.thumb_url = item.thumb.path;
+            asset.thumb_md5 = item.thumb.etag;
+            asset.thumb_size = std::stoi(item.thumb.size);
+
             group.assets.push_back(asset);
+          }
         }
       }
       // add the new group regardless of it there are assets present
