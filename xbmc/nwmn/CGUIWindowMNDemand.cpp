@@ -92,7 +92,7 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
 
         pItem->GetVideoInfoTag()->m_strTitle = asset.name;
         pItem->GetVideoInfoTag()->m_streamDetails.Reset();
-        CMediaSettings::GetInstance().SetVideoStartWindowed(false);
+        CMediaSettings::GetInstance().SetVideoStartWindowed(true);
         g_playlistPlayer.Add(PLAYLIST_VIDEO, pItem);
         g_playlistPlayer.SetRepeat(PLAYLIST_VIDEO, PLAYLIST::REPEAT_NONE, false);
         g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
@@ -101,11 +101,11 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
         return true;
       }
     }
-    case GUI_MSG_WINDOW_DEINIT:
-    {
-      CGUIWindow::OnMessage(message);
-      return true;
-    }
+//    case GUI_MSG_WINDOW_DEINIT:
+//    {
+//      CGUIWindow::OnMessage(message);
+//      return true;
+//    }
     case GUI_MSG_WINDOW_INIT:
     {
       CGUIWindow::OnMessage(message);
@@ -190,6 +190,12 @@ void CGUIWindowMNDemand::FillAssets()
 
   CGUIMessage msg1(GUI_MSG_SETFOCUS, GetID(), ONDEMAND_CATEGORY_LIST);
   OnMessage(msg1);
+  
+  CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_CATEGORY_LIST);
+  OnMessage(msg);
+  
+  int item = msg.GetParam1();
+  SetCategoryItems(item);
 }
 
 void CGUIWindowMNDemand::SetControlLabel(int id, const char *format, int info)
@@ -200,8 +206,6 @@ void CGUIWindowMNDemand::SetControlLabel(int id, const char *format, int info)
 
 bool CGUIWindowMNDemand::OnAction(const CAction& action)
 {
-  bool ret = CGUIWindow::OnAction(action);
-  
   if (action.GetID() == ACTION_PREVIOUS_MENU ||
       action.GetID() == ACTION_NAV_BACK)
   {
@@ -213,15 +217,17 @@ bool CGUIWindowMNDemand::OnAction(const CAction& action)
   }
   else if (GetFocusedControlID() == ONDEMAND_CATEGORY_LIST)
   {
+    bool ret = CGUIWindow::OnAction(action);
+    
     CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_CATEGORY_LIST);
     OnMessage(msg);
     
     int item = msg.GetParam1();
     SetCategoryItems(item);
     
-    return true;
+    return ret;
   }
-  return ret;
+  return CGUIWindow::OnAction(action);
 }
 
 CGUIWindowMNDemand* CGUIWindowMNDemand::GetDialogMNDemand()
