@@ -183,9 +183,9 @@ void CGUIWindowMNDemand::SetCategoryItems()
 {
   CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND_CATEGORY_LIST);
   OnMessage(msg);
-  
+
   int category = msg.GetParam1();
-  
+
   SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_ITEM_LIST);
   CFileItemList ListItems;
   NWGroup group = m_GroupPlayList.groups[category];
@@ -193,14 +193,15 @@ void CGUIWindowMNDemand::SetCategoryItems()
   {
     NWAsset asset = group.assets[i];
     CFileItemPtr pItem = CFileItemPtr(new CFileItem(asset.name));
+
     std::string path = asset.video_localpath;
-    if(path.empty())
+    if(!asset.valid || path.empty())
       path = asset.video_url;
-    
+
     std::string thumb = asset.thumb_localpath;
-    if(thumb.empty())
+    if(!asset.valid || thumb.empty())
       thumb = asset.thumb_url;
-    
+
     pItem->SetPath(path);
     pItem->SetArt("thumb", thumb);
     pItem->GetVideoInfoTag()->m_strPath = pItem->GetPath();

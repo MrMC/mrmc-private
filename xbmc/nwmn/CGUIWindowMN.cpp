@@ -127,9 +127,8 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       if (!m_RefreshRunning)
       {
         m_RefreshRunning = true;
-        CNWClient* client = CNWClient::GetClient();
-        if (client)
-          client->PlayNext();
+        if (m_client)
+          m_client->PlayNext();
       }
       return true;
     }
@@ -254,9 +253,6 @@ void CGUIWindowMN::OnWindowUnload()
 void CGUIWindowMN::Refresh()
 {
   CLog::Log(LOGDEBUG, "**NW** - CGUIWindowMN::Refresh()");
-  CNWClient* client = CNWClient::GetClient();
-  if (client)
-    client->Startup();
 }
 
 void CGUIWindowMN::OnStartup()
