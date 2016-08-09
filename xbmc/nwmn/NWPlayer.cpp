@@ -234,12 +234,16 @@ void CNWPlayer::Process()
 
               CMediaSettings::GetInstance().SetVideoStartWindowed(true);
 
-              g_playlistPlayer.Add(PLAYLIST_VIDEO, item);
-              g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
+              auto fileItemList = new CFileItemList();
+              fileItemList->Add(item);
+              CApplicationMessenger::GetInstance().SendMsg(TMSG_PLAYLISTPLAYER_ADD, PLAYLIST_VIDEO, -1, static_cast<void*>(fileItemList));
 
               // play!
               if (g_playlistPlayer.GetPlaylist(PLAYLIST_VIDEO).size() == 1)
+              {
+                g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
                 CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_PLAY, 0);
+              }
 
               if (m_PlayerCallBackFn)
                 (*m_PlayerCallBackFn)(m_PlayerCallBackCtx, 0, asset);

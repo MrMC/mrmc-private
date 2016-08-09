@@ -124,7 +124,6 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), PLAYLIST);
       OnMessage(msg);
-
       if (!m_RefreshRunning)
       {
         m_RefreshRunning = true;
@@ -132,7 +131,6 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
         if (client)
           client->PlayNext();
       }
-
       return true;
     }
     else if (iControl == MEDIAUPDATE)
@@ -146,9 +144,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), NETWORKTEST);
       OnMessage(msg);
-      
       m_testServers = true;
-      
       return true;
     }
     else if (iControl == SETVERTICAL)
@@ -158,7 +154,6 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       CSettings::GetInstance().SetBool(CSettings::MN_VERTICAL, true);
       CSettings::GetInstance().Save();
       SET_CONTROL_FOCUS(SETHORIZONTAL,0);
-      
       return true;
     }
     else if (iControl == SETHORIZONTAL)
@@ -168,7 +163,6 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       CSettings::GetInstance().SetBool(CSettings::MN_VERTICAL, false);
       CSettings::GetInstance().Save();
       SET_CONTROL_FOCUS(SETVERTICAL,0);
-      
       return true;
     }
     else if (iControl == ONDEMAND)
@@ -179,8 +173,11 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       //fill in on demand window here
       NWGroupPlaylist groupPlayList;
       m_client->GetProgamInfo(groupPlayList);
-      CGUIWindowMNDemand::SetDialogMNPlaylist(groupPlayList);
-      g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
+      if (!groupPlayList.groups.empty())
+      {
+        CGUIWindowMNDemand::SetDialogMNPlaylist(groupPlayList);
+        g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
+      }
       return true;
     }
     
