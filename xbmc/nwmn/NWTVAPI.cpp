@@ -385,7 +385,7 @@ bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string play
           CVariant fileobj = it->second;
           if (fileobj.isObject())
           {
-            if (it->first == "720" || it->first == "1080" || it->first == "4k")
+            if (it->first == "720" || it->first == "1080" || it->first == "4K")
             {
               TVAPI_PlaylistFile file;
               file.type = it->first;

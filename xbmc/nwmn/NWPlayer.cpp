@@ -49,6 +49,7 @@ CNWPlayer::CNWPlayer()
 CNWPlayer::~CNWPlayer()
 {
   m_PlayerCallBackFn = NULL;
+  m_bStop = true;
   StopThread();
   Reset();
 }
@@ -58,16 +59,14 @@ void CNWPlayer::Reset()
   CSingleLock lock(m_media_lock);
   StopPlaying();
   m_playlist = NWGroupPlaylist();
-  g_playlistPlayer.Clear();
-  g_playlistPlayer.Reset();
+  CApplicationMessenger::GetInstance().SendMsg(TMSG_PLAYLISTPLAYER_CLEAR, PLAYLIST_VIDEO);
 }
 
 void CNWPlayer::Play()
 {
   CSingleLock lock(m_player_lock);
   CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::Play() playback enabled");
-  g_playlistPlayer.Clear();
-  g_playlistPlayer.Reset();
+  CApplicationMessenger::GetInstance().SendMsg(TMSG_PLAYLISTPLAYER_CLEAR, PLAYLIST_VIDEO);
   m_playing = true;
 }
 
@@ -76,13 +75,13 @@ void CNWPlayer::PlayPause()
   // PlayPause is a toggle (play or unpause)/pause.
   CSingleLock lock(m_player_lock);
   if (g_application.m_pPlayer->IsPaused())
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_UNPAUSE);
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_UNPAUSE);
   else
   {
     if (!m_playing)
       m_playing = true;
     else
-      CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE);
+      CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PAUSE);
   }
 }
 
@@ -93,7 +92,7 @@ void CNWPlayer::PlayNext()
   // doing the StopPlaying on player will cause
   // next pass in Process to sequence to next.
   if (m_playing)
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_STOP);
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP);
   else
     m_playing = true;
 
@@ -105,7 +104,7 @@ void CNWPlayer::Pause()
 {
   // Pause is a toggle, pause/unpause
   CSingleLock lock(m_player_lock);
-  CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE);
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PAUSE);
 }
 
 bool CNWPlayer::IsPlaying()
@@ -118,7 +117,7 @@ void CNWPlayer::StopPlaying()
 {
   CSingleLock lock(m_player_lock);
   m_playing = false;
-  CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_STOP);
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP);
 }
 
 void CNWPlayer::OverridePlayBackWindow(bool override)
@@ -209,7 +208,7 @@ void CNWPlayer::Process()
           // check if we already have handled this group
           auto group = std::find_if(m_playlist.groups.begin(), m_playlist.groups.end(),
             [groupID](const NWGroup &existingGroup) { return existingGroup.id == groupID; });
-          if (group != m_playlist.groups.end())
+          if (group != m_playlist.groups.end() && !group->assets.empty())
           {
             NWAsset asset = group->assets.front();
             group->assets.erase(group->assets.begin());

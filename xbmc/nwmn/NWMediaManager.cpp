@@ -35,7 +35,7 @@ CNWMediaManager::CNWMediaManager()
 CNWMediaManager::~CNWMediaManager()
 {
   m_AssetUpdateCallBackFn = NULL;
-  m_bStop = false;
+  m_bStop = true;
   m_http.Cancel();
   StopThread();
 }

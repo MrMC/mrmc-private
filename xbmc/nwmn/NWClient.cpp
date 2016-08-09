@@ -73,8 +73,19 @@ CNWClient::CNWClient()
   CLog::Log(LOGDEBUG, "**NW** - NW version %f", kTVAPI_PlayerFloatVersion);
 
   // hardcode for now
-  m_activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
-  m_activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
+  //m_activate.code = "GR7IDTYXOF";
+  m_activate.code = "HPPALSRK/A";
+  
+  m_activate.application_id = StringUtils::CreateUUID();
+  //m_activate.application_id = "137e4e4a-2224-49c9-b8f1-f833cec4a3a3";
+ // if (!TVAPI_DoActivate(m_activate))
+  {
+    //m_activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
+    //m_activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
+    m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
+    m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
+    
+  }
 
   m_status.apiKey = m_activate.apiKey;
   m_status.apiSecret = m_activate.apiSecret;
@@ -152,9 +163,10 @@ CNWClient::~CNWClient()
   CSingleLock lock(m_playerLock);
   m_this = NULL;
   m_ClientCallBackFn = NULL;
+  m_bStop = true;
   StopThread();
 
-  SendPlayerStatus(kTVAPI_Status_On);
+  SendPlayerStatus(kTVAPI_Status_Off);
 
   //CGUIDialogRedAbout* about = CGUIDialogRedAbout::GetDialogRedAbout();
   //about->SetInfo(NULL, kTVAPI_PlayerFloatVersion);

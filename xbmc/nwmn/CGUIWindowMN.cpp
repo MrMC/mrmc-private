@@ -205,12 +205,12 @@ bool CGUIWindowMN::OnAction(const CAction &action)
       m_AboutUp = false;
       return true;
     }
-    
+
     if (m_testServersPopup)
     {
       SET_CONTROL_HIDDEN(PINGDIALOG);
       m_testServersPopup = false;
-      return true;
+      //return true;
     }
     
     if (g_application.m_pPlayer->IsPlaying())
@@ -230,11 +230,13 @@ void CGUIWindowMN::OnInitWindow()
 {
   // below needs to be called once we run the update, it disables buttons in skin
   //DisableButtonsOnRefresh(true)
-  
-  m_client = new CNWClient();
-  m_client->RegisterClientCallBack(this, ClientCallBack);
-  m_client->RegisterPlayerCallBack(this, PlayerCallBack);
-  m_client->Startup();
+  if (!m_client)
+  {
+    m_client = new CNWClient();
+    m_client->RegisterClientCallBack(this, ClientCallBack);
+    m_client->RegisterPlayerCallBack(this, PlayerCallBack);
+    m_client->Startup();
+  }
 
   CGUIWindow::OnInitWindow();
 }
