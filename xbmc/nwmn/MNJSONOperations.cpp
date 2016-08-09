@@ -18,6 +18,9 @@
  */
 
 #include "MNJSONOperations.h"
+
+#include "NWClient.h"
+
 #include "utils/Variant.h"
 #include "interfaces/json-rpc/JSONRPCUtils.h"
 #include "utils/JSONVariantWriter.h"
@@ -26,7 +29,6 @@
 #include "filesystem/File.h"
 #include "utils/log.h"
 #include "settings/Settings.h"
-#include "PlayerManagerMN.h"
 #include "dialogs/GUIDialogKaiToast.h"
 
 using namespace JSONRPC;
@@ -102,9 +104,9 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
                                           "MemberNet",
                                           "Player details updated",
                                           TOAST_DISPLAY_TIME, false);
-    CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
-    if (MNPlayerManager)
-      MNPlayerManager->Startup();
+    CNWClient* client = CNWClient::GetClient();
+    if (client)
+      client->Startup();
     
   }
   return OK;

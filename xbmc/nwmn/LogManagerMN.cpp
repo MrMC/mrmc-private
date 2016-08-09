@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2015 Team MN
+ *  Copyright (C) 2016 RootCoder, LLC.
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -12,14 +12,14 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MrMC; see the file COPYING.  If not, see
+ *  along with this app; see the file COPYING.  If not, see
  *  <http://www.gnu.org/licenses/>.
  *
  */
 
 #include "nwmn/LogManagerMN.h"
 
-#include "nwmn/MNMedia.h"
+#include "nwmn/NWClient.h"
 #include "nwmn/UtilitiesMN.h"
 
 #include "URL.h"
@@ -50,7 +50,7 @@ void CLogManagerMN::TriggerLogUpload()
   m_wait_event.Set();
 }
 
-void CLogManagerMN::LogPlayback(PlayerSettings settings, std::string assetID)
+void CLogManagerMN::LogPlayback(NWPlayerSettings settings, std::string assetID)
 {
 //  date,assetID
 //  2015-02-05 12:01:40-0500,58350
@@ -89,7 +89,7 @@ void CLogManagerMN::LogPlayback(PlayerSettings settings, std::string assetID)
   file.Close();
 }
 
-void CLogManagerMN::LogSettings(PlayerSettings settings)
+void CLogManagerMN::LogSettings(NWPlayerSettings settings)
 {
   //  date,uptime,disk-used,disk-free,smart-status
   //  2015-03-04 18:08:21+0400,11 days 2 hours 12 minutes,118GB,24GB,Disks OK
@@ -132,6 +132,7 @@ void CLogManagerMN::LogSettings(PlayerSettings settings)
 
 void CLogManagerMN::Process()
 {
+  SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
   CLog::Log(LOGDEBUG, "**MN** - CLogManagerMN::Process Started");
 
   while (!m_bStop)
@@ -143,7 +144,7 @@ void CLogManagerMN::Process()
       CFileItemList items;
       CDateTime time = CDateTime::GetCurrentDateTime();
       std::string datefilter = time.GetAsDBDate();
-      std::string srcLogPath = m_strHome + kMNDownloadLogPath;
+      std::string srcLogPath = m_strHome + kTVAPI_DownloadLogPath;
       XFILE::CDirectory::GetDirectory(srcLogPath, items, ".log", XFILE::DIR_FLAG_NO_FILE_DIRS);
       for (int i = 0; i < items.Size(); ++i)
       {

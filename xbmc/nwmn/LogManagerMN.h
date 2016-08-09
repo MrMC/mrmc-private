@@ -1,6 +1,6 @@
 #pragma once
 /*
- *  Copyright (C) 2015 Team MN
+ *  Copyright (C) 2016 RootCoder, LLC.
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MrMC; see the file COPYING.  If not, see
+ *  along with this app; see the file COPYING.  If not, see
  *  <http://www.gnu.org/licenses/>.
  *
  */
@@ -21,7 +21,7 @@
 #include <string>
 #include "threads/Thread.h"
 
-struct PlayerSettings;
+struct NWPlayerSettings;
 
 class CLogManagerMN : public CThread
 {
@@ -30,8 +30,8 @@ public:
   virtual ~CLogManagerMN();
 
   void TriggerLogUpload();
-  void LogPlayback(PlayerSettings settings, std::string assetID);
-  void LogSettings(PlayerSettings settings);
+  void LogPlayback(NWPlayerSettings settings, std::string assetID);
+  void LogSettings(NWPlayerSettings settings);
 
 protected:
   virtual void  Process();

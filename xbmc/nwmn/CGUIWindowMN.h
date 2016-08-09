@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *  Copyright (C) 2014 Team MN
+ *  Copyright (C) 2016 RootCoder, LLC.
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MrMC; see the file COPYING.  If not, see
+ *  along with this app; see the file COPYING.  If not, see
  *  <http://www.gnu.org/licenses/>.
  *
  */
@@ -24,11 +24,10 @@
 
 #include "cores/IPlayerCallback.h"
 #include "guilib/GUIWindow.h"
-#include "MNMedia.h"
 #include "NWTVAPI.h"
 #include "threads/Thread.h"
 
-class  CPlayerManagerMN;
+class  CNWClient;
 struct MNMediaAsset;
 
 class CGUIWindowMN : public CGUIWindow, public CThread
@@ -48,8 +47,8 @@ public:
 
 protected:
   virtual void  Process(unsigned int currentTime, CDirtyRegionList &dirtyregions);
-  static  void  PlayerCallBack(const void *ctx, bool status);
-  static  void  PlaybackCallBack(const void *ctx, int msg, MNMediaAsset &asset);
+  static  void  ClientCallBack(const void *ctx, bool status);
+  static  void  PlayerCallBack(const void *ctx, int msg, struct NWAsset &asset);
   virtual bool  OnAction(const CAction &action);
   virtual void  Process();
   virtual void  OnStartup();
@@ -60,6 +59,5 @@ protected:
   bool          m_AboutUp;
   bool          m_testServersPopup;
   bool          m_testServers;
-  CPlayerManagerMN *m_PlayerManager;
-  NWMediaPlaylist m_MediaPlayList;
+  CNWClient    *m_client;
 };

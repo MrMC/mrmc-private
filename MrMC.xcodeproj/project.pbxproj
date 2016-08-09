@@ -21,12 +21,6 @@
 		183588E81CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */; };
 		183588E91CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */; };
 		183588EA1CB76FC900D84C73 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */; };
-		183588EB1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */; };
-		183588EC1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */; };
-		183588ED1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */; };
-		183588EE1CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */; };
-		183588EF1CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */; };
-		183588F01CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */; };
 		183588F11CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */; };
 		183588F21CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */; };
 		183588F31CB76FC900D84C73 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */; };
@@ -2166,6 +2160,15 @@
 		F5CC390E1D469279005402C7 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC390C1D469279005402C7 /* NWTVAPI.cpp */; };
 		F5CC390F1D469279005402C7 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC390C1D469279005402C7 /* NWTVAPI.cpp */; };
 		F5CC39101D469279005402C7 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC390C1D469279005402C7 /* NWTVAPI.cpp */; };
+		F5CC39131D55042D005402C7 /* NWClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC39111D55042D005402C7 /* NWClient.cpp */; };
+		F5CC39141D55042D005402C7 /* NWClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC39111D55042D005402C7 /* NWClient.cpp */; };
+		F5CC39151D55042D005402C7 /* NWClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC39111D55042D005402C7 /* NWClient.cpp */; };
+		F5CC39181D550439005402C7 /* NWMediaManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC39161D550439005402C7 /* NWMediaManager.cpp */; };
+		F5CC39191D550439005402C7 /* NWMediaManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC39161D550439005402C7 /* NWMediaManager.cpp */; };
+		F5CC391A1D550439005402C7 /* NWMediaManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC39161D550439005402C7 /* NWMediaManager.cpp */; };
+		F5CC391D1D550444005402C7 /* NWPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC391B1D550444005402C7 /* NWPlayer.cpp */; };
+		F5CC391E1D550444005402C7 /* NWPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC391B1D550444005402C7 /* NWPlayer.cpp */; };
+		F5CC391F1D550444005402C7 /* NWPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CC391B1D550444005402C7 /* NWPlayer.cpp */; };
 		F5CEE60913D3C89700225F72 /* DVDOverlayCodecTX3G.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5CEE60713D3C89700225F72 /* DVDOverlayCodecTX3G.cpp */; };
 		F5D0E1151BA667600070EE9C /* MCRuntimeLibContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045931BA3D75000DB589A /* MCRuntimeLibContext.cpp */; };
 		F5D0E1161BA667650070EE9C /* MCRuntimeLibStartupLogger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F59045901BA375B100DB589A /* MCRuntimeLibStartupLogger.cpp */; };
@@ -3145,11 +3148,6 @@
 		183588D11CB76FC900D84C73 /* LogManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogManagerMN.h; sourceTree = "<group>"; };
 		183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNJSONOperations.cpp; sourceTree = "<group>"; };
 		183588D41CB76FC900D84C73 /* MNJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNJSONOperations.h; sourceTree = "<group>"; };
-		183588D51CB76FC900D84C73 /* MNMedia.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNMedia.h; sourceTree = "<group>"; };
-		183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlayerManagerMN.cpp; sourceTree = "<group>"; };
-		183588D71CB76FC900D84C73 /* PlayerManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayerManagerMN.h; sourceTree = "<group>"; };
-		183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UpdateManagerMN.cpp; sourceTree = "<group>"; };
-		183588D91CB76FC900D84C73 /* UpdateManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateManagerMN.h; sourceTree = "<group>"; };
 		183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UtilitiesMN.cpp; sourceTree = "<group>"; };
 		183588DB1CB76FC900D84C73 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UtilitiesMN.h; sourceTree = "<group>"; };
 		183CB23A1C0B4C5A004218C2 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -5509,6 +5507,12 @@
 		F5CC234618150277006B5E91 /* AESinkNULL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AESinkNULL.h; path = Sinks/AESinkNULL.h; sourceTree = "<group>"; };
 		F5CC390C1D469279005402C7 /* NWTVAPI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWTVAPI.cpp; sourceTree = "<group>"; };
 		F5CC390D1D469279005402C7 /* NWTVAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWTVAPI.h; sourceTree = "<group>"; };
+		F5CC39111D55042D005402C7 /* NWClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWClient.cpp; sourceTree = "<group>"; };
+		F5CC39121D55042D005402C7 /* NWClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWClient.h; sourceTree = "<group>"; };
+		F5CC39161D550439005402C7 /* NWMediaManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWMediaManager.cpp; sourceTree = "<group>"; };
+		F5CC39171D550439005402C7 /* NWMediaManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWMediaManager.h; sourceTree = "<group>"; };
+		F5CC391B1D550444005402C7 /* NWPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWPlayer.cpp; sourceTree = "<group>"; };
+		F5CC391C1D550444005402C7 /* NWPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWPlayer.h; sourceTree = "<group>"; };
 		F5CEE60713D3C89700225F72 /* DVDOverlayCodecTX3G.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DVDOverlayCodecTX3G.cpp; sourceTree = "<group>"; };
 		F5CEE60813D3C89700225F72 /* DVDOverlayCodecTX3G.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDOverlayCodecTX3G.h; sourceTree = "<group>"; };
 		F5D0E1171BA88FCC0070EE9C /* cocoa_monitor.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = cocoa_monitor.mm; sourceTree = "<group>"; };
@@ -5723,13 +5727,14 @@
 				183588D11CB76FC900D84C73 /* LogManagerMN.h */,
 				183588D31CB76FC900D84C73 /* MNJSONOperations.cpp */,
 				183588D41CB76FC900D84C73 /* MNJSONOperations.h */,
-				183588D51CB76FC900D84C73 /* MNMedia.h */,
 				F5CC390C1D469279005402C7 /* NWTVAPI.cpp */,
 				F5CC390D1D469279005402C7 /* NWTVAPI.h */,
-				183588D61CB76FC900D84C73 /* PlayerManagerMN.cpp */,
-				183588D71CB76FC900D84C73 /* PlayerManagerMN.h */,
-				183588D81CB76FC900D84C73 /* UpdateManagerMN.cpp */,
-				183588D91CB76FC900D84C73 /* UpdateManagerMN.h */,
+				F5CC39111D55042D005402C7 /* NWClient.cpp */,
+				F5CC39121D55042D005402C7 /* NWClient.h */,
+				F5CC391B1D550444005402C7 /* NWPlayer.cpp */,
+				F5CC391C1D550444005402C7 /* NWPlayer.h */,
+				F5CC39161D550439005402C7 /* NWMediaManager.cpp */,
+				F5CC39171D550439005402C7 /* NWMediaManager.h */,
 				183588DA1CB76FC900D84C73 /* UtilitiesMN.cpp */,
 				183588DB1CB76FC900D84C73 /* UtilitiesMN.h */,
 			);
@@ -10176,6 +10181,7 @@
 				E4DC97550FFE5BA8008E0C07 /* SAPFile.cpp in Sources */,
 				F5D8D732102BB3B1004A11AB /* OverlayRendererGL.cpp in Sources */,
 				F5D8D733102BB3B1004A11AB /* OverlayRenderer.cpp in Sources */,
+				F5CC39181D550439005402C7 /* NWMediaManager.cpp in Sources */,
 				E49ACD8C100745C400A86ECD /* ZeroconfDirectory.cpp in Sources */,
 				E49ACD9F10074A4000A86ECD /* ZeroconfBrowserOSX.cpp in Sources */,
 				DF6F52AE1AF6D03F001BC57D /* dacp.cpp in Sources */,
@@ -10409,7 +10415,6 @@
 				F558F25613ABCF7800631E12 /* WinEventsOSX.mm in Sources */,
 				F558F27B13ABD56600631E12 /* DirtyRegionSolvers.cpp in Sources */,
 				F558F27F13ABD57400631E12 /* DirtyRegionTracker.cpp in Sources */,
-				183588EE1CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */,
 				F59045781BA372A600DB589A /* CocoaInterface.mm in Sources */,
 				F558F29613ABD7DF00631E12 /* GUIWindowDebugInfo.cpp in Sources */,
 				DF0DF15C13A3ADA7008ED511 /* NFSDirectory.cpp in Sources */,
@@ -10554,11 +10559,13 @@
 				36A9444115821E7C00727135 /* SortUtils.cpp in Sources */,
 				F5B725251C7E150C006432AE /* unicode.cpp in Sources */,
 				1DE0443515828F4B005DDB4D /* Exception.cpp in Sources */,
+				F5CC391D1D550444005402C7 /* NWPlayer.cpp in Sources */,
 				7C1D682915A7D2FD00658B65 /* DatabaseManager.cpp in Sources */,
 				7C1A492315A962EE004AF4A4 /* SeekHandler.cpp in Sources */,
 				DF830D0C15BB260C00602BE6 /* GUIDialogKeyboardGeneric.cpp in Sources */,
 				DF830D1215BB262700602BE6 /* GUIKeyboardFactory.cpp in Sources */,
 				F5B725361C7E150C006432AE /* volume.cpp in Sources */,
+				F5CC39131D55042D005402C7 /* NWClient.cpp in Sources */,
 				36A9466315CF1FA600727135 /* DbUrl.cpp in Sources */,
 				3994427F1A8DD96F006C39E9 /* VideoLibraryQueue.cpp in Sources */,
 				36A9466715CF1FD200727135 /* MusicDbUrl.cpp in Sources */,
@@ -10783,7 +10790,6 @@
 				7CCDA7BE192756250074CF51 /* NptFile.cpp in Sources */,
 				F5B723361C7C9681006432AE /* ContextMenuItem.cpp in Sources */,
 				7CCDA7C7192756250074CF51 /* NptHash.cpp in Sources */,
-				183588EB1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */,
 				DF1D2DED1B6E85EE002BB9DB /* XbtDirectory.cpp in Sources */,
 				7CCDA7D0192756250074CF51 /* NptHttp.cpp in Sources */,
 				7CCDA7D9192756250074CF51 /* NptJson.cpp in Sources */,
@@ -10871,6 +10877,7 @@
 				E4991186174E5CE000741B6D /* GUIWindowAddonBrowser.cpp in Sources */,
 				E4991188174E5CE000741B6D /* Repository.cpp in Sources */,
 				E4991189174E5CE000741B6D /* Scraper.cpp in Sources */,
+				F5CC391E1D550444005402C7 /* NWPlayer.cpp in Sources */,
 				E499118A174E5CE000741B6D /* ScreenSaver.cpp in Sources */,
 				E499118B174E5CE000741B6D /* Service.cpp in Sources */,
 				E499118C174E5CE000741B6D /* Skin.cpp in Sources */,
@@ -11369,7 +11376,6 @@
 				E49913B5174E5F3700741B6D /* WebSocketV8.cpp in Sources */,
 				E49913B6174E5F3C00741B6D /* AirPlayServer.cpp in Sources */,
 				E49913B7174E5F3C00741B6D /* AirTunesServer.cpp in Sources */,
-				183588EC1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */,
 				E49913B9174E5F3C00741B6D /* DNSNameCache.cpp in Sources */,
 				E49913BA174E5F3C00741B6D /* EventClient.cpp in Sources */,
 				E49913BB174E5F3C00741B6D /* EventPacket.cpp in Sources */,
@@ -11595,7 +11601,9 @@
 				E4991489174E606500741B6D /* GUIDialogVideoOSD.cpp in Sources */,
 				E499148B174E606500741B6D /* GUIDialogVideoSettings.cpp in Sources */,
 				E499148C174E606500741B6D /* GUIWindowFullScreen.cpp in Sources */,
+				F5CC39141D55042D005402C7 /* NWClient.cpp in Sources */,
 				E499148D174E606500741B6D /* GUIWindowVideoBase.cpp in Sources */,
+				F5CC39191D550439005402C7 /* NWMediaManager.cpp in Sources */,
 				E499148E174E606500741B6D /* GUIWindowVideoNav.cpp in Sources */,
 				E499148F174E606600741B6D /* GUIWindowVideoPlaylist.cpp in Sources */,
 				E4991490174E606600741B6D /* Bookmark.cpp in Sources */,
@@ -11842,7 +11850,6 @@
 				7CCDAA83192756250074CF51 /* NptPosixDynamicLibraries.cpp in Sources */,
 				7CCDAA86192756250074CF51 /* NptPosixEnvironment.cpp in Sources */,
 				7CCDAA8C192756250074CF51 /* NptPosixNetwork.cpp in Sources */,
-				183588EF1CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */,
 				7CCDAA8F192756250074CF51 /* NptPosixQueue.cpp in Sources */,
 				7CCDAA98192756250074CF51 /* NptPosixSystem.cpp in Sources */,
 				7CCDAAA1192756250074CF51 /* NptPosixThreads.cpp in Sources */,
@@ -12277,7 +12284,6 @@
 				F5D140281BAF0B6D0075A95C /* GUIWrappingListContainer.cpp in Sources */,
 				F5D140291BAF0B6D0075A95C /* imagefactory.cpp in Sources */,
 				F5D1402A1BAF0B6D0075A95C /* IWindowManagerCallback.cpp in Sources */,
-				183588ED1CB76FC900D84C73 /* PlayerManagerMN.cpp in Sources */,
 				F5D1402B1BAF0B6D0075A95C /* JpegIO.cpp in Sources */,
 				F5D1402C1BAF0B6D0075A95C /* LocalizeStrings.cpp in Sources */,
 				F5D1402D1BAF0B6D0075A95C /* MatrixGLES.cpp in Sources */,
@@ -12635,6 +12641,7 @@
 				F5D1415C1BAF0B6D0075A95C /* GUIViewControl.cpp in Sources */,
 				F5D1415D1BAF0B6D0075A95C /* GUIViewState.cpp in Sources */,
 				F5D1415E1BAF0B6D0075A95C /* ViewDatabase.cpp in Sources */,
+				F5CC39151D55042D005402C7 /* NWClient.cpp in Sources */,
 				F5D1415F1BAF0B6D0075A95C /* ViewStateSettings.cpp in Sources */,
 				F5B723CF1C7C9F5C006432AE /* AddonCallbacksAudioDSP.cpp in Sources */,
 				F5D141601BAF0B6D0075A95C /* WinSystem.cpp in Sources */,
@@ -12669,7 +12676,6 @@
 				F5D141781BAF0B6D0075A95C /* LangInfo.cpp in Sources */,
 				F5D141791BAF0B6D0075A95C /* MediaSource.cpp in Sources */,
 				F5D1417A1BAF0B6D0075A95C /* NfoFile.cpp in Sources */,
-				183588F01CB76FC900D84C73 /* UpdateManagerMN.cpp in Sources */,
 				F5D1417B1BAF0B6D0075A95C /* PartyModeManager.cpp in Sources */,
 				F5D1417C1BAF0B6D0075A95C /* PasswordManager.cpp in Sources */,
 				F5D1417D1BAF0B6D0075A95C /* PlayListPlayer.cpp in Sources */,
@@ -12686,6 +12692,7 @@
 				F5D141891BAF0B6D0075A95C /* XBDateTime.cpp in Sources */,
 				F5D1418A1BAF0B6D0075A95C /* MouseStat.cpp in Sources */,
 				F5D1418B1BAF0B6D0075A95C /* ButtonTranslator.cpp in Sources */,
+				F5CC391A1D550439005402C7 /* NWMediaManager.cpp in Sources */,
 				F5D1418C1BAF0B6D0075A95C /* InertialScrollingHandler.cpp in Sources */,
 				F5D1418D1BAF0B6D0075A95C /* KeyboardStat.cpp in Sources */,
 				F5D1418E1BAF0B6D0075A95C /* GUIWindowSplash.cpp in Sources */,
@@ -12753,6 +12760,7 @@
 				F5D141C51BAF0B6D0075A95C /* ActiveAESound.cpp in Sources */,
 				F5B724D01C7E150C006432AE /* isnt.cpp in Sources */,
 				F5D141C61BAF0B6D0075A95C /* ActiveAEStream.cpp in Sources */,
+				F5CC391F1D550444005402C7 /* NWPlayer.cpp in Sources */,
 				F5D141C71BAF0B6D0075A95C /* ActorProtocol.cpp in Sources */,
 				F5D141C81BAF0B6D0075A95C /* EndianSwap.cpp in Sources */,
 				F5D141C91BAF0B6D0075A95C /* AESinkFactory.cpp in Sources */,

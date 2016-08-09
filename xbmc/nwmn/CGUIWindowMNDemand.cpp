@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Team MN
+ *  Copyright (C) 2016 RootCoder, LLC.
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MrMC; see the file COPYING.  If not, see
+ *  along with this app; see the file COPYING.  If not, see
  *  <http://www.gnu.org/licenses/>.
  *
  */
@@ -20,7 +20,7 @@
 #include "system.h"
 
 #include "CGUIWindowMNDemand.h"
-//#include "PlayerManagerRed.h"
+#include "NWClient.h"
 
 #include "GUIInfoManager.h"
 #include "guilib/GUIWindowManager.h"
@@ -38,12 +38,8 @@
 #define ONDEMAND_ITEM_LIST          1050
 #define ONDEMAND_CATEGORY_LIST      50
 
-PlayerSettings* CGUIWindowMNDemand::m_PlayerInfo = NULL;
-float CGUIWindowMNDemand::m_Version;
 CGUIWindowMNDemand *CGUIWindowMNDemand::m_MNDemand = NULL;
-CCriticalSection CGUIWindowMNDemand::m_PlayerInfo_lock;
-MNCategory CGUIWindowMNDemand::m_OnDemand;
-NWMediaPlaylist CGUIWindowMNDemand::m_MediaPlayList;
+NWGroupPlaylist CGUIWindowMNDemand::m_GroupPlayList;
 
 CGUIWindowMNDemand::CGUIWindowMNDemand()
 : CGUIWindow(WINDOW_MEMBERNET_DEMAND, "DialogNationWideOndemand.xml")
@@ -78,7 +74,7 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
         
         CFileItem item;
       
-        NWAsset asset = m_MediaPlayList.groups[category].assets[listItem];
+        NWAsset asset = m_GroupPlayList.groups[category].assets[listItem];
         CFileItemPtr pItem = CFileItemPtr(new CFileItem(asset.name));
         std::string path = asset.video_localpath;
         if(path.empty())
@@ -93,6 +89,8 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
         pItem->GetVideoInfoTag()->m_strTitle = asset.name;
         pItem->GetVideoInfoTag()->m_streamDetails.Reset();
         CMediaSettings::GetInstance().SetVideoStartWindowed(true);
+        g_playlistPlayer.Clear();
+        g_playlistPlayer.Reset();
         g_playlistPlayer.Add(PLAYLIST_VIDEO, pItem);
         g_playlistPlayer.SetRepeat(PLAYLIST_VIDEO, PLAYLIST::REPEAT_NONE, false);
         g_playlistPlayer.SetCurrentPlaylist(PLAYLIST_VIDEO);
@@ -125,19 +123,13 @@ void CGUIWindowMNDemand::OnWindowUnload()
 {
 }
 
-void CGUIWindowMNDemand::SetInfo(PlayerSettings *playerInfo, const float version)
-{
-  m_PlayerInfo = playerInfo;
-  m_Version    = version;
-}
-
 void CGUIWindowMNDemand::FillAssets()
 {
   SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_CATEGORY_LIST);
   CFileItemList stackItems;
-  for (size_t i = 0; i < m_MediaPlayList.groups.size(); i++)
+  for (size_t i = 0; i < m_GroupPlayList.groups.size(); i++)
   {
-    CFileItemPtr pItem = CFileItemPtr(new CFileItem(m_MediaPlayList.groups[i].name));
+    CFileItemPtr pItem = CFileItemPtr(new CFileItem(m_GroupPlayList.groups[i].name));
     stackItems.Add(pItem);
   }
   CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_CATEGORY_LIST, 0, 0, &stackItems);
@@ -177,14 +169,14 @@ CGUIWindowMNDemand* CGUIWindowMNDemand::GetDialogMNDemand()
   return m_MNDemand;
 }
 
-void CGUIWindowMNDemand::GetDialogMNPlaylist(NWMediaPlaylist &mediaPlayList)
+void CGUIWindowMNDemand::GetDialogMNPlaylist(NWGroupPlaylist &groupPlayList)
 {
-  mediaPlayList = m_MediaPlayList;
+  groupPlayList = m_GroupPlayList;
 }
 
-void CGUIWindowMNDemand::SetDialogMNPlaylist(const NWMediaPlaylist mediaPlayList)
+void CGUIWindowMNDemand::SetDialogMNPlaylist(const NWGroupPlaylist &groupPlayList)
 {
-  m_MediaPlayList = mediaPlayList;
+  m_GroupPlayList = groupPlayList;
 }
 
 void CGUIWindowMNDemand::SetCategoryItems()
@@ -196,7 +188,7 @@ void CGUIWindowMNDemand::SetCategoryItems()
   
   SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_ITEM_LIST);
   CFileItemList ListItems;
-  NWGroup group = m_MediaPlayList.groups[category];
+  NWGroup group = m_GroupPlayList.groups[category];
   for (size_t i = 0; i < group.assets.size(); i++)
   {
     NWAsset asset = group.assets[i];

@@ -19,14 +19,16 @@
 
 #include "NWTVAPI.h"
 
+#include "NWClient.h"
 #include "URL.h"
 #include "filesystem/CurlFile.h"
-#include "utils/Variant.h"
 #include "utils/JSONVariantParser.h"
+#include "utils/Variant.h"
+#include "utils/URIUtils.h"
 #include "utils/log.h"
 
 
-bool TVAPI_DoActivate(NWActivate &activate)
+bool TVAPI_DoActivate(TVAPI_Activate &activate)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
@@ -59,7 +61,7 @@ bool TVAPI_DoActivate(NWActivate &activate)
   return false;
 }
 
-bool TVAPI_GetStatus(NWStatus &status)
+bool TVAPI_GetStatus(TVAPI_Status &status)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
@@ -92,7 +94,7 @@ bool TVAPI_GetStatus(NWStatus &status)
   return false;
 }
 
-bool TVAPI_GetMachine(NWMachine &machine)
+bool TVAPI_GetMachine(TVAPI_Machine &machine)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
@@ -127,6 +129,7 @@ bool TVAPI_GetMachine(NWMachine &machine)
     machine.allow_new_content     = reply["allow_new_content"].asString();
     machine.allow_software_update = reply["allow_software_update"].asString();
     machine.update_time           = reply["update_time"].asString();
+    machine.update_interval       = reply["update_interval"].asString();
 
     CVariant location             = reply["location"];
     machine.location.id           = location["id"].asString();
@@ -187,7 +190,7 @@ bool TVAPI_GetMachine(NWMachine &machine)
   return false;
 }
 
-bool TVAPI_GetPlaylists(NWPlaylists &playlists)
+bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
@@ -226,18 +229,18 @@ bool TVAPI_GetPlaylists(NWPlaylists &playlists)
       {
         CVariant result = results[i];
 
-        NWPlaylistPlaylist playlist;
-        playlist.id = result["id"].asString();
-        playlist.name = result["name"].asString();
-        playlist.type = result["type"].asString();
-        playlist.updated_date = result["updated_date"].asString();
-        playlist.layout = result["layout"].asString();
-        playlist.member_id = result["member_id"].asString();
-        playlist.member_name = result["member_name"].asString();
-        playlist.nmg_managed = result["nmg_managed"].asString();
-        playlists.playlists.push_back(playlist);
+        TVAPI_PlaylistInfo playListInfo;
+        playListInfo.id = result["id"].asString();
+        playListInfo.name = result["name"].asString();
+        playListInfo.type = result["type"].asString();
+        playListInfo.updated_date = result["updated_date"].asString();
+        playListInfo.layout = result["layout"].asString();
+        playListInfo.member_id = result["member_id"].asString();
+        playListInfo.member_name = result["member_name"].asString();
+        playListInfo.nmg_managed = result["nmg_managed"].asString();
+        playlists.playlists.push_back(playListInfo);
 
-        CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists %d, %s", sub_total, playlist.name.c_str());
+        CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists %d, %s", sub_total, playListInfo.name.c_str());
       }
       
       CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists page = %d, perPage = %d, sub_total = %d, total = %d", curPage, perPage, sub_total, total);
@@ -264,7 +267,7 @@ bool TVAPI_GetPlaylists(NWPlaylists &playlists)
   return false;
 }
 
-bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id)
+bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
@@ -301,7 +304,7 @@ bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id)
       categories = reply["categories"];
       for (size_t i = 0; i < categories.size(); ++i)
       {
-        NWCategoryId category;
+        TVAPI_CategoryId category;
         category.id = categories[i]["id"].asString();
         category.name = categories[i]["name"].asString();
         playlist.categories.push_back(category);
@@ -313,7 +316,7 @@ bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id)
       files = reply["files"];
       for (size_t i = 0; i < files.size(); ++i)
       {
-        NWFileId file;
+        TVAPI_FileId file;
         file.id = files[i]["id"].asString();
         playlist.files.push_back(file);
       }
@@ -325,7 +328,7 @@ bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id)
   return false;
 }
 
-bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist_id)
+bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string playlist_id)
 {
   XFILE::CCurlFile nwmn;
   nwmn.SetTimeout(30);
@@ -359,7 +362,7 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
     {
       CVariant result = results[i];
 
-      NWPlaylistItem item;
+      TVAPI_PlaylistItem item;
       item.id = result["id"].asString();
       item.name = result["name"].asString();
       item.tv_category_id = result["tv_category_id"].asString();
@@ -384,7 +387,7 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
           {
             if (it->first == "720" || it->first == "1080" || it->first == "4k")
             {
-              NWPlaylistFile file;
+              TVAPI_PlaylistFile file;
               file.type = it->first;
               file.path = fileobj["path"].asString();
               file.size = fileobj["size"].asString();
@@ -400,7 +403,7 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
         }
         // sort from low rez to high rez
         std::sort(item.files.begin(), item.files.end(),
-          [] (NWPlaylistFile const& a, NWPlaylistFile const& b)
+          [] (TVAPI_PlaylistFile const& a, TVAPI_PlaylistFile const& b)
           {
             return std::stoi(a.type) < std::stoi(b.type);
           });
@@ -446,88 +449,6 @@ bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist
     }
 
     return true;
-  }
-
-  return false;
-}
-
-bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
-  const NWPlaylist &playlist, const NWPlaylistItems &playlistItems)
-{
-  // convert server structures to player structure
-  mediaPlayList.id = std::stoi(playlist.id);
-  mediaPlayList.name = playlist.name;
-  mediaPlayList.type = playlist.type;
-  // format is "2013-08-22"
-  mediaPlayList.updated_date.SetFromDBDate(playlist.updated_date);
-  mediaPlayList.max_rez = 1080;
-  mediaPlayList.groups.clear();
-  mediaPlayList.play_order.clear();
-
-  for (auto catagory : playlist.categories)
-  {
-    NWGroup group;
-    group.id = std::stoi(catagory.id);
-    group.name = catagory.name;
-    group.next_asset_index = 0;
-    // always remember original group play order
-    // this determines group play order. ie.
-    // pick 1st group, play asset, pick next group, play asset, do all groups
-    // cycle back, pick 1st group, play next asset...
-    mediaPlayList.play_order.push_back(group.id);
-
-    // check if we already have handled this group
-    auto it = std::find_if(mediaPlayList.groups.begin(), mediaPlayList.groups.end(),
-      [group](const NWGroup &existingGroup) { return existingGroup.id == group.id; });
-    if (it == mediaPlayList.groups.end())
-    {
-      // not present, pull out assets assigned to this group
-      for (auto item : playlistItems.items)
-      {
-        if (item.tv_category_id == catagory.id)
-        {
-          NWAsset asset;
-          asset.id = std::stoi(item.id);
-          asset.name = item.name;
-          asset.group_id = std::stoi(item.tv_category_id);
-          asset.valid = false;
-
-          // tries to find a good content match to player capabilities
-          // for example, if player is connected to 720 display,
-          // get 720 content, unless 720 content is missing, then take the
-          // next highest. Needs work :)
-          for (auto file : item.files)
-          {
-            // item.files is pre-sorted low to high rez
-            // take anything up to max rez, never take higher than max_rez
-            if (std::stoi(file.type) <= mediaPlayList.max_rez)
-            {
-              asset.id = std::stoi(item.id);
-              asset.rez = std::stoi(file.type);
-              asset.video_url = file.path;
-              asset.video_md5 = file.etag;
-              asset.video_size = std::stoi(file.size);
-              // format is "2013-02-27 01:00:00"
-              asset.available_to.SetFromDBDateTime(item.availability_to);
-              asset.available_from.SetFromDBDateTime(item.availability_from);
-            }
-          }
-          // if we got an complete asset, save it.
-          if (!asset.video_url.empty())
-          {
-            // bring over thumb references
-            asset.thumb_url = item.thumb.path;
-            asset.thumb_md5 = item.thumb.etag;
-            asset.thumb_size = std::stoi(item.thumb.size);
-
-            group.assets.push_back(asset);
-          }
-        }
-      }
-      // add the new group regardless of it there are assets present
-      // player will skip over this group if there are no assets.
-      mediaPlayList.groups.push_back(group);
-    }
   }
 
   return false;

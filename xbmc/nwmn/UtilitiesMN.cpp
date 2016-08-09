@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Team MN
+ *  Copyright (C) 2016 RootCoder, LLC.
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MrMC; see the file COPYING.  If not, see
+ *  along with this app; see the file COPYING.  If not, see
  *  <http://www.gnu.org/licenses/>.
  *
  */
 
 #include "nwmn/UtilitiesMN.h"
-#include "nwmn/MNMedia.h"
+#include "nwmn/NWTVAPI.h"
 
 #include "URL.h"
 #include "utils/md5.h"
@@ -98,7 +98,25 @@ std::string EncodeExtra(const std::string& strURLData)
   return strResult;
 }
 
-
+void GetLocalPlayerInfo(NWPlayerInfo &player, std::string home)
+{
+/*
+  CLog::Log(LOGDEBUG, "**NW** - GetLocalPlayerInfo");
+  std::string localPlayer = home + "webdata/PlayerSetup.xml";
+  CXBMCTinyXML XmlDoc;
+  
+  if (XFILE::CFile::Exists(localPlayer) && XmlDoc.LoadFile(localPlayer))
+  {
+    TiXmlElement *rootXmlNode = XmlDoc.RootElement();
+    if (!ParsePlayerInfo(player, rootXmlNode))
+      SetDefaultPlayerInfo(player);
+  }
+  else
+  {
+    SetDefaultPlayerInfo(player);
+  }
+*/
+}
 
 bool SaveLocalPlayerInfo(const TiXmlElement settingsNode, std::string home)
 {
@@ -116,12 +134,6 @@ std::string GetMD5(const std::string strText)
   std::string hash = XBMC::XBMC_MD5::GetMD5(strText);
   StringUtils::ToLower(hash);
   return hash;
-}
-
-bool IsMNVideo(MNMediaAsset asset)
-{
-//  return StringUtils::EqualsNoCase(asset.type, "video");
-  return false;
 }
 
 void OpenAndroidSettings()
@@ -231,7 +243,7 @@ std::string GetSystemUpTime()
   return uptime;
 }
 
-bool SetDownloadedAsset(const std::string AssetID, bool downloaded)
+bool SetDownloadedAsset(int assetID, bool downloaded)
 {
 //  // simplify calling MN db SetDownloadedAsset
 //  CDBManagerMN database;
@@ -240,174 +252,4 @@ bool SetDownloadedAsset(const std::string AssetID, bool downloaded)
 //  database.Close();
 //  return result;
   return false;
-}
-
-void ParseMediaXML(PlayerSettings settings,std::vector<MNCategory> &categories, MNCategory &OnDemand)
-{
-  
-  std::string url = StringUtils::Format("%s/xml/tv/media.php?machine=%s-%s",
-                                        settings.strUrl_feed.c_str(),
-                                        settings.strLocation_id.c_str(),
-                                        settings.strMachine_id.c_str()
-                                        );
-  categories.clear();
-  
-  // local media xml
-  std::string localMediaXML = "special://MN/media_xml.xml";
-  
-  CXBMCTinyXML xmlDoc;
-  TiXmlElement *rootXmlNode;
-  if (PingMNServer(url))
-  {
-    XFILE::CCurlFile http;
-    std::string strXML;
-    http.Get(url, strXML);
-    
-    xmlDoc.Parse(strXML.c_str());
-    rootXmlNode = xmlDoc.RootElement();
-    xmlDoc.InsertEndChild(*rootXmlNode);
-    xmlDoc.SaveFile(localMediaXML);
-  }
-  else if (XFILE::CFile::Exists(localMediaXML))// No internet
-  {
-    xmlDoc.LoadFile(localMediaXML);
-    rootXmlNode = xmlDoc.RootElement();
-  }
-  
-  if (rootXmlNode)
-  {
-    
-    TiXmlNode *pCatNode = NULL;
-    while ((pCatNode = rootXmlNode->IterateChildren(pCatNode)) != NULL)
-    {
-      if (pCatNode->ValueStr() == "category")
-      {
-        MNCategory category;
-        category.id = ((TiXmlElement*) pCatNode)->Attribute("id");
-        category.name = ((TiXmlElement*) pCatNode)->Attribute("name");
-        category.icon = ((TiXmlElement*) pCatNode)->Attribute("icon");
-
-        TiXmlNode *pAssetNode = NULL;
-        while ((pAssetNode = pCatNode->IterateChildren(pAssetNode)) != NULL)
-        {
-          MNMediaAsset asset;
-          asset.id = ((TiXmlElement*) pAssetNode)->Attribute("id");
-          asset.category_id = category.id;
-          XMLUtils::GetString(pAssetNode, "title", asset.title);
-          // video details
-          TiXmlElement* pMetadataNode = pAssetNode->FirstChildElement("media:highresolution_video");
-          if (pMetadataNode)
-          {
-            asset.video_url      = ((TiXmlElement*) pMetadataNode)->Attribute("url");
-            asset.video_md5      = ((TiXmlElement*) pMetadataNode)->Attribute("md5");
-            asset.video_fileSize = ((TiXmlElement*) pMetadataNode)->Attribute("fileSize");
-            asset.video_height   = ((TiXmlElement*) pMetadataNode)->Attribute("height");
-            asset.video_width    = ((TiXmlElement*) pMetadataNode)->Attribute("width");
-            asset.video_duration = ((TiXmlElement*) pMetadataNode)->Attribute("duration");
-          }
-          // thumb details
-          pMetadataNode = pAssetNode->FirstChildElement("media:lowresolution_posterframe");
-          if (pMetadataNode)
-          {
-            asset.thumb_url      = ((TiXmlElement*) pMetadataNode)->Attribute("thumb_url");
-            asset.thumb_md5      = ((TiXmlElement*) pMetadataNode)->Attribute("thumb_md5");
-            asset.thumb_fileSize = ((TiXmlElement*) pMetadataNode)->Attribute("thumb_fileSize");
-            asset.thumb_width    = ((TiXmlElement*) pMetadataNode)->Attribute("thumb_width");
-            asset.thumb_height   = ((TiXmlElement*) pMetadataNode)->Attribute("thumb_height");
-          }
-          // start/stop details
-          pMetadataNode = pAssetNode->FirstChildElement("available")->FirstChildElement("publish");
-          if (pMetadataNode)
-          {
-            asset.available_start     = ((TiXmlElement*) pMetadataNode)->Attribute("start");
-            asset.available_stop      = ((TiXmlElement*) pMetadataNode)->Attribute("stop");
-          }
-
-          category.items.push_back(asset);
-        }
-        
-        if (category.items.size() > 0)
-        {
-          if (category.id == "10")
-            OnDemand = category;
-          else
-            categories.push_back(category);
-        }
-      }
-    }
-  }
-}
-
-void ParseSettingsXML(PlayerSettings &settings)
-{
-  
-  std::string url = StringUtils::Format("%s/xml/tv/settings.php?machine=%s-%s",
-                                        settings.strUrl_feed.c_str(),
-                                        settings.strLocation_id.c_str(),
-                                        settings.strMachine_id.c_str()
-                                        );
-  
-  // Local settings xml
-  std::string localSettingsXML = "special://MN/settings_xml.xml";
-  
-  CXBMCTinyXML xmlDoc;
-  TiXmlElement *rootXmlNode;
-  
-  if (PingMNServer(url))
-  {
-    XFILE::CCurlFile http;
-    std::string strXML;
-    http.Get(url, strXML);
-    
-    xmlDoc.Parse(strXML.c_str());
-    rootXmlNode = xmlDoc.RootElement();
-    xmlDoc.InsertEndChild(*rootXmlNode);
-    xmlDoc.SaveFile(localSettingsXML);
-  }
-  else if (XFILE::CFile::Exists(localSettingsXML))// No internet
-  {
-    xmlDoc.LoadFile(localSettingsXML);
-    rootXmlNode = xmlDoc.RootElement();
-  }
-  
-
-  
-  if (rootXmlNode)
-  {
-    TiXmlElement* pSettingsNode = rootXmlNode->FirstChildElement("settings");
-    if (pSettingsNode)
-    {
-      TiXmlElement* pplaylistsNode = pSettingsNode->FirstChildElement("playlist");
-      settings.strSettings_update_interval = ((TiXmlElement*) pplaylistsNode)->Attribute("updateinterval");
-      settings.strSettings_update_time     = ((TiXmlElement*) pplaylistsNode)->Attribute("time");
-    }
-
-    TiXmlElement *pPLNode = rootXmlNode->FirstChildElement("playlist");
-    TiXmlElement* pCategoryNode = pPLNode->FirstChildElement("category");
-    while (pCategoryNode)
-    {
-      settings.intCategories_order.push_back(((TiXmlElement*) pCategoryNode)->Attribute("id"));
-      pCategoryNode = pCategoryNode->NextSiblingElement("category");
-    }
-    
-    std::string TZ;
-    XMLUtils::GetString(rootXmlNode, "timezone", TZ);
-    
-    if (TZ != settings.strTimeZone)
-    {
-      settings.strTimeZone = TZ;
-#if defined(TARGET_LINUX)
-      g_timezone.SetTimezone(settings.strTimeZone);
-      CDateTime::ResetTimezoneBias();
-#endif
-    }
-    
-    TiXmlElement *pUpdateNode = rootXmlNode->FirstChildElement("allow_software_update");
-    settings.allowUpdate = strncmp(((TiXmlElement*) pUpdateNode)->Attribute("available"), "1", strlen("1"))==0;
-    
-    TiXmlElement *pSWNode = rootXmlNode->FirstChildElement("mn_software");
-    settings.strSettings_cf_bundle_version = ((TiXmlElement*) pSWNode)->Attribute("CFBundleVersion");
-    settings.strSettings_software_version  = ((TiXmlElement*) pSWNode)->Attribute("version");
-    settings.strSettings_software_url      = ((TiXmlElement*) pSWNode)->Attribute("url");
-  }
 }

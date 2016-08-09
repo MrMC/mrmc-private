@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Team MN
+ *  Copyright (C) 2016 RootCoder, LLC.
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with MrMC; see the file COPYING.  If not, see
+ *  along with this app; see the file COPYING.  If not, see
  *  <http://www.gnu.org/licenses/>.
  *
  */
@@ -20,9 +20,9 @@
 #include "system.h"
 
 #include "CGUIWindowMN.h"
+
 #include "CGUIWindowMNDemand.h"
-#include "PlayerManagerMN.h"
-#include "network/Network.h"
+#include "NWClient.h"
 #include "UtilitiesMN.h"
 
 #include "Application.h"
@@ -34,6 +34,7 @@
 #include "utils/log.h"
 #include "guilib/GUIWindowManager.h"
 #include "input/Key.h"
+#include "network/Network.h"
 #include "settings/DisplaySettings.h"
 #include "settings/SkinSettings.h"
 #include "settings/Settings.h"
@@ -64,8 +65,7 @@ CGUIWindowMN::CGUIWindowMN()
 , m_RefreshRunning(false)
 , m_AboutUp(false)
 , m_testServersPopup(false)
-, m_PlayerManager(NULL)
-, m_MediaPlayList(*new NWMediaPlaylist)
+, m_client(NULL)
 {
   Create();
   m_loadType = KEEP_IN_MEMORY;
@@ -95,8 +95,8 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
       if (iface)
         strIPAddress = iface->GetCurrentIPAddress();
-      
-      PlayerSettings settings = m_PlayerManager->GetSettings();
+
+      NWPlayerSettings settings = m_client->GetSettings();
       // Fill in about popup
       SET_CONTROL_LABEL(90210, StringUtils::Format("Machine Name: %s",
                                                    CSettings::GetInstance().GetString("services.devicename").c_str()));
@@ -124,13 +124,15 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), PLAYLIST);
       OnMessage(msg);
+
       if (!m_RefreshRunning)
       {
-//        m_RefreshRunning = true;
-        CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
-        if (MNPlayerManager)
-          MNPlayerManager->CreatePlaylist();
+        m_RefreshRunning = true;
+        CNWClient* client = CNWClient::GetClient();
+        if (client)
+          client->PlayNext();
       }
+
       return true;
     }
     else if (iControl == MEDIAUPDATE)
@@ -175,7 +177,9 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       OnMessage(msg);
       
       //fill in on demand window here
-      CGUIWindowMNDemand::SetDialogMNPlaylist(m_MediaPlayList);
+      NWGroupPlaylist groupPlayList;
+      m_client->GetProgamInfo(groupPlayList);
+      CGUIWindowMNDemand::SetDialogMNPlaylist(groupPlayList);
       g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
       return true;
     }
@@ -214,7 +218,7 @@ bool CGUIWindowMN::OnAction(const CAction &action)
     
     if (g_application.m_pPlayer->IsPlaying())
     {
-      m_PlayerManager->StopPlaying();
+      m_client->StopPlaying();
       return true;
     }
     // this return blocks any other "back/esc" action, prevents us closing MN main screen
@@ -230,38 +234,10 @@ void CGUIWindowMN::OnInitWindow()
   // below needs to be called once we run the update, it disables buttons in skin
   //DisableButtonsOnRefresh(true)
   
-//  if (!m_PlayerManager)
-//  {
-//    m_PlayerManager = new CPlayerManagerMN();
-//    m_PlayerManager->RegisterPlayerCallBack(this, PlayerCallBack);
-//    m_PlayerManager->Startup();
-//  }
-  NWActivate activate;
-  activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
-  activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
-  
-  NWStatus status;
-  status.apiKey = activate.apiKey;
-  status.apiSecret = activate.apiSecret;
-  TVAPI_GetStatus(status);
-
-  NWMachine machine;
-  machine.apiKey = activate.apiKey;
-  machine.apiSecret = activate.apiSecret;
-  TVAPI_GetMachine(machine);
-  
-  NWPlaylist playlist;
-  playlist.apiKey = activate.apiKey;
-  playlist.apiSecret = activate.apiSecret;
-  TVAPI_GetPlaylist(playlist, machine.playlist_id);
-
-  NWPlaylistItems playlistItems;
-  playlistItems.apiKey = activate.apiKey;
-  playlistItems.apiSecret = activate.apiSecret;
-  TVAPI_GetPlaylistItems(playlistItems, machine.playlist_id);
-
-  m_MediaPlayList = NWMediaPlaylist();
-  TVAPI_CreateMediaPlaylist(m_MediaPlayList, playlist, playlistItems);
+  m_client = new CNWClient();
+  m_client->RegisterClientCallBack(this, ClientCallBack);
+  m_client->RegisterPlayerCallBack(this, PlayerCallBack);
+  m_client->Startup();
 
   CGUIWindow::OnInitWindow();
 }
@@ -273,16 +249,15 @@ void CGUIWindowMN::OnWindowLoaded()
 
 void CGUIWindowMN::OnWindowUnload()
 {
-  m_PlayerManager = NULL;
-  SAFE_DELETE(m_PlayerManager);
+  SAFE_DELETE(m_client);
 }
 
 void CGUIWindowMN::Refresh()
 {
-  CLog::Log(LOGDEBUG, "**MN** - CGUIWindowMN::Refresh()");
-  CPlayerManagerMN* MNPlayerManager = CPlayerManagerMN::GetPlayerManager();
-  if (MNPlayerManager)
-    MNPlayerManager->Startup();
+  CLog::Log(LOGDEBUG, "**NW** - CGUIWindowMN::Refresh()");
+  CNWClient* client = CNWClient::GetClient();
+  if (client)
+    client->Startup();
 }
 
 void CGUIWindowMN::OnStartup()
@@ -310,33 +285,16 @@ void CGUIWindowMN::Process(unsigned int currentTime, CDirtyRegionList &dirtyregi
   CGUIWindow::Process(currentTime, dirtyregions);
 }
 
-void CGUIWindowMN::PlayerCallBack(const void *ctx, bool status)
+void CGUIWindowMN::ClientCallBack(const void *ctx, bool status)
 {
-  CLog::Log(LOGDEBUG, "**MN** - CGUIWindowMN::PlayerCallBack() player running" );
+  CLog::Log(LOGDEBUG, "**NW** - CGUIWindowMN::ClientCallBack() player running" );
   CGUIWindowMN *dlog = (CGUIWindowMN*)ctx;
   dlog->m_RefreshRunning = false;
-
-  
-  CGUIWindow *pWindow = (CGUIWindow*)g_windowManager.GetWindow(WINDOW_MEMBERNET);
-  if (pWindow && 0)
-  {
-    CDateTime NextUpdateTime;
-    CDateTime NextDownloadTime;
-    CDateTimeSpan NextDownloadDuration;
-//    dlog->m_PlayerManager->GetStats(NextUpdateTime, NextDownloadTime, NextDownloadDuration);
-    
-    CDateTime end = NextDownloadTime + NextDownloadDuration;
-    pWindow->SetProperty("line1", StringUtils::Format("dl bgn: %s", NextDownloadTime.GetAsDBDateTime().c_str()));
-    pWindow->SetProperty("line2", StringUtils::Format("dl end: %s", end.GetAsDBDateTime().c_str()));
-    pWindow->SetProperty("line3", StringUtils::Format("update: %s", NextUpdateTime.GetAsDBDateTime().c_str()));
-
-    CLog::Log(LOGDEBUG, "**MN** - CGUIWindowMN::Process %s", NextDownloadTime.GetAsDBDateTime().c_str());
-  }
 }
 
-void CGUIWindowMN::PlaybackCallBack(const void *ctx, int msg, MNMediaAsset &asset)
+void CGUIWindowMN::PlayerCallBack(const void *ctx, int msg, NWAsset &asset)
 {
-  CLog::Log(LOGDEBUG, "**MN** - CGUIWindowMN::PlaybackCallBack(): playing \'%s\'", asset.title.c_str());
+  CLog::Log(LOGDEBUG, "**NW** - CGUIWindowMN::PlayerCallBack(): playing \'%s\'", asset.name.c_str());
 }
 
 void CGUIWindowMN::DisableButtonsOnRefresh(bool disable)

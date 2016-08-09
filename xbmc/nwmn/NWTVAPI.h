@@ -24,28 +24,33 @@
 
 #include "XBDateTime.h"
 
-const float kTVAPI_PlayerFloatVersion = 1.0;
+const float       kTVAPI_PlayerFloatVersion = 1.0;
 const std::string kTVAPI_NDownloadPath = "downloads/";
 const std::string kTVAPI_DownloadLogPath = "log/";
-const std::string kTVAPI_DownloadUpdatePath = "update/";
-
+const std::string kTVAPI_DownloadVideoPath = "downloads/video/";
+const std::string kTVAPI_DownloadVideoThumbNailsPath = "downloads/video_thumbnails/";
+const std::string kTVAPI_DownloadMusicPath = "downloads/music/";
+const std::string kTVAPI_DownloadMusicThumbNailsPath = "downloads/music_thumbnails/";
 const std::string kTVAPI_Status_On = "On";
 const std::string kTVAPI_Status_Off = "Off";
 const std::string kTVAPI_Status_Restarting = "Restarting";
 
+const std::string kTVAPI_BASE = "test.nationwidemember.com";
 const std::string kTVAPI_URLBASE = "http://test.nationwidemember.com/tv-api/1/";
 
 // ---------------------------------------------
-typedef struct NWActivate {
+// ---------------------------------------------
+typedef struct TVAPI_Activate {
   std::string code;
   std::string application_id;
   // reply
   std::string apiKey;
   std::string apiSecret;
-} NWActivate;
+} TVAPI_Activate;
 
 // ---------------------------------------------
-typedef struct NWStatus {
+// ---------------------------------------------
+typedef struct TVAPI_Status {
   std::string apiKey;
   std::string apiSecret;
   // reply
@@ -55,10 +60,11 @@ typedef struct NWStatus {
   std::string status;
   std::string status_text;
   std::string activation_date;
-} NWStatus;
+} TVAPI_Status;
 
 // ---------------------------------------------
-typedef struct NWMachineLocation {
+// ---------------------------------------------
+typedef struct TVAPI_MachineLocation {
     std::string id;
     std::string name;
     std::string address;
@@ -67,9 +73,9 @@ typedef struct NWMachineLocation {
     std::string state;
     std::string phone;
     std::string fax;
-} NWMachineLocation;
+} TVAPI_MachineLocation;
 
-typedef struct NWMachineNetwork {
+typedef struct TVAPI_MachineNetwork {
     std::string macaddress;
     std::string macaddress_wireless;
     std::string dhcp;
@@ -78,9 +84,9 @@ typedef struct NWMachineNetwork {
     std::string router;
     std::string dns_1;
     std::string dns_2;
-} NWMachineNetwork;
+} TVAPI_MachineNetwork;
 
-typedef struct NWMachineSettings {
+typedef struct TVAPI_MachineSettings {
   std::string network;
   std::string pairing;
   std::string about;
@@ -89,9 +95,9 @@ typedef struct NWMachineSettings {
   std::string updatesoftware;
   std::string language;
   std::string legal;
-} NWMachineSettings;
+} TVAPI_MachineSettings;
 
-typedef struct NWMachineMenu {
+typedef struct TVAPI_MachineMenu {
   std::string membernettv;
   std::string vendorcommercials;
   std::string hdcontent;
@@ -101,22 +107,22 @@ typedef struct NWMachineMenu {
   std::string nationwidebroadcasts;
   std::string imaginationwidehd;
   std::string primemediacommercialfactory;
-} NWMachineMenu;
+} TVAPI_MachineMenu;
 
-typedef struct NWMachineMembernet_software {
+typedef struct TVAPI_MachineMembernet_software {
   std::string id;
   std::string version;
   std::string cfbundleversion;
   std::string url;
-} NWMachineMembernet_software;
+} TVAPI_MachineMembernet_software;
 
-typedef struct NWMachineApple_software {
+typedef struct TVAPI_MachineApple_software {
   std::string id;
   std::string version;
   std::string url;
-} NWMachineApple_software;
+} TVAPI_MachineApple_software;
 
-typedef struct NWMachine {
+typedef struct TVAPI_Machine {
   std::string apiKey;
   std::string apiSecret;
   // reply
@@ -135,64 +141,18 @@ typedef struct NWMachine {
   std::string allow_new_content;
   std::string allow_software_update;
   std::string update_time;
-  NWMachineLocation location;
-  NWMachineNetwork  network;
-  NWMachineSettings settings;
-  NWMachineMenu     menu;
-  NWMachineMembernet_software  membernet_software;
-  NWMachineApple_software apple_software;
-} NWMachine;
+  std::string update_interval;
+  TVAPI_MachineLocation location;
+  TVAPI_MachineNetwork  network;
+  TVAPI_MachineSettings settings;
+  TVAPI_MachineMenu     menu;
+  TVAPI_MachineMembernet_software  membernet_software;
+  TVAPI_MachineApple_software apple_software;
+} TVAPI_Machine;
 
 // ---------------------------------------------
-typedef struct NWPlaylistPlaylist {
-  std::string id;
-  std::string name;
-  std::string type;
-  std::string updated_date;
-  std::string layout;
-  std::string member_id;
-  std::string member_name;
-  std::string nmg_managed;
-} NWPlaylistPlaylist;
-
-typedef struct NWPlaylists {
-  std::string apiKey;
-  std::string apiSecret;
-  // reply
-  //std::string page;
-  //std::string perPage;
-  //std::string total;
-  //std::string total_pages;
-  std::vector<NWPlaylistPlaylist> playlists;
-} NWPlaylists;
-
 // ---------------------------------------------
-typedef struct NWCategoryId {
-  std::string id;
-  std::string name;
-} NWCategoryId;
-
-typedef struct NWFileId {
-  std::string id;
-} NWFileId;
-
-typedef struct NWPlaylist {
-  std::string apiKey;
-  std::string apiSecret;
-  // reply
-  std::string id;
-  std::string name;
-  std::string type;
-  std::string layout;
-  std::string member_id;
-  std::string nmg_managed;
-  std::string updated_date;
-  std::vector<NWFileId> files;
-  std::vector<NWCategoryId> categories;
-} NWPlaylist;
-
-// ---------------------------------------------
-typedef struct NWPlaylistFile {
+typedef struct TVAPI_PlaylistFile {
   std::string type;
   std::string path;
   std::string size;
@@ -202,9 +162,9 @@ typedef struct NWPlaylistFile {
   std::string mime_type;
   std::string created_date;
   std::string updated_date;
-} NWPlaylistFile;
+} TVAPI_PlaylistFile;
 
-typedef struct NWPlaylistItem {
+typedef struct TVAPI_PlaylistItem {
   std::string id;
   std::string name;
   std::string tv_category_id;
@@ -217,70 +177,77 @@ typedef struct NWPlaylistItem {
   std::string download;
   std::string availability_to;
   std::string availability_from;
-  NWPlaylistFile thumb;
-  NWPlaylistFile poster;
-  std::vector<NWPlaylistFile> files;
-} NWPlaylistItem;
+  TVAPI_PlaylistFile thumb;
+  TVAPI_PlaylistFile poster;
+  std::vector<TVAPI_PlaylistFile> files;
+} TVAPI_PlaylistItem;
 
-typedef struct NWPlaylistItems {
+typedef struct TVAPI_PlaylistItems {
   std::string apiKey;
   std::string apiSecret;
   // reply
   std::string id;
   std::string name;
   std::string type;
-  std::vector<NWPlaylistItem> items;
-} NWPlaylistItems;
+  std::vector<TVAPI_PlaylistItem> items;
+} TVAPI_PlaylistItems;
 
-typedef struct NWAsset {
-  int id;
-  int group_id;
-  int rez;
-  std::string name;
-  std::string video_url;
-  std::string video_md5;
-  int         video_size;
-  std::string video_localpath;
-  std::string thumb_url;
-  std::string thumb_md5;
-  int         thumb_size;
-  std::string thumb_localpath;
-  CDateTime   available_to;
-  CDateTime   available_from;
-  
-  std::string uuid;       // changes all the time, not to be used as identifier
-  std::string time_played;// ditto
-  bool        valid;
-} NWAsset;
-
-typedef struct NWGroup {
-  int id;
-  std::string name;
-  int next_asset_index;
-  std::vector<NWAsset> assets;
-} NWGroup;
-
-typedef struct NWMediaPlaylist {
-  int id;
+// ---------------------------------------------
+// ---------------------------------------------
+typedef struct TVAPI_PlaylistInfo {
+  std::string id;
   std::string name;
   std::string type;
-  int max_rez;
-  CDateTime updated_date;
-  std::vector<int> play_order;
-  std::vector<NWGroup> groups;
-} NWMediaPlaylist;
+  std::string updated_date;
+  std::string layout;
+  std::string member_id;
+  std::string member_name;
+  std::string nmg_managed;
+} TVAPI_PlaylistInfo;
+
+typedef struct TVAPI_Playlists {
+  std::string apiKey;
+  std::string apiSecret;
+  // reply
+  //std::string page;
+  //std::string perPage;
+  //std::string total;
+  //std::string total_pages;
+  std::vector<TVAPI_PlaylistInfo> playlists;
+} NWPlaylists;
 
 // ---------------------------------------------
 // ---------------------------------------------
-bool TVAPI_DoActivate(NWActivate &activate);
-bool TVAPI_GetStatus(NWStatus &status);
-bool TVAPI_GetMachine(NWMachine &machine);
-bool TVAPI_GetPlaylists(NWPlaylists &playlists);
+typedef struct TVAPI_CategoryId {
+  std::string id;
+  std::string name;
+} TVAPI_CategoryId;
 
-bool TVAPI_GetPlaylist(NWPlaylist &playlist, std::string playlist_id);
-bool TVAPI_GetPlaylistItems(NWPlaylistItems &playlistItems, std::string playlist_id);
+typedef struct TVAPI_FileId {
+  std::string id;
+} TVAPI_FileId;
 
-bool TVAPI_CreateMediaPlaylist(NWMediaPlaylist &mediaPlayList,
-  const NWPlaylist &playlist, const NWPlaylistItems &playlistItems);
+typedef struct TVAPI_Playlist {
+  std::string apiKey;
+  std::string apiSecret;
+  // reply
+  std::string id;
+  std::string name;
+  std::string type;
+  std::string layout;
+  std::string member_id;
+  std::string nmg_managed;
+  std::string updated_date;
+  std::vector<TVAPI_FileId> files;
+  std::vector<TVAPI_CategoryId> categories;
+} TVAPI_Playlist;
 
+// ---------------------------------------------
+// ---------------------------------------------
+bool TVAPI_DoActivate(TVAPI_Activate &activate);
+bool TVAPI_GetStatus(TVAPI_Status &status);
+bool TVAPI_GetMachine(TVAPI_Machine &machine);
+bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists);
 
+bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id);
+bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string playlist_id);
