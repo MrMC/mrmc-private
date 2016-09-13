@@ -10,7 +10,7 @@
           <posy>0</posy>
           <width>1280</width>
           <height>720</height>
-          <texture>MNSkinFiles/MNBackgroundBlur.png</texture>
+          <texture>MNSkinFiles/OnDemandH.png</texture>
         </control>
         <control type="image">
           <visible>system.getbool(mn.vertical)</visible>
@@ -25,33 +25,14 @@
             <visible>!system.getbool(mn.vertical)</visible>
             <control type="image">
               <posx>64</posx>
-              <posy>34</posy>
-              <width>1152</width>
-              <height>95</height>
-              <texture>MNSkinFiles/BannerArea.png</texture>
-            </control> 
-            <control type="label">
-                <posy>62</posy>
-                <posx>100</posx>
-                <width>500</width>
-                <height>40</height>
-                <font>OnDemand36B</font>
-                <textcolor>black</textcolor>
-                <scroll>false</scroll>
-                <align>left</align>
-                <aligny>center</aligny>
-                <label>On Demand</label>
-            </control>
-            <control type="image">
-              <posx>64</posx>
               <posy>150</posy>
               <width>1152</width>
               <height>536</height>
               <texture>MNSkinFiles/ListArea.png</texture>
             </control>  
             <control type="list" id="50">
-                <posx>90</posx>
-                <posy>171</posy>
+                <posx>70</posx>
+                <posy>80</posy>
                 <width>690</width>
                 <height>495</height>
                 <onleft>1050</onleft>
@@ -60,43 +41,43 @@
                 <ondown>50</ondown>
                 <viewtype label="535">list</viewtype>
                 <scrolltime>200</scrolltime>
-                <itemlayout height="50.2" width="500">
+                <itemlayout height="50.2" width="450">
                     <control type="image">
-                        <posx>3</posx>
-                        <posy>3</posy>
-                        <width>446</width>
-                        <height>42</height>
-                        <texture>MNSkinFiles/SelectionArea.png</texture>
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>400</width>
+                        <height>40</height>
+                        <texture>MNSkinFiles/button.png</texture>
                     </control>
                     <control type="label">
                         <posx>13</posx>
-                        <posy>8</posy>
-                        <width>426</width>
+                        <posy>5</posy>
+                        <width>390</width>
                         <height>30</height>
-                        <font>OnDemand20B</font>
-                        <textcolor>black</textcolor>
-                        <selectedcolor>black</selectedcolor>
+                        <font>Button20</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
                         <align>left</align>
                         <aligny>center</aligny>
                         <label>$INFO[ListItem.Label]</label>
                     </control>
                 </itemlayout>
-                <focusedlayout height="50.2" width="500">
+                <focusedlayout height="50.2" width="450">
                     <control type="image">
                         <posx>0</posx>
                         <posy>0</posy>
-                        <width>452</width>
-                        <height>48</height>
-                        <texture>MNSkinFiles/glowSelectionArea.png</texture>
+                        <width>400</width>
+                        <height>40</height>
+                        <texture>MNSkinFiles/button.png</texture>
                     </control>
                     <control type="label">
                         <posx>13</posx>
-                        <posy>8</posy>
-                        <width>426</width>
+                        <posy>5</posy>
+                        <width>390</width>
                         <height>30</height>
-                        <font>OnDemand20B</font>
-                        <textcolor>blue</textcolor>
-                        <selectedcolor>white</selectedcolor>
+                        <font>Button20</font>
+                        <textcolor>black</textcolor>
+                        <selectedcolor>black</selectedcolor>
                         <align>left</align>
                         <aligny>center</aligny>
                         <label>$INFO[ListItem.Label]</label>
@@ -201,18 +182,11 @@
               <effect type="slide" start="0,0" end="-210,-213" time="0" />
               <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
             </animation>
-            <control type="image">
-              <posx>565</posx>
-              <posy>171</posy>
-              <width>626</width>
-              <height>495</height>
-              <texture>MNSkinFiles/ContentArea.png</texture>
-            </control> 
             <control type="panel" id="1050">
-                <posx>573</posx>
-                <posy>180</posy>
-                <width>610</width>
-                <height>480</height>
+                <posx>523</posx>
+                <posy>80</posy>
+                <width>800</width>
+                <height>560</height>
                 <onleft>50</onleft>
                 <onright>50</onright>
                 <onup>1050</onup>
@@ -221,79 +195,49 @@
                 <pagecontrol>61</pagecontrol>
                 <scrolltime>200</scrolltime>
                 <orientation>vertical</orientation>
-                <itemlayout height="95" width="152">
+                <itemlayout height="140" width="240">
                     <control type="image">
                         <description>Item Thumb</description>
-                        <posx>5</posx>
-                        <posy>5</posy>
-                        <width>142</width>
-                        <height>76</height>
-                        <texture>DefaultVideo.png</texture>
+                        <posx>1</posx>
+                        <posy>1</posy>
+                        <width>220</width>
+                        <height>126</height>
+                        <texture>MNSkinFiles/preview_background.png</texture>
                     </control>
                     <control type="image">
                         <description>Item Thumb</description>
-                        <posx>5</posx>
-                        <posy>5</posy>
-                        <width>142</width>
-                        <height>76</height>
+                        <posx>1</posx>
+                        <posy>1</posy>
+                        <width>220</width>
+                        <height>126</height>
                         <aspectratio>keep</aspectratio>
                         <texture>$INFO[ListItem.Art(thumb)]</texture>
-                    </control>
-                    <control type="image">
-                        <posx>5</posx>
-                        <posy>5</posy>
-                        <width>142</width>
-                        <height>76</height>
-                        <texture>MNSkinFiles/PanelItem.png</texture>
-                    </control>
-                    <control type="label">
-                        <posx>76</posx>
-                        <posy>83</posy>
-                        <width>132</width>
-                        <height>15</height>
-                        <font>OnDemand12B</font>
-                        <align>center</align>
-                        <aligny>center</aligny>
-                        <textcolor>black</textcolor>
-                        <label>$INFO[ListItem.Label] - $INFO[ListItem.Duration] Min</label>
                     </control>
                 </itemlayout>
-                <focusedlayout height="95" width="152">
+                <focusedlayout height="140" width="240">
                     <control type="image">
                         <description>Item Thumb</description>
-                        <posx>5</posx>
-                        <posy>5</posy>
-                        <width>142</width>
-                        <height>76</height>
-                        <texture>DefaultVideo.png</texture>
-                        <texture border="5">button-focus2.png</texture>
+                        <posx>1</posx>
+                        <posy>1</posy>
+                        <width>220</width>
+                        <height>126</height>
+                        <texture>MNSkinFiles/preview_background.png</texture>
                     </control>
                     <control type="image">
                         <description>Item Thumb</description>
-                        <posx>5</posx>
-                        <posy>5</posy>
-                        <width>142</width>
-                        <height>76</height>
+                        <posx>1</posx>
+                        <posy>1</posy>
+                        <width>220</width>
+                        <height>126</height>
                         <aspectratio>keep</aspectratio>
                         <texture>$INFO[ListItem.Art(thumb)]</texture>
                     </control>
                     <control type="image">
-                        <posx>2</posx>
-                        <posy>2</posy>
-                        <width>148</width>
-                        <height>82</height>
-                        <texture>MNSkinFiles/GlowPanelItem.png</texture>
-                    </control>
-                    <control type="label">
-                        <posx>76</posx>
-                        <posy>83</posy>
-                        <width>132</width>
-                        <height>15</height>
-                        <font>OnDemand12B</font>
-                        <align>center</align>
-                        <aligny>center</aligny>
-                        <textcolor>blue</textcolor>
-                        <label>$INFO[ListItem.Label] - $INFO[ListItem.Duration] Min</label>
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>222</width>
+                        <height>128</height>
+                        <texture>MNSkinFiles/preview_frame.png</texture>
                     </control>
                 </focusedlayout>
             </control>
@@ -305,7 +249,7 @@
                 <posy>0</posy>
                 <width>1280</width>
                 <height>720</height>
-                <texture>MNSkinFiles/background.png</texture>
+                <texture>background.png</texture>
             </control>
             <control type="videowindow">
                 <posx>0</posx>

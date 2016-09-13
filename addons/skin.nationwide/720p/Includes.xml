@@ -64,6 +64,26 @@
 		<texturenofocus>-</texturenofocus>
 		<pulseonselect>false</pulseonselect>
 	</include>
+	<include name="MNButton">
+		<width>306</width>
+		<height>43</height>
+		<font>Button20</font>
+		<onfocus>-</onfocus>
+		<texturefocus>MNSkinFiles/button.png</texturefocus>
+		<texturenofocus>MNSkinFiles/button.png</texturenofocus>
+		<align>center</align>
+		<focusedcolor>black</focusedcolor>
+	</include>
+	<include name="MNButtonSettings">
+		<width>306</width>
+		<height>30</height>
+		<font>Button20</font>
+		<onfocus>-</onfocus>
+		<texturefocus>MNSkinFiles/button.png</texturefocus>
+		<texturenofocus>MNSkinFiles/button.png</texturenofocus>
+		<align>center</align>
+		<focusedcolor>black</focusedcolor>
+	</include>
 	<include name="ButtonMediaSubCommonValues">
 		<height>40</height>
 		<width>221</width>
