@@ -65,6 +65,7 @@ CGUIWindowMN::CGUIWindowMN()
 , m_RefreshRunning(false)
 , m_AboutUp(false)
 , m_testServersPopup(false)
+, m_testServers(false)
 , m_client(NULL)
 {
   Create();
