@@ -309,15 +309,15 @@
 					</control>
 					<control type="label">
 						<description>header label</description>
-						<posx>105</posx>
+						<posx>55</posx>
 						<posy>10</posy>
-						<width>200</width>
+						<width>300</width>
 						<height>30</height>
 						<font>Button20</font>
 						<label>Network Test Results</label>
 						<align>center</align>
 						<aligny>center</aligny>
-						<textcolor>blue</textcolor>
+						<textcolor>white</textcolor>
 					</control>
 					<control type="grouplist" id="90146">
 						<posx>5</posx>
