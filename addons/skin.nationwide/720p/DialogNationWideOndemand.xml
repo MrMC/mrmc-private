@@ -18,24 +18,17 @@
           <posy>0</posy>
           <width>1280</width>
           <height>720</height>
-          <texture>MNSkinFiles/VerticalOnDemandMN.png</texture>
+          <texture>MNSkinFiles/OnDemandV.png</texture>
         </control>
         <!-- Horizontal Layout -->
         <control type="group">
-            <visible>!system.getbool(mn.vertical)</visible>
-            <control type="image">
-              <posx>64</posx>
-              <posy>150</posy>
-              <width>1152</width>
-              <height>536</height>
-              <texture>MNSkinFiles/ListArea.png</texture>
-            </control>  
+            <visible>!system.getbool(mn.vertical)</visible> 
             <control type="list" id="50">
                 <posx>70</posx>
                 <posy>80</posy>
                 <width>690</width>
                 <height>495</height>
-                <onleft>1050</onleft>
+                <onleft>80102</onleft>
                 <onright>1050</onright>
                 <onup>50</onup>
                 <ondown>50</ondown>
@@ -47,7 +40,7 @@
                         <posy>0</posy>
                         <width>400</width>
                         <height>40</height>
-                        <texture>MNSkinFiles/button.png</texture>
+                        <texture>MNSkinFiles/buttonSelected.png</texture>
                     </control>
                     <control type="label">
                         <posx>13</posx>
@@ -76,8 +69,8 @@
                         <width>390</width>
                         <height>30</height>
                         <font>Button20</font>
-                        <textcolor>black</textcolor>
-                        <selectedcolor>black</selectedcolor>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
                         <align>left</align>
                         <aligny>center</aligny>
                         <label>$INFO[ListItem.Label]</label>
@@ -88,91 +81,65 @@
         <!-- Vertical Layout -->
         <control type="group">
             <visible>system.getbool(mn.vertical)</visible>
-            <control type="image">
-              <posx>963</posx>
-              <posy>61.5</posy>
-              <width>60</width>
-              <height>596</height>
-              <texture>MNSkinFiles/verticalBannerArea.png</texture>
-            </control> 
-            <control type="image">
-              <posx>60</posx>
-              <posy>55</posy>
-              <width>970</width>
-              <height>609</height>
-              <texture>MNSkinFiles/verticalListArea.png</texture>
-            </control>
             <control type="group">
                 <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-                  <effect type="slide" start="0,0" end="46,227" time="0" />
+                  <effect type="slide" start="0,0" end="46,177" time="0" />
                   <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
                 </animation>
-                <control type="label">
-                    <posy>62</posy>
-                    <posx>100</posx>
-                    <width>500</width>
-                    <height>40</height>
-                    <font>OnDemand36B</font>
-                    <textcolor>black</textcolor>
-                    <scroll>false</scroll>
-                    <align>left</align>
-                    <aligny>center</aligny>
-                    <label>On Demand</label>
-                </control>
                 <control type="panel" id="50">
-                    <posx>90</posx>
-                    <posy>135</posy>
-                    <width>620</width>
-                    <height>250</height>
+                    <posx>120</posx>
+                    <posy>105</posy>
+                    <width>690</width>
+                    <height>205</height>
                     <onleft>1050</onleft>
                     <onright>1050</onright>
                     <onup>50</onup>
                     <ondown>50</ondown>
                     <viewtype label="535">list</viewtype>
                     <scrolltime>200</scrolltime>
-                    <orientation>vertical</orientation>
-                    <itemlayout height="50.2" width="302">
-                        <control type="image">
-                            <posx>3</posx>
-                            <posy>3</posy>
-                            <width>295</width>
-                            <height>42</height>
-                            <texture>MNSkinFiles/verticalSelectionArea.png</texture>
-                        </control>
-                        <control type="label">
-                            <posx>13</posx>
-                            <posy>8</posy>
-                            <width>426</width>
-                            <height>30</height>
-                            <font>OnDemand20B</font>
-                            <textcolor>black</textcolor>
-                            <selectedcolor>black</selectedcolor>
-                            <align>left</align>
-                            <aligny>center</aligny>
-                            <label>$INFO[ListItem.Label]</label>
-                        </control>
-                    </itemlayout>
-                    <focusedlayout height="50.2" width="302">
-                        <control type="image">
-                            <posx>0</posx>
-                            <posy>0</posy>
-                            <width>301</width>
-                            <height>48</height>
-                            <texture>MNSkinFiles/glowVerticalSelectionArea.png</texture>
-                        </control>
-                        <control type="label">
-                            <posx>13</posx>
-                            <posy>8</posy>
-                            <width>426</width>
-                            <height>30</height>
-                            <font>OnDemand20B</font>
-                            <textcolor>blue</textcolor>
-                            <selectedcolor>white</selectedcolor>
-                            <align>left</align>
-                            <aligny>center</aligny>
-                            <label>$INFO[ListItem.Label]</label>
-                        </control>
-                    </focusedlayout>
+                    <!-- <orientation>vertical</orientation> -->
+                <itemlayout height="50.2" width="340">
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>340</width>
+                        <height>40</height>
+                        <texture>MNSkinFiles/buttonSelected.png</texture>
+                    </control>
+                    <control type="label">
+                        <posx>13</posx>
+                        <posy>5</posy>
+                        <width>330</width>
+                        <height>30</height>
+                        <font>Label18</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
+                        <align>left</align>
+                        <aligny>center</aligny>
+                        <label>$INFO[ListItem.Label]</label>
+                    </control>
+                </itemlayout>
+                <focusedlayout height="50.2" width="340">
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>340</width>
+                        <height>40</height>
+                        <texture>MNSkinFiles/button.png</texture>
+                    </control>
+                    <control type="label">
+                        <posx>13</posx>
+                        <posy>5</posy>
+                        <width>330</width>
+                        <height>30</height>
+                        <font>Label18</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
+                        <align>left</align>
+                        <aligny>center</aligny>
+                        <label>$INFO[ListItem.Label]</label>
+                    </control>
+                </focusedlayout>
                 </control>
             </control>   
         </control>        
@@ -188,7 +155,7 @@
                 <width>800</width>
                 <height>560</height>
                 <onleft>50</onleft>
-                <onright>50</onright>
+                <onright>80101</onright>
                 <onup>1050</onup>
                 <ondown>1050</ondown>
                 <viewtype label="">list</viewtype>
@@ -240,6 +207,62 @@
                         <texture>MNSkinFiles/preview_frame.png</texture>
                     </control>
                 </focusedlayout>
+            </control>
+        </control>
+        <control type="group">
+            <visible>!system.getbool(mn.vertical)</visible>
+            <control type="button" id="80101">
+                <description>Network Test</description>
+                <posx>550</posx>
+                <posy>635</posy>
+                <label>Return to Playlist</label>
+                <onleft>50</onleft>
+                <onright>80102</onright>
+                <onup>1050</onup>
+                <ondown>1050</ondown>
+                <include>MNButtonSettings</include>
+            </control>
+            <control type="button" id="80102">
+                <description>Back</description>
+                <posx>900</posx>
+                <posy>635</posy>
+                <label>Return to Main Menu</label>
+                <onleft>80101</onleft>
+                <onright>50</onright>
+                <onup>1050</onup>
+                <ondown>1050</ondown>
+                <include>MNButtonSettings</include>
+                <onclick>back</onclick>
+            </control>
+        </control>
+        <control type="group">
+            <visible>system.getbool(mn.vertical)</visible>
+            <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
+              <effect type="slide" start="0,0" end="-225,-240" time="0" />
+              <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
+            </animation>
+            <control type="button" id="80101">
+                <description>Network Test</description>
+                <posx>550</posx>
+                <posy>635</posy>
+                <label>Return to Playlist</label>
+                <onleft>50</onleft>
+                <onright>80102</onright>
+                <onup>1050</onup>
+                <ondown>1050</ondown>
+                <include>MNButtonSettings</include>
+            </control>
+            <control type="button" id="80102">
+                <description>Back</description>
+                <posx>900</posx>
+                <posy>635</posy>
+                <label>Return to Main Menu</label>
+                <onleft>80101</onleft>
+                <onright>50</onright>
+                <onup>1050</onup>
+                <ondown>1050</ondown>
+                <include>MNButtonSettings</include>
+                <onclick>back</onclick>
             </control>
         </control>
         <control type="group">

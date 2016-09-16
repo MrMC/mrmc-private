@@ -35,6 +35,7 @@
 #include "settings/MediaSettings.h"
 #include "messaging/ApplicationMessenger.h"
 
+#define PLAYLIST_BUTTON             80101
 #define ONDEMAND_ITEM_LIST          1050
 #define ONDEMAND_CATEGORY_LIST      50
 
@@ -43,6 +44,7 @@ NWGroupPlaylist CGUIWindowMNDemand::m_GroupPlayList;
 
 CGUIWindowMNDemand::CGUIWindowMNDemand()
 : CGUIWindow(WINDOW_MEMBERNET_DEMAND, "DialogNationWideOndemand.xml")
+, m_client(NULL)
 {
   m_loadType = KEEP_IN_MEMORY;
   m_MNDemand = this;
@@ -98,6 +100,11 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
         KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_PLAY, 0);
         return true;
       }
+      if (iControl == PLAYLIST_BUTTON)
+      {
+        if (m_client)
+          m_client->PlayNext();
+      }
     }
 //    case GUI_MSG_WINDOW_DEINIT:
 //    {
@@ -116,6 +123,11 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
 
 void CGUIWindowMNDemand::OnInitWindow()
 {
+  if (!m_client)
+  {
+    m_client = new CNWClient();
+    m_client->Startup();
+  }
   CGUIWindow::OnInitWindow();
 }
 
