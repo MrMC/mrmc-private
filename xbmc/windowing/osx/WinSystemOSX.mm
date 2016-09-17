@@ -336,6 +336,7 @@ bool CWinSystemOSX::CreateNewWindow(const std::string& name, bool fullScreen, RE
   [NSAnimationContext beginGrouping];
   [[NSAnimationContext currentContext] setCompletionHandler: ^{
     [appWindow makeKeyWindow];
+    [appWindow setMovable:YES];
   }];
 
   // for native fullscreen we always want to set the same windowed flags
