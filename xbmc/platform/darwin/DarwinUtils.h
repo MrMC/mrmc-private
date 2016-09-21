@@ -66,6 +66,7 @@ public:
   static void        DumpAudioDescriptions(const std::string& why);
   static std::string GetHardwareUUID();
   static void        GetAppMemory(int64_t &free, int64_t &delta);
+  static std::string GetHardwareSerialNumber(void);
 };
 
 #endif

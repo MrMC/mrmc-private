@@ -57,7 +57,7 @@ if [ "$ACTION" == build ] || [ "$ACTION" == install ]; then
   LANGSYNC="rsync -aq ${PLATFORM} ${BUILDSRC} ${BUILDSYS} --exclude resource.uisounds*"
 
   # rsync command for including everything but the skins
-  DEFAULTSKIN_EXCLUDES="--exclude addons/skin.mrmc --exclude addons/skin.re-touched --exclude addons/skin.amber --exclude addons/skin.pm3.hd --exclude addons/skin.sio2"
+  DEFAULTSKIN_EXCLUDES="--exclude addons/skin.mrmc --exclude addons/skin.re-touched --exclude addons/skin.amber --exclude addons/skin.pm3.hd --exclude addons/skin.sio2 --exclude addons/skin.nationwide"
   ADDONSYNC="rsync -aq ${PLATFORM} ${BUILDSRC} ${BUILDDBG} ${DEFAULTSKIN_EXCLUDES} --exclude addons/lib --exclude addons/share  --exclude *changelog.* --exclude *library.*/*.h --exclude *library.*/*.cpp --exclude *xml.in"
 
   # binary name is MrMC but we build MrMC so to get a clean binary each time
@@ -83,26 +83,9 @@ if [ "$ACTION" == build ] || [ "$ACTION" == install ]; then
 
   # always sync skin.mrmc
   package_skin "${SYNC}" "$SRCROOT/addons/skin.mrmc"
+  # and move nwmn skin in as well
+  package_skin "${SYNC}" "$SRCROOT/addons/skin.nationwide"
 
-  # sync touch skin if it exists
-  if [ -f "$SRCROOT/addons/skin.re-touched/addon.xml" ] && [ "$PLATFORM_NAME" == "iphoneos" ]; then
-    package_skin "${SYNC}" "$SRCROOT/addons/skin.re-touched"
-  fi
-
-  # sync amber skin if tvos
-  if [ -f "$SRCROOT/addons/skin.amber/addon.xml" ] && [ "$PLATFORM_NAME" == "appletvos" ]; then
-    package_skin "${SYNC}" "$SRCROOT/addons/skin.amber"
-  fi
-
-    # sync pm3.hd skin if tvos
-  if [ -f "$SRCROOT/addons/skin.pm3.hd/addon.xml" ] && [ "$PLATFORM_NAME" == "appletvos" ]; then
-    package_skin "${SYNC}" "$SRCROOT/addons/skin.pm3.hd"
-  fi
-
-  # sync sio2 skin if tvos
-  if [ -f "$SRCROOT/addons/skin.sio2/addon.xml" ] && [ "$PLATFORM_NAME" == "appletvos" ]; then
-    package_skin "${SYNC}" "$SRCROOT/addons/skin.sio2"
-  fi
 
   # fixups, addons might have silly symlinks because cmake is stupid, remove them
   # rsync can be strange so we manually do these fixes.

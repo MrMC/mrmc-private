@@ -111,6 +111,9 @@
 #include "network/GUIDialogAccessPoints.h"
 #endif
 
+#include "nwmn/CGUIWindowMN.h"
+#include "nwmn/CGUIWindowMNDemand.h"
+
 /* PVR related include Files */
 #include "pvr/PVRManager.h"
 #include "pvr/windows/GUIWindowPVRChannels.h"
@@ -234,6 +237,9 @@ void CGUIWindowManager::CreateWindows()
   Add(new CGUIDialogMediaFilter);
   Add(new CGUIDialogSubtitles);
 
+  Add(new CGUIWindowMN);
+  Add(new CGUIWindowMNDemand);
+
   Add(new CGUIWindowMusicPlayList);
   Add(new CGUIWindowMusicNav);
   Add(new CGUIWindowMusicPlaylistEditor);
@@ -330,6 +336,9 @@ bool CGUIWindowManager::DestroyWindows()
     Delete(WINDOW_DIALOG_SLIDER);
     Delete(WINDOW_DIALOG_MEDIA_FILTER);
     Delete(WINDOW_DIALOG_SUBTITLES);
+
+    Delete(WINDOW_MEMBERNET);
+    Delete(WINDOW_MEMBERNET_DEMAND);
 
     /* Delete PVR related windows and dialogs */
     Delete(WINDOW_TV_CHANNELS);

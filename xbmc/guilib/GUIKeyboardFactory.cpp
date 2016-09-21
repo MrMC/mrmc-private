@@ -99,8 +99,12 @@ bool CGUIKeyboardFactory::ShowAndGetInput(std::string& aTextString, CVariant hea
     headingStr = g_localizeStrings.Get((uint32_t)heading.asInteger());
 
 #if defined(TARGET_DARWIN_TVOS)
-  if (g_Windowing.GetCurrentScreen() == 0)
-    kb = new CMainKeyboard();
+  // we want our keyboard here on MemberNet
+  if (0)
+  {
+    if (g_Windowing.GetCurrentScreen() == 0)
+      kb = new CMainKeyboard();
+  }
 #elif defined(TARGET_DARWIN_IOS)
   if (g_Windowing.GetCurrentScreen() == 0)
     kb = new CIOSKeyboard();

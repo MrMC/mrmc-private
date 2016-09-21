@@ -25,6 +25,9 @@
 #include "guilib/GUIWindowManager.h"
 #include "utils/log.h"
 
+#include "settings/SkinSettings.h"
+#include "settings/Settings.h"
+
 CGUIWindowSplash::CGUIWindowSplash(void) : CGUIWindow(WINDOW_SPLASH, "")
 {
   m_loadType = LOAD_ON_GUI_INIT;
@@ -39,6 +42,8 @@ CGUIWindowSplash::~CGUIWindowSplash(void)
 void CGUIWindowSplash::OnInitWindow()
 {
   std::string splashImage = "special://home/media/Splash.png";
+  if (CSettings::GetInstance().GetBool(CSettings::MN_VERTICAL))
+    splashImage = "special://xbmc/media/SplashVertical.png";
   if (!XFILE::CFile::Exists(splashImage))
     splashImage = "special://xbmc/media/Splash.png";
 
