@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT([mrmc], [16.0.992], [http://mrmc.tv])
+AC_INIT([MemberNetTV], [16.0.000], [http://mrmc.tv])
 AC_CONFIG_HEADERS([xbmc/config.h])
 AH_TOP([#pragma once])
 m4_include([m4/ax_prog_cc_for_build.m4])
@@ -2114,9 +2114,7 @@ fi
 OUTPUT_FILES="$OUTPUT_FILES Makefile"
 OUTPUT_FILES="$OUTPUT_FILES Makefile.include"
 OUTPUT_FILES="$OUTPUT_FILES addons/skin.mrmc/media/Makefile"
-OUTPUT_FILES="$OUTPUT_FILES addons/skin.amber/media/Makefile"
-OUTPUT_FILES="$OUTPUT_FILES addons/skin.pm3.hd/media/Makefile"
-OUTPUT_FILES="$OUTPUT_FILES addons/skin.sio2/media/Makefile"
+OUTPUT_FILES="$OUTPUT_FILES addons/skin.nationwide/media/Makefile"
 
 OUTPUT_FILES="$OUTPUT_FILES lib/libUPnP/Makefile"
 
@@ -2179,7 +2177,6 @@ OUTPUT_FILES="$OUTPUT_FILES tools/darwin/packaging/osx/mkdmg-osx.sh"
 
 OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/darwin/osx/Info.plist"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/darwin/ios/Info.plist"
-OUTPUT_FILES="$OUTPUT_FILES TopShelf/Info.plist"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/darwin/tvos/Info.plist"
 else
 OUTPUT_FILES="$OUTPUT_FILES tools/Linux/${APP_NAME_LC}.sh"

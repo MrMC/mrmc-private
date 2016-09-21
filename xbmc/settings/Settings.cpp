@@ -477,6 +477,12 @@ const std::string CSettings::SETTING_SERVICES_PLEXGDMSERVER = "plex.gdmserver";
 const std::string CSettings::SETTING_SERVICES_PLEXUPDATEMINS = "plex.updatetime";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH = "plex.myplexauthtoken";
 
+// NWMN settings strings
+const std::string CSettings::MN_URL = "mn.url_feed";
+const std::string CSettings::MN_MACHINE_ID = "mn.machine_id";
+const std::string CSettings::MN_LOCATION_ID = "mn.location_id";
+const std::string CSettings::MN_VERTICAL = "mn.vertical";
+
 CSettings::CSettings()
   : m_initialized(false)
 {
@@ -982,7 +988,7 @@ void CSettings::InitializeDefaults()
   default_touch_skin = CAndroidFeatures::HasTouchScreen();
 #endif
   if (default_touch_skin)
-    ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->SetDefault("skin.re-touched");
+    ((CSettingAddon*)m_settingsManager->GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->SetDefault("skin.nationwide");
 #endif
 
 #if defined(TARGET_POSIX)
