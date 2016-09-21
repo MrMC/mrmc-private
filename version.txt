@@ -1,6 +1,6 @@
-APP_NAME MrMC
-APP_PACKAGE tv.mrmc.mrmc
-COMPANY_NAME Team-MrMC
+APP_NAME MemberNetTV
+APP_PACKAGE tv.mrmc.membernet
+COMPANY_NAME Rootcoder, LLC.
 WEBSITE http://mrmc.tv
 VERSION_MAJOR 2
 VERSION_MINOR 6

@@ -5,7 +5,7 @@
       <group id="1">
         <setting id="lookandfeel.skin" type="addon" label="166" help="36103">
           <level>0</level>
-          <default>skin.mrmc</default>
+          <default>skin.nationwide</default>
           <constraints>
             <addontype>xbmc.gui.skin</addontype>
           </constraints>
@@ -286,6 +286,90 @@
           </dependencies>
           <control type="list" format="string" />
         </setting>
+      </group>
+    </category>
+        <category id="MN" label="membernet" help="">
+      <group id="1">
+        <setting id="mn.location_id" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>10140003</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_id" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1147</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.url_feed" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>http://www.nationwidemember.com</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_description" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>Some description</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_ethernet_id" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1234567890</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_hw_version" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>abcde</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_name" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>Name of Machine</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_purchase_date" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>09/03/2012</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_sn" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1234567890</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_vendor" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>Dummy</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.machine_warrenty_nr" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1234567890</default>
+          <control type="edit" format="string" />
+        </setting> 
+        <setting id="mn.machine_wireless_id" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>1234567890</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.settings_cf_bundle_version" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>0.2.5a</default>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="mn.settings_update_interval" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>123456</default>
+          <control type="edit" format="string" />
+        </setting>  
+         <setting id="mn.settings_update_time" type="string" label="20026" help="36115">
+          <level>0</level>
+          <default>123456</default>
+          <control type="edit" format="string" />
+        </setting> 
+        <setting id="mn.vertical" type="boolean" label="20026" help="36115">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>       
       </group>
     </category>
     <category id="filelists" label="14081" help="36121">
@@ -2138,7 +2222,7 @@
       <group id="1">
         <setting id="services.devicename" type="string" label="1271" help="36321">
           <level>0</level>
-          <default>MrMC</default>
+          <default>MemberNetTV</default>
           <control type="edit" format="string" />
         </setting>
         <setting id="services.uuid" type="string" label="" help="">
@@ -2507,7 +2591,7 @@
       <group id="1">
         <setting id="services.webserver" type="boolean" label="263" help="36328">
           <level>0</level>
-          <default>false</default>
+          <default>true</default>
           <control type="toggle" />
         </setting>
         <setting id="services.webserverport" type="integer" parent="services.webserver" label="730" help="36329">
@@ -2525,7 +2609,7 @@
         </setting>
         <setting id="services.webserverusername" type="string" parent="services.webserver" label="1048" help="36330">
           <level>0</level>
-          <default>mrmc</default>
+          <default>membernet</default>
           <constraints>
             <allowempty>true</allowempty>
           </constraints>
@@ -2552,7 +2636,7 @@
         </setting>
         <setting id="services.webskin" type="addon" label="199" help="36332">
           <level>1</level>
-          <default>webinterface.default</default>
+          <default>webinterface.nationwide_membernet</default>
           <constraints>
             <addontype>xbmc.webinterface</addontype>
           </constraints>
