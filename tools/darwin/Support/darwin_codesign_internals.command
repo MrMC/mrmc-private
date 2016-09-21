@@ -12,11 +12,11 @@ if ! [ -z "${CODE_SIGN_IDENTITY}" ] && [ "${CODE_SIGN_IDENTITY}" != "Don't Code 
   fi
 
   # todo: pull from xxx.app/Info.plist
-  BUNDLEID="tv.mrmc.mrmc.osx"
+  BUNDLEID="tv.mrmc.membernet"
   if [ "${PLATFORM_NAME}" == "iphoneos" ]; then
-    BUNDLEID="tv.mrmc.mrmc.ios"
+    BUNDLEID="tv.mrmc.membernet"
   elif [ "${PLATFORM_NAME}" == "appletvos" ]; then
-    BUNDLEID="tv.mrmc.mrmc.tvos"
+    BUNDLEID="tv.mrmc.membernet"
   fi
   echo "CFBundleIdentifier is ${BUNDLEID}"
   echo "${CODE_SIGN_IDENTITY_FOR_ITEMS}"

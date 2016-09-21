@@ -3100,6 +3100,9 @@
 		F5E55B66107412DE006E788A /* GUIDialogTeletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B65107412DE006E788A /* GUIDialogTeletext.cpp */; };
 		F5E55B7010741340006E788A /* Teletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B6E10741340006E788A /* Teletext.cpp */; };
 		F5E56BA61082A675006E788A /* PosixMountProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E56BA51082A675006E788A /* PosixMountProvider.cpp */; };
+		F5E9E7A31D98311D0012044B /* NWClientUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */; };
+		F5E9E7A41D98311D0012044B /* NWClientUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */; };
+		F5E9E7A51D98311D0012044B /* NWClientUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */; };
 		F5EA02260F6DA990005C2EC5 /* CocoaPowerSyscall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5EA02200F6DA85C005C2EC5 /* CocoaPowerSyscall.cpp */; };
 		F5EA02270F6DA9A5005C2EC5 /* PowerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5EA021A0F6DA7E8005C2EC5 /* PowerManager.cpp */; };
 		F5ED908815538DCE00842059 /* XBMCTinyXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5ED908615538DCE00842059 /* XBMCTinyXML.cpp */; };
@@ -3113,6 +3116,27 @@
 		F5F244651110DC6B009126C6 /* FileOperationJob.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F244641110DC6B009126C6 /* FileOperationJob.cpp */; };
 		F5F245EE1112C9AB009126C6 /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F245EC1112C9AB009126C6 /* FileUtils.cpp */; };
 		F5F2EF4B0E593E0D0092C37F /* DVDFileInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F2EF4A0E593E0D0092C37F /* DVDFileInfo.cpp */; };
+		F5F7594C1D91B0F100D3BCB2 /* CGUIWindowMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759391D91B0F100D3BCB2 /* CGUIWindowMN.cpp */; };
+		F5F7594D1D91B0F100D3BCB2 /* CGUIWindowMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759391D91B0F100D3BCB2 /* CGUIWindowMN.cpp */; };
+		F5F7594E1D91B0F100D3BCB2 /* CGUIWindowMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759391D91B0F100D3BCB2 /* CGUIWindowMN.cpp */; };
+		F5F7594F1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */; };
+		F5F759501D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */; };
+		F5F759511D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */; };
+		F5F759581D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */; };
+		F5F759591D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */; };
+		F5F7595A1D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */; };
+		F5F7595B1D91B0F100D3BCB2 /* NWClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759421D91B0F100D3BCB2 /* NWClient.cpp */; };
+		F5F7595C1D91B0F100D3BCB2 /* NWClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759421D91B0F100D3BCB2 /* NWClient.cpp */; };
+		F5F7595D1D91B0F100D3BCB2 /* NWClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759421D91B0F100D3BCB2 /* NWClient.cpp */; };
+		F5F7595E1D91B0F100D3BCB2 /* NWMediaManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759441D91B0F100D3BCB2 /* NWMediaManager.cpp */; };
+		F5F7595F1D91B0F100D3BCB2 /* NWMediaManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759441D91B0F100D3BCB2 /* NWMediaManager.cpp */; };
+		F5F759601D91B0F100D3BCB2 /* NWMediaManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759441D91B0F100D3BCB2 /* NWMediaManager.cpp */; };
+		F5F759611D91B0F100D3BCB2 /* NWPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759461D91B0F100D3BCB2 /* NWPlayer.cpp */; };
+		F5F759621D91B0F100D3BCB2 /* NWPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759461D91B0F100D3BCB2 /* NWPlayer.cpp */; };
+		F5F759631D91B0F100D3BCB2 /* NWPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759461D91B0F100D3BCB2 /* NWPlayer.cpp */; };
+		F5F759641D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */; };
+		F5F759651D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */; };
+		F5F759661D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */; };
 		F5F8E1E80E427F6700A8E96F /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F8E1E60E427F6700A8E96F /* md5.cpp */; };
 		F5FDF51D0E7218950005B0A6 /* AsyncFileCopy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FDF51C0E7218950005B0A6 /* AsyncFileCopy.cpp */; };
 /* End PBXBuildFile section */
@@ -4089,7 +4113,7 @@
 		889B4D8C0E0EF86C00FAD25E /* RSSDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RSSDirectory.cpp; sourceTree = "<group>"; };
 		889B4D8D0E0EF86C00FAD25E /* RSSDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSSDirectory.h; sourceTree = "<group>"; };
 		88ECB6580DE013C4003396A7 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = /System/Library/Frameworks/DiskArbitration.framework; sourceTree = "<absolute>"; };
-		8DD76F7E0486A8DE00D96B5E /* MrMC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MrMC; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76F7E0486A8DE00D96B5E /* MemberNetTV */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MemberNetTV; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE4E87A517354C4A00D15206 /* XSLTUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XSLTUtils.cpp; sourceTree = "<group>"; };
 		AE4E87A617354C4A00D15206 /* XSLTUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XSLTUtils.h; sourceTree = "<group>"; };
 		AE84CB5915A5B8A600A3810E /* TagLibVFSStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TagLibVFSStream.cpp; sourceTree = "<group>"; };
@@ -4211,7 +4235,7 @@
 		C8D0B2AE1265A9A800F0C0AC /* SystemGlobals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SystemGlobals.cpp; sourceTree = "<group>"; };
 		C8EC5D0C1369519D00CCC10D /* XBMC_keytable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XBMC_keytable.cpp; sourceTree = "<group>"; };
 		C8EC5D0D1369519D00CCC10D /* XBMC_keytable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBMC_keytable.h; sourceTree = "<group>"; };
-		D6299ABB1AFC2A9F00E3059D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF00492B162DAEA200A971AD /* PVROperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVROperations.cpp; sourceTree = "<group>"; };
 		DF00492C162DAEA200A971AD /* PVROperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVROperations.h; sourceTree = "<group>"; };
 		DF02BA601A910623006DCA16 /* VideoSyncIos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoSyncIos.cpp; path = videosync/VideoSyncIos.cpp; sourceTree = "<group>"; };
@@ -4987,7 +5011,7 @@
 		E46F7C2B0F77219700C25D29 /* ZeroconfOSX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZeroconfOSX.h; sourceTree = "<group>"; };
 		E46F7C2C0F77219700C25D29 /* ZeroconfOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZeroconfOSX.cpp; sourceTree = "<group>"; };
 		E47252BF175115F9001C1AAA /* darwin_codesign_internals.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = darwin_codesign_internals.command; sourceTree = "<group>"; };
-		E4991089174D0D2600741B6D /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4991089174D0D2600741B6D /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E499108D174D0D2600741B6D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-iOS.xcconfig"; sourceTree = "<group>"; };
 		E49910D1174E2E0000741B6D /* App-OSX.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-OSX.xcconfig"; sourceTree = "<group>"; };
@@ -5543,7 +5567,7 @@
 		F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DictionaryUtils.mm; sourceTree = "<group>"; };
 		F5D13EBA1BAA17890075A95C /* DictionaryUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DictionaryUtils.h; sourceTree = "<group>"; };
 		F5D13EC01BAE3C060075A95C /* GUIInfoLabels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GUIInfoLabels.h; sourceTree = "<group>"; };
-		F5D142651BAF0B6D0075A95C /* MrMC.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MrMC.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5D142651BAF0B6D0075A95C /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5D142901BAF29E20075A95C /* App-TVOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-TVOS.xcconfig"; sourceTree = "<group>"; };
 		F5D142931BAF31FB0075A95C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F5D142991BAF31FB0075A95C /* English */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -5616,6 +5640,8 @@
 		F5E55B6F10741340006E788A /* TeletextDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TeletextDefines.h; sourceTree = "<group>"; };
 		F5E56BA41082A675006E788A /* PosixMountProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PosixMountProvider.h; sourceTree = "<group>"; };
 		F5E56BA51082A675006E788A /* PosixMountProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixMountProvider.cpp; sourceTree = "<group>"; };
+		F5E9E7A11D982F760012044B /* NWClientUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWClientUtilities.h; sourceTree = "<group>"; };
+		F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWClientUtilities.cpp; sourceTree = "<group>"; };
 		F5EA021A0F6DA7E8005C2EC5 /* PowerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PowerManager.cpp; sourceTree = "<group>"; };
 		F5EA021B0F6DA7E8005C2EC5 /* PowerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PowerManager.h; sourceTree = "<group>"; };
 		F5EA02200F6DA85C005C2EC5 /* CocoaPowerSyscall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CocoaPowerSyscall.cpp; sourceTree = "<group>"; };
@@ -5634,6 +5660,20 @@
 		F5F245ED1112C9AB009126C6 /* FileUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileUtils.h; sourceTree = "<group>"; };
 		F5F2EF490E593E0D0092C37F /* DVDFileInfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DVDFileInfo.h; sourceTree = "<group>"; };
 		F5F2EF4A0E593E0D0092C37F /* DVDFileInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = DVDFileInfo.cpp; sourceTree = "<group>"; };
+		F5F759391D91B0F100D3BCB2 /* CGUIWindowMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CGUIWindowMN.cpp; sourceTree = "<group>"; };
+		F5F7593A1D91B0F100D3BCB2 /* CGUIWindowMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGUIWindowMN.h; sourceTree = "<group>"; };
+		F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CGUIWindowMNDemand.cpp; sourceTree = "<group>"; };
+		F5F7593C1D91B0F100D3BCB2 /* CGUIWindowMNDemand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGUIWindowMNDemand.h; sourceTree = "<group>"; };
+		F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNJSONOperations.cpp; sourceTree = "<group>"; };
+		F5F759411D91B0F100D3BCB2 /* MNJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNJSONOperations.h; sourceTree = "<group>"; };
+		F5F759421D91B0F100D3BCB2 /* NWClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWClient.cpp; sourceTree = "<group>"; };
+		F5F759431D91B0F100D3BCB2 /* NWClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWClient.h; sourceTree = "<group>"; };
+		F5F759441D91B0F100D3BCB2 /* NWMediaManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWMediaManager.cpp; sourceTree = "<group>"; };
+		F5F759451D91B0F100D3BCB2 /* NWMediaManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWMediaManager.h; sourceTree = "<group>"; };
+		F5F759461D91B0F100D3BCB2 /* NWPlayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWPlayer.cpp; sourceTree = "<group>"; };
+		F5F759471D91B0F100D3BCB2 /* NWPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWPlayer.h; sourceTree = "<group>"; };
+		F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWTVAPI.cpp; sourceTree = "<group>"; };
+		F5F759491D91B0F100D3BCB2 /* NWTVAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWTVAPI.h; sourceTree = "<group>"; };
 		F5F8E1E60E427F6700A8E96F /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
 		F5F8E1E70E427F6700A8E96F /* md5.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
 		F5FDF51B0E7218950005B0A6 /* AsyncFileCopy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AsyncFileCopy.h; sourceTree = "<group>"; };
@@ -6179,10 +6219,10 @@
 		19C28FBDFE9D53C911CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76F7E0486A8DE00D96B5E /* MrMC */,
-				D6299ABB1AFC2A9F00E3059D /* MrMC.app */,
-				E4991089174D0D2600741B6D /* MrMC.app */,
-				F5D142651BAF0B6D0075A95C /* MrMC.app */,
+				8DD76F7E0486A8DE00D96B5E /* MemberNetTV */,
+				D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */,
+				E4991089174D0D2600741B6D /* MemberNetTV.app */,
+				F5D142651BAF0B6D0075A95C /* MemberNetTV.app */,
 				18AC31ED1C49445D00AE9433 /* TopShelf.appex */,
 			);
 			name = Products;
@@ -7821,6 +7861,7 @@
 				DF4A3BAC1B4B0FC100F9CDC0 /* messaging */,
 				18B7C853129423A7009E7A26 /* music */,
 				431376F212D6449100680C15 /* network */,
+				F5F759381D91B0F100D3BCB2 /* nwmn */,
 				F5E1050C140AA38000175026 /* peripherals */,
 				4313767E12D63EC200680C15 /* pictures */,
 				F59045261BA372A600DB589A /* platform */,
@@ -9513,6 +9554,29 @@
 			name = playercorefactory;
 			sourceTree = "<group>";
 		};
+		F5F759381D91B0F100D3BCB2 /* nwmn */ = {
+			isa = PBXGroup;
+			children = (
+				F5F759391D91B0F100D3BCB2 /* CGUIWindowMN.cpp */,
+				F5F7593A1D91B0F100D3BCB2 /* CGUIWindowMN.h */,
+				F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */,
+				F5F7593C1D91B0F100D3BCB2 /* CGUIWindowMNDemand.h */,
+				F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */,
+				F5F759411D91B0F100D3BCB2 /* MNJSONOperations.h */,
+				F5F759421D91B0F100D3BCB2 /* NWClient.cpp */,
+				F5F759431D91B0F100D3BCB2 /* NWClient.h */,
+				F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */,
+				F5E9E7A11D982F760012044B /* NWClientUtilities.h */,
+				F5F759441D91B0F100D3BCB2 /* NWMediaManager.cpp */,
+				F5F759451D91B0F100D3BCB2 /* NWMediaManager.h */,
+				F5F759461D91B0F100D3BCB2 /* NWPlayer.cpp */,
+				F5F759471D91B0F100D3BCB2 /* NWPlayer.h */,
+				F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */,
+				F5F759491D91B0F100D3BCB2 /* NWTVAPI.h */,
+			);
+			path = nwmn;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -9533,9 +9597,9 @@
 			productReference = 18AC31ED1C49445D00AE9433 /* TopShelf.appex */;
 			productType = "com.apple.product-type.tv-app-extension";
 		};
-		6E2FACBA0E26DF7A00DF79EA /* MrMC.app */ = {
+		6E2FACBA0E26DF7A00DF79EA /* MemberNetTV.app */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MrMC.app" */;
+			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MemberNetTV.app" */;
 			buildPhases = (
 				F5DEC3580E6DEBB2005A4E24 /* package root files */,
 				6E2FACC70E26E22400DF79EA /* package dylibs */,
@@ -9546,9 +9610,9 @@
 			dependencies = (
 				6E2FACC40E26E08100DF79EA /* PBXTargetDependency */,
 			);
-			name = MrMC.app;
+			name = MemberNetTV.app;
 			productName = Kodi.app;
-			productReference = D6299ABB1AFC2A9F00E3059D /* MrMC.app */;
+			productReference = D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 		8DD76F740486A8DE00D96B5E /* MrMC */ = {
@@ -9567,7 +9631,7 @@
 			name = MrMC;
 			productInstallPath = "$(HOME)/bin";
 			productName = Kodi;
-			productReference = 8DD76F7E0486A8DE00D96B5E /* MrMC */;
+			productReference = 8DD76F7E0486A8DE00D96B5E /* MemberNetTV */;
 			productType = "com.apple.product-type.tool";
 		};
 		E4991088174D0D2600741B6D /* MrMC-iOS */ = {
@@ -9589,7 +9653,7 @@
 			);
 			name = "MrMC-iOS";
 			productName = "Kodi-iOS";
-			productReference = E4991089174D0D2600741B6D /* MrMC.app */;
+			productReference = E4991089174D0D2600741B6D /* MemberNetTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 		F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */ = {
@@ -9613,7 +9677,7 @@
 			);
 			name = "MrMC-TVOS";
 			productName = MrMC;
-			productReference = F5D142651BAF0B6D0075A95C /* MrMC.app */;
+			productReference = F5D142651BAF0B6D0075A95C /* MemberNetTV.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -9665,7 +9729,7 @@
 			projectRoot = "";
 			targets = (
 				8DD76F740486A8DE00D96B5E /* MrMC */,
-				6E2FACBA0E26DF7A00DF79EA /* MrMC.app */,
+				6E2FACBA0E26DF7A00DF79EA /* MemberNetTV.app */,
 				E4991088174D0D2600741B6D /* MrMC-iOS */,
 				F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */,
 				18AC31EC1C49445D00AE9433 /* TopShelf */,
@@ -9946,6 +10010,7 @@
 				E38E1F370D25F9FD00618676 /* Application.cpp in Sources */,
 				399442771A8DD920006C39E9 /* VideoLibraryProgressJob.cpp in Sources */,
 				E38E1F3D0D25F9FD00618676 /* AutoSwitch.cpp in Sources */,
+				F5F7594C1D91B0F100D3BCB2 /* CGUIWindowMN.cpp in Sources */,
 				E38E1F3E0D25F9FD00618676 /* BackgroundInfoLoader.cpp in Sources */,
 				DF4BF0151A4EF30F0053AC56 /* cc_decoder.c in Sources */,
 				E38E1F570D25F9FD00618676 /* DllLoaderContainer.cpp in Sources */,
@@ -9955,6 +10020,7 @@
 				E38E1F790D25F9FD00618676 /* DVDAudio.cpp in Sources */,
 				E38E1F7A0D25F9FD00618676 /* DVDClock.cpp in Sources */,
 				E38E1F7B0D25F9FD00618676 /* DVDAudioCodecFFmpeg.cpp in Sources */,
+				F5F7595E1D91B0F100D3BCB2 /* NWMediaManager.cpp in Sources */,
 				E38E1F840D25F9FD00618676 /* DVDCodecUtils.cpp in Sources */,
 				F5B7250A1C7E150C006432AE /* sha1.cpp in Sources */,
 				E38E1F850D25F9FD00618676 /* DVDFactoryCodec.cpp in Sources */,
@@ -9999,6 +10065,7 @@
 				F5B722AB1C7BBFBF006432AE /* EncoderFFmpeg.cpp in Sources */,
 				E38E1FE90D25F9FD00618676 /* LinuxRendererGL.cpp in Sources */,
 				E38E1FEC0D25F9FD00618676 /* RenderManager.cpp in Sources */,
+				F5F759641D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */,
 				E38E1FF00D25F9FD00618676 /* VideoFilterShader.cpp in Sources */,
 				E38E1FF10D25F9FD00618676 /* YUV2RGBShader.cpp in Sources */,
 				E38E1FF70D25F9FD00618676 /* CueDocument.cpp in Sources */,
@@ -10016,6 +10083,7 @@
 				E38E200B0D25F9FD00618676 /* DllLibCurl.cpp in Sources */,
 				E38E200E0D25F9FD00618676 /* File.cpp in Sources */,
 				F5B723AD1C7C9C1A006432AE /* AudioDSPSettings.cpp in Sources */,
+				F5E9E7A31D98311D0012044B /* NWClientUtilities.cpp in Sources */,
 				E38E20130D25F9FD00618676 /* FileFactory.cpp in Sources */,
 				E38E20230D25F9FD00618676 /* FTPDirectory.cpp in Sources */,
 				E38E20240D25F9FD00618676 /* FTPParse.cpp in Sources */,
@@ -10061,6 +10129,7 @@
 				E38E20610D25F9FD00618676 /* DirectoryNodeEpisodes.cpp in Sources */,
 				F5B724901C7E150C006432AE /* archive.cpp in Sources */,
 				E38E20630D25F9FD00618676 /* DirectoryNodeMoviesOverview.cpp in Sources */,
+				F5F7595B1D91B0F100D3BCB2 /* NWClient.cpp in Sources */,
 				E38E20640D25F9FD00618676 /* DirectoryNodeMusicVideosOverview.cpp in Sources */,
 				E38E20650D25F9FD00618676 /* DirectoryNodeOverview.cpp in Sources */,
 				E38E20660D25F9FD00618676 /* DirectoryNodeRecentlyAddedEpisodes.cpp in Sources */,
@@ -10321,6 +10390,7 @@
 				43348AA4107747CD00F859CF /* Edl.cpp in Sources */,
 				43348AAE1077486D00F859CF /* PlayerCoreFactory.cpp in Sources */,
 				43348AAF1077486D00F859CF /* PlayerSelectionRule.cpp in Sources */,
+				F5F759611D91B0F100D3BCB2 /* NWPlayer.cpp in Sources */,
 				7CAA20511079C8160096DE39 /* BaseRenderer.cpp in Sources */,
 				55D3604E1826CAB900DA66D2 /* OverlayRendererGUI.cpp in Sources */,
 				F5E56BA61082A675006E788A /* PosixMountProvider.cpp in Sources */,
@@ -10536,6 +10606,7 @@
 				18ECC96213CF178D00A9ED6C /* StreamUtils.cpp in Sources */,
 				F5CEE60913D3C89700225F72 /* DVDOverlayCodecTX3G.cpp in Sources */,
 				38F4E57013CCCB3B00664821 /* Implementation.cpp in Sources */,
+				F5F759581D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */,
 				3802709A13D5A653009493DD /* SystemClock.cpp in Sources */,
 				DFAB049813F8376700B70BFB /* InertialScrollingHandler.cpp in Sources */,
 				F5B723891C7C9AF6006432AE /* RarDirectory.cpp in Sources */,
@@ -10829,6 +10900,7 @@
 				7CF0504B190A1D7200222135 /* FFmpeg.cpp in Sources */,
 				F5B7234D1C7C9928006432AE /* InputCodingTableKorean.cpp in Sources */,
 				F5B724BC1C7E150C006432AE /* filefn.cpp in Sources */,
+				F5F7594F1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */,
 				7CF05056191195DA00222135 /* MediaType.cpp in Sources */,
 				7CC7B6B31918699000DDB120 /* GUIDialogSettingsBase.cpp in Sources */,
 				7CC7B6B61918699000DDB120 /* GUIDialogSettingsManagerBase.cpp in Sources */,
@@ -11105,6 +11177,7 @@
 				F5B723F41C7CA014006432AE /* DetectDVDType.cpp in Sources */,
 				E4991226174E5D5A00741B6D /* RenderManager.cpp in Sources */,
 				F5B723DB1C7C9F76006432AE /* ContextMenuAddon.cpp in Sources */,
+				F5F759501D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */,
 				E4991227174E5D5A00741B6D /* DummyVideoPlayer.cpp in Sources */,
 				E4991228174E5D6100741B6D /* Database.cpp in Sources */,
 				E4991229174E5D6100741B6D /* dataset.cpp in Sources */,
@@ -11236,6 +11309,7 @@
 				F5B722AC1C7BBFBF006432AE /* EncoderFFmpeg.cpp in Sources */,
 				E49912AA174E5D9900741B6D /* SAPDirectory.cpp in Sources */,
 				E49912AB174E5D9900741B6D /* SAPFile.cpp in Sources */,
+				F5F7594D1D91B0F100D3BCB2 /* CGUIWindowMN.cpp in Sources */,
 				E49912AC174E5D9900741B6D /* SFTPDirectory.cpp in Sources */,
 				E49912AD174E5D9900741B6D /* SFTPFile.cpp in Sources */,
 				E49912AE174E5D9900741B6D /* ShoutcastFile.cpp in Sources */,
@@ -11350,6 +11424,7 @@
 				E4991306174E5DAD00741B6D /* GUIMultiSelectText.cpp in Sources */,
 				F5B723E31C7C9FAF006432AE /* PluginSource.cpp in Sources */,
 				3994427B1A8DD920006C39E9 /* VideoLibraryScanningJob.cpp in Sources */,
+				F5F759591D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */,
 				E4991307174E5DAD00741B6D /* GUIPanelContainer.cpp in Sources */,
 				E4991308174E5DAD00741B6D /* GUIProgressControl.cpp in Sources */,
 				E4991309174E5DAD00741B6D /* GUIRadioButtonControl.cpp in Sources */,
@@ -11408,6 +11483,7 @@
 				E499134F174E5EBE00741B6D /* ApplicationOperations.cpp in Sources */,
 				E4991350174E5EBE00741B6D /* AudioLibrary.cpp in Sources */,
 				F5B723441C7C98B7006432AE /* DVDVideoCodecLibMpeg2.cpp in Sources */,
+				F5E9E7A41D98311D0012044B /* NWClientUtilities.cpp in Sources */,
 				F59045721BA372A600DB589A /* IOSScreenManager.mm in Sources */,
 				F5B7236F1C7C9A51006432AE /* ActiveAEDSP.cpp in Sources */,
 				E4991351174E5EBE00741B6D /* FavouritesOperations.cpp in Sources */,
@@ -11418,6 +11494,7 @@
 				E4991355174E5EBE00741B6D /* InputOperations.cpp in Sources */,
 				E4991356174E5EBE00741B6D /* JSONRPC.cpp in Sources */,
 				E4991357174E5EBE00741B6D /* JSONServiceDescription.cpp in Sources */,
+				F5F7595F1D91B0F100D3BCB2 /* NWMediaManager.cpp in Sources */,
 				E4991358174E5EBE00741B6D /* PlayerOperations.cpp in Sources */,
 				F5D13EBE1BAE388E0075A95C /* DictionaryUtils.mm in Sources */,
 				E4991359174E5EBE00741B6D /* PlaylistOperations.cpp in Sources */,
@@ -11472,6 +11549,7 @@
 				E49913A4174E5F2100741B6D /* HTTPJsonRpcHandler.cpp in Sources */,
 				F5B7240F1C7CA242006432AE /* PVRSettings.cpp in Sources */,
 				F5B723B81C7C9C34006432AE /* GUIDialogAudioDSPSettings.cpp in Sources */,
+				F5F7595C1D91B0F100D3BCB2 /* NWClient.cpp in Sources */,
 				E49913A5174E5F2100741B6D /* HTTPVfsHandler.cpp in Sources */,
 				E49913A6174E5F2100741B6D /* HTTPWebinterfaceAddonsHandler.cpp in Sources */,
 				E49913A7174E5F2100741B6D /* HTTPWebinterfaceHandler.cpp in Sources */,
@@ -11567,6 +11645,7 @@
 				E49913F4174E5FB000741B6D /* PVRChannel.cpp in Sources */,
 				E49913F5174E5FB000741B6D /* PVRChannelGroup.cpp in Sources */,
 				F5D5F2EC1C2083B700E3FE8B /* darwinICMPPing.m in Sources */,
+				F5F759621D91B0F100D3BCB2 /* NWPlayer.cpp in Sources */,
 				E49913F6174E5FB000741B6D /* PVRChannelGroupInternal.cpp in Sources */,
 				E49913F7174E5FB000741B6D /* PVRChannelGroups.cpp in Sources */,
 				E49913F8174E5FB000741B6D /* PVRChannelGroupsContainer.cpp in Sources */,
@@ -11881,6 +11960,7 @@
 				7CCDA109192753E30074CF51 /* PltDatagramStream.cpp in Sources */,
 				7CCDA112192753E30074CF51 /* PltDeviceData.cpp in Sources */,
 				7CCDA11B192753E30074CF51 /* PltDeviceHost.cpp in Sources */,
+				F5F759651D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */,
 				7CCDA124192753E30074CF51 /* PltEvent.cpp in Sources */,
 				7CCDA12D192753E30074CF51 /* PltHttp.cpp in Sources */,
 				7CCDA136192753E30074CF51 /* PltHttpClientTask.cpp in Sources */,
@@ -12077,6 +12157,7 @@
 				F5D13F111BAF0B6D0075A95C /* DVDSubtitleParserSSA.cpp in Sources */,
 				F5D13F121BAF0B6D0075A95C /* DVDSubtitlesLibass.cpp in Sources */,
 				F5D13F131BAF0B6D0075A95C /* DVDSubtitleParserMicroDVD.cpp in Sources */,
+				F5F759631D91B0F100D3BCB2 /* NWPlayer.cpp in Sources */,
 				F5D13F141BAF0B6D0075A95C /* DVDSubtitleParserMPL2.cpp in Sources */,
 				F5D13F151BAF0B6D0075A95C /* DVDSubtitleParserSami.cpp in Sources */,
 				F5D13F161BAF0B6D0075A95C /* PngIO.cpp in Sources */,
@@ -12182,6 +12263,7 @@
 				F5D13F691BAF0B6D0075A95C /* GUIDialogTextViewer.cpp in Sources */,
 				F5D13F6A1BAF0B6D0075A95C /* GUIDialogVolumeBar.cpp in Sources */,
 				F5B722F91C7C894F006432AE /* Builtins.cpp in Sources */,
+				F5F759601D91B0F100D3BCB2 /* NWMediaManager.cpp in Sources */,
 				F5D13F6B1BAF0B6D0075A95C /* GUIDialogYesNo.cpp in Sources */,
 				F5D13F6C1BAF0B6D0075A95C /* AddonsDirectory.cpp in Sources */,
 				F5D13F6D1BAF0B6D0075A95C /* CacheStrategy.cpp in Sources */,
@@ -12191,6 +12273,7 @@
 				F5D13F711BAF0B6D0075A95C /* DAVDirectory.cpp in Sources */,
 				F5D13F721BAF0B6D0075A95C /* DAVFile.cpp in Sources */,
 				F5D13F741BAF0B6D0075A95C /* Directory.cpp in Sources */,
+				F5F759511D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */,
 				F5D13F751BAF0B6D0075A95C /* DirectoryCache.cpp in Sources */,
 				F5D13F761BAF0B6D0075A95C /* DirectoryFactory.cpp in Sources */,
 				F5D13F771BAF0B6D0075A95C /* DirectoryHistory.cpp in Sources */,
@@ -12299,6 +12382,7 @@
 				F5A4F2A91BB086FE0083FC69 /* libexif.cpp in Sources */,
 				F5D13FD01BAF0B6D0075A95C /* DirectoryNodeRecentlyAddedMusicVideos.cpp in Sources */,
 				F5D13FD11BAF0B6D0075A95C /* DirectoryNodeRoot.cpp in Sources */,
+				F5F7595D1D91B0F100D3BCB2 /* NWClient.cpp in Sources */,
 				F5D13FD21BAF0B6D0075A95C /* DirectoryNodeSeasons.cpp in Sources */,
 				F5D13FD31BAF0B6D0075A95C /* XbtDirectory.cpp in Sources */,
 				F5D13FD41BAF0B6D0075A95C /* DirectoryNodeTitleMovies.cpp in Sources */,
@@ -12566,6 +12650,7 @@
 				F5D140BA1BAF0B6D0075A95C /* PlayListWPL.cpp in Sources */,
 				F5D140BB1BAF0B6D0075A95C /* PlayListXML.cpp in Sources */,
 				F5D140BC1BAF0B6D0075A95C /* SmartPlayList.cpp in Sources */,
+				F5F759661D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */,
 				F5D140BD1BAF0B6D0075A95C /* CocoaPowerSyscall.cpp in Sources */,
 				F5D140BE1BAF0B6D0075A95C /* DPMSSupport.cpp in Sources */,
 				F5D140BF1BAF0B6D0075A95C /* PowerManager.cpp in Sources */,
@@ -12618,6 +12703,7 @@
 				F5D140E71BAF0B6D0075A95C /* GUIControlSettings.cpp in Sources */,
 				F5B724B81C7E150C006432AE /* filcreat.cpp in Sources */,
 				F5B723B91C7C9C34006432AE /* GUIDialogAudioDSPSettings.cpp in Sources */,
+				F5E9E7A51D98311D0012044B /* NWClientUtilities.cpp in Sources */,
 				F5D140E81BAF0B6D0075A95C /* GUIDialogContentSettings.cpp in Sources */,
 				F5B7251E1C7E150C006432AE /* system.cpp in Sources */,
 				F5D140E91BAF0B6D0075A95C /* GUIWindowSettings.cpp in Sources */,
@@ -12862,6 +12948,7 @@
 				F5D141B71BAF0B6D0075A95C /* SettingConditions.cpp in Sources */,
 				F5D141B81BAF0B6D0075A95C /* SettingDependency.cpp in Sources */,
 				F5B7226C1C7BBDD2006432AE /* DVDInputStreamBluray.cpp in Sources */,
+				F5F7594E1D91B0F100D3BCB2 /* CGUIWindowMN.cpp in Sources */,
 				F5D141B91BAF0B6D0075A95C /* SettingRequirement.cpp in Sources */,
 				F5D141BA1BAF0B6D0075A95C /* SettingSection.cpp in Sources */,
 				F5D141BB1BAF0B6D0075A95C /* SettingsManager.cpp in Sources */,
@@ -12885,6 +12972,7 @@
 				F5D141CB1BAF0B6D0075A95C /* CoreAudioHelpers.cpp in Sources */,
 				F5D141CC1BAF0B6D0075A95C /* FFmpeg.cpp in Sources */,
 				F5D141CD1BAF0B6D0075A95C /* MediaType.cpp in Sources */,
+				F5F7595A1D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */,
 				F5D141CE1BAF0B6D0075A95C /* GUIDialogSettingsBase.cpp in Sources */,
 				F5B723F81C7CA014006432AE /* IoSupport.cpp in Sources */,
 				F5D141CF1BAF0B6D0075A95C /* GUIDialogSettingsManagerBase.cpp in Sources */,
@@ -13173,7 +13261,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = "";
 				ZERO_LINK = NO;
@@ -13209,7 +13297,7 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = "";
 				ZERO_LINK = NO;
@@ -13247,7 +13335,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -13258,7 +13346,7 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				SDKROOT = macosx;
 				ZERO_LINK = NO;
 			};
@@ -13353,7 +13441,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = appletvos;
 				STRIP_STYLE = "non-global";
@@ -13385,7 +13473,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_NAME = MrMC;
+				PRODUCT_NAME = MemberNetTV;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = appletvos;
 				SKIP_INSTALL = NO;
@@ -13426,7 +13514,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MrMC.app" */ = {
+		6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MemberNetTV.app" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6E2FACBB0E26DF7A00DF79EA /* Debug */,

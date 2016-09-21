@@ -41,6 +41,8 @@
 #include "TextureOperations.h"
 #include "SettingsOperations.h"
 
+#include "nwmn/MNJSONOperations.h"
+
 using namespace JSONRPC;
 
 std::map<std::string, CVariant> CJSONServiceDescription::m_notifications = std::map<std::string, CVariant>();
@@ -233,7 +235,9 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
 
 // XBMC operations
   { "XBMC.GetInfoLabels",                           CXBMCOperations::GetInfoLabels },
-  { "XBMC.GetInfoBooleans",                         CXBMCOperations::GetInfoBooleans }
+  { "XBMC.GetInfoBooleans",                         CXBMCOperations::GetInfoBooleans },
+
+  { "MN.SaveSettings",                              CMNJSONOperations::SetPlayerSettings }
 };
 
 JSONSchemaTypeDefinition::JSONSchemaTypeDefinition()

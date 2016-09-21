@@ -426,6 +426,12 @@ public:
   static const std::string SETTING_SERVICES_PLEXUPDATEMINS;
   static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
 
+  // NWMN settings strings
+  static const std::string MN_URL;
+  static const std::string MN_MACHINE_ID;
+  static const std::string MN_LOCATION_ID;
+  static const std::string MN_VERTICAL;
+
   /*!
    \brief Creates a new settings wrapper around a new settings manager.
 
