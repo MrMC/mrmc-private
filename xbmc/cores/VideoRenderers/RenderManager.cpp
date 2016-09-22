@@ -113,6 +113,7 @@ CXBMCRenderManager::CXBMCRenderManager()
   m_bReconfigured = false;
   m_hasCaptures = false;
   m_displayLatency = 0.0f;
+  m_videoDelay = 0;
   m_presentcorr = 0.0;
   m_presenterr = 0.0;
   memset(&m_errorbuff, 0, ERRORBUFFSIZE);
@@ -162,63 +163,6 @@ static double wrap(double x, double minimum, double maximum)
   if(x > maximum)
     x -= maximum - minimum;
   return x;
-}
-
-void CXBMCRenderManager::WaitPresentTime(double presenttime)
-{
-  double frametime;
-  double fps = g_VideoReferenceClock.GetRefreshRate(&frametime);
-  if(fps <= 0)
-  {
-    /* smooth video not enabled */
-    m_dvdClock->WaitAbsoluteClock(presenttime * DVD_TIME_BASE);
-    return;
-  }
-
-  if(m_dvdClock && m_dvdClock->GetSpeedAdjust() != 0.0)
-  {
-    m_dvdClock->WaitAbsoluteClock(presenttime * DVD_TIME_BASE);
-    m_presenterr = 0;
-    m_presentcorr = 0;
-    return;
-  }
-
-  double clock     = m_dvdClock->WaitAbsoluteClock(presenttime * DVD_TIME_BASE) / DVD_TIME_BASE;
-  double target    = 0.5;
-  double error     = ( clock - presenttime ) / frametime - target;
-
-  m_presenterr     = error;
-
-  // correct error so it targets the closest vblank
-  error = wrap(error, 0.0 - target, 1.0 - target);
-
-  // scale the error used for correction,
-  // based on how much buffer we have on
-  // that side of the target
-  if(error > 0)
-    error /= 2.0 * (1.0 - target);
-  if(error < 0)
-    error /= 2.0 * (0.0 + target);
-
-  //save error in the buffer
-  m_errorindex = (m_errorindex + 1) % ERRORBUFFSIZE;
-  m_errorbuff[m_errorindex] = error;
-
-  //get the average error from the buffer
-  double avgerror = 0.0;
-  for (int i = 0; i < ERRORBUFFSIZE; i++)
-    avgerror += m_errorbuff[i];
-
-  avgerror /= ERRORBUFFSIZE;
-
-
-  //we change the clock speed slightly
-  //to make every frame's presenttime end up in the middle of two vblanks
-  //integral correction, clamp to -0.5:0.5 range
-  m_presentcorr = std::max(std::min(m_presentcorr + avgerror * 0.01, 0.1), -0.1);
-  g_VideoReferenceClock.SetFineAdjust(1.0 - avgerror * 0.01 - m_presentcorr * 0.01);
-
-  //printf("%f %f % 2.0f%% % f % f\n", presenttime, clock, m_presentcorr * 100, error, error_org);
 }
 
 std::string CXBMCRenderManager::GetVSyncState()
@@ -306,6 +250,7 @@ bool CXBMCRenderManager::Configure(unsigned int width, unsigned int height, unsi
     m_sleeptime = 1.0;
     m_presentevent.notifyAll();
     m_renderedOverlay = false;
+    m_fps == fps;
 
     CLog::Log(LOGDEBUG, "CXBMCRenderManager::Configure - %d", m_QueueSize);
   }
@@ -360,14 +305,8 @@ void CXBMCRenderManager::FrameMove()
     {
       if(!m_queued.empty())
       {
-        double timestamp = GetPresentTime();
-        SPresent& m = m_Queue[m_presentsource];
-        SPresent& q = m_Queue[m_queued.front()];
-        if(timestamp > m.timestamp + (q.timestamp - m.timestamp) * 0.5)
-        {
-          m_presentstep = PRESENT_READY;
-          m_presentevent.notifyAll();
-        }
+        m_presentstep = PRESENT_READY;
+        m_presentevent.notifyAll();
       }
     }
 
@@ -382,7 +321,7 @@ void CXBMCRenderManager::FrameMove()
     }
 
     /* release all previous */
-    for(std::deque<int>::iterator it = m_discard.begin(); it != m_discard.end(); )
+    for (std::deque<int>::iterator it = m_discard.begin(); it != m_discard.end(); )
     {
       // renderer may want to keep the frame for postprocessing
       if (!m_pRenderer->NeedBufferForRef(*it) || !m_bRenderGUI)
@@ -397,43 +336,6 @@ void CXBMCRenderManager::FrameMove()
     }
 
     m_bRenderGUI = true;
-  }
-}
-
-void CXBMCRenderManager::FrameFinish()
-{
-  /* wait for this present to be valid */
-  SPresent& m = m_Queue[m_presentsource];
-
-  if(g_graphicsContext.IsFullScreenVideo())
-  {
-    CSingleExit lock(g_graphicsContext);
-    WaitPresentTime(m.timestamp);
-  }
-
-  m_clock_framefinish = GetPresentTime();
-
-  { CSingleLock lock(m_presentlock);
-
-    if(m_presentstep == PRESENT_FRAME)
-    {
-      if( m.presentmethod == PRESENT_METHOD_BOB
-      ||  m.presentmethod == PRESENT_METHOD_WEAVE)
-        m_presentstep = PRESENT_FRAME2;
-      else
-        m_presentstep = PRESENT_IDLE;
-    }
-    else if(m_presentstep == PRESENT_FRAME2)
-      m_presentstep = PRESENT_IDLE;
-
-
-    if(m_presentstep == PRESENT_IDLE)
-    {
-      if(!m_queued.empty())
-        m_presentstep = PRESENT_READY;
-    }
-
-    m_presentevent.notifyAll();
   }
 }
 
@@ -675,7 +577,7 @@ void CXBMCRenderManager::SetViewMode(int iViewMode)
   g_dataCacheCore.SignalVideoInfoChange();
 }
 
-void CXBMCRenderManager::FlipPage(volatile std::atomic_bool& bStop, double timestamp /* = 0LL*/, double pts /* = 0 */, int source /*= -1*/, EFIELDSYNC sync /*= FS_NONE*/)
+void CXBMCRenderManager::FlipPage(volatile std::atomic_bool& bStop, double pts /* = 0 */, int source /*= -1*/, EFIELDSYNC sync /*= FS_NONE*/)
 {
   { CSharedLock lock(m_sharedSection);
 
@@ -729,10 +631,6 @@ void CXBMCRenderManager::FlipPage(volatile std::atomic_bool& bStop, double times
       }
     }
 
-    /* failsafe for invalid timestamps, to make sure queue always empties */
-    if(timestamp > GetPresentTime() + 5.0)
-      timestamp = GetPresentTime() + 5.0;
-
     CSingleLock lock2(m_presentlock);
 
     if(m_free.empty())
@@ -742,7 +640,6 @@ void CXBMCRenderManager::FlipPage(volatile std::atomic_bool& bStop, double times
       source = m_free.front();
 
     SPresent& m = m_Queue[source];
-    m.timestamp     = timestamp;
     m.presentfield  = sync;
     m.presentmethod = presentmethod;
     m.pts           = pts;
@@ -825,8 +722,35 @@ void CXBMCRenderManager::Render(bool clear, uint32_t flags, uint32_t alpha, bool
   {
     if (!m_pRenderer->IsGuiLayer())
       m_pRenderer->Update();
+
     m_renderedOverlay = m_overlays.HasOverlay(m_presentsource);
+    //CRect src, dst, view;
+    //m_pRenderer->GetVideoRect(src, dst, view);
+    //m_overlays.SetVideoRect(src, dst, view);
     m_overlays.Render(m_presentsource);
+
+    SPresent& m = m_Queue[m_presentsource];
+
+    { CSingleLock lock(m_presentlock);
+
+      if(m_presentstep == PRESENT_FRAME)
+      {
+        if( m.presentmethod == PRESENT_METHOD_BOB
+           ||  m.presentmethod == PRESENT_METHOD_WEAVE)
+          m_presentstep = PRESENT_FRAME2;
+        else
+          m_presentstep = PRESENT_IDLE;
+      }
+      else if(m_presentstep == PRESENT_FRAME2)
+        m_presentstep = PRESENT_IDLE;
+
+      if(m_presentstep == PRESENT_IDLE)
+      {
+        if(!m_queued.empty())
+          m_presentstep = PRESENT_READY;
+      }
+    }
+    m_presentevent.notifyAll();
   }
 }
 
@@ -1094,7 +1018,7 @@ EINTERLACEMETHOD CXBMCRenderManager::AutoInterlaceMethodInternal(EINTERLACEMETHO
 
 int CXBMCRenderManager::WaitForBuffer(volatile std::atomic_bool& bStop, int timeout)
 {
-  CSingleLock lock2(m_presentlock);
+  CSingleLock lock(m_presentlock);
 
   // check if gui is active and discard buffer if not
   // this keeps videoplayer going
@@ -1102,11 +1026,11 @@ int CXBMCRenderManager::WaitForBuffer(volatile std::atomic_bool& bStop, int time
   {
     m_bRenderGUI = false;
     double presenttime = 0;
-    double clock = GetPresentTime();
+    double clock = m_dvdClock->GetClock();
     if (!m_queued.empty())
     {
       int idx = m_queued.front();
-      presenttime = m_Queue[idx].timestamp;
+      presenttime = m_Queue[idx].pts;
     }
     else
       presenttime = clock + 0.02;
@@ -1115,7 +1039,7 @@ int CXBMCRenderManager::WaitForBuffer(volatile std::atomic_bool& bStop, int time
     if (sleeptime < 0)
       sleeptime = 0;
     sleeptime = std::min(sleeptime, 20);
-    m_presentevent.wait(lock2, sleeptime);
+    m_presentevent.wait(lock, sleeptime);
     DiscardBuffer();
     return 0;
   }
@@ -1123,7 +1047,7 @@ int CXBMCRenderManager::WaitForBuffer(volatile std::atomic_bool& bStop, int time
   XbmcThreads::EndTime endtime(timeout);
   while(m_free.empty())
   {
-    m_presentevent.wait(lock2, std::min(50, timeout));
+    m_presentevent.wait(lock, std::min(50, timeout));
     if(endtime.IsTimePast() || bStop)
     {
       if (timeout != 0 && !bStop)
@@ -1160,55 +1084,77 @@ void CXBMCRenderManager::PrepareNextRender()
     return;
   }
 
-  double clocktime = GetPresentTime();
-  double frametime = 1.0 / GetMaximumFPS();
-  double correction = 0.0;
-  int fps = g_VideoReferenceClock.GetRefreshRate();
-  if((fps > 0) && g_graphicsContext.IsFullScreenVideo() && (clocktime != m_clock_framefinish))
-  {
-    correction = frametime;
-  }
+  double frameOnScreen = m_dvdClock->GetClock();
+  double frametime = 1.0 / g_graphicsContext.GetFPS() * DVD_TIME_BASE;
 
-  /* see if any future queued frames are already due */
-  std::deque<int>::reverse_iterator curr, prev;
-  int idx;
-  curr = prev = m_queued.rbegin();
-  ++prev;
-  while (prev != m_queued.rend())
-  {
-    if(clocktime > m_Queue[*prev].timestamp + correction                 /* previous frame is late */
-    && clocktime > m_Queue[*curr].timestamp - frametime + correction)    /* selected frame is close to it's display time */
-      break;
-    ++curr;
-    ++prev;
-  }
-  idx = *curr;
+  // correct display latency
+  // internal buffers of driver, assume that driver lets us go one frame in advance
+  double totalLatency = DVD_SEC_TO_TIME(m_displayLatency) - DVD_MSEC_TO_TIME(m_videoDelay) + 2* frametime;
 
-  /* in fullscreen we will block after render, but only for MAXPRESENTDELAY */
-  bool next;
-  if(g_graphicsContext.IsFullScreenVideo())
-    next = (m_Queue[idx].timestamp <= clocktime + MAXPRESENTDELAY);
+  double renderPts = frameOnScreen + totalLatency;
+
+  double nextFramePts = m_Queue[m_queued.front()].pts;
+  if (m_dvdClock->GetClockSpeed() < 0)
+    nextFramePts = renderPts;
+
+  if (m_clockSync.m_enabled)
+  {
+    double err = fmod(renderPts - nextFramePts, frametime);
+    m_clockSync.m_error += err;
+    m_clockSync.m_errCount ++;
+    if (m_clockSync.m_errCount > 30)
+    {
+      double average = m_clockSync.m_error / m_clockSync.m_errCount;
+      m_clockSync.m_syncOffset = average;
+      m_clockSync.m_error = 0;
+      m_clockSync.m_errCount = 0;
+
+      m_dvdClock->SetVsyncAdjust(-average);
+    }
+    renderPts += frametime / 2 - m_clockSync.m_syncOffset;
+  }
   else
-    next = (m_Queue[idx].timestamp <= clocktime + frametime);
-
-  //CLog::Log(LOGDEBUG, "CRenderManager - next(%d), clocktime(%f), m_Queue[*curr].timestamp(%f)",
-  //  (int)next, clocktime, m_Queue[idx].timestamp);
-
-  if (next)
   {
-    /* skip late frames */
-    while(m_queued.front() != idx)
+    m_dvdClock->SetVsyncAdjust(0);
+  }
+
+  if (renderPts >= nextFramePts)
+  {
+    // see if any future queued frames are already due
+    auto iter = m_queued.begin();
+    int idx = *iter;
+    ++iter;
+    while (iter != m_queued.end())
+    {
+      // the slot for rendering in time is [pts .. (pts +  x * frametime)]
+      // renderer/drivers have internal queues, being slightliy late here does not mean that
+      // we are really late. The likelihood that we recover decreases the greater m_lateframes
+      // get. Skipping a frame is easier than having decoder dropping one (lateframes > 10)
+      double x = (m_lateframes <= 6) ? 0.98 : 0;
+      if (renderPts < m_Queue[*iter].pts + x * frametime)
+        break;
+      idx = *iter;
+      ++iter;
+    }
+
+    // skip late frames
+    while (m_queued.front() != idx)
     {
       requeue(m_discard, m_queued);
       m_QueueSkip++;
     }
 
-    m_presentstep   = PRESENT_FLIP;
+    int lateframes = (renderPts - m_Queue[idx].pts) * m_fps / DVD_TIME_BASE;
+    if (lateframes)
+      m_lateframes += lateframes;
+    else
+      m_lateframes = 0;
+
+    m_presentstep = PRESENT_FLIP;
     m_discard.push_back(m_presentsource);
     m_presentsource = idx;
     m_queued.pop_front();
-    m_sleeptime = m_Queue[idx].timestamp - clocktime;
-    m_presentpts = m_Queue[idx].pts;
+    m_presentpts = m_Queue[idx].pts - totalLatency;
     m_presentevent.notifyAll();
   }
 }
@@ -1221,17 +1167,15 @@ void CXBMCRenderManager::DiscardBuffer()
   while(!m_queued.empty())
     requeue(m_discard, m_queued);
 
-  m_Queue[m_presentsource].timestamp = GetPresentTime();
-
   if(m_presentstep == PRESENT_READY)
     m_presentstep = PRESENT_IDLE;
   m_presentevent.notifyAll();
 }
 
-bool CXBMCRenderManager::GetStats(double &sleeptime, double &pts, int &queued, int &discard)
+bool CXBMCRenderManager::GetStats(int &lateframes, double &pts, int &queued, int &discard)
 {
   CSingleLock lock(m_presentlock);
-  sleeptime = m_sleeptime;
+  lateframes = m_lateframes / 10;
   pts = m_presentpts;
   queued = m_queued.size();
   discard  = m_discard.size();

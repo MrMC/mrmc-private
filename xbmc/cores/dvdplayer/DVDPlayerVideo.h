@@ -46,17 +46,15 @@ class CDroppingStats
 {
 public:
   void Reset();
-  void AddOutputDropGain(double pts, double frametime);
+  void AddOutputDropGain(double pts, int frames);
   struct CGain
   {
-    double gain;
+    int frames;
     double pts;
   };
   std::deque<CGain> m_gain;
   double m_totalGain;
   double m_lastPts;
-  unsigned int m_lateFrames;
-  unsigned int m_dropRequests;
 };
 
 class CDVDPlayerVideo : public CThread, public IDVDStreamPlayerVideo
@@ -87,11 +85,10 @@ public:
   float GetAspectRatio() { return g_renderManager.GetAspectRatio(); }
 #endif
 
-  double GetDelay() { return m_iVideoDelay; }
-  void SetDelay(double delay) { m_iVideoDelay = delay; }
   double GetSubtitleDelay() { return m_iSubtitleDelay; }
   void SetSubtitleDelay(double delay) { m_iSubtitleDelay = delay; }
   bool IsStalled() const { return m_stalled; }
+  bool IsRewindStalled() const { return m_rewindStalled; }
   bool IsEOS() { return false; }
   bool SubmittedEOS() const { return false; }
   double GetCurrentPts();
@@ -119,18 +116,11 @@ protected:
 #endif
   void OpenStream(CDVDStreamInfo &hint, CDVDVideoCodec* codec);
 
-  // waits until all available data has been rendered
-  // just waiting for packetqueue should be enough for video
-  void WaitForBuffers()  { m_messageQueue.WaitUntilEmpty(); }
-
   void ResetFrameRateCalc();
   void CalcFrameRate();
   int CalcDropRequirement(double pts);
 
-  double m_iVideoDelay;
   double m_iSubtitleDelay;
-  double m_FlipTimeStamp; // time stamp of last flippage. used to play at a forced framerate
-  double m_FlipTimePts;   // pts of the last flipped page
 
   int m_iLateFrames;
   int m_iDroppedFrames;
@@ -167,7 +157,8 @@ protected:
   bool m_bRenderSubs;
   float m_fForcedAspectRatio;
   int m_speed;
-  bool m_stalled;
+  std::atomic_bool m_stalled;
+  std::atomic_bool m_rewindStalled;
   bool m_paused;
   IDVDStreamPlayer::ESyncState m_syncState;
   std::string m_codecname;

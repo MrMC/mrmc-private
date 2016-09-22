@@ -141,7 +141,6 @@ public:
   virtual void CloseStream(bool bWaitForBuffers) = 0;
   virtual bool StepFrame() { return false; };
   virtual void Flush(bool sync) = 0;
-  virtual void WaitForBuffers() = 0;
   virtual bool AcceptsData() const = 0;
   virtual bool HasData() const = 0;
   virtual int  GetLevel() const = 0;
@@ -154,11 +153,10 @@ public:
   virtual void GetVideoRect(CRect& SrcRect, CRect& DestRect, CRect& ViewRect) const = 0;
   virtual float GetAspectRatio() = 0;
 #endif
-  virtual double GetDelay() = 0;
-  virtual void SetDelay(double delay) = 0;
   virtual double GetSubtitleDelay() = 0;
   virtual void SetSubtitleDelay(double delay) = 0;
   virtual bool IsStalled() const = 0;
+  virtual bool IsRewindStalled() const { return false; }
   virtual double GetCurrentPts() = 0;
   virtual double GetOutputDelay() = 0;
   virtual std::string GetPlayerInfo() = 0;
@@ -181,7 +179,6 @@ public:
   virtual void CloseStream(bool bWaitForBuffers) = 0;
   virtual void SetSpeed(int speed) = 0;
   virtual void Flush(bool sync) = 0;
-  virtual void WaitForBuffers() = 0;
   virtual bool AcceptsData() const = 0;
   virtual bool HasData() const = 0;
   virtual int  GetLevel() const = 0;

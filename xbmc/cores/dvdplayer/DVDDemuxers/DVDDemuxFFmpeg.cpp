@@ -243,11 +243,11 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
 
   if( m_pInput->IsStreamType(DVDSTREAM_TYPE_FFMPEG) )
   {
+    CURL url = m_pInput->GetURL();
     // special stream type that makes avformat handle file opening
     // allows internal ffmpeg protocols to be used
-    CURL url = m_pInput->GetURL();
-
     AVDictionary *options = GetFFMpegOptionsFromURL(url);
+
 
     int result=-1;
     if (url.IsProtocol("mms"))
@@ -507,11 +507,39 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
 
   // in case of mpegts and we have not seen pat/pmt, defer creation of streams
   if (!skipCreateStreams || m_pFormatContext->nb_programs > 0)
+  {
     CreateStreams();
+    /*
+    unsigned int nProgram(~0);
+    if (m_pFormatContext->nb_programs > 0)
+    {
+
+      // select the corrrect program if requested
+      CVariant programProp(pInput->GetProperty("program"));
+      if (!programProp.isNull())
+      {
+        int programNumber = programProp.asInteger();
+
+        for (unsigned int i = 0; i < m_pFormatContext->nb_programs; ++i)
+        {
+          if (m_pFormatContext->programs[i]->program_num == programNumber)
+          {
+            nProgram = i;
+            break;
+          }
+        }
+      }
+    }
+    CreateStreams(nProgram);
+    */
+  }
 
   // allow IsProgramChange to return true
   if (skipCreateStreams && GetNrOfStreams() == 0)
     m_program = 0;
+
+  m_displayTime = 0;
+  m_dtsAtDisplayTime = DVD_NOPTS_VALUE;
 
   return true;
 }
@@ -568,6 +596,9 @@ void CDVDDemuxFFmpeg::Flush()
 
   m_pkt.result = -1;
   av_free_packet(&m_pkt.pkt);
+
+  m_displayTime = 0;
+  m_dtsAtDisplayTime = DVD_NOPTS_VALUE;
 }
 
 void CDVDDemuxFFmpeg::Abort()
@@ -821,7 +852,26 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
         pPacket->pts = ConvertTimestamp(m_pkt.pkt.pts, stream->time_base.den, stream->time_base.num);
         pPacket->dts = ConvertTimestamp(m_pkt.pkt.dts, stream->time_base.den, stream->time_base.num);
         pPacket->duration =  DVD_SEC_TO_TIME((double)m_pkt.pkt.duration * stream->time_base.num / stream->time_base.den);
-
+/*
+        CDVDInputStream::IDisplayTime *inputStream = m_pInput->GetIDisplayTime();
+        if (inputStream)
+        {
+          int dispTime = inputStream->GetTime();
+          if (m_displayTime != dispTime)
+          {
+            m_displayTime = dispTime;
+            if (pPacket->dts != DVD_NOPTS_VALUE)
+            {
+              m_dtsAtDisplayTime = pPacket->dts;
+            }
+          }
+          if (m_dtsAtDisplayTime != DVD_NOPTS_VALUE && pPacket->dts != DVD_NOPTS_VALUE)
+          {
+            pPacket->dispTime = m_displayTime;
+            pPacket->dispTime += DVD_TIME_TO_MSEC(pPacket->dts - m_dtsAtDisplayTime);
+          }
+        }
+*/
         // used to guess streamlength
         if (pPacket->dts != DVD_NOPTS_VALUE && (pPacket->dts > m_currentPts || m_currentPts == DVD_NOPTS_VALUE))
           m_currentPts = pPacket->dts;
@@ -858,7 +908,8 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
   if (bReturnEmpty && !pPacket)
     pPacket = CDVDDemuxUtils::AllocateDemuxPacket(0);
 
-  if (!pPacket) return NULL;
+  if (!pPacket)
+    return nullptr;
 
   // check streams, can we make this a bit more simple?
   if (pPacket && pPacket->iStreamId >= 0)
@@ -904,11 +955,16 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
 
 bool CDVDDemuxFFmpeg::SeekTime(int time, bool backwords, double *startpts)
 {
+  bool hitEnd = false;
+
   if (!m_pInput)
     return false;
 
-  if(time < 0)
+  if (time < 0)
+  {
     time = 0;
+    hitEnd = true;
+  }
 
   m_pkt.result = -1;
   av_free_packet(&m_pkt.pkt);
@@ -930,8 +986,8 @@ bool CDVDDemuxFFmpeg::SeekTime(int time, bool backwords, double *startpts)
     return true;
   }
 
-  if(!m_pInput->Seek(0, SEEK_POSSIBLE)
-  && !m_pInput->IsStreamType(DVDSTREAM_TYPE_FFMPEG))
+  if (!m_pInput->Seek(0, SEEK_POSSIBLE) &&
+      !m_pInput->IsStreamType(DVDSTREAM_TYPE_FFMPEG))
   {
     CLog::Log(LOGDEBUG, "%s - input stream reports it is not seekable", __FUNCTION__);
     return false;
@@ -953,7 +1009,7 @@ bool CDVDDemuxFFmpeg::SeekTime(int time, bool backwords, double *startpts)
     else if (ret < 0 && m_pInput->IsEOF())
       ret = 0;
 
-    if(ret >= 0)
+    if (ret >= 0)
       UpdateCurrentPTS();
   }
 
@@ -963,10 +1019,18 @@ bool CDVDDemuxFFmpeg::SeekTime(int time, bool backwords, double *startpts)
     CLog::Log(LOGDEBUG, "%s - seek ended up on time %d", __FUNCTION__, (int)(m_currentPts / DVD_TIME_BASE * 1000));
 
   // in this case the start time is requested time
-  if(startpts)
+  if (startpts)
     *startpts = DVD_MSEC_TO_TIME(time);
 
-  return (ret >= 0);
+  if (ret >= 0)
+  {
+    if (!hitEnd)
+      return true;
+    else
+      return false;
+  }
+  else
+    return false;
 }
 
 bool CDVDDemuxFFmpeg::SeekByte(int64_t pos)
@@ -1093,7 +1157,9 @@ void CDVDDemuxFFmpeg::CreateStreams(unsigned int program)
     {
       // add streams from selected program
       for (unsigned int i = 0; i < m_pFormatContext->programs[m_program]->nb_stream_indexes; i++)
+      {
         AddStream(m_pFormatContext->programs[m_program]->stream_index[i]);
+      }
     }
   }
   else
@@ -1352,8 +1418,10 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
     }
 
 #ifdef HAVE_LIBBLURAY
-    if( m_pInput->IsStreamType(DVDSTREAM_TYPE_BLURAY) )
+    if (m_pInput->IsStreamType(DVDSTREAM_TYPE_BLURAY))
+    {
       static_cast<CDVDInputStreamBluray*>(m_pInput)->GetStreamInfo(pStream->id, stream->language);
+    }
 #endif
     if( m_pInput->IsStreamType(DVDSTREAM_TYPE_DVD) )
     {
@@ -1761,9 +1829,8 @@ void CDVDDemuxFFmpeg::ResetVideoStreams()
     st = m_pFormatContext->streams[i];
     if (st->codec->codec_type == AVMEDIA_TYPE_VIDEO)
     {
-      if (st->codec->extradata)
-        av_free(st->codec->extradata);
-      st->codec->extradata = NULL;
+      av_freep(&st->codec->extradata);
+      st->codec->extradata_size = 0;
       st->codec->width = 0;
     }
   }

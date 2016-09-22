@@ -18,9 +18,9 @@
  *
  */
 
+#include "DVDAudio.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
-#include "DVDAudio.h"
 #include "DVDClock.h"
 #include "DVDCodecs/Audio/DVDAudioCodec.h"
 #include "cores/AudioEngine/AEFactory.h"
@@ -332,9 +332,8 @@ void CDVDAudio::SetResampleMode(int mode)
 
 double CDVDAudio::GetClock()
 {
-  double absolute;
   if (m_pClock)
-    return m_pClock->GetClock(absolute) / DVD_TIME_BASE * 1000;
+    return (m_pClock->GetClock() + m_pClock->GetVsyncAdjust()) / DVD_TIME_BASE * 1000;
   else
     return 0.0;
 }

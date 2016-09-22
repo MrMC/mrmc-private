@@ -737,7 +737,8 @@ void CDVDVideoCodecAVFoundation::StopSampleProvider()
 double CDVDVideoCodecAVFoundation::GetRenderPtsSeconds()
 {
   int queued, discard;
-  double sleepTime, renderPts;
+  int sleepTime;
+  double renderPts;
   g_renderManager.GetStats(sleepTime, renderPts, queued, discard);
 
   return renderPts / DVD_TIME_BASE;

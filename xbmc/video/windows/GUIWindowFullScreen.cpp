@@ -344,7 +344,6 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
 #ifdef HAS_VIDEO_PLAYBACK
       // make sure renderer is uptospeed
       g_renderManager.Update();
-      g_renderManager.FrameFinish();
 #endif
       return true;
     }
@@ -585,7 +584,6 @@ void CGUIWindowFullScreen::RenderEx()
   g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetVideoResolution(), false);
 #ifdef HAS_VIDEO_PLAYBACK
   g_renderManager.Render(false, 0, 255, false);
-  g_renderManager.FrameFinish();
 #endif
 }
 

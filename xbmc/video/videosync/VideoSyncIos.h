@@ -30,7 +30,7 @@ public:
   
   // CVideoSync interface
   virtual bool Setup(PUPDATECLOCK func);
-  virtual void Run(volatile bool& stop);
+  virtual void Run(std::atomic<bool>& stop);
   virtual void Cleanup();
   virtual float GetFps();
   
@@ -46,7 +46,7 @@ private:
   virtual void DeinitDisplayLink();
 
   int64_t m_LastVBlankTime;  //timestamp of the last vblank, used for calculating how many vblanks happened
-  volatile bool m_abort;
+  std::atomic<bool> m_abort;
 };
 
 #endif// TARGET_DARWIN_IOS

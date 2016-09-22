@@ -21,6 +21,7 @@
 #include "DVDDemuxSPU.h"
 #include "DVDClock.h"
 #include "utils/log.h"
+#include "system.h"
 
 #undef ALIGN
 #define ALIGN(value, alignment) (((value)+((alignment)-1))&~((alignment)-1))

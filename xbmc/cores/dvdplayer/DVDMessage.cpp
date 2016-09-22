@@ -19,6 +19,7 @@
  */
 
 #include <algorithm>
+#include "system.h"
 #include "threads/SystemClock.h"
 #include "DVDMessage.h"
 #include "DVDDemuxers/DVDDemuxUtils.h"
@@ -89,13 +90,9 @@ bool CDVDMsgGeneralSynchronize::Wait(unsigned int milliseconds, unsigned int sou
   return true;
 }
 
-void CDVDMsgGeneralSynchronize::Wait(volatile bool *abort, unsigned int source)
+void CDVDMsgGeneralSynchronize::Wait(std::atomic<bool>& abort, unsigned int source)
 {
-  while(!Wait(100, source))
-  {
-    if(abort && *abort)
-      return;
-  }
+  while(!Wait(100, source) && !abort);
 }
 
 long CDVDMsgGeneralSynchronize::Release()
@@ -122,4 +119,12 @@ CDVDMsgDemuxerPacket::~CDVDMsgDemuxerPacket()
 {
   if (m_packet)
     CDVDDemuxUtils::FreeDemuxPacket(m_packet);
+}
+
+unsigned int CDVDMsgDemuxerPacket::GetPacketSize()
+{
+  if (m_packet)
+    return m_packet->iSize;
+  else
+    return 0;
 }

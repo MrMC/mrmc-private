@@ -201,7 +201,7 @@ bool CCoreAudioDevice::RemoveIOProc()
 
   m_IoProc = NULL; // Clear the reference no matter what
 
-  Sleep(100);
+  usleep(100000);
 
   return true;
 }

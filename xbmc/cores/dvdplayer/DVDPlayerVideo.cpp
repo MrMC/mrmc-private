@@ -77,10 +77,7 @@ CDVDPlayerVideo::CDVDPlayerVideo( CDVDClock* pClock
   m_stalled = false;
   m_paused = false;
   m_syncState = IDVDStreamPlayer::SYNC_STARTING;
-  m_iVideoDelay = 0;
   m_iSubtitleDelay = 0;
-  m_FlipTimeStamp = 0.0;
-  m_FlipTimePts = 0.0f; //silence coverity uninitialized warning, is set elsewhere
   m_iLateFrames = 0;
   m_iDroppedRequest = 0;
   m_fForcedAspectRatio = 0;
@@ -198,6 +195,7 @@ void CDVDPlayerVideo::OpenStream(CDVDStreamInfo &hint, CDVDVideoCodec* codec)
   m_pVideoCodec = codec;
   m_hints   = hint;
   m_stalled = m_messageQueue.GetPacketCount(CDVDMsg::DEMUXER_PACKET) == 0;
+  m_rewindStalled = false;
   m_codecname = m_pVideoCodec->GetName();
   m_packets.clear();
   m_syncState = IDVDStreamPlayer::SYNC_STARTING;
@@ -246,8 +244,6 @@ bool CDVDPlayerVideo::AcceptsData() const
 void CDVDPlayerVideo::OnStartup()
 {
   m_iDroppedFrames = 0;
-  m_FlipTimeStamp = m_pClock->GetAbsoluteClock();
-  m_FlipTimePts = 0.0;
 }
 
 void CDVDPlayerVideo::Process()
@@ -265,6 +261,8 @@ void CDVDPlayerVideo::Process()
 
   m_videoStats.Start();
   m_droppingStats.Reset();
+  m_iDroppedFrames = 0;
+  m_rewindStalled = false;
 
   while (!m_bStop)
   {
@@ -329,9 +327,9 @@ void CDVDPlayerVideo::Process()
     {
       pts = static_cast<CDVDMsgDouble*>(pMsg)->m_value;
 
-      m_FlipTimePts = pts -frametime;
       m_syncState = IDVDStreamPlayer::SYNC_INSYNC;
       m_droppingStats.Reset();
+      m_rewindStalled = false;
 
       CLog::Log(LOGDEBUG, "CDVDPlayerVideo - CDVDMsg::GENERAL_RESYNC(%f)", pts);
     }
@@ -348,6 +346,7 @@ void CDVDPlayerVideo::Process()
       m_packets.clear();
       m_droppingStats.Reset();
       m_syncState = IDVDStreamPlayer::SYNC_STARTING;
+      m_rewindStalled = false;
     }
     else if (pMsg->IsType(CDVDMsg::GENERAL_FLUSH)) // private message sent by (CDVDPlayerVideo::Flush())
     {
@@ -357,6 +356,7 @@ void CDVDPlayerVideo::Process()
       m_picture.iFlags &= ~DVP_FLAG_ALLOCATED;
       m_packets.clear();
       pts = 0;
+      m_rewindStalled = false;
 
       m_pullupCorrection.Flush();
       //we need to recalculate the framerate
@@ -437,7 +437,6 @@ void CDVDPlayerVideo::Process()
       {
         if (m_bAllowDrop)
         {
-          m_pullupCorrection.Flush();
           bRequestDrop = true;
         }
       }
@@ -455,6 +454,7 @@ void CDVDPlayerVideo::Process()
       {
         m_iDroppedFrames++;
         iDropped++;
+        m_pullupCorrection.Flush();
       }
 
       if (m_messageQueue.GetDataSize() == 0
@@ -653,7 +653,10 @@ bool CDVDPlayerVideo::ProcessDecoderOutput(int &decoderState, double &frametime,
       }
 
       if ((iResult & EOS_DROPPED) && !(m_picture.iFlags & DVP_FLAG_DROPPED))
+      {
         m_iDroppedFrames++;
+        m_pullupCorrection.Flush();
+      }
     }
     else
     {
@@ -841,7 +844,7 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
   DVDVideoPicture* pPicture = &picture;
 
   /* grab stereo mode from image if available */
-  if(src->stereo_mode[0])
+  if (src->stereo_mode[0] && m_hints.stereo_mode.compare(src->stereo_mode) != 0)
     m_hints.stereo_mode = src->stereo_mode;
 
   /* figure out steremode expected based on user settings and hints */
@@ -944,113 +947,70 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
   }
 
   //try to calculate the framerate
-  CalcFrameRate();
-
-  // remember original pts, we need it later for overlaying subtitles
-  double pts_org = pts;
+  if (!m_stalled)
+    CalcFrameRate();
 
   // signal to clock what our framerate is, it may want to adjust it's
   // speed to better match with our video renderer's output speed
-  double interval;
-  int refreshrate = m_pClock->UpdateFramerate(m_fFrameRate, &interval);
-  if (refreshrate > 0) //refreshrate of -1 means the videoreferenceclock is not running
-  {//when using the videoreferenceclock, a frame is always presented half a vblank interval too late
-    pts -= DVD_TIME_BASE * interval;
-  }
-
-  if (m_output.color_format != RENDER_FMT_BYPASS)
-  {
-    // Correct pts by user set delay and rendering delay
-    pts += m_iVideoDelay - DVD_SEC_TO_TIME(g_renderManager.GetDisplayLatency());
-  }
+  m_pClock->UpdateFramerate(m_fFrameRate);
 
   // calculate the time we need to delay this picture before displaying
-  double iSleepTime, iClockSleep, iFrameSleep, iPlayingClock, iCurrentClock;
+  double iPlayingClock, iCurrentClock;
 
   iPlayingClock = m_pClock->GetClock(iCurrentClock, false); // snapshot current clock
 
-  // correct sleep times based on speed
-  if(m_speed)
-  {
-    iClockSleep = (pts - iPlayingClock) * DVD_PLAYSPEED_NORMAL / m_speed;
-    iFrameSleep = (pts - m_FlipTimePts) * DVD_PLAYSPEED_NORMAL / m_speed - (iCurrentClock - m_FlipTimeStamp);
-  }
-  else
-  {
-    iClockSleep = 0;
-    iFrameSleep = 0;
-  }
-
-  if (m_syncState != IDVDStreamPlayer::SYNC_INSYNC)
-    iSleepTime = 0.0;
-  else if (m_stalled)
-    iSleepTime = iFrameSleep;
-  else
-    iSleepTime = iClockSleep;
-
-  // limit sleep time to 2000ms
-  if (iSleepTime > DVD_MSEC_TO_TIME(2000))
-    iSleepTime = DVD_MSEC_TO_TIME(2000);
-
   if (m_speed < 0)
   {
-    double sleepTime, renderPts;
+    double renderPts;
     int queued, discard;
+    int lateframes;
     double inputPts = m_droppingStats.m_lastPts;
-    g_renderManager.GetStats(sleepTime, renderPts, queued, discard);
-    if (pts_org > renderPts || queued > 0)
+    g_renderManager.GetStats(lateframes, renderPts, queued, discard);
+    if (pts > renderPts || queued > 0)
     {
       if (inputPts >= renderPts)
       {
+        m_rewindStalled = true;
         Sleep(50);
       }
       CLog::Log(LOGDEBUG, "%s - EOS_DROPPED 1", __FUNCTION__);
       return result | EOS_DROPPED;
     }
-    else if (pts_org < iPlayingClock)
+    else if (pts < iPlayingClock)
     {
       CLog::Log(LOGDEBUG, "%s - EOS_DROPPED 2", __FUNCTION__);
       return result | EOS_DROPPED;
     }
-
-    if (iSleepTime > DVD_MSEC_TO_TIME(20))
-      iSleepTime = DVD_MSEC_TO_TIME(20);
   }
   else if (m_speed > DVD_PLAYSPEED_NORMAL)
   {
-    double sleepTime, renderPts;
+    double renderPts;
+    int lateframes;
     int bufferLevel, queued, discard;
-    g_renderManager.GetStats(sleepTime, renderPts, queued, discard);
+    g_renderManager.GetStats(lateframes, renderPts, queued, discard);
     bufferLevel = queued + discard;
 
     // estimate the time it will take for the next frame to get rendered
     // drop the frame if it's late in regard to this estimation
-    double diff = pts_org - renderPts;
+    double diff = pts - renderPts;
     double mindiff = DVD_SEC_TO_TIME(1/m_fFrameRate) * (bufferLevel + 1);
     if (diff < mindiff)
     {
-      m_droppingStats.AddOutputDropGain(pts, 1/m_fFrameRate);
-      CLog::Log(LOGDEBUG, "%s - EOS_DROPPED 3", __FUNCTION__);
+      m_droppingStats.AddOutputDropGain(pts, 1);
       return result | EOS_DROPPED;
     }
   }
 
-  // timestamp when we think next picture should be displayed based on current duration
-  m_FlipTimeStamp  = iCurrentClock;
-  m_FlipTimeStamp += std::max(0.0, iSleepTime);
-  m_FlipTimePts    = pts;
-
   if ((pPicture->iFlags & DVP_FLAG_DROPPED))
   {
-    m_droppingStats.AddOutputDropGain(pts, 1/m_fFrameRate);
+    m_droppingStats.AddOutputDropGain(pts, 1);
     CLog::Log(LOGDEBUG,"%s - dropped in output", __FUNCTION__);
-    CLog::Log(LOGDEBUG, "%s - EOS_DROPPED 4", __FUNCTION__);
     return result | EOS_DROPPED;
   }
 
   // set fieldsync if picture is interlaced
   EFIELDSYNC mDisplayField = FS_NONE;
-  if( pPicture->iFlags & DVP_FLAG_INTERLACED )
+  if (pPicture->iFlags & DVP_FLAG_INTERLACED)
   {
     if( pPicture->iFlags & DVP_FLAG_TOP_FIELD_FIRST )
       mDisplayField = FS_TOP;
@@ -1058,26 +1018,26 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
       mDisplayField = FS_BOT;
   }
 
+  int timeToDisplay = DVD_TIME_TO_MSEC(pts - iPlayingClock);
   // make sure waiting time is not negative
-  int maxWaitTime = std::min(std::max(DVD_TIME_TO_MSEC(iSleepTime) + 500, 50), 500);
+  int maxWaitTime = std::min(std::max(timeToDisplay + 500, 50), 500);
   // don't wait when going ff
   if (m_speed > DVD_PLAYSPEED_NORMAL)
-    maxWaitTime = std::max(DVD_TIME_TO_MSEC(iSleepTime), 0);
+    maxWaitTime = std::max(timeToDisplay, 0);
   int buffer = g_renderManager.WaitForBuffer(m_bAbortOutput, maxWaitTime);
   if (buffer < 0)
   {
-    m_droppingStats.AddOutputDropGain(pts, 1/m_fFrameRate);
-    CLog::Log(LOGDEBUG, "%s - EOS_DROPPED 5", __FUNCTION__);
+    m_droppingStats.AddOutputDropGain(pts, 1);
     return EOS_DROPPED;
   }
 
-  ProcessOverlays(pPicture, pts_org);
+  ProcessOverlays(pPicture, pts);
 
   int index = g_renderManager.AddVideoPicture(*pPicture);
 
   // video device might not be done yet
   while (index < 0 && !m_bAbortOutput &&
-         m_pClock->GetAbsoluteClock(false) < iCurrentClock + iSleepTime + DVD_MSEC_TO_TIME(500) )
+         m_pClock->GetAbsoluteClock(false) < iCurrentClock + DVD_MSEC_TO_TIME(500))
   {
     Sleep(1);
     index = g_renderManager.AddVideoPicture(*pPicture);
@@ -1085,12 +1045,11 @@ int CDVDPlayerVideo::OutputPicture(const DVDVideoPicture* src, double pts)
 
   if (index < 0)
   {
-    m_droppingStats.AddOutputDropGain(pts, 1/m_fFrameRate);
-    CLog::Log(LOGDEBUG, "%s - EOS_DROPPED 6", __FUNCTION__);
+    m_droppingStats.AddOutputDropGain(pts, 1);
     return EOS_DROPPED;
   }
 
-  g_renderManager.FlipPage(m_bAbortOutput, (iCurrentClock + iSleepTime) / DVD_TIME_BASE, pts_org, -1, mDisplayField);
+  g_renderManager.FlipPage(m_bAbortOutput, pts, -1, mDisplayField);
 
   return result;
 #else
@@ -1136,24 +1095,23 @@ void CDVDPlayerVideo::ResetFrameRateCalc()
 
 double CDVDPlayerVideo::GetCurrentPts()
 {
-  double iSleepTime, iRenderPts;
+  double renderPts;
+  int sleepTime;
   int queued, discard;
 
   // get render stats
-  g_renderManager.GetStats(iSleepTime, iRenderPts, queued, discard);
+  g_renderManager.GetStats(sleepTime, renderPts, queued, discard);
 
-  if (iRenderPts == DVD_NOPTS_VALUE)
+  if (renderPts == DVD_NOPTS_VALUE)
     return DVD_NOPTS_VALUE;
   else if (m_stalled)
     return DVD_NOPTS_VALUE;
   else if (m_speed == DVD_PLAYSPEED_NORMAL)
   {
-    iRenderPts -= std::max(0.0, iSleepTime);
-
-    if (iRenderPts < 0)
-      iRenderPts = 0;
+    if (renderPts < 0)
+      renderPts = 0;
   }
-  return iRenderPts;
+  return renderPts;
 }
 
 #define MAXFRAMERATEDIFF   0.01
@@ -1242,11 +1200,8 @@ void CDVDPlayerVideo::CalcFrameRate()
 int CDVDPlayerVideo::CalcDropRequirement(double pts)
 {
   int result = 0;
-  double iSleepTime;
+  int lateframes;
   double iDecoderPts, iRenderPts;
-  double interval;
-  double iGain;
-  double iLateness;
   int iSkippedPicture = -1;
   int iDroppedFrames = -1;
   int    iBufferLevel;
@@ -1261,7 +1216,7 @@ int CDVDPlayerVideo::CalcDropRequirement(double pts)
     iDecoderPts = pts;
 
   // get render stats
-  g_renderManager.GetStats(iSleepTime, iRenderPts, queued, discard);
+  g_renderManager.GetStats(lateframes, iRenderPts, queued, discard);
   iBufferLevel = queued + discard;
 
   if (iBufferLevel < 0)
@@ -1273,35 +1228,29 @@ int CDVDPlayerVideo::CalcDropRequirement(double pts)
       CLog::Log(LOGDEBUG,"CDVDPlayerVideo::CalcDropRequirement - hurry: %d", iBufferLevel);
   }
 
-  interval = 1/m_fFrameRate*(double)DVD_TIME_BASE;
-
   if (m_bAllowDrop)
   {
     if (iSkippedPicture > 0)
     {
-      iGain = iSkippedPicture*interval;
       CDroppingStats::CGain gain;
-      gain.gain = iGain;
+      gain.frames = iSkippedPicture;
       gain.pts = iDecoderPts;
       m_droppingStats.m_gain.push_back(gain);
-      m_droppingStats.m_totalGain += gain.gain;
+      m_droppingStats.m_totalGain += gain.frames;
       result |= EOS_DROPPED;
-      m_droppingStats.m_dropRequests = 0;
       if (g_advancedSettings.CanLogComponent(LOGVIDEO))
-        CLog::Log(LOGDEBUG,"CDVDPlayerVideo::CalcDropRequirement - dropped pictures, Sleeptime: %d, Bufferlevel: %d, Gain: %d", DVD_TIME_TO_MSEC(iSleepTime), iBufferLevel, DVD_TIME_TO_MSEC(iGain));
+        CLog::Log(LOGDEBUG,"CDVDPlayerVideo::CalcDropRequirement - dropped pictures, lateframes: %d, Bufferlevel: %d, dropped: %d", lateframes, iBufferLevel, iSkippedPicture);
     }
     if (iDroppedFrames > 0)
     {
-      iGain = iDroppedFrames*interval;
       CDroppingStats::CGain gain;
-      gain.gain = iGain;
+      gain.frames = iDroppedFrames;
       gain.pts = iDecoderPts;
       m_droppingStats.m_gain.push_back(gain);
-      m_droppingStats.m_totalGain += iGain;
+      m_droppingStats.m_totalGain += iDroppedFrames;
       result |= EOS_DROPPED;
-      m_droppingStats.m_dropRequests = 0;
       if (g_advancedSettings.CanLogComponent(LOGVIDEO))
-        CLog::Log(LOGDEBUG,"CDVDPlayerVideo::CalcDropRequirement - dropped in decoder, Sleeptime: %d, Bufferlevel: %d, Gain: %d", DVD_TIME_TO_MSEC(iSleepTime), iBufferLevel, DVD_TIME_TO_MSEC(iGain));
+        CLog::Log(LOGDEBUG,"CDVDPlayerVideo::CalcDropRequirement - dropped in decoder, lateframes: %d, Bufferlevel: %d, dropped: %d", lateframes, iBufferLevel, iDroppedFrames);
     }
   }
 
@@ -1309,28 +1258,16 @@ int CDVDPlayerVideo::CalcDropRequirement(double pts)
   while (!m_droppingStats.m_gain.empty() &&
          iRenderPts >= m_droppingStats.m_gain.front().pts)
   {
-    m_droppingStats.m_totalGain -= m_droppingStats.m_gain.front().gain;
+    m_droppingStats.m_totalGain -= m_droppingStats.m_gain.front().frames;
     m_droppingStats.m_gain.pop_front();
   }
 
   // calculate lateness
-  iLateness = iSleepTime + m_droppingStats.m_totalGain;
-  if (iLateness < 0 && m_speed)
-  {
-    m_droppingStats.m_lateFrames++;
+  int lateness = lateframes - m_droppingStats.m_totalGain;
 
-    // if lateness is smaller than frametime, we observe this state
-    // for 10 cycles
-    if (m_droppingStats.m_lateFrames > 10 || iLateness < -2*DVD_TIME_BASE/m_fFrameRate)
-    {
-      result |= EOS_VERYLATE;
-      m_droppingStats.m_dropRequests++;
-    }
-  }
-  else
+  if (lateness > 0 && m_speed)
   {
-    m_droppingStats.m_dropRequests = 0;
-    m_droppingStats.m_lateFrames = 0;
+    result |= EOS_VERYLATE;
   }
   return result;
 }
@@ -1339,15 +1276,13 @@ void CDroppingStats::Reset()
 {
   m_gain.clear();
   m_totalGain = 0;
-  m_lateFrames = 0;
-  m_dropRequests = 0;
 }
 
-void CDroppingStats::AddOutputDropGain(double pts, double frametime)
+void CDroppingStats::AddOutputDropGain(double pts, int frames)
 {
   CDroppingStats::CGain gain;
-  gain.gain = frametime;
+  gain.frames = frames;
   gain.pts = pts;
   m_gain.push_back(gain);
-  m_totalGain += frametime;
+  m_totalGain += frames;
 }

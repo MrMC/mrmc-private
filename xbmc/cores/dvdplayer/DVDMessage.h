@@ -29,11 +29,12 @@
 #endif
 
 // include as less is possible to prevent dependencies
-#include "system.h"
-#include "DVDDemuxers/DVDDemux.h"
 #include "DVDResource.h"
+#include <atomic>
+#include <string>
+#include <string.h>
 
-#include <assert.h>
+struct DemuxPacket;
 
 class CDVDMsg : public IDVDResourceCounted<CDVDMsg>
 {
@@ -74,7 +75,6 @@ public:
     PLAYER_CHANNEL_SELECT_NUMBER,   // switches to the channel with the provided channel number
     PLAYER_CHANNEL_SELECT,          // switches to the provided channel
     PLAYER_STARTED,                 // sent whenever a sub player has finished it's first frame after open
-    PLAYER_DISPLAYTIME,             // display time struct from av players
     PLAYER_AVCHANGE,                // signal a change in audio or video parameters
 
     // demuxer related messages
@@ -135,15 +135,6 @@ private:
 //////
 ////////////////////////////////////////////////////////////////////////////////
 
-/*
-class CDVDMsgGeneralResync : public CDVDMsg
-{
-public:
-  CDVDMsgGeneralResync(double timestamp, bool clock) : CDVDMsg(GENERAL_RESYNC)  { m_timestamp = timestamp; m_clock = clock; }
-  double m_timestamp;
-  bool m_clock;
-};
-*/
 #define SYNCSOURCE_AUDIO  0x00000001
 #define SYNCSOURCE_VIDEO  0x00000002
 #define SYNCSOURCE_SUB    0x00000004
@@ -160,8 +151,8 @@ public:
 
   // waits until all threads waiting, released the object
   // if abort is set somehow
-  bool Wait(unsigned int   ms   , unsigned int source);
-  void Wait(volatile bool *abort, unsigned int source);
+  bool Wait(unsigned int ms         , unsigned int source);
+  void Wait(std::atomic<bool>& abort, unsigned int source);
 private:
   class CDVDMsgGeneralSynchronizePriv* m_p;
 };
@@ -281,7 +272,7 @@ public:
   CDVDMsgDemuxerPacket(DemuxPacket* packet, bool drop = false);
   virtual ~CDVDMsgDemuxerPacket();
   DemuxPacket* GetPacket()      { return m_packet; }
-  unsigned int GetPacketSize()  { if(m_packet) return m_packet->iSize; else return 0; }
+  unsigned int GetPacketSize();
   bool         GetPacketDrop()  { return m_drop; }
   DemuxPacket* m_packet;
   bool         m_drop;

@@ -51,8 +51,6 @@ public:
   void CloseStream(bool bWaitForBuffers);
   void Flush();
 
-  // waits until all available data has been rendered
-  void WaitForBuffers() { m_messageQueue.WaitUntilEmpty(); }
   bool AcceptsData() const { return !m_messageQueue.IsFull(); }
   void SendMessage(CDVDMsg* pMsg, int priority = 0) { if(m_messageQueue.IsInited()) m_messageQueue.Put(pMsg, priority); }
   void FlushMessages() { m_messageQueue.Flush(); }

@@ -293,6 +293,9 @@ public:
   virtual int64_t GetTime();
   virtual int64_t GetDisplayTime();
   virtual int64_t GetTotalTime();
+  virtual void SetSpeed(float speed);
+  virtual float GetSpeed();
+  virtual bool SupportsTempo();
   virtual void ToFFRW(int iSpeed);
   virtual bool OnAction(const CAction &action);
 
@@ -429,7 +432,8 @@ protected:
 
   CSelectionStreams m_SelectionStreams;
 
-  int m_playSpeed;
+  std::atomic_int m_playSpeed;
+  std::atomic_int m_newPlaySpeed;
   int m_streamPlayerSpeed;
   struct SSpeedState
   {
@@ -438,6 +442,7 @@ protected:
     int lastseekpts;
     double  lastabstime;
   } m_SpeedState;
+  std::atomic_bool m_canTempo;
 
   int m_errorCount;
   double m_offset_pts;

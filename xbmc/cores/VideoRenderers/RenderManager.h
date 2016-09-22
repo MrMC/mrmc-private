@@ -30,6 +30,7 @@
 #include "settings/VideoSettings.h"
 #include "OverlayRenderer.h"
 #include <deque>
+#include <atomic>
 #include "linux/PlatformDefs.h"
 #include "threads/Event.h"
 
@@ -67,7 +68,6 @@ public:
   float GetAspectRatio();
   void Update();
   void FrameMove();
-  void FrameFinish();
   void FrameWait(int ms);
   bool HasFrame();
   void Render(bool clear, uint32_t flags = 0, uint32_t alpha = 255, bool gui = true);
@@ -115,7 +115,7 @@ public:
    * @param source depreciated
    * @param sync signals frame, top, or bottom field
    */
-  void FlipPage(volatile std::atomic_bool& bStop, double timestamp = 0.0, double pts = 0.0, int source = -1, EFIELDSYNC sync = FS_NONE);
+  void FlipPage(volatile std::atomic_bool& bStop, double pts = 0.0, int source = -1, EFIELDSYNC sync = FS_NONE);
   unsigned int PreInit(CDVDClock *clock);
   void UnInit();
   bool Flush();
@@ -153,7 +153,6 @@ public:
   EINTERLACEMETHOD AutoInterlaceMethod(EINTERLACEMETHOD mInt);
 
   double GetPresentTime();
-  void  WaitPresentTime(double presenttime);
 
   std::string GetVSyncState();
 
@@ -193,12 +192,14 @@ public:
    * Can be called by player for lateness detection. This is done best by
    * looking at the end of the queue.
    */
-  bool GetStats(double &sleeptime, double &pts, int &queued, int &discard);
+  bool GetStats(int &lateframes, double &pts, int &queued, int &discard);
 
   /**
    * Video player call this on flush in oder to discard any queued frames
    */
   void DiscardBuffer();
+  void SetDelay(int delay) { m_videoDelay = delay; };
+  int GetDelay() { return m_videoDelay; };
 
 protected:
 
@@ -237,6 +238,7 @@ protected:
   };
 
   double m_displayLatency;
+  std::atomic_int m_videoDelay;
   void UpdateDisplayLatency();
 
   int m_QueueSize;
@@ -245,7 +247,6 @@ protected:
   struct SPresent
   {
     double         pts;
-    double         timestamp;
     EFIELDSYNC     presentfield;
     EPRESENTMETHOD presentmethod;
   } m_Queue[NUM_BUFFERS];
@@ -255,8 +256,10 @@ protected:
   std::deque<int> m_discard;
 
   ERenderFormat m_format;
+  float m_fps;
 
   double m_sleeptime;
+  int m_lateframes;
   double m_presentpts;
   double m_presentcorr;
   double m_presenterr;
@@ -269,6 +272,17 @@ protected:
   CEvent m_flushEvent;
   double m_clock_framefinish;
   CDVDClock *m_dvdClock;
+
+  struct CClockSync
+  {
+    void Reset();
+    double m_error;
+    int m_errCount;
+    double m_syncOffset;
+    bool m_enabled;
+  };
+  CClockSync m_clockSync;
+
 
   OVERLAY::CRenderer m_overlays;
   bool m_renderedOverlay;

@@ -20,8 +20,10 @@
  *
  */
 
-#include "system.h"
 #include "threads/CriticalSection.h"
+
+#include <memory>
+#include <stdint.h>
 
 #define DVD_TIME_BASE 1000000
 #define DVD_NOPTS_VALUE -4503599627370496.000000
@@ -33,6 +35,8 @@
 
 #define DVD_PLAYSPEED_PAUSE       0       // frame stepping
 #define DVD_PLAYSPEED_NORMAL      1000
+
+class CVideoReferenceClock;
 
 class CDVDClock
 {
@@ -66,13 +70,14 @@ public:
 
   double GetAbsoluteClock(bool interpolated = true);
   double GetFrequency() { return (double)m_systemFrequency ; }
-  double WaitAbsoluteClock(double target);
+
+  bool GetClockInfo(int& MissedVblanks, double& ClockSpeed, double& RefreshRate) const;
   void SetVsyncAdjust(double adjustment);
   double GetVsyncAdjust();
+
   void Pause(bool pause);
 
 protected:
-  void CheckSystemClock();
   double SystemToAbsolute(int64_t system);
   int64_t AbsoluteToSystem(double absolute);
   double SystemToPlaying(int64_t system);
@@ -85,10 +90,11 @@ protected:
   bool m_bReset;
   bool m_paused;
   int m_speedAfterPause;
+  std::unique_ptr<CVideoReferenceClock> m_videoRefClock;
 
-  static int64_t m_systemFrequency;
-  static int64_t m_systemOffset;
-  static CCriticalSection m_systemsection;
+  int64_t m_systemFrequency;
+  int64_t m_systemOffset;
+  CCriticalSection m_systemsection;
 
   int64_t m_systemAdjust;
   int64_t m_lastSystemTime;

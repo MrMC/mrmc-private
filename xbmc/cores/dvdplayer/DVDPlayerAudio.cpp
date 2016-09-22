@@ -106,6 +106,8 @@ bool CDVDPlayerAudio::OpenStream(CDVDStreamInfo &hints)
 
   bool allowpassthrough = CSettings::GetInstance().GetBool(CSettings::SETTING_AUDIOOUTPUT_PASSTHROUGH);
   // exceptions for passthrough
+  if (hints.realtime)
+    allowpassthrough = false;
   if (CSettings::GetInstance().GetBool(CSettings::SETTING_VIDEOPLAYER_USEDISPLAYASCLOCK))
     allowpassthrough = false;
 
@@ -115,9 +117,6 @@ bool CDVDPlayerAudio::OpenStream(CDVDStreamInfo &hints)
   if (CDarwinUtils::GetAudioRoute().find("HDMI") == std::string::npos)
     allowpassthrough = false;
 #endif
-
-  //if (hints.realtime)
-  //  allowpassthrough = false;
 
   CDVDAudioCodec* codec = CDVDFactoryCodec::CreateAudioCodec(hints, allowpassthrough);
   if(!codec)
@@ -374,16 +373,16 @@ void CDVDPlayerAudio::Process()
       CLog::Log(LOGDEBUG, "CDVDPlayerAudio - CDVDMsg::AUDIO_SILENCE(%f, %d)"
                 , m_audioClock, m_silence);
     }
-    else if (pMsg->IsType(CDVDMsg::GENERAL_PAUSE))
-    {
-      m_paused = static_cast<CDVDMsgBool*>(pMsg)->m_value;
-      CLog::Log(LOGDEBUG, "CDVDPlayerAudio - CDVDMsg::GENERAL_PAUSE: %d", m_paused);
-    }
     else if (pMsg->IsType(CDVDMsg::GENERAL_STREAMCHANGE))
     {
       CDVDMsgAudioCodecChange* msg(static_cast<CDVDMsgAudioCodecChange*>(pMsg));
       OpenStream(msg->m_hints, msg->m_codec);
       msg->m_codec = NULL;
+    }
+    else if (pMsg->IsType(CDVDMsg::GENERAL_PAUSE))
+    {
+      m_paused = static_cast<CDVDMsgBool*>(pMsg)->m_value;
+      CLog::Log(LOGDEBUG, "CDVDPlayerAudio - CDVDMsg::GENERAL_PAUSE: %d", m_paused);
     }
     else if (pMsg->IsType(CDVDMsg::DEMUXER_PACKET))
     {
@@ -598,18 +597,6 @@ void CDVDPlayerAudio::Flush(bool sync)
   m_messageQueue.Put( new CDVDMsgBool(CDVDMsg::GENERAL_FLUSH, sync), 1);
 
   m_dvdAudio.AbortAddPackets();
-}
-
-void CDVDPlayerAudio::WaitForBuffers()
-{
-  // make sure there are no more packets available
-  m_messageQueue.WaitUntilEmpty();
-
-  // make sure almost all has been rendered
-  // leave 500ms to avound buffer underruns
-  double delay = m_dvdAudio.GetCacheTime();
-  if(delay > 0.5)
-    Sleep((int)(1000 * (delay - 0.5)));
 }
 
 bool CDVDPlayerAudio::AcceptsData() const

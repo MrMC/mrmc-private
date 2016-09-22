@@ -26,7 +26,7 @@ class CVideoSync
 public:
   virtual ~CVideoSync() {};
   virtual bool Setup(PUPDATECLOCK func) = 0;
-  virtual void Run(volatile bool& stop) = 0;
+  virtual void Run(std::atomic<bool>& stop) = 0;
   virtual void Cleanup() = 0;
   virtual float GetFps() = 0;
   virtual void RefreshChanged() {};

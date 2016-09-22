@@ -46,7 +46,7 @@ bool CVideoSyncAndroid::Setup(PUPDATECLOCK func)
   return true;
 }
 
-void CVideoSyncAndroid::Run(volatile bool& stop)
+void CVideoSyncAndroid::Run(std::atomic<bool>& stop)
 {
   int NrVBlanks;
   double VBlankTime;
