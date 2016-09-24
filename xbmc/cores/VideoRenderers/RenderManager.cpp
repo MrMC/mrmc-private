@@ -250,7 +250,7 @@ bool CXBMCRenderManager::Configure(unsigned int width, unsigned int height, unsi
     m_sleeptime = 1.0;
     m_presentevent.notifyAll();
     m_renderedOverlay = false;
-    m_fps == fps;
+    m_fps = fps;
 
     CLog::Log(LOGDEBUG, "CXBMCRenderManager::Configure - %d", m_QueueSize);
   }
