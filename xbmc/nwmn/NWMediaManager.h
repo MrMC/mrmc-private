@@ -41,6 +41,7 @@ public:
   bool          GetLocalAsset(size_t index, NWAsset &asset);
   bool          GetLocalAsset(int asset_id, NWAsset &asset);
   size_t        GetLocalAssetCount();
+  void          UpdateNetworkStatus(bool hasNetwork);
   void          QueueAssetsForDownload(std::vector<NWAsset> &assets);
   void          QueueAssetForDownload(NWAsset &asset);
   bool          CheckAssetIsPresentLocal(NWAsset &asset);
@@ -52,6 +53,7 @@ protected:
   bool          Exists(NWAsset &asset);
 
   XFILE::CCurlFile      m_http;
+  bool                  m_hasNetwork;
   std::vector<NWAsset>  m_download;
   CCriticalSection      m_download_lock;
 

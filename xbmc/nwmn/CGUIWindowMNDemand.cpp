@@ -40,7 +40,7 @@
 #define ONDEMAND_CATEGORY_LIST      50
 
 CGUIWindowMNDemand *CGUIWindowMNDemand::m_MNDemand = NULL;
-NWGroupPlaylist CGUIWindowMNDemand::m_GroupPlayList;
+NWPlaylist CGUIWindowMNDemand::m_PlayList;
 
 CGUIWindowMNDemand::CGUIWindowMNDemand()
 : CGUIWindow(WINDOW_MEMBERNET_DEMAND, "DialogNationWideOndemand.xml")
@@ -76,7 +76,7 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
         
         CFileItem item;
       
-        NWAsset asset = m_GroupPlayList.groups[category].assets[listItem];
+        NWAsset asset = m_PlayList.groups[category].assets[listItem];
         CFileItemPtr pItem = CFileItemPtr(new CFileItem(asset.name));
         std::string path = asset.video_localpath;
         if(path.empty())
@@ -139,9 +139,9 @@ void CGUIWindowMNDemand::FillAssets()
 {
   SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_CATEGORY_LIST);
   CFileItemList stackItems;
-  for (size_t i = 0; i < m_GroupPlayList.groups.size(); i++)
+  for (size_t i = 0; i < m_PlayList.groups.size(); i++)
   {
-    CFileItemPtr pItem = CFileItemPtr(new CFileItem(m_GroupPlayList.groups[i].name));
+    CFileItemPtr pItem = CFileItemPtr(new CFileItem(m_PlayList.groups[i].name));
     stackItems.Add(pItem);
   }
   CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_CATEGORY_LIST, 0, 0, &stackItems);
@@ -181,14 +181,14 @@ CGUIWindowMNDemand* CGUIWindowMNDemand::GetDialogMNDemand()
   return m_MNDemand;
 }
 
-void CGUIWindowMNDemand::GetDialogMNPlaylist(NWGroupPlaylist &groupPlayList)
+void CGUIWindowMNDemand::GetDialogMNPlaylist(NWPlaylist &playList)
 {
-  groupPlayList = m_GroupPlayList;
+  playList = m_PlayList;
 }
 
-void CGUIWindowMNDemand::SetDialogMNPlaylist(const NWGroupPlaylist &groupPlayList)
+void CGUIWindowMNDemand::SetDialogMNPlaylist(const NWPlaylist &playList)
 {
-  m_GroupPlayList = groupPlayList;
+  m_PlayList = playList;
 }
 
 void CGUIWindowMNDemand::SetCategoryItems()
@@ -200,7 +200,7 @@ void CGUIWindowMNDemand::SetCategoryItems()
 
   SendMessage(GUI_MSG_LABEL_RESET, GetID(), ONDEMAND_ITEM_LIST);
   CFileItemList ListItems;
-  NWGroup group = m_GroupPlayList.groups[category];
+  NWGroup group = m_PlayList.groups[category];
   for (size_t i = 0; i < group.assets.size(); i++)
   {
     NWAsset asset = group.assets[i];

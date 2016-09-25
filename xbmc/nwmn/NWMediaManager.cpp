@@ -27,6 +27,7 @@
 
 CNWMediaManager::CNWMediaManager()
  : CThread("CNWMediaManager")
+ , m_hasNetwork(false)
  , m_AssetUpdateCallBackFn(NULL)
  , m_AssetUpdateCallBackCtx(NULL)
 {
@@ -115,6 +116,11 @@ void CNWMediaManager::QueueAssetsForDownload(std::vector<NWAsset> &assets)
   }
 }
 
+void CNWMediaManager::UpdateNetworkStatus(bool hasNetwork)
+{
+  m_hasNetwork = hasNetwork;
+}
+
 void CNWMediaManager::QueueAssetForDownload(NWAsset &asset)
 {
   // check if this asset is already in the download list
@@ -125,7 +131,6 @@ void CNWMediaManager::QueueAssetForDownload(NWAsset &asset)
 
   // queue for download
   CSingleLock lock(m_download_lock);
-  SetDownloadedAsset(asset.id, false);
   CLog::Log(LOGERROR, "**NW** - CNWMediaManager::QueueAssetForDownload "
     "%s", asset.video_localpath.c_str());
   m_download.push_back(asset);
@@ -141,9 +146,6 @@ bool CNWMediaManager::CheckAssetIsPresentLocal(NWAsset &asset)
     {
       if (!Exists(asset))
       {
-        // if we have the asset, write it into database as downloaded
-        SetDownloadedAsset(asset.id);
-        
         // we have a verified local existing asset, skip downloading it
         CSingleLock lock(m_assets_lock);
         m_assets.push_back(asset);
@@ -185,6 +187,9 @@ void CNWMediaManager::Process()
 
       // check if we already have this asset on disk
       if (CheckAssetIsPresentLocal(asset))
+        continue;
+
+      if (!m_hasNetwork)
         continue;
 
       // download it

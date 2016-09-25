@@ -3100,6 +3100,9 @@
 		F5E55B66107412DE006E788A /* GUIDialogTeletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B65107412DE006E788A /* GUIDialogTeletext.cpp */; };
 		F5E55B7010741340006E788A /* Teletext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E55B6E10741340006E788A /* Teletext.cpp */; };
 		F5E56BA61082A675006E788A /* PosixMountProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E56BA51082A675006E788A /* PosixMountProvider.cpp */; };
+		F5E9E7A31D98311D0012044B /* NWClientUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */; };
+		F5E9E7A41D98311D0012044B /* NWClientUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */; };
+		F5E9E7A51D98311D0012044B /* NWClientUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */; };
 		F5EA02260F6DA990005C2EC5 /* CocoaPowerSyscall.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5EA02200F6DA85C005C2EC5 /* CocoaPowerSyscall.cpp */; };
 		F5EA02270F6DA9A5005C2EC5 /* PowerManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5EA021A0F6DA7E8005C2EC5 /* PowerManager.cpp */; };
 		F5ED908815538DCE00842059 /* XBMCTinyXML.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5ED908615538DCE00842059 /* XBMCTinyXML.cpp */; };
@@ -5643,6 +5646,8 @@
 		F5E55B6F10741340006E788A /* TeletextDefines.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TeletextDefines.h; sourceTree = "<group>"; };
 		F5E56BA41082A675006E788A /* PosixMountProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PosixMountProvider.h; sourceTree = "<group>"; };
 		F5E56BA51082A675006E788A /* PosixMountProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PosixMountProvider.cpp; sourceTree = "<group>"; };
+		F5E9E7A11D982F760012044B /* NWClientUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWClientUtilities.h; sourceTree = "<group>"; };
+		F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWClientUtilities.cpp; sourceTree = "<group>"; };
 		F5EA021A0F6DA7E8005C2EC5 /* PowerManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PowerManager.cpp; sourceTree = "<group>"; };
 		F5EA021B0F6DA7E8005C2EC5 /* PowerManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PowerManager.h; sourceTree = "<group>"; };
 		F5EA02200F6DA85C005C2EC5 /* CocoaPowerSyscall.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CocoaPowerSyscall.cpp; sourceTree = "<group>"; };
@@ -9572,6 +9577,8 @@
 				F5F759411D91B0F100D3BCB2 /* MNJSONOperations.h */,
 				F5F759421D91B0F100D3BCB2 /* NWClient.cpp */,
 				F5F759431D91B0F100D3BCB2 /* NWClient.h */,
+				F5E9E7A21D98311D0012044B /* NWClientUtilities.cpp */,
+				F5E9E7A11D982F760012044B /* NWClientUtilities.h */,
 				F5F759441D91B0F100D3BCB2 /* NWMediaManager.cpp */,
 				F5F759451D91B0F100D3BCB2 /* NWMediaManager.h */,
 				F5F759461D91B0F100D3BCB2 /* NWPlayer.cpp */,
@@ -10088,6 +10095,7 @@
 				E38E200B0D25F9FD00618676 /* DllLibCurl.cpp in Sources */,
 				E38E200E0D25F9FD00618676 /* File.cpp in Sources */,
 				F5B723AD1C7C9C1A006432AE /* AudioDSPSettings.cpp in Sources */,
+				F5E9E7A31D98311D0012044B /* NWClientUtilities.cpp in Sources */,
 				E38E20130D25F9FD00618676 /* FileFactory.cpp in Sources */,
 				E38E20230D25F9FD00618676 /* FTPDirectory.cpp in Sources */,
 				E38E20240D25F9FD00618676 /* FTPParse.cpp in Sources */,
@@ -11489,6 +11497,7 @@
 				E499134F174E5EBE00741B6D /* ApplicationOperations.cpp in Sources */,
 				E4991350174E5EBE00741B6D /* AudioLibrary.cpp in Sources */,
 				F5B723441C7C98B7006432AE /* DVDVideoCodecLibMpeg2.cpp in Sources */,
+				F5E9E7A41D98311D0012044B /* NWClientUtilities.cpp in Sources */,
 				F59045721BA372A600DB589A /* IOSScreenManager.mm in Sources */,
 				F5B7236F1C7C9A51006432AE /* ActiveAEDSP.cpp in Sources */,
 				E4991351174E5EBE00741B6D /* FavouritesOperations.cpp in Sources */,
@@ -12711,6 +12720,7 @@
 				F5D140E71BAF0B6D0075A95C /* GUIControlSettings.cpp in Sources */,
 				F5B724B81C7E150C006432AE /* filcreat.cpp in Sources */,
 				F5B723B91C7C9C34006432AE /* GUIDialogAudioDSPSettings.cpp in Sources */,
+				F5E9E7A51D98311D0012044B /* NWClientUtilities.cpp in Sources */,
 				F5D140E81BAF0B6D0075A95C /* GUIDialogContentSettings.cpp in Sources */,
 				F5B7251E1C7E150C006432AE /* system.cpp in Sources */,
 				F5D140E91BAF0B6D0075A95C /* GUIWindowSettings.cpp in Sources */,

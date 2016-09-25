@@ -40,13 +40,13 @@ public:
   void          FillAssets();
   void          SetControlLabel(int id, const char *format, int info);
   static  CGUIWindowMNDemand* GetDialogMNDemand();
-  static void   GetDialogMNPlaylist(NWGroupPlaylist &groupPlayList);
-  static void   SetDialogMNPlaylist(const NWGroupPlaylist &groupPlayList);
+  static void   GetDialogMNPlaylist(NWPlaylist &playList);
+  static void   SetDialogMNPlaylist(const NWPlaylist &playList);
 
 protected:
   void SetCategoryItems();
 
   static CGUIWindowMNDemand *m_MNDemand;
-  static NWGroupPlaylist m_GroupPlayList;
+  static NWPlaylist m_PlayList;
   CNWClient    *m_client;
 };

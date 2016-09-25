@@ -19,25 +19,13 @@
  *
  */
 
-#include <vector>
-#include "XBDateTime.h"
+#include <string>
 
-class  TiXmlElement;
-class  NWPlayerInfo;
-
-bool        PingMNServer(const std::string& strURL);
 std::string Encode(const std::string& strURLData);
 std::string EncodeExtra(const std::string& strURLData);
-//std::string FormatUrl(const PlayerInfo &PlayerInfo, const std::string &function, const std::string extrashit = "");
-//void        SetDefaultPlayerInfo(PlayerInfo &player);
-//bool        ParsePlayerInfo(PlayerInfo &player, TiXmlElement *settingsNode);
 
-void        GetLocalPlayerInfo(NWPlayerInfo &player,std::string home);
-bool        SaveLocalPlayerInfo(const TiXmlElement settingsNode, std::string home);
-std::string GetMD5(const std::string strText);
 void        OpenAndroidSettings();
 std::string GetDiskUsed(std::string path);
 std::string GetDiskFree(std::string path);
 std::string GetDiskTotal(std::string path);
 std::string GetSystemUpTime();
-bool        SetDownloadedAsset(int AssetID, bool downloaded=true);

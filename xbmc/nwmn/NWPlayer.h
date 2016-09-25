@@ -44,7 +44,7 @@ public:
   void          OverridePlayBackWindow(bool override);
   void          SetPlayBackTime(const CDateTime &time, const CDateTimeSpan &duration);
   void          ValidateAsset(struct NWAsset &asset, bool valid);
-  void          QueueProgramInfo(NWGroupPlaylist &playlist);
+  void          QueueProgramInfo(NWPlaylist &playlist);
   void          RegisterPlayerCallBack(const void *ctx, PlayerCallBackFn fn);
 
 protected:
@@ -54,7 +54,7 @@ protected:
   bool                  m_playing;
   CCriticalSection      m_media_lock;
   CCriticalSection      m_player_lock;
-  NWGroupPlaylist       m_playlist;
+  NWPlaylist            m_playlist;
   bool                  m_Override;
   CDateTime             m_PlaybackTime;
   CDateTimeSpan         m_PlayBackDuration;

@@ -24,7 +24,6 @@
 
 #include "cores/IPlayerCallback.h"
 #include "guilib/GUIWindow.h"
-#include "NWTVAPI.h"
 #include "threads/Thread.h"
 
 class  CNWClient;
@@ -53,6 +52,7 @@ protected:
   virtual void  Process();
   virtual void  OnStartup();
   void          TestServers();
+  bool          PingMNServer(const std::string& strURL);
   void          SetResolution(const std::string &strResolution);
 
   bool          m_RefreshRunning;

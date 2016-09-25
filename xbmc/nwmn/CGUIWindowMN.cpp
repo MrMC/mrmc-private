@@ -26,18 +26,18 @@
 #include "UtilitiesMN.h"
 
 #include "Application.h"
-#include "messaging/ApplicationMessenger.h"
 #include "URL.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/LocalizeStrings.h"
-#include "utils/StringUtils.h"
-#include "utils/log.h"
-#include "guilib/GUIWindowManager.h"
+#include "filesystem/CurlFile.h"
 #include "input/Key.h"
 #include "network/Network.h"
 #include "settings/DisplaySettings.h"
 #include "settings/SkinSettings.h"
 #include "settings/Settings.h"
+#include "messaging/ApplicationMessenger.h"
+#include "utils/StringUtils.h"
+#include "utils/log.h"
 
 #include "NWTVAPI.h"
 
@@ -171,11 +171,11 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       OnMessage(msg);
       
       //fill in on demand window here
-      NWGroupPlaylist groupPlayList;
-      m_client->GetProgamInfo(groupPlayList);
-      if (!groupPlayList.groups.empty())
+      NWPlaylist playList;
+      m_client->GetProgamInfo(playList);
+      if (!playList.groups.empty())
       {
-        CGUIWindowMNDemand::SetDialogMNPlaylist(groupPlayList);
+        CGUIWindowMNDemand::SetDialogMNPlaylist(playList);
         g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
       }
       return true;
@@ -331,6 +331,27 @@ void CGUIWindowMN::TestServers()
   else
     SET_CONTROL_LABEL(PROXYMNSERVER, "'proxy.membernettv.com' is not reachable");
   */
+}
+
+bool CGUIWindowMN::PingMNServer(const std::string& apiURL)
+{
+  CURL url(apiURL.c_str());
+  std::string http_path = url.GetProtocol().c_str();
+  http_path += "://" + url.GetHostName();
+
+  XFILE::CCurlFile http;
+  CURL http_url(http_path.c_str());
+  bool found = http.Open(http_url);
+  if (!found && (errno == EACCES))
+    found = true;
+  http.Close();
+  
+  if (found)
+    CLog::Log(LOGDEBUG, "**MN** - PingMNServer: network=yes");
+  else
+    CLog::Log(LOGDEBUG, "**MN** - PingMNServer: network=no");
+
+  return found;
 }
 
 void CGUIWindowMN::SetResolution(const std::string &strResolution)

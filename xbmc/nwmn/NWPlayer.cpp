@@ -58,7 +58,8 @@ void CNWPlayer::Reset()
 {
   CSingleLock lock(m_media_lock);
   StopPlaying();
-  m_playlist = NWGroupPlaylist();
+  // new empty playlist
+  m_playlist = NWPlaylist();
   CApplicationMessenger::GetInstance().SendMsg(TMSG_PLAYLISTPLAYER_CLEAR, PLAYLIST_VIDEO);
 }
 
@@ -151,7 +152,7 @@ void CNWPlayer::ValidateAsset(NWAsset &asset, bool valid)
   }
 }
 
-void CNWPlayer::QueueProgramInfo(NWGroupPlaylist &playlist)
+void CNWPlayer::QueueProgramInfo(NWPlaylist &playlist)
 {
   CSingleLock lock(m_media_lock);
   m_playlist = playlist;
@@ -178,7 +179,7 @@ void CNWPlayer::Process()
     int count = g_playlistPlayer.GetPlaylist(PLAYLIST_VIDEO).size();
     if (m_playing && (current == -1 || (count - current) < 2))
     {
-      CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::playlist current(%d), count(%d)", current, count);
+      //CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::playlist current(%d), count(%d)", current, count);
 
       CDateTime cur = CDateTime::GetCurrentDateTime();
       // playback can only occur in a datetime window.

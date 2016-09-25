@@ -19,7 +19,6 @@
 
 #include "NWTVAPI.h"
 
-#include "NWClient.h"
 #include "URL.h"
 #include "filesystem/CurlFile.h"
 #include "utils/JSONVariantParser.h"
@@ -64,7 +63,7 @@ bool TVAPI_DoActivate(TVAPI_Activate &activate)
 bool TVAPI_GetStatus(TVAPI_Status &status)
 {
   XFILE::CCurlFile nwmn;
-  nwmn.SetTimeout(30);
+  nwmn.SetTimeout(5);
 
   CURL nwmn_status(kTVAPI_URLBASE + "status");
   nwmn_status.SetProtocolOption("seekable", "0");

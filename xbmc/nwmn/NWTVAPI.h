@@ -24,13 +24,6 @@
 
 #include "XBDateTime.h"
 
-const float       kTVAPI_PlayerFloatVersion = 1.0;
-const std::string kTVAPI_NDownloadPath = "downloads/";
-const std::string kTVAPI_DownloadLogPath = "log/";
-const std::string kTVAPI_DownloadVideoPath = "downloads/video/";
-const std::string kTVAPI_DownloadVideoThumbNailsPath = "downloads/video_thumbnails/";
-const std::string kTVAPI_DownloadMusicPath = "downloads/music/";
-const std::string kTVAPI_DownloadMusicThumbNailsPath = "downloads/music_thumbnails/";
 const std::string kTVAPI_Status_On = "On";
 const std::string kTVAPI_Status_Off = "Off";
 const std::string kTVAPI_Status_Restarting = "Restarting";
@@ -214,7 +207,7 @@ typedef struct TVAPI_Playlists {
   //std::string total;
   //std::string total_pages;
   std::vector<TVAPI_PlaylistInfo> playlists;
-} NWPlaylists;
+} TVAPI_Playlists;
 
 // ---------------------------------------------
 // ---------------------------------------------

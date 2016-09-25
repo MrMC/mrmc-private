@@ -21,99 +21,12 @@
 
 #include <queue>
 #include <string>
-#include "XBDateTime.h"
-#include "threads/Thread.h"
-#include "threads/CriticalSection.h"
 
 #include "NWTVAPI.h"
+#include "NWClientUtilities.h"
 
-// ---------------------------------------------
-// ---------------------------------------------
-typedef struct NWPlayerSettings {
-  std::string strLocation_id;
-  std::string strMachine_id;
-  std::string strMachine_description;
-  std::string strMachine_ethernet_id;
-  std::string strMachine_hw_version;
-  std::string strMachine_name;
-  std::string strMachine_purchase_date;
-  std::string strMachine_sn;
-  std::string strMachine_vendor;
-  std::string strMachine_warrenty_nr;
-  std::string strMachine_wireless_id;
-  std::string strSettings_cf_bundle_version;
-  std::string strSettings_update_interval;
-  std::string strSettings_update_time;
-  std::string strSettings_software_version;
-  std::string strSettings_software_url;
-  std::string strUrl_feed;
-  std::string strTimeZone;
-  bool        allowUpdate;
-  std::vector <std::string> intCategories_order;
-} NWPlayerSettings;
-
-typedef struct NWPlayerInfo {
-  std::string id;
-  std::string name;
-  std::string member;
-  std::string timezone;
-  std::string playlist_id;
-  std::string video_format;
-  std::string update_time;
-  std::string update_interval;
-  std::string status;
-  std::string apiKey;
-  std::string apiSecret;
-  int         intSettingsVersion;
- 
-  std::string strUpdateUrl;
-  std::string strUpdateKey;
-  std::string strUpdateMD5;
-  std::string strUpdateSize;
-  std::string strUpdateName;
-  std::string strUpdateDate;
-  std::string strUpdateVersion;
-} NWPlayerInfo;
-
-typedef struct NWAsset {
-  int id;
-  int group_id;
-  std::string name;
-  std::string type;
-  std::string video_url;
-  std::string video_md5;
-  int         video_size;
-  std::string video_basename;
-  std::string video_localpath;
-  std::string thumb_url;
-  std::string thumb_md5;
-  int         thumb_size;
-  std::string thumb_basename;
-  std::string thumb_localpath;
-  CDateTime   available_to;
-  CDateTime   available_from;
-  
-  std::string uuid;       // changes all the time, not to be used as identifier
-  std::string time_played;// ditto
-  bool        valid;
-} NWAsset;
-
-typedef struct NWGroup {
-  int id;
-  std::string name;
-  int next_asset_index;
-  std::vector<NWAsset> assets;
-} NWGroup;
-
-typedef struct NWGroupPlaylist {
-  int id;
-  std::string name;
-  std::string type;
-  std::string video_format;
-  std::string updated_date;
-  std::vector<int> play_order;
-  std::vector<NWGroup> groups;
-} NWGroupPlaylist;
+#include "threads/Thread.h"
+#include "threads/CriticalSection.h"
 
 // ---------------------------------------------
 // ---------------------------------------------
@@ -146,10 +59,7 @@ public:
   void          StopPlaying();
   void          PlayNext();
   
-  void          GetProgamInfo(NWGroupPlaylist &groupPlayList)
-                {
-                  groupPlayList = m_ProgramInfo;
-                };
+  void          GetProgamInfo(NWPlaylist &playList) { playList = m_ProgramInfo; };
   bool          SendPlayerStatus(const std::string status);
 
   void          RegisterClientCallBack(const void *ctx, ClientCallBackFn fn);
@@ -170,7 +80,7 @@ protected:
   void          SendPlayerLog();
   void          GetActions();
   void          ClearAction(std::string action);
-  bool          CreateGroupPlaylist(std::string home, NWGroupPlaylist &groupPlayList,
+  bool          CreatePlaylist(std::string home, NWPlaylist &playList,
                   const TVAPI_Playlist &playlist, const TVAPI_PlaylistItems &playlistItems);
 
   static void   AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded);
@@ -192,7 +102,7 @@ protected:
   TVAPI_Status   m_status;
 
   NWPlayerInfo  m_PlayerInfo;
-  NWGroupPlaylist m_ProgramInfo;
+  NWPlaylist    m_ProgramInfo;
   CDateTime     m_StartUpdateTime;
   CDateTime     m_EndUpdateTime;
   CDateTime     m_ProgramDateStamp;

@@ -17,10 +17,10 @@
  *
  */
 
-#include "nwmn/LogManagerMN.h"
+#include "LogManagerMN.h"
 
-#include "nwmn/NWClient.h"
-#include "nwmn/UtilitiesMN.h"
+#include "NWClientUtilities.h"
+#include "UtilitiesMN.h"
 
 #include "URL.h"
 #include "FileItem.h"
@@ -144,7 +144,7 @@ void CLogManagerMN::Process()
       CFileItemList items;
       CDateTime time = CDateTime::GetCurrentDateTime();
       std::string datefilter = time.GetAsDBDate();
-      std::string srcLogPath = m_strHome + kTVAPI_DownloadLogPath;
+      std::string srcLogPath = m_strHome + kNWClient_LogPath;
       XFILE::CDirectory::GetDirectory(srcLogPath, items, ".log", XFILE::DIR_FLAG_NO_FILE_DIRS);
       for (int i = 0; i < items.Size(); ++i)
       {

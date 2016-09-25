@@ -18,43 +18,12 @@
  */
 
 #include "nwmn/UtilitiesMN.h"
-#include "nwmn/NWTVAPI.h"
 
-#include "URL.h"
-#include "utils/md5.h"
-#include "filesystem/File.h"
-#include "filesystem/CurlFile.h"
 #include "filesystem/SpecialProtocol.h"
 #include "storage/MediaManager.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
-#include "utils/XMLUtils.h"
-
-#if defined(TARGET_LINUX)
-  #include "linux/LinuxTimezone.h"
-#endif
-
-bool PingMNServer(const std::string& apiURL)
-{
-  CURL url(apiURL.c_str());
-  std::string http_path = url.GetProtocol().c_str();
-  http_path += "://" + url.GetHostName();
-
-  XFILE::CCurlFile http;
-  CURL http_url(http_path.c_str());
-  bool found = http.Open(http_url);
-  if (!found && (errno == EACCES))
-    found = true;
-  http.Close();
-  
-  if (found)
-    CLog::Log(LOGDEBUG, "**MN** - PingMNServer: network=yes");
-  else
-    CLog::Log(LOGDEBUG, "**MN** - PingMNServer: network=no");
-
-  return found;
-}
 
 // this is needed as standard XBMC CURL::Encode() did not do it right, XBMC or server issue?
 std::string Encode(const std::string& strURLData)
@@ -96,44 +65,6 @@ std::string EncodeExtra(const std::string& strURLData)
   }
   
   return strResult;
-}
-
-void GetLocalPlayerInfo(NWPlayerInfo &player, std::string home)
-{
-/*
-  CLog::Log(LOGDEBUG, "**NW** - GetLocalPlayerInfo");
-  std::string localPlayer = home + "webdata/PlayerSetup.xml";
-  CXBMCTinyXML XmlDoc;
-  
-  if (XFILE::CFile::Exists(localPlayer) && XmlDoc.LoadFile(localPlayer))
-  {
-    TiXmlElement *rootXmlNode = XmlDoc.RootElement();
-    if (!ParsePlayerInfo(player, rootXmlNode))
-      SetDefaultPlayerInfo(player);
-  }
-  else
-  {
-    SetDefaultPlayerInfo(player);
-  }
-*/
-}
-
-bool SaveLocalPlayerInfo(const TiXmlElement settingsNode, std::string home)
-{
-  CLog::Log(LOGDEBUG, "**MN** - SaveLocalPlayerInfo - settings node");
-  CXBMCTinyXML xmlDoc;
-  TiXmlNode *pRoot = xmlDoc.InsertEndChild(settingsNode);
-  if (!pRoot) return false;
-  
-  std::string localPlayer = home + "webdata/PlayerSetup.xml";
-  return xmlDoc.SaveFile(localPlayer);
-}
-
-std::string GetMD5(const std::string strText)
-{
-  std::string hash = XBMC::XBMC_MD5::GetMD5(strText);
-  StringUtils::ToLower(hash);
-  return hash;
 }
 
 void OpenAndroidSettings()
@@ -241,15 +172,4 @@ std::string GetSystemUpTime()
                                            iHours,
                                            iMinutes);
   return uptime;
-}
-
-bool SetDownloadedAsset(int assetID, bool downloaded)
-{
-//  // simplify calling MN db SetDownloadedAsset
-//  CDBManagerMN database;
-//  database.Open();
-//  bool result = database.SetDownloadedAsset(AssetID,downloaded);
-//  database.Close();
-//  return result;
-  return false;
 }

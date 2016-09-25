@@ -70,7 +70,7 @@ CNWClient::CNWClient()
  , m_ClientCallBackFn(NULL)
  , m_ClientCallBackCtx(NULL)
 {
-  CLog::Log(LOGDEBUG, "**NW** - NW version %f", kTVAPI_PlayerFloatVersion);
+  CLog::Log(LOGDEBUG, "**NW** - NW version %f", kNWClient_PlayerFloatVersion);
 
   // hardcode for now
   //m_activate.code = "GR7IDTYXOF";
@@ -116,27 +116,27 @@ CNWClient::CNWClient()
   if (!XFILE::CFile::Exists(m_strHome))
     CUtil::CreateDirectoryEx(m_strHome);
 
-  std::string download_path = m_strHome + kTVAPI_NDownloadPath;
+  std::string download_path = m_strHome + kNWClient_DownloadPath;
   if (!XFILE::CFile::Exists(download_path))
     CUtil::CreateDirectoryEx(download_path);
 
-  std::string download_log_path = m_strHome + kTVAPI_DownloadLogPath;
+  std::string download_log_path = m_strHome + kNWClient_LogPath;
   if (!XFILE::CFile::Exists(download_log_path))
     CUtil::CreateDirectoryEx(download_log_path);
 
-  std::string video_path = m_strHome + kTVAPI_DownloadVideoPath;
+  std::string video_path = m_strHome + kNWClient_DownloadVideoPath;
   if (!XFILE::CFile::Exists(video_path))
     CUtil::CreateDirectoryEx(video_path);
 
-  std::string videothumbs_path = m_strHome + kTVAPI_DownloadVideoThumbNailsPath;
+  std::string videothumbs_path = m_strHome + kNWClient_DownloadVideoThumbNailsPath;
   if (!XFILE::CFile::Exists(videothumbs_path))
     CUtil::CreateDirectoryEx(videothumbs_path);
 /*
-  std::string music_path = m_strHome + kRedDownloadMusicPath;
+  std::string music_path = m_strHome + kNWClient_DownloadMusicPath;
   if (!XFILE::CFile::Exists(music_path))
     CUtil::CreateDirectoryEx(music_path);
 
-  std::string musicthumbs_path = m_strHome + kRedDownloadMusicThumbNailsPath;
+  std::string musicthumbs_path = m_strHome + kNWClient_DownloadMusicThumbNailsPath;
   if (!XFILE::CFile::Exists(musicthumbs_path))
     CUtil::CreateDirectoryEx(musicthumbs_path);
 */
@@ -144,7 +144,7 @@ CNWClient::CNWClient()
   if (!XFILE::CFile::Exists(webui_path))
     CUtil::CreateDirectoryEx(webui_path);
 
-  GetLocalPlayerInfo(m_PlayerInfo, m_strHome);
+  LoadLocalPlayer(m_strHome, m_PlayerInfo);
   SendPlayerStatus(kTVAPI_Status_Restarting);
 
   m_MediaManager = new CNWMediaManager();
@@ -169,7 +169,7 @@ CNWClient::~CNWClient()
   SendPlayerStatus(kTVAPI_Status_Off);
 
   //CGUIDialogRedAbout* about = CGUIDialogRedAbout::GetDialogRedAbout();
-  //about->SetInfo(NULL, kTVAPI_PlayerFloatVersion);
+  //about->SetInfo(NULL, kNWClient_PlayerFloatVersion);
 
   SAFE_DELETE(m_Player);
   SAFE_DELETE(m_MediaManager);
@@ -316,6 +316,8 @@ void CNWClient::Process()
       m_NextUpdateTime = time + m_NextUpdateInterval;
 
       m_HasNetwork = GetPlayerStatus();
+      m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
+
       if (m_FullUpdate)
         SendNetworkInfo();
 
@@ -342,171 +344,76 @@ void CNWClient::Process()
 
 void CNWClient::GetPlayerInfo()
 {
-  TVAPI_Machine machine;
-  machine.apiKey = m_activate.apiKey;
-  machine.apiSecret = m_activate.apiSecret;
-  TVAPI_GetMachine(machine);
-  
-  m_PlayerInfo.id  = machine.id;
-  m_PlayerInfo.name = machine.machine_name;
-  m_PlayerInfo.member = machine.member;
-  m_PlayerInfo.timezone = machine.timezone;
-  m_PlayerInfo.playlist_id = machine.playlist_id;
-  m_PlayerInfo.video_format = machine.video_format;
-  m_PlayerInfo.update_time = machine.update_time;
-  m_PlayerInfo.update_interval = machine.update_interval;
-  /*
-  // "update_interval":"86400","update_time":"24:00"
-  if (settings.strSettings_update_interval == "daily")
+  if (m_HasNetwork)
   {
-    sscanf(settings.strSettings_update_time.c_str(),"%d:%d", &hours, &minutes);
-    m_NextDownloadTime.SetDateTime(cur.GetYear(), cur.GetMonth(), cur.GetDay(), hours, minutes, 0);
-  }
-  else
-  {
-    // if interval is not "daily", its set to minutes
-    int interval = atoi(settings.strSettings_update_time.c_str());
+    TVAPI_Machine machine;
+    machine.apiKey = m_activate.apiKey;
+    machine.apiSecret = m_activate.apiSecret;
+    TVAPI_GetMachine(machine);
     
-    // we add minutes to current time to trigger the next update
-    m_NextDownloadTime = cur + CDateTimeSpan(0,0,interval,0);
-  }
-  */
-  m_PlayerInfo.status = machine.status;
-  m_PlayerInfo.apiKey = machine.apiKey;
-  m_PlayerInfo.apiSecret = machine.apiSecret;
-  //m_PlayerInfo.intSettingsVersion;
-
-/*
-  std::string apiKey;
-  std::string apiSecret;
-  // reply
-  std::string id;
-  std::string member;
-  std::string machine_name;
-  std::string description;
-  std::string playlist_id;
-  std::string status;
-  std::string vendor;
-  std::string hardware;
-  std::string timezone;
-  std::string serial_number;
-  std::string warranty_number;
-  std::string video_format;
-  std::string allow_new_content;
-  std::string allow_software_update;
-  std::string update_time;
-  std::string update_interval;
-  NWMachineLocation location;
-  NWMachineNetwork  network;
-  NWMachineSettings settings;
-  NWMachineMenu     menu;
-  NWMachineMembernet_software  membernet_software;
-  NWMachineApple_software apple_software;
-*/
-
-/*
-  CDBManagerRed database;
-
-  if (!m_HasNetwork)
-  {
-    database.Open();
-    if (!database.IsPlayerValid())
+    m_PlayerInfo.id  = machine.id;
+    m_PlayerInfo.name = machine.machine_name;
+    m_PlayerInfo.member = machine.member;
+    m_PlayerInfo.timezone = machine.timezone;
+    m_PlayerInfo.playlist_id = machine.playlist_id;
+    m_PlayerInfo.video_format = machine.video_format;
+    m_PlayerInfo.update_time = machine.update_time;
+    m_PlayerInfo.update_interval = machine.update_interval;
+    /*
+    // "update_interval":"86400","update_time":"24:00"
+    if (settings.strSettings_update_interval == "daily")
     {
-      database.Close();
-      return;
+      sscanf(settings.strSettings_update_time.c_str(),"%d:%d", &hours, &minutes);
+      m_NextDownloadTime.SetDateTime(cur.GetYear(), cur.GetMonth(), cur.GetDay(), hours, minutes, 0);
     }
-    database.GetPlayer(m_PlayerInfo);
-    database.Close();
-    CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetPlayerInfo() (off-line)" );
+    else
+    {
+      // if interval is not "daily", its set to minutes
+      int interval = atoi(settings.strSettings_update_time.c_str());
+      
+      // we add minutes to current time to trigger the next update
+      m_NextDownloadTime = cur + CDateTimeSpan(0,0,interval,0);
+    }
+    */
+    m_PlayerInfo.status = machine.status;
+    m_PlayerInfo.apiKey = machine.apiKey;
+    m_PlayerInfo.apiSecret = machine.apiSecret;
+    m_PlayerInfo.intSettingsVersion = 0;
+
+    /*
+    std::string apiKey;
+    std::string apiSecret;
+    // reply
+    std::string id;
+    std::string member;
+    std::string machine_name;
+    std::string description;
+    std::string playlist_id;
+    std::string status;
+    std::string vendor;
+    std::string hardware;
+    std::string timezone;
+    std::string serial_number;
+    std::string warranty_number;
+    std::string video_format;
+    std::string allow_new_content;
+    std::string allow_software_update;
+    std::string update_time;
+    std::string update_interval;
+    NWMachineLocation location;
+    NWMachineNetwork  network;
+    NWMachineSettings settings;
+    NWMachineMenu     menu;
+    NWMachineMembernet_software  membernet_software;
+    NWMachineApple_software apple_software;
+    */
+    SaveLocalPlayer(m_strHome, m_PlayerInfo);
   }
   else
   {
-    CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetPlayerInfo() (on-line)" );
-
-    XFILE::CCurlFile http;
-    std::string strXML;
-    http.Get(url, strXML);
-
-    TiXmlDocument xml;
-    xml.Parse(strXML.c_str());
-
-    TiXmlElement *rootXmlNode = xml.RootElement();
-    if (rootXmlNode)
-    {
-      TiXmlElement *responseNode = rootXmlNode->FirstChildElement("response");
-      if (responseNode)
-      {
-        TiXmlElement *settingsNode = responseNode->FirstChildElement("settings");
-        if (settingsNode)
-        {
-          if (ParsePlayerInfo(m_PlayerInfo, settingsNode))
-          {
-            database.Open();
-            database.ClearPlayer();
-            database.SavePlayer(m_PlayerInfo);
-            database.Close();
-            SaveLocalPlayerInfo(*settingsNode, m_strHome);
-
-            // Only check for app updates from server player xml.
-            CheckForUpdate(m_PlayerInfo);
-          }
-        }
-      }
-    }
+    if (HasLocalPlayer(m_strHome))
+      LoadLocalPlayer(m_strHome, m_PlayerInfo);
   }
-  // now parse and fill in member vars.
-  int update_interval = strtol(m_PlayerInfo.strUpdateInterval.c_str(), NULL, 10);
-  m_NextUpdateInterval.SetDateTimeSpan(0, 0, update_interval, 0);
-  CLog::Log(LOGINFO, "**NW** - CNWClient::GetPlayerInfo() update   %d", update_interval);
-
-  int report_interval = 1;
-  if (m_PlayerInfo.strReportInterval.size())
-    report_interval = strtol(m_PlayerInfo.strUpdateInterval.c_str(), NULL, 10);
-  m_NextReportInterval.SetDateTimeSpan(0, report_interval, 0, 0);
-  m_ReportManager->SetReportInterval(m_NextReportInterval);
-
-  if (!m_PlayerInfo.strDownloadStartTime.empty() && !m_PlayerInfo.strDownloadDuration.empty())
-  {
-    // complicated but required. we get download time as a
-    // hh:mm:ss field, duration is in hours. So we have to
-    // be able to span over the beginning or end of a 24 hour day.
-    // for example. start at 6pm, end at 6am. start would be 18:00:00,
-    // duration would be 12.
-    // don't use SetFromDBTime, it does the wrong thing :)
-    int hours, minutes, seconds;
-    sscanf(m_PlayerInfo.strDownloadStartTime.c_str(), "%d:%d:%d", &hours, &minutes, &seconds);
-    CDateTime cur = CDateTime::GetCurrentDateTime();
-    m_NextDownloadTime.SetDateTime(cur.GetYear(), cur.GetMonth(), cur.GetDay(), hours, minutes, seconds);
-
-    int download_duration = 12;
-    if (m_PlayerInfo.strDownloadDuration.size())
-      download_duration = strtol(m_PlayerInfo.strDownloadDuration.c_str(), NULL, 10);
-    m_NextDownloadDuration.SetDateTimeSpan(0, download_duration, 0, 0);
-    m_MediaManager->SetDownloadTime(m_NextDownloadTime, m_NextDownloadDuration);
-    CLog::Log(LOGINFO, "**NW** - CNWClient::GetPlayerInfo() download %s, %d", m_NextDownloadTime.GetAsDBDateTime().c_str(), download_duration);
-  }
-
-  m_Player->OverridePlayBackWindow(true);
-  if (!m_PlayerInfo.strPlayStartTime.empty() && !m_PlayerInfo.strPlayDuration.empty())
-  {
-    int hours, minutes, seconds;
-    sscanf(m_PlayerInfo.strPlayStartTime.c_str(), "%d:%d:%d", &hours, &minutes, &seconds);
-    CDateTime cur = CDateTime::GetCurrentDateTime();
-    m_PlaybackTime.SetDateTime(cur.GetYear(), cur.GetMonth(), cur.GetDay(), hours, minutes, seconds);
-
-    int playback_duration = 12;
-    if (m_PlayerInfo.strPlayDuration.size())
-      playback_duration = strtol(m_PlayerInfo.strPlayDuration.c_str(), NULL, 10);
-    m_PlaybackDuration.SetDateTimeSpan(0, playback_duration, 0, 0);
-
-    if (playback_duration > 0)
-    {
-      m_Player->OverridePlayBackWindow(false);
-      m_Player->SetPlayBackTime(m_PlaybackTime, m_PlaybackDuration);
-    }
-    CLog::Log(LOGINFO, "**NW** - CNWClient::GetPlayerInfo() playback %s, %d", m_PlaybackTime.GetAsDBDateTime().c_str(), playback_duration);
-  }
-*/
 }
 
 bool CNWClient::GetPlayerStatus()
@@ -519,255 +426,52 @@ bool CNWClient::GetPlayerStatus()
 bool CNWClient::GetProgamInfo()
 {
   bool rtn = false;
-  TVAPI_Playlist playlist;
-  playlist.apiKey = m_activate.apiKey;
-  playlist.apiSecret = m_activate.apiSecret;
-  TVAPI_GetPlaylist(playlist, m_PlayerInfo.playlist_id);
 
-  if (m_ProgramInfo.updated_date != playlist.updated_date)
+  if (m_HasNetwork)
   {
-    TVAPI_PlaylistItems playlistItems;
-    playlistItems.apiKey = m_activate.apiKey;
-    playlistItems.apiSecret = m_activate.apiSecret;
-    TVAPI_GetPlaylistItems(playlistItems, m_PlayerInfo.playlist_id);
+    TVAPI_Playlist playlist;
+    playlist.apiKey = m_activate.apiKey;
+    playlist.apiSecret = m_activate.apiSecret;
+    TVAPI_GetPlaylist(playlist, m_PlayerInfo.playlist_id);
 
-    //m_ProgramInfo = NWGroupPlaylist();
-    m_ProgramInfo.video_format = m_PlayerInfo.video_format;
-    CreateGroupPlaylist(m_strHome, m_ProgramInfo, playlist, playlistItems);
-
-    // queue all assets belonging to this mediagroup
-    m_Player->QueueProgramInfo(m_ProgramInfo);
-    for (auto group : m_ProgramInfo.groups)
-      m_MediaManager->QueueAssetsForDownload(group.assets);
-
-    rtn = true;
-  }
-
-/*
-  std::string function = "function=programInfo&id=" + m_PlayerInfo.strProgramID;
-  std::string url = FormatUrl(m_PlayerInfo, function);
-
-  CDBManagerRed database;
-  std::vector<RedMediaGroup> mediagroups;
-
-  if (!m_HasNetwork)
-  {
-    database.Open();
-    if (!database.IsPlayerValid())
+    if (m_ProgramInfo.updated_date != playlist.updated_date)
     {
-      database.Close();
-      CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo() no program info (off-line)" );
-      return false;
+      TVAPI_PlaylistItems playlistItems;
+      playlistItems.apiKey = m_activate.apiKey;
+      playlistItems.apiSecret = m_activate.apiSecret;
+      TVAPI_GetPlaylistItems(playlistItems, m_PlayerInfo.playlist_id);
+
+      m_ProgramInfo.video_format = m_PlayerInfo.video_format;
+      CreatePlaylist(m_strHome, m_ProgramInfo, playlist, playlistItems);
+      SaveLocalPlaylist(m_strHome, m_ProgramInfo);
+
+      // queue all assets belonging to this mediagroup
+      m_Player->QueueProgramInfo(m_ProgramInfo);
+      for (auto group : m_ProgramInfo.groups)
+        m_MediaManager->QueueAssetsForDownload(group.assets);
+
+      rtn = true;
     }
-
-    database.GetProgram(m_ProgramInfo);
-    database.Close();
-
-    CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo() using old program info (off-line)" );
   }
   else
   {
-    CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo() fetching program info (on-line)" );
-
-    XFILE::CCurlFile http;
-    std::string strXML;
-    http.Get(url, strXML);
-
-    TiXmlDocument xml;
-    xml.Parse(strXML.c_str());
-
-    while(true)
+    if (HasLocalPlaylist(m_strHome))
     {
-      TiXmlElement* rootXmlNode = xml.RootElement();
-      if (!rootXmlNode)
-        break;
-
-      TiXmlElement* responseNode = rootXmlNode->FirstChildElement("response");
-      if (!responseNode)
-        break;
-
-      TiXmlElement* programNode = responseNode->FirstChildElement("program");
-      if (!programNode)
-        break;
-
-      // compare the date to previous data, if newer or 1st time
-      // reset player and load new info, else skip checking the rest
-      std::string date;
-      XMLUtils::GetString(programNode, "date", date);
-      CDateTime programDate;
-      programDate.SetFromDBDateTime(date);
-      if (!m_FullUpdate && m_ProgramDateStamp.IsValid() && programDate <= m_ProgramDateStamp)
+      std::string updated_date = m_ProgramInfo.updated_date;
+      if (LoadLocalPlaylist(m_strHome, m_ProgramInfo))
       {
-        CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo() using old program info (on-line)" );
-        break;
-      }
-      CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo() using new program info (on-line)" );
-
-      m_ProgramDateStamp = programDate;
-
-      m_ProgramInfo.strDate = date;
-      m_ProgramInfo.strProgramID = ((TiXmlElement*) programNode)->Attribute("id");
-
-      // new program list, purge active program.
-      m_Player->Reset();
-      m_MediaManager->ClearAssets();
-      m_ProgramInfo.zones.clear();
-
-      TiXmlElement* zonesNode = programNode->FirstChildElement("zones");
-      if (!zonesNode)
-        break;
-      TiXmlNode *pZoneNode = NULL;
-      while ((pZoneNode = zonesNode->IterateChildren(pZoneNode)) != NULL)
-      {
-        RedMediaZone zone;
-
-        zone.strId = ((TiXmlElement*) pZoneNode)->Attribute("id");
-        XMLUtils::GetString(pZoneNode, "left", zone.strLeft);
-        XMLUtils::GetString(pZoneNode, "top", zone.strTop);
-        XMLUtils::GetString(pZoneNode, "width", zone.strWidth);
-        XMLUtils::GetString(pZoneNode, "height", zone.strHeight);
-
-        TiXmlElement* playlistsNode = pZoneNode->FirstChildElement("playlists");
-        if (!playlistsNode)
-          break;
-
-        TiXmlNode *pPlaylistNode = NULL;
-
-        while ((pPlaylistNode = playlistsNode->IterateChildren(pPlaylistNode)) != NULL)
+        if (m_ProgramInfo.updated_date != updated_date)
         {
-          RedMediaPlaylist playlist;
-
-          playlist.strID = ((TiXmlElement*) pPlaylistNode)->Attribute("id");
-          XMLUtils::GetString(pZoneNode, "name", playlist.strName);
-          XMLUtils::GetString(pZoneNode, "lastUpdated", playlist.strLastUpdated);
-
-          TiXmlElement* mediaGroupsNode = pPlaylistNode->FirstChildElement("mediaGroups");
-          if (!mediaGroupsNode)
-            break;
-
-          playlist.intMediaGroupsCount = (int) atoi(((TiXmlElement*) mediaGroupsNode)->Attribute("count"));
-
-          TiXmlNode *pMediaGroupsNode = NULL;
-
-          while ((pMediaGroupsNode = mediaGroupsNode->IterateChildren(pMediaGroupsNode)) != NULL)
-          {
-            RedMediaGroup mediagroup;
-            mediagroup.id = ((TiXmlElement*) pMediaGroupsNode)->Attribute("id");
-            mediagroup.name = ((TiXmlElement*) pMediaGroupsNode)->Attribute("name");
-            mediagroup.playbackType = ((TiXmlElement*) pMediaGroupsNode)->Attribute("playback");
-            mediagroup.playlistId = playlist.strID;
-            mediagroup.assetIndex = "0";
-
-            std::string date;
-            XMLUtils::GetString(pMediaGroupsNode, "startDate", date);
-            mediagroup.startDate.SetFromDBDateTime(date);
-
-
-            XMLUtils::GetString(pMediaGroupsNode, "endDate", date);
-            mediagroup.endDate.SetFromDBDateTime(date);
-
-            TiXmlElement* assetsNode = pMediaGroupsNode->FirstChildElement("assets");
-            if (!assetsNode)
-              break;
-
-            TiXmlNode *pAssetNode = NULL;
-            while ((pAssetNode = assetsNode->IterateChildren(pAssetNode)) != NULL)
-            {
-              RedMediaAsset asset;
-
-              asset.id = ((TiXmlElement*) pAssetNode)->Attribute("id");
-              XMLUtils::GetString(pAssetNode, "url", asset.url);
-              XMLUtils::GetString(pAssetNode, "md5", asset.md5);
-              XMLUtils::GetString(pAssetNode, "size", asset.size);
-              XMLUtils::GetString(pAssetNode, "title", asset.name);
-              XMLUtils::GetString(pAssetNode, "type", asset.type);
-              XMLUtils::GetString(pAssetNode, "thumbnail", asset.thumbnail_url);
-              asset.basename = URIUtils::GetFileName(asset.url);
-              asset.localpath = URIUtils::AddFileToFolder(m_strHome, kRedDownloadMusicPath + asset.basename);
-              asset.thumbnail_basename = URIUtils::GetFileName(asset.thumbnail_url);
-              asset.thumbnail_localpath = URIUtils::AddFileToFolder(m_strHome, kRedDownloadMusicThumbNailsPath + asset.thumbnail_basename);
-              asset.mediagroup_id = mediagroup.id;
-
-              TiXmlElement* pMetadataNode = pAssetNode->FirstChildElement("metadata");
-              if (pMetadataNode)
-              {
-                TiXmlNode *pRecordNode = NULL;
-                while ((pRecordNode = pMetadataNode->IterateChildren(pRecordNode)) != NULL)
-                {
-                  std::string key;
-                  std::string value;
-                  XMLUtils::GetString(pRecordNode, "key", key);
-                  XMLUtils::GetString(pRecordNode, "value", value);
-
-                  if (!key.empty() && !value.empty())
-                  {
-                    if (StringUtils::EqualsNoCase(key, "artist"))
-                      asset.artist = value;
-                    else if (StringUtils::EqualsNoCase(key, "year"))
-                      asset.year = value;
-                    else if (StringUtils::EqualsNoCase(key, "genre"))
-                      asset.genre = value;
-                    else if (StringUtils::EqualsNoCase(key, "composer"))
-                      asset.composer = value;
-                    else if (StringUtils::EqualsNoCase(key, "album"))
-                      asset.album = value;
-                    else if (StringUtils::EqualsNoCase(key, "tracknumber"))
-                      asset.tracknumber = value;
-                  }
-                }
-              }
- 
-              //CLog::Log(LOGDEBUG, "CNWClient::GetProgamInfo[%s\n,%s\n,%s\n,%s\n,%s\n,%s\n,%s\n,%s\n,%s\n,%s\n]",
-              //          asset.url.c_str(),asset.md5.c_str(),asset.name.c_str(),asset.basename.c_str(),
-              //          asset.artist.c_str(),asset.year.c_str(),asset.genre.c_str(),asset.composer.c_str(),
-              //          asset.album.c_str(),asset.tracknumber.c_str());
-
-              mediagroup.assets.push_back(asset);
-            }
-
-            // if requested, initial ramdomize of this group assets
-            mediagroup.lastPlayedId.clear();
-            if (mediagroup.playbackType == "random" && mediagroup.assets.size() > 3)
-              std::random_shuffle(mediagroup.assets.begin(), mediagroup.assets.end());
-
-            playlist.MediaGroups.push_back(mediagroup);
-          } // while groups node
-          zone.playlists.push_back(playlist);
-        } // while playlists node
-        m_ProgramInfo.zones.push_back(zone);
-      } // while zones node
-
-      database.Open();
-      database.SaveProgram(m_ProgramInfo);
-      database.Close();
-
-      // force ourselves out of the fake while loop
-      break;
-    }
-  }
-
-  for (std::vector<RedMediaZone>::iterator rzit = m_ProgramInfo.zones.begin(); rzit != m_ProgramInfo.zones.end(); ++rzit)
-  {
-    for (std::vector<RedMediaPlaylist>::iterator rpit = rzit->playlists.begin(); rpit != rzit->playlists.end(); ++rpit)
-    {
-      for (std::vector<RedMediaGroup>::iterator mgit = rpit->MediaGroups.begin(); mgit != rpit->MediaGroups
-           .end(); ++mgit)
-      {
-        // queue all assets belonging to this mediagroup
-        m_Player->QueueMediaGroup(*mgit);
-        m_MediaManager->QueueAssetsForDownload(mgit->assets);
+          // queue all assets belonging to this mediagroup
+          m_Player->QueueProgramInfo(m_ProgramInfo);
+          for (auto group : m_ProgramInfo.groups)
+            m_MediaManager->QueueAssetsForDownload(group.assets);
+          rtn = true;
+        }
       }
     }
   }
 
-  // if this is the inital start up, override
-  // download window in MediaManager
-  if (m_Startup)
-  {
-    m_Startup = false;
-    m_MediaManager->OverrideDownloadWindow();
-  }
-*/
   return rtn;
 }
 
@@ -1063,17 +767,17 @@ void CNWClient::ClearAction(std::string action)
   }
 }
 
-bool CNWClient::CreateGroupPlaylist(std::string home, NWGroupPlaylist &groupPlayList,
+bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
   const TVAPI_Playlist &playlist, const TVAPI_PlaylistItems &playlistItems)
 {
   // convert server structures to player structure
-  groupPlayList.id = std::stoi(playlist.id);
-  groupPlayList.name = playlist.name;
-  groupPlayList.type = playlist.type;
+  playList.id = std::stoi(playlist.id);
+  playList.name = playlist.name;
+  playList.type = playlist.type;
   // format is "2013-08-22"
-  groupPlayList.updated_date = playlist.updated_date;
-  groupPlayList.groups.clear();
-  groupPlayList.play_order.clear();
+  playList.updated_date = playlist.updated_date;
+  playList.groups.clear();
+  playList.play_order.clear();
 
   for (auto catagory : playlist.categories)
   {
@@ -1085,12 +789,12 @@ bool CNWClient::CreateGroupPlaylist(std::string home, NWGroupPlaylist &groupPlay
     // this determines group play order. ie.
     // pick 1st group, play asset, pick next group, play asset, do all groups
     // cycle back, pick 1st group, play next asset...
-    groupPlayList.play_order.push_back(group.id);
+    playList.play_order.push_back(group.id);
 
     // check if we already have handled this group
-    auto it = std::find_if(groupPlayList.groups.begin(), groupPlayList.groups.end(),
+    auto it = std::find_if(playList.groups.begin(), playList.groups.end(),
       [group](const NWGroup &existingGroup) { return existingGroup.id == group.id; });
-    if (it == groupPlayList.groups.end())
+    if (it == playList.groups.end())
     {
       // not present, pull out assets assigned to this group
       for (auto item : playlistItems.items)
@@ -1105,7 +809,7 @@ bool CNWClient::CreateGroupPlaylist(std::string home, NWGroupPlaylist &groupPlay
 
           for (auto file : item.files)
           {
-            if (file.type == groupPlayList.video_format)
+            if (file.type == playList.video_format)
             {
               // trap out bad urls
               if (file.path.find("proxy.membernettv.com") != std::string::npos)
@@ -1119,7 +823,7 @@ bool CNWClient::CreateGroupPlaylist(std::string home, NWGroupPlaylist &groupPlay
               asset.available_to.SetFromDBDateTime(item.availability_to);
               asset.available_from.SetFromDBDateTime(item.availability_from);
               asset.video_basename = URIUtils::GetFileName(asset.video_url);
-              asset.video_localpath = URIUtils::AddFileToFolder(home, kTVAPI_DownloadVideoPath + asset.video_basename);
+              asset.video_localpath = URIUtils::AddFileToFolder(home, kNWClient_DownloadVideoPath + asset.video_basename);
               break;
             }
           }
@@ -1134,7 +838,7 @@ bool CNWClient::CreateGroupPlaylist(std::string home, NWGroupPlaylist &groupPlay
               asset.thumb_md5 = item.thumb.etag;
               asset.thumb_size = std::stoi(item.thumb.size);
               asset.thumb_basename = URIUtils::GetFileName(asset.thumb_url);
-              asset.thumb_localpath = URIUtils::AddFileToFolder(home, kTVAPI_DownloadVideoThumbNailsPath + asset.thumb_basename);
+              asset.thumb_localpath = URIUtils::AddFileToFolder(home, kNWClient_DownloadVideoThumbNailsPath + asset.thumb_basename);
             }
             group.assets.push_back(asset);
           }
@@ -1142,7 +846,7 @@ bool CNWClient::CreateGroupPlaylist(std::string home, NWGroupPlaylist &groupPlay
       }
       // add the new group regardless of it there are assets present
       // player will skip over this group if there are no assets.
-      groupPlayList.groups.push_back(group);
+      playList.groups.push_back(group);
     }
   }
 
@@ -1156,11 +860,7 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDow
   manager->m_Player->ValidateAsset(asset, true);
 
   if (wasDownloaded)
-  {
-    // mark it downloaded in DB
-    SetDownloadedAsset(asset.id);
     manager->NotifyAssetDownload(asset);
-  }
 }
 
 void CNWClient::ReportManagerCallBack(const void *ctx, bool status)
@@ -1179,7 +879,7 @@ void CNWClient::UpdatePlayerInfo(const std::string strPlayerID, const std::strin
 
 void CNWClient::ForceLocalPlayerUpdate()
 {
-  GetLocalPlayerInfo(m_PlayerInfo, m_strHome);
+  LoadLocalPlayer(m_strHome, m_PlayerInfo);
 }
 
 void CNWClient::CheckForUpdate(NWPlayerInfo &player)
