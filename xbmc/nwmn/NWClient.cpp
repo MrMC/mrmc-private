@@ -45,6 +45,7 @@
 #include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
 
+#include "guilib/GUIKeyboardFactory.h"
 #include "guilib/GUIWindowManager.h"
 #include "settings/MediaSourceSettings.h"
 #include "storage/MediaManager.h"
@@ -74,19 +75,21 @@ CNWClient::CNWClient()
 
   // hardcode for now
   //m_activate.code = "GR7IDTYXOF";
-  m_activate.code = "HPPALSRK/A";
+//  m_activate.code = "HPPALSRK/A";
   
   m_activate.application_id = StringUtils::CreateUUID();
   //m_activate.application_id = "137e4e4a-2224-49c9-b8f1-f833cec4a3a3";
  // if (!TVAPI_DoActivate(m_activate))
-  {
-    //m_activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
-    //m_activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
-    m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
-    m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
-    
-  }
+//  {
+//    //m_activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
+//    //m_activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
+//    m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
+//    m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
+//    
+//  }
 
+  DoAuthorize();
+  
   m_status.apiKey = m_activate.apiKey;
   m_status.apiSecret = m_activate.apiSecret;
   TVAPI_GetStatus(m_status);
@@ -909,4 +912,34 @@ void CNWClient::CheckForUpdate(NWPlayerInfo &player)
     }
   }
 #endif
+}
+bool CNWClient::DoAuthorize()
+{
+//  m_activate.code = "HPPALSRK/A";
+  
+  m_activate.application_id = StringUtils::CreateUUID();
+  
+  std::string code = "";
+  const std::string header = "Enter Authorization string";
+  
+  if (CGUIKeyboardFactory::ShowAndGetInput(code, CVariant{header}, false))
+  {
+    TVAPI_Activate activate = m_activate;
+    activate.code = code;
+    if (!TVAPI_DoActivate(activate))
+    {
+      m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
+      m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
+      
+    }
+    else
+    {
+      m_activate = activate;
+      m_status.apiKey = m_activate.apiKey;
+      m_status.apiSecret = m_activate.apiSecret;
+      TVAPI_GetStatus(m_status);
+      return true;
+    }
+  }
+  return false;
 }

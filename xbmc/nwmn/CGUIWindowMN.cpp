@@ -50,6 +50,7 @@
 #define NETWORKTEST       90126
 #define SETVERTICAL       90134
 #define SETHORIZONTAL     90144
+#define AUTHORIZE         90150
 #define ABOUTDIALOG       90200
 
 #define PINGDIALOG        90145
@@ -180,7 +181,14 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       }
       return true;
     }
-    
+    else if (iControl == AUTHORIZE)
+    {
+      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND);
+      OnMessage(msg);
+      
+      m_client->DoAuthorize();
+      return true;
+    }
   }
   else if (message.GetMessage() == GUI_MSG_WINDOW_DEINIT)
   {

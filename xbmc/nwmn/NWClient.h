@@ -67,6 +67,7 @@ public:
   void          UpdatePlayerInfo(const std::string strPlayerID, const std::string strApiKey,const std::string strSecretKey);
   void          ForceLocalPlayerUpdate();
   void          CheckForUpdate(NWPlayerInfo &player);
+  bool          DoAuthorize();
 
 protected:
   virtual void  Process();
