@@ -50,6 +50,8 @@
 #include "settings/MediaSourceSettings.h"
 #include "storage/MediaManager.h"
 
+// temp until access moves to core
+#include "platform/darwin/DarwinUtils.h"
 
 CCriticalSection CNWClient::m_playerLock;
 CNWClient *CNWClient::m_this = NULL;
@@ -73,26 +75,33 @@ CNWClient::CNWClient()
 {
   CLog::Log(LOGDEBUG, "**NW** - NW version %f", kNWClient_PlayerFloatVersion);
 
+  m_activate.application_id = CDarwinUtils::GetHardwareUUID();
+  DoAuthorize();
+
+/*
   // hardcode for now
   //m_activate.code = "GR7IDTYXOF";
-//  m_activate.code = "HPPALSRK/A";
-  
-  m_activate.application_id = StringUtils::CreateUUID();
-  //m_activate.application_id = "137e4e4a-2224-49c9-b8f1-f833cec4a3a3";
- // if (!TVAPI_DoActivate(m_activate))
-//  {
-//    //m_activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
-//    //m_activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
-//    m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
-//    m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
-//    
-//  }
+  m_activate.code = "HPPALSRK/A";
 
-  DoAuthorize();
-  
+  m_activate.application_id = CDarwinUtils::GetHardwareUUID();
+  if (!TVAPI_DoActivate(m_activate))
+  {
+    //m_activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
+    //m_activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
+    m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
+    m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
+  }
+*/
+
   m_status.apiKey = m_activate.apiKey;
   m_status.apiSecret = m_activate.apiSecret;
   TVAPI_GetStatus(m_status);
+/*
+  TVAPI_Actions actions;
+  actions.apiKey = m_activate.apiKey;
+  actions.apiSecret = m_activate.apiSecret;
+  TVAPI_GetActionQueue(actions);
+*/
 
   // default path to local red directory in home
   std::string home = "special://home/nwmn/";

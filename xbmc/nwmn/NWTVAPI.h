@@ -28,7 +28,7 @@ const std::string kTVAPI_Status_On = "On";
 const std::string kTVAPI_Status_Off = "Off";
 const std::string kTVAPI_Status_Restarting = "Restarting";
 
-const std::string kTVAPI_BASE = "test.nationwidemember.com";
+//const std::string kTVAPI_URLBASE = "http://nationwidemember.com/tv-api/1/";
 const std::string kTVAPI_URLBASE = "http://test.nationwidemember.com/tv-api/1/";
 
 // ---------------------------------------------
@@ -48,7 +48,7 @@ typedef struct TVAPI_Status {
   std::string apiSecret;
   // reply
   std::string key;
-  std::string unique_id;
+  std::string unique_id;  // application_id used when doing activation
   std::string machine_id;
   std::string status;
   std::string status_text;
@@ -143,6 +143,27 @@ typedef struct TVAPI_Machine {
   TVAPI_MachineApple_software apple_software;
 } TVAPI_Machine;
 
+typedef struct TVAPI_MachineUpdate {
+  std::string apiKey;
+  std::string apiSecret;
+  // post
+  std::string playlist_id;
+  std::string machine_name;
+  std::string description;
+  std::string serial_number;
+  std::string warranty_number;
+  std::string macaddress;
+  std::string macaddress_wireless;
+  std::string vendor;
+  std::string hardware_version;
+  std::string timezone;
+  std::string status;
+  std::string allow_new_content;
+  std::string allow_software_update;
+  std::string update_interval;
+  std::string update_time;
+} TVAPI_MachineUpdate;
+
 // ---------------------------------------------
 // ---------------------------------------------
 typedef struct TVAPI_PlaylistFile {
@@ -235,12 +256,88 @@ typedef struct TVAPI_Playlist {
   std::vector<TVAPI_CategoryId> categories;
 } TVAPI_Playlist;
 
+typedef struct TVAPI_File {
+  std::string id;
+  std::string date;
+} TVAPI_File;
+
+typedef struct TVAPI_Files {
+  std::string apiKey;
+  std::string apiSecret;
+  // post
+  std::vector<TVAPI_File> files;
+} TVAPI_Files;
+
+typedef struct TVAPI_HealthReport {
+  std::string apiKey;
+  std::string apiSecret;
+  // post
+  std::string date;
+  std::string uptime;
+  std::string disk_used;
+  std::string disk_free;
+  std::string smart_status;
+} TVAPI_HealthReport;
+
+const std::string kTVAPI_ActionDownloaded = "downloaded";
+const std::string kTVAPI_ActionHealth = "health";
+const std::string kTVAPI_ActionFilePlayed = "file-played";
+const std::string kTVAPI_ActionRestart = "restart";
+const std::string kTVAPI_ActionPlay = "play";
+const std::string kTVAPI_ActionStop = "stop";
+const std::string kTVAPI_ActionSwitchOff = "switch-off";
+
+const std::string kTVAPI_ActionStatusPending = "pending";
+const std::string kTVAPI_ActionStatusInProgress = "in-progress";
+const std::string kTVAPI_ActionStatusCompleted = "completed";
+const std::string kTVAPI_ActionStatusError = "error";
+
+typedef struct TVAPI_Action {
+  std::string id;
+  std::string action;
+  std::string name;
+  std::string status;
+  std::string created_date;
+} TVAPI_Action;
+
+typedef struct TVAPI_Actions {
+  std::string apiKey;
+  std::string apiSecret;
+  // get
+  std::vector<TVAPI_Action> actions;
+} TVAPI_Actions;
+
+typedef struct TVAPI_ActionStatus {
+  std::string id;
+  std::string apiKey;
+  std::string apiSecret;
+  // post
+  std::string status;
+  std::string message;
+} TVAPI_ActionStatus;
+
+
 // ---------------------------------------------
 // ---------------------------------------------
+// activation
 bool TVAPI_DoActivate(TVAPI_Activate &activate);
 bool TVAPI_GetStatus(TVAPI_Status &status);
-bool TVAPI_GetMachine(TVAPI_Machine &machine);
-bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists);
 
+// machines
+bool TVAPI_GetMachine(TVAPI_Machine &machine);
+bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate);
+
+// playlists
+bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists);
 bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id);
 bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string playlist_id);
+
+// reports
+bool TVAPI_ReportHealth(TVAPI_HealthReport &health);
+bool TVAPI_ReportFilesPlayed(TVAPI_Files &files, std::string serial_number);
+bool TVAPI_ReportFilesDeleted(TVAPI_Files &files);
+bool TVAPI_ReportFilesDownloaded(TVAPI_Files &files);
+
+// actions
+bool TVAPI_GetActionQueue(TVAPI_Actions &actions);
+bool TVAPI_UpdateActionStatus(TVAPI_ActionStatus &actionStatus);

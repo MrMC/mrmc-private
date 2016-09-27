@@ -22,6 +22,7 @@
 #include "URL.h"
 #include "filesystem/CurlFile.h"
 #include "utils/JSONVariantParser.h"
+#include "utils/JSONVariantWriter.h"
 #include "utils/Variant.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
@@ -29,17 +30,17 @@
 
 bool TVAPI_DoActivate(TVAPI_Activate &activate)
 {
-  XFILE::CCurlFile nwmn;
-  nwmn.SetTimeout(30);
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(30);
 
-  CURL nwmn_activate(kTVAPI_URLBASE + "activate");
-  nwmn_activate.SetProtocolOption("seekable", "0");
-  nwmn_activate.SetProtocolOption("auth", "basic");
-  nwmn_activate.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
-  nwmn_activate.SetOption("code", activate.code);
-  nwmn_activate.SetOption("application_id", activate.application_id);
+  CURL curl(kTVAPI_URLBASE + "activate");
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  curl.SetOption("code", activate.code);
+  curl.SetOption("application_id", activate.application_id);
   std::string strResponse;
-  if (nwmn.Post(nwmn_activate.Get(), "", strResponse))
+  if (curlfile.Post(curl.Get(), "", strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_DoActivate %s", strResponse.c_str());
     //{"message":"Operation Successful","key":"\/3\/NKO6ZFdRgum7fZkMi","secret":"ewuDiXOIgZP7l9\/Rxt\/LDQbmAI1zJe0PQ5VZYnuy"}
@@ -62,18 +63,18 @@ bool TVAPI_DoActivate(TVAPI_Activate &activate)
 
 bool TVAPI_GetStatus(TVAPI_Status &status)
 {
-  XFILE::CCurlFile nwmn;
-  nwmn.SetTimeout(5);
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(5);
 
-  CURL nwmn_status(kTVAPI_URLBASE + "status");
-  nwmn_status.SetProtocolOption("seekable", "0");
-  nwmn_status.SetProtocolOption("auth", "basic");
-  nwmn_status.SetProtocolOption("Cache-Control", "no-cache");
-  nwmn_status.SetUserName(status.apiKey);
-  nwmn_status.SetPassword(status.apiSecret);
+  CURL curl(kTVAPI_URLBASE + "status");
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Cache-Control", "no-cache");
+  curl.SetUserName(status.apiKey);
+  curl.SetPassword(status.apiSecret);
   std::string strResponse;
 
-  if (nwmn.Get(nwmn_status.Get(), strResponse))
+  if (curlfile.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_GetStatus %s", strResponse.c_str());
     //{"key":"fGyb157LNrPsP4DOVin1","unique_id":"My Application Id","activation_date":"2016-07-08 14:19:51","status":"1","status_text":"Active","machine_id":"1757"}
@@ -95,18 +96,18 @@ bool TVAPI_GetStatus(TVAPI_Status &status)
 
 bool TVAPI_GetMachine(TVAPI_Machine &machine)
 {
-  XFILE::CCurlFile nwmn;
-  nwmn.SetTimeout(30);
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(30);
 
-  CURL nwmn_machine(kTVAPI_URLBASE + "machine");
-  nwmn_machine.SetProtocolOption("seekable", "0");
-  nwmn_machine.SetProtocolOption("auth", "basic");
-  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
-  nwmn_machine.SetUserName(machine.apiKey);
-  nwmn_machine.SetPassword(machine.apiSecret);
+  CURL curl(kTVAPI_URLBASE + "machine");
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Cache-Control", "no-cache");
+  curl.SetUserName(machine.apiKey);
+  curl.SetPassword(machine.apiSecret);
   std::string strResponse;
 
-  if (nwmn.Get(nwmn_machine.Get(), strResponse))
+  if (curlfile.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_GetMachine %s", strResponse.c_str());
     //{"id":"1757","member":"1560","machine_name":"jww-test","description":"Description from JSON","playlist_id":"1096","status":null,"vendor":"0","hardware":"0","timezone":"America\/Puerto_Rico","serial_number":"421232123212321232124","warranty_number":"0","video_format":"720","allow_new_content":"1","allow_software_update":"1","update_interval":"daily","update_time":"2400","location":{"id":"83400001","name":"All Maytag","address":"401 S. Broadway","address2":"","zip_code":"73034","state":"OK","city":"Edmond","phone":"(405) 359-9274","fax":"(405) 359-0022"},"network":{"macaddress":"","macaddress_wireless":"","dhcp":"1","ipaddress":"","subnet":"","router":"","dns_1":"","dns_2":""},"settings":{"network":"1","pairing":"1","about":"1","hdmibrightness":"1","tvresolution":"1","updatesoftware":"0","language":"1","legal":"1"},"menu":{"membernettv":"1","vendorcommercials":"0","hdcontent":"1","membercommercials":"0","movietrailers":"1","promotionalcampaigns":"1","nationwidebroadcasts":"0","imaginationwidehd":"1","primemediacommercialfactory":"1"},"membernet_software":{"id":"20","version":"MNTV 2.1","cfbundleversion":"2.1.1","url":"http:\/\/test.nationwidemember.com\/resources\/tv\/versions\/membernet_2_1.tar.gz"},"apple_software":{"id":"20","version":"MNTV 2.1","url":"http:\/\/test.nationwidemember.com\/resources\/tv\/versions\/membernet_2_1.tar.gz"}}
@@ -189,24 +190,63 @@ bool TVAPI_GetMachine(TVAPI_Machine &machine)
   return false;
 }
 
+bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
+{
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10);
+
+  CURL curl(kTVAPI_URLBASE + "machine");
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Cache-Control", "no-cache");
+  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  curl.SetUserName(machineUpdate.apiKey);
+  curl.SetPassword(machineUpdate.apiSecret);
+  // parameters
+  curl.SetOption("playlist_id", machineUpdate.playlist_id);
+  curl.SetOption("machine_name", machineUpdate.machine_name);
+  curl.SetOption("description", machineUpdate.description);
+  curl.SetOption("serial_number", machineUpdate.serial_number);
+  curl.SetOption("warranty_number", machineUpdate.warranty_number);
+  curl.SetOption("macaddress", machineUpdate.macaddress);
+  curl.SetOption("macaddress_wireless", machineUpdate.macaddress_wireless);
+  curl.SetOption("vendor", machineUpdate.vendor);
+  curl.SetOption("hardware_version", machineUpdate.hardware_version);
+  curl.SetOption("timezone", machineUpdate.timezone);
+  curl.SetOption("status", machineUpdate.status);
+  curl.SetOption("allow_new_content", machineUpdate.allow_new_content);
+  curl.SetOption("allow_software_update", machineUpdate.allow_software_update);
+  curl.SetOption("update_interval", machineUpdate.update_interval);
+  curl.SetOption("playlist_id", machineUpdate.playlist_id);
+  curl.SetOption("update_time", machineUpdate.update_time);
+
+  std::string strResponse;
+  if (curlfile.Post(curl.Get(), "", strResponse))
+  {
+    CLog::Log(LOGDEBUG, "TVAPI_UpdateMachineInfo %s", strResponse.c_str());
+    return true;
+  }
+  return false;
+}
+
 bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 {
-  XFILE::CCurlFile nwmn;
-  nwmn.SetTimeout(30);
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(30);
 
   std::string sub_url;
   sub_url = kTVAPI_URLBASE + "playlist";
   sub_url += "?_page=" + std::to_string(1) + "&_perPage=50";
 
-  CURL nwmn_machine(sub_url);
-  nwmn_machine.SetProtocolOption("seekable", "0");
-  nwmn_machine.SetProtocolOption("auth", "basic");
-  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
-  nwmn_machine.SetUserName(playlists.apiKey);
-  nwmn_machine.SetPassword(playlists.apiSecret);
+  CURL curl(sub_url);
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Cache-Control", "no-cache");
+  curl.SetUserName(playlists.apiKey);
+  curl.SetPassword(playlists.apiSecret);
   std::string strResponse;
 
-  if (nwmn.Get(nwmn_machine.Get(), strResponse))
+  if (curlfile.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists %s", strResponse.c_str());
 
@@ -248,8 +288,8 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
       {
         sub_url = kTVAPI_URLBASE + "playlist";
         sub_url += "?_page=" + std::to_string(++page) + "&_perPage=25";
-        nwmn_machine = CURL(sub_url);
-        if (nwmn.Get(nwmn_machine.Get(), strResponse))
+        curl = CURL(sub_url);
+        if (curlfile.Get(curl.Get(), strResponse))
         {
           reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
           continue;
@@ -268,21 +308,21 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 
 bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id)
 {
-  XFILE::CCurlFile nwmn;
-  nwmn.SetTimeout(30);
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(30);
 
   std::string url;
   url = kTVAPI_URLBASE + "playlist/" + playlist_id;
 
-  CURL nwmn_machine(url);
-  nwmn_machine.SetProtocolOption("seekable", "0");
-  nwmn_machine.SetProtocolOption("auth", "basic");
-  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
-  nwmn_machine.SetUserName(playlist.apiKey);
-  nwmn_machine.SetPassword(playlist.apiSecret);
+  CURL curl(url);
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Cache-Control", "no-cache");
+  curl.SetUserName(playlist.apiKey);
+  curl.SetPassword(playlist.apiSecret);
   std::string strResponse;
 
-  if (nwmn.Get(nwmn_machine.Get(), strResponse))
+  if (curlfile.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_GetPlaylist %s", strResponse.c_str());
 
@@ -329,21 +369,21 @@ bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id)
 
 bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string playlist_id)
 {
-  XFILE::CCurlFile nwmn;
-  nwmn.SetTimeout(30);
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(30);
 
   std::string url;
   url = kTVAPI_URLBASE + "playlist/" + playlist_id + "/files";
 
-  CURL nwmn_machine(url);
-  nwmn_machine.SetProtocolOption("seekable", "0");
-  nwmn_machine.SetProtocolOption("auth", "basic");
-  nwmn_machine.SetProtocolOption("Cache-Control", "no-cache");
-  nwmn_machine.SetUserName(playlistItems.apiKey);
-  nwmn_machine.SetPassword(playlistItems.apiSecret);
+  CURL curl(url);
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Cache-Control", "no-cache");
+  curl.SetUserName(playlistItems.apiKey);
+  curl.SetPassword(playlistItems.apiSecret);
   std::string strResponse;
 
-  if (nwmn.Get(nwmn_machine.Get(), strResponse))
+  if (curlfile.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_GetPlaylistItems %s", strResponse.c_str());
 
@@ -450,5 +490,204 @@ bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string play
     return true;
   }
 
+  return false;
+}
+
+bool TVAPI_ReportHealth(TVAPI_HealthReport &health)
+{
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10);
+
+  CURL curl(kTVAPI_URLBASE + "health");
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  curl.SetUserName(health.apiKey);
+  curl.SetPassword(health.apiSecret);
+  // parameters
+  curl.SetOption("date", health.date);
+  curl.SetOption("uptime", health.uptime);
+  curl.SetOption("disk_used", health.disk_used);
+  curl.SetOption("disk_free", health.disk_free);
+  curl.SetOption("smart_status", health.smart_status);
+
+  std::string strResponse;
+  if (curlfile.Post(curl.Get(), "", strResponse))
+  {
+    CLog::Log(LOGDEBUG, "TVAPI_ReportHealth %s", strResponse.c_str());
+    return true;
+  }
+  return false;
+}
+
+bool TVAPI_ReportFilesPlayed(TVAPI_Files &files, std::string serial_number)
+{
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10);
+
+  std::string url;
+  url = kTVAPI_URLBASE + "file-played";
+
+  CURL curl(url);
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Content-Type", "application/json");
+  curl.SetOption("serial_number", serial_number);
+  curl.SetUserName(files.apiKey);
+  curl.SetPassword(files.apiSecret);
+
+  CVariant vfiles(CVariant::VariantTypeArray);
+  for (size_t i = 0; i < files.files.size(); ++i)
+  {
+    CVariant file;
+    file["id"] = files.files[i].id;
+    file["date"] = files.files[i].date;
+    vfiles.push_back(file);
+  }
+  std::string jsonBody = CJSONVariantWriter::Write(vfiles, false);
+  std::string strResponse;
+  if (curlfile.Post(curl.Get(), jsonBody, strResponse))
+  {
+    CLog::Log(LOGDEBUG, "TVAPI_ReportFilesPlayed %s", strResponse.c_str());
+    return true;
+  }
+  
+  return false;
+}
+
+bool TVAPI_ReportFilesDeleted(TVAPI_Files &files)
+{
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10);
+
+  std::string url;
+  url = kTVAPI_URLBASE + "file-downloaded";
+
+  CURL curl(url);
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Content-Type", "application/json");
+  curl.SetUserName(files.apiKey);
+  curl.SetPassword(files.apiSecret);
+
+  CVariant vfiles(CVariant::VariantTypeArray);
+  for (size_t i = 0; i < files.files.size(); ++i)
+  {
+    CVariant file;
+    file["id"] = files.files[i].id;
+    file["date"] = files.files[i].date;
+    vfiles.push_back(file);
+  }
+  std::string jsonBody = CJSONVariantWriter::Write(vfiles, false);
+  std::string strResponse;
+  if (curlfile.Delete(curl.Get(), jsonBody, strResponse))
+  {
+    CLog::Log(LOGDEBUG, "TVAPI_ReportFilesDeleted %s", strResponse.c_str());
+    return true;
+  }
+ 
+  return false;
+}
+
+bool TVAPI_ReportFilesDownloaded(TVAPI_Files &files)
+{
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10);
+
+  std::string url;
+  url = kTVAPI_URLBASE + "file-downloaded";
+
+  CURL curl(url);
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Content-Type", "application/json");
+  curl.SetUserName(files.apiKey);
+  curl.SetPassword(files.apiSecret);
+
+  CVariant vfiles(CVariant::VariantTypeArray);
+  for (size_t i = 0; i < files.files.size(); ++i)
+  {
+    CVariant file;
+    file["id"] = files.files[i].id;
+    file["date"] = files.files[i].date;
+    vfiles.push_back(file);
+  }
+  std::string jsonBody = CJSONVariantWriter::Write(vfiles, false);
+  std::string strResponse;
+  if (curlfile.Post(curl.Get(), jsonBody, strResponse))
+  {
+    CLog::Log(LOGDEBUG, "TVAPI_ReportFilesDownloaded %s", strResponse.c_str());
+    return true;
+  }
+  
+  return false;
+}
+
+bool TVAPI_GetActionQueue(TVAPI_Actions &actions)
+{
+  bool result = false;
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(5);
+
+  CURL curl(kTVAPI_URLBASE + "machine-actions");
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Cache-Control", "no-cache");
+  curl.SetUserName(actions.apiKey);
+  curl.SetPassword(actions.apiSecret);
+
+  std::string strResponse;
+  if (curlfile.Get(curl.Get(), strResponse))
+  {
+    CLog::Log(LOGDEBUG, "TVAPI_GetActionQueue %s", strResponse.c_str());
+    //{"key":"fGyb157LNrPsP4DOVin1","unique_id":"My Application Id","activation_date":"2016-07-08 14:19:51","status":"1","status_text":"Active","machine_id":"1757"}
+
+    CVariant results(CVariant::VariantTypeArray);
+    results = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+    for (size_t i = 0; i < results.size(); ++i)
+    {
+      CVariant result = results[i];
+
+      TVAPI_Action action;
+      action.id = result["id"].asString();
+      action.action = result["action"].asString();
+      action.name = result["name"].asString();
+      action.status = result["status"].asString();
+      action.created_date = result["created_date"].asString();
+      actions.actions.push_back(action);
+      result = true;
+
+      CLog::Log(LOGDEBUG, "TVAPI_GetActionQueue %s, %s", action.action.c_str(), action.name.c_str());
+    }
+  }
+
+  return result;
+}
+
+bool TVAPI_UpdateActionStatus(TVAPI_ActionStatus &actionStatus)
+{
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10);
+
+  std::string url;
+  url = kTVAPI_URLBASE + "machine-actions/" + actionStatus.id;
+
+  CURL curl(url);
+  curl.SetProtocolOption("seekable", "0");
+  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  curl.SetUserName(actionStatus.apiKey);
+  curl.SetPassword(actionStatus.apiSecret);
+  // parameters
+  curl.SetOption("status", actionStatus.status);
+  if (!actionStatus.message.empty())
+    curl.SetOption("message", actionStatus.message);
+
+  std::string strResponse;
+  if (curlfile.Post(curl.Get(), "", strResponse))
+  {
+    CLog::Log(LOGDEBUG, "TVAPI_UpdateActionStatus %s", strResponse.c_str());
+    return true;
+  }
   return false;
 }
