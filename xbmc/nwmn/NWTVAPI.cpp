@@ -31,7 +31,7 @@
 bool TVAPI_DoActivate(TVAPI_Activate &activate)
 {
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(30);
+  curlfile.SetTimeout(10);
 
   CURL curl(kTVAPI_URLBASE + "activate");
   curl.SetProtocolOption("seekable", "0");
@@ -64,7 +64,7 @@ bool TVAPI_DoActivate(TVAPI_Activate &activate)
 bool TVAPI_GetStatus(TVAPI_Status &status)
 {
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(5);
+  curlfile.SetTimeout(10);
 
   CURL curl(kTVAPI_URLBASE + "status");
   curl.SetProtocolOption("seekable", "0");
@@ -97,7 +97,7 @@ bool TVAPI_GetStatus(TVAPI_Status &status)
 bool TVAPI_GetMachine(TVAPI_Machine &machine)
 {
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(30);
+  curlfile.SetTimeout(10);
 
   CURL curl(kTVAPI_URLBASE + "machine");
   curl.SetProtocolOption("seekable", "0");
@@ -232,7 +232,7 @@ bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
 bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 {
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(30);
+  curlfile.SetTimeout(10);
 
   std::string sub_url;
   sub_url = kTVAPI_URLBASE + "playlist";
@@ -309,7 +309,7 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id)
 {
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(30);
+  curlfile.SetTimeout(10);
 
   std::string url;
   url = kTVAPI_URLBASE + "playlist/" + playlist_id;
@@ -370,7 +370,7 @@ bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id)
 bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string playlist_id)
 {
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(30);
+  curlfile.SetTimeout(10);
 
   std::string url;
   url = kTVAPI_URLBASE + "playlist/" + playlist_id + "/files";
@@ -627,7 +627,7 @@ bool TVAPI_GetActionQueue(TVAPI_Actions &actions)
 {
   bool result = false;
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(5);
+  curlfile.SetTimeout(10);
 
   CURL curl(kTVAPI_URLBASE + "machine-actions");
   curl.SetProtocolOption("seekable", "0");

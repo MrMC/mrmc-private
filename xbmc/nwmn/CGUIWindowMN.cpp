@@ -183,7 +183,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
     }
     else if (iControl == AUTHORIZE)
     {
-      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND);
+      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), AUTHORIZE);
       OnMessage(msg);
       
       m_client->DoAuthorize();

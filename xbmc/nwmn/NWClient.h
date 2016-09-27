@@ -68,6 +68,7 @@ public:
   void          ForceLocalPlayerUpdate();
   void          CheckForUpdate(NWPlayerInfo &player);
   bool          DoAuthorize();
+  bool          IsAuthorized();
 
 protected:
   virtual void  Process();

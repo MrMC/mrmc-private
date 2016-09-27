@@ -75,34 +75,6 @@ CNWClient::CNWClient()
 {
   CLog::Log(LOGDEBUG, "**NW** - NW version %f", kNWClient_PlayerFloatVersion);
 
-  m_activate.application_id = CDarwinUtils::GetHardwareUUID();
-  DoAuthorize();
-
-/*
-  // hardcode for now
-  //m_activate.code = "GR7IDTYXOF";
-  m_activate.code = "HPPALSRK/A";
-
-  m_activate.application_id = CDarwinUtils::GetHardwareUUID();
-  if (!TVAPI_DoActivate(m_activate))
-  {
-    //m_activate.apiKey = "/3/NKO6ZFdRgum7fZkMi";
-    //m_activate.apiSecret = "ewuDiXOIgZP7l9/Rxt/LDQbmAI1zJe0PQ5VZYnuy";
-    m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
-    m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
-  }
-*/
-
-  m_status.apiKey = m_activate.apiKey;
-  m_status.apiSecret = m_activate.apiSecret;
-  TVAPI_GetStatus(m_status);
-/*
-  TVAPI_Actions actions;
-  actions.apiKey = m_activate.apiKey;
-  actions.apiSecret = m_activate.apiSecret;
-  TVAPI_GetActionQueue(actions);
-*/
-
   // default path to local red directory in home
   std::string home = "special://home/nwmn/";
 
@@ -157,7 +129,9 @@ CNWClient::CNWClient()
     CUtil::CreateDirectoryEx(webui_path);
 
   LoadLocalPlayer(m_strHome, m_PlayerInfo);
-  SendPlayerStatus(kTVAPI_Status_Restarting);
+  m_activate.apiKey = m_PlayerInfo.apiKey;
+  m_activate.apiSecret = m_PlayerInfo.apiSecret;
+  m_activate.application_id = CDarwinUtils::GetHardwareUUID();
 
   m_MediaManager = new CNWMediaManager();
   m_MediaManager->RegisterAssetUpdateCallBack(this, AssetUpdateCallBack);
@@ -197,6 +171,22 @@ CNWClient* CNWClient::GetClient()
 
 void CNWClient::Startup()
 {
+  if (!IsAuthorized())
+    while (!DoAuthorize());
+
+  m_status.apiKey = m_activate.apiKey;
+  m_status.apiSecret = m_activate.apiSecret;
+  TVAPI_GetStatus(m_status);
+
+/*
+  TVAPI_Actions actions;
+  actions.apiKey = m_activate.apiKey;
+  actions.apiSecret = m_activate.apiSecret;
+  TVAPI_GetActionQueue(actions);
+*/
+
+  SendPlayerStatus(kTVAPI_Status_Restarting);
+
   Create();
   m_MediaManager->Create();
   //m_ReportManager->Create();
@@ -922,33 +912,55 @@ void CNWClient::CheckForUpdate(NWPlayerInfo &player)
   }
 #endif
 }
+
 bool CNWClient::DoAuthorize()
 {
-//  m_activate.code = "HPPALSRK/A";
-  
-  m_activate.application_id = StringUtils::CreateUUID();
-  
+/*
+  m_activate.code = "HPPALSRK/A";
+  if (!TVAPI_DoActivate(m_activate))
+  {
+    m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
+    m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
+  }
+*/
+
+//m_activate.code = "HPPALSRK/A";
+
   std::string code = "";
-  const std::string header = "Enter Authorization string";
-  
+  const std::string header = "Enter Authorization Code";
+
   if (CGUIKeyboardFactory::ShowAndGetInput(code, CVariant{header}, false))
   {
     TVAPI_Activate activate = m_activate;
     activate.code = code;
-    if (!TVAPI_DoActivate(activate))
-    {
-      m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
-      m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
-      
-    }
-    else
+    if (TVAPI_DoActivate(activate))
     {
       m_activate = activate;
       m_status.apiKey = m_activate.apiKey;
       m_status.apiSecret = m_activate.apiSecret;
-      TVAPI_GetStatus(m_status);
-      return true;
+      return TVAPI_GetStatus(m_status);
+    }
+    else
+    {
+      m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
+      m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
+      m_status.apiKey = m_activate.apiKey;
+      m_status.apiSecret = m_activate.apiSecret;
+      return TVAPI_GetStatus(m_status);
     }
   }
+
   return false;
+}
+
+bool CNWClient::IsAuthorized()
+{
+  if (m_PlayerInfo.apiKey.empty() || m_PlayerInfo.apiSecret.empty())
+  {
+    m_status.apiKey = m_activate.apiKey;
+    m_status.apiSecret = m_activate.apiSecret;
+    return TVAPI_GetStatus(m_status);
+  }
+  else
+    return false;
 }
