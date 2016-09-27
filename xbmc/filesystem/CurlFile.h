@@ -65,6 +65,7 @@ namespace XFILE
       virtual int IoControl(EIoControl request, void* param);
       virtual std::string GetContentCharset(void)                { return GetServerReportedCharset(); }
 
+      bool Delete(const std::string& strURL, const std::string& strPostData, std::string& strHTML);
       bool Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML);
       bool Get(const std::string& strURL, std::string& strHTML);
       bool ReadData(std::string& strHTML);
@@ -193,6 +194,8 @@ namespace XFILE
       bool            m_multisession;
       bool            m_skipshout;
       bool            m_postdataset;
+      std::string     m_deletedata;
+      bool            m_deletedataset;
 
       CRingBuffer     m_buffer;           // our ringhold buffer
       char *          m_overflowBuffer;   // in the rare case we would overflow the above buffer

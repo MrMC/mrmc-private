@@ -444,6 +444,8 @@ CCurlFile::CCurlFile()
   m_skipshout = false;
   m_httpresponse = -1;
   m_acceptCharset = "UTF-8,*;q=0.8"; /* prefer UTF-8 if available */
+  m_deletedata = "";
+  m_deletedataset = false;
 }
 
 //Has to be called before Open()
@@ -555,6 +557,12 @@ void CCurlFile::SetCommonOptions(CReadState* state)
     g_curlInterface.easy_setopt(h, CURLOPT_POST, 1 );
     g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_postdata.length());
     g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_postdata.c_str());
+  } else if (m_deletedataset)
+  {
+    // setup DELETE data if it is set (and it may be empty)
+    g_curlInterface.easy_setopt(h, CURLOPT_CUSTOMREQUEST, "DELETE");
+    g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_deletedata.length());
+    g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_deletedata.c_str());
   }
 
   // setup Referer header if needed
@@ -858,10 +866,19 @@ void CCurlFile::SetStreamProxy(const std::string &proxy, ProxyType type)
   CLog::Log(LOGDEBUG, "Overriding proxy from URL parameter: %s, type %d", m_proxy.c_str(), proxyType2CUrlProxyType[m_proxytype]);
 }
 
+bool CCurlFile::Delete(const std::string& strURL, const std::string& strDeleteData, std::string& strHTML)
+{
+  m_deletedata = strDeleteData;
+  m_deletedataset = true;
+  m_postdataset = false;
+  return Service(strURL, strHTML);
+}
+
 bool CCurlFile::Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML)
 {
   m_postdata = strPostData;
   m_postdataset = true;
+  m_deletedataset = false;
   return Service(strURL, strHTML);
 }
 
