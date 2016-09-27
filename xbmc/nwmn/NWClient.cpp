@@ -95,7 +95,7 @@ CNWClient::CNWClient()
   std::string home = "special://home/nwmn/";
 
   // look for a removable disk with an
-  // existing red directory
+  // existing nwmn directory
   VECSOURCES sources;
   g_mediaManager.GetRemovableDrives(sources);
   for (size_t indx = 0; indx < sources.size(); indx++)
