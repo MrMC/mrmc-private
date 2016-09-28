@@ -41,7 +41,6 @@ public:
   virtual void  OnWindowUnload();
 
   static void   Refresh();
-  void          SendReport();
   void          DisableButtonsOnRefresh(bool disable);
 
 protected:

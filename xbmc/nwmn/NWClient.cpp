@@ -22,19 +22,18 @@
 #include "NWTVAPI.h"
 #include "NWClient.h"
 #include "NWPlayer.h"
-//#include "NWReportManager.h"
-//#include "NWUpdateManager.h"
 #include "NWMediaManager.h"
-#include "UtilitiesMN.h"
 
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
 #include "Util.h"
 #include "URL.h"
+#include "dialogs/GUIDialogKaiToast.h"
 #include "filesystem/Directory.h"
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/SpecialProtocol.h"
+#include "interfaces/AnnouncementManager.h"
 #include "network/Network.h"
 #include "settings/Settings.h"
 #include "utils/FileUtils.h"
@@ -68,8 +67,6 @@ CNWClient::CNWClient()
  , m_NextDownloadDuration(0, 6, 0, 0)
  , m_Player(NULL)
  , m_MediaManager(NULL)
- , m_ReportManager(NULL)
- , m_UpdateManager(NULL)
  , m_ClientCallBackFn(NULL)
  , m_ClientCallBackCtx(NULL)
 {
@@ -135,13 +132,12 @@ CNWClient::CNWClient()
 
   m_MediaManager = new CNWMediaManager();
   m_MediaManager->RegisterAssetUpdateCallBack(this, AssetUpdateCallBack);
-  //m_ReportManager = new CNWReportManager(m_strHome, &m_PlayerInfo);
-  //m_ReportManager->RegisterReportManagerCallBack(this, ReportManagerCallBack);
-  //m_UpdateManager = new CNWUpdateManager(m_strHome);
   m_Player = new CNWPlayer();
 
   CSingleLock lock(m_playerLock);
   m_this = this;
+
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().AddAnnouncer(this);
 }
 
 CNWClient::~CNWClient()
@@ -152,21 +148,35 @@ CNWClient::~CNWClient()
   m_bStop = true;
   StopThread();
 
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
   SendPlayerStatus(kTVAPI_Status_Off);
-
-  //CGUIDialogRedAbout* about = CGUIDialogRedAbout::GetDialogRedAbout();
-  //about->SetInfo(NULL, kNWClient_PlayerFloatVersion);
 
   SAFE_DELETE(m_Player);
   SAFE_DELETE(m_MediaManager);
-  //SAFE_DELETE(m_ReportManager);
-  //SAFE_DELETE(m_UpdateManager);
 }
 
 CNWClient* CNWClient::GetClient()
 {
   CSingleLock lock(m_playerLock);
   return m_this;
+}
+
+void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
+{
+  if (strcmp(sender, "xbmc") != 0)
+    return;
+
+  if (flag == ANNOUNCEMENT::Player)
+  {
+    if (strcmp(message, "OnPlay") == 0)
+    {
+      CLog::Log(LOGDEBUG, "**MN** - CNWClient::Announce() - Playback started");
+      std::string strPath = g_application.CurrentFileItem().GetPath();
+      std::string assetID = URIUtils::GetFileName(strPath);
+      URIUtils::RemoveExtension(assetID);
+      LogPlayback(m_strHome, m_PlayerInfo.id, assetID);
+    }
+  }
 }
 
 void CNWClient::Startup()
@@ -189,8 +199,6 @@ void CNWClient::Startup()
 
   Create();
   m_MediaManager->Create();
-  //m_ReportManager->Create();
-  //m_UpdateManager->Create();
   m_Player->Create();
 }
 
@@ -253,11 +261,6 @@ void CNWClient::FullUpdate()
 {
   SendPlayerStatus(kTVAPI_Status_Restarting);
   m_FullUpdate = true;
-}
-
-void CNWClient::SendReport()
-{
-  //m_ReportManager->SendReport();
 }
 
 void CNWClient::GetStats(CDateTime &NextUpdateTime, CDateTime &NextDownloadTime, CDateTimeSpan &NextDownloadDuration)
@@ -477,36 +480,6 @@ bool CNWClient::GetProgamInfo()
   return rtn;
 }
 
-
-void CNWClient::NotifyAssetDownload(NWAsset &asset)
-{
-  CLog::Log(LOGDEBUG, "**NW** - CNWClient::NotifyAssetDownload");
-/*
-  std::string function = "function=player-NotifyAssetDownload&id=" + m_PlayerInfo.strPlayerID;
-  function += "&asset_id=" + asset.id;
-
-  std::string url = FormatUrl(m_PlayerInfo, function, "&format=xml");
-  XFILE::CCurlFile http;
-  std::string strXML;
-  http.Get(url, strXML);
-
-  TiXmlDocument xml;
-  xml.Parse(strXML.c_str());
-
-  TiXmlElement* rootXmlNode = xml.RootElement();
-  if (rootXmlNode)
-  {
-    TiXmlElement* responseNode = rootXmlNode->FirstChildElement("response");
-    if (responseNode)
-    {
-      std::string result; // 'Operation Successful'
-      XMLUtils::GetString(responseNode, "result", result);
-      CLog::Log(LOGDEBUG, "**NW** - CNWClient::NotifyAssetDownload - Response '%s'", result.c_str());
-    }
-  }
-*/
-}
-
 void CNWClient::SendFilesDownloaded()
 {
 /*
@@ -652,120 +625,80 @@ void CNWClient::GetActions()
 {
   if (m_HasNetwork)
   {
-    /*
-     During the update interval, query the player-GetActions method and perform the following:
-     info (can be multiple info actions):
-      a) SendFilesDownloaded - parse the Program Info, and compare to list of locally
-        downloaded files and then sent up an API call.
-      b) SendPlayerHealth - send up the health stats.
-      c) SendPlayerNetworkInfo - send up the player network information.
-      d) SendFilePlayed - send up file played report
-      e) SendPlayerLog - send up file played report
-
-     command:
-      a) PlayerRestart - restart the system (reboot the box)
-      b) PlayerStop - stop playback on the blackbird player
-      c) PlayerStart - start playback on the blackbird player
-    */
-
-/*
-    std::string function = "function=player-GetActions&id=" + m_PlayerInfo.strPlayerID;
-    std::string url = FormatUrl(m_PlayerInfo, function);
-
-    XFILE::CCurlFile http;
-    std::string strXML;
-    http.Get(url, strXML);
-
-    TiXmlDocument xml;
-    xml.Parse(strXML.c_str());
-
-    TiXmlElement *rootXmlNode = xml.RootElement();
-    if (rootXmlNode)
+    TVAPI_Actions actions;
+    actions.apiKey = m_activate.apiKey;
+    actions.apiSecret = m_activate.apiSecret;
+    if (TVAPI_GetActionQueue(actions))
     {
-      TiXmlElement *responseNode = rootXmlNode->FirstChildElement("response");
-      if (responseNode)
+      for (auto action: actions.actions)
       {
-        std::string playerId;
-        XMLUtils::GetString(responseNode, "playerId", playerId);
-        if (playerId == m_PlayerInfo.strPlayerID)
+        if (action.action == kTVAPI_ActionHealth)
         {
-          TiXmlElement *actionsNode = responseNode->FirstChildElement("actions");
-          if (actionsNode)
-          {
-            std::string info_str;
-            XMLUtils::GetString(responseNode, "info", info_str);
-            if (!info_str.empty())
-            {
-              std::vector<std::string> info_actions = StringUtils::Split(info_str, ",");
-              for (size_t i = 0; i < info_actions.size(); i++)
-              {
-                if (info_actions[i] == "SendFilesDownloaded")
-                {
-                  SendFilesDownloaded();
-                  ClearAction(info_actions[i]);
-                }
-                else if (info_actions[i] == "SendPlayerHealth")
-                {
-                  SendPlayerHealth();
-                  ClearAction(info_actions[i]);
-                }
-                else if (info_actions[i] == "SendPlayerNetworkInfo")
-                {
-                  SendNetworkInfo();
-                  ClearAction(info_actions[i]);
-                }
-                else if (info_actions[i] == "SendFilePlayed")
-                {
-                  m_ReportManager->SendReport();
-                  ClearAction(info_actions[i]);
-                }
-                else if (info_actions[i] == "SendPlayerLog")
-                {
-                  SendPlayerLog();
-                  ClearAction(info_actions[i]);
-                }
-                else
-                {
-                  // unknown action
-                  ClearAction(info_actions[i]);
-                }
-              }
-            }
-
-            std::string command_str;
-            XMLUtils::GetString(responseNode, "command", command_str);
-            if (!command_str.empty())
-            {
-              if (command_str == "PlayerRestart")
-              {
-                // flip the order so server action gets cleared
-                ClearAction(command_str);
-//                CApplicationMessenger::Get().Restart();
-              }
-              else if (command_str == "PlayerStop")
-              {
-                m_Player->StopPlaying();
-                ClearAction(command_str);
-              }
-              else if (command_str == "PlayerStart")
-              {
-                m_Player->Play();
-                ClearAction(command_str);
-              }
-            }
-          }
+          TVAPI_HealthReport health;
+          health.apiKey = m_activate.apiKey;
+          health.apiSecret = m_activate.apiSecret;
+          health.date = CDateTime::GetCurrentDateTime().GetAsDBDateTime();
+          health.uptime = GetSystemUpTime();
+          //health.uptime = "48hours";
+          health.disk_used = GetDiskUsed("/");
+          health.disk_free = GetDiskFree("/");
+          health.smart_status = "Disk Ok";
+          TVAPI_ReportHealth(health);
+          ClearAction(actions, action.id);
+        }
+        else if (action.action == kTVAPI_ActionDownloaded)
+        {
+          //SendFilesDownloaded();
+          //ClearAction(actions, action.id);
+        }
+        else if (action.action == kTVAPI_ActionFilePlayed)
+        {
+          //SendFilesPlayed();
+          //ClearAction(actions, action.id);
+        }
+        else if (action.action == kTVAPI_ActionPlay)
+        {
+          //m_Player->Play();
+          //ClearAction(actions, action.id);
+        }
+        else if (action.action == kTVAPI_ActionStop)
+        {
+          //m_Player->StopPlaying();
+          //ClearAction(actions, action.id);
+        }
+        else if (action.action == kTVAPI_ActionRestart)
+        {
+          // flip the order so server action gets cleared
+          //ClearAction(actions, action.id);
+          //CApplicationMessenger::Get().Restart();
+        }
+        else if (action.action == kTVAPI_ActionSwitchOff)
+        {
         }
       }
+      actions.actions.clear();
     }
-*/
   }
 }
 
-void CNWClient::ClearAction(std::string action)
+void CNWClient::ClearAction(TVAPI_Actions &actions, std::string id)
 {
   if (m_HasNetwork)
   {
     // clear a server side requested action
+    for (auto action: actions.actions)
+    {
+      if (action.id == id)
+      {
+        TVAPI_ActionStatus actionStatus;
+        actionStatus.apiKey = m_activate.apiKey;
+        actionStatus.apiSecret = m_activate.apiSecret;
+        actionStatus.id = action.id;
+        actionStatus.status = kTVAPI_ActionStatusCompleted;
+        TVAPI_UpdateActionStatus(actionStatus);
+        break;
+      }
+    }
   }
 }
 
@@ -857,12 +790,13 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
 
 void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded)
 {
-  //CLog::Log(LOGDEBUG, "**NW** - CNWClient::AssetUpdateCallBack()" );
   CNWClient *manager = (CNWClient*)ctx;
-  manager->m_Player->ValidateAsset(asset, true);
+  manager->m_Player->MarkValidated(asset);
+  if (!g_application.m_pPlayer->IsPlaying())
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "validating", asset.name, 500, false);
 
   if (wasDownloaded)
-    manager->NotifyAssetDownload(asset);
+    LogDownLoad(manager->m_strHome, manager->m_PlayerInfo.id, std::to_string(asset.id));
 }
 
 void CNWClient::ReportManagerCallBack(const void *ctx, bool status)
@@ -877,40 +811,6 @@ void CNWClient::UpdatePlayerInfo(const std::string strPlayerID, const std::strin
   m_PlayerInfo.id = strPlayerID;
   m_PlayerInfo.apiKey = strApiKey;
   m_PlayerInfo.apiSecret = strSecretKey;
-}
-
-void CNWClient::ForceLocalPlayerUpdate()
-{
-  LoadLocalPlayer(m_strHome, m_PlayerInfo);
-}
-
-void CNWClient::CheckForUpdate(NWPlayerInfo &player)
-{
-#if defined(TARGET_ANDROID)
-  if (!player.strUpdateUrl.empty() && !player.strUpdateMD5.empty())
-  {
-    RedMediaUpdate update = {};
-    sscanf(player.strUpdateVersion.c_str(), "%f", &update.version);
-
-    if (update.version > kRedPlayerFloatVersion)
-    {
-      CLog::Log(LOGDEBUG, "**NW** - CNWClient::CheckForUpdate(), version %f, version %f found.", kRedPlayerFloatVersion, update.version);
-
-      update.url = player.strUpdateUrl;
-      update.key = player.strUpdateKey;
-      update.md5 = player.strUpdateMD5;
-      update.size = player.strUpdateSize;
-      update.name = player.strUpdateName;
-      update.date.SetFromDBDateTime(player.strUpdateDate);
-      std::string home = CSpecialProtocol::TranslatePath(m_strHome);
-      std::string localpath = home + kRedDownloadUpdatePath + URIUtils::GetFileName(update.url).c_str();
-      update.localpath = CSpecialProtocol::TranslatePath(localpath);
-
-      m_UpdateManager->SetDownloadTime(m_NextDownloadTime, m_NextDownloadDuration);
-      m_UpdateManager->QueueUpdateForDownload(update);
-    }
-  }
-#endif
 }
 
 bool CNWClient::DoAuthorize()

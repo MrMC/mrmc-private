@@ -3122,9 +3122,6 @@
 		F5F7594F1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */; };
 		F5F759501D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */; };
 		F5F759511D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */; };
-		F5F759521D91B0F100D3BCB2 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593D1D91B0F100D3BCB2 /* LogManagerMN.cpp */; };
-		F5F759531D91B0F100D3BCB2 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593D1D91B0F100D3BCB2 /* LogManagerMN.cpp */; };
-		F5F759541D91B0F100D3BCB2 /* LogManagerMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7593D1D91B0F100D3BCB2 /* LogManagerMN.cpp */; };
 		F5F759581D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */; };
 		F5F759591D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */; };
 		F5F7595A1D91B0F100D3BCB2 /* MNJSONOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */; };
@@ -3140,9 +3137,6 @@
 		F5F759641D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */; };
 		F5F759651D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */; };
 		F5F759661D91B0F100D3BCB2 /* NWTVAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */; };
-		F5F759671D91B0F100D3BCB2 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7594A1D91B0F100D3BCB2 /* UtilitiesMN.cpp */; };
-		F5F759681D91B0F100D3BCB2 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7594A1D91B0F100D3BCB2 /* UtilitiesMN.cpp */; };
-		F5F759691D91B0F100D3BCB2 /* UtilitiesMN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F7594A1D91B0F100D3BCB2 /* UtilitiesMN.cpp */; };
 		F5F8E1E80E427F6700A8E96F /* md5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5F8E1E60E427F6700A8E96F /* md5.cpp */; };
 		F5FDF51D0E7218950005B0A6 /* AsyncFileCopy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FDF51C0E7218950005B0A6 /* AsyncFileCopy.cpp */; };
 /* End PBXBuildFile section */
@@ -5670,8 +5664,6 @@
 		F5F7593A1D91B0F100D3BCB2 /* CGUIWindowMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGUIWindowMN.h; sourceTree = "<group>"; };
 		F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CGUIWindowMNDemand.cpp; sourceTree = "<group>"; };
 		F5F7593C1D91B0F100D3BCB2 /* CGUIWindowMNDemand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CGUIWindowMNDemand.h; sourceTree = "<group>"; };
-		F5F7593D1D91B0F100D3BCB2 /* LogManagerMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LogManagerMN.cpp; sourceTree = "<group>"; };
-		F5F7593E1D91B0F100D3BCB2 /* LogManagerMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LogManagerMN.h; sourceTree = "<group>"; };
 		F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MNJSONOperations.cpp; sourceTree = "<group>"; };
 		F5F759411D91B0F100D3BCB2 /* MNJSONOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MNJSONOperations.h; sourceTree = "<group>"; };
 		F5F759421D91B0F100D3BCB2 /* NWClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWClient.cpp; sourceTree = "<group>"; };
@@ -5682,8 +5674,6 @@
 		F5F759471D91B0F100D3BCB2 /* NWPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWPlayer.h; sourceTree = "<group>"; };
 		F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWTVAPI.cpp; sourceTree = "<group>"; };
 		F5F759491D91B0F100D3BCB2 /* NWTVAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWTVAPI.h; sourceTree = "<group>"; };
-		F5F7594A1D91B0F100D3BCB2 /* UtilitiesMN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UtilitiesMN.cpp; sourceTree = "<group>"; };
-		F5F7594B1D91B0F100D3BCB2 /* UtilitiesMN.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UtilitiesMN.h; sourceTree = "<group>"; };
 		F5F8E1E60E427F6700A8E96F /* md5.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = md5.cpp; sourceTree = "<group>"; };
 		F5F8E1E70E427F6700A8E96F /* md5.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
 		F5FDF51B0E7218950005B0A6 /* AsyncFileCopy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AsyncFileCopy.h; sourceTree = "<group>"; };
@@ -9571,8 +9561,6 @@
 				F5F7593A1D91B0F100D3BCB2 /* CGUIWindowMN.h */,
 				F5F7593B1D91B0F100D3BCB2 /* CGUIWindowMNDemand.cpp */,
 				F5F7593C1D91B0F100D3BCB2 /* CGUIWindowMNDemand.h */,
-				F5F7593D1D91B0F100D3BCB2 /* LogManagerMN.cpp */,
-				F5F7593E1D91B0F100D3BCB2 /* LogManagerMN.h */,
 				F5F759401D91B0F100D3BCB2 /* MNJSONOperations.cpp */,
 				F5F759411D91B0F100D3BCB2 /* MNJSONOperations.h */,
 				F5F759421D91B0F100D3BCB2 /* NWClient.cpp */,
@@ -9585,8 +9573,6 @@
 				F5F759471D91B0F100D3BCB2 /* NWPlayer.h */,
 				F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */,
 				F5F759491D91B0F100D3BCB2 /* NWTVAPI.h */,
-				F5F7594A1D91B0F100D3BCB2 /* UtilitiesMN.cpp */,
-				F5F7594B1D91B0F100D3BCB2 /* UtilitiesMN.h */,
 			);
 			path = nwmn;
 			sourceTree = "<group>";
@@ -10366,7 +10352,6 @@
 				F5AACA970FB3E2B800DBB77C /* GUIDialogSlider.cpp in Sources */,
 				F59876C00FBA351D008EF4FB /* VideoReferenceClock.cpp in Sources */,
 				F5987F050FBDF274008EF4FB /* DPMSSupport.cpp in Sources */,
-				F5F759521D91B0F100D3BCB2 /* LogManagerMN.cpp in Sources */,
 				F5987FDB0FBE2DFD008EF4FB /* PAPlayer.cpp in Sources */,
 				F548786D0FE060FF00E506FD /* DVDSubtitleParserMPL2.cpp in Sources */,
 				F5487B4C0FE6F02700E506FD /* StreamDetails.cpp in Sources */,
@@ -10574,7 +10559,6 @@
 				18B7C935129428CA009E7A26 /* PlayListURL.cpp in Sources */,
 				18B7C936129428CA009E7A26 /* PlayListWPL.cpp in Sources */,
 				18B7C937129428CA009E7A26 /* PlayListXML.cpp in Sources */,
-				F5F759671D91B0F100D3BCB2 /* UtilitiesMN.cpp in Sources */,
 				F59045611BA372A600DB589A /* DarwinUtils.mm in Sources */,
 				18B7C938129428CA009E7A26 /* SmartPlayList.cpp in Sources */,
 				18B7C97C1294380A009E7A26 /* GUIWindowAddonBrowser.cpp in Sources */,
@@ -11537,7 +11521,6 @@
 				E499137A174E5F0E00741B6D /* MusicInfoScanner.cpp in Sources */,
 				E499137B174E5F0E00741B6D /* MusicInfoScraper.cpp in Sources */,
 				E4991388174E5F0E00741B6D /* MusicInfoTag.cpp in Sources */,
-				F5F759681D91B0F100D3BCB2 /* UtilitiesMN.cpp in Sources */,
 				E499138A174E5F0E00741B6D /* MusicInfoTagLoaderCDDA.cpp in Sources */,
 				E499138B174E5F0E00741B6D /* MusicInfoTagLoaderDatabase.cpp in Sources */,
 				E499138C174E5F0E00741B6D /* MusicInfoTagLoaderFactory.cpp in Sources */,
@@ -11699,7 +11682,6 @@
 				F5B7230C1C7C894F006432AE /* OpticalBuiltins.cpp in Sources */,
 				E499141A174E603C00741B6D /* GUIWindowSettings.cpp in Sources */,
 				E499141B174E603C00741B6D /* GUIWindowSettingsCategory.cpp in Sources */,
-				F5F759531D91B0F100D3BCB2 /* LogManagerMN.cpp in Sources */,
 				E499141C174E603C00741B6D /* GUIWindowSettingsScreenCalibration.cpp in Sources */,
 				E499141D174E603C00741B6D /* GUIWindowTestPattern.cpp in Sources */,
 				E499141E174E603C00741B6D /* AdvancedSettings.cpp in Sources */,
@@ -12182,7 +12164,6 @@
 				F5D13F191BAF0B6D0075A95C /* DVDSubtitleParserSubrip.cpp in Sources */,
 				F5D13F1A1BAF0B6D0075A95C /* DVDSubtitleParserVplayer.cpp in Sources */,
 				F5D13F1B1BAF0B6D0075A95C /* DVDSubtitleStream.cpp in Sources */,
-				F5F759541D91B0F100D3BCB2 /* LogManagerMN.cpp in Sources */,
 				F5D13F1C1BAF0B6D0075A95C /* DVDSubtitleTagMicroDVD.cpp in Sources */,
 				F5D13F1D1BAF0B6D0075A95C /* DVDSubtitleTagSami.cpp in Sources */,
 				F5D13F1E1BAF0B6D0075A95C /* DVDAudio.cpp in Sources */,
@@ -12832,7 +12813,6 @@
 				F5B723271C7C9561006432AE /* MusicInfoTagLoaderFFmpeg.cpp in Sources */,
 				F5D141431BAF0B6D0075A95C /* XMLUtils.cpp in Sources */,
 				F5D141441BAF0B6D0075A95C /* GUIDialogAudioSubtitleSettings.cpp in Sources */,
-				F5F759691D91B0F100D3BCB2 /* UtilitiesMN.cpp in Sources */,
 				F5D141461BAF0B6D0075A95C /* GUIDialogFullScreenInfo.cpp in Sources */,
 				F5D141471BAF0B6D0075A95C /* GUIDialogTeletext.cpp in Sources */,
 				F5D141481BAF0B6D0075A95C /* CueInfoLoader.cpp in Sources */,

@@ -19,10 +19,16 @@
 
 #include "NWClientUtilities.h"
 
+#include "LangInfo.h"
 #include "filesystem/File.h"
+#include "filesystem/SpecialProtocol.h"
+#include "storage/MediaManager.h"
 #include "utils/StringUtils.h"
 #include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
+#include "utils/log.h"
+#include "utils/StringUtils.h"
+#include "utils/SystemInfo.h"
 
 // ---------------------------------------------
 // ---------------------------------------------
@@ -247,4 +253,161 @@ bool SaveLocalPlaylist(std::string home, const NWPlaylist &playList)
   }
   
   return false;
+}
+
+void LogPlayback(std::string home, std::string machineID, std::string assetID)
+{
+//  date,assetID
+//  2015-02-05 12:01:40-0500,58350
+//  2015-02-05 12:05:40-0500,57116
+
+  CDateTime time = CDateTime::GetCurrentDateTime();
+  std::string strFileName = StringUtils::Format("%slog/%s_%s_playback.log",
+    home.c_str(),
+    machineID.c_str(),
+    time.GetAsDBDate().c_str()
+  );
+  XFILE::CFile file;
+  XFILE::auto_buffer buffer;
+
+  if (XFILE::CFile::Exists(strFileName))
+  {
+    file.LoadFile(strFileName, buffer);
+    file.OpenForWrite(strFileName);
+    file.Write(buffer.get(), buffer.size());
+  }
+
+  CLangInfo langInfo;
+  std::string strData = StringUtils::Format("%s,%s\n",
+    time.GetAsDBDateTime().c_str(),
+    assetID.c_str()
+  );
+  file.Write(strData.c_str(), strData.size());
+  file.Close();
+}
+
+void LogDownLoad(std::string home, std::string machineID, std::string assetID)
+{
+//  date,assetID
+//  2015-02-05 12:01:40-0500,58350
+//  2015-02-05 12:05:40-0500,57116
+
+  CDateTime time = CDateTime::GetCurrentDateTime();
+  std::string strFileName = StringUtils::Format("%slog/%s_%s_download.log",
+    home.c_str(),
+    machineID.c_str(),
+    time.GetAsDBDate().c_str()
+  );
+  XFILE::CFile file;
+  XFILE::auto_buffer buffer;
+
+  if (XFILE::CFile::Exists(strFileName))
+  {
+    file.LoadFile(strFileName, buffer);
+    file.OpenForWrite(strFileName);
+    file.Write(buffer.get(), buffer.size());
+  }
+
+  CLangInfo langInfo;
+  std::string strData = StringUtils::Format("%s,%s\n",
+    time.GetAsDBDateTime().c_str(),
+    assetID.c_str()
+  );
+  file.Write(strData.c_str(), strData.size());
+  file.Close();
+}
+
+std::string GetDiskUsed(std::string path)
+{
+  std::string used;
+  std::string home = CSpecialProtocol::TranslatePath(path);
+
+  std::vector<std::string> diskUsage = g_mediaManager.GetDiskUsage();
+  for (size_t d = 1; d < diskUsage.size(); d++)
+  {
+    StringUtils::RemoveCRLF(diskUsage[d]);
+    StringUtils::RemoveDuplicatedSpacesAndTabs(diskUsage[d]);
+
+    std::vector<std::string> items = StringUtils::Split(diskUsage[d], " ");
+    std::string mountPoint = items[items.size() - 1];
+    if (mountPoint == "/")
+      used = items[2];
+    if (mountPoint.find(path) != std::string::npos)
+      used = items[2];
+  }
+
+  StringUtils::Replace(used, "Gi", "GB");
+
+  return used;
+}
+
+std::string GetDiskFree(std::string path)
+{
+  std::string free;
+  std::string home = CSpecialProtocol::TranslatePath(path);
+
+  std::vector<std::string> diskUsage = g_mediaManager.GetDiskUsage();
+  for (size_t d = 1; d < diskUsage.size(); d++)
+  {
+    StringUtils::RemoveCRLF(diskUsage[d]);
+    StringUtils::RemoveDuplicatedSpacesAndTabs(diskUsage[d]);
+
+    std::vector<std::string> items = StringUtils::Split(diskUsage[d], " ");
+    std::string mountPoint = items[items.size() - 1];
+    if (mountPoint == "/")
+      free = items[3];
+    if (mountPoint.find(path) != std::string::npos)
+      free = items[3];
+  }
+
+  StringUtils::Replace(free, "Gi", "GB");
+
+  return free;
+}
+
+std::string GetDiskTotal(std::string path)
+{
+  std::string total;
+  std::string home = CSpecialProtocol::TranslatePath(path);
+
+  std::vector<std::string> diskUsage = g_mediaManager.GetDiskUsage();
+  for (size_t d = 1; d < diskUsage.size(); d++)
+  {
+    StringUtils::RemoveCRLF(diskUsage[d]);
+    StringUtils::RemoveDuplicatedSpacesAndTabs(diskUsage[d]);
+
+    std::vector<std::string> items = StringUtils::Split(diskUsage[d], " ");
+    std::string mountPoint = items[items.size() - 1];
+    if (mountPoint == "/")
+      total = items[1];
+    if (mountPoint.find(path) != std::string::npos)
+      total = items[1];
+  }
+  StringUtils::Replace(total, "Gi", "GB");
+
+  return total;
+}
+
+std::string GetSystemUpTime()
+{
+  // uptime=0 days 5 hours 22 minutes
+  int iMinutes = 0; int iHours = 0; int iDays = 0;
+  iMinutes = g_sysinfo.GetTotalUptime();
+  if (iMinutes >= 60) // Hour's
+  {
+    iHours = iMinutes / 60;
+    iMinutes = iMinutes - (iHours *60);
+  }
+  if (iHours >= 24) // Days
+  {
+    iDays = iHours / 24;
+    iHours = iHours - (iDays * 24);
+  }
+
+  std::string uptime = StringUtils::Format("%d day%s %d hours %d minutes",
+                                           iDays,
+                                           iDays > 1 ? "s" :"",
+                                           iHours,
+                                           iMinutes);
+  return uptime;
 }

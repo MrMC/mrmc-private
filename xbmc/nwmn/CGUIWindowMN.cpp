@@ -23,7 +23,6 @@
 
 #include "CGUIWindowMNDemand.h"
 #include "NWClient.h"
-#include "UtilitiesMN.h"
 
 #include "Application.h"
 #include "URL.h"
@@ -85,7 +84,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
   {
     int iControl = message.GetSenderId();
     
-    if (iControl == ABOUT)
+    if (iControl == ABOUT && m_client)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ABOUT);
       OnMessage(msg);
@@ -122,7 +121,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
                                                    GetSystemUpTime().c_str()));
       return true;
     }
-    else if (iControl == PLAYLIST)
+    else if (iControl == PLAYLIST && m_client)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), PLAYLIST);
       OnMessage(msg);
@@ -134,7 +133,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       }
       return true;
     }
-    else if (iControl == MEDIAUPDATE)
+    else if (iControl == MEDIAUPDATE && m_client)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), MEDIAUPDATE);
       OnMessage(msg);
@@ -166,7 +165,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       SET_CONTROL_FOCUS(SETVERTICAL,0);
       return true;
     }
-    else if (iControl == ONDEMAND)
+    else if (iControl == ONDEMAND && m_client)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), ONDEMAND);
       OnMessage(msg);
@@ -181,7 +180,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       }
       return true;
     }
-    else if (iControl == AUTHORIZE)
+    else if (iControl == AUTHORIZE && m_client)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), AUTHORIZE);
       OnMessage(msg);
@@ -221,7 +220,7 @@ bool CGUIWindowMN::OnAction(const CAction &action)
       //return true;
     }
     
-    if (g_application.m_pPlayer->IsPlaying())
+    if (m_client && g_application.m_pPlayer->IsPlaying())
     {
       m_client->StopPlaying();
       return true;

@@ -137,4 +137,12 @@ bool HasLocalPlaylist(std::string home);
 bool LoadLocalPlaylist(std::string home, NWPlaylist &payList);
 bool SaveLocalPlaylist(std::string home, const NWPlaylist &playList);
 
+void LogPlayback(std::string home, std::string machineID, std::string assetID);
+void LogDownLoad(std::string home, std::string machineID, std::string assetID);
+
+std::string GetDiskUsed(std::string path);
+std::string GetDiskFree(std::string path);
+std::string GetDiskTotal(std::string path);
+std::string GetSystemUpTime();
+
 

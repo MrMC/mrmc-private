@@ -43,7 +43,7 @@ public:
   void          StopPlaying();
   void          OverridePlayBackWindow(bool override);
   void          SetPlayBackTime(const CDateTime &time, const CDateTimeSpan &duration);
-  void          ValidateAsset(struct NWAsset &asset, bool valid);
+  void          MarkValidated(struct NWAsset &asset);
   void          QueueProgramInfo(NWPlaylist &playlist);
   void          RegisterPlayerCallBack(const void *ctx, PlayerCallBackFn fn);
 

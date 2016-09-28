@@ -221,7 +221,8 @@ bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
   curl.SetOption("update_time", machineUpdate.update_time);
 
   std::string strResponse;
-  if (curlfile.Post(curl.Get(), "", strResponse))
+  curlfile.SetCustomRequest("PUT");
+  if (curlfile.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_UpdateMachineInfo %s", strResponse.c_str());
     return true;
@@ -501,7 +502,7 @@ bool TVAPI_ReportHealth(TVAPI_HealthReport &health)
   CURL curl(kTVAPI_URLBASE + "health");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
-  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  curl.SetProtocolOption("Content-Type", "application/json");
   curl.SetUserName(health.apiKey);
   curl.SetPassword(health.apiSecret);
   // parameters
@@ -625,7 +626,7 @@ bool TVAPI_ReportFilesDownloaded(TVAPI_Files &files)
 
 bool TVAPI_GetActionQueue(TVAPI_Actions &actions)
 {
-  bool result = false;
+  bool rtn = false;
   XFILE::CCurlFile curlfile;
   curlfile.SetTimeout(10);
 
@@ -655,13 +656,13 @@ bool TVAPI_GetActionQueue(TVAPI_Actions &actions)
       action.status = result["status"].asString();
       action.created_date = result["created_date"].asString();
       actions.actions.push_back(action);
-      result = true;
+      rtn = true;
 
       CLog::Log(LOGDEBUG, "TVAPI_GetActionQueue %s, %s", action.action.c_str(), action.name.c_str());
     }
   }
 
-  return result;
+  return rtn;
 }
 
 bool TVAPI_UpdateActionStatus(TVAPI_ActionStatus &actionStatus)
@@ -684,7 +685,8 @@ bool TVAPI_UpdateActionStatus(TVAPI_ActionStatus &actionStatus)
     curl.SetOption("message", actionStatus.message);
 
   std::string strResponse;
-  if (curlfile.Post(curl.Get(), "", strResponse))
+  curlfile.SetCustomRequest("PUT");
+  if (curlfile.Get(curl.Get(), strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_UpdateActionStatus %s", strResponse.c_str());
     return true;

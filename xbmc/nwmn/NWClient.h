@@ -25,6 +25,7 @@
 #include "NWTVAPI.h"
 #include "NWClientUtilities.h"
 
+#include "interfaces/IAnnouncer.h"
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 
@@ -36,11 +37,10 @@ typedef void (*PlayerCallBackFn)(const void *ctx, int msg, struct NWAsset &asset
 
 class CNWPlayer;
 class CNWMediaManager;
-class CNWReportManager;
-class CNWUpdateManager;
 
 class CNWClient
 : public CThread
+, public ANNOUNCEMENT::IAnnouncer
 {
 public:
   CNWClient();
@@ -48,11 +48,12 @@ public:
 
   static CNWClient* GetClient();
   
+  virtual void  Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
+
   void          Startup();
   void          SetSettings(NWPlayerSettings settings);
   NWPlayerSettings GetSettings();
   void          FullUpdate();
-  void          SendReport();
   void          GetStats(CDateTime &NextUpdateTime, CDateTime &NextDownloadTime, CDateTimeSpan &NextDownloadDuration);
   void          PlayPause();
   void          PausePlaying();
@@ -65,8 +66,6 @@ public:
   void          RegisterClientCallBack(const void *ctx, ClientCallBackFn fn);
   void          RegisterPlayerCallBack(const void *ctx, PlayerCallBackFn fn);
   void          UpdatePlayerInfo(const std::string strPlayerID, const std::string strApiKey,const std::string strSecretKey);
-  void          ForceLocalPlayerUpdate();
-  void          CheckForUpdate(NWPlayerInfo &player);
   bool          DoAuthorize();
   bool          IsAuthorized();
 
@@ -75,13 +74,12 @@ protected:
   void          GetPlayerInfo();
   bool          GetPlayerStatus();
   bool          GetProgamInfo();
-  void          NotifyAssetDownload(NWAsset &asset);
   void          SendFilesDownloaded();
   void          SendPlayerHealth();
   void          SendNetworkInfo();
   void          SendPlayerLog();
   void          GetActions();
-  void          ClearAction(std::string action);
+  void          ClearAction(TVAPI_Actions &actions, std::string id);
   bool          CreatePlaylist(std::string home, NWPlaylist &playList,
                   const TVAPI_Playlist &playlist, const TVAPI_PlaylistItems &playlistItems);
 
@@ -110,9 +108,7 @@ protected:
   CDateTime     m_ProgramDateStamp;
   
   CNWPlayer     *m_Player;
-  CNWMediaManager  *m_MediaManager;
-  CNWReportManager *m_ReportManager;
-  CNWUpdateManager *m_UpdateManager;
+  CNWMediaManager *m_MediaManager;
 
   static CCriticalSection m_playerLock;
   static CNWClient *m_this;

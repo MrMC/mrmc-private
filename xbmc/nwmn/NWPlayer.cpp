@@ -18,7 +18,6 @@
  */
 
 #include "NWPlayer.h"
-#include "UtilitiesMN.h"
 
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
@@ -132,7 +131,7 @@ void CNWPlayer::SetPlayBackTime(const CDateTime &time, const CDateTimeSpan &dura
   m_PlayBackDuration = duration;
 }
 
-void CNWPlayer::ValidateAsset(NWAsset &asset, bool valid)
+void CNWPlayer::MarkValidated(NWAsset &asset)
 {
   CSingleLock lock(m_media_lock);
   for (size_t g = 0; g < m_playlist.groups.size(); g++)
@@ -143,7 +142,7 @@ void CNWPlayer::ValidateAsset(NWAsset &asset, bool valid)
       {
         if (m_playlist.groups[g].assets[a].id == asset.id)
         {
-          m_playlist.groups[g].assets[a].valid = valid;
+          m_playlist.groups[g].assets[a].valid = true;
           CLog::Log(LOGDEBUG, "**NW** - NW Asset - %s validated", m_playlist.groups[g].assets[a].video_localpath.c_str());
           break;
         }
