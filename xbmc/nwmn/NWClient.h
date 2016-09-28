@@ -61,6 +61,8 @@ public:
   void          PlayNext();
   
   void          GetProgamInfo(NWPlaylist &playList) { playList = m_ProgramInfo; };
+  void          GetPlayerInfo(NWPlayerInfo &playerInfo) { playerInfo = m_PlayerInfo; };
+  
   bool          SendPlayerStatus(const std::string status);
 
   void          RegisterClientCallBack(const void *ctx, ClientCallBackFn fn);
