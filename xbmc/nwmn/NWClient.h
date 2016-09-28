@@ -112,7 +112,9 @@ protected:
   CNWPlayer     *m_Player;
   CNWMediaManager *m_MediaManager;
 
-  static CCriticalSection m_playerLock;
+  CCriticalSection m_reportLock;
+
+  static CCriticalSection m_clientLock;
   static CNWClient *m_this;
 
   ClientCallBackFn m_ClientCallBackFn;

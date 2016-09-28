@@ -19,9 +19,11 @@
 
 #include "NWClientUtilities.h"
 
+#include "Application.h"
 #include "LangInfo.h"
 #include "filesystem/File.h"
 #include "filesystem/SpecialProtocol.h"
+#include "network/Network.h"
 #include "storage/MediaManager.h"
 #include "utils/StringUtils.h"
 #include "utils/XBMCTinyXML.h"
@@ -50,23 +52,25 @@ bool LoadLocalPlayer(std::string home, NWPlayerInfo &playerInfo)
   XMLUtils::GetString(rootElement, "id", playerInfo.id);
   XMLUtils::GetString(rootElement, "name", playerInfo.name);
   XMLUtils::GetString(rootElement, "member", playerInfo.member);
-  XMLUtils::GetString(rootElement, "timezone", playerInfo.timezone);
+  XMLUtils::GetString(rootElement, "vendor", playerInfo.vendor);
+  XMLUtils::GetString(rootElement, "description", playerInfo.description);
+  XMLUtils::GetString(rootElement, "serial_number", playerInfo.serial_number);
+  XMLUtils::GetString(rootElement, "warranty_number", playerInfo.warranty_number);
+  XMLUtils::GetString(rootElement, "macaddress", playerInfo.macaddress);
+  XMLUtils::GetString(rootElement, "macaddress_wireless", playerInfo.macaddress_wireless);
+  XMLUtils::GetString(rootElement, "hardware_version", playerInfo.hardware_version);
+  XMLUtils::GetString(rootElement, "software_version", playerInfo.software_version);
+
   XMLUtils::GetString(rootElement, "playlist_id", playerInfo.playlist_id);
   XMLUtils::GetString(rootElement, "video_format", playerInfo.video_format);
   XMLUtils::GetString(rootElement, "update_time", playerInfo.update_time);
   XMLUtils::GetString(rootElement, "update_interval", playerInfo.update_interval);
+  XMLUtils::GetString(rootElement, "allow_new_content", playerInfo.allow_new_content);
+  XMLUtils::GetString(rootElement, "allow_software_update", playerInfo.allow_software_update);
   XMLUtils::GetString(rootElement, "status", playerInfo.status);
   XMLUtils::GetString(rootElement, "apiKey", playerInfo.apiKey);
   XMLUtils::GetString(rootElement, "apiSecret", playerInfo.apiSecret);
-  XMLUtils::GetInt(   rootElement, "intSettingsVersion", playerInfo.intSettingsVersion);
-
-  XMLUtils::GetString(rootElement, "strUpdateUrl", playerInfo.strUpdateUrl);
-  XMLUtils::GetString(rootElement, "strUpdateKey", playerInfo.strUpdateKey);
-  XMLUtils::GetString(rootElement, "strUpdateMD5", playerInfo.strUpdateMD5);
-  XMLUtils::GetString(rootElement, "strUpdateSize", playerInfo.strUpdateSize);
-  XMLUtils::GetString(rootElement, "strUpdateName", playerInfo.strUpdateName);
-  XMLUtils::GetString(rootElement, "strUpdateDate", playerInfo.strUpdateDate);
-  XMLUtils::GetString(rootElement, "strUpdateVersion", playerInfo.strUpdateVersion);
+  XMLUtils::GetString(rootElement, "tvapiURLBase", playerInfo.tvapiURLBase);
 
   return true;
 }
@@ -82,23 +86,25 @@ bool SaveLocalPlayer(std::string home, const NWPlayerInfo &playerInfo)
     XMLUtils::SetString(rootNode, "id", playerInfo.id);
     XMLUtils::SetString(rootNode, "name", playerInfo.name);
     XMLUtils::SetString(rootNode, "member", playerInfo.member);
-    XMLUtils::SetString(rootNode, "timezone", playerInfo.timezone);
+    XMLUtils::SetString(rootNode, "vendor", playerInfo.vendor);
+    XMLUtils::SetString(rootNode, "description", playerInfo.description);
+    XMLUtils::SetString(rootNode, "serial_number", playerInfo.serial_number);
+    XMLUtils::SetString(rootNode, "warranty_number", playerInfo.warranty_number);
+    XMLUtils::SetString(rootNode, "macaddress", playerInfo.macaddress);
+    XMLUtils::SetString(rootNode, "macaddress_wireless", playerInfo.macaddress_wireless);
+    XMLUtils::SetString(rootNode, "hardware_version", playerInfo.hardware_version);
+    XMLUtils::SetString(rootNode, "software_version", playerInfo.software_version);
+
     XMLUtils::SetString(rootNode, "playlist_id", playerInfo.playlist_id);
     XMLUtils::SetString(rootNode, "video_format", playerInfo.video_format);
     XMLUtils::SetString(rootNode, "update_time", playerInfo.update_time);
     XMLUtils::SetString(rootNode, "update_interval", playerInfo.update_interval);
+    XMLUtils::SetString(rootNode, "allow_new_content", playerInfo.allow_new_content);
+    XMLUtils::SetString(rootNode, "allow_software_update", playerInfo.allow_software_update);
     XMLUtils::SetString(rootNode, "status", playerInfo.status);
     XMLUtils::SetString(rootNode, "apiKey", playerInfo.apiKey);
     XMLUtils::SetString(rootNode, "apiSecret", playerInfo.apiSecret);
-    XMLUtils::SetInt(   rootNode, "intSettingsVersion", playerInfo.intSettingsVersion);
-
-    XMLUtils::SetString(rootNode, "strUpdateUrl", playerInfo.strUpdateUrl);
-    XMLUtils::SetString(rootNode, "strUpdateKey", playerInfo.strUpdateKey);
-    XMLUtils::SetString(rootNode, "strUpdateMD5", playerInfo.strUpdateMD5);
-    XMLUtils::SetString(rootNode, "strUpdateSize", playerInfo.strUpdateSize);
-    XMLUtils::SetString(rootNode, "strUpdateName", playerInfo.strUpdateName);
-    XMLUtils::SetString(rootNode, "strUpdateDate", playerInfo.strUpdateDate);
-    XMLUtils::SetString(rootNode, "strUpdateVersion", playerInfo.strUpdateVersion);
+    XMLUtils::SetString(rootNode, "tvapiURLBase", playerInfo.tvapiURLBase);
 
     return xmlDoc.SaveFile(home + kNWClient_PlayerFileName);
   }
@@ -276,7 +282,11 @@ void LogPlayback(std::string home, std::string machineID, std::string assetID)
     file.OpenForWrite(strFileName);
     file.Write(buffer.get(), buffer.size());
   }
-
+  else
+  {
+    file.OpenForWrite(strFileName);
+    file.Write(buffer.get(), buffer.size());
+  }
   CLangInfo langInfo;
   std::string strData = StringUtils::Format("%s,%s\n",
     time.GetAsDBDateTime().c_str(),
@@ -304,6 +314,11 @@ void LogDownLoad(std::string home, std::string machineID, std::string assetID)
   if (XFILE::CFile::Exists(strFileName))
   {
     file.LoadFile(strFileName, buffer);
+    file.OpenForWrite(strFileName);
+    file.Write(buffer.get(), buffer.size());
+  }
+  else
+  {
     file.OpenForWrite(strFileName);
     file.Write(buffer.get(), buffer.size());
   }
@@ -410,4 +425,25 @@ std::string GetSystemUpTime()
                                            iHours,
                                            iMinutes);
   return uptime;
+}
+
+const std::string GetWiredMACAddress()
+{
+  CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
+  if (iface)
+    return iface->GetMacAddress();
+
+  return "00:00:00:00:00:00";
+}
+
+const std::string GetWirelessMACAddress()
+{
+  std::vector<CNetworkInterface*> ifaces = g_application.getNetwork().GetInterfaceList();
+  for (size_t i = 0; i < ifaces.size(); i++)
+  {
+    if (ifaces[i]->IsWireless())
+      return ifaces[i]->GetMacAddress();
+  }
+
+  return "00:00:00:00:00:00";
 }

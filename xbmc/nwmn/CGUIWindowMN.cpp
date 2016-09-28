@@ -23,6 +23,7 @@
 
 #include "CGUIWindowMNDemand.h"
 #include "NWClient.h"
+#include "NWTVAPI.h"
 
 #include "Application.h"
 #include "URL.h"
@@ -35,10 +36,10 @@
 #include "settings/SkinSettings.h"
 #include "settings/Settings.h"
 #include "messaging/ApplicationMessenger.h"
+#include "utils/Environment.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
-#include "NWTVAPI.h"
 
 
 #define PLAYLIST          90101
@@ -68,6 +69,12 @@ CGUIWindowMN::CGUIWindowMN()
 , m_testServers(false)
 , m_client(NULL)
 {
+  std::string override_urlbase = CEnvironment::getenv("TVAPI_URLBASE");
+  if (!override_urlbase.empty())
+    TVAPI_SetURLBASE(override_urlbase);
+  else
+    TVAPI_SetURLBASE(kTVAPI_URLBASE);
+
   Create();
   m_loadType = KEEP_IN_MEMORY;
 }

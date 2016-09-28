@@ -319,6 +319,9 @@ typedef struct TVAPI_ActionStatus {
 
 // ---------------------------------------------
 // ---------------------------------------------
+const std::string TVAPI_GetURLBASE();
+void TVAPI_SetURLBASE(std::string urlbase);
+
 // activation
 bool TVAPI_DoActivate(TVAPI_Activate &activate);
 bool TVAPI_GetStatus(TVAPI_Status &status);

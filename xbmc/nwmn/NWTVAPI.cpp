@@ -27,13 +27,24 @@
 #include "utils/URIUtils.h"
 #include "utils/log.h"
 
+static std::string TVAPI_URLBASE;
+
+const std::string TVAPI_GetURLBASE()
+{
+  return TVAPI_URLBASE;
+}
+
+void TVAPI_SetURLBASE(std::string urlbase)
+{
+  TVAPI_URLBASE = urlbase;
+}
 
 bool TVAPI_DoActivate(TVAPI_Activate &activate)
 {
   XFILE::CCurlFile curlfile;
   curlfile.SetTimeout(10);
 
-  CURL curl(kTVAPI_URLBASE + "activate");
+  CURL curl(TVAPI_URLBASE + "activate");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
   curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
@@ -66,7 +77,7 @@ bool TVAPI_GetStatus(TVAPI_Status &status)
   XFILE::CCurlFile curlfile;
   curlfile.SetTimeout(10);
 
-  CURL curl(kTVAPI_URLBASE + "status");
+  CURL curl(TVAPI_URLBASE + "status");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
   curl.SetProtocolOption("Cache-Control", "no-cache");
@@ -99,7 +110,7 @@ bool TVAPI_GetMachine(TVAPI_Machine &machine)
   XFILE::CCurlFile curlfile;
   curlfile.SetTimeout(10);
 
-  CURL curl(kTVAPI_URLBASE + "machine");
+  CURL curl(TVAPI_URLBASE + "machine");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
   curl.SetProtocolOption("Cache-Control", "no-cache");
@@ -195,7 +206,7 @@ bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
   XFILE::CCurlFile curlfile;
   curlfile.SetTimeout(10);
 
-  CURL curl(kTVAPI_URLBASE + "machine");
+  CURL curl(TVAPI_URLBASE + "machine");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
   curl.SetProtocolOption("Cache-Control", "no-cache");
@@ -236,7 +247,7 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
   curlfile.SetTimeout(10);
 
   std::string sub_url;
-  sub_url = kTVAPI_URLBASE + "playlist";
+  sub_url = TVAPI_URLBASE + "playlist";
   sub_url += "?_page=" + std::to_string(1) + "&_perPage=50";
 
   CURL curl(sub_url);
@@ -287,7 +298,7 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 
       if (sub_total < total)
       {
-        sub_url = kTVAPI_URLBASE + "playlist";
+        sub_url = TVAPI_URLBASE + "playlist";
         sub_url += "?_page=" + std::to_string(++page) + "&_perPage=25";
         curl = CURL(sub_url);
         if (curlfile.Get(curl.Get(), strResponse))
@@ -313,7 +324,7 @@ bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id)
   curlfile.SetTimeout(10);
 
   std::string url;
-  url = kTVAPI_URLBASE + "playlist/" + playlist_id;
+  url = TVAPI_URLBASE + "playlist/" + playlist_id;
 
   CURL curl(url);
   curl.SetProtocolOption("seekable", "0");
@@ -374,7 +385,7 @@ bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string play
   curlfile.SetTimeout(10);
 
   std::string url;
-  url = kTVAPI_URLBASE + "playlist/" + playlist_id + "/files";
+  url = TVAPI_URLBASE + "playlist/" + playlist_id + "/files";
 
   CURL curl(url);
   curl.SetProtocolOption("seekable", "0");
@@ -499,7 +510,7 @@ bool TVAPI_ReportHealth(TVAPI_HealthReport &health)
   XFILE::CCurlFile curlfile;
   curlfile.SetTimeout(10);
 
-  CURL curl(kTVAPI_URLBASE + "health");
+  CURL curl(TVAPI_URLBASE + "health");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
   curl.SetProtocolOption("Content-Type", "application/json");
@@ -527,7 +538,7 @@ bool TVAPI_ReportFilesPlayed(TVAPI_Files &files, std::string serial_number)
   curlfile.SetTimeout(10);
 
   std::string url;
-  url = kTVAPI_URLBASE + "file-played";
+  url = TVAPI_URLBASE + "file-played";
 
   CURL curl(url);
   curl.SetProtocolOption("seekable", "0");
@@ -562,7 +573,7 @@ bool TVAPI_ReportFilesDeleted(TVAPI_Files &files)
   curlfile.SetTimeout(10);
 
   std::string url;
-  url = kTVAPI_URLBASE + "file-downloaded";
+  url = TVAPI_URLBASE + "file-downloaded";
 
   CURL curl(url);
   curl.SetProtocolOption("seekable", "0");
@@ -596,7 +607,7 @@ bool TVAPI_ReportFilesDownloaded(TVAPI_Files &files)
   curlfile.SetTimeout(10);
 
   std::string url;
-  url = kTVAPI_URLBASE + "file-downloaded";
+  url = TVAPI_URLBASE + "file-downloaded";
 
   CURL curl(url);
   curl.SetProtocolOption("seekable", "0");
@@ -630,7 +641,7 @@ bool TVAPI_GetActionQueue(TVAPI_Actions &actions)
   XFILE::CCurlFile curlfile;
   curlfile.SetTimeout(10);
 
-  CURL curl(kTVAPI_URLBASE + "machine-actions");
+  CURL curl(TVAPI_URLBASE + "machine-actions");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
   curl.SetProtocolOption("Cache-Control", "no-cache");
@@ -671,7 +682,7 @@ bool TVAPI_UpdateActionStatus(TVAPI_ActionStatus &actionStatus)
   curlfile.SetTimeout(10);
 
   std::string url;
-  url = kTVAPI_URLBASE + "machine-actions/" + actionStatus.id;
+  url = TVAPI_URLBASE + "machine-actions/" + actionStatus.id;
 
   CURL curl(url);
   curl.SetProtocolOption("seekable", "0");

@@ -66,23 +66,26 @@ typedef struct NWPlayerInfo {
   std::string id;
   std::string name;
   std::string member;
+  std::string vendor;
   std::string timezone;
+  std::string description;
+  std::string serial_number;
+  std::string warranty_number;
+  std::string macaddress;
+  std::string macaddress_wireless;
+  std::string hardware_version;
+  std::string software_version;
+
   std::string playlist_id;
   std::string video_format;
   std::string update_time;
   std::string update_interval;
+  std::string allow_new_content;
+  std::string allow_software_update;
   std::string status;
   std::string apiKey;
   std::string apiSecret;
-  int         intSettingsVersion;
- 
-  std::string strUpdateUrl;
-  std::string strUpdateKey;
-  std::string strUpdateMD5;
-  std::string strUpdateSize;
-  std::string strUpdateName;
-  std::string strUpdateDate;
-  std::string strUpdateVersion;
+  std::string tvapiURLBase;
 } NWPlayerInfo;
 
 // ---------------------------------------------
@@ -144,5 +147,7 @@ std::string GetDiskUsed(std::string path);
 std::string GetDiskFree(std::string path);
 std::string GetDiskTotal(std::string path);
 std::string GetSystemUpTime();
+const std::string GetWiredMACAddress();
+const std::string GetWirelessMACAddress();
 
 

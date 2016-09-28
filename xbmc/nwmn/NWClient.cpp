@@ -52,7 +52,7 @@
 // temp until access moves to core
 #include "platform/darwin/DarwinUtils.h"
 
-CCriticalSection CNWClient::m_playerLock;
+CCriticalSection CNWClient::m_clientLock;
 CNWClient *CNWClient::m_this = NULL;
 
 CNWClient::CNWClient()
@@ -134,7 +134,7 @@ CNWClient::CNWClient()
   m_MediaManager->RegisterAssetUpdateCallBack(this, AssetUpdateCallBack);
   m_Player = new CNWPlayer();
 
-  CSingleLock lock(m_playerLock);
+  CSingleLock lock(m_clientLock);
   m_this = this;
 
   ANNOUNCEMENT::CAnnouncementManager::GetInstance().AddAnnouncer(this);
@@ -142,7 +142,7 @@ CNWClient::CNWClient()
 
 CNWClient::~CNWClient()
 {
-  CSingleLock lock(m_playerLock);
+  CSingleLock lock(m_clientLock);
   m_this = NULL;
   m_ClientCallBackFn = NULL;
   m_bStop = true;
@@ -157,7 +157,7 @@ CNWClient::~CNWClient()
 
 CNWClient* CNWClient::GetClient()
 {
-  CSingleLock lock(m_playerLock);
+  CSingleLock lock(m_clientLock);
   return m_this;
 }
 
@@ -174,6 +174,7 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
       std::string strPath = g_application.CurrentFileItem().GetPath();
       std::string assetID = URIUtils::GetFileName(strPath);
       URIUtils::RemoveExtension(assetID);
+      CSingleLock lock(m_reportLock);
       LogPlayback(m_strHome, m_PlayerInfo.id, assetID);
     }
   }
@@ -355,11 +356,27 @@ void CNWClient::GetPlayerInfo()
     machine.apiKey = m_activate.apiKey;
     machine.apiSecret = m_activate.apiSecret;
     TVAPI_GetMachine(machine);
-    
+
+  std::string allow_new_content;
+  std::string allow_software_update;
+  std::string status;
+  std::string apiKey;
+  std::string apiSecret;
+  std::string tvapiURLBase;
+
     m_PlayerInfo.id  = machine.id;
     m_PlayerInfo.name = machine.machine_name;
+    m_PlayerInfo.vendor = machine.vendor;
     m_PlayerInfo.member = machine.member;
     m_PlayerInfo.timezone = machine.timezone;
+    m_PlayerInfo.description = machine.description;
+    m_PlayerInfo.serial_number = machine.serial_number;
+    m_PlayerInfo.warranty_number = machine.warranty_number;
+    m_PlayerInfo.macaddress = GetWiredMACAddress();
+    m_PlayerInfo.macaddress_wireless = GetWirelessMACAddress();
+    m_PlayerInfo.hardware_version = "";
+    m_PlayerInfo.software_version = kNWClient_PlayerFloatVersion * 10;
+
     m_PlayerInfo.playlist_id = machine.playlist_id;
     m_PlayerInfo.video_format = machine.video_format;
     m_PlayerInfo.update_time = machine.update_time;
@@ -375,16 +392,19 @@ void CNWClient::GetPlayerInfo()
     {
       // if interval is not "daily", its set to minutes
       int interval = atoi(settings.strSettings_update_time.c_str());
-      
+
       // we add minutes to current time to trigger the next update
       m_NextDownloadTime = cur + CDateTimeSpan(0,0,interval,0);
     }
     */
+    m_PlayerInfo.allow_new_content = machine.allow_new_content;
+    m_PlayerInfo.allow_software_update = machine.allow_software_update;
     m_PlayerInfo.status = machine.status;
     m_PlayerInfo.apiKey = machine.apiKey;
     m_PlayerInfo.apiSecret = machine.apiSecret;
-    m_PlayerInfo.intSettingsVersion = 0;
 
+    m_PlayerInfo.tvapiURLBase = TVAPI_GetURLBASE();
+;
     /*
     std::string apiKey;
     std::string apiSecret;
@@ -639,7 +659,6 @@ void CNWClient::GetActions()
           health.apiSecret = m_activate.apiSecret;
           health.date = CDateTime::GetCurrentDateTime().GetAsDBDateTime();
           health.uptime = GetSystemUpTime();
-          //health.uptime = "48hours";
           health.disk_used = GetDiskUsed("/");
           health.disk_free = GetDiskFree("/");
           health.smart_status = "Disk Ok";
@@ -648,11 +667,13 @@ void CNWClient::GetActions()
         }
         else if (action.action == kTVAPI_ActionDownloaded)
         {
+          //CSingleLock lock(m_reportLock);
           //SendFilesDownloaded();
           //ClearAction(actions, action.id);
         }
         else if (action.action == kTVAPI_ActionFilePlayed)
         {
+          //CSingleLock lock(m_reportLock);
           //SendFilesPlayed();
           //ClearAction(actions, action.id);
         }
@@ -758,7 +779,9 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
               asset.available_to.SetFromDBDateTime(item.availability_to);
               asset.available_from.SetFromDBDateTime(item.availability_from);
               asset.video_basename = URIUtils::GetFileName(asset.video_url);
-              asset.video_localpath = URIUtils::AddFileToFolder(home, kNWClient_DownloadVideoPath + asset.video_basename);
+              std::string video_extension = URIUtils::GetExtension(asset.video_url);
+              std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std::to_string(asset.id) + video_extension;
+              asset.video_localpath = URIUtils::AddFileToFolder(home, localpath);
               break;
             }
           }
@@ -773,7 +796,9 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
               asset.thumb_md5 = item.thumb.etag;
               asset.thumb_size = std::stoi(item.thumb.size);
               asset.thumb_basename = URIUtils::GetFileName(asset.thumb_url);
-              asset.thumb_localpath = URIUtils::AddFileToFolder(home, kNWClient_DownloadVideoThumbNailsPath + asset.thumb_basename);
+              std::string thumb_extension = URIUtils::GetExtension(asset.thumb_url);
+              std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std::to_string(asset.id) + thumb_extension;
+              asset.thumb_localpath = URIUtils::AddFileToFolder(home, localpath);
             }
             group.assets.push_back(asset);
           }
@@ -796,7 +821,10 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDow
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "validating", asset.name, 500, false);
 
   if (wasDownloaded)
+  {
+    CSingleLock lock(manager->m_reportLock);
     LogDownLoad(manager->m_strHome, manager->m_PlayerInfo.id, std::to_string(asset.id));
+  }
 }
 
 void CNWClient::ReportManagerCallBack(const void *ctx, bool status)
@@ -855,7 +883,7 @@ bool CNWClient::DoAuthorize()
 
 bool CNWClient::IsAuthorized()
 {
-  if (m_PlayerInfo.apiKey.empty() || m_PlayerInfo.apiSecret.empty())
+  if (!m_activate.apiKey.empty() && !m_activate.apiSecret.empty())
   {
     m_status.apiKey = m_activate.apiKey;
     m_status.apiSecret = m_activate.apiSecret;
