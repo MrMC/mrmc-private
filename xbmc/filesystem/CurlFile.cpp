@@ -432,8 +432,8 @@ CCurlFile::CCurlFile()
   m_ftpport = "";
   m_ftppasvip = false;
   m_bufferSize = 32768;
-  m_postdata = "";
-  m_postdataset = false;
+  m_methoddata = "";
+  m_methodset = GET;
   m_username = "";
   m_password = "";
   m_httpauth = "";
@@ -444,8 +444,6 @@ CCurlFile::CCurlFile()
   m_skipshout = false;
   m_httpresponse = -1;
   m_acceptCharset = "UTF-8,*;q=0.8"; /* prefer UTF-8 if available */
-  m_deletedata = "";
-  m_deletedataset = false;
 }
 
 //Has to be called before Open()
@@ -552,17 +550,35 @@ void CCurlFile::SetCommonOptions(CReadState* state)
   g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_NOPROGRESS, 0);
 
   // setup POST data if it is set (and it may be empty)
-  if (m_postdataset)
+  switch(m_methodset)
   {
-    g_curlInterface.easy_setopt(h, CURLOPT_POST, 1 );
-    g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_postdata.length());
-    g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_postdata.c_str());
-  } else if (m_deletedataset)
-  {
-    // setup DELETE data if it is set (and it may be empty)
-    g_curlInterface.easy_setopt(h, CURLOPT_CUSTOMREQUEST, "DELETE");
-    g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_deletedata.length());
-    g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_deletedata.c_str());
+    default:
+    GET:
+      break;
+    PUT:
+      g_curlInterface.easy_setopt(h, CURLOPT_CUSTOMREQUEST, "PUT");
+      if (!m_methoddata.empty())
+      {
+        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_methoddata.length());
+        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_methoddata.c_str());
+      }
+      break;
+    POST:
+      g_curlInterface.easy_setopt(h, CURLOPT_POST, 1 );
+      if (!m_methoddata.empty())
+      {
+        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_methoddata.length());
+        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_methoddata.c_str());
+      }
+      break;
+    DELETE:
+      g_curlInterface.easy_setopt(h, CURLOPT_CUSTOMREQUEST, "DELETE");
+      if (!m_methoddata.empty())
+      {
+        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_methoddata.length());
+        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_methoddata.c_str());
+      }
+      break;
   }
 
   // setup Referer header if needed
@@ -866,26 +882,31 @@ void CCurlFile::SetStreamProxy(const std::string &proxy, ProxyType type)
   CLog::Log(LOGDEBUG, "Overriding proxy from URL parameter: %s, type %d", m_proxy.c_str(), proxyType2CUrlProxyType[m_proxytype]);
 }
 
-bool CCurlFile::Delete(const std::string& strURL, const std::string& strDeleteData, std::string& strHTML)
+bool CCurlFile::Delete(const std::string& strURL, const std::string& strMethodData, std::string& strHTML)
 {
-  m_deletedata = strDeleteData;
-  m_deletedataset = true;
-  m_postdataset = false;
+  m_methoddata = strMethodData;
+  m_methodset = DELETE;
   return Service(strURL, strHTML);
 }
 
-bool CCurlFile::Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML)
+bool CCurlFile::Post(const std::string& strURL, const std::string& strMethodData, std::string& strHTML)
 {
-  m_postdata = strPostData;
-  m_postdataset = true;
-  m_deletedataset = false;
+  m_methoddata = strMethodData;
+  m_methodset = POST;
+  return Service(strURL, strHTML);
+}
+
+bool CCurlFile::Put(const std::string& strURL, const std::string& strMethodData, std::string& strHTML)
+{
+  m_methoddata = strMethodData;
+  m_methodset = PUT;
   return Service(strURL, strHTML);
 }
 
 bool CCurlFile::Get(const std::string& strURL, std::string& strHTML)
 {
-  m_postdata = "";
-  m_postdataset = false;
+  m_methoddata = "";
+  m_methodset = GET;
   return Service(strURL, strHTML);
 }
 
