@@ -104,7 +104,6 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       if (iface)
         strIPAddress = iface->GetCurrentIPAddress();
 
-//      NWPlayerSettings settings = m_client->GetSettings();
       NWPlayerInfo playerInfo;
       m_client->GetPlayerInfo(playerInfo);
       // Fill in about popup
