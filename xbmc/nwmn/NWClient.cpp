@@ -295,6 +295,8 @@ void CNWClient::Process()
   SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
   CLog::Log(LOGDEBUG, "**NW** - CNWClient::Process Started");
 
+  SendPlayerStatus(kTVAPI_Status_On);
+
   while (!m_bStop)
   {
     Sleep(100);
@@ -325,9 +327,9 @@ void CNWClient::Process()
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
 
       if (m_Player->IsPlaying())
-        SendPlayerStatus(kTVAPI_Status_On);
+        SendPlayerStatus(kTVAPI_Status_Playing);
       else
-        SendPlayerStatus(kTVAPI_Status_Off);
+        SendPlayerStatus(kTVAPI_Status_On);
     }
   }
 
@@ -696,7 +698,7 @@ void CNWClient::InitializeInternalsFromPlayer()
 {
   if (!m_PlayerInfo.update_time.empty() && !m_PlayerInfo.update_interval.empty())
   {
-    // "update_interval":"86400" or "daily","update_time":"24:00"
+    // "update_interval":"86400" or "daily", "update_time":"24:00"
     CDateTime time = CDateTime::GetCurrentDateTime();
     if (m_PlayerInfo.update_interval == "daily")
     {
@@ -716,6 +718,7 @@ void CNWClient::InitializeInternalsFromPlayer()
       m_NextUpdateInterval.SetDateTimeSpan(0, 0, update_interval, 0);
     }
 
+    // make sure we schedual next update past the current time
     if (time >= m_NextUpdateTime)
       m_NextUpdateTime += m_NextUpdateInterval;
 
