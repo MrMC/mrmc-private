@@ -198,61 +198,6 @@ void CNWClient::Startup()
   m_Player->Create();
 }
 
-void CNWClient::SetSettings(NWPlayerSettings settings)
-{
-  CSettings::GetInstance().SetString(CSettings::MN_LOCATION_ID,settings.strLocation_id);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_ID,settings.strMachine_id);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_DESCRIPTION,settings.strMachine_description);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_ETHERNET_ID,settings.strMachine_ethernet_id);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_HW_VERSION,settings.strMachine_hw_version);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_NAME,settings.strMachine_name);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_PURCHASE_DATE,settings.strMachine_purchase_date);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_SN,settings.strMachine_sn);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_VENDOR,settings.strMachine_vendor);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_WARRANTY,settings.strMachine_warrenty_nr);
-  CSettings::GetInstance().SetString(CSettings::MN_MACHINE_WIRELESS,settings.strMachine_wireless_id);
-  CSettings::GetInstance().SetString(CSettings::MN_SETTINGS_CF_BUNDLE,settings.strSettings_cf_bundle_version);
-  CSettings::GetInstance().SetString(CSettings::MN_SETTINGS_UPDATE_INTERVAL,settings.strSettings_update_interval);
-  CSettings::GetInstance().SetString(CSettings::MN_SETTINGS_UPDATE_TIME,settings.strSettings_update_time);
-  CSettings::GetInstance().SetString(CSettings::MN_URL,settings.strUrl_feed);
-  CSettings::GetInstance().Save();
-}
-
-NWPlayerSettings CNWClient::GetSettings()
-{
-  NWPlayerSettings settings;
-  settings.strLocation_id                = CSettings::GetInstance().GetString(CSettings::MN_LOCATION_ID);
-  settings.strMachine_id                 = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_ID);
-  settings.strMachine_description        = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_DESCRIPTION);
-  settings.strMachine_ethernet_id        = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_ETHERNET_ID);
-  settings.strMachine_hw_version         = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_HW_VERSION);
-  settings.strMachine_name               = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_NAME);
-  settings.strMachine_purchase_date      = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_PURCHASE_DATE);
-  settings.strMachine_sn                 = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_SN);
-  settings.strMachine_vendor             = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_VENDOR);
-  settings.strMachine_warrenty_nr        = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_WARRANTY);
-  settings.strMachine_wireless_id        = CSettings::GetInstance().GetString(CSettings::MN_MACHINE_WIRELESS);
-  settings.strSettings_cf_bundle_version = CSettings::GetInstance().GetString(CSettings::MN_SETTINGS_CF_BUNDLE);
-  settings.strSettings_update_interval   = CSettings::GetInstance().GetString(CSettings::MN_SETTINGS_UPDATE_INTERVAL);
-  settings.strSettings_update_time       = CSettings::GetInstance().GetString(CSettings::MN_SETTINGS_UPDATE_TIME);
-  settings.strUrl_feed                   = CSettings::GetInstance().GetString(CSettings::MN_URL);
-  
-  if (settings.strMachine_sn.empty())
-    settings.strMachine_sn = "UNKNOWN";
-
-  if (settings.strMachine_ethernet_id.empty())
-  {
-    CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
-    if (iface)
-    {
-      settings.strMachine_ethernet_id = iface->GetMacAddress();
-      CSettings::GetInstance().SetString(CSettings::MN_MACHINE_ETHERNET_ID,settings.strMachine_ethernet_id);
-    }
-  }
-
-  return settings;
-}
-
 void CNWClient::FullUpdate()
 {
   SendPlayerStatus(kTVAPI_Status_Restarting);
@@ -283,6 +228,10 @@ void CNWClient::RegisterClientCallBack(const void *ctx, ClientCallBackFn fn)
 {
   m_ClientCallBackFn = fn;
   m_ClientCallBackCtx = ctx;
+}
+
+void CNWClient::UpdateFromJson(std::string url, std::string machineID, std::string locationID)
+{
 }
 
 void CNWClient::RegisterPlayerCallBack(const void *ctx, PlayerCallBackFn fn)

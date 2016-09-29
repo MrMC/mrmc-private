@@ -96,9 +96,6 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
   {
     CLog::Log(LOGERROR, "MN Updated settings, url - %s, Machine ID - %s , location ID - %s", url.c_str(), machineID.c_str(), locationID.c_str());
     
-    CSettings::GetInstance().SetString(CSettings::MN_LOCATION_ID ,locationID);
-    CSettings::GetInstance().SetString(CSettings::MN_MACHINE_ID  ,machineID);
-    CSettings::GetInstance().SetString(CSettings::MN_URL         ,url);
     // Notify that we have changed settings
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
                                           "MemberNet",
@@ -106,7 +103,10 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
                                           TOAST_DISPLAY_TIME, false);
     CNWClient* client = CNWClient::GetClient();
     if (client)
+    {
+      client->UpdateFromJson(url, machineID, locationID);
       client->Startup();
+    }
     
   }
   return OK;

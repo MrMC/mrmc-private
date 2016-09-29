@@ -39,29 +39,6 @@ const std::string kNWClient_PlaylistFileName = "playlist.xml";
 
 // ---------------------------------------------
 // ---------------------------------------------
-typedef struct NWPlayerSettings {
-  std::string strLocation_id;
-  std::string strMachine_id;
-  std::string strMachine_description;
-  std::string strMachine_ethernet_id;
-  std::string strMachine_hw_version;
-  std::string strMachine_name;
-  std::string strMachine_purchase_date;
-  std::string strMachine_sn;
-  std::string strMachine_vendor;
-  std::string strMachine_warrenty_nr;
-  std::string strMachine_wireless_id;
-  std::string strSettings_cf_bundle_version;
-  std::string strSettings_update_interval;
-  std::string strSettings_update_time;
-  std::string strSettings_software_version;
-  std::string strSettings_software_url;
-  std::string strUrl_feed;
-  std::string strTimeZone;
-  bool        allowUpdate;
-  std::vector <std::string> intCategories_order;
-} NWPlayerSettings;
-
 typedef struct NWPlayerInfo {
   std::string id;
   std::string name;

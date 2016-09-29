@@ -51,14 +51,14 @@ public:
   virtual void  Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
   void          Startup();
-  void          SetSettings(NWPlayerSettings settings);
-  NWPlayerSettings GetSettings();
   void          FullUpdate();
   void          PlayPause();
   void          PausePlaying();
   void          StopPlaying();
   void          PlayNext();
-  
+
+  void          UpdateFromJson(std::string url, std::string machineID, std::string locationID);
+
   void          GetProgamInfo(NWPlaylist &playList) { playList = m_ProgramInfo; };
   void          GetPlayerInfo(NWPlayerInfo &playerInfo) { playerInfo = m_PlayerInfo; };
   
