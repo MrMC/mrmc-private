@@ -672,7 +672,7 @@ bool CNWClient::SendPlayerStatus(const std::string status)
     machineUpdate.apiKey = m_PlayerInfo.apiKey;
     machineUpdate.apiSecret = m_PlayerInfo.apiSecret;
     machineUpdate.playlist_id = m_PlayerInfo.id;
-    machineUpdate.machine_name = m_PlayerInfo.name;
+    machineUpdate.name = m_PlayerInfo.name;
     machineUpdate.description = m_PlayerInfo.description;
     machineUpdate.serial_number = m_PlayerInfo.serial_number;
     machineUpdate.warranty_number = m_PlayerInfo.warranty_number;

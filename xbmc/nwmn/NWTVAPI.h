@@ -151,7 +151,7 @@ typedef struct TVAPI_MachineUpdate {
   std::string apiSecret;
   // post
   std::string playlist_id;
-  std::string machine_name;
+  std::string name;
   std::string description;
   std::string serial_number;
   std::string warranty_number;

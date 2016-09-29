@@ -210,30 +210,47 @@ bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
   curl.SetProtocolOption("Cache-Control", "no-cache");
-  //curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
   curl.SetUserName(machineUpdate.apiKey);
   curl.SetPassword(machineUpdate.apiSecret);
+/*
+  CVariant params;
+  params["playlist_id"] = machineUpdate.name;
+  params["name"] = machineUpdate.name;
+  params["description"] = machineUpdate.description;
+  params["serial_number"] = machineUpdate.serial_number;
+  params["warranty_number"] = machineUpdate.warranty_number;
+  params["mac_address"] = machineUpdate.macaddress;
+  params["mac_address_wireless"] = machineUpdate.macaddress_wireless;
+  params["vendor"] = machineUpdate.vendor;
+  params["hardware_version"] = machineUpdate.hardware_version;
+  params["timezone"] = machineUpdate.timezone;
+  params["status"] = machineUpdate.status;
+  params["allow_new_content"] = machineUpdate.allow_new_content;
+  params["allow_software"] = machineUpdate.allow_software_update;
+  params["update_interval"] = machineUpdate.update_interval;
+  params["update_time"] = machineUpdate.name;
+  std::string jsonBody = CJSONVariantWriter::Write(params, false);
+*/
   // parameters
   curl.SetOption("playlist_id", machineUpdate.playlist_id);
-  curl.SetOption("machine_name", machineUpdate.machine_name);
+  curl.SetOption("name", machineUpdate.name);
   curl.SetOption("description", machineUpdate.description);
   curl.SetOption("serial_number", machineUpdate.serial_number);
   curl.SetOption("warranty_number", machineUpdate.warranty_number);
-  curl.SetOption("macaddress", machineUpdate.macaddress);
-  curl.SetOption("macaddress_wireless", machineUpdate.macaddress_wireless);
+  curl.SetOption("mac_address", machineUpdate.macaddress);
+  curl.SetOption("mac_address_wireless", machineUpdate.macaddress_wireless);
   curl.SetOption("vendor", machineUpdate.vendor);
   curl.SetOption("hardware_version", machineUpdate.hardware_version);
   curl.SetOption("timezone", machineUpdate.timezone);
   curl.SetOption("status", machineUpdate.status);
   curl.SetOption("allow_new_content", machineUpdate.allow_new_content);
-  curl.SetOption("allow_software_update", machineUpdate.allow_software_update);
+  curl.SetOption("allow_software", machineUpdate.allow_software_update);
   curl.SetOption("update_interval", machineUpdate.update_interval);
-  curl.SetOption("playlist_id", machineUpdate.playlist_id);
   curl.SetOption("update_time", machineUpdate.update_time);
 
   std::string strResponse;
-  curlfile.SetCustomRequest("PUT");
-  if (curlfile.Get(curl.Get(), strResponse))
+  if (curlfile.Put(curl.Get(), "", strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_UpdateMachineInfo %s", strResponse.c_str());
     return true;
@@ -696,8 +713,7 @@ bool TVAPI_UpdateActionStatus(TVAPI_ActionStatus &actionStatus)
     curl.SetOption("message", actionStatus.message);
 
   std::string strResponse;
-  curlfile.SetCustomRequest("PUT");
-  if (curlfile.Get(curl.Get(), strResponse))
+  if (curlfile.Put(curl.Get(), "", strResponse))
   {
     CLog::Log(LOGDEBUG, "TVAPI_UpdateActionStatus %s", strResponse.c_str());
     return true;
