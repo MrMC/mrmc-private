@@ -104,24 +104,26 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       if (iface)
         strIPAddress = iface->GetCurrentIPAddress();
 
-      NWPlayerSettings settings = m_client->GetSettings();
+//      NWPlayerSettings settings = m_client->GetSettings();
+      NWPlayerInfo playerInfo;
+      m_client->GetPlayerInfo(playerInfo);
       // Fill in about popup
-      SET_CONTROL_LABEL(90210, StringUtils::Format("Machine Name: %s",
-                                                   CSettings::GetInstance().GetString("services.devicename").c_str()));
-      SET_CONTROL_LABEL(90211, StringUtils::Format("Serial Number: %s",
-                                                   settings.strMachine_sn.c_str()));
-      SET_CONTROL_LABEL(90212, StringUtils::Format("Location ID: %s",
-                                                   settings.strLocation_id.c_str()));
-      SET_CONTROL_LABEL(90213, StringUtils::Format("Machine ID: %s",
-                                                   settings.strMachine_id.c_str()));
+      SET_CONTROL_LABEL(90212, StringUtils::Format("Machine Name: %s",
+                                                   playerInfo.name.c_str()));
+      SET_CONTROL_LABEL(90213, StringUtils::Format("Serial Number: %s",
+                                                   playerInfo.serial_number.c_str()));
+//      SET_CONTROL_LABEL(90212, StringUtils::Format("Location ID: %s",
+//                                                   playerInfo..c_str()));
+//      SET_CONTROL_LABEL(90213, StringUtils::Format("Machine ID: %s",
+//                                                   settings.strMachine_id.c_str()));
       SET_CONTROL_LABEL(90214, StringUtils::Format("MNTV Software Version: %s",
-                                                   settings.strSettings_cf_bundle_version.c_str()));
+                                                   playerInfo.software_version.c_str()));
       SET_CONTROL_LABEL(90215, StringUtils::Format("IP Address:  %s",
                                                    strIPAddress.c_str()));
       SET_CONTROL_LABEL(90216, StringUtils::Format("Ethernet MAC: %s",
-                                                   settings.strMachine_ethernet_id.c_str()));
+                                                   playerInfo.macaddress.c_str()));
       SET_CONTROL_LABEL(90217, StringUtils::Format("Wireless MAC: %s",
-                                                   settings.strMachine_wireless_id.c_str()));
+                                                   playerInfo.macaddress_wireless.c_str()));
       SET_CONTROL_LABEL(90218, StringUtils::Format("Free Space: %s/%s",
                                                    GetDiskFree("/").c_str(),GetDiskTotal("/").c_str()));
       SET_CONTROL_LABEL(90219, StringUtils::Format("System Uptime: %s",
