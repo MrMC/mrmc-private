@@ -47,7 +47,7 @@ bool TVAPI_DoActivate(TVAPI_Activate &activate)
   CURL curl(TVAPI_URLBASE + "activate");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
-  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  //curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
   curl.SetOption("code", activate.code);
   curl.SetOption("application_id", activate.application_id);
   std::string strResponse;
@@ -210,7 +210,7 @@ bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
   curl.SetProtocolOption("Cache-Control", "no-cache");
-  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  //curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
   curl.SetUserName(machineUpdate.apiKey);
   curl.SetPassword(machineUpdate.apiSecret);
   // parameters
@@ -687,7 +687,7 @@ bool TVAPI_UpdateActionStatus(TVAPI_ActionStatus &actionStatus)
   CURL curl(url);
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
-  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+  //curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
   curl.SetUserName(actionStatus.apiKey);
   curl.SetPassword(actionStatus.apiSecret);
   // parameters

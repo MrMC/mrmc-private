@@ -54,7 +54,6 @@ public:
   void          SetSettings(NWPlayerSettings settings);
   NWPlayerSettings GetSettings();
   void          FullUpdate();
-  void          GetStats(CDateTime &NextUpdateTime, CDateTime &NextDownloadTime, CDateTimeSpan &NextDownloadDuration);
   void          PlayPause();
   void          PausePlaying();
   void          StopPlaying();
@@ -63,30 +62,31 @@ public:
   void          GetProgamInfo(NWPlaylist &playList) { playList = m_ProgramInfo; };
   void          GetPlayerInfo(NWPlayerInfo &playerInfo) { playerInfo = m_PlayerInfo; };
   
-  bool          SendPlayerStatus(const std::string status);
-
   void          RegisterClientCallBack(const void *ctx, ClientCallBackFn fn);
   void          RegisterPlayerCallBack(const void *ctx, PlayerCallBackFn fn);
-  void          UpdatePlayerInfo(const std::string strPlayerID, const std::string strApiKey,const std::string strSecretKey);
   bool          DoAuthorize();
   bool          IsAuthorized();
 
 protected:
   virtual void  Process();
-  void          GetPlayerInfo();
+
   bool          GetPlayerStatus();
+  void          GetPlayerInfo();
   bool          GetProgamInfo();
-  void          SendFilesDownloaded();
-  void          SendPlayerHealth();
-  void          SendNetworkInfo();
-  void          SendPlayerLog();
   void          GetActions();
   void          ClearAction(TVAPI_Actions &actions, std::string id);
+
+  void          SendFilesPlayed();
+  void          LogFilesPlayed(std::string assetID);
+  void          SendFilesDownloaded();
+  void          LogFilesDownLoaded(std::string assetID);
+  bool          SendPlayerStatus(const std::string status);
+
+  void          InitializeInternalsFromPlayer();
   bool          CreatePlaylist(std::string home, NWPlaylist &playList,
                   const TVAPI_Playlist &playlist, const TVAPI_PlaylistItems &playlistItems);
 
   static void   AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded);
-  static void   ReportManagerCallBack(const void *ctx, bool status);
 
   std::string   m_strHome;
   bool          m_Startup;
@@ -100,8 +100,7 @@ protected:
   CDateTime     m_PlaybackTime;
   CDateTimeSpan m_PlaybackDuration;
   
-  TVAPI_Activate m_activate;
-  TVAPI_Status   m_status;
+  TVAPI_Status  m_status;
 
   NWPlayerInfo  m_PlayerInfo;
   NWPlaylist    m_ProgramInfo;

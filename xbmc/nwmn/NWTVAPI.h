@@ -24,9 +24,7 @@
 
 #include "XBDateTime.h"
 
-const std::string kTVAPI_Status_On = "On";
-const std::string kTVAPI_Status_Off = "Off";
-const std::string kTVAPI_Status_Restarting = "Restarting";
+// https://www.nationwidemember.com/tv-api-doc/
 
 //const std::string kTVAPI_URLBASE = "http://nationwidemember.com/tv-api/1/";
 const std::string kTVAPI_URLBASE = "http://test.nationwidemember.com/tv-api/1/";
@@ -124,7 +122,7 @@ typedef struct TVAPI_Machine {
   std::string machine_name;
   std::string description;
   std::string playlist_id;
-  std::string status;
+  std::string status;         //Status of the machine: ‘off’, ‘on’, ‘restarting’, ‘playing’
   std::string vendor;
   std::string hardware;
   std::string timezone;
@@ -142,6 +140,11 @@ typedef struct TVAPI_Machine {
   TVAPI_MachineMembernet_software  membernet_software;
   TVAPI_MachineApple_software apple_software;
 } TVAPI_Machine;
+
+const std::string kTVAPI_Status_On = "on";
+const std::string kTVAPI_Status_Off = "off";
+const std::string kTVAPI_Status_Playing = "playing";
+const std::string kTVAPI_Status_Restarting = "restarting";
 
 typedef struct TVAPI_MachineUpdate {
   std::string apiKey;

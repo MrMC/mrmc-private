@@ -59,12 +59,10 @@ CNWClient::CNWClient()
  : CThread("CNWClient")
  , m_Startup(true)
  , m_HasNetwork(true)
- , m_FullUpdate(false)
+ , m_FullUpdate(true)
  , m_NextUpdateTime(CDateTime::GetCurrentDateTime())
  , m_NextUpdateInterval(0, 0, 5, 0)
  , m_NextReportInterval(0, 6, 0, 0)
- , m_NextDownloadTime(CDateTime::GetCurrentDateTime())
- , m_NextDownloadDuration(0, 6, 0, 0)
  , m_Player(NULL)
  , m_MediaManager(NULL)
  , m_ClientCallBackFn(NULL)
@@ -126,9 +124,7 @@ CNWClient::CNWClient()
     CUtil::CreateDirectoryEx(webui_path);
 
   LoadLocalPlayer(m_strHome, m_PlayerInfo);
-  m_activate.apiKey = m_PlayerInfo.apiKey;
-  m_activate.apiSecret = m_PlayerInfo.apiSecret;
-  m_activate.application_id = CDarwinUtils::GetHardwareUUID();
+  InitializeInternalsFromPlayer();
 
   m_MediaManager = new CNWMediaManager();
   m_MediaManager->RegisterAssetUpdateCallBack(this, AssetUpdateCallBack);
@@ -174,8 +170,7 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
       std::string strPath = g_application.CurrentFileItem().GetPath();
       std::string assetID = URIUtils::GetFileName(strPath);
       URIUtils::RemoveExtension(assetID);
-      CSingleLock lock(m_reportLock);
-      LogPlayback(m_strHome, m_PlayerInfo.id, assetID);
+      LogFilesPlayed(assetID);
     }
   }
 }
@@ -185,8 +180,8 @@ void CNWClient::Startup()
   if (!IsAuthorized())
     while (!DoAuthorize());
 
-  m_status.apiKey = m_activate.apiKey;
-  m_status.apiSecret = m_activate.apiSecret;
+  m_status.apiKey = m_PlayerInfo.apiKey;
+  m_status.apiSecret = m_PlayerInfo.apiSecret;
   TVAPI_GetStatus(m_status);
 
 /*
@@ -264,13 +259,6 @@ void CNWClient::FullUpdate()
   m_FullUpdate = true;
 }
 
-void CNWClient::GetStats(CDateTime &NextUpdateTime, CDateTime &NextDownloadTime, CDateTimeSpan &NextDownloadDuration)
-{
-  NextUpdateTime = m_NextUpdateTime;
-  NextDownloadTime = m_NextDownloadTime;
-  NextDownloadDuration = m_NextDownloadDuration;
-}
-
 void CNWClient::PlayPause()
 {
   m_Player->PlayPause();
@@ -289,11 +277,6 @@ void CNWClient::StopPlaying()
 void CNWClient::PlayNext()
 {
   m_Player->PlayNext();
-}
-
-bool CNWClient::SendPlayerStatus(const std::string status)
-{
-  return false;
 }
 
 void CNWClient::RegisterClientCallBack(const void *ctx, ClientCallBackFn fn)
@@ -319,13 +302,16 @@ void CNWClient::Process()
     CDateTime time = CDateTime::GetCurrentDateTime();
     if (m_FullUpdate || time >= m_NextUpdateTime)
     {
-      m_NextUpdateTime = time + m_NextUpdateInterval;
+      CLog::Log(LOGDEBUG, "**NW** - time = %s", time.GetAsDBDateTime().c_str());
+      CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
+      CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateInterval = %d days, %d hours, %d mins",
+        m_NextUpdateInterval.GetDays(), m_NextUpdateInterval.GetHours(), m_NextUpdateInterval.GetMinutes());
+
+      m_NextUpdateTime += m_NextUpdateInterval;
+      CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
 
       m_HasNetwork = GetPlayerStatus();
       m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
-
-      if (m_FullUpdate)
-        SendNetworkInfo();
 
       GetPlayerInfo();
       GetActions();
@@ -348,21 +334,21 @@ void CNWClient::Process()
   CLog::Log(LOGDEBUG, "**NW** - CNWClient::Process Stopped");
 }
 
+bool CNWClient::GetPlayerStatus()
+{
+  m_status.apiKey = m_PlayerInfo.apiKey;
+  m_status.apiSecret = m_PlayerInfo.apiSecret;
+  return TVAPI_GetStatus(m_status);
+}
+
 void CNWClient::GetPlayerInfo()
 {
   if (m_HasNetwork)
   {
     TVAPI_Machine machine;
-    machine.apiKey = m_activate.apiKey;
-    machine.apiSecret = m_activate.apiSecret;
+    machine.apiKey = m_PlayerInfo.apiKey;
+    machine.apiSecret = m_PlayerInfo.apiSecret;
     TVAPI_GetMachine(machine);
-
-  std::string allow_new_content;
-  std::string allow_software_update;
-  std::string status;
-  std::string apiKey;
-  std::string apiSecret;
-  std::string tvapiURLBase;
 
     m_PlayerInfo.id  = machine.id;
     m_PlayerInfo.name = machine.machine_name;
@@ -381,71 +367,25 @@ void CNWClient::GetPlayerInfo()
     m_PlayerInfo.video_format = machine.video_format;
     m_PlayerInfo.update_time = machine.update_time;
     m_PlayerInfo.update_interval = machine.update_interval;
-    /*
-    // "update_interval":"86400","update_time":"24:00"
-    if (settings.strSettings_update_interval == "daily")
-    {
-      sscanf(settings.strSettings_update_time.c_str(),"%d:%d", &hours, &minutes);
-      m_NextDownloadTime.SetDateTime(cur.GetYear(), cur.GetMonth(), cur.GetDay(), hours, minutes, 0);
-    }
-    else
-    {
-      // if interval is not "daily", its set to minutes
-      int interval = atoi(settings.strSettings_update_time.c_str());
 
-      // we add minutes to current time to trigger the next update
-      m_NextDownloadTime = cur + CDateTimeSpan(0,0,interval,0);
-    }
-    */
     m_PlayerInfo.allow_new_content = machine.allow_new_content;
     m_PlayerInfo.allow_software_update = machine.allow_software_update;
     m_PlayerInfo.status = machine.status;
     m_PlayerInfo.apiKey = machine.apiKey;
     m_PlayerInfo.apiSecret = machine.apiSecret;
-
     m_PlayerInfo.tvapiURLBase = TVAPI_GetURLBASE();
-;
-    /*
-    std::string apiKey;
-    std::string apiSecret;
-    // reply
-    std::string id;
-    std::string member;
-    std::string machine_name;
-    std::string description;
-    std::string playlist_id;
-    std::string status;
-    std::string vendor;
-    std::string hardware;
-    std::string timezone;
-    std::string serial_number;
-    std::string warranty_number;
-    std::string video_format;
-    std::string allow_new_content;
-    std::string allow_software_update;
-    std::string update_time;
-    std::string update_interval;
-    NWMachineLocation location;
-    NWMachineNetwork  network;
-    NWMachineSettings settings;
-    NWMachineMenu     menu;
-    NWMachineMembernet_software  membernet_software;
-    NWMachineApple_software apple_software;
-    */
+    InitializeInternalsFromPlayer();
+
     SaveLocalPlayer(m_strHome, m_PlayerInfo);
   }
   else
   {
     if (HasLocalPlayer(m_strHome))
+    {
       LoadLocalPlayer(m_strHome, m_PlayerInfo);
+      InitializeInternalsFromPlayer();
+    }
   }
-}
-
-bool CNWClient::GetPlayerStatus()
-{
-  m_status.apiKey = m_activate.apiKey;
-  m_status.apiSecret = m_activate.apiSecret;
-  return TVAPI_GetStatus(m_status);
 }
 
 bool CNWClient::GetProgamInfo()
@@ -455,15 +395,15 @@ bool CNWClient::GetProgamInfo()
   if (m_HasNetwork)
   {
     TVAPI_Playlist playlist;
-    playlist.apiKey = m_activate.apiKey;
-    playlist.apiSecret = m_activate.apiSecret;
+    playlist.apiKey = m_PlayerInfo.apiKey;
+    playlist.apiSecret = m_PlayerInfo.apiSecret;
     TVAPI_GetPlaylist(playlist, m_PlayerInfo.playlist_id);
 
     if (m_ProgramInfo.updated_date != playlist.updated_date)
     {
       TVAPI_PlaylistItems playlistItems;
-      playlistItems.apiKey = m_activate.apiKey;
-      playlistItems.apiSecret = m_activate.apiSecret;
+      playlistItems.apiKey = m_PlayerInfo.apiKey;
+      playlistItems.apiSecret = m_PlayerInfo.apiSecret;
       TVAPI_GetPlaylistItems(playlistItems, m_PlayerInfo.playlist_id);
 
       m_ProgramInfo.video_format = m_PlayerInfo.video_format;
@@ -500,154 +440,13 @@ bool CNWClient::GetProgamInfo()
   return rtn;
 }
 
-void CNWClient::SendFilesDownloaded()
-{
-/*
-  if (m_HasNetwork)
-  {
-    // compare program list to files on disk, send what we have on disk
-
-    CDBManagerRed database;
-    database.Open();
-    std::vector<NWAsset> assets; // this holds all downloaded assest at the time of a query
-    database.GetAllDownloadedAssets(assets);
-    database.Close();
-
-    // below if we need all files that are on local disc
-    CFileItemList items;
-    XFILE::CDirectory::GetDirectory(m_strHome + kRedDownloadMusicPath, items, "", XFILE::DIR_FLAG_NO_FILE_DIRS);
-
-    for (int i=0; i < items.Size(); i++)
-    {
-      std::string itemName = URIUtils::GetFileName(items[i]->GetPath());
-      CLog::Log(LOGDEBUG, "**NW** - SendFilesDownloaded() - %s", itemName.c_str());
-    }
-  }
-*/
-}
-
-void CNWClient::SendPlayerHealth()
-{
-/*
-  if (m_HasNetwork)
-  {
-    CLog::Log(LOGDEBUG, "**NW** - CNWClient::SendPlayerHealth");
-    // date=2014-10-03 06:25:30-0800
-    // uptime=0 days 5 hours 22 minutes
-    //
-    // function=playerHealth&id=8&date=2014-10-03+06%3A25%3A30-0800&uptime=0+days+5+hours+22+minutes&disk_used=63GB&disk_free=395GB&smart_status=Disks+OK&format=xml&security=1538c84eef34e81f6cbe807f10095fa7&apiKey=cFpN1RnsW9YulGb2Vhvy
-    std::string function = "function=playerHealth&id=" + m_PlayerInfo.strPlayerID;
-
-    std::string date = CDateTime::GetCurrentDateTime().GetAsDBDateTime();
-    CDateTimeSpan bias = CDateTime::GetTimezoneBias();
-    function += "&date=" + date + StringUtils::Format("-%02d00", bias.GetHours());
-    function += "&uptime=" + GetSystemUpTime();
-    function += "&disk_used=" + GetDiskUsed(m_strHome);
-    function += "&disk_free=" + GetDiskFree(m_strHome);
-    function += "&smart_status=Disks OK";
-
-    StringUtils::Replace(function, ' ', '+');
-    std::string xmlEncoded = EncodeExtra(function);
-    std::string url = FormatUrl(m_PlayerInfo, xmlEncoded, "&format=xml");
-    XFILE::CCurlFile http;
-    std::string strXML;
-    http.Get(url, strXML);
-
-    TiXmlDocument xml;
-    xml.Parse(strXML.c_str());
-
-    TiXmlElement* rootXmlNode = xml.RootElement();
-    if (rootXmlNode)
-    {
-      TiXmlElement* responseNode = rootXmlNode->FirstChildElement("response");
-      if (responseNode)
-      {
-        std::string result; // 'Operation Successful'
-        XMLUtils::GetString(responseNode, "result", result);
-        CLog::Log(LOGDEBUG, "**NW** - CNWClient::SendPlayerHealth - Response '%s'", result.c_str());
-      }
-    }
-  }
-*/
-}
-
-void CNWClient::SendNetworkInfo()
-{
-/*
-  CLog::Log(LOGDEBUG, "**NW** - CNWClient::SendNetworkInfo()");
-  if (m_HasNetwork)
-  {
-    // send networking information to the server.
-    CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
-    if (iface)
-    {
-      // yes, player-Edit really means send network info
-      std::string function = "function=player-Edit&id=" + m_PlayerInfo.strPlayerID;
-      function += "&network_ip_address=" + iface->GetCurrentIPAddress();
-      function += "&network_default_gateway=" + iface->GetCurrentDefaultGateway();
-
-      std::vector<std::string> nss = g_application.getNetwork().GetNameServers();
-      if (nss.size() >= 1)
-        function += "&network_dns_server_1=" + nss[0];
-      else
-        function += "&network_dns_server_1=0.0.0.0";
-      if (nss.size() >= 2)
-        function += "&network_dns_server_2=" + nss[1];
-      else
-        function += "&network_dns_server_2=0.0.0.0";
-      function += "&network_subnet_mask=" + iface->GetCurrentNetmask();
-      function += "&network_ethernet_mac_address=" + iface->GetMacAddress();
-
-      std::vector<CNetworkInterface*> ifaces = g_application.getNetwork().GetInterfaceList();
-      for (size_t i = 0; i < ifaces.size(); i++)
-      {
-        if (ifaces[i]->IsWireless())
-        {
-          function += "&network_wireless_mac_address=" + ifaces[i]->GetMacAddress();
-          break;
-        }
-      }
-      if (function.find("network_wireless_mac_address") == std::string::npos)
-        function += "&network_wireless_mac_address=00:00:00:00:00:00";
-
-      // make it network pretty
-      std::string xmlEncoded = EncodeExtra(function);
-      std::string url = FormatUrl(m_PlayerInfo, xmlEncoded, "&format=xml");
-      XFILE::CCurlFile http;
-      std::string strXML;
-      http.Get(url, strXML);
-
-      TiXmlDocument xml;
-      xml.Parse(strXML.c_str());
-
-      TiXmlElement* rootXmlNode = xml.RootElement();
-      if (rootXmlNode)
-      {
-        TiXmlElement* responseNode = rootXmlNode->FirstChildElement("response");
-        if (responseNode)
-        {
-          std::string result; // 'Operation Successful'
-          XMLUtils::GetString(responseNode, "result", result);
-          CLog::Log(LOGDEBUG, "**NW** - CNWClient::SendNetworkInfo - Response '%s'", result.c_str());
-        }
-      }
-    }
-  }
-*/
-}
-
-void CNWClient::SendPlayerLog()
-{
-  // fetch xbmc.log and push it up
-}
-
 void CNWClient::GetActions()
 {
   if (m_HasNetwork)
   {
     TVAPI_Actions actions;
-    actions.apiKey = m_activate.apiKey;
-    actions.apiSecret = m_activate.apiSecret;
+    actions.apiKey = m_PlayerInfo.apiKey;
+    actions.apiSecret = m_PlayerInfo.apiSecret;
     if (TVAPI_GetActionQueue(actions))
     {
       for (auto action: actions.actions)
@@ -655,8 +454,8 @@ void CNWClient::GetActions()
         if (action.action == kTVAPI_ActionHealth)
         {
           TVAPI_HealthReport health;
-          health.apiKey = m_activate.apiKey;
-          health.apiSecret = m_activate.apiSecret;
+          health.apiKey = m_PlayerInfo.apiKey;
+          health.apiSecret = m_PlayerInfo.apiSecret;
           health.date = CDateTime::GetCurrentDateTime().GetAsDBDateTime();
           health.uptime = GetSystemUpTime();
           health.disk_used = GetDiskUsed("/");
@@ -667,25 +466,23 @@ void CNWClient::GetActions()
         }
         else if (action.action == kTVAPI_ActionDownloaded)
         {
-          //CSingleLock lock(m_reportLock);
-          //SendFilesDownloaded();
-          //ClearAction(actions, action.id);
+          SendFilesDownloaded();
+          ClearAction(actions, action.id);
         }
         else if (action.action == kTVAPI_ActionFilePlayed)
         {
-          //CSingleLock lock(m_reportLock);
-          //SendFilesPlayed();
-          //ClearAction(actions, action.id);
+          SendFilesPlayed();
+          ClearAction(actions, action.id);
         }
         else if (action.action == kTVAPI_ActionPlay)
         {
-          //m_Player->Play();
-          //ClearAction(actions, action.id);
+          m_Player->Play();
+          ClearAction(actions, action.id);
         }
         else if (action.action == kTVAPI_ActionStop)
         {
-          //m_Player->StopPlaying();
-          //ClearAction(actions, action.id);
+          m_Player->StopPlaying();
+          ClearAction(actions, action.id);
         }
         else if (action.action == kTVAPI_ActionRestart)
         {
@@ -712,8 +509,8 @@ void CNWClient::ClearAction(TVAPI_Actions &actions, std::string id)
       if (action.id == id)
       {
         TVAPI_ActionStatus actionStatus;
-        actionStatus.apiKey = m_activate.apiKey;
-        actionStatus.apiSecret = m_activate.apiSecret;
+        actionStatus.apiKey = m_PlayerInfo.apiKey;
+        actionStatus.apiSecret = m_PlayerInfo.apiSecret;
         actionStatus.id = action.id;
         actionStatus.status = kTVAPI_ActionStatusCompleted;
         TVAPI_UpdateActionStatus(actionStatus);
@@ -721,6 +518,215 @@ void CNWClient::ClearAction(TVAPI_Actions &actions, std::string id)
       }
     }
   }
+}
+
+void CNWClient::SendFilesPlayed()
+{
+  if (m_HasNetwork)
+  {
+    std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_playback.log";
+    XFILE::CFile file;
+    XFILE::auto_buffer buffer;
+
+    CSingleLock lock(m_reportLock);
+    if (XFILE::CFile::Exists(filename))
+    {
+      file.LoadFile(filename, buffer);
+      std::string charbuffer(buffer.get());
+
+      TVAPI_Files playedFiles;
+      playedFiles.apiKey = m_PlayerInfo.apiKey;
+      playedFiles.apiSecret = m_PlayerInfo.apiSecret;
+
+      std::vector<std::string> lines = StringUtils::Split(charbuffer, '\n');
+      for (auto line: lines)
+      {
+        std::vector<std::string> items = StringUtils::Split(line, ',');
+        if (items.size() == 2)
+        {
+          TVAPI_File playedFile;
+          playedFile.date = items[0];
+          playedFile.id = items[1];
+          playedFiles.files.push_back(playedFile);
+        }
+      }
+
+      if (!playedFiles.files.empty())
+      {
+        if (TVAPI_ReportFilesPlayed(playedFiles, m_PlayerInfo.serial_number))
+          XFILE::CFile::Delete(filename);
+      }
+    }
+  }
+}
+
+void CNWClient::LogFilesPlayed(std::string assetID)
+{
+//  date,assetID
+//  2015-02-05 12:01:40-0500,58350
+//  2015-02-05 12:05:40-0500,57116
+
+  std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_playback.log";
+  XFILE::CFile file;
+  XFILE::auto_buffer buffer;
+
+  CSingleLock lock(m_reportLock);
+  if (XFILE::CFile::Exists(filename))
+  {
+    file.LoadFile(filename, buffer);
+    file.OpenForWrite(filename);
+    file.Write(buffer.get(), buffer.size());
+  }
+  else
+  {
+    file.OpenForWrite(filename);
+    file.Write(buffer.get(), buffer.size());
+  }
+  CDateTime time = CDateTime::GetCurrentDateTime();
+  std::string strData = StringUtils::Format("%s,%s\n",
+    time.GetAsDBDateTime().c_str(),
+    assetID.c_str()
+  );
+  file.Write(strData.c_str(), strData.size());
+  file.Close();
+}
+
+void CNWClient::SendFilesDownloaded()
+{
+  if (m_HasNetwork)
+  {
+    std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_download.log";
+    XFILE::CFile file;
+    XFILE::auto_buffer buffer;
+
+    CSingleLock lock(m_reportLock);
+    if (XFILE::CFile::Exists(filename))
+    {
+      file.LoadFile(filename, buffer);
+      std::string charbuffer(buffer.get());
+
+      TVAPI_Files downloadedFiles;
+      downloadedFiles.apiKey = m_PlayerInfo.apiKey;
+      downloadedFiles.apiSecret = m_PlayerInfo.apiSecret;
+
+      std::vector<std::string> lines = StringUtils::Split(charbuffer, '\n');
+      for (auto line: lines)
+      {
+        std::vector<std::string> items = StringUtils::Split(line, ',');
+        if (items.size() == 2)
+        {
+          TVAPI_File downloadedFile;
+          downloadedFile.date = items[0];
+          downloadedFile.id = items[1];
+          downloadedFiles.files.push_back(downloadedFile);
+        }
+      }
+
+      if (!downloadedFiles.files.empty())
+      {
+        if (TVAPI_ReportFilesDeleted(downloadedFiles))
+          XFILE::CFile::Delete(filename);
+      }
+    }
+  }
+}
+
+void CNWClient::LogFilesDownLoaded(std::string assetID)
+{
+  //  date,assetID
+  //  2015-02-05 12:01:40-0500,58350
+  //  2015-02-05 12:05:40-0500,57116
+  std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_download.log";
+  XFILE::CFile file;
+  XFILE::auto_buffer buffer;
+
+  CSingleLock lock(m_reportLock);
+  if (XFILE::CFile::Exists(filename))
+  {
+    file.LoadFile(filename, buffer);
+    file.OpenForWrite(filename);
+    file.Write(buffer.get(), buffer.size());
+  }
+  else
+  {
+    file.OpenForWrite(filename);
+    file.Write(buffer.get(), buffer.size());
+  }
+
+  CDateTime time = CDateTime::GetCurrentDateTime();
+  std::string strData = StringUtils::Format("%s,%s\n",
+    time.GetAsDBDateTime().c_str(),
+    assetID.c_str()
+  );
+  file.Write(strData.c_str(), strData.size());
+  file.Close();
+}
+
+bool CNWClient::SendPlayerStatus(const std::string status)
+{
+  m_PlayerInfo.status = status;
+
+  if (m_HasNetwork)
+  {
+    TVAPI_MachineUpdate machineUpdate;
+    machineUpdate.apiKey = m_PlayerInfo.apiKey;
+    machineUpdate.apiSecret = m_PlayerInfo.apiSecret;
+    machineUpdate.playlist_id = m_PlayerInfo.id;
+    machineUpdate.machine_name = m_PlayerInfo.name;
+    machineUpdate.description = m_PlayerInfo.description;
+    machineUpdate.serial_number = m_PlayerInfo.serial_number;
+    machineUpdate.warranty_number = m_PlayerInfo.warranty_number;
+    machineUpdate.macaddress = m_PlayerInfo.macaddress;
+    machineUpdate.macaddress_wireless = m_PlayerInfo.macaddress_wireless;
+    machineUpdate.vendor = m_PlayerInfo.vendor;
+    machineUpdate.hardware_version = m_PlayerInfo.hardware_version;
+    machineUpdate.timezone = m_PlayerInfo.timezone;
+    machineUpdate.status = m_PlayerInfo.status;
+    machineUpdate.allow_new_content = m_PlayerInfo.allow_new_content;
+    machineUpdate.allow_software_update = m_PlayerInfo.allow_software_update;
+    machineUpdate.update_interval = m_PlayerInfo.update_interval;
+    machineUpdate.update_time = m_PlayerInfo.update_time;
+    return TVAPI_UpdateMachineInfo(machineUpdate);
+  }
+
+  return true;
+}
+
+void CNWClient::InitializeInternalsFromPlayer()
+{
+  if (!m_PlayerInfo.update_time.empty() && !m_PlayerInfo.update_interval.empty())
+  {
+    // "update_interval":"86400" or "daily","update_time":"24:00"
+    CDateTime time = CDateTime::GetCurrentDateTime();
+    if (m_PlayerInfo.update_interval == "daily")
+    {
+      int hours, minutes;
+      sscanf(m_PlayerInfo.update_time.c_str(),"%d:%d", &hours, &minutes);
+      m_NextUpdateTime.SetDateTime(time.GetYear(), time.GetMonth(), time.GetDay(), hours, minutes, 0);
+
+      // next update is 24 hours from m_NextUpdateTime
+      m_NextUpdateInterval.SetDateTimeSpan(0, 24, 0, 0);
+    }
+    else
+    {
+      // if update_interval is not "daily", it is set to minutes
+      int update_interval = atoi(m_PlayerInfo.update_interval.c_str());
+      // we add minutes to current time to trigger the next update
+      m_NextUpdateTime = time + CDateTimeSpan(0, 0, update_interval, 0);
+      m_NextUpdateInterval.SetDateTimeSpan(0, 0, update_interval, 0);
+    }
+
+    if (time >= m_NextUpdateTime)
+      m_NextUpdateTime += m_NextUpdateInterval;
+
+    CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
+    CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateInterval = %d days, %d hours, %d mins",
+      m_NextUpdateInterval.GetDays(), m_NextUpdateInterval.GetHours(), m_NextUpdateInterval.GetMinutes());
+
+  }
+
+  if (TVAPI_GetURLBASE().empty() && !m_PlayerInfo.tvapiURLBase.empty())
+    TVAPI_SetURLBASE(m_PlayerInfo.tvapiURLBase);
 }
 
 bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
@@ -815,30 +821,13 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
 
 void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded)
 {
-  CNWClient *manager = (CNWClient*)ctx;
-  manager->m_Player->MarkValidated(asset);
+  CNWClient *client = (CNWClient*)ctx;
+  client->m_Player->MarkValidated(asset);
   if (!g_application.m_pPlayer->IsPlaying())
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "validating", asset.name, 500, false);
 
   if (wasDownloaded)
-  {
-    CSingleLock lock(manager->m_reportLock);
-    LogDownLoad(manager->m_strHome, manager->m_PlayerInfo.id, std::to_string(asset.id));
-  }
-}
-
-void CNWClient::ReportManagerCallBack(const void *ctx, bool status)
-{
-  CLog::Log(LOGDEBUG, "**NW** - CNWClient::ReportManagerCallBack()" );
-  CNWClient *manager = (CNWClient*)ctx;
-  manager->SendPlayerHealth();
-}
-
-void CNWClient::UpdatePlayerInfo(const std::string strPlayerID, const std::string strApiKey,const std::string strSecretKey)
-{
-  m_PlayerInfo.id = strPlayerID;
-  m_PlayerInfo.apiKey = strApiKey;
-  m_PlayerInfo.apiSecret = strSecretKey;
+    client->LogFilesDownLoaded(std::to_string(asset.id));
 }
 
 bool CNWClient::DoAuthorize()
@@ -859,23 +848,22 @@ bool CNWClient::DoAuthorize()
 
   if (CGUIKeyboardFactory::ShowAndGetInput(code, CVariant{header}, false))
   {
-    TVAPI_Activate activate = m_activate;
+    TVAPI_Activate activate;
     activate.code = code;
+    activate.application_id = CDarwinUtils::GetHardwareUUID();
     if (TVAPI_DoActivate(activate))
     {
-      m_activate = activate;
-      m_status.apiKey = m_activate.apiKey;
-      m_status.apiSecret = m_activate.apiSecret;
-      return TVAPI_GetStatus(m_status);
+      m_PlayerInfo.apiKey = activate.apiKey;
+      m_PlayerInfo.apiSecret = activate.apiSecret;
     }
     else
     {
-      m_activate.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
-      m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
-      m_status.apiKey = m_activate.apiKey;
-      m_status.apiSecret = m_activate.apiSecret;
-      return TVAPI_GetStatus(m_status);
+      m_PlayerInfo.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
+      m_PlayerInfo.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
     }
+    m_status.apiKey = m_PlayerInfo.apiKey;
+    m_status.apiSecret = m_PlayerInfo.apiSecret;
+    return TVAPI_GetStatus(m_status);
   }
 
   return false;
@@ -883,10 +871,10 @@ bool CNWClient::DoAuthorize()
 
 bool CNWClient::IsAuthorized()
 {
-  if (!m_activate.apiKey.empty() && !m_activate.apiSecret.empty())
+  if (!m_PlayerInfo.apiKey.empty() && !m_PlayerInfo.apiSecret.empty())
   {
-    m_status.apiKey = m_activate.apiKey;
-    m_status.apiSecret = m_activate.apiSecret;
+    m_status.apiKey = m_PlayerInfo.apiKey;
+    m_status.apiSecret = m_PlayerInfo.apiSecret;
     return TVAPI_GetStatus(m_status);
   }
   else
