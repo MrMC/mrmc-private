@@ -358,9 +358,12 @@ std::string GetSystemUpTime()
 
 const std::string GetWiredMACAddress()
 {
-  CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
-  if (iface)
-    return iface->GetMacAddress();
+  std::vector<CNetworkInterface*> ifaces = g_application.getNetwork().GetInterfaceList();
+  for (size_t i = 0; i < ifaces.size(); i++)
+  {
+    if (!ifaces[i]->IsWireless())
+      return ifaces[i]->GetMacAddress();
+  }
 
   return "00:00:00:00:00:00";
 }
