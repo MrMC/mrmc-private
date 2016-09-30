@@ -39,13 +39,6 @@ namespace XFILE
     public:
       typedef enum
       {
-        GET = 0,
-        PUT,
-        POST,
-        DELETE,
-      } MethodType;
-      typedef enum
-      {
         PROXY_HTTP = 0,
         PROXY_SOCKS4,
         PROXY_SOCKS4A,
@@ -72,9 +65,9 @@ namespace XFILE
       virtual int IoControl(EIoControl request, void* param);
       virtual std::string GetContentCharset(void)                { return GetServerReportedCharset(); }
 
-      bool Delete(const std::string& strURL, const std::string& strPostData, std::string& strHTML);
+      bool Delete(const std::string& strURL, const std::string& strData, std::string& strHTML);
+      bool Put(const std::string& strURL, const std::string& strData, std::string& strHTML);
       bool Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML);
-      bool Put(const std::string& strURL, const std::string& strMethodData, std::string& strHTML);
       bool Get(const std::string& strURL, std::string& strHTML);
       bool ReadData(std::string& strHTML);
       bool Download(const std::string& strURL, const std::string& strFileName, uint32_t* pdwSize = NULL);
@@ -92,7 +85,7 @@ namespace XFILE
       void SetAcceptCharset(const std::string& charset)          { m_acceptCharset = charset; }
       void SetTimeout(int connecttimeout)                        { m_connecttimeout = connecttimeout; }
       void SetLowSpeedTime(int lowspeedtime)                     { m_lowspeedtime = lowspeedtime; }
-      void SetMethodData(const std::string& methoddata)          { m_methoddata = methoddata; }
+      void SetPostData(const std::string& postdata)              { m_postdata = postdata; }
       void SetReferer(const std::string& referer)                { m_referer = referer; }
       void SetCookie(const std::string& cookie)                  { m_cookie = cookie; }
       void SetMimeType(std::string mimetype)                     { SetRequestHeader("Content-Type", mimetype); }
@@ -184,7 +177,7 @@ namespace XFILE
       std::string     m_ftpauth;
       std::string     m_ftpport;
       std::string     m_binary;
-      std::string     m_methoddata;
+      std::string     m_postdata;
       std::string     m_referer;
       std::string     m_cookie;
       std::string     m_username;
@@ -201,7 +194,7 @@ namespace XFILE
       bool            m_seekable;
       bool            m_multisession;
       bool            m_skipshout;
-      MethodType      m_methodset;
+      bool            m_postdataset;
 
       CRingBuffer     m_buffer;           // our ringhold buffer
       char *          m_overflowBuffer;   // in the rare case we would overflow the above buffer

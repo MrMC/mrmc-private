@@ -432,8 +432,8 @@ CCurlFile::CCurlFile()
   m_ftpport = "";
   m_ftppasvip = false;
   m_bufferSize = 32768;
-  m_methoddata = "";
-  m_methodset = GET;
+  m_postdata = "";
+  m_postdataset = false;
   m_username = "";
   m_password = "";
   m_httpauth = "";
@@ -550,35 +550,11 @@ void CCurlFile::SetCommonOptions(CReadState* state)
   g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_NOPROGRESS, 0);
 
   // setup POST data if it is set (and it may be empty)
-  switch(m_methodset)
+  if (m_postdataset)
   {
-    default:
-    GET:
-      break;
-    PUT:
-      g_curlInterface.easy_setopt(h, CURLOPT_CUSTOMREQUEST, "PUT");
-      if (!m_methoddata.empty())
-      {
-        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_methoddata.length());
-        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_methoddata.c_str());
-      }
-      break;
-    POST:
-      g_curlInterface.easy_setopt(h, CURLOPT_POST, 1 );
-      if (!m_methoddata.empty())
-      {
-        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_methoddata.length());
-        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_methoddata.c_str());
-      }
-      break;
-    DELETE:
-      g_curlInterface.easy_setopt(h, CURLOPT_CUSTOMREQUEST, "DELETE");
-      if (!m_methoddata.empty())
-      {
-        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_methoddata.length());
-        g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_methoddata.c_str());
-      }
-      break;
+    g_curlInterface.easy_setopt(h, CURLOPT_POST, 1 );
+    g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDSIZE, m_postdata.length());
+    g_curlInterface.easy_setopt(h, CURLOPT_POSTFIELDS, m_postdata.c_str());
   }
 
   // setup Referer header if needed
@@ -882,31 +858,78 @@ void CCurlFile::SetStreamProxy(const std::string &proxy, ProxyType type)
   CLog::Log(LOGDEBUG, "Overriding proxy from URL parameter: %s, type %d", m_proxy.c_str(), proxyType2CUrlProxyType[m_proxytype]);
 }
 
-bool CCurlFile::Delete(const std::string& strURL, const std::string& strMethodData, std::string& strHTML)
+bool CCurlFile::Delete(const std::string& strURL, const std::string& strData, std::string& strHTML)
 {
-  m_methoddata = strMethodData;
-  m_methodset = DELETE;
-  return Service(strURL, strHTML);
+  CURL url2(strURL);
+  ParseAndCorrectUrl(url2);
+
+  assert(m_state->m_easyHandle == NULL);
+  g_curlInterface.easy_aquire(
+    url2.GetProtocol().c_str(), url2.GetHostName().c_str(), &m_state->m_easyHandle, NULL);
+
+  SetCommonOptions(m_state);
+  SetRequestHeaders(m_state);
+
+  g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_CUSTOMREQUEST, "DELETE");
+  // grrr, not in curl docs but use CURLOPT_POSTFIELDS for content body.
+  if (!strData.empty())
+    g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_POSTFIELDS, strData.c_str());
+
+  CURLcode result = g_curlInterface.easy_perform(m_state->m_easyHandle);
+  if (result != CURLE_OK)
+  {
+    long code;
+    if (g_curlInterface.easy_getinfo(m_state->m_easyHandle, CURLINFO_RESPONSE_CODE, &code) == CURLE_OK)
+      CLog::Log(LOGERROR, "CCurlFile::Delete - Failed: HTTP returned error %ld for %s", code, url2.GetRedacted().c_str());
+  }
+
+  g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_CUSTOMREQUEST, NULL);
+  g_curlInterface.easy_release(&m_state->m_easyHandle, NULL);
+
+  return result == CURLE_OK;
 }
 
-bool CCurlFile::Post(const std::string& strURL, const std::string& strMethodData, std::string& strHTML)
+bool CCurlFile::Put(const std::string& strURL, const std::string& strData, std::string& strHTML)
 {
-  m_methoddata = strMethodData;
-  m_methodset = POST;
-  return Service(strURL, strHTML);
+  CURL url2(strURL);
+  ParseAndCorrectUrl(url2);
+
+  assert(m_state->m_easyHandle == NULL);
+  g_curlInterface.easy_aquire(
+    url2.GetProtocol().c_str(), url2.GetHostName().c_str(), &m_state->m_easyHandle, NULL);
+
+  SetCommonOptions(m_state);
+  SetRequestHeaders(m_state);
+
+  g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_CUSTOMREQUEST, "PUT");
+  // grrr, not in curl docs but use CURLOPT_POSTFIELDS for content body.
+  if (!strData.empty())
+    g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_POSTFIELDS, strData.c_str());
+
+  CURLcode result = g_curlInterface.easy_perform(m_state->m_easyHandle);
+  if (result != CURLE_OK)
+  {
+    long code;
+    if (g_curlInterface.easy_getinfo(m_state->m_easyHandle, CURLINFO_RESPONSE_CODE, &code) == CURLE_OK)
+      CLog::Log(LOGERROR, "CCurlFile::Put - Failed: HTTP returned error %ld for %s", code, url2.GetRedacted().c_str());
+  }
+  g_curlInterface.easy_setopt(m_state->m_easyHandle, CURLOPT_CUSTOMREQUEST, NULL);
+  g_curlInterface.easy_release(&m_state->m_easyHandle, NULL);
+
+  return result == CURLE_OK;
 }
 
-bool CCurlFile::Put(const std::string& strURL, const std::string& strMethodData, std::string& strHTML)
+bool CCurlFile::Post(const std::string& strURL, const std::string& strPostData, std::string& strHTML)
 {
-  m_methoddata = strMethodData;
-  m_methodset = PUT;
+  m_postdata = strPostData;
+  m_postdataset = true;
   return Service(strURL, strHTML);
 }
 
 bool CCurlFile::Get(const std::string& strURL, std::string& strHTML)
 {
-  m_methoddata = "";
-  m_methodset = GET;
+  m_postdata = "";
+  m_postdataset = false;
   return Service(strURL, strHTML);
 }
 
