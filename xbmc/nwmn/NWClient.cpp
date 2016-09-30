@@ -184,14 +184,9 @@ void CNWClient::Startup()
   m_status.apiSecret = m_PlayerInfo.apiSecret;
   TVAPI_GetStatus(m_status);
 
-/*
-  TVAPI_Actions actions;
-  actions.apiKey = m_activate.apiKey;
-  actions.apiSecret = m_activate.apiSecret;
-  TVAPI_GetActionQueue(actions);
-*/
-
   SendPlayerStatus(kTVAPI_Status_Restarting);
+  if (!g_application.m_pPlayer->IsPlaying())
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Starting Client", "", 1000, false);
 
   Create();
   m_MediaManager->Create();
