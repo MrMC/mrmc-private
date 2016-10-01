@@ -33,6 +33,7 @@
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/SpecialProtocol.h"
+#include "guilib/GUIWindowManager.h"
 #include "interfaces/AnnouncementManager.h"
 #include "network/Network.h"
 #include "settings/Settings.h"
@@ -256,32 +257,7 @@ void CNWClient::Process()
     Sleep(100);
 
     if (m_Startup)
-    {
-      if (g_application.m_pPlayer->IsPlaying() && m_dlgProgress->IsDialogRunning())
-      {
-        m_Startup = false;
-        CloseStartUpDialog();
-        if (m_ClientCallBackFn)
-          (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
-        continue;
-      }
-
-      if (m_dlgProgress->IsCanceled())
-      {
-        m_Startup = false;
-        m_FullUpdate = false;
-        CloseStartUpDialog();
-
-        StopPlaying();
-        m_MediaManager->ClearDownloads();
-        m_MediaManager->ClearAssets();
-
-        if (m_ClientCallBackFn)
-          (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
-        SendPlayerStatus(kTVAPI_Status_On);
-        continue;
-      }
-    }
+      ManageStartupDialog();
 
     CDateTime time = CDateTime::GetCurrentDateTime();
     if (m_FullUpdate || time >= m_NextUpdateTime)
@@ -320,8 +296,7 @@ void CNWClient::Process()
 
 void CNWClient::ShowStartUpDialog()
 {
-  m_dlgProgress->SetHeading("MemberNetTV");
-  m_dlgProgress->SetLine(0, "Download and Verify media files");
+  m_dlgProgress->SetHeading("Download and Verify media files");
   m_dlgProgress->Open();
   m_dlgProgress->ShowProgressBar(true);
 }
@@ -329,6 +304,36 @@ void CNWClient::ShowStartUpDialog()
 void CNWClient::CloseStartUpDialog()
 {
    m_dlgProgress->Close();
+}
+
+bool CNWClient::ManageStartupDialog()
+{
+  // when starting up, two choices
+  // 1) dialog is up -> waiting for download, verify and start of playback
+  // 2) dialog was canceled -> return to main window and idle
+  if (g_application.m_pPlayer->IsPlaying() && m_dlgProgress->IsDialogRunning())
+  {
+    m_Startup = false;
+    CloseStartUpDialog();
+    if (m_ClientCallBackFn)
+      (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
+  }
+  else if (m_dlgProgress->IsCanceled())
+  {
+    m_Startup = false;
+    m_FullUpdate = false;
+    CloseStartUpDialog();
+
+    StopPlaying();
+    m_MediaManager->ClearDownloads();
+    m_MediaManager->ClearAssets();
+
+    if (m_ClientCallBackFn)
+      (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
+    SendPlayerStatus(kTVAPI_Status_On);
+  }
+
+  return m_Startup;
 }
 
 bool CNWClient::GetPlayerStatus()
@@ -409,8 +414,27 @@ bool CNWClient::GetProgamInfo()
 
       // send msg to GUIWindowMN to change to horz/vert
       // see m_ProgramInfo.layout
+      // make sure control id's match those in CGUIWindowMN.cpp
+      if (m_ProgramInfo.layout == "horizontal")
+      {
+        // if we are vertical, switch to horizontal
+        if (CSettings::GetInstance().GetBool(CSettings::MN_VERTICAL))
+        {
+          CGUIMessage msg(GUI_MSG_CLICKED, 90144, WINDOW_MEMBERNET);
+          g_windowManager.SendMessage(msg);
+        }
+      }
+      else if (m_ProgramInfo.layout == "vertical")
+      {
+        // if we are horizontal, switch to vertical
+        if (!CSettings::GetInstance().GetBool(CSettings::MN_VERTICAL))
+        {
+          CGUIMessage msg(GUI_MSG_CLICKED, 90134, WINDOW_MEMBERNET);
+          g_windowManager.SendMessage(msg);
+        }
+      }
 
-      // queue all assets belonging to this mediagroup
+      // queue all assets belonging to this playlist
       m_Player->QueueProgramInfo(m_ProgramInfo);
       for (auto group : m_ProgramInfo.groups)
         m_MediaManager->QueueAssetsForDownload(group.assets);
@@ -828,7 +852,7 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDow
   if (client->m_Player->IsPlaying())
   {
     client->m_Player->MarkValidated(asset);
-    if (client->m_dlgProgress->IsDialogRunning())
+    if (client->m_Startup && client->m_dlgProgress->IsDialogRunning())
     {
       int assetcount = client->m_MediaManager->GetLocalAssetCount();
       int downloadcount = client->m_MediaManager->GetDownloadCount();

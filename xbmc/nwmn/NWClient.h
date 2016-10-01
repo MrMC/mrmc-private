@@ -20,6 +20,7 @@
  */
 
 #include <queue>
+#include <atomic>
 #include <string>
 
 #include "NWTVAPI.h"
@@ -73,6 +74,7 @@ protected:
 
   void          ShowStartUpDialog();
   void          CloseStartUpDialog();
+  bool          ManageStartupDialog();
 
   bool          GetPlayerStatus();
   void          GetPlayerInfo();
@@ -93,7 +95,7 @@ protected:
   static void   AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded);
 
   std::string   m_strHome;
-  bool          m_Startup;
+  std::atomic<bool> m_Startup;
   bool          m_HasNetwork;
   bool          m_FullUpdate;
   CDateTime     m_NextUpdateTime;
