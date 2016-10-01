@@ -356,6 +356,9 @@ bool CNWClient::GetProgamInfo()
       CreatePlaylist(m_strHome, m_ProgramInfo, playlist, playlistItems);
       SaveLocalPlaylist(m_strHome, m_ProgramInfo);
 
+      // send msg to GUIWindowMN to change to horz/vert
+      // see m_ProgramInfo.layout
+
       // queue all assets belonging to this mediagroup
       m_Player->QueueProgramInfo(m_ProgramInfo);
       for (auto group : m_ProgramInfo.groups)
@@ -685,6 +688,7 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
   playList.name = playlist.name;
   playList.type = playlist.type;
   // format is "2013-08-22"
+  playList.layout = playlist.layout;
   playList.updated_date = playlist.updated_date;
   playList.groups.clear();
   playList.play_order.clear();
@@ -792,7 +796,7 @@ bool CNWClient::DoAuthorize()
 //m_activate.code = "HPPALSRK/A";
 
   std::string code = "";
-  const std::string header = "Enter Authorization Code";
+  const std::string header = "Enter Activation Code";
 
   if (CGUIKeyboardFactory::ShowAndGetInput(code, CVariant{header}, false))
   {

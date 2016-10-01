@@ -216,7 +216,7 @@ typedef struct TVAPI_PlaylistInfo {
   std::string name;
   std::string type;
   std::string updated_date;
-  std::string layout;
+  std::string layout;  // horizontal or vertical
   std::string member_id;
   std::string member_name;
   std::string nmg_managed;

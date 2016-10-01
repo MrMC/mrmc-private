@@ -240,6 +240,8 @@ bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
   params["update_time"] = machineUpdate.name;
   */
   params["status"] = machineUpdate.status;
+  params["macaddress"] = machineUpdate.macaddress;
+  params["mac_address_wireless"] = machineUpdate.macaddress_wireless;
 
   std::string jsonBody = CJSONVariantWriter::Write(params, false);
   std::string strResponse;

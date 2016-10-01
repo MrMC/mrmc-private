@@ -100,6 +100,7 @@ typedef struct NWPlaylist {
   std::string name;
   std::string type;
   std::string video_format;
+  std::string layout;
   std::string updated_date;
   std::vector<int> play_order;
   std::vector<NWGroup> groups;

@@ -131,6 +131,7 @@ bool LoadLocalPlaylist(std::string home, NWPlaylist &playList)
   XMLUtils::GetString(rootElement, "name", playList.name);
   XMLUtils::GetString(rootElement, "type", playList.type);
   XMLUtils::GetString(rootElement, "video_format", playList.video_format);
+  XMLUtils::GetString(rootElement, "layout", playList.layout);
   XMLUtils::GetString(rootElement, "updated_date", playList.updated_date);
 
   std::string play_order;
@@ -208,6 +209,7 @@ bool SaveLocalPlaylist(std::string home, const NWPlaylist &playList)
     XMLUtils::SetString(rootNode, "name", playList.name);
     XMLUtils::SetString(rootNode, "type", playList.type);
     XMLUtils::SetString(rootNode, "video_format", playList.video_format);
+    XMLUtils::SetString(rootNode, "layout", playList.layout);
     XMLUtils::SetString(rootNode, "updated_date", playList.updated_date);
     std::string play_order;
     for (auto order: playList.play_order)
