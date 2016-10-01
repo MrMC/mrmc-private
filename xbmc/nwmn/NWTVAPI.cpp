@@ -39,6 +39,7 @@ void TVAPI_SetURLBASE(std::string urlbase)
   // the code expects a trailing slash
   URIUtils::AddSlashAtEnd(urlbase);
   TVAPI_URLBASE = urlbase;
+  CLog::Log(LOGDEBUG, "TVAPI_SetURLBASE %s", TVAPI_URLBASE.c_str());
 }
 
 bool TVAPI_DoActivate(TVAPI_Activate &activate)
@@ -47,10 +48,13 @@ bool TVAPI_DoActivate(TVAPI_Activate &activate)
   curlfile.SetTimeout(10);
 
   CURL curl(TVAPI_URLBASE + "activate");
-  curl.SetProtocolOption("seekable", "0");
-  curl.SetProtocolOption("auth", "basic");
+  curl.SetProtocolOption("Cache-Control", "no-cache");
+  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
+
   curl.SetOption("code", activate.code);
   curl.SetOption("application_id", activate.application_id);
+  CLog::Log(LOGDEBUG, "TVAPI_DoActivate %s", curl.Get().c_str());
+
   std::string strResponse;
   if (curlfile.Post(curl.Get(), "", strResponse))
   {
@@ -70,6 +74,7 @@ bool TVAPI_DoActivate(TVAPI_Activate &activate)
       return true;
     }
   }
+
   return false;
 }
 
@@ -516,20 +521,20 @@ bool TVAPI_ReportHealth(TVAPI_HealthReport &health)
   CURL curl(TVAPI_URLBASE + "health");
   curl.SetProtocolOption("seekable", "0");
   curl.SetProtocolOption("auth", "basic");
-  curl.SetProtocolOption("Content-Type", "application/json");
+  curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
   curl.SetUserName(health.apiKey);
   curl.SetPassword(health.apiSecret);
 
-  CVariant params;
-  params["date"] = health.date;
-  params["uptime"] = health.uptime;
-  params["disk_used"] = health.disk_used;
-  params["disk_free"] = health.disk_free;
-  params["smart_status"] = health.smart_status;
+  // parameters
+  std::string params;
+  params = "date=" + health.date;
+  params += "&uptime=" + health.uptime;
+  params += "&disk_used=" + health.disk_used;
+  params += "&disk_free=" + health.disk_free;
+  params += "&smart_status=" + health.smart_status;
 
-  std::string jsonBody = CJSONVariantWriter::Write(params, false);
   std::string strResponse;
-  if (curlfile.Post(curl.Get(), "", strResponse))
+  if (curlfile.Post(curl.Get(), params, strResponse))
   {
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_ReportHealth %s", strResponse.c_str());

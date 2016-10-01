@@ -345,7 +345,7 @@ bool CNWClient::GetProgamInfo()
     playlist.apiSecret = m_PlayerInfo.apiSecret;
     TVAPI_GetPlaylist(playlist, m_PlayerInfo.playlist_id);
 
-    if (m_ProgramInfo.updated_date != playlist.updated_date)
+    if (m_FullUpdate || m_ProgramInfo.updated_date != playlist.updated_date)
     {
       TVAPI_PlaylistItems playlistItems;
       playlistItems.apiKey = m_PlayerInfo.apiKey;
@@ -371,15 +371,16 @@ bool CNWClient::GetProgamInfo()
       std::string updated_date = m_ProgramInfo.updated_date;
       if (LoadLocalPlaylist(m_strHome, m_ProgramInfo))
       {
-        if (m_ProgramInfo.updated_date != updated_date)
+        if (m_FullUpdate || m_ProgramInfo.updated_date != updated_date)
         {
           // queue all assets belonging to this mediagroup
           m_Player->QueueProgramInfo(m_ProgramInfo);
           for (auto group : m_ProgramInfo.groups)
             m_MediaManager->QueueAssetsForDownload(group.assets);
-          rtn = true;
         }
       }
+      // if we are off-line, always return true so m_FullUpdate will get set right
+      rtn = true;
     }
   }
 
@@ -733,7 +734,7 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
               asset.available_from.SetFromDBDateTime(item.availability_from);
               asset.video_basename = URIUtils::GetFileName(asset.video_url);
               std::string video_extension = URIUtils::GetExtension(asset.video_url);
-              std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std::to_string(asset.id) + video_extension;
+              std::string localpath = kNWClient_DownloadVideoPath + std::to_string(asset.id) + video_extension;
               asset.video_localpath = URIUtils::AddFileToFolder(home, localpath);
               break;
             }
@@ -802,17 +803,14 @@ bool CNWClient::DoAuthorize()
     {
       m_PlayerInfo.apiKey = activate.apiKey;
       m_PlayerInfo.apiSecret = activate.apiSecret;
+      m_status.apiKey = m_PlayerInfo.apiKey;
+      m_status.apiSecret = m_PlayerInfo.apiSecret;
+      SaveLocalPlayer(m_strHome, m_PlayerInfo);
+      return TVAPI_GetStatus(m_status);
     }
-    else
-    {
-      m_PlayerInfo.apiKey = "gMFQKKYS/Ib3Kyo/2oMA";
-      m_PlayerInfo.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
-    }
-    m_status.apiKey = m_PlayerInfo.apiKey;
-    m_status.apiSecret = m_PlayerInfo.apiSecret;
-    return TVAPI_GetStatus(m_status);
   }
 
+  CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Activation Failed/Cancelled", "", 4000, false);
   return false;
 }
 
