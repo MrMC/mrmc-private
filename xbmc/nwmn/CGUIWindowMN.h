@@ -40,7 +40,7 @@ public:
   virtual void  OnWindowLoaded();
   virtual void  OnWindowUnload();
 
-  static void   Refresh();
+  void          Refresh();
   void          DisableButtonsOnRefresh(bool disable);
 
 protected:

@@ -133,12 +133,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), PLAYLIST);
       OnMessage(msg);
-      if (!m_RefreshRunning)
-      {
-        m_RefreshRunning = true;
-        if (m_client)
-          m_client->PlayNext();
-      }
+      Refresh();
       return true;
     }
     else if (iControl == MEDIAUPDATE && m_client)
@@ -269,6 +264,12 @@ void CGUIWindowMN::OnWindowUnload()
 void CGUIWindowMN::Refresh()
 {
   CLog::Log(LOGDEBUG, "**NW** - CGUIWindowMN::Refresh()");
+  if (!m_RefreshRunning)
+  {
+    m_RefreshRunning = true;
+    if (m_client)
+      m_client->Startup();
+  }
 }
 
 void CGUIWindowMN::OnStartup()

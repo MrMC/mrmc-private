@@ -130,6 +130,8 @@ CNWClient::CNWClient()
   m_MediaManager->RegisterAssetUpdateCallBack(this, AssetUpdateCallBack);
   m_Player = new CNWPlayer();
 
+  m_dlgProgress = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
+
   CSingleLock lock(m_clientLock);
   m_this = this;
 
@@ -140,6 +142,7 @@ CNWClient::~CNWClient()
 {
   CSingleLock lock(m_clientLock);
   m_this = NULL;
+  m_dlgProgress = NULL;
   m_ClientCallBackFn = NULL;
   m_bStop = true;
   StopThread();
@@ -177,20 +180,27 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
 
 void CNWClient::Startup()
 {
+  CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Starting Client", "", 4000, false);
+
+  StopThread();
+  StopPlaying();
+  m_MediaManager->ClearDownloads();
+  m_MediaManager->ClearAssets();
+
   if (!IsAuthorized())
     while (!DoAuthorize());
 
-  m_status.apiKey = m_PlayerInfo.apiKey;
-  m_status.apiSecret = m_PlayerInfo.apiSecret;
-  TVAPI_GetStatus(m_status);
-
   SendPlayerStatus(kTVAPI_Status_Restarting);
-  if (!g_application.m_pPlayer->IsPlaying())
-    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Starting Client", "", 1000, false);
+
+  m_Startup = true;
+  m_FullUpdate = true;
+  ShowStartUpDialog();
 
   Create();
-  m_MediaManager->Create();
-  m_Player->Create();
+  if (!m_MediaManager->IsRunning())
+    m_MediaManager->Create();
+  if (!m_Player->IsRunning())
+    m_Player->Create();
 }
 
 void CNWClient::FullUpdate()
@@ -245,6 +255,34 @@ void CNWClient::Process()
   {
     Sleep(100);
 
+    if (m_Startup)
+    {
+      if (g_application.m_pPlayer->IsPlaying() && m_dlgProgress->IsDialogRunning())
+      {
+        m_Startup = false;
+        CloseStartUpDialog();
+        if (m_ClientCallBackFn)
+          (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
+        continue;
+      }
+
+      if (m_dlgProgress->IsCanceled())
+      {
+        m_Startup = false;
+        m_FullUpdate = false;
+        CloseStartUpDialog();
+
+        StopPlaying();
+        m_MediaManager->ClearDownloads();
+        m_MediaManager->ClearAssets();
+
+        if (m_ClientCallBackFn)
+          (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
+        SendPlayerStatus(kTVAPI_Status_On);
+        continue;
+      }
+    }
+
     CDateTime time = CDateTime::GetCurrentDateTime();
     if (m_FullUpdate || time >= m_NextUpdateTime)
     {
@@ -278,6 +316,19 @@ void CNWClient::Process()
   }
 
   CLog::Log(LOGDEBUG, "**NW** - CNWClient::Process Stopped");
+}
+
+void CNWClient::ShowStartUpDialog()
+{
+  m_dlgProgress->SetHeading("MemberNetTV");
+  m_dlgProgress->SetLine(0, "Download and Verify media files");
+  m_dlgProgress->Open();
+  m_dlgProgress->ShowProgressBar(true);
+}
+
+void CNWClient::CloseStartUpDialog()
+{
+   m_dlgProgress->Close();
 }
 
 bool CNWClient::GetPlayerStatus()
@@ -774,12 +825,22 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
 void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded)
 {
   CNWClient *client = (CNWClient*)ctx;
-  client->m_Player->MarkValidated(asset);
-  if (!g_application.m_pPlayer->IsPlaying())
-    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "validating", asset.name, 500, false);
+  if (client->m_Player->IsPlaying())
+  {
+    client->m_Player->MarkValidated(asset);
+    if (client->m_dlgProgress->IsDialogRunning())
+    {
+      int assetcount = client->m_MediaManager->GetLocalAssetCount();
+      int downloadcount = client->m_MediaManager->GetDownloadCount();
 
-  if (wasDownloaded)
-    client->LogFilesDownLoaded(std::to_string(asset.id));
+      client->m_dlgProgress->SetLine(1, StringUtils::Format("Checking: %s", asset.name.c_str()));
+      client->m_dlgProgress->SetLine(2, StringUtils::Format("Asset %i/%i", assetcount, downloadcount));
+      client->m_dlgProgress->SetPercentage(int(float(assetcount) / float(downloadcount) * 100));
+    }
+
+    if (wasDownloaded)
+      client->LogFilesDownLoaded(std::to_string(asset.id));
+  }
 }
 
 bool CNWClient::DoAuthorize()

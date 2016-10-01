@@ -28,6 +28,7 @@
 #include "interfaces/IAnnouncer.h"
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
+#include "dialogs/GUIDialogProgress.h"
 
 // ---------------------------------------------
 // ---------------------------------------------
@@ -70,6 +71,9 @@ public:
 protected:
   virtual void  Process();
 
+  void          ShowStartUpDialog();
+  void          CloseStartUpDialog();
+
   bool          GetPlayerStatus();
   void          GetPlayerInfo();
   bool          GetProgamInfo();
@@ -110,6 +114,7 @@ protected:
   
   CNWPlayer     *m_Player;
   CNWMediaManager *m_MediaManager;
+  CGUIDialogProgress *m_dlgProgress;
 
   CCriticalSection m_reportLock;
 
