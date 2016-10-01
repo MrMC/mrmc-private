@@ -247,7 +247,7 @@
 						<control type="button" id="90150">
 							<description>Authorize</description>
 							<posx>490</posx>
-							<posy>783</posy>
+							<posy>779</posy>
 							<label>Authorize</label>
 							<onleft>90102</onleft>
 							<onright>90101</onright>
@@ -258,7 +258,7 @@
 						<control type="button" id="90103">
 							<description>Media Content Update</description>
 							<posx>490</posx>
-							<posy>813</posy>
+							<posy>809</posy>
 							<label>Media Content Update</label>
 							<onleft>90102</onleft>
 							<onright>90101</onright>
@@ -269,7 +269,7 @@
 						<control type="button" id="90105">
 							<description>About</description>
 							<posx>490</posx>
-							<posy>843</posy>
+							<posy>839</posy>
 							<label>About</label>
 							<onleft>90102</onleft>
 							<onright>90101</onright>
@@ -280,7 +280,7 @@
 						<control type="button" id="90126">
 							<description>Network Test</description>
 							<posx>490</posx>
-							<posy>873</posy>
+							<posy>869</posy>
 							<label>Network Test</label>
 							<onleft>90102</onleft>
 							<onright>90101</onright>
@@ -291,7 +291,7 @@
 						<control type="button" id="90144">
 							<description>Set Horizontal</description>
 							<posx>490</posx>
-							<posy>913</posy>
+							<posy>899</posy>
 							<label>Horizontal</label>
 							<onleft>90102</onleft>
 							<onright>90101</onright>
