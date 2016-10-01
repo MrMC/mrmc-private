@@ -574,7 +574,7 @@ void CNWClient::SendFilesDownloaded()
 
       if (!downloadedFiles.files.empty())
       {
-        if (TVAPI_ReportFilesDeleted(downloadedFiles))
+        if (TVAPI_ReportFilesDownloaded(downloadedFiles))
           XFILE::CFile::Delete(filename);
       }
     }
