@@ -9,7 +9,7 @@
 	<controls>
 	 <control type="group">
   	  <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-  	    <effect type="slide" start="0,0" end="-410,100" time="0" />
+  	    <effect type="slide" start="0,0" end="-360,100" time="0" />
         <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
       </animation>
   		<control type="image">
@@ -17,16 +17,8 @@
   			<posy>0</posy>
   			<width>610</width>
   			<height>240</height>
-  			<texture border="40">MNSkinFiles/grey_top.png</texture>
+  			<texture border="40">MNSkinFiles/popupBack.png</texture>
   		</control>
-<!--   		<control type="image">
-  			<description>Dialog Header image</description>
-  			<posx>40</posx>
-  			<posy>16</posy>
-  			<width>530</width>
-  			<height>40</height>
-  			<texture>dialogheader.png</texture>
-  		</control> -->
   		<control type="label" id="1">
   			<description>fake heading label</description>
   			<posx>0</posx>
@@ -42,29 +34,12 @@
   			<posy>20</posy>
   			<width>530</width>
   			<height>30</height>
-  			<font>OnDemand24B</font>
+  			<font>Button20</font>
   			<label>$INFO[Control.GetLabel(1)] $INFO[System.Progressbar,- ,%]</label>
   			<align>center</align>
   			<aligny>center</aligny>
-  			<textcolor>blue</textcolor>
+  			<textcolor>white</textcolor>
   		</control>
-<!--   		<control type="button">
-  			<description>Close Window button</description>
-  			<posx>520</posx>
-  			<posy>15</posy>
-  			<width>64</width>
-  			<height>32</height>
-  			<label>-</label>
-  			<font>-</font>
-  			<onclick>PreviousMenu</onclick>
-  			<texturefocus>DialogCloseButton-focus.png</texturefocus>
-  			<texturenofocus>DialogCloseButton.png</texturenofocus>
-  			<onleft>10</onleft>
-  			<onright>10</onright>
-  			<onup>10</onup>
-  			<ondown>10</ondown>
-  			<visible>system.getbool(input.enablemouse)</visible>
-  		</control> -->
   		<control type="label" id="2">
   			<description>dialog line 1</description>
   			<posx>30</posx>
@@ -75,7 +50,7 @@
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
-  			<font>OnDemand20B</font>
+  			<font>Button20</font>
   		</control>
   		<control type="label" id="3">
   			<description>dialog line 2</description>
@@ -87,7 +62,7 @@
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
-  			<font>OnDemand20B</font>
+  			<font>Button20</font>
   		</control>
   		<control type="label" id="4">
   			<description>dialog line 3</description>
@@ -99,7 +74,7 @@
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
-  			<font>OnDemand20B</font>
+  			<font>Button20</font>
   		</control>
   		<control type="progress">
   			<description>Progressbar</description>
@@ -107,22 +82,18 @@
   			<posy>148</posy>
   			<width>550</width>
   			<height>16</height>
+  			<texturebg border="6,0,6,0">MNSkinFiles/OSDProgressBack.png</texturebg>
+			<midtexture border="6,0,6,0">MNSkinFiles/OSDProgressMid.png</midtexture>
   			<info>System.Progressbar</info>
   		</control>
   		<control type="button" id="10">
   			<description>Cancel button</description>
-  			<posx>205</posx>
+  			<include>MNButton</include>
+  			<posx>150</posx>
   			<posy>175</posy>
-  			<width>200</width>
+  			<width>150</width>
   			<height>40</height>
   			<label>222</label>
-  			<font>OnDemand16B</font>
-  			<textcolor>white</textcolor>
-        <focusedcolor>blue</focusedcolor>
-        <onfocus>-</onfocus>
-        <texturefocus>dialogheader.png</texturefocus>
-        <texturenofocus>dialogheader.png</texturenofocus>
-        <pulseonselect>true</pulseonselect>
   			<align>center</align>
   			<onleft>10</onleft>
   			<onright>10</onright>
