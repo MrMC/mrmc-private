@@ -41,6 +41,7 @@
 #include "guilib/LocalizeStrings.h"
 #include "input/ButtonTranslator.h"
 #include "input/InputManager.h"
+#include "interfaces/AnnouncementManager.h"
 #include "services/ServicesManager.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
@@ -266,14 +267,10 @@ bool CProfilesManager::LoadProfile(size_t index)
 
   CreateProfileFolders();
 
-  // check if we have set internal MYSQL settings and load
-  const CSetting *mysqlSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_MYSQL_ENABLED);
-  if (((CSettingBool*)mysqlSetting)->GetValue())
-  {
-    g_advancedSettings.setInternalMYSQL(((CSettingBool*)mysqlSetting)->GetValue(), false);
-  }
+  // check if we have set internal MYSQL settings and load, we will initialize databases there by setting that call to true
+  g_advancedSettings.setInternalMYSQL(CSettings::GetInstance().GetBool(CSettings::SETTING_MYSQL_ENABLED), true);
+
   
-  CDatabaseManager::GetInstance().Initialize();
   CButtonTranslator::GetInstance().Load(true);
 
   CInputManager::GetInstance().SetMouseEnabled(CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_ENABLEMOUSE));
