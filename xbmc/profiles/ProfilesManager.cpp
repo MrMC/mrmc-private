@@ -42,6 +42,7 @@
 #include "input/ButtonTranslator.h"
 #include "input/InputManager.h"
 #include "services/ServicesManager.h"
+#include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #if defined(HAS_DVD_DRIVE)
 #include "storage/DetectDVDType.h"
@@ -265,6 +266,13 @@ bool CProfilesManager::LoadProfile(size_t index)
 
   CreateProfileFolders();
 
+  // check if we have set internal MYSQL settings and load
+  const CSetting *mysqlSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_MYSQL_ENABLED);
+  if (((CSettingBool*)mysqlSetting)->GetValue())
+  {
+    g_advancedSettings.setInternalMYSQL(((CSettingBool*)mysqlSetting)->GetValue(), false);
+  }
+  
   CDatabaseManager::GetInstance().Initialize();
   CButtonTranslator::GetInstance().Load(true);
 
