@@ -222,23 +222,6 @@ bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
   curl.SetPassword(machineUpdate.apiSecret);
 
   CVariant params;
-  /*
-  params["playlist_id"] = machineUpdate.name;
-  params["name"] = machineUpdate.name;
-  params["description"] = machineUpdate.description;
-  params["serial_number"] = machineUpdate.serial_number;
-  params["warranty_number"] = machineUpdate.warranty_number;
-  params["mac_address"] = machineUpdate.macaddress;
-  params["mac_address_wireless"] = machineUpdate.macaddress_wireless;
-  params["vendor"] = machineUpdate.vendor;
-  params["hardware_version"] = machineUpdate.hardware_version;
-  params["timezone"] = machineUpdate.timezone;
-  params["status"] = machineUpdate.status;
-  params["allow_new_content"] = machineUpdate.allow_new_content;
-  params["allow_software"] = machineUpdate.allow_software_update;
-  params["update_interval"] = machineUpdate.update_interval;
-  params["update_time"] = machineUpdate.name;
-  */
   params["status"] = machineUpdate.status;
   params["macaddress"] = machineUpdate.macaddress;
   params["mac_address_wireless"] = machineUpdate.macaddress_wireless;

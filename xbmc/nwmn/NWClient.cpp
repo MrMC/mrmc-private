@@ -187,6 +187,7 @@ void CNWClient::Startup()
 
   StopThread();
   StopPlaying();
+  m_totalAssets = 0;
   m_MediaManager->ClearDownloads();
   m_MediaManager->ClearAssets();
 
@@ -280,7 +281,8 @@ void CNWClient::Process()
       if (GetProgamInfo())
       {
         m_FullUpdate = false;
-        m_Player->Play();
+        if (m_PlayerInfo.allow_async_player != "no")
+          m_Player->Play();
       }
 
       if (m_ClientCallBackFn)
@@ -311,29 +313,60 @@ void CNWClient::CloseStartUpDialog()
 
 bool CNWClient::ManageStartupDialog()
 {
-  // when starting up, two choices
-  // 1) dialog is up -> waiting for download, verify and start of playback
-  // 2) dialog was canceled -> return to main window and idle
-  if (g_application.m_pPlayer->IsPlaying() && m_dlgProgress->IsDialogRunning())
+  if (m_PlayerInfo.allow_async_player == "no")
   {
-    m_Startup = false;
-    CloseStartUpDialog();
-    if (m_ClientCallBackFn)
-      (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
+    if (m_dlgProgress->IsDialogRunning())
+    {
+      if (m_MediaManager->GetLocalAssetCount() > 0 && m_MediaManager->GetDownloadCount() == 0)
+      {
+        m_Startup = false;
+        CloseStartUpDialog();
+        m_Player->Play();
+        if (m_ClientCallBackFn)
+          (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
+      }
+    }
+    else if (m_dlgProgress->IsCanceled())
+    {
+      m_Startup = false;
+      m_FullUpdate = false;
+      CloseStartUpDialog();
+
+      StopPlaying();
+      m_MediaManager->ClearDownloads();
+      m_MediaManager->ClearAssets();
+
+      if (m_ClientCallBackFn)
+        (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
+      SendPlayerStatus(kTVAPI_Status_On);
+    }
   }
-  else if (m_dlgProgress->IsCanceled())
+  else
   {
-    m_Startup = false;
-    m_FullUpdate = false;
-    CloseStartUpDialog();
+    // when starting up, two choices
+    // 1) dialog is up -> waiting for download, verify and start of playback
+    // 2) dialog was canceled -> return to main window and idle
+    if (g_application.m_pPlayer->IsPlaying() && m_dlgProgress->IsDialogRunning())
+    {
+      m_Startup = false;
+      CloseStartUpDialog();
+      if (m_ClientCallBackFn)
+        (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
+    }
+    else if (m_dlgProgress->IsCanceled())
+    {
+      m_Startup = false;
+      m_FullUpdate = false;
+      CloseStartUpDialog();
 
-    StopPlaying();
-    m_MediaManager->ClearDownloads();
-    m_MediaManager->ClearAssets();
+      StopPlaying();
+      m_MediaManager->ClearDownloads();
+      m_MediaManager->ClearAssets();
 
-    if (m_ClientCallBackFn)
-      (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
-    SendPlayerStatus(kTVAPI_Status_On);
+      if (m_ClientCallBackFn)
+        (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
+      SendPlayerStatus(kTVAPI_Status_On);
+    }
   }
 
   return m_Startup;
@@ -368,6 +401,7 @@ void CNWClient::GetPlayerInfo()
 
     m_PlayerInfo.allow_new_content = machine.allow_new_content;
     m_PlayerInfo.allow_software_update = machine.allow_software_update;
+    m_PlayerInfo.allow_async_player = "no";
     m_PlayerInfo.status = machine.status;
     m_PlayerInfo.apiKey = machine.apiKey;
     m_PlayerInfo.apiSecret = machine.apiSecret;
@@ -432,8 +466,13 @@ bool CNWClient::GetProgamInfo()
 
       // queue all assets belonging to this playlist
       m_Player->QueueProgramInfo(m_ProgramInfo);
+      int total_assets = 0;
       for (auto group : m_ProgramInfo.groups)
+      {
+        total_assets += group.assets.size();
         m_MediaManager->QueueAssetsForDownload(group.assets);
+      }
+      m_totalAssets = total_assets;
 
       rtn = true;
     }
@@ -471,8 +510,13 @@ bool CNWClient::GetProgamInfo()
 
           // queue all assets belonging to this mediagroup
           m_Player->QueueProgramInfo(m_ProgramInfo);
+          int total_assets = 0;
           for (auto group : m_ProgramInfo.groups)
+          {
+            total_assets += group.assets.size();
             m_MediaManager->QueueAssetsForDownload(group.assets);
+          }
+          m_totalAssets = total_assets;
         }
       }
       // if we are off-line, always return true so m_FullUpdate will get set right
@@ -868,21 +912,19 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
 void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded)
 {
   CNWClient *client = (CNWClient*)ctx;
-  if (client->m_Player->IsPlaying())
+  client->m_Player->MarkValidated(asset);
+  if (wasDownloaded)
+    client->LogFilesDownLoaded(std::to_string(asset.id));
+
+  if (client->m_Player->IsPlaying() || client->m_PlayerInfo.allow_async_player == "no")
   {
-    client->m_Player->MarkValidated(asset);
     if (client->m_Startup && client->m_dlgProgress->IsDialogRunning())
     {
       int assetcount = client->m_MediaManager->GetLocalAssetCount();
-      int downloadcount = client->m_MediaManager->GetDownloadCount();
-
       client->m_dlgProgress->SetLine(1, StringUtils::Format("Checking: %s", asset.name.c_str()));
-      client->m_dlgProgress->SetLine(2, StringUtils::Format("Asset %i/%i", assetcount, downloadcount));
-      client->m_dlgProgress->SetPercentage(int(float(assetcount) / float(downloadcount) * 100));
+      client->m_dlgProgress->SetLine(2, StringUtils::Format("Asset %i/%i", assetcount, client->m_totalAssets));
+      client->m_dlgProgress->SetPercentage(int(float(assetcount) / float(client->m_totalAssets) * 100));
     }
-
-    if (wasDownloaded)
-      client->LogFilesDownLoaded(std::to_string(asset.id));
   }
 }
 

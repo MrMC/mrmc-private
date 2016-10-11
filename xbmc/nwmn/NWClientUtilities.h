@@ -59,6 +59,7 @@ typedef struct NWPlayerInfo {
   std::string update_interval;
   std::string allow_new_content;
   std::string allow_software_update;
+  std::string allow_async_player;
   std::string status;
   std::string apiKey;
   std::string apiSecret;

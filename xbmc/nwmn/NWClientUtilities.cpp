@@ -67,6 +67,7 @@ bool LoadLocalPlayer(std::string home, NWPlayerInfo &playerInfo)
   XMLUtils::GetString(rootElement, "update_interval", playerInfo.update_interval);
   XMLUtils::GetString(rootElement, "allow_new_content", playerInfo.allow_new_content);
   XMLUtils::GetString(rootElement, "allow_software_update", playerInfo.allow_software_update);
+  XMLUtils::GetString(rootElement, "allow_async_player", playerInfo.allow_async_player);
   XMLUtils::GetString(rootElement, "status", playerInfo.status);
   XMLUtils::GetString(rootElement, "apiKey", playerInfo.apiKey);
   XMLUtils::GetString(rootElement, "apiSecret", playerInfo.apiSecret);
@@ -101,6 +102,7 @@ bool SaveLocalPlayer(std::string home, const NWPlayerInfo &playerInfo)
     XMLUtils::SetString(rootNode, "update_interval", playerInfo.update_interval);
     XMLUtils::SetString(rootNode, "allow_new_content", playerInfo.allow_new_content);
     XMLUtils::SetString(rootNode, "allow_software_update", playerInfo.allow_software_update);
+    XMLUtils::SetString(rootNode, "allow_async_player", playerInfo.allow_async_player);
     XMLUtils::SetString(rootNode, "status", playerInfo.status);
     XMLUtils::SetString(rootNode, "apiKey", playerInfo.apiKey);
     XMLUtils::SetString(rootNode, "apiSecret", playerInfo.apiSecret);

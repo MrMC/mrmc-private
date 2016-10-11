@@ -97,6 +97,7 @@ protected:
   std::atomic<bool> m_Startup;
   bool          m_HasNetwork;
   bool          m_FullUpdate;
+  int           m_totalAssets;
   CDateTime     m_NextUpdateTime;
   CDateTimeSpan m_NextUpdateInterval;
   
