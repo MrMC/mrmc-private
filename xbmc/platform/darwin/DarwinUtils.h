@@ -65,6 +65,8 @@ public:
   static std::string GetAudioRoute();
   static void        DumpAudioDescriptions(const std::string& why);
   static std::string GetHardwareUUID();
+  static std::string GetHardwareSerialNumber(void);
+
 
 };
 

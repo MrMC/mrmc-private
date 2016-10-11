@@ -885,4 +885,40 @@ std::string CDarwinUtils::GetHardwareUUID()
   return uuid;
 }
 
+std::string CDarwinUtils::GetHardwareSerialNumber(void)
+{
+  static std::string serialNumber = "314159";
+  if (serialNumber == "314159")
+  {
+#if defined(TARGET_DARWIN_OSX)
+    CCocoaAutoPool pool;
+
+    const CFMutableDictionaryRef matchExpDev = IOServiceMatching("IOPlatformExpertDevice");
+    if (matchExpDev)
+    {
+      const io_service_t servExpDev = IOServiceGetMatchingService(kIOMasterPortDefault, matchExpDev);
+      if (servExpDev)
+      {
+        CFTypeRef serialnumber = IORegistryEntryCreateCFProperty(servExpDev, CFSTR("IOPlatformSerialNumber"), kCFAllocatorDefault, 0);
+        if (serialnumber)
+        {
+          if (CFGetTypeID(serialnumber) == CFStringGetTypeID())
+            serialNumber = (const char*)[[NSString stringWithString:(NSString *)serialnumber] UTF8String];
+          else if (CFGetTypeID(serialnumber) == CFDataGetTypeID())
+          {
+            serialNumber.assign((const char*)CFDataGetBytePtr((CFDataRef)serialnumber), CFDataGetLength((CFDataRef)serialnumber));
+            if (!serialNumber.empty() && serialNumber[serialNumber.length() - 1] == 0)
+              serialNumber.erase(serialNumber.length() - 1); // remove extra null at the end if any
+          }
+          CFRelease(serialnumber);
+        }
+      }
+      IOObjectRelease(servExpDev);
+    }
+#endif
+  }
+
+  return serialNumber;
+}
+
 #endif

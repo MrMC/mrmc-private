@@ -26,8 +26,8 @@
 
 // https://www.nationwidemember.com/tv-api-doc/
 
-//const std::string kTVAPI_URLBASE = "https://www.nationwidemember.com/tv-api/1/";
-const std::string kTVAPI_URLBASE = "http://test.nationwidemember.com/tv-api/1/";
+const std::string kTVAPI_URLBASE = "https://www.nationwidemember.com/tv-api/1/";
+//const std::string kTVAPI_URLBASE = "http://test.nationwidemember.com/tv-api/1/";
 
 // ---------------------------------------------
 // ---------------------------------------------
