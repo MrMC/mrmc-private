@@ -27,6 +27,9 @@
 #include "windowing/WindowingFactory.h"
 #include "log.h"
 
+#include "settings/SkinSettings.h"
+#include "settings/Settings.h"
+
 using namespace XFILE;
 
 CSplash::CSplash()
@@ -58,6 +61,8 @@ void CSplash::Show(const std::string& message)
   if (!m_image)
   {
     std::string splashImage = "special://home/media/Splash.png";
+    if (CSettings::GetInstance().GetBool(CSettings::MN_VERTICAL))
+      splashImage = "special://xbmc/media/SplashVertical.png";
     if (!XFILE::CFile::Exists(splashImage))
       splashImage = "special://xbmc/media/Splash.png";
 
