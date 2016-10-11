@@ -248,6 +248,7 @@ bool CDVDVideoCodecVDA::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
       return false;
     }
 
+    m_use_cvBufferRef = true;
     std::string rendervendor = g_Windowing.GetRenderVendor();
     StringUtils::ToLower(rendervendor);
     if (rendervendor.find("nvidia") != std::string::npos)
@@ -255,20 +256,20 @@ bool CDVDVideoCodecVDA::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
       // Nvidia gpu's are all powerful and work the way god intended
       m_decode_async = true;
       // The gods are liars, ignore the sirens for now.
-      m_use_cvBufferRef = false;
+      //m_use_cvBufferRef = false;
     }
     else if (rendervendor.find("intel") != std::string::npos)
     {
       // Intel gpu are borked when using cvBufferRef
       m_decode_async = true;
-      m_use_cvBufferRef = false;
+      //m_use_cvBufferRef = false;
     }
     else
     {
       // ATI gpu's are borked when using async decode
       m_decode_async = false;
       // They lie here too.
-      m_use_cvBufferRef = false;
+      //m_use_cvBufferRef = false;
     }
 
     if (!m_use_cvBufferRef)
