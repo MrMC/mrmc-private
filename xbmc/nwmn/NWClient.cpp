@@ -257,7 +257,7 @@ void CNWClient::Process()
 
   while (!m_bStop)
   {
-    Sleep(100);
+    Sleep(500);
 
     if (m_Startup)
       ManageStartupDialog();
@@ -315,7 +315,21 @@ bool CNWClient::ManageStartupDialog()
 {
   if (m_PlayerInfo.allow_async_player == "no")
   {
-    if (m_dlgProgress->IsDialogRunning())
+    if (m_dlgProgress->IsCanceled())
+    {
+      m_Startup = false;
+      m_FullUpdate = false;
+      CloseStartUpDialog();
+      
+      StopPlaying();
+      m_MediaManager->ClearDownloads();
+      m_MediaManager->ClearAssets();
+      
+      if (m_ClientCallBackFn)
+        (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
+      SendPlayerStatus(kTVAPI_Status_On);
+    }
+    else if (m_dlgProgress->IsDialogRunning())
     {
       if (m_MediaManager->GetLocalAssetCount() > 0 && m_MediaManager->GetDownloadCount() == 0)
       {
@@ -326,7 +340,13 @@ bool CNWClient::ManageStartupDialog()
           (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
       }
     }
-    else if (m_dlgProgress->IsCanceled())
+  }
+  else
+  {
+    // when starting up, two choices
+    // 1) dialog was canceled -> return to main window and idle
+    // 2) dialog is up -> waiting for download, verify and start of playback
+    if (m_dlgProgress->IsCanceled())
     {
       m_Startup = false;
       m_FullUpdate = false;
@@ -340,33 +360,14 @@ bool CNWClient::ManageStartupDialog()
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
       SendPlayerStatus(kTVAPI_Status_On);
     }
-  }
-  else
-  {
-    // when starting up, two choices
-    // 1) dialog is up -> waiting for download, verify and start of playback
-    // 2) dialog was canceled -> return to main window and idle
-    if (g_application.m_pPlayer->IsPlaying() && m_dlgProgress->IsDialogRunning())
+    else if (g_application.m_pPlayer->IsPlaying() && m_dlgProgress->IsDialogRunning())
     {
       m_Startup = false;
       CloseStartUpDialog();
       if (m_ClientCallBackFn)
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
     }
-    else if (m_dlgProgress->IsCanceled())
-    {
-      m_Startup = false;
-      m_FullUpdate = false;
-      CloseStartUpDialog();
 
-      StopPlaying();
-      m_MediaManager->ClearDownloads();
-      m_MediaManager->ClearAssets();
-
-      if (m_ClientCallBackFn)
-        (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
-      SendPlayerStatus(kTVAPI_Status_On);
-    }
   }
 
   return m_Startup;
