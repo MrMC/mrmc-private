@@ -815,7 +815,7 @@ void CNWClient::InitializeInternalsFromPlayer()
 
   }
 
-  if (TVAPI_GetURLBASE().empty() && !m_PlayerInfo.tvapiURLBase.empty())
+  if (!m_PlayerInfo.tvapiURLBase.empty())
     TVAPI_SetURLBASE(m_PlayerInfo.tvapiURLBase);
 }
 
