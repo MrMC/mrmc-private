@@ -400,8 +400,8 @@ MainController *g_xbmcController;
         //  b) if not, let it pass to us.
         int windowID = g_windowManager.GetActiveWindow();
         int focusedwindowID = g_windowManager.GetFocusedWindow();
-        if ((windowID == WINDOW_HOME || windowID == WINDOW_DIALOG_MN || windowID == WINDOW_STARTUP_ANIM) &&
-            focusedwindowID != WINDOW_DIALOG_MN_DEMAND &&
+        if ((windowID == WINDOW_HOME || windowID == WINDOW_MEMBERNET || windowID == WINDOW_STARTUP_ANIM) &&
+            focusedwindowID != WINDOW_MEMBERNET_DEMAND &&
             focusedwindowID != WINDOW_DIALOG_FAVOURITES &&
             focusedwindowID != WINDOW_DIALOG_CONTEXT_MENU &&
             focusedwindowID != WINDOW_DIALOG_BUSY &&
@@ -409,7 +409,7 @@ MainController *g_xbmcController;
         {
           // About dialog has ID 90200,network test has ID 90145
           // if MN Home has that visible we shoudl not get out to main ATV screen
-          CGUIWindow *pWindow = (CGUIWindow*)g_windowManager.GetWindow(WINDOW_DIALOG_MN);
+          CGUIWindow *pWindow = (CGUIWindow*)g_windowManager.GetWindow(WINDOW_MEMBERNET);
           handled = (BOOL)(pWindow->HasVisibleID(90200) || pWindow->HasVisibleID(90145));
         }
       }
