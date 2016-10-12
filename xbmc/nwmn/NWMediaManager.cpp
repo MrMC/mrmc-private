@@ -239,7 +239,8 @@ void CNWMediaManager::Process()
       {
         // download/save failed, just requeue
         CSingleLock lock(m_download_lock);
-        m_download.erase(m_download.begin());
+        if (m_download.size() > 0)
+          m_download.erase(m_download.begin());
       }
     }
   }
