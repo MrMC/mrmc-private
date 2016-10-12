@@ -126,6 +126,7 @@ CNWClient::CNWClient()
 
   m_HasNetwork = g_sysinfo.HasInternet();
 
+  TVAPI_SetURLBASE(kTVAPI_URLBASE);
   LoadLocalPlayer(m_strHome, m_PlayerInfo);
   InitializeInternalsFromPlayer();
 
@@ -956,6 +957,10 @@ bool CNWClient::DoAuthorize()
       // if we find code starts with test site url, switch to test site
       TVAPI_SetURLBASE(kTVAPI_URLBASE_TESTSITE);
       code.erase(test_url_pos + 1);
+    }
+    else
+    {
+      TVAPI_SetURLBASE(kTVAPI_URLBASE);
     }
 
     TVAPI_Activate activate;

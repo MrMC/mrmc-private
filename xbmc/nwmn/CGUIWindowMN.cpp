@@ -71,12 +71,6 @@ CGUIWindowMN::CGUIWindowMN()
 , m_testServers(false)
 , m_client(NULL)
 {
-  std::string override_urlbase = CEnvironment::getenv("TVAPI_URLBASE");
-  if (!override_urlbase.empty())
-    TVAPI_SetURLBASE(override_urlbase);
-  else
-    TVAPI_SetURLBASE(kTVAPI_URLBASE);
-
   Create();
   m_loadType = KEEP_IN_MEMORY;
 }
