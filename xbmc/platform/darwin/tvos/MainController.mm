@@ -405,7 +405,8 @@ MainController *g_xbmcController;
             focusedwindowID != WINDOW_DIALOG_FAVOURITES &&
             focusedwindowID != WINDOW_DIALOG_CONTEXT_MENU &&
             focusedwindowID != WINDOW_DIALOG_BUSY &&
-            focusedwindowID != WINDOW_DIALOG_VIDEO_INFO)
+            focusedwindowID != WINDOW_DIALOG_VIDEO_INFO &&
+            focusedwindowID != WINDOW_DIALOG_KEYBOARD)
         {
           // About dialog has ID 90200,network test has ID 90145
           // if MN Home has that visible we shoudl not get out to main ATV screen
@@ -626,6 +627,8 @@ MainController *g_xbmcController;
         else
           [self sendKeyDownUp:XBMCK_ESCAPE];
       }
+      else if (g_windowManager.GetFocusedWindow() == WINDOW_DIALOG_KEYBOARD)
+        [self sendKeyDownUp:XBMCK_ESCAPE];
       else
         [self sendKeyDownUp:XBMCK_BACKSPACE];
       
