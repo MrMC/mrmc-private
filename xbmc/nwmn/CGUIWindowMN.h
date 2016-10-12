@@ -53,6 +53,7 @@ protected:
   void          TestServers();
   bool          PingMNServer(const std::string& strURL);
   void          SetResolution(const std::string &strResolution);
+  void          StartClient();
 
   bool          m_RefreshRunning;
   bool          m_AboutUp;

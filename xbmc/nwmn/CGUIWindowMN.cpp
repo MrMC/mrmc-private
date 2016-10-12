@@ -58,6 +58,8 @@
 #define NWSEREVER         90148
 #define PROXYMNSERVER     90149
 
+#define STARTCLIENT       90999
+
 
 
 CGUIWindowMN::CGUIWindowMN()
@@ -198,7 +200,13 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
     // CGUIWindow::OnMessage(message);
     return true;
   }
-
+  else if (message.GetMessage() == GUI_MSG_NOTIFY_ALL)
+  {
+    if (message.GetSenderId() == GetID() && message.GetParam1() == STARTCLIENT)
+    {
+      StartClient();
+    }
+  }
   return CGUIWindow::OnMessage(message);
 }
 
@@ -240,14 +248,10 @@ void CGUIWindowMN::OnInitWindow()
 {
   // below needs to be called once we run the update, it disables buttons in skin
   //DisableButtonsOnRefresh(true)
-  if (!m_client)
-  {
-    m_client = new CNWClient();
-    m_client->RegisterClientCallBack(this, ClientCallBack);
-    m_client->RegisterPlayerCallBack(this, PlayerCallBack);
-    m_client->Startup();
-  }
 
+  CGUIMessage reload(GUI_MSG_NOTIFY_ALL, GetID(), 0, STARTCLIENT, 0);
+  g_windowManager.SendThreadMessage(reload, GetID());
+  
   CGUIWindow::OnInitWindow();
 }
 
@@ -269,6 +273,17 @@ void CGUIWindowMN::Refresh()
     m_RefreshRunning = true;
     if (m_client)
       m_client->Startup();
+  }
+}
+
+void CGUIWindowMN::StartClient()
+{
+  if (!m_client)
+  {
+    m_client = new CNWClient();
+    m_client->RegisterClientCallBack(this, ClientCallBack);
+    m_client->RegisterPlayerCallBack(this, PlayerCallBack);
+    m_client->Startup();
   }
 }
 
