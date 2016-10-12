@@ -40,7 +40,7 @@
                         <posy>0</posy>
                         <width>400</width>
                         <height>40</height>
-                        <texture>MNSkinFiles/buttonSelected.png</texture>
+                        <texture>MNSkinFiles/button.png</texture>
                     </control>
                     <control type="label">
                         <posx>13</posx>
@@ -61,7 +61,7 @@
                         <posy>0</posy>
                         <width>400</width>
                         <height>40</height>
-                        <texture>MNSkinFiles/button.png</texture>
+                        <texture>MNSkinFiles/buttonSelected.png</texture>
                     </control>
                     <control type="label">
                         <posx>13</posx>
@@ -104,7 +104,7 @@
                         <posy>0</posy>
                         <width>340</width>
                         <height>40</height>
-                        <texture>MNSkinFiles/buttonSelected.png</texture>
+                        <texture>MNSkinFiles/button.png</texture>
                     </control>
                     <control type="label">
                         <posx>13</posx>
@@ -125,7 +125,7 @@
                         <posy>0</posy>
                         <width>340</width>
                         <height>40</height>
-                        <texture>MNSkinFiles/button.png</texture>
+                        <texture>MNSkinFiles/buttonSelected.png</texture>
                     </control>
                     <control type="label">
                         <posx>13</posx>
