@@ -947,18 +947,47 @@ bool CNWClient::DoAuthorize()
 
   if (CGUIKeyboardFactory::ShowAndGetInput(code, CVariant{header}, false))
   {
+    size_t test_url_pos = code.find("test://");
+    if (test_url_pos != std::string::npos)
+    {
+      // if we find code starts with test site url, switch to test site
+      TVAPI_SetURLBASE(kTVAPI_URLBASE_TESTSITE);
+      code.erase(test_url_pos + 1);
+    }
+
     TVAPI_Activate activate;
     activate.code = code;
     activate.application_id = CDarwinUtils::GetHardwareUUID();
-    if (TVAPI_DoActivate(activate))
+
+    if (code.find("NWMNDEMO4K") != std::string::npos)
     {
-      m_PlayerInfo.apiKey = activate.apiKey;
-      m_PlayerInfo.apiSecret = activate.apiSecret;
-      TVAPI_Status  status;
-      status.apiKey = m_PlayerInfo.apiKey;
-      status.apiSecret = m_PlayerInfo.apiSecret;
+      m_PlayerInfo.apiKey = "wAE/V6Gq3X3h0ZOjcK/A";
+      m_PlayerInfo.apiSecret = "dMLudiHXRKc18ZJXFk4o7pyhaSww41/kvnjbmc4L";
+      TVAPI_SetURLBASE(kTVAPI_URLBASE);
       SaveLocalPlayer(m_strHome, m_PlayerInfo);
-      return TVAPI_GetStatus(status);
+      return true;
+    }
+    else if (code.find("NWMNDEMO") != std::string::npos)
+    {
+      // special case for code of 'NWMNDEMO'
+      m_PlayerInfo.apiKey = "LbpCC91TBDsoHExRxvtV";
+      m_PlayerInfo.apiSecret = "RN16RS1PUZVt8xgW+URBjU0o/ZXcdLWUDA45v2qQ";
+      TVAPI_SetURLBASE(kTVAPI_URLBASE_TESTSITE);
+      SaveLocalPlayer(m_strHome, m_PlayerInfo);
+      return true;
+    }
+    else
+    {
+      if (TVAPI_DoActivate(activate))
+      {
+        m_PlayerInfo.apiKey = activate.apiKey;
+        m_PlayerInfo.apiSecret = activate.apiSecret;
+        TVAPI_Status  status;
+        status.apiKey = m_PlayerInfo.apiKey;
+        status.apiSecret = m_PlayerInfo.apiSecret;
+        SaveLocalPlayer(m_strHome, m_PlayerInfo);
+        return TVAPI_GetStatus(status);
+      }
     }
   }
 
