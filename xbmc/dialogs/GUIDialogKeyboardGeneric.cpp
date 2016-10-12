@@ -87,7 +87,8 @@ CGUIDialogKeyboardGeneric::CGUIDialogKeyboardGeneric()
   m_bIsConfirmed = false;
   m_bShift = false;
   m_hiddenInput = false;
-  m_keyType = LOWER;
+  // MemberNet activation code is CAPS
+  m_keyType = CAPS;
   m_currentLayout = 0;
   m_loadType = KEEP_IN_MEMORY;
   m_isKeyboardNavigationMode = false;
