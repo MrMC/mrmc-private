@@ -1,9 +1,11 @@
-SRCS = GUIDialogMN.cpp
-SRCS += GUIDialogMNDemand.cpp
-SRCS += UtilitiesRed.cpp
-SRCS += PlayerManagerMN.cpp
-SRCS += PythonBindingsMN.cpp
-SRCS += UpdateManagerMN.cpp
+SRCS  = CGUIWindowMN.cpp
+SRCS += CGUIWindowMNDemand.cpp
+SRCS += MNJSONOperations.cpp
+SRCS += NWClient.cpp
+SRCS += NWClientUtilities.cpp
+SRCS += NWMediaManager.cpp
+SRCS += NWPlayer.cpp
+SRCS += NWTVAPI.cpp
 
 LIB   = nwmn.a
 
