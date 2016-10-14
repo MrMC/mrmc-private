@@ -32,6 +32,23 @@
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 
+template <typename T>
+static std::string std_to_string(T value)
+{
+#if defined(TARGET_ANDROID)
+  std::ostringstream os;
+  os << value;
+  return os.str();
+#else
+  return std::to_string(value);
+#endif
+}
+
+static int std_stoi(std::string value)
+{
+  return atoi(value.c_str());
+}
+
 // ---------------------------------------------
 // ---------------------------------------------
 bool HasLocalPlayer(std::string home)
@@ -143,7 +160,7 @@ bool LoadLocalPlaylist(std::string home, NWPlaylist &playList)
   for (auto order: orders)
   {
     if (!order.empty())
-      playList.play_order.push_back(std::stoi(order));
+      playList.play_order.push_back(std_stoi(order));
   }
 
   playList.groups.clear();
@@ -215,7 +232,7 @@ bool SaveLocalPlaylist(std::string home, const NWPlaylist &playList)
     XMLUtils::SetString(rootNode, "updated_date", playList.updated_date);
     std::string play_order;
     for (auto order: playList.play_order)
-      play_order += std::to_string(order) + ",";
+      play_order += std_to_string(order) + ",";
     // remove the trailing ','
     play_order.pop_back();
     XMLUtils::SetString(rootNode, "play_order", play_order);

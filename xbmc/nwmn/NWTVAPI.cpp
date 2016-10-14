@@ -17,6 +17,9 @@
  *
  */
 
+
+#include <algorithm>
+
 #include "NWTVAPI.h"
 
 #include "URL.h"
@@ -26,6 +29,27 @@
 #include "utils/Variant.h"
 #include "utils/URIUtils.h"
 #include "utils/log.h"
+
+
+#include <string>
+#include <sstream>
+
+template <typename T>
+static std::string std_to_string(T value)
+{
+#if defined(TARGET_ANDROID)
+  std::ostringstream os;
+  os << value;
+  return os.str();
+#else
+  return std::to_string(value);
+#endif
+}
+
+static int std_stoi(std::string value)
+{
+  return atoi(value.c_str());
+}
 
 static std::string TVAPI_URLBASE;
 
@@ -244,7 +268,7 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 
   std::string sub_url;
   sub_url = TVAPI_URLBASE + "playlist";
-  sub_url += "?_page=" + std::to_string(1) + "&_perPage=50";
+  sub_url += "?_page=" + std_to_string(1) + "&_perPage=50";
 
   CURL curl(sub_url);
   curl.SetProtocolOption("seekable", "0");
@@ -290,13 +314,13 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 
         CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists %d, %s", sub_total, playListInfo.name.c_str());
       }
-      
+
       CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists page = %d, perPage = %d, sub_total = %d, total = %d", curPage, perPage, sub_total, total);
 
       if (sub_total < total)
       {
         sub_url = TVAPI_URLBASE + "playlist";
-        sub_url += "?_page=" + std::to_string(++page) + "&_perPage=25";
+        sub_url += "?_page=" + std_to_string(++page) + "&_perPage=25";
         curl = CURL(sub_url);
         if (curlfile.Get(curl.Get(), strResponse))
         {
@@ -449,7 +473,7 @@ bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string play
         std::sort(item.files.begin(), item.files.end(),
           [] (TVAPI_PlaylistFile const& a, TVAPI_PlaylistFile const& b)
           {
-            return std::stoi(a.type) < std::stoi(b.type);
+            return std_stoi(a.type) < std_stoi(b.type);
           });
 
         // now find the 'thumb'

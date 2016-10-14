@@ -52,7 +52,32 @@
 #include "storage/MediaManager.h"
 
 // temp until access moves to core
+#if defined(TARGET_ANDROID)
+#include "platform/android/jni/Context.h"
+#include "platform/android/jni/SettingsSecure.h"
+#else
 #include "platform/darwin/DarwinUtils.h"
+#endif
+
+#include <string>
+#include <sstream>
+
+template <typename T>
+static std::string std_to_string(T value)
+{
+#if defined(TARGET_ANDROID)
+  std::ostringstream os;
+  os << value;
+  return os.str();
+#else
+  return std::to_string(value);
+#endif
+}
+
+static int std_stoi(std::string value)
+{
+  return atoi(value.c_str());
+}
 
 CCriticalSection CNWClient::m_clientLock;
 CNWClient *CNWClient::m_this = NULL;
@@ -824,7 +849,7 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
   const TVAPI_Playlist &playlist, const TVAPI_PlaylistItems &playlistItems)
 {
   // convert server structures to player structure
-  playList.id = std::stoi(playlist.id);
+  playList.id = std_stoi(playlist.id);
   playList.name = playlist.name;
   playList.type = playlist.type;
   // format is "2013-08-22"
@@ -836,7 +861,7 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
   for (auto catagory : playlist.categories)
   {
     NWGroup group;
-    group.id = std::stoi(catagory.id);
+    group.id = std_stoi(catagory.id);
     group.name = catagory.name;
     group.next_asset_index = 0;
     // always remember original group play order
@@ -856,9 +881,9 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
         if (item.tv_category_id == catagory.id)
         {
           NWAsset asset;
-          asset.id = std::stoi(item.id);
+          asset.id = std_stoi(item.id);
           asset.name = item.name;
-          asset.group_id = std::stoi(item.tv_category_id);
+          asset.group_id = std_stoi(item.tv_category_id);
           asset.valid = false;
 
           for (auto file : item.files)
@@ -868,17 +893,17 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
               // trap out bad urls
               if (file.path.find("proxy.membernettv.com") != std::string::npos)
                 continue;
-              asset.id = std::stoi(item.id);
+              asset.id = std_stoi(item.id);
               asset.type = file.type;
               asset.video_url = file.path;
               asset.video_md5 = file.etag;
-              asset.video_size = std::stoi(file.size);
+              asset.video_size = std_stoi(file.size);
               // format is "2013-02-27 01:00:00"
               asset.available_to.SetFromDBDateTime(item.availability_to);
               asset.available_from.SetFromDBDateTime(item.availability_from);
               asset.video_basename = URIUtils::GetFileName(asset.video_url);
               std::string video_extension = URIUtils::GetExtension(asset.video_url);
-              std::string localpath = kNWClient_DownloadVideoPath + std::to_string(asset.id) + video_extension;
+              std::string localpath = kNWClient_DownloadVideoPath + std_to_string(asset.id) + video_extension;
               asset.video_localpath = URIUtils::AddFileToFolder(home, localpath);
               break;
             }
@@ -892,10 +917,10 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
               // bring over thumb references
               asset.thumb_url = item.thumb.path;
               asset.thumb_md5 = item.thumb.etag;
-              asset.thumb_size = std::stoi(item.thumb.size);
+              asset.thumb_size = std_stoi(item.thumb.size);
               asset.thumb_basename = URIUtils::GetFileName(asset.thumb_url);
               std::string thumb_extension = URIUtils::GetExtension(asset.thumb_url);
-              std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std::to_string(asset.id) + thumb_extension;
+              std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std_to_string(asset.id) + thumb_extension;
               asset.thumb_localpath = URIUtils::AddFileToFolder(home, localpath);
             }
             group.assets.push_back(asset);
@@ -916,7 +941,7 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDow
   CNWClient *client = (CNWClient*)ctx;
   client->m_Player->MarkValidated(asset);
   if (wasDownloaded)
-    client->LogFilesDownLoaded(std::to_string(asset.id));
+    client->LogFilesDownLoaded(std_to_string(asset.id));
 
   if (client->m_Player->IsPlaying() || client->m_PlayerInfo.allow_async_player == "no")
   {
@@ -965,7 +990,11 @@ bool CNWClient::DoAuthorize()
 
     TVAPI_Activate activate;
     activate.code = code;
+#if defined(TARGET_ANDROID)
+    activate.application_id = jni::CJNISettingsSecure::getString(CJNIContext::getContentResolver(), jni::CJNISettingsSecure::ANDROID_ID);
+#else
     activate.application_id = CDarwinUtils::GetHardwareUUID();
+#endif
 
     if (code.find("NWMNDEMO4K") != std::string::npos)
     {
