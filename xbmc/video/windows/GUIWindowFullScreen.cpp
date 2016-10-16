@@ -112,8 +112,11 @@ CGUIWindowFullScreen::~CGUIWindowFullScreen(void)
 bool CGUIWindowFullScreen::OnAction(const CAction &action)
 {
   // MN doesnt need any onAction
-  return true;
-  
+  if (action.GetID() == ACTION_STOP)
+    return CGUIWindow::OnAction(action);
+  else
+    return true;
+
   if (m_timeCodePosition > 0 && action.GetButtonCode())
   { // check whether we have a mapping in our virtual videotimeseek "window" and have a select action
     CKey key(action.GetButtonCode());
