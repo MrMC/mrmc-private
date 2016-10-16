@@ -231,7 +231,7 @@ void CNWPlayer::Process()
               if (XFILE::CFile::Exists(asset.thumb_localpath))
                 item->SetArt("thumb", asset.thumb_localpath);
 
-              CMediaSettings::GetInstance().SetVideoStartWindowed(true);
+              CMediaSettings::GetInstance().SetVideoStartWindowed(false);
 
               auto fileItemList = new CFileItemList();
               fileItemList->Add(item);
