@@ -209,8 +209,6 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
 
 void CNWClient::Startup()
 {
-  CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Starting Client", "", 4000, false);
-
   StopThread();
   StopPlaying();
   m_totalAssets = 0;
@@ -251,7 +249,8 @@ void CNWClient::PausePlaying()
 
 void CNWClient::StopPlaying()
 {
-  m_Player->StopPlaying();
+  if (m_Player->IsPlaying())
+    m_Player->StopPlaying();
 }
 
 void CNWClient::PlayNext()
@@ -346,11 +345,11 @@ bool CNWClient::ManageStartupDialog()
       m_Startup = false;
       m_FullUpdate = false;
       CloseStartUpDialog();
-      
+
       StopPlaying();
       m_MediaManager->ClearDownloads();
       m_MediaManager->ClearAssets();
-      
+
       if (m_ClientCallBackFn)
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
       SendPlayerStatus(kTVAPI_Status_On);

@@ -19,6 +19,8 @@
  *
  */
 
+#include <atomic>
+
 #include "XBDateTime.h"
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
@@ -51,7 +53,7 @@ protected:
   virtual void  Process();
   bool          Exists(NWGroup &group);
 
-  bool                  m_playing;
+  std::atomic<bool>     m_playing;
   CCriticalSection      m_media_lock;
   CCriticalSection      m_player_lock;
   NWPlaylist            m_playlist;
