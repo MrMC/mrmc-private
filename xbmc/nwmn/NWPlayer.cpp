@@ -87,7 +87,6 @@ void CNWPlayer::PlayPause()
 
 void CNWPlayer::PlayNext()
 {
-  CSingleLock lock(m_player_lock);
   // if m_playing is true, then just
   // doing the StopPlaying on player will cause
   // next pass in Process to sequence to next.
@@ -109,13 +108,11 @@ void CNWPlayer::Pause()
 
 bool CNWPlayer::IsPlaying()
 {
-  CSingleLock lock(m_player_lock);
   return m_playing;
 }
 
 void CNWPlayer::StopPlaying()
 {
-  CSingleLock lock(m_player_lock);
   m_playing = false;
   CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP);
 }
@@ -173,7 +170,7 @@ void CNWPlayer::Process()
     Sleep(100);
 
     CSingleLock player_lock(m_player_lock);
-    
+
     int current = g_playlistPlayer.GetCurrentSong();
     int count = g_playlistPlayer.GetPlaylist(PLAYLIST_VIDEO).size();
     if (m_playing && (current == -1 || (count - current) < 2))
@@ -247,7 +244,7 @@ void CNWPlayer::Process()
               if (m_PlayerCallBackFn)
                 (*m_PlayerCallBackFn)(m_PlayerCallBackCtx, 0, asset);
 
-              while (!m_bStop && !g_application.m_pPlayer->IsPlaying())
+              while (!m_bStop && m_playing && !g_application.m_pPlayer->IsPlaying())
                 Sleep(100);
             }
           }
@@ -255,7 +252,7 @@ void CNWPlayer::Process()
       }
     }
   }
-  
+
   CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::Process Stopped");
 }
 
