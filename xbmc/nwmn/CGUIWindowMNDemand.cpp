@@ -39,6 +39,8 @@
 #define ONDEMAND_ITEM_LIST          1050
 #define ONDEMAND_CATEGORY_LIST      50
 
+#define SETCATEGORYITEMS            80888
+
 CGUIWindowMNDemand *CGUIWindowMNDemand::m_MNDemand = NULL;
 NWPlaylist CGUIWindowMNDemand::m_PlayList;
 
@@ -116,6 +118,13 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
       CGUIWindow::OnMessage(message);
       return true;
     }
+    case GUI_MSG_NOTIFY_ALL:
+    {
+      if (message.GetSenderId() == GetID() && message.GetParam1() == SETCATEGORYITEMS)
+      {
+        SetCategoryItems();
+      }
+    }
   }
   return CGUIWindow::OnMessage(message);
 }
@@ -147,7 +156,9 @@ void CGUIWindowMNDemand::FillAssets()
   CGUIMessage msg(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_CATEGORY_LIST, 0, 0, &stackItems);
   OnMessage(msg);
 
-  SetCategoryItems();
+  CGUIMessage reload(GUI_MSG_NOTIFY_ALL, GetID(), 0, SETCATEGORYITEMS, 0);
+  g_windowManager.SendThreadMessage(reload, GetID());
+  
 }
 
 void CGUIWindowMNDemand::SetControlLabel(int id, const char *format, int info)
