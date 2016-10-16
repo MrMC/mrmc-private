@@ -114,7 +114,6 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
     case GUI_MSG_WINDOW_INIT:
     {
       CGUIWindow::OnMessage(message);
-      FillAssets();
       return true;
     }
   }
@@ -128,6 +127,7 @@ void CGUIWindowMNDemand::OnInitWindow()
     m_client = new CNWClient();
     m_client->Startup();
   }
+  FillAssets();
   CGUIWindow::OnInitWindow();
 }
 
