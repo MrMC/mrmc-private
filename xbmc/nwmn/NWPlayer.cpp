@@ -201,7 +201,7 @@ void CNWPlayer::Process()
           int groupID = m_playlist.play_order.front();
           m_playlist.play_order.erase(m_playlist.play_order.begin());
           m_playlist.play_order.push_back(groupID);
-          
+
           // check if we already have handled this group
           auto group = std::find_if(m_playlist.groups.begin(), m_playlist.groups.end(),
             [groupID](const NWGroup &existingGroup) { return existingGroup.id == groupID; });
@@ -220,7 +220,7 @@ void CNWPlayer::Process()
               CFileItemPtr item(new CFileItem());
               item->SetLabel2(asset.name);
               item->SetPath(asset.video_localpath);
-              
+
               item->GetVideoInfoTag()->m_strTitle = asset.name;
               item->GetVideoInfoTag()->m_streamDetails.Reset();
               item->GetVideoInfoTag()->m_iDbId = -1;
@@ -244,6 +244,7 @@ void CNWPlayer::Process()
               if (m_PlayerCallBackFn)
                 (*m_PlayerCallBackFn)(m_PlayerCallBackCtx, 0, asset);
 
+              player_lock.Leave();
               while (!m_bStop && m_playing && !g_application.m_pPlayer->IsPlaying())
                 Sleep(100);
             }
@@ -263,6 +264,6 @@ bool CNWPlayer::Exists(NWGroup &testgroup)
     if (group.id == testgroup.id)
       return true;
   }
-  
+
   return false;
 }
