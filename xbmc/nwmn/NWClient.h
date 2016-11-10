@@ -31,6 +31,13 @@
 #include "threads/CriticalSection.h"
 #include "dialogs/GUIDialogProgress.h"
 
+enum AssetDownloadState
+{
+  IsPresent,
+  willDownload,
+  wasDownloaded,
+};
+
 // ---------------------------------------------
 // ---------------------------------------------
 typedef void (*ClientCallBackFn)(const void *ctx, bool status);
@@ -91,7 +98,7 @@ protected:
   bool          CreatePlaylist(std::string home, NWPlaylist &playList,
                   const TVAPI_Playlist &playlist, const TVAPI_PlaylistItems &playlistItems);
 
-  static void   AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded);
+  static void   AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownloadState downloadState);
 
   std::string   m_strHome;
   std::atomic<bool> m_Startup;

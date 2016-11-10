@@ -152,7 +152,7 @@ bool CNWMediaManager::CheckAssetIsPresentLocal(NWAsset &asset)
         CSingleLock lock(m_assets_lock);
         m_assets.push_back(asset);
         if (m_AssetUpdateCallBackFn)
-          (*m_AssetUpdateCallBackFn)(m_AssetUpdateCallBackCtx, asset, false);
+          (*m_AssetUpdateCallBackFn)(m_AssetUpdateCallBackCtx, asset, AssetDownloadState::IsPresent);
       }
       return true;
     }
@@ -172,7 +172,7 @@ void CNWMediaManager::Process()
   SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
   CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process Started");
 
-  m_http.SetBufferSize(32768*10);
+  m_http.SetBufferSize(32768 * 10);
   m_http.SetTimeout(5);
 
   while (!m_bStop)
@@ -198,6 +198,9 @@ void CNWMediaManager::Process()
         continue;
 
       // download it
+      if (m_AssetUpdateCallBackFn)
+        (*m_AssetUpdateCallBackFn)(m_AssetUpdateCallBackCtx, asset, AssetDownloadState::willDownload);
+
       unsigned int size = asset.video_size;
       if (size && m_http.Download(asset.video_url, asset.video_localpath, &size))
       {
@@ -217,7 +220,7 @@ void CNWMediaManager::Process()
             CSingleLock lock(m_assets_lock);
             m_assets.push_back(asset);
             if (m_AssetUpdateCallBackFn)
-              (*m_AssetUpdateCallBackFn)(m_AssetUpdateCallBackCtx, asset, true);
+              (*m_AssetUpdateCallBackFn)(m_AssetUpdateCallBackCtx, asset, AssetDownloadState::wasDownloaded);
           }
         }
         else
@@ -229,8 +232,7 @@ void CNWMediaManager::Process()
           {
             // remove any thumbnail for this asset
             XFILE::CFile::Delete(asset.thumb_localpath);
-            
-            CSingleLock lock(m_download_lock);
+            download_lock.Enter();
             m_download.push_back(asset);
           }
        }
@@ -239,9 +241,8 @@ void CNWMediaManager::Process()
       {
         CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process download/save failed, just requeue");
         // download/save failed, just requeue
-        CSingleLock lock(m_download_lock);
-        if (m_download.size() > 0)
-          m_download.erase(m_download.begin());
+        download_lock.Enter();
+        m_download.push_back(asset);
       }
     }
   }

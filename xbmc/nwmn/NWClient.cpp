@@ -935,11 +935,14 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
   return false;
 }
 
-void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDownloaded)
+void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownloadState downloadState)
 {
   CNWClient *client = (CNWClient*)ctx;
+  if (downloadState != AssetDownloadState::willDownload)
+    client->LogFilesDownLoaded(std_to_string(asset.id));
+
   client->m_Player->MarkValidated(asset);
-  if (wasDownloaded)
+  if (downloadState == AssetDownloadState::wasDownloaded)
     client->LogFilesDownLoaded(std_to_string(asset.id));
 
   if (client->m_Player->IsPlaying() || client->m_PlayerInfo.allow_async_player == "no")
@@ -947,11 +950,15 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, bool wasDow
     if (client->m_Startup && client->m_dlgProgress->IsDialogRunning())
     {
       int assetcount = client->m_MediaManager->GetLocalAssetCount();
-      client->m_dlgProgress->SetLine(1, StringUtils::Format("Checking: %s", asset.name.c_str()));
+      if (downloadState == AssetDownloadState::willDownload)
+        client->m_dlgProgress->SetLine(1, StringUtils::Format("Downloading: %s", asset.name.c_str()));
+      else
+        client->m_dlgProgress->SetLine(1, StringUtils::Format("Checking: %s", asset.name.c_str()));
       client->m_dlgProgress->SetLine(2, StringUtils::Format("Asset %i/%i", assetcount, client->m_totalAssets));
       client->m_dlgProgress->SetPercentage(int(float(assetcount) / float(client->m_totalAssets) * 100));
     }
   }
+
 }
 
 bool CNWClient::DoAuthorize()
