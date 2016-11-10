@@ -969,25 +969,34 @@ bool CCurlFile::Download(const std::string& strURL, const std::string& strFileNa
 {
   CLog::Log(LOGINFO, "CCurlFile::Download - %s->%s", strURL.c_str(), strFileName.c_str());
 
-  std::string strData;
-  if (!Get(strURL, strData))
-    return false;
-
-  XFILE::CFile file;
-  if (!file.OpenForWrite(strFileName, true))
+  bool rtn = false;
+  try
   {
-    CLog::Log(LOGERROR, "CCurlFile::Download - Unable to open file %s: %u",
-    strFileName.c_str(), GetLastError());
+    std::string strData;
+    if (!Get(strURL, strData))
+      return false;
+
+    XFILE::CFile file;
+    if (!file.OpenForWrite(strFileName, true))
+    {
+      CLog::Log(LOGERROR, "CCurlFile::Download - Unable to open file %s: %u",
+      strFileName.c_str(), GetLastError());
+      return false;
+    }
+    ssize_t written = 0;
+    if (strData.size() > 0)
+      written = file.Write(strData.c_str(), strData.size());
+
+    if (pdwSize != NULL)
+      *pdwSize = written > 0 ? written : 0;
+    rtn = written == static_cast<ssize_t>(strData.size());
+  }
+  catch(...)
+  {
+    CLog::Log(LOGERROR, "%s - Exception thrown while trying to download %s", __FUNCTION__, strURL.c_str());
     return false;
   }
-  ssize_t written = 0;
-  if (strData.size() > 0)
-    written = file.Write(strData.c_str(), strData.size());
-
-  if (pdwSize != NULL)
-    *pdwSize = written > 0 ? written : 0;
-
-  return written == static_cast<ssize_t>(strData.size());
+  return rtn;
 }
 
 // Detect whether we are "online" or not! Very simple and dirty!
