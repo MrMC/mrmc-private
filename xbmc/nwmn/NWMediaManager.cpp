@@ -223,7 +223,7 @@ void CNWMediaManager::Process()
         else
         {
           CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process "
-                    "md5 mismatch for %s", asset.thumb_localpath.c_str());
+                    "md5 mismatch for %s", asset.video_localpath.c_str());
           // must be bad file, delete and requeue for download
           if (XFILE::CFile::Delete(asset.video_localpath))
           {
