@@ -386,5 +386,5 @@ void CGUIWindowMN::SetResolution(const std::string &strResolution)
   RESOLUTION res = CDisplaySettings::GetResolutionFromString(strResolution);
 //  const char *strMode = CDisplaySettings::Get().GetResolutionInfo(res).strMode.c_str();
   CDisplaySettings::GetInstance().SetCurrentResolution(res, true);
-  CLog::Log(LOGERROR,"resolution:res(%d), parameter(%s)", res, strResolution.c_str());
+  CLog::Log(LOGDEBUG,"resolution:res(%d), parameter(%s)", res, strResolution.c_str());
 }

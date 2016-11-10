@@ -133,7 +133,7 @@ void CNWMediaManager::QueueAssetForDownload(NWAsset &asset)
 
   // queue for download
   CSingleLock lock(m_download_lock);
-  CLog::Log(LOGERROR, "**NW** - CNWMediaManager::QueueAssetForDownload "
+  CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::QueueAssetForDownload "
     "%s", asset.video_localpath.c_str());
   m_download.push_back(asset);
 }
@@ -222,7 +222,7 @@ void CNWMediaManager::Process()
         }
         else
         {
-          CLog::Log(LOGERROR, "**NW** - CNWMediaManager::Process "
+          CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process "
                     "md5 mismatch for %s", asset.thumb_localpath.c_str());
           // must be bad file, delete and requeue for download
           if (XFILE::CFile::Delete(asset.video_localpath))
@@ -237,6 +237,7 @@ void CNWMediaManager::Process()
       }
       else
       {
+        CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process download/save failed, just requeue");
         // download/save failed, just requeue
         CSingleLock lock(m_download_lock);
         if (m_download.size() > 0)

@@ -94,7 +94,7 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
   }
   else
   {
-    CLog::Log(LOGERROR, "MN Updated settings, url - %s, Machine ID - %s , location ID - %s", url.c_str(), machineID.c_str(), locationID.c_str());
+    CLog::Log(LOGDEBUG, "MN Updated settings, url - %s, Machine ID - %s , location ID - %s", url.c_str(), machineID.c_str(), locationID.c_str());
     
     // Notify that we have changed settings
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
