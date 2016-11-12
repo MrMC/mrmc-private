@@ -92,7 +92,7 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
 
         pItem->GetVideoInfoTag()->m_strTitle = asset.name;
         pItem->GetVideoInfoTag()->m_streamDetails.Reset();
-        CMediaSettings::GetInstance().SetVideoStartWindowed(true);
+        CMediaSettings::GetInstance().SetVideoStartWindowed(false);
         g_playlistPlayer.Clear();
         g_playlistPlayer.Reset();
         g_playlistPlayer.Add(PLAYLIST_VIDEO, pItem);
