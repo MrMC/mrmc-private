@@ -849,7 +849,8 @@ void CNWClient::InitializeInternalsFromPlayer()
     TVAPI_SetURLBASE(m_PlayerInfo.tvapiURLBase);
 }
 
-static std::string CheckForVideoFormatAndFallBack(const std::string video_format, std::vector<TVAPI_PlaylistFile> files)
+
+static std::string CheckForVideoFormatAndFallBack(const std::string &video_format, const std::vector<TVAPI_PlaylistFile> &files)
 {
   // if there is a match, return it
   for (auto file : files)
