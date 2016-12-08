@@ -849,6 +849,43 @@ void CNWClient::InitializeInternalsFromPlayer()
     TVAPI_SetURLBASE(m_PlayerInfo.tvapiURLBase);
 }
 
+static std::string CheckForVideoFormatAndFallBack(const std::string video_format, std::vector<TVAPI_PlaylistFile> files)
+{
+  // if there is a match, return it
+  for (auto file : files)
+  {
+    if (file.type == video_format)
+      return video_format;
+  }
+
+  // if 4k, check for 1080, then 720
+  if (video_format == "4K")
+  {
+    for (auto file : files)
+    {
+      if (file.type == "1080")
+        return file.type;
+    }
+    for (auto file : files)
+    {
+      if (file.type == "720")
+        return file.type;
+    }
+  }
+
+  // if 1080, check for 720
+  if (video_format == "1080")
+  {
+    for (auto file : files)
+    {
+      if (file.type == "720")
+        return file.type;
+    }
+  }
+
+  return "not found";
+}
+
 bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
   const TVAPI_Playlist &playlist, const TVAPI_PlaylistItems &playlistItems)
 {
@@ -890,9 +927,10 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
           asset.group_id = std_stoi(item.tv_category_id);
           asset.valid = false;
 
+          std::string video_format = CheckForVideoFormatAndFallBack(playList.video_format, item.files);
           for (auto file : item.files)
           {
-            if (file.type == playList.video_format)
+            if (file.type == video_format)
             {
               // trap out bad urls
               if (file.path.find("proxy.membernettv.com") != std::string::npos)
