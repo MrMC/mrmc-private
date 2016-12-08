@@ -173,7 +173,7 @@ void CNWPlayer::Process()
 
     int current = g_playlistPlayer.GetCurrentSong();
     int count = g_playlistPlayer.GetPlaylist(PLAYLIST_VIDEO).size();
-    if (m_playing && (current == -1 || (count - current) < 2))
+    if (m_playing && (current == -1 || (count - current) < 3))
     {
       //CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::playlist current(%d), count(%d)", current, count);
 
