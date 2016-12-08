@@ -476,6 +476,12 @@ void CDVDPlayerVideo::Process()
       // decoder still needs to provide an empty image structure, with correct flags
       m_pVideoCodec->SetDropState(bRequestDrop);
       int iDecoderState = m_pVideoCodec->Decode(pPacket->pData, pPacket->iSize, pPacket->dts, pPacket->pts);
+      if (iDecoderState & VC_ERROR)
+      {
+        pMsg->Release();
+        m_messageParent.Put(new CDVDMsg(CDVDMsg::PLAYER_ERROR));
+        break;
+      }
 
       // buffer packets so we can recover should decoder flush for some reason
       if(m_pVideoCodec->GetConvergeCount() > 0)

@@ -76,6 +76,7 @@ public:
     PLAYER_STARTED,                 // sent whenever a sub player has finished it's first frame after open
     PLAYER_DISPLAYTIME,             // display time struct from av players
     PLAYER_AVCHANGE,                // signal a change in audio or video parameters
+    PLAYER_ERROR,
 
     // demuxer related messages
 

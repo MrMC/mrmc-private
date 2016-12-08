@@ -2959,6 +2959,11 @@ void CDVDPlayer::HandleMessages()
         g_dataCacheCore.SignalAudioInfoChange();
         g_dataCacheCore.SignalVideoInfoChange();
       }
+      else if (pMsg->IsType(CDVDMsg::PLAYER_ERROR))
+      {
+        CLog::Log(LOGDEBUG, "CDVDPlayer - CDVDMsg::PLAYER_ERROR");
+        CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_NEXT, 0);
+      }
 
     pMsg->Release();
   }
