@@ -46,7 +46,6 @@ NWPlaylist CGUIWindowMNDemand::m_PlayList;
 
 CGUIWindowMNDemand::CGUIWindowMNDemand()
 : CGUIWindow(WINDOW_MEMBERNET_DEMAND, "DialogNationWideOndemand.xml")
-, m_client(NULL)
 {
   m_loadType = KEEP_IN_MEMORY;
   m_MNDemand = this;
@@ -104,8 +103,11 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
       }
       if (iControl == PLAYLIST_BUTTON)
       {
-        if (m_client)
-          m_client->PlayNext();
+        // need to exit this window, return to CGUIWindowMN and do a playlist click
+        g_windowManager.PreviousWindow();
+        CGUIMessage msg(GUI_MSG_CLICKED, 90101, WINDOW_MEMBERNET);
+        g_windowManager.SendThreadMessage(msg, WINDOW_MEMBERNET);
+
       }
     }
 //    case GUI_MSG_WINDOW_DEINIT:
@@ -131,11 +133,6 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
 
 void CGUIWindowMNDemand::OnInitWindow()
 {
-  if (!m_client)
-  {
-    m_client = new CNWClient();
-    m_client->Startup();
-  }
   FillAssets();
   CGUIWindow::OnInitWindow();
 }

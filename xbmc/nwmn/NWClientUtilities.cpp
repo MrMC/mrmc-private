@@ -22,6 +22,7 @@
 #include "Application.h"
 #include "LangInfo.h"
 #include "filesystem/File.h"
+#include "filesystem/CurlFile.h"
 #include "filesystem/SpecialProtocol.h"
 #include "network/Network.h"
 #include "storage/MediaManager.h"
@@ -399,4 +400,10 @@ const std::string GetWirelessMACAddress()
   }
 
   return "00:00:00:00:00:00";
+}
+
+bool HasInternet()
+{
+  XFILE::CCurlFile http;
+  return http.IsInternet();
 }

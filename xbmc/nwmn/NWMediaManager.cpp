@@ -17,6 +17,8 @@
  *
  */
 
+#include "system.h"
+
 #include "NWMediaManager.h"
 
 #include "Util.h"
@@ -144,9 +146,11 @@ bool CNWMediaManager::CheckAssetIsPresentLocal(NWAsset &asset)
   if (XFILE::CFile::Exists(asset.video_localpath))
   {
     // verify it by md5 check
-    if (StringUtils::EqualsNoCase(asset.video_md5, CUtil::GetFileMD5(asset.video_localpath)))
+    //if (StringUtils::EqualsNoCase(asset.video_md5, CUtil::GetFileMD5(asset.video_localpath)))
+    struct __stat64 st;
+    if (XFILE::CFile::Stat(asset.video_localpath, &st) != -1 && st.st_size == asset.video_size)
     {
-      if (!Exists(asset))
+      if (!AssetExists(asset))
       {
         // we have a verified local existing asset, skip downloading it
         CSingleLock lock(m_assets_lock);
@@ -177,7 +181,8 @@ void CNWMediaManager::Process()
 
   while (!m_bStop)
   {
-    Sleep(500);
+    if (m_download.empty())
+      Sleep(100);
 
     CSingleLock download_lock(m_download_lock);
     if (!m_download.empty())
@@ -187,15 +192,22 @@ void CNWMediaManager::Process()
 
       // fetch an asset to download
       NWAsset asset = m_download.front();
-      m_download.erase(m_download.begin());
       download_lock.Leave();
 
       // check if we already have this asset on disk
       if (CheckAssetIsPresentLocal(asset))
+      {
+        download_lock.Enter();
+        m_download.erase(m_download.begin());
         continue;
+      }
 
       if (!m_hasNetwork)
+      {
+        download_lock.Enter();
+        m_download.erase(m_download.begin());
         continue;
+      }
 
       // download it
       if (m_AssetUpdateCallBackFn)
@@ -205,7 +217,9 @@ void CNWMediaManager::Process()
       if (size && m_http.Download(asset.video_url, asset.video_localpath, &size))
       {
         // verify download by md5 check
-        if (StringUtils::EqualsNoCase(asset.video_md5, CUtil::GetFileMD5(asset.video_localpath)))
+        //if (StringUtils::EqualsNoCase(asset.video_md5, CUtil::GetFileMD5(asset.video_localpath)))
+        struct __stat64 st;
+        if (XFILE::CFile::Stat(asset.video_localpath, &st) != -1 && st.st_size == asset.video_size)
         {
           // quick grab of thumbnail with no error checking.
           if (!XFILE::CFile::Exists(asset.thumb_localpath))
@@ -214,13 +228,16 @@ void CNWMediaManager::Process()
             m_http.Download(asset.thumb_url, asset.thumb_localpath, &size);
           }
 
-          if (!Exists(asset))
+          if (!AssetExists(asset))
           {
             // we have a verified asset, keep it
             CSingleLock lock(m_assets_lock);
             m_assets.push_back(asset);
             if (m_AssetUpdateCallBackFn)
               (*m_AssetUpdateCallBackFn)(m_AssetUpdateCallBackCtx, asset, AssetDownloadState::wasDownloaded);
+            // erase front after verified and transfered
+            download_lock.Enter();
+            m_download.erase(m_download.begin());
           }
         }
         else
@@ -234,6 +251,8 @@ void CNWMediaManager::Process()
             XFILE::CFile::Delete(asset.thumb_localpath);
             download_lock.Enter();
             m_download.push_back(asset);
+            // erase front after we re-queue
+            m_download.erase(m_download.begin());
           }
        }
       }
@@ -243,6 +262,8 @@ void CNWMediaManager::Process()
         // download/save failed, just requeue
         download_lock.Enter();
         m_download.push_back(asset);
+        // erase front after we re-queue
+        m_download.erase(m_download.begin());
       }
     }
   }
@@ -250,7 +271,7 @@ void CNWMediaManager::Process()
   CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process Stopped");
 }
 
-bool CNWMediaManager::Exists(NWAsset &asset)
+bool CNWMediaManager::AssetExists(NWAsset &asset)
 {
   for (size_t index = 0; index < m_assets.size(); index++)
   {

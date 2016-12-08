@@ -45,7 +45,7 @@ public:
 
 protected:
   virtual void  Process(unsigned int currentTime, CDirtyRegionList &dirtyregions);
-  static  void  ClientCallBack(const void *ctx, bool status);
+  static  void  ClientCallBack(const void *ctx, int msg);
   static  void  PlayerCallBack(const void *ctx, int msg, struct NWAsset &asset);
   virtual bool  OnAction(const CAction &action);
   virtual void  Process();
@@ -53,7 +53,7 @@ protected:
   void          TestServers();
   bool          PingMNServer(const std::string& strURL);
   void          SetResolution(const std::string &strResolution);
-  void          StartClient();
+  void          StartClient(bool force);
 
   bool          m_RefreshRunning;
   bool          m_AboutUp;

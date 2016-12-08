@@ -149,7 +149,7 @@ CNWClient::CNWClient()
   if (!XFILE::CFile::Exists(webui_path))
     CUtil::CreateDirectoryEx(webui_path);
 
-  m_HasNetwork = g_sysinfo.HasInternet();
+  m_HasNetwork = HasInternet();
 
   TVAPI_SetURLBASE(kTVAPI_URLBASE);
   LoadLocalPlayer(m_strHome, m_PlayerInfo);
@@ -207,22 +207,26 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
   }
 }
 
-void CNWClient::Startup()
+void CNWClient::Startup(bool bypass_authorization)
 {
+  ShowStartUpDialog();
+
   StopThread();
   StopPlaying();
   m_totalAssets = 0;
   m_MediaManager->ClearDownloads();
   m_MediaManager->ClearAssets();
 
-  if (!IsAuthorized())
-    while (!DoAuthorize());
+  if (!bypass_authorization)
+  {
+    if (HasInternet() && !IsAuthorized())
+      while (!DoAuthorize());
+  }
 
   SendPlayerStatus(kTVAPI_Status_Restarting);
 
   m_Startup = true;
   m_FullUpdate = true;
-  ShowStartUpDialog();
 
   Create();
   if (!m_MediaManager->IsRunning())
@@ -282,7 +286,8 @@ void CNWClient::Process()
 
   while (!m_bStop)
   {
-    Sleep(500);
+    if (!m_Startup)
+      Sleep(100);
 
     if (m_Startup)
       ManageStartupDialog();
@@ -298,7 +303,7 @@ void CNWClient::Process()
       m_NextUpdateTime += m_NextUpdateInterval;
       CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
 
-      m_HasNetwork = g_sysinfo.HasInternet();
+      m_HasNetwork = HasInternet();
       m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
 
       GetPlayerInfo();
@@ -311,7 +316,7 @@ void CNWClient::Process()
       }
 
       if (m_ClientCallBackFn)
-        (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
+        (*m_ClientCallBackFn)(m_ClientCallBackCtx, 0);
 
       if (m_Player->IsPlaying())
         SendPlayerStatus(kTVAPI_Status_Playing);
@@ -351,7 +356,7 @@ bool CNWClient::ManageStartupDialog()
       m_MediaManager->ClearAssets();
 
       if (m_ClientCallBackFn)
-        (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
+        (*m_ClientCallBackFn)(m_ClientCallBackCtx, 1);
       SendPlayerStatus(kTVAPI_Status_On);
     }
     else if (m_dlgProgress->IsDialogRunning())
@@ -362,7 +367,7 @@ bool CNWClient::ManageStartupDialog()
         CloseStartUpDialog();
         m_Player->Play();
         if (m_ClientCallBackFn)
-          (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
+          (*m_ClientCallBackFn)(m_ClientCallBackCtx, 2);
       }
     }
   }
@@ -382,7 +387,7 @@ bool CNWClient::ManageStartupDialog()
       m_MediaManager->ClearAssets();
 
       if (m_ClientCallBackFn)
-        (*m_ClientCallBackFn)(m_ClientCallBackCtx, false);
+        (*m_ClientCallBackFn)(m_ClientCallBackCtx, 1);
       SendPlayerStatus(kTVAPI_Status_On);
     }
     else if (g_application.m_pPlayer->IsPlaying() && m_dlgProgress->IsDialogRunning())
@@ -390,7 +395,7 @@ bool CNWClient::ManageStartupDialog()
       m_Startup = false;
       CloseStartUpDialog();
       if (m_ClientCallBackFn)
-        (*m_ClientCallBackFn)(m_ClientCallBackCtx, true);
+        (*m_ClientCallBackFn)(m_ClientCallBackCtx, 2);
     }
 
   }
@@ -958,7 +963,6 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownlo
       client->m_dlgProgress->SetPercentage(int(float(assetcount) / float(client->m_totalAssets) * 100));
     }
   }
-
 }
 
 bool CNWClient::DoAuthorize()
@@ -971,7 +975,7 @@ bool CNWClient::DoAuthorize()
     m_activate.apiSecret = "HtqhPrk3JyvX5bDSay75OY1RHTvGAhxwg51Kh7KJ";
   }
 */
-  if (!m_HasNetwork)
+  if (!HasInternet())
     return !m_PlayerInfo.apiKey.empty() && !m_PlayerInfo.apiSecret.empty();
 
   std::string code = "";
@@ -1040,7 +1044,7 @@ bool CNWClient::DoAuthorize()
 
 bool CNWClient::IsAuthorized()
 {
-  if (!m_HasNetwork)
+  if (!HasInternet())
     return !m_PlayerInfo.apiKey.empty() && !m_PlayerInfo.apiSecret.empty();
 
   if (!m_PlayerInfo.apiKey.empty() && !m_PlayerInfo.apiSecret.empty())

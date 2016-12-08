@@ -129,14 +129,16 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), PLAYLIST);
       OnMessage(msg);
-      Refresh();
+      if (m_client->IsAuthorized())
+        Refresh();
       return true;
     }
     else if (iControl == MEDIAUPDATE && m_client)
     {
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), MEDIAUPDATE);
       OnMessage(msg);
-      Refresh();
+      if (m_client->IsAuthorized())
+        Refresh();
       return true;
     }
     else if (iControl == NETWORKTEST)
@@ -176,6 +178,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       {
         CGUIWindowMNDemand::SetDialogMNPlaylist(playList);
         g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
+        m_client->StopPlaying();
       }
       return true;
     }
@@ -196,10 +199,8 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
   }
   else if (message.GetMessage() == GUI_MSG_NOTIFY_ALL)
   {
-    if (message.GetSenderId() == GetID() && message.GetParam1() == STARTCLIENT)
-    {
-      StartClient();
-    }
+    if (message.GetParam1() == STARTCLIENT)
+      StartClient(message.GetSenderId() != GetID());
   }
   return CGUIWindow::OnMessage(message);
 }
@@ -240,9 +241,6 @@ bool CGUIWindowMN::OnAction(const CAction &action)
 
 void CGUIWindowMN::OnInitWindow()
 {
-  // below needs to be called once we run the update, it disables buttons in skin
-  //DisableButtonsOnRefresh(true)
-
   CGUIMessage reload(GUI_MSG_NOTIFY_ALL, GetID(), 0, STARTCLIENT, 0);
   g_windowManager.SendThreadMessage(reload, GetID());
   
@@ -266,19 +264,25 @@ void CGUIWindowMN::Refresh()
   {
     m_RefreshRunning = true;
     if (m_client)
-      m_client->Startup();
+      m_client->Startup(false);
   }
 }
 
-void CGUIWindowMN::StartClient()
+void CGUIWindowMN::StartClient(bool force)
 {
   if (!m_client)
   {
     m_client = new CNWClient();
     m_client->RegisterClientCallBack(this, ClientCallBack);
     m_client->RegisterPlayerCallBack(this, PlayerCallBack);
-    m_client->Startup();
+    m_client->Startup(false);
   }
+  else
+  {
+    if (force)
+      m_client->Startup(true);
+  }
+
 }
 
 void CGUIWindowMN::OnStartup()
@@ -306,10 +310,19 @@ void CGUIWindowMN::Process(unsigned int currentTime, CDirtyRegionList &dirtyregi
   CGUIWindow::Process(currentTime, dirtyregions);
 }
 
-void CGUIWindowMN::ClientCallBack(const void *ctx, bool status)
+void CGUIWindowMN::ClientCallBack(const void *ctx, int msg)
 {
-  CLog::Log(LOGDEBUG, "**NW** - CGUIWindowMN::ClientCallBack() player running" );
+  CLog::Log(LOGDEBUG, "**NW** - CGUIWindowMN::ClientCallBack() msg = %d", msg);
   CGUIWindowMN *dlog = (CGUIWindowMN*)ctx;
+  switch(msg)
+  {
+    case 0:
+      break;
+    case 1:
+      break;
+    case 2:
+      break;
+  }
   dlog->m_RefreshRunning = false;
 }
 

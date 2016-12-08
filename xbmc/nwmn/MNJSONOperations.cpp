@@ -105,7 +105,7 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
     if (client)
     {
       client->UpdateFromJson(url, machineID, locationID);
-      client->Startup();
+      client->Startup(false);
     }
     
   }

@@ -40,7 +40,7 @@ enum AssetDownloadState
 
 // ---------------------------------------------
 // ---------------------------------------------
-typedef void (*ClientCallBackFn)(const void *ctx, bool status);
+typedef void (*ClientCallBackFn)(const void *ctx, int msg);
 typedef void (*PlayerCallBackFn)(const void *ctx, int msg, struct NWAsset &asset);
 
 
@@ -59,7 +59,7 @@ public:
   
   virtual void  Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
-  void          Startup();
+  void          Startup(bool bypass_authorization);
   void          FullUpdate();
   void          PlayPause();
   void          PausePlaying();
@@ -105,6 +105,7 @@ protected:
   bool          m_HasNetwork;
   bool          m_FullUpdate;
   int           m_totalAssets;
+  bool          m_assetsValidated;
   CDateTime     m_NextUpdateTime;
   CDateTimeSpan m_NextUpdateInterval;
   

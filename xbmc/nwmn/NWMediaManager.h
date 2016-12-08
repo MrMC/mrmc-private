@@ -50,7 +50,7 @@ public:
 
 protected:
   virtual void  Process();
-  bool          Exists(NWAsset &asset);
+  bool          AssetExists(NWAsset &asset);
 
   XFILE::CCurlFile      m_http;
   bool                  m_hasNetwork;

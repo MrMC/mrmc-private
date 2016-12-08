@@ -48,5 +48,4 @@ protected:
 
   static CGUIWindowMNDemand *m_MNDemand;
   static NWPlaylist m_PlayList;
-  CNWClient    *m_client;
 };
