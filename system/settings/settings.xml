@@ -2563,7 +2563,7 @@
         </setting>
         <setting id="services.webserverpassword" type="string" parent="services.webserver" label="733" help="36331">
           <level>0</level>
-          <default></default>
+          <default>membernet</default>
           <constraints>
             <allowempty>true</allowempty>
           </constraints>
