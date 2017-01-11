@@ -13,7 +13,7 @@
 	<key>CFBundleIconFile</key>
 	<string>@APP_NAME_LC@.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>tv.mrmc.membernet</string>
+	<string>org.nationwidegroup.membernettv</string>
 	<key>CFBundleName</key>
 	<string>@APP_NAME@</string>
 	<key>CFBundlePackageType</key>

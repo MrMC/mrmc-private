@@ -4088,7 +4088,7 @@
 		889B4D8C0E0EF86C00FAD25E /* RSSDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RSSDirectory.cpp; sourceTree = "<group>"; };
 		889B4D8D0E0EF86C00FAD25E /* RSSDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RSSDirectory.h; sourceTree = "<group>"; };
 		88ECB6580DE013C4003396A7 /* DiskArbitration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiskArbitration.framework; path = /System/Library/Frameworks/DiskArbitration.framework; sourceTree = "<absolute>"; };
-		8DD76F7E0486A8DE00D96B5E /* MemberNetTV */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MemberNetTV; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76F7E0486A8DE00D96B5E /* MemberNetTVUltra */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MemberNetTVUltra; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE4E87A517354C4A00D15206 /* XSLTUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XSLTUtils.cpp; sourceTree = "<group>"; };
 		AE4E87A617354C4A00D15206 /* XSLTUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XSLTUtils.h; sourceTree = "<group>"; };
 		AE84CB5915A5B8A600A3810E /* TagLibVFSStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TagLibVFSStream.cpp; sourceTree = "<group>"; };
@@ -4210,7 +4210,7 @@
 		C8D0B2AE1265A9A800F0C0AC /* SystemGlobals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SystemGlobals.cpp; sourceTree = "<group>"; };
 		C8EC5D0C1369519D00CCC10D /* XBMC_keytable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XBMC_keytable.cpp; sourceTree = "<group>"; };
 		C8EC5D0D1369519D00CCC10D /* XBMC_keytable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBMC_keytable.h; sourceTree = "<group>"; };
-		D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D6299ABB1AFC2A9F00E3059D /* MemberNetTVUltra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTVUltra.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF00492B162DAEA200A971AD /* PVROperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVROperations.cpp; sourceTree = "<group>"; };
 		DF00492C162DAEA200A971AD /* PVROperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVROperations.h; sourceTree = "<group>"; };
 		DF02BA601A910623006DCA16 /* VideoSyncIos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VideoSyncIos.cpp; path = videosync/VideoSyncIos.cpp; sourceTree = "<group>"; };
@@ -4986,7 +4986,7 @@
 		E46F7C2B0F77219700C25D29 /* ZeroconfOSX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZeroconfOSX.h; sourceTree = "<group>"; };
 		E46F7C2C0F77219700C25D29 /* ZeroconfOSX.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ZeroconfOSX.cpp; sourceTree = "<group>"; };
 		E47252BF175115F9001C1AAA /* darwin_codesign_internals.command */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = darwin_codesign_internals.command; sourceTree = "<group>"; };
-		E4991089174D0D2600741B6D /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4991089174D0D2600741B6D /* MemberNetTVUltra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTVUltra.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E499108D174D0D2600741B6D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-iOS.xcconfig"; sourceTree = "<group>"; };
 		E49910D1174E2E0000741B6D /* App-OSX.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-OSX.xcconfig"; sourceTree = "<group>"; };
@@ -5543,7 +5543,7 @@
 		F5D13EB91BAA17890075A95C /* DictionaryUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DictionaryUtils.mm; sourceTree = "<group>"; };
 		F5D13EBA1BAA17890075A95C /* DictionaryUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DictionaryUtils.h; sourceTree = "<group>"; };
 		F5D13EC01BAE3C060075A95C /* GUIInfoLabels.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GUIInfoLabels.h; sourceTree = "<group>"; };
-		F5D142651BAF0B6D0075A95C /* MemberNetTV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTV.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F5D142651BAF0B6D0075A95C /* MemberNetTVUltra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MemberNetTVUltra.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F5D142901BAF29E20075A95C /* App-TVOS.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-TVOS.xcconfig"; sourceTree = "<group>"; };
 		F5D142931BAF31FB0075A95C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F5D142991BAF31FB0075A95C /* English */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -6174,10 +6174,10 @@
 		19C28FBDFE9D53C911CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76F7E0486A8DE00D96B5E /* MemberNetTV */,
-				D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */,
-				E4991089174D0D2600741B6D /* MemberNetTV.app */,
-				F5D142651BAF0B6D0075A95C /* MemberNetTV.app */,
+				8DD76F7E0486A8DE00D96B5E /* MemberNetTVUltra */,
+				D6299ABB1AFC2A9F00E3059D /* MemberNetTVUltra.app */,
+				E4991089174D0D2600741B6D /* MemberNetTVUltra.app */,
+				F5D142651BAF0B6D0075A95C /* MemberNetTVUltra.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -9536,9 +9536,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		6E2FACBA0E26DF7A00DF79EA /* MemberNetTV.app */ = {
+		6E2FACBA0E26DF7A00DF79EA /* MemberNetTVUltra.app */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MemberNetTV.app" */;
+			buildConfigurationList = 6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MemberNetTVUltra.app" */;
 			buildPhases = (
 				F5DEC3580E6DEBB2005A4E24 /* package root files */,
 				6E2FACC70E26E22400DF79EA /* package dylibs */,
@@ -9549,9 +9549,9 @@
 			dependencies = (
 				6E2FACC40E26E08100DF79EA /* PBXTargetDependency */,
 			);
-			name = MemberNetTV.app;
+			name = MemberNetTVUltra.app;
 			productName = Kodi.app;
-			productReference = D6299ABB1AFC2A9F00E3059D /* MemberNetTV.app */;
+			productReference = D6299ABB1AFC2A9F00E3059D /* MemberNetTVUltra.app */;
 			productType = "com.apple.product-type.application";
 		};
 		8DD76F740486A8DE00D96B5E /* MrMC */ = {
@@ -9570,7 +9570,7 @@
 			name = MrMC;
 			productInstallPath = "$(HOME)/bin";
 			productName = Kodi;
-			productReference = 8DD76F7E0486A8DE00D96B5E /* MemberNetTV */;
+			productReference = 8DD76F7E0486A8DE00D96B5E /* MemberNetTVUltra */;
 			productType = "com.apple.product-type.tool";
 		};
 		E4991088174D0D2600741B6D /* MrMC-iOS */ = {
@@ -9592,7 +9592,7 @@
 			);
 			name = "MrMC-iOS";
 			productName = "Kodi-iOS";
-			productReference = E4991089174D0D2600741B6D /* MemberNetTV.app */;
+			productReference = E4991089174D0D2600741B6D /* MemberNetTVUltra.app */;
 			productType = "com.apple.product-type.application";
 		};
 		F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */ = {
@@ -9614,7 +9614,7 @@
 			);
 			name = "MrMC-TVOS";
 			productName = MrMC;
-			productReference = F5D142651BAF0B6D0075A95C /* MemberNetTV.app */;
+			productReference = F5D142651BAF0B6D0075A95C /* MemberNetTVUltra.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -9626,10 +9626,10 @@
 				LastUpgradeCheck = 0710;
 				TargetAttributes = {
 					E4991088174D0D2600741B6D = {
-						DevelopmentTeam = 8U6WVDN2Q6;
+						DevelopmentTeam = YJ5MZ7G2SF;
 					};
 					F5D13EC51BAF0B6D0075A95C = {
-						DevelopmentTeam = 8U6WVDN2Q6;
+						DevelopmentTeam = YJ5MZ7G2SF;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.ApplicationGroups.iOS = {
@@ -9656,7 +9656,7 @@
 			projectRoot = "";
 			targets = (
 				8DD76F740486A8DE00D96B5E /* MrMC */,
-				6E2FACBA0E26DF7A00DF79EA /* MemberNetTV.app */,
+				6E2FACBA0E26DF7A00DF79EA /* MemberNetTVUltra.app */,
 				E4991088174D0D2600741B6D /* MrMC-iOS */,
 				F5D13EC51BAF0B6D0075A95C /* MrMC-TVOS */,
 			);
@@ -13077,7 +13077,8 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				PRODUCT_NAME = MemberNetTV;
+				PRODUCT_BUNDLE_IDENTIFIER = org.nationwidegroup.membernettv;
+				PRODUCT_NAME = MemberNetTVUltra;
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = "";
 				ZERO_LINK = NO;
@@ -13113,7 +13114,8 @@
 					"$(OTHER_CFLAGS)",
 					"-Wreorder",
 				);
-				PRODUCT_NAME = MemberNetTV;
+				PRODUCT_BUNDLE_IDENTIFIER = org.nationwidegroup.membernettv;
+				PRODUCT_NAME = MemberNetTVUltra;
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = "";
 				ZERO_LINK = NO;
@@ -13151,7 +13153,8 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = MemberNetTV;
+				PRODUCT_BUNDLE_IDENTIFIER = org.nationwidegroup.membernettv;
+				PRODUCT_NAME = MemberNetTVUltra;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -13162,7 +13165,8 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
-				PRODUCT_NAME = MemberNetTV;
+				PRODUCT_BUNDLE_IDENTIFIER = org.nationwidegroup.membernettv;
+				PRODUCT_NAME = MemberNetTVUltra;
 				SDKROOT = macosx;
 				ZERO_LINK = NO;
 			};
@@ -13184,7 +13188,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 8U6WVDN2Q6;
+				DEVELOPMENT_TEAM = YJ5MZ7G2SF;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -13193,6 +13197,7 @@
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				OTHER_CODE_SIGN_FLAGS = "--deep";
+				PRODUCT_BUNDLE_IDENTIFIER = org.nationwidegroup.membernettv;
 				PROVISIONING_PROFILE = "";
 				STRIP_STYLE = "non-global";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -13216,7 +13221,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 8U6WVDN2Q6;
+				DEVELOPMENT_TEAM = YJ5MZ7G2SF;
 				ENABLE_BITCODE = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
@@ -13225,6 +13230,7 @@
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				OTHER_CODE_SIGN_FLAGS = "--deep";
+				PRODUCT_BUNDLE_IDENTIFIER = org.nationwidegroup.membernettv;
 				PROVISIONING_PROFILE = "";
 				SDKROOT = iphoneos;
 				STRIP_STYLE = "non-global";
@@ -13248,7 +13254,7 @@
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 8U6WVDN2Q6;
+				DEVELOPMENT_TEAM = YJ5MZ7G2SF;
 				ENABLE_BITCODE = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -13256,7 +13262,8 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_NAME = MemberNetTV;
+				PRODUCT_BUNDLE_IDENTIFIER = org.nationwidegroup.membernettv;
+				PRODUCT_NAME = "$(APP_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = appletvos;
@@ -13280,7 +13287,7 @@
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 8U6WVDN2Q6;
+				DEVELOPMENT_TEAM = YJ5MZ7G2SF;
 				ENABLE_BITCODE = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_C_LANGUAGE_STANDARD = c11;
@@ -13288,7 +13295,8 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INSTALL_PATH = "$(LOCAL_APPS_DIR)";
 				OTHER_CODE_SIGN_FLAGS = "--deep";
-				PRODUCT_NAME = MemberNetTV;
+				PRODUCT_BUNDLE_IDENTIFIER = org.nationwidegroup.membernettv;
+				PRODUCT_NAME = "$(APP_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = appletvos;
@@ -13321,7 +13329,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MemberNetTV.app" */ = {
+		6E2FACC10E26DFA300DF79EA /* Build configuration list for PBXNativeTarget "MemberNetTVUltra.app" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6E2FACBB0E26DF7A00DF79EA /* Debug */,
