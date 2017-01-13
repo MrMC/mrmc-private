@@ -58,9 +58,9 @@ endif
 ifeq ($(findstring mips, $(CPU)), mips)
   ffmpg_config += --disable-mips32r2 --disable-mipsdspr1 --disable-mipsdspr2
 endif
-ifeq ($(Configuration), Release)
+#ifeq ($(Configuration), Release)
   ffmpg_config += --disable-debug
-endif
+#endif
 
 
 CLEAN_FILES=$(ARCHIVE) $(PLATFORM)

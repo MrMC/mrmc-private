@@ -2,9 +2,9 @@ include ../../depends/Makefile.include
 
 OBJS = libcurl.so
 OBJS+= libcpluff.so
-OBJS+= libass.so
-OBJS+= libxbogg.so libxbvorbis.so libxbvorbisfile.so
-OBJS+= libmpeg2.so libmpeg2convert.so
+#OBJS+= libass.so
+#OBJS+= libxbogg.so libxbvorbis.so libxbvorbisfile.so
+#OBJS+= libmpeg2.so libmpeg2convert.so
 #OBJS+= libnfs.so
 #OBJS+= libdsm.so
 #OBJS+= libsmbclient.so
@@ -88,7 +88,7 @@ endif
 shared:
 	mkdir -p assets
 	cp -rfp $(PREFIX)/share/@APP_NAME_LC@/* ./assets
-	#cp -rfp $(PREFIX)/mrmc/repo-resources/* ./assets/addons
+	#cp -rfp $(PREFIX)/@APP_NAME_LC@/repo-resources/* ./assets/addons
 	find `pwd`/assets/ -depth -name ".git" -exec rm -rf {} \;
 	find `pwd`/assets/ -name "*.so" -exec rm {} \;
 	find `pwd`/assets/addons/skin.*/media/* -depth -not -iname "Textures.xbt" -exec rm -rf {} \;
@@ -119,7 +119,7 @@ res:
 	cp xbmc/activity_main.xml xbmc/res/layout/
 	cp xbmc/searchable.xml xbmc/res/xml/
 	mkdir -p tmp/res; $(AAPT) c -S xbmc/res -C tmp/res; cp -r -n xbmc/res tmp/ || true
-	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/@APP_NAME@app-debug-skeleton.apk -J xbmc/gen/@APP_PACKAGE_DIR@
+	$(AAPT) p -f -I $(SDKROOT)/platforms/$(SDK_PLATFORM)/android.jar -S tmp/res/ -M xbmc/AndroidManifest.xml -F images/@APP_NAME@-debug-skeleton.apk -J xbmc/gen/@APP_PACKAGE_DIR@
 	@rm -rf tmp/
 
 libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
@@ -148,15 +148,15 @@ xbmc/classes.dex: res
 
 package: libs symbols xbmc/classes.dex
 	@echo "Creating package..."
-	@cp images/@APP_NAME@app-debug-skeleton.apk images/@APP_NAME@app-debug-$(CPU)-unaligned.apk
-	@cd xbmc; $(ZIP) -r -q ../images/@APP_NAME@app-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
+	@cp images/@APP_NAME@-debug-skeleton.apk images/@APP_NAME@-debug-$(CPU)-unaligned.apk
+	@cd xbmc; $(ZIP) -r -q ../images/@APP_NAME@-debug-$(CPU)-unaligned.apk lib/$(CPU) assets classes.dex
 
 apk-sign:
 	@echo "Signing..."
-	@jarsigner -sigalg SHA1withRSA -digestalg SHA1 -tsa http://timestamp.digicert.com -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/@APP_NAME@app-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
-	@$(ZIPALIGN) -f 4 images/@APP_NAME@app-debug-$(CPU)-unaligned.apk $(XBMCROOT)/@APP_NAME@app-$(CPU)-debug.apk
-	@rm images/@APP_NAME@app-debug-$(CPU)-unaligned.apk
-	@echo "$(XBMCROOT)/@APP_NAME_LC@app-$(CPU)-debug.apk created"
+	@jarsigner -sigalg SHA1withRSA -digestalg SHA1 -tsa http://timestamp.digicert.com -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) images/@APP_NAME@-debug-$(CPU)-unaligned.apk $(SIGN_KEY)
+	@$(ZIPALIGN) -f 4 images/@APP_NAME@-debug-$(CPU)-unaligned.apk $(XBMCROOT)/@APP_NAME@-$(CPU)-debug.apk
+	@rm images/@APP_NAME@-debug-$(CPU)-unaligned.apk
+	@echo "$(XBMCROOT)/@APP_NAME_LC@-$(CPU)-debug.apk created"
 
 $(PREFIX)/lib/xbmc/lib@APP_NAME_LC@.so: $(SRCLIBS)
 	$(MAKE) -C ../../depends/target/xbmc

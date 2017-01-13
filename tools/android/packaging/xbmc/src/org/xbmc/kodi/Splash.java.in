@@ -665,7 +665,7 @@ public class Splash extends Activity {
   }
 
   protected void startXBMC() {
-    // Run Kodi
+    // Run MemberNetTVUltra
     Intent intent = getIntent();
     intent.setClass(this, @APP_PACKAGE@.Main.class);
     intent.addFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
@@ -744,7 +744,7 @@ public class Splash extends Activity {
         if (!curArch.equalsIgnoreCase(properties.getProperty("native_arch"))
               && !curArch2.equalsIgnoreCase(properties.getProperty("native_arch")))
         {
-          mErrorMsg = "This @APP_NAME@ package is not compatible with your device (device=" + curArch + " vs. package=" + properties.getProperty("native_arch") +").\nPlease check the <a href=\"http://wiki.kodi.tv/index.php?title=XBMC_for_Android_specific_FAQ\">Kodi Android wiki</a> for more information.";
+          mErrorMsg = "This @APP_NAME@ package is not compatible with your device (device=" + curArch + " vs. package=" + properties.getProperty("native_arch") +").\nPlease check the <a href=\"http://www.nationwidegroup.org\">Nationwide Marketing Group</a> for more information.";
           Log.e(TAG, mErrorMsg);
           mState = InError;
         }
@@ -771,7 +771,7 @@ public class Splash extends Activity {
         } else {
           ret = CheckCpuFeature("neon") || CheckCpuFeature("aarch64");  //aarch64 is always neon
           if (!ret) {
-            mErrorMsg = "This @APP_NAME@ package is not compatible with your device (NEON).\nPlease check the <a href=\"http://wiki.kodi.tv/index.php?title=XBMC_for_Android_specific_FAQ\">Kodi Android wiki</a> for more information.";
+            mErrorMsg = "This @APP_NAME@ package is not compatible with your device (NEON).\nPlease check the <a href=\"http://www.nationwidegroup.org\">Nationwide Marketing Group</a> for more information.";
             Log.e(TAG, mErrorMsg);
             mState = InError;
           }
