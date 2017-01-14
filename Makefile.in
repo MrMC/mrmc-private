@@ -188,10 +188,8 @@ LIBADDON_DIRS=\
 	lib/addons/library.xbmc.pvr \
 	lib/addons/library.kodi.guilib \
 
-MRMC_MEDIA=addons/skin.mrmc/media
 NWMN_MEDIA=addons/skin.nationwide/media
-SKIN_DIRS=$(MRMC_MEDIA)
-SKIN_DIRS+=NWMN_MEDIA
+SKIN_DIRS=$(NWMN_MEDIA)
 
 LIBS=@LIBS@
 CFLAGS=@CFLAGS@
@@ -245,7 +243,6 @@ config.status: configure
 # skin textures
 ifeq (@USE_TEXTUREPACKER@,1)
 skins: @TEXTUREPACKER@
-	 $(MAKE) -C $(MRMC_MEDIA)
 	 $(MAKE) -C $(NWMN_MEDIA)
 else
 skins:
