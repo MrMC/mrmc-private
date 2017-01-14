@@ -58,7 +58,7 @@ if [ "$ACTION" == build ] || [ "$ACTION" == install ]; then
 
   # rsync command for including everything but the skins
   DEFAULTSKIN_EXCLUDES="--exclude addons/skin.mrmc --exclude addons/skin.re-touched --exclude addons/skin.amber --exclude addons/skin.pm3.hd --exclude addons/skin.sio2 --exclude addons/skin.nationwide"
-  ADDONSYNC="rsync -aq ${PLATFORM} ${BUILDSRC} ${BUILDDBG} ${DEFAULTSKIN_EXCLUDES} --exclude addons/lib --exclude addons/share  --exclude *changelog.* --exclude *library.*/*.h --exclude *library.*/*.cpp --exclude *xml.in"
+  ADDONSYNC="rsync -aq ${PLATFORM} ${BUILDSRC} ${BUILDDBG} ${DEFAULTSKIN_EXCLUDES} --exclude addons/lib --exclude addons/share  --exclude *changelog.* --exclude *library.*/*.h --exclude *library.*/*.cpp --exclude *xml.in --exclude *pvr.* --exclude *visualization.*"
 
   # binary name is MrMC but we build MrMC so to get a clean binary each time
   mv $TARGET_BUILD_DIR/$TARGET_NAME/$APP_NAME $TARGET_BUILD_DIR/$TARGET_NAME/$APP_NAME
@@ -78,11 +78,11 @@ if [ "$ACTION" == build ] || [ "$ACTION" == install ]; then
   ${ADDONSYNC} "$SRCROOT/addons"  "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome"
 
   # package items that are located in depends
-  ${LANGSYNC} "$XBMC_DEPENDS/mrmc/repo-resources/" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons"
+  # ${LANGSYNC} "$XBMC_DEPENDS/mrmc/repo-resources/" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons"
   ${ADDONSYNC} "$XBMC_DEPENDS/mrmc/addons/" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons"
 
   # always sync skin.mrmc
-  package_skin "${SYNC}" "$SRCROOT/addons/skin.mrmc"
+  # package_skin "${SYNC}" "$SRCROOT/addons/skin.mrmc"
   # and move nwmn skin in as well
   package_skin "${SYNC}" "$SRCROOT/addons/skin.nationwide"
 
