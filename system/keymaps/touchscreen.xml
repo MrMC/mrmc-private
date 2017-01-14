@@ -24,8 +24,8 @@
   </MyFiles>
   <FullScreenVideo>
     <touch>
-      <swipe direction="left">StepBack</swipe>
-      <swipe direction="right">StepForward</swipe>
+      <swipe direction="left">Stop</swipe>
+      <swipe direction="right">Stop</swipe>
       <swipe direction="up">ChapterOrBigStepForward</swipe>
       <swipe direction="down">ChapterOrBigStepBack</swipe>
       <swipe direction="left" pointers="2">Seek(-7)</swipe>
