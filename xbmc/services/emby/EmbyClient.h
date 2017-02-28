@@ -25,14 +25,14 @@
 #include "utils/XMLUtils.h"
 #include "threads/CriticalSection.h"
 
-enum class PlexSectionParsing
+enum class EmbySectionParsing
 {
   newSection,
   checkSection,
   updateSection,
 };
 
-struct PlexConnection
+struct EmbyConnection
 {
   std::string port;
   std::string address;
@@ -40,7 +40,7 @@ struct PlexConnection
   int external;
 };
 
-struct PlexSectionsContent
+struct EmbySectionsContent
 {
   int port;
   std::string type;
@@ -51,8 +51,6 @@ struct PlexSectionsContent
   std::string uuid;
   std::string updatedAt;
   std::string address;
-  //std::string serverName;
-  //std::string serverVersion;
   std::string path;
   std::string section;
   std::string art;
@@ -61,19 +59,19 @@ struct PlexSectionsContent
 
 class CFileItem;
 typedef std::shared_ptr<CFileItem> CFileItemPtr;
-typedef std::vector<PlexSectionsContent> PlexSectionsContentVector;
+typedef std::vector<EmbySectionsContent> EmbySectionsContentVector;
 
 
-class CPlexClient
+class CEmbyClient
 {
-  friend class CPlexServices;
+  friend class CEmbyServices;
 
 public:
-  CPlexClient();
- ~CPlexClient();
+  CEmbyClient();
+ ~CEmbyClient();
 
   bool Init(const TiXmlElement* DeviceNode);
-  bool Init(std::string data, std::string ip);
+  bool Init(const CVariant &data, std::string ip);
 
   const bool NeedUpdate() const             { return m_needUpdate; }
   const std::string &GetContentType() const { return m_contentType; }
@@ -90,10 +88,10 @@ public:
   std::vector<CFileItemPtr> GetSectionItems()  { return m_section_items; };
   void ClearSectionItems()                  { m_section_items.clear(); };
 
-  const PlexSectionsContentVector GetTvContent() const;
-  const PlexSectionsContentVector GetMovieContent() const;
-  const PlexSectionsContentVector GetArtistContent() const;
-  const PlexSectionsContentVector GetPhotoContent() const;
+  const EmbySectionsContentVector GetTvContent() const;
+  const EmbySectionsContentVector GetMovieContent() const;
+  const EmbySectionsContentVector GetArtistContent() const;
+  const EmbySectionsContentVector GetPhotoContent() const;
   const std::string FormatContentTitle(const std::string contentTitle) const;
   std::string FindSectionTitle(const std::string &path);
 
@@ -104,7 +102,7 @@ public:
 protected:
   bool        IsSameClientHostName(const CURL& url);
   std::string LookUpUuid(const std::string path) const;
-  bool        ParseSections(enum PlexSectionParsing parser);
+  bool        ParseSections(enum EmbySectionParsing parser);
   void        SetPresence(bool presence);
 
 private:
@@ -125,8 +123,8 @@ private:
   CCriticalSection  m_criticalTVShow;
   CCriticalSection  m_criticalArtist;
   CCriticalSection  m_criticalPhoto;
-  std::vector<PlexSectionsContent> m_movieSectionsContents;
-  std::vector<PlexSectionsContent> m_showSectionsContents;
-  std::vector<PlexSectionsContent> m_artistSectionsContents;
-  std::vector<PlexSectionsContent> m_photoSectionsContents;
+  std::vector<EmbySectionsContent> m_movieSectionsContents;
+  std::vector<EmbySectionsContent> m_showSectionsContents;
+  std::vector<EmbySectionsContent> m_artistSectionsContents;
+  std::vector<EmbySectionsContent> m_photoSectionsContents;
 };

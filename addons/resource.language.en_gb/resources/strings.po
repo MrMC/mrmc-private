@@ -4268,7 +4268,6 @@ msgctxt "#1235"
 msgid "Programs & pictures & video"
 msgstr ""
 
-
 #: system/settings/settings.xml
 msgctxt "#1236"
 msgid "Plex client"
@@ -4991,7 +4990,77 @@ msgctxt "#2104"
 msgid "Check the log for more information."
 msgstr ""
 
-#empty strings from id 2105 to 9999
+#: system/settings/settings.xml
+msgctxt "#2105"
+msgid "Emby client"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2106"
+msgid "Enable Emby server sign-in/discovery"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2107"
+msgid "Emby Manual Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2108"
+msgid "Emby Manual Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2109"
+msgid "Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2110"
+msgid "Sign-out"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2111"
+msgid "Emby Server Broadcast Discovery"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2112"
+msgid "Emby Server Broadcast Discovery"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2113"
+msgid "Emby User"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2114"
+msgid "Change the Emby User"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2115"
+msgid "Emby Pin Request Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2116"
+msgid "Emby Pin Request Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2117"
+msgid "From your computer, go to this url"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2118"
+msgid "https://emby.media/pin and enter this code -> "
+msgstr ""
+
+#empty strings from id 2120 to 9999
 
 #: xbmc/guilib/WindowIDs.h
 msgctxt "#10000"

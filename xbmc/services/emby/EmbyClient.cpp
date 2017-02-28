@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2016 Team MrMC
+ *      Copyright (C) 2017 Team MrMC
  *      https://github.com/MrMC
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -22,8 +22,8 @@
 #include <memory>
 #include <algorithm>
 
-#include "PlexClient.h"
-#include "PlexUtils.h"
+#include "EmbyClient.h"
+#include "EmbyUtils.h"
 
 #include "Application.h"
 #include "URL.h"
@@ -38,28 +38,7 @@
 #include <string>
 #include <sstream>
 
-/*
-static bool IsInSubNet(CURL url)
-{
-  bool rtn = false;
-  CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
-  in_addr_t localMask = ntohl(inet_addr(iface->GetCurrentNetmask().c_str()));
-  in_addr_t testAddress = ntohl(inet_addr(url.GetHostName().c_str()));
-  in_addr_t localAddress = ntohl(inet_addr(iface->GetCurrentIPAddress().c_str()));
-
-  in_addr_t temp1 = testAddress & localMask;
-  in_addr_t temp2 = localAddress & localMask;
-  if (temp1 == temp2)
-  {
-    // we are on the same subnet
-    // now make sure it is a plex server
-    rtn = CPlexUtils::GetIdentity(url, 1);
-  }
-  return rtn;
-}
-*/
-
-CPlexClient::CPlexClient()
+CEmbyClient::CEmbyClient()
 {
   m_local = true;
   m_owned = true;
@@ -68,50 +47,39 @@ CPlexClient::CPlexClient()
   m_needUpdate = false;
 }
 
-CPlexClient::~CPlexClient()
+CEmbyClient::~CEmbyClient()
 {
 }
 
-bool CPlexClient::Init(std::string data, std::string ip)
+bool CEmbyClient::Init(const CVariant &data, std::string ip)
 {
-  m_url = "";
+  static const std::string ServerPropertyId = "Id";
+  static const std::string ServerPropertyName = "Name";
+  static const std::string ServerPropertyAddress = "Address";
 
-  int port = 32400;
-  m_protocol = "http";
+  if (!data.isObject() ||
+      !data.isMember(ServerPropertyId) ||
+      !data.isMember(ServerPropertyName) ||
+      !data.isMember(ServerPropertyAddress))
+    return false;
 
-  std::string s;
-  std::istringstream f(data);
-  while (std::getline(f, s))
-  {
-    int pos = s.find(':');
-    if (pos > 0)
-    {
-      std::string substr = s.substr(0, pos);
-      std::string name = StringUtils::Trim(substr);
-      substr = s.substr(pos + 1);
-      std::string val = StringUtils::Trim(substr);
-      if (name == "Content-Type")
-        m_contentType = val;
-      else if (name == "Resource-Identifier")
-        m_uuid = val;
-      else if (name == "Name")
-        m_serverName = val;
-      else if (name == "Port")
-        port = atoi(val.c_str());
-    }
-  }
+  std::string id = data[ServerPropertyId].asString();
+  std::string name = data[ServerPropertyName].asString();
+  std::string address = data[ServerPropertyAddress].asString();
+  if (id.empty() || name.empty() || address.empty())
+    return false;
 
-  CURL url;
-  url.SetHostName(ip);
-  url.SetPort(port);
-  url.SetProtocol(m_protocol);
-  if (CPlexUtils::GetIdentity(url, 2))
-    m_url = url.Get();
+  CURL url(address);
+
+  m_url = url.Get();
+  m_protocol = url.GetProtocol();
+  m_uuid = id;
+  m_serverName = name;
 
   return !m_url.empty();
 }
 
-bool CPlexClient::Init(const TiXmlElement* DeviceNode)
+bool CEmbyClient::Init(const TiXmlElement* DeviceNode)
 {
   m_url = "";
   m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
@@ -125,11 +93,11 @@ bool CPlexClient::Init(const TiXmlElement* DeviceNode)
   m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
   m_platform = XMLUtils::GetAttribute(DeviceNode, "platform");
 
-  std::vector<PlexConnection> connections;
+  std::vector<EmbyConnection> connections;
   const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
   while (ConnectionNode)
   {
-    PlexConnection connection;
+    EmbyConnection connection;
     connection.port = XMLUtils::GetAttribute(ConnectionNode, "port");
     connection.address = XMLUtils::GetAttribute(ConnectionNode, "address");
     connection.protocol = XMLUtils::GetAttribute(ConnectionNode, "protocol");
@@ -144,18 +112,18 @@ bool CPlexClient::Init(const TiXmlElement* DeviceNode)
   {
     // sort so that all external=0 are first. These are the local connections.
     std::sort(connections.begin(), connections.end(),
-      [] (PlexConnection const& a, PlexConnection const& b) { return a.external < b.external; });
+      [] (EmbyConnection const& a, EmbyConnection const& b) { return a.external < b.external; });
 
     for (const auto &connection : connections)
     {
       url.SetHostName(connection.address);
       url.SetPort(atoi(connection.port.c_str()));
       url.SetProtocol(connection.protocol);
-      url.SetProtocolOptions("&X-Plex-Token=" + m_accessToken);
+      url.SetProtocolOptions("&X-MediaBrowser-Token=" + m_accessToken);
       int timeout = connection.external ? 5 : 1;
-      if (CPlexUtils::GetIdentity(url, timeout))
+      //if (CEmbyUtils::GetIdentity(url, timeout))
       {
-        CLog::Log(LOGDEBUG, "CPlexClient::Init "
+        CLog::Log(LOGDEBUG, "CEmbyClient::Init "
           "serverName(%s), ipAddress(%s), protocol(%s)",
           m_serverName.c_str(), connection.address.c_str(), connection.protocol.c_str());
 
@@ -170,48 +138,48 @@ bool CPlexClient::Init(const TiXmlElement* DeviceNode)
   return !m_url.empty();
 }
 
-std::string CPlexClient::GetUrl()
+std::string CEmbyClient::GetUrl()
 {
   return m_url;
 }
 
-std::string CPlexClient::GetHost()
+std::string CEmbyClient::GetHost()
 {
   CURL url(m_url);
   return url.GetHostName();
 }
 
-int CPlexClient::GetPort()
+int CEmbyClient::GetPort()
 {
   CURL url(m_url);
   return url.GetPort();
 }
 
-const PlexSectionsContentVector CPlexClient::GetTvContent() const
+const EmbySectionsContentVector CEmbyClient::GetTvContent() const
 {
   CSingleLock lock(m_criticalTVShow);
   return m_showSectionsContents;
 }
 
-const PlexSectionsContentVector CPlexClient::GetMovieContent() const
+const EmbySectionsContentVector CEmbyClient::GetMovieContent() const
 {
   CSingleLock lock(m_criticalMovies);
   return m_movieSectionsContents;
 }
 
-const PlexSectionsContentVector CPlexClient::GetArtistContent() const
+const EmbySectionsContentVector CEmbyClient::GetArtistContent() const
 {
   CSingleLock lock(m_criticalArtist);
   return m_artistSectionsContents;
 }
 
-const PlexSectionsContentVector CPlexClient::GetPhotoContent() const
+const EmbySectionsContentVector CEmbyClient::GetPhotoContent() const
 {
   CSingleLock lock(m_criticalPhoto);
   return m_photoSectionsContents;
 }
 
-const std::string CPlexClient::FormatContentTitle(const std::string contentTitle) const
+const std::string CEmbyClient::FormatContentTitle(const std::string contentTitle) const
 {
   std::string owned = (GetOwned() == "1") ? "O":"S";
   std::string title = StringUtils::Format("Plex(%s) - %s - %s %s",
@@ -219,7 +187,7 @@ const std::string CPlexClient::FormatContentTitle(const std::string contentTitle
   return title;
 }
 
-std::string CPlexClient::FindSectionTitle(const std::string &path)
+std::string CEmbyClient::FindSectionTitle(const std::string &path)
 {
   CURL real_url(path);
   if (real_url.GetProtocol() == "plex")
@@ -248,7 +216,7 @@ std::string CPlexClient::FindSectionTitle(const std::string &path)
   return "";
 }
 
-bool CPlexClient::IsSameClientHostName(const CURL& url)
+bool CEmbyClient::IsSameClientHostName(const CURL& url)
 {
   CURL real_url(url);
   if (real_url.GetProtocol() == "plex")
@@ -260,7 +228,7 @@ bool CPlexClient::IsSameClientHostName(const CURL& url)
   return GetHost() == real_url.GetHostName();
 }
 
-std::string CPlexClient::LookUpUuid(const std::string path) const
+std::string CEmbyClient::LookUpUuid(const std::string path) const
 {
   std::string uuid;
 
@@ -285,7 +253,7 @@ std::string CPlexClient::LookUpUuid(const std::string path) const
   return uuid;
 }
 
-bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
+bool CEmbyClient::ParseSections(enum EmbySectionParsing parser)
 {
   bool rtn = false;
   XFILE::CCurlFile plex;
@@ -298,10 +266,10 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
   if (plex.Get(curl.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
-    if (parser == PlexSectionParsing::newSection || parser == PlexSectionParsing::checkSection)
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %d, %s", parser, strResponse.c_str());
+    if (parser == EmbySectionParsing::newSection || parser == EmbySectionParsing::checkSection)
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %d, %s", parser, strResponse.c_str());
 #endif
-    if (parser == PlexSectionParsing::updateSection)
+    if (parser == EmbySectionParsing::updateSection)
     {
       {
         CSingleLock lock(m_criticalMovies);
@@ -323,7 +291,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
       const TiXmlElement* DirectoryNode = MediaContainer->FirstChildElement("Directory");
       while (DirectoryNode)
       {
-        PlexSectionsContent content;
+        EmbySectionsContent content;
         content.uuid = XMLUtils::GetAttribute(DirectoryNode, "uuid");
         content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
         content.type = XMLUtils::GetAttribute(DirectoryNode, "type");
@@ -339,7 +307,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
           content.art = content.section + "/resources/" + URIUtils::GetFileName(art);
         if (content.type == "movie")
         {
-          if (parser == PlexSectionParsing::checkSection)
+          if (parser == EmbySectionParsing::checkSection)
           {
             CSingleLock lock(m_criticalMovies);
             for (const auto &contents : m_movieSectionsContents)
@@ -349,7 +317,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
                 if (contents.updatedAt != content.updatedAt)
                 {
 #if defined(PLEX_DEBUG_VERBOSE)
-                  CLog::Log(LOGDEBUG, "CPlexClient::ParseSections need update on %s:%s",
+                  CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections need update on %s:%s",
                     m_serverName.c_str(), content.title.c_str());
 #endif
                   m_needUpdate = true;
@@ -365,7 +333,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
         }
         else if (content.type == "show")
         {
-          if (parser == PlexSectionParsing::checkSection)
+          if (parser == EmbySectionParsing::checkSection)
           {
             CSingleLock lock(m_criticalTVShow);
             for (const auto &contents : m_showSectionsContents)
@@ -375,7 +343,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
                 if (contents.updatedAt != content.updatedAt)
                 {
 #if defined(PLEX_DEBUG_VERBOSE)
-                  CLog::Log(LOGDEBUG, "CPlexClient::ParseSections need update on %s:%s",
+                  CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections need update on %s:%s",
                     m_serverName.c_str(), content.title.c_str());
 #endif
                   m_needUpdate = true;
@@ -391,7 +359,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
         }
         else if (content.type == "artist")
         {
-          if (parser == PlexSectionParsing::checkSection)
+          if (parser == EmbySectionParsing::checkSection)
           {
             CSingleLock lock(m_criticalArtist);
             for (const auto &contents : m_artistSectionsContents)
@@ -401,7 +369,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
                 if (contents.updatedAt != content.updatedAt)
                 {
 #if defined(PLEX_DEBUG_VERBOSE)
-                  CLog::Log(LOGDEBUG, "CPlexClient::ParseSections need update on %s:%s",
+                  CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections need update on %s:%s",
                             m_serverName.c_str(), content.title.c_str());
 #endif
                   m_needUpdate = true;
@@ -417,7 +385,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
         }
         else if (content.type == "photo")
         {
-          if (parser == PlexSectionParsing::checkSection)
+          if (parser == EmbySectionParsing::checkSection)
           {
             CSingleLock lock(m_criticalPhoto);
             for (const auto &contents : m_photoSectionsContents)
@@ -427,7 +395,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
                 if (contents.updatedAt != content.updatedAt)
                 {
 #if defined(PLEX_DEBUG_VERBOSE)
-                  CLog::Log(LOGDEBUG, "CPlexClient::ParseSections need update on %s:%s",
+                  CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections need update on %s:%s",
                             m_serverName.c_str(), content.title.c_str());
 #endif
                   m_needUpdate = true;
@@ -443,26 +411,26 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
         }
         else
         {
-          CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found unhandled content type %s",
+          CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found unhandled content type %s",
             m_serverName.c_str(), content.type.c_str());
         }
         DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
       }
 
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d movie sections",
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d movie sections",
         m_serverName.c_str(), (int)m_movieSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d shows sections",
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d shows sections",
         m_serverName.c_str(), (int)m_showSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d artist sections",
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d artist sections",
                 m_serverName.c_str(), (int)m_artistSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d photo sections",
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d photo sections",
                 m_serverName.c_str(), (int)m_photoSectionsContents.size());
 
       rtn = true;
     }
     else
     {
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections no MediaContainer found");
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections no MediaContainer found");
     }
   }
   else
@@ -471,14 +439,14 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
     // and these require an access token. Only local servers that are
     // not is PMS can be accessed via GDM.
     if (plex.GetResponseCode() != 401)
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections failed %s", strResponse.c_str());
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections failed %s", strResponse.c_str());
     rtn = false;
   }
 
   return rtn;
 }
 
-void CPlexClient::SetPresence(bool presence)
+void CEmbyClient::SetPresence(bool presence)
 {
   if (m_presence != presence)
   {

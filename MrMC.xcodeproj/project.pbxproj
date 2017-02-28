@@ -3248,6 +3248,18 @@
 		F5FBE7DC1E2AB65F001B85EE /* strutl.c in Sources */ = {isa = PBXBuildFile; fileRef = F5FBE7DA1E2AB65F001B85EE /* strutl.c */; };
 		F5FBE7DD1E2AB65F001B85EE /* strutl.c in Sources */ = {isa = PBXBuildFile; fileRef = F5FBE7DA1E2AB65F001B85EE /* strutl.c */; };
 		F5FBE7DE1E2AB65F001B85EE /* strutl.c in Sources */ = {isa = PBXBuildFile; fileRef = F5FBE7DA1E2AB65F001B85EE /* strutl.c */; };
+		F5FC88E31E61E44D00449E85 /* easywsclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88E01E61E44D00449E85 /* easywsclient.cpp */; };
+		F5FC88E41E61E44D00449E85 /* easywsclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88E01E61E44D00449E85 /* easywsclient.cpp */; };
+		F5FC88E51E61E44D00449E85 /* easywsclient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88E01E61E44D00449E85 /* easywsclient.cpp */; };
+		F5FC88EE1E648AEE00449E85 /* EmbyClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88EA1E648AEE00449E85 /* EmbyClient.cpp */; };
+		F5FC88EF1E648AEE00449E85 /* EmbyClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88EA1E648AEE00449E85 /* EmbyClient.cpp */; };
+		F5FC88F01E648AEE00449E85 /* EmbyClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88EA1E648AEE00449E85 /* EmbyClient.cpp */; };
+		F5FC88F11E648AEE00449E85 /* EmbyServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88EC1E648AEE00449E85 /* EmbyServices.cpp */; };
+		F5FC88F21E648AEE00449E85 /* EmbyServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88EC1E648AEE00449E85 /* EmbyServices.cpp */; };
+		F5FC88F31E648AEE00449E85 /* EmbyServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88EC1E648AEE00449E85 /* EmbyServices.cpp */; };
+		F5FC88F61E64A8C100449E85 /* EmbyUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88F41E64A8C100449E85 /* EmbyUtils.cpp */; };
+		F5FC88F71E64A8C100449E85 /* EmbyUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88F41E64A8C100449E85 /* EmbyUtils.cpp */; };
+		F5FC88F81E64A8C100449E85 /* EmbyUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FC88F41E64A8C100449E85 /* EmbyUtils.cpp */; };
 		F5FDF51D0E7218950005B0A6 /* AsyncFileCopy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5FDF51C0E7218950005B0A6 /* AsyncFileCopy.cpp */; };
 /* End PBXBuildFile section */
 
@@ -5868,6 +5880,14 @@
 		F5FBE7DA1E2AB65F001B85EE /* strutl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = strutl.c; sourceTree = "<group>"; };
 		F5FBE7DB1E2AB65F001B85EE /* strutl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = strutl.h; sourceTree = "<group>"; };
 		F5FBE7DF1E2AC87A001B85EE /* log_control.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = log_control.h; sourceTree = "<group>"; };
+		F5FC88E01E61E44D00449E85 /* easywsclient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = easywsclient.cpp; sourceTree = "<group>"; };
+		F5FC88E11E61E44D00449E85 /* easywsclient.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = easywsclient.hpp; sourceTree = "<group>"; };
+		F5FC88EA1E648AEE00449E85 /* EmbyClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyClient.cpp; sourceTree = "<group>"; };
+		F5FC88EB1E648AEE00449E85 /* EmbyClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyClient.h; sourceTree = "<group>"; };
+		F5FC88EC1E648AEE00449E85 /* EmbyServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyServices.cpp; sourceTree = "<group>"; };
+		F5FC88ED1E648AEE00449E85 /* EmbyServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyServices.h; sourceTree = "<group>"; };
+		F5FC88F41E64A8C100449E85 /* EmbyUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyUtils.cpp; sourceTree = "<group>"; };
+		F5FC88F51E64A8C100449E85 /* EmbyUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyUtils.h; sourceTree = "<group>"; };
 		F5FDF51B0E7218950005B0A6 /* AsyncFileCopy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AsyncFileCopy.h; sourceTree = "<group>"; };
 		F5FDF51C0E7218950005B0A6 /* AsyncFileCopy.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = AsyncFileCopy.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -9337,6 +9357,7 @@
 			children = (
 				F55BD31B1D246E240072FE3A /* ServicesManager.cpp */,
 				F55BD3191D22423D0072FE3A /* ServicesManager.h */,
+				F5FC88E91E648AEE00449E85 /* emby */,
 				F55BD2FF1D0A14ED0072FE3A /* plex */,
 				F58BF96E1CD83FAF005BB003 /* lighteffects */,
 			);
@@ -9539,6 +9560,7 @@
 		F5B722B11C7BC10B006432AE /* contrib */ = {
 			isa = PBXGroup;
 			children = (
+				F5FC88DF1E61E44D00449E85 /* easywsclient */,
 				F5B722B21C7BC10B006432AE /* kissfft */,
 			);
 			path = contrib;
@@ -9881,6 +9903,28 @@
 				43348AAB1077486D00F859CF /* PlayerSelectionRule.h */,
 			);
 			name = playercorefactory;
+			sourceTree = "<group>";
+		};
+		F5FC88DF1E61E44D00449E85 /* easywsclient */ = {
+			isa = PBXGroup;
+			children = (
+				F5FC88E01E61E44D00449E85 /* easywsclient.cpp */,
+				F5FC88E11E61E44D00449E85 /* easywsclient.hpp */,
+			);
+			path = easywsclient;
+			sourceTree = "<group>";
+		};
+		F5FC88E91E648AEE00449E85 /* emby */ = {
+			isa = PBXGroup;
+			children = (
+				F5FC88F41E64A8C100449E85 /* EmbyUtils.cpp */,
+				F5FC88F51E64A8C100449E85 /* EmbyUtils.h */,
+				F5FC88EA1E648AEE00449E85 /* EmbyClient.cpp */,
+				F5FC88EB1E648AEE00449E85 /* EmbyClient.h */,
+				F5FC88EC1E648AEE00449E85 /* EmbyServices.cpp */,
+				F5FC88ED1E648AEE00449E85 /* EmbyServices.h */,
+			);
+			path = emby;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -10705,6 +10749,7 @@
 				7CCF7FC9106A0DF500992676 /* TimeUtils.cpp in Sources */,
 				F5B723F01C7CA014006432AE /* cdioSupport.cpp in Sources */,
 				F57B6F801071B8B500079ACB /* JobManager.cpp in Sources */,
+				F5FC88E31E61E44D00449E85 /* easywsclient.cpp in Sources */,
 				F5E55B5D10741272006E788A /* DVDPlayerTeletext.cpp in Sources */,
 				F5B7233E1C7C9870006432AE /* GUIWindowWeather.cpp in Sources */,
 				F5E55B66107412DE006E788A /* GUIDialogTeletext.cpp in Sources */,
@@ -10864,6 +10909,7 @@
 				18B7C8D712942546009E7A26 /* ButtonTranslator.cpp in Sources */,
 				18B7C8D912942546009E7A26 /* KeyboardStat.cpp in Sources */,
 				18B7C8DA12942546009E7A26 /* MouseStat.cpp in Sources */,
+				F5FC88F61E64A8C100449E85 /* EmbyUtils.cpp in Sources */,
 				18B7C8DB12942546009E7A26 /* SDLJoystick.cpp in Sources */,
 				F5B724EE1C7E150C006432AE /* rawread.cpp in Sources */,
 				18B7C8E912942603009E7A26 /* Crc32.cpp in Sources */,
@@ -11210,6 +11256,7 @@
 				7C140992183224B8009F9411 /* SettingCategoryAccess.cpp in Sources */,
 				7C140995183224B8009F9411 /* SettingConditions.cpp in Sources */,
 				7C140998183224B8009F9411 /* SettingDependency.cpp in Sources */,
+				F5FC88F11E648AEE00449E85 /* EmbyServices.cpp in Sources */,
 				7C14099B183224B8009F9411 /* SettingRequirement.cpp in Sources */,
 				7C14099E183224B8009F9411 /* SettingSection.cpp in Sources */,
 				7C1409A1183224B8009F9411 /* SettingsManager.cpp in Sources */,
@@ -11234,6 +11281,7 @@
 				7C8AE850189DE3CD00C33786 /* CoreAudioHardware.cpp in Sources */,
 				18FD1CA91BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
 				DF5E699A1B28121E009A88C3 /* PVRTimerType.cpp in Sources */,
+				F5FC88EE1E648AEE00449E85 /* EmbyClient.cpp in Sources */,
 				7C8AE851189DE3CD00C33786 /* CoreAudioStream.cpp in Sources */,
 				7C8AE854189DE47F00C33786 /* CoreAudioHelpers.cpp in Sources */,
 				7CF0504B190A1D7200222135 /* FFmpeg.cpp in Sources */,
@@ -11498,6 +11546,7 @@
 				E49911FF174E5D4500741B6D /* DVDPlayer.cpp in Sources */,
 				E4991200174E5D4500741B6D /* DVDPlayerAudio.cpp in Sources */,
 				E4991201174E5D4500741B6D /* DVDPlayerSubtitle.cpp in Sources */,
+				F5FC88EF1E648AEE00449E85 /* EmbyClient.cpp in Sources */,
 				E4991202174E5D4500741B6D /* DVDPlayerTeletext.cpp in Sources */,
 				F5B724A51C7E150C006432AE /* crypt.cpp in Sources */,
 				E4991203174E5D4500741B6D /* DVDPlayerVideo.cpp in Sources */,
@@ -11890,6 +11939,7 @@
 				E499138A174E5F0E00741B6D /* MusicInfoTagLoaderCDDA.cpp in Sources */,
 				E499138B174E5F0E00741B6D /* MusicInfoTagLoaderDatabase.cpp in Sources */,
 				E499138C174E5F0E00741B6D /* MusicInfoTagLoaderFactory.cpp in Sources */,
+				F5FC88F21E648AEE00449E85 /* EmbyServices.cpp in Sources */,
 				E499138F174E5F0E00741B6D /* MusicInfoTagLoaderShn.cpp in Sources */,
 				E4991393174E5F0E00741B6D /* TagLibVFSStream.cpp in Sources */,
 				E4991394174E5F0E00741B6D /* TagLoaderTagLib.cpp in Sources */,
@@ -11917,6 +11967,7 @@
 				E49913A5174E5F2100741B6D /* HTTPVfsHandler.cpp in Sources */,
 				E49913A6174E5F2100741B6D /* HTTPWebinterfaceAddonsHandler.cpp in Sources */,
 				E49913A7174E5F2100741B6D /* HTTPWebinterfaceHandler.cpp in Sources */,
+				F5FC88F71E64A8C100449E85 /* EmbyUtils.cpp in Sources */,
 				E49913A8174E5F2100741B6D /* IHTTPRequestHandler.cpp in Sources */,
 				F58BF9721CD83FAF005BB003 /* LightEffectServices.cpp in Sources */,
 				3994425C1A8DD8D0006C39E9 /* ProgressJob.cpp in Sources */,
@@ -12099,6 +12150,7 @@
 				F5B725201C7E150C006432AE /* timefn.cpp in Sources */,
 				E4991447174E605900741B6D /* CharsetConverter.cpp in Sources */,
 				E4991448174E605900741B6D /* CPUInfo.cpp in Sources */,
+				F5FC88E41E61E44D00449E85 /* easywsclient.cpp in Sources */,
 				E4991449174E605900741B6D /* Crc32.cpp in Sources */,
 				E499144A174E605900741B6D /* CryptThreading.cpp in Sources */,
 				F51D16FB1E29950600A03C93 /* dvd_input.c in Sources */,
@@ -12842,6 +12894,7 @@
 				F5D140081BAF0B6D0075A95C /* VideoLibraryMarkWatchedJob.cpp in Sources */,
 				F5D140091BAF0B6D0075A95C /* GUIMultiImage.cpp in Sources */,
 				F5D1400A1BAF0B6D0075A95C /* GUIMultiSelectText.cpp in Sources */,
+				F5FC88E51E61E44D00449E85 /* easywsclient.cpp in Sources */,
 				F5D1400B1BAF0B6D0075A95C /* VideoLibraryScanningJob.cpp in Sources */,
 				F5D1400C1BAF0B6D0075A95C /* GUIPanelContainer.cpp in Sources */,
 				F5D1400D1BAF0B6D0075A95C /* GUIProgressControl.cpp in Sources */,
@@ -13001,6 +13054,7 @@
 				F5D140931BAF0B6D0075A95C /* NetworkServices.cpp in Sources */,
 				F5D140941BAF0B6D0075A95C /* Socket.cpp in Sources */,
 				F5D140951BAF0B6D0075A95C /* TCPServer.cpp in Sources */,
+				F5FC88F81E64A8C100449E85 /* EmbyUtils.cpp in Sources */,
 				F5B722AA1C7BBFBF006432AE /* Encoder.cpp in Sources */,
 				F5D140961BAF0B6D0075A95C /* UdpClient.cpp in Sources */,
 				F5D140971BAF0B6D0075A95C /* AEResampleFactory.cpp in Sources */,
@@ -13347,6 +13401,7 @@
 				F5D141AE1BAF0B6D0075A95C /* SettingsOperations.cpp in Sources */,
 				F5D141AF1BAF0B6D0075A95C /* IListProvider.cpp in Sources */,
 				F5D141B01BAF0B6D0075A95C /* StaticProvider.cpp in Sources */,
+				F5FC88F31E648AEE00449E85 /* EmbyServices.cpp in Sources */,
 				F5B7231C1C7C894F006432AE /* SkinBuiltins.cpp in Sources */,
 				F5D141B11BAF0B6D0075A95C /* DirectoryProvider.cpp in Sources */,
 				F5B723781C7C9A51006432AE /* ActiveAEDSPProcess.cpp in Sources */,
@@ -13371,6 +13426,7 @@
 				F5B724EA1C7E150C006432AE /* rarvm.cpp in Sources */,
 				F5D141C21BAF0B6D0075A95C /* ActiveAE.cpp in Sources */,
 				F5D141C31BAF0B6D0075A95C /* ActiveAEBuffer.cpp in Sources */,
+				F5FC88F01E648AEE00449E85 /* EmbyClient.cpp in Sources */,
 				F5D141C41BAF0B6D0075A95C /* ActiveAESink.cpp in Sources */,
 				F5D141C51BAF0B6D0075A95C /* ActiveAESound.cpp in Sources */,
 				F5B724D01C7E150C006432AE /* isnt.cpp in Sources */,

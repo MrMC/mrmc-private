@@ -87,6 +87,7 @@
 #include "view/ViewStateSettings.h"
 #include "input/InputManager.h"
 #include "services/lighteffects/LightEffectServices.h"
+#include "services/emby/EmbyServices.h"
 #include "services/plex/PlexServices.h"
 
 #define SETTINGS_XML_FOLDER "special://xbmc/system/settings/"
@@ -480,6 +481,13 @@ const std::string CSettings::SETTING_SERVICES_PLEXTRANSCODELOCAL = "plex.transco
 const std::string CSettings::SETTING_SERVICES_PLEXTRANSCODEAUDIO = "plex.transcodeaudio";
 const std::string CSettings::SETTING_SERVICES_PLEXTRANSCODELOCALEXCLUSION = "plex.transcodelocalexclusions";
 const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH = "plex.myplexauthtoken";
+
+// emby services
+const std::string CSettings::SETTING_SERVICES_EMBYSIGNIN = "emby.signin";
+const std::string CSettings::SETTING_SERVICES_EMBYSIGNINPIN = "emby.signinpin";
+const std::string CSettings::SETTING_SERVICES_EMBYHOMEUSER  = "emby.homeuser";
+const std::string CSettings::SETTING_SERVICES_EMBYBROADCAST  = "emby.broadcast";
+const std::string CSettings::SETTING_SERVICES_EMBYAUTHTOKEN = "emby.embyauthtoken";
 
 CSettings::CSettings()
   : m_initialized(false)
@@ -1345,6 +1353,14 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXUPDATEMINS);
   settingSet.insert(CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH);
   m_settingsManager->RegisterCallback(&CPlexServices::GetInstance(), settingSet);
+
+  settingSet.clear();
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSIGNIN);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSIGNINPIN);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYHOMEUSER);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYBROADCAST);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYAUTHTOKEN);
+  m_settingsManager->RegisterCallback(&CEmbyServices::GetInstance(), settingSet);
 }
 
 bool CSettings::Reset()

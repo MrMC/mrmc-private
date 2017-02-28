@@ -433,6 +433,13 @@ public:
   static const std::string SETTING_SERVICES_PLEXTRANSCODELOCALEXCLUSION;
   static const std::string SETTING_SERVICES_PLEXMYPLEXAUTH;
 
+  // emby services
+  static const std::string SETTING_SERVICES_EMBYSIGNIN;
+  static const std::string SETTING_SERVICES_EMBYSIGNINPIN;
+  static const std::string SETTING_SERVICES_EMBYHOMEUSER;
+  static const std::string SETTING_SERVICES_EMBYBROADCAST;
+  static const std::string SETTING_SERVICES_EMBYAUTHTOKEN;
+
   /*!
    \brief Creates a new settings wrapper around a new settings manager.
 
