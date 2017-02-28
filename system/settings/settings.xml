@@ -2304,6 +2304,15 @@
           <default>false</default>
           <control type="toggle" />
         </setting>
+        <setting id="emby.embyauthtoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
       </group>
     </category>
     <category id="smb" label="1200" help="36346">
