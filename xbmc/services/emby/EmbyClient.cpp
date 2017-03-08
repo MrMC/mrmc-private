@@ -182,7 +182,7 @@ const EmbySectionsContentVector CEmbyClient::GetPhotoContent() const
 const std::string CEmbyClient::FormatContentTitle(const std::string contentTitle) const
 {
   std::string owned = (GetOwned() == "1") ? "O":"S";
-  std::string title = StringUtils::Format("Plex(%s) - %s - %s %s",
+  std::string title = StringUtils::Format("Emby(%s) - %s - %s %s",
               owned.c_str(), GetServerName().c_str(), contentTitle.c_str(), GetPresence()? "":"(off-line)");
   return title;
 }
