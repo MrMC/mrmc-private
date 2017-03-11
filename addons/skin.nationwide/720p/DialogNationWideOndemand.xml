@@ -162,7 +162,7 @@
                 <pagecontrol>61</pagecontrol>
                 <scrolltime>200</scrolltime>
                 <orientation>vertical</orientation>
-                <itemlayout height="140" width="240">
+                <itemlayout height="160" width="240">
                     <control type="image">
                         <description>Item Thumb</description>
                         <posx>1</posx>
@@ -180,8 +180,20 @@
                         <aspectratio>keep</aspectratio>
                         <texture>$INFO[ListItem.Art(thumb)]</texture>
                     </control>
+                    <control type="label">
+                        <posx>110</posx>
+                        <posy>128</posy>
+                        <width>200</width>
+                        <height>30</height>
+                        <font>Label16</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <label>$INFO[ListItem.Label]</label>
+                    </control>
                 </itemlayout>
-                <focusedlayout height="140" width="240">
+                <focusedlayout height="160" width="240">
                     <control type="image">
                         <description>Item Thumb</description>
                         <posx>1</posx>
@@ -205,6 +217,18 @@
                         <width>222</width>
                         <height>128</height>
                         <texture>MNSkinFiles/preview_frame.png</texture>
+                    </control>
+                    <control type="label">
+                        <posx>110</posx>
+                        <posy>128</posy>
+                        <width>200</width>
+                        <height>30</height>
+                        <font>Label16</font>
+                        <textcolor>white</textcolor>
+                        <selectedcolor>white</selectedcolor>
+                        <align>center</align>
+                        <aligny>center</aligny>
+                        <label>$INFO[ListItem.Label]</label>
                     </control>
                 </focusedlayout>
             </control>

@@ -226,6 +226,7 @@ void CGUIWindowMNDemand::SetCategoryItems()
     pItem->SetArt("thumb", thumb);
     pItem->GetVideoInfoTag()->m_strPath = pItem->GetPath();
     pItem->GetVideoInfoTag()->m_strTitle = asset.name;
+    pItem->SetLabel(asset.name);
     ListItems.Add(pItem);
   }
   CGUIMessage msg1(GUI_MSG_LABEL_BIND, GetID(), ONDEMAND_ITEM_LIST, 0, 0, &ListItems);

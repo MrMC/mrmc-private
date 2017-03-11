@@ -27,6 +27,11 @@
 			<filename>arial.ttf</filename>
 			<size>18</size>
 		</font>
+		<font>
+			<name>Label16</name>
+			<filename>arial.ttf</filename>
+			<size>16</size>
+		</font>
 	<!-- Normal Fonts -->
 	 	<font>
 			<name>font10</name>
