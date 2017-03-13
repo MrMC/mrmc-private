@@ -990,7 +990,7 @@ bool CCurlFile::Download(const std::string& strURL, const std::string& strFileNa
       }
 
       int size_read;
-      const int size_read_max = 128 * 1024;
+      const int size_read_max = 1024 * 1024;
       char *buffer = (char*)malloc(size_read_max);
       while( (size_read = Read(buffer, size_read_max)) > 0 )
         written += file.Write(buffer, size_read);
