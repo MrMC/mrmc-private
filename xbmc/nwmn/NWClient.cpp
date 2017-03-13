@@ -295,6 +295,8 @@ void CNWClient::Process()
   {
     if (!m_Startup)
       Sleep(100);
+    else
+      Sleep(1);
 
     if (m_Startup)
       ManageStartupDialog();

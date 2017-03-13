@@ -32,7 +32,7 @@
 #include "utils/URIUtils.h"
 
 //#define DEBUG_NO_DELETEFILES
-#define DEBUG_PURGEWAIT_TIMEOUT
+//#define DEBUG_PURGEWAIT_TIMEOUT
 
 #define PURGEWAIT_TIMEOUTMS (1000 * 60 * 10)
 
