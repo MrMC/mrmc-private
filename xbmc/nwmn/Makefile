@@ -4,6 +4,7 @@ SRCS += MNJSONOperations.cpp
 SRCS += NWClient.cpp
 SRCS += NWClientUtilities.cpp
 SRCS += NWMediaManager.cpp
+SRCS += NWPurgeManager.cpp
 SRCS += NWPlayer.cpp
 SRCS += NWTVAPI.cpp
 

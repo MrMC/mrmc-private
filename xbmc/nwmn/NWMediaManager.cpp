@@ -176,7 +176,7 @@ void CNWMediaManager::Process()
   SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
   CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process Started");
 
-  m_http.SetBufferSize(32768 * 10);
+  //m_http.SetBufferSize(32768 * 10);
   m_http.SetTimeout(5);
 
   while (!m_bStop)
@@ -276,6 +276,17 @@ bool CNWMediaManager::AssetExists(NWAsset &asset)
   for (size_t index = 0; index < m_assets.size(); index++)
   {
     if (asset.id == m_assets[index].id)
+      return true;
+  }
+
+  return false;
+}
+
+bool CNWMediaManager::BaseNameInList(const std::string &basename)
+{
+  for (size_t index = 0; index < m_assets.size(); index++)
+  {
+    if (basename == m_assets[index].video_basename)
       return true;
   }
 

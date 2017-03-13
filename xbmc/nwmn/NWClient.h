@@ -46,6 +46,7 @@ typedef void (*PlayerCallBackFn)(const void *ctx, int msg, struct NWAsset &asset
 
 class CNWPlayer;
 class CNWMediaManager;
+class CNWPurgeManager;
 
 class CNWClient
 : public CThread
@@ -113,6 +114,7 @@ protected:
   NWPlaylist    m_ProgramInfo;
   CNWPlayer     *m_Player;
   CNWMediaManager *m_MediaManager;
+  CNWPurgeManager *m_PurgeManager;
   CGUIDialogProgress *m_dlgProgress;
 
   CCriticalSection m_reportLock;

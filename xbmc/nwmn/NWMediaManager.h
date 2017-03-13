@@ -45,6 +45,7 @@ public:
   void          QueueAssetsForDownload(std::vector<NWAsset> &assets);
   void          QueueAssetForDownload(NWAsset &asset);
   bool          CheckAssetIsPresentLocal(NWAsset &asset);
+  bool          BaseNameInList(const std::string &basename);
 
   void          RegisterAssetUpdateCallBack(const void *ctx, AssetUpdateCallBackFn fn);
 

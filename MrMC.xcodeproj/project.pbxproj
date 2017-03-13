@@ -1676,6 +1676,9 @@
 		F52CC6AA1713BD2B00113454 /* DirectoryNodeGrouped.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F52CC6A81713BD2B00113454 /* DirectoryNodeGrouped.cpp */; };
 		F5364D34155B3B270016D00B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5364D33155B3B270016D00B /* CoreVideo.framework */; };
 		F5364E05155B3CAF0016D00B /* IOSurface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F5364E04155B3CAF0016D00B /* IOSurface.framework */; };
+		F53BA7C11E758C5400964AD1 /* NWPurgeManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53BA7C01E758C5400964AD1 /* NWPurgeManager.cpp */; };
+		F53BA7C21E758C5400964AD1 /* NWPurgeManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53BA7C01E758C5400964AD1 /* NWPurgeManager.cpp */; };
+		F53BA7C31E758C5400964AD1 /* NWPurgeManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F53BA7C01E758C5400964AD1 /* NWPurgeManager.cpp */; };
 		F548786D0FE060FF00E506FD /* DVDSubtitleParserMPL2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F548786C0FE060FF00E506FD /* DVDSubtitleParserMPL2.cpp */; };
 		F5487B4C0FE6F02700E506FD /* StreamDetails.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5487B4B0FE6F02700E506FD /* StreamDetails.cpp */; };
 		F557CD981CFDE37000DC3D50 /* TCPClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F557CD961CFDE37000DC3D50 /* TCPClient.cpp */; };
@@ -5062,6 +5065,8 @@
 		F536166E1B94E61200BD5776 /* sha1.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = sha1.hpp; sourceTree = "<group>"; };
 		F5364D33155B3B270016D00B /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = /System/Library/Frameworks/CoreVideo.framework; sourceTree = "<absolute>"; };
 		F5364E04155B3CAF0016D00B /* IOSurface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOSurface.framework; path = /System/Library/Frameworks/IOSurface.framework; sourceTree = "<absolute>"; };
+		F53BA7BF1E758C5400964AD1 /* NWPurgeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NWPurgeManager.h; sourceTree = "<group>"; };
+		F53BA7C01E758C5400964AD1 /* NWPurgeManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NWPurgeManager.cpp; sourceTree = "<group>"; };
 		F54570841BF5947A00432C6A /* Info.plist.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = Info.plist.in; sourceTree = "<group>"; };
 		F54570851BF5947A00432C6A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F54570881BF5955900432C6A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -9525,6 +9530,8 @@
 				F5E9E7A11D982F760012044B /* NWClientUtilities.h */,
 				F5F759441D91B0F100D3BCB2 /* NWMediaManager.cpp */,
 				F5F759451D91B0F100D3BCB2 /* NWMediaManager.h */,
+				F53BA7C01E758C5400964AD1 /* NWPurgeManager.cpp */,
+				F53BA7BF1E758C5400964AD1 /* NWPurgeManager.h */,
 				F5F759461D91B0F100D3BCB2 /* NWPlayer.cpp */,
 				F5F759471D91B0F100D3BCB2 /* NWPlayer.h */,
 				F5F759481D91B0F100D3BCB2 /* NWTVAPI.cpp */,
@@ -10300,6 +10307,7 @@
 				F5E55B66107412DE006E788A /* GUIDialogTeletext.cpp in Sources */,
 				F5E55B7010741340006E788A /* Teletext.cpp in Sources */,
 				43348AA4107747CD00F859CF /* Edl.cpp in Sources */,
+				F53BA7C11E758C5400964AD1 /* NWPurgeManager.cpp in Sources */,
 				43348AAE1077486D00F859CF /* PlayerCoreFactory.cpp in Sources */,
 				43348AAF1077486D00F859CF /* PlayerSelectionRule.cpp in Sources */,
 				F5F759611D91B0F100D3BCB2 /* NWPlayer.cpp in Sources */,
@@ -11049,6 +11057,7 @@
 				E49911F4174E5D3E00741B6D /* DVDSubtitleTagSami.cpp in Sources */,
 				E49911F5174E5D4500741B6D /* DVDAudio.cpp in Sources */,
 				E49911F6174E5D4500741B6D /* DVDClock.cpp in Sources */,
+				F53BA7C21E758C5400964AD1 /* NWPurgeManager.cpp in Sources */,
 				E49911F7174E5D4500741B6D /* DVDDemuxSPU.cpp in Sources */,
 				E49911F8174E5D4500741B6D /* DVDFileInfo.cpp in Sources */,
 				E49911F9174E5D4500741B6D /* DVDMessage.cpp in Sources */,
@@ -12369,6 +12378,7 @@
 				F5D1400E1BAF0B6D0075A95C /* GUIRadioButtonControl.cpp in Sources */,
 				F5D1400F1BAF0B6D0075A95C /* GUIRenderingControl.cpp in Sources */,
 				F5B723541C7C996F006432AE /* GUIVisualisationControl.cpp in Sources */,
+				F53BA7C31E758C5400964AD1 /* NWPurgeManager.cpp in Sources */,
 				F5D140101BAF0B6D0075A95C /* GUIResizeControl.cpp in Sources */,
 				F5D140111BAF0B6D0075A95C /* KeyboardLayoutManager.cpp in Sources */,
 				F5D140121BAF0B6D0075A95C /* AudioDecoder.cpp in Sources */,

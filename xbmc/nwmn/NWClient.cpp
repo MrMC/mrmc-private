@@ -23,6 +23,7 @@
 #include "NWClient.h"
 #include "NWPlayer.h"
 #include "NWMediaManager.h"
+#include "NWPurgeManager.h"
 
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
@@ -91,6 +92,7 @@ CNWClient::CNWClient()
  , m_NextUpdateInterval(0, 0, 5, 0)
  , m_Player(NULL)
  , m_MediaManager(NULL)
+ , m_PurgeManager(NULL)
  , m_ClientCallBackFn(NULL)
  , m_ClientCallBackCtx(NULL)
 {
@@ -157,6 +159,8 @@ CNWClient::CNWClient()
 
   m_MediaManager = new CNWMediaManager();
   m_MediaManager->RegisterAssetUpdateCallBack(this, AssetUpdateCallBack);
+  m_PurgeManager = new CNWPurgeManager();
+  m_PurgeManager->AddPurgePath(video_path, videothumbs_path);
   m_Player = new CNWPlayer();
 
   m_dlgProgress = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
@@ -181,6 +185,7 @@ CNWClient::~CNWClient()
 
   SAFE_DELETE(m_Player);
   SAFE_DELETE(m_MediaManager);
+  SAFE_DELETE(m_PurgeManager);
 }
 
 CNWClient* CNWClient::GetClient()
@@ -231,6 +236,8 @@ void CNWClient::Startup(bool bypass_authorization)
   Create();
   if (!m_MediaManager->IsRunning())
     m_MediaManager->Create();
+  if (!m_PurgeManager->IsRunning())
+    m_PurgeManager->Create();
   if (!m_Player->IsRunning())
     m_Player->Create();
 }
