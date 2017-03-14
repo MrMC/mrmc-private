@@ -17,7 +17,16 @@
  *
  */
 
+#include <algorithm>
+
 #include "system.h"
+
+#if defined(TARGET_ANDROID)
+#include <sys/statfs.h>
+#else
+#include <sys/param.h>
+#include <sys/mount.h>
+#endif
 
 #include "NWPurgeManager.h"
 
@@ -25,6 +34,7 @@
 #include "FileItem.h"
 #include "filesystem/File.h"
 #include "filesystem/Directory.h"
+#include "filesystem/SpecialProtocol.h"
 
 #include "utils/log.h"
 #include "utils/StringUtils.h"
@@ -117,23 +127,36 @@ void CNWPurgeManager::Process()
 
 void CNWPurgeManager::UpdateMargins()
 {
-  // GetDiskSpace returns MBs and percent
-  int total, totalFree, totalUsed, percentFree, percentused;
-  if (g_sysinfo.GetDiskSpace("", total, totalFree, totalUsed, percentFree, percentused))
+  CSingleLock lock(m_paths_lock);
+  if (!m_media_paths.empty())
   {
-    // ignore if less than 4GB filesystem.
-    if (total > (4 * 1024))
+    std::string storage_path;
+    storage_path = m_media_paths[0];
+
+    struct statfs fsInfo;
+    if (statfs(CSpecialProtocol::TranslatePath(storage_path).c_str(), &fsInfo) == 0)
     {
-      m_freeMBs = totalFree;
-      // less than LO_FREE triggers purge (5 percent)
-      m_loFreeMBs = total * 0.05;
-      // greater then HI_FREE ends purge (15 percent)
-      m_hiFreeMBs = total * 0.15;
+      int64_t free = (int64_t)fsInfo.f_bfree * fsInfo.f_bsize;
+      int64_t capacity = (int64_t)fsInfo.f_blocks * fsInfo.f_bsize;
 
-      CLog::Log(LOGDEBUG, "**NW** - CNWPurgeManager::UpdateMargins free = %d, lo_trigger = %d, hi_trigger = %d",
-        m_freeMBs, m_loFreeMBs, m_hiFreeMBs);
+      // switch units from bytes to megabytes
+      free /= 1024 * 1024;
+      capacity /= 1024 * 1024;
 
-      m_canPurge = true;
+      // ignore if less than 4GB filesystem.
+      if (capacity > (4 * 1024))
+      {
+        m_freeMBs = free;
+        // less than LO_FREE triggers purge (5 percent)
+        m_loFreeMBs = capacity * 0.05;
+        // greater then HI_FREE ends purge (15 percent)
+        m_hiFreeMBs = capacity * 0.15;
+
+        CLog::Log(LOGDEBUG, "**NW** - CNWPurgeManager::UpdateMargins free = %d, lo_trigger = %d, hi_trigger = %d",
+          m_freeMBs, m_loFreeMBs, m_hiFreeMBs);
+
+        m_canPurge = true;
+      }
     }
   }
 }
