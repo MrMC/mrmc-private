@@ -2273,6 +2273,33 @@
           </dependencies>
           <control type="button" format="action"/>
         </setting>
+        <setting id="emby.userid" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="emby.serverip" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="emby.accesstoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
         <setting id="emby.signinpin" type="string" label="2115" help="2116">
           <level>0</level>
           <default>Sign-in</default>
@@ -2292,7 +2319,6 @@
           <dependencies>
             <dependency type="enable">
               <or>
-                <condition on="property" name="embyhomeuser" setting="emby.signin" />
                 <condition on="property" name="embyhomeuser" setting="emby.signinpin" />
               </or>
             </dependency>

@@ -25,12 +25,22 @@
 #include "utils/XMLUtils.h"
 #include "threads/CriticalSection.h"
 
-enum class EmbySectionParsing
+enum class EmbyViewParsing
 {
-  newSection,
-  checkSection,
-  updateSection,
+  newView,
+  checkView,
+  updateView,
 };
+
+typedef struct EmbyServerInfo
+{
+  std::string Id;
+  std::string Version;
+  std::string ServerName;
+  std::string WanAddress;
+  std::string LocalAddress;
+  std::string OperatingSystem;
+} EmbyServerInfo;
 
 struct EmbyConnection
 {
@@ -40,9 +50,19 @@ struct EmbyConnection
   int external;
 };
 
-struct EmbySectionsContent
+struct EmbyViewContent
 {
-  int port;
+  std::string id;
+  std::string name;
+  std::string etag;
+  std::string serverid;
+  std::string mediaType;
+  std::string viewprefix;
+};
+
+/*
+struct EmbyViewContent
+{
   std::string type;
   std::string title;
   std::string agent;
@@ -51,15 +71,15 @@ struct EmbySectionsContent
   std::string uuid;
   std::string updatedAt;
   std::string address;
-  std::string path;
   std::string section;
   std::string art;
   std::string thumb;
 };
+*/
 
 class CFileItem;
 typedef std::shared_ptr<CFileItem> CFileItemPtr;
-typedef std::vector<EmbySectionsContent> EmbySectionsContentVector;
+typedef std::vector<EmbyViewContent> EmbyViewContentVector;
 
 
 class CEmbyClient
@@ -70,13 +90,12 @@ public:
   CEmbyClient();
  ~CEmbyClient();
 
-  bool Init(const TiXmlElement* DeviceNode);
-  bool Init(const CVariant &data, std::string ip);
+  bool Init(const std::string &userId, const std::string &accessToken, const EmbyServerInfo &serverInfo);
 
   const bool NeedUpdate() const             { return m_needUpdate; }
   const std::string &GetContentType() const { return m_contentType; }
-  const std::string &GetServerName() const  { return m_serverName; }
-  const std::string &GetUuid() const        { return m_uuid; }
+  const std::string &GetServerName() const  { return m_serverInfo.ServerName; }
+  const std::string &GetUuid() const        { return m_userId; }
   const std::string &GetOwned() const       { return m_owned; }
   // bool GetPresence() const                  { return m_presence; }
   bool GetPresence() const                  { return true; }
@@ -84,16 +103,16 @@ public:
   const bool &IsLocal() const               { return m_local; }
   const bool IsCloud() const                { return (m_platform == "Cloud"); }
 
-  void  AddSectionItem(CFileItemPtr root)   { m_section_items.push_back(root); };
-  std::vector<CFileItemPtr> GetSectionItems()  { return m_section_items; };
-  void ClearSectionItems()                  { m_section_items.clear(); };
+  void  AddViewItem(CFileItemPtr root)      { m_view_items.push_back(root); };
+  std::vector<CFileItemPtr> GetViewItems()  { return m_view_items; };
+  void ClearViewItems()                     { m_view_items.clear(); };
 
-  const EmbySectionsContentVector GetTvContent() const;
-  const EmbySectionsContentVector GetMovieContent() const;
-  const EmbySectionsContentVector GetArtistContent() const;
-  const EmbySectionsContentVector GetPhotoContent() const;
+  const EmbyViewContentVector GetTvContent() const;
+  const EmbyViewContentVector GetMovieContent() const;
+  const EmbyViewContentVector GetArtistContent() const;
+  const EmbyViewContentVector GetPhotoContent() const;
   const std::string FormatContentTitle(const std::string contentTitle) const;
-  std::string FindSectionTitle(const std::string &path);
+  std::string FindViewName(const std::string &path);
 
   std::string GetHost();
   int         GetPort();
@@ -101,30 +120,30 @@ public:
 
 protected:
   bool        IsSameClientHostName(const CURL& url);
-  std::string LookUpUuid(const std::string path) const;
-  bool        ParseSections(enum EmbySectionParsing parser);
+  bool        ParseViews(enum EmbyViewParsing parser);
   void        SetPresence(bool presence);
+  bool        NeedViewUpdate(const EmbyViewContent &content, const EmbyViewContent &contents, const std::string server);
 
 private:
   bool        m_local;
   std::string m_contentType;
-  std::string m_uuid;
   std::string m_owned;
-  std::string m_serverName;
-  std::string m_url;
+  std::string m_userId;
   std::string m_accessToken;
+  std::string m_url;
   std::string m_httpsRequired;
   std::string m_protocol;
   std::string m_platform;
+  EmbyServerInfo m_serverInfo;
   std::atomic<bool> m_presence;
   std::atomic<bool> m_needUpdate;
-  std::vector<CFileItemPtr> m_section_items;
+  std::vector<CFileItemPtr> m_view_items;
   CCriticalSection  m_criticalMovies;
   CCriticalSection  m_criticalTVShow;
   CCriticalSection  m_criticalArtist;
   CCriticalSection  m_criticalPhoto;
-  std::vector<EmbySectionsContent> m_movieSectionsContents;
-  std::vector<EmbySectionsContent> m_showSectionsContents;
-  std::vector<EmbySectionsContent> m_artistSectionsContents;
-  std::vector<EmbySectionsContent> m_photoSectionsContents;
+  std::vector<EmbyViewContent> m_movieSectionsContents;
+  std::vector<EmbyViewContent> m_showSectionsContents;
+  std::vector<EmbyViewContent> m_artistSectionsContents;
+  std::vector<EmbyViewContent> m_photoSectionsContents;
 };

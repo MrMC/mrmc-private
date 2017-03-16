@@ -23,6 +23,7 @@
 #include "FileItem.h"
 #include "utils/XBMCTinyXML.h"
 #include "utils/XMLUtils.h"
+#include "services/ServicesManager.h"
 
 #define EMBY_DEBUG_VERBOSE
 
@@ -34,6 +35,9 @@ class CEmbyClient;
 typedef std::shared_ptr<CEmbyClient> CEmbyClientPtr;
 
 
+static const std::string EmbyApiKeyHeader = "X-MediaBrowser-Token";
+static const std::string EmbyAuthorizationHeader = "X-Emby-Authorization";
+
 enum class EmbyUtilsPlayerState
 {
   paused = 1,
@@ -41,26 +45,12 @@ enum class EmbyUtilsPlayerState
   stopped = 3,
 };
 
-typedef struct EmbyMediaCount
-{
-  int iMovieTotal = 0;
-  int iMovieUnwatched = 0;
-  int iEpisodeTotal = 0;
-  int iEpisodeUnwatched = 0;
-  int iShowTotal = 0;
-  int iShowUnwatched = 0;
-  int iMusicSongs = 0;
-  int iMusicAlbums = 0;
-  int iMusicArtist = 0;
-  
-} EmbyMediaCount;
-
 class CEmbyUtils
 {
 public:
   static bool HasClients();
   static bool GetIdentity(CURL url, int timeout);
-  static void GetDefaultHeaders(const std::string& userId, XFILE::CCurlFile &curl);
+  static void PrepareApiCall(const std::string& userId, const std::string& accessToken, XFILE::CCurlFile &curl);
   static void SetEmbyItemProperties(CFileItem &item);
   static void SetEmbyItemProperties(CFileItem &item, const CEmbyClientPtr &client);
   static void SetEmbyItemsProperties(CFileItemList &items);
@@ -95,15 +85,15 @@ public:
   static bool ShowMusicInfo(CFileItem item);
   static bool GetEmbyRecentlyAddedAlbums(CFileItemList &items,int limit);
   static bool GetEmbyAlbumSongs(CFileItem item, CFileItemList &items);
-  static bool GetEmbyMediaTotals(EmbyMediaCount &totals);
+  static bool GetEmbyMediaTotals(MediaServicesMediaCount &totals);
 
 private:
   static void ReportToServer(std::string url, std::string filename);
-  static bool GetVideoItems(CFileItemList &items,CURL url, TiXmlElement* rootXmlNode, std::string type, bool formatLabel, int season = -1);
-  static void GetVideoDetails(CFileItem &item, const TiXmlElement* videoNode);
-  static void GetMusicDetails(CFileItem &item, const TiXmlElement* videoNode);
-  static void GetMediaDetals(CFileItem &item, CURL url, const TiXmlElement* videoNode, std::string id = "0");
-  static TiXmlDocument GetEmbyXML(std::string url, std::string filter = "");
+  static bool GetVideoItems(CFileItemList &items,CURL url, const CVariant &object, std::string type, bool formatLabel, int season = -1);
+  static void GetVideoDetails(CFileItem &item, const CVariant &object);
+  static void GetMusicDetails(CFileItem &item, const CVariant &object);
+  static void GetMediaDetals(CFileItem &item, CURL url, const CVariant &object, std::string id = "0");
+  static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
   static int ParseEmbyMediaXML(TiXmlDocument xml);
   static void RemoveSubtitleProperties(CFileItem &item);
 };

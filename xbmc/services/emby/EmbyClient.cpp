@@ -34,6 +34,9 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "utils/Base64.h"
+#include "utils/JSONVariantParser.h"
+#include "utils/JSONVariantWriter.h"
+#include "utils/Variant.h"
 
 #include <string>
 #include <sstream>
@@ -51,91 +54,19 @@ CEmbyClient::~CEmbyClient()
 {
 }
 
-bool CEmbyClient::Init(const CVariant &data, std::string ip)
+bool CEmbyClient::Init(const std::string &userId, const std::string &accessToken, const EmbyServerInfo &serverInfo)
 {
-  static const std::string ServerPropertyId = "Id";
-  static const std::string ServerPropertyName = "Name";
-  static const std::string ServerPropertyAddress = "Address";
+  m_local = true;
+  m_userId = userId;
+  m_serverInfo = serverInfo;
+  m_accessToken = accessToken;
 
-  if (!data.isObject() ||
-      !data.isMember(ServerPropertyId) ||
-      !data.isMember(ServerPropertyName) ||
-      !data.isMember(ServerPropertyAddress))
-    return false;
-
-  std::string id = data[ServerPropertyId].asString();
-  std::string name = data[ServerPropertyName].asString();
-  std::string address = data[ServerPropertyAddress].asString();
-  if (id.empty() || name.empty() || address.empty())
-    return false;
-
-  CURL url(address);
-
+  CURL url(m_serverInfo.LocalAddress);
+  url.SetProtocolOptions("&X-MediaBrowser-Token=" + m_accessToken);
   m_url = url.Get();
   m_protocol = url.GetProtocol();
-  m_uuid = id;
-  m_serverName = name;
 
-  return !m_url.empty();
-}
-
-bool CEmbyClient::Init(const TiXmlElement* DeviceNode)
-{
-  m_url = "";
-  m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
-  //if (!m_presence)
-  //  return false;
-
-  m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
-  m_owned = XMLUtils::GetAttribute(DeviceNode, "owned");
-  m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
-  m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
-  m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
-  m_platform = XMLUtils::GetAttribute(DeviceNode, "platform");
-
-  std::vector<EmbyConnection> connections;
-  const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
-  while (ConnectionNode)
-  {
-    EmbyConnection connection;
-    connection.port = XMLUtils::GetAttribute(ConnectionNode, "port");
-    connection.address = XMLUtils::GetAttribute(ConnectionNode, "address");
-    connection.protocol = XMLUtils::GetAttribute(ConnectionNode, "protocol");
-    connection.external = XMLUtils::GetAttribute(ConnectionNode, "local") == "0" ? 1 : 0;
-    connections.push_back(connection);
-
-    ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
-  }
-
-  CURL url;
-  if (!connections.empty())
-  {
-    // sort so that all external=0 are first. These are the local connections.
-    std::sort(connections.begin(), connections.end(),
-      [] (EmbyConnection const& a, EmbyConnection const& b) { return a.external < b.external; });
-
-    for (const auto &connection : connections)
-    {
-      url.SetHostName(connection.address);
-      url.SetPort(atoi(connection.port.c_str()));
-      url.SetProtocol(connection.protocol);
-      url.SetProtocolOptions("&X-MediaBrowser-Token=" + m_accessToken);
-      int timeout = connection.external ? 5 : 1;
-      //if (CEmbyUtils::GetIdentity(url, timeout))
-      {
-        CLog::Log(LOGDEBUG, "CEmbyClient::Init "
-          "serverName(%s), ipAddress(%s), protocol(%s)",
-          m_serverName.c_str(), connection.address.c_str(), connection.protocol.c_str());
-
-        m_url = url.Get();
-        m_protocol = url.GetProtocol();
-        m_local = (connection.external == 0);
-        break;
-      }
-    }
-  }
-
-  return !m_url.empty();
+  return true;
 }
 
 std::string CEmbyClient::GetUrl()
@@ -155,25 +86,25 @@ int CEmbyClient::GetPort()
   return url.GetPort();
 }
 
-const EmbySectionsContentVector CEmbyClient::GetTvContent() const
+const EmbyViewContentVector CEmbyClient::GetTvContent() const
 {
   CSingleLock lock(m_criticalTVShow);
   return m_showSectionsContents;
 }
 
-const EmbySectionsContentVector CEmbyClient::GetMovieContent() const
+const EmbyViewContentVector CEmbyClient::GetMovieContent() const
 {
   CSingleLock lock(m_criticalMovies);
   return m_movieSectionsContents;
 }
 
-const EmbySectionsContentVector CEmbyClient::GetArtistContent() const
+const EmbyViewContentVector CEmbyClient::GetArtistContent() const
 {
   CSingleLock lock(m_criticalArtist);
   return m_artistSectionsContents;
 }
 
-const EmbySectionsContentVector CEmbyClient::GetPhotoContent() const
+const EmbyViewContentVector CEmbyClient::GetPhotoContent() const
 {
   CSingleLock lock(m_criticalPhoto);
   return m_photoSectionsContents;
@@ -187,10 +118,10 @@ const std::string CEmbyClient::FormatContentTitle(const std::string contentTitle
   return title;
 }
 
-std::string CEmbyClient::FindSectionTitle(const std::string &path)
+std::string CEmbyClient::FindViewName(const std::string &path)
 {
   CURL real_url(path);
-  if (real_url.GetProtocol() == "plex")
+  if (real_url.GetProtocol() == "emby")
     real_url = CURL(Base64::Decode(URIUtils::GetFileName(real_url)));
 
   if (!real_url.GetFileName().empty())
@@ -199,16 +130,16 @@ std::string CEmbyClient::FindSectionTitle(const std::string &path)
       CSingleLock lock(m_criticalMovies);
       for (const auto &contents : m_movieSectionsContents)
       {
-        if (real_url.GetFileName().find(contents.section) != std::string::npos)
-          return contents.title;
+        if (real_url.GetFileName().find(contents.viewprefix) != std::string::npos)
+          return contents.name;
       }
     }
     {
       CSingleLock lock(m_criticalTVShow);
       for (const auto &contents : m_showSectionsContents)
       {
-        if (real_url.GetFileName().find(contents.section) != std::string::npos)
-          return contents.title;
+        if (real_url.GetFileName().find(contents.viewprefix) != std::string::npos)
+          return contents.name;
       }
     }
   }
@@ -219,7 +150,7 @@ std::string CEmbyClient::FindSectionTitle(const std::string &path)
 bool CEmbyClient::IsSameClientHostName(const CURL& url)
 {
   CURL real_url(url);
-  if (real_url.GetProtocol() == "plex")
+  if (real_url.GetProtocol() == "emby")
     real_url = CURL(Base64::Decode(URIUtils::GetFileName(real_url)));
 
   if (URIUtils::IsStack(real_url.Get()))
@@ -228,48 +159,27 @@ bool CEmbyClient::IsSameClientHostName(const CURL& url)
   return GetHost() == real_url.GetHostName();
 }
 
-std::string CEmbyClient::LookUpUuid(const std::string path) const
-{
-  std::string uuid;
-
-  CURL url(path);
-  {
-    CSingleLock lock(m_criticalMovies);
-    for (const auto &contents : m_movieSectionsContents)
-    {
-      if (contents.section == url.GetFileName())
-        return m_uuid;
-    }
-  }
-  {
-    CSingleLock lock(m_criticalTVShow);
-    for (const auto &contents : m_showSectionsContents)
-    {
-      if (contents.section == url.GetFileName())
-        return m_uuid;
-    }
-  }
-
-  return uuid;
-}
-
-bool CEmbyClient::ParseSections(enum EmbySectionParsing parser)
+bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
 {
   bool rtn = false;
-  XFILE::CCurlFile plex;
-  //plex.SetBufferSize(32768*10);
-  plex.SetTimeout(10);
+  XFILE::CCurlFile emby;
+  emby.SetTimeout(10);
+  emby.SetRequestHeader("Cache-Control", "no-cache");
+  emby.SetRequestHeader("Content-Type", "application/json");
+  CEmbyUtils::PrepareApiCall(m_userId, m_accessToken, emby);
 
   CURL curl(m_url);
-  curl.SetFileName(curl.GetFileName() + "library/sections");
-  std::string strResponse;
-  if (plex.Get(curl.Get(), strResponse))
+  // /Users/{UserId}/Views
+  curl.SetFileName(curl.GetFileName() + "Users/" + m_userId + "/Views");
+  std::string viewsUrl = curl.Get();
+  std::string response;
+  if (emby.Get(viewsUrl, response))
   {
-#if defined(PLEX_DEBUG_VERBOSE)
-    if (parser == EmbySectionParsing::newSection || parser == EmbySectionParsing::checkSection)
-      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %d, %s", parser, strResponse.c_str());
+#if defined(EMBY_DEBUG_VERBOSE)
+    if (parser == EmbyViewParsing::newView || parser == EmbyViewParsing::checkView)
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseViews %d, %s", parser, response.c_str());
 #endif
-    if (parser == EmbySectionParsing::updateSection)
+    if (parser == EmbyViewParsing::updateView)
     {
       {
         CSingleLock lock(m_criticalMovies);
@@ -282,165 +192,136 @@ bool CEmbyClient::ParseSections(enum EmbySectionParsing parser)
       m_needUpdate = false;
     }
 
-    TiXmlDocument xml;
-    xml.Parse(strResponse.c_str());
-
-    TiXmlElement* MediaContainer = xml.RootElement();
-    if (MediaContainer)
+    auto resultObject = CJSONVariantParser::Parse((const unsigned char*)response.c_str(), response.size());
+    if (!resultObject.isObject() || !resultObject.isMember("Items"))
     {
-      const TiXmlElement* DirectoryNode = MediaContainer->FirstChildElement("Directory");
-      while (DirectoryNode)
+      CLog::Log(LOGERROR, "CEmbyClient::ParseViews: invalid response for library views from %s", CURL::GetRedacted(viewsUrl).c_str());
+      return false;
+    }
+
+    static const std::string PropertyViewId = "Id";
+    static const std::string PropertyViewName = "Name";
+    static const std::string PropertyViewETag = "Etag";
+    static const std::string PropertyViewServerID = "ServerId";
+    static const std::string PropertyViewCollectionType = "CollectionType";
+
+    std::vector<EmbyViewContent> views;
+    std::vector<const std::string> mediaTypes = {
+    "movies",
+  // musicvideos,
+  // homevideos,
+    "tvshows",
+  // livetv,
+  // channels,
+    "music"
+    };
+
+    const auto& viewsObject = resultObject["Items"];
+    for (auto viewIt = viewsObject.begin_array(); viewIt != viewsObject.end_array(); ++viewIt)
+    {
+      const auto view = *viewIt;
+      if (!view.isObject() || !view.isMember(PropertyViewId) ||
+          !view.isMember(PropertyViewName) || !view.isMember(PropertyViewCollectionType))
+        continue;
+
+      std::string type = view[PropertyViewCollectionType].asString();
+      if (type.empty())
+        continue;
+
+      if (!std::any_of(mediaTypes.cbegin(), mediaTypes.cend(),
+          [type](const MediaType& mediaType)
+          {
+            return MediaTypes::IsMediaType(type, mediaType);
+          }))
+        continue;
+
+      EmbyViewContent libraryView = {
+        view[PropertyViewId].asString(),
+        view[PropertyViewName].asString(),
+        view[PropertyViewETag].asString(),
+        view[PropertyViewServerID].asString(),
+        type,
+        "Users/" + m_userId + "/Items?parentId=" + view[PropertyViewId].asString()
+      };
+      if (libraryView.id.empty() || libraryView.name.empty())
+        continue;
+
+      views.push_back(libraryView);
+    }
+
+    for (const auto &content : views)
+    {
+      if (content.mediaType == "movies")
       {
-        EmbySectionsContent content;
-        content.uuid = XMLUtils::GetAttribute(DirectoryNode, "uuid");
-        content.path = XMLUtils::GetAttribute(DirectoryNode, "path");
-        content.type = XMLUtils::GetAttribute(DirectoryNode, "type");
-        content.title = XMLUtils::GetAttribute(DirectoryNode, "title");
-        content.updatedAt = XMLUtils::GetAttribute(DirectoryNode, "updatedAt");
-        std::string key = XMLUtils::GetAttribute(DirectoryNode, "key");
-        content.section = "library/sections/" + key;
-        content.thumb = XMLUtils::GetAttribute(DirectoryNode, "composite");
-        std::string art = XMLUtils::GetAttribute(DirectoryNode, "art");
-        if (m_local)
-          content.art = art;
-        else
-          content.art = content.section + "/resources/" + URIUtils::GetFileName(art);
-        if (content.type == "movie")
+        CSingleLock lock(m_criticalMovies);
+        if (parser == EmbyViewParsing::checkView)
         {
-          if (parser == EmbySectionParsing::checkSection)
-          {
-            CSingleLock lock(m_criticalMovies);
-            for (const auto &contents : m_movieSectionsContents)
-            {
-              if (contents.uuid == content.uuid)
-              {
-                if (contents.updatedAt != content.updatedAt)
-                {
-#if defined(PLEX_DEBUG_VERBOSE)
-                  CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections need update on %s:%s",
-                    m_serverName.c_str(), content.title.c_str());
-#endif
-                  m_needUpdate = true;
-                }
-              }
-            }
-          }
-          else
-          {
-            CSingleLock lock(m_criticalMovies);
-            m_movieSectionsContents.push_back(content);
-          }
-        }
-        else if (content.type == "show")
-        {
-          if (parser == EmbySectionParsing::checkSection)
-          {
-            CSingleLock lock(m_criticalTVShow);
-            for (const auto &contents : m_showSectionsContents)
-            {
-              if (contents.uuid == content.uuid)
-              {
-                if (contents.updatedAt != content.updatedAt)
-                {
-#if defined(PLEX_DEBUG_VERBOSE)
-                  CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections need update on %s:%s",
-                    m_serverName.c_str(), content.title.c_str());
-#endif
-                  m_needUpdate = true;
-                }
-              }
-            }
-          }
-          else
-          {
-            CSingleLock lock(m_criticalTVShow);
-            m_showSectionsContents.push_back(content);
-          }
-        }
-        else if (content.type == "artist")
-        {
-          if (parser == EmbySectionParsing::checkSection)
-          {
-            CSingleLock lock(m_criticalArtist);
-            for (const auto &contents : m_artistSectionsContents)
-            {
-              if (contents.uuid == content.uuid)
-              {
-                if (contents.updatedAt != content.updatedAt)
-                {
-#if defined(PLEX_DEBUG_VERBOSE)
-                  CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections need update on %s:%s",
-                            m_serverName.c_str(), content.title.c_str());
-#endif
-                  m_needUpdate = true;
-                }
-              }
-            }
-          }
-          else
-          {
-            CSingleLock lock(m_criticalArtist);
-            m_artistSectionsContents.push_back(content);
-          }
-        }
-        else if (content.type == "photo")
-        {
-          if (parser == EmbySectionParsing::checkSection)
-          {
-            CSingleLock lock(m_criticalPhoto);
-            for (const auto &contents : m_photoSectionsContents)
-            {
-              if (contents.uuid == content.uuid)
-              {
-                if (contents.updatedAt != content.updatedAt)
-                {
-#if defined(PLEX_DEBUG_VERBOSE)
-                  CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections need update on %s:%s",
-                            m_serverName.c_str(), content.title.c_str());
-#endif
-                  m_needUpdate = true;
-                }
-              }
-            }
-          }
-          else
-          {
-            CSingleLock lock(m_criticalPhoto);
-            m_photoSectionsContents.push_back(content);
-          }
+          for (const auto &contents : m_movieSectionsContents)
+            m_needUpdate = NeedViewUpdate(content, contents, m_serverInfo.ServerName);
         }
         else
         {
-          CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found unhandled content type %s",
-            m_serverName.c_str(), content.type.c_str());
+          m_movieSectionsContents.push_back(content);
         }
-        DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
       }
+      else if (content.mediaType == "tvshows")
+      {
+        CSingleLock lock(m_criticalTVShow);
+        if (parser == EmbyViewParsing::checkView)
+        {
+          for (const auto &contents : m_showSectionsContents)
+            m_needUpdate = NeedViewUpdate(content, contents, m_serverInfo.ServerName);
+        }
+        else
+        {
+          m_showSectionsContents.push_back(content);
+        }
+      }
+      else if (content.mediaType == "artist")
+      {
+        CSingleLock lock(m_criticalArtist);
+        if (parser == EmbyViewParsing::checkView)
+        {
+          for (const auto &contents : m_artistSectionsContents)
+            m_needUpdate = NeedViewUpdate(content, contents, m_serverInfo.ServerName);
+        }
+        else
+        {
+          m_artistSectionsContents.push_back(content);
+        }
+      }
+      else if (content.mediaType == "photo")
+      {
+        CSingleLock lock(m_criticalPhoto);
+        if (parser == EmbyViewParsing::checkView)
+        {
+          for (const auto &contents : m_photoSectionsContents)
+            m_needUpdate = NeedViewUpdate(content, contents, m_serverInfo.ServerName);
+        }
+        else
+        {
+          m_photoSectionsContents.push_back(content);
+        }
+      }
+      else
+      {
+        CLog::Log(LOGDEBUG, "CEmbyClient::ParseView %s found unhandled content type %s",
+          m_serverInfo.ServerName.c_str(), content.name.c_str());
+      }
+    }
 
-      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d movie sections",
-        m_serverName.c_str(), (int)m_movieSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d shows sections",
-        m_serverName.c_str(), (int)m_showSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d artist sections",
-                m_serverName.c_str(), (int)m_artistSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d photo sections",
-                m_serverName.c_str(), (int)m_photoSectionsContents.size());
-
+    if (!views.empty())
+    {
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d movies view",
+        m_serverInfo.ServerName.c_str(), (int)m_movieSectionsContents.size());
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d tvshows view",
+        m_serverInfo.ServerName.c_str(), (int)m_showSectionsContents.size());
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d artist view",
+        m_serverInfo.ServerName.c_str(), (int)m_artistSectionsContents.size());
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections %s found %d photos view",
+        m_serverInfo.ServerName.c_str(), (int)m_photoSectionsContents.size());
       rtn = true;
     }
-    else
-    {
-      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections no MediaContainer found");
-    }
-  }
-  else
-  {
-    // 401's are attempts to access a local server that is also in PMS
-    // and these require an access token. Only local servers that are
-    // not is PMS can be accessed via GDM.
-    if (plex.GetResponseCode() != 401)
-      CLog::Log(LOGDEBUG, "CEmbyClient::ParseSections failed %s", strResponse.c_str());
-    rtn = false;
   }
 
   return rtn;
@@ -452,4 +333,21 @@ void CEmbyClient::SetPresence(bool presence)
   {
     m_presence = presence;
   }
+}
+
+bool CEmbyClient::NeedViewUpdate(const EmbyViewContent &content, const EmbyViewContent &contents, const std::string server)
+{
+  bool rtn = false;
+  if (contents.id == content.id)
+  {
+    if (contents.etag != content.etag)
+    {
+#if defined(EMBY_DEBUG_VERBOSE)
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseView need update on %s:%s",
+        server.c_str(), content.name.c_str());
+#endif
+      rtn = true;
+    }
+  }
+  return rtn;
 }

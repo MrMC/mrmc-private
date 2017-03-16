@@ -1831,6 +1831,9 @@
 		F56352C816E5436900D21BAD /* AppParamParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56352C616E5436900D21BAD /* AppParamParser.cpp */; };
 		F56353BF16E9BB3500D21BAD /* BitstreamConverter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56353BD16E9BB3500D21BAD /* BitstreamConverter.cpp */; };
 		F56579AF13060D1E0085ED7F /* RenderCapture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F56579AD13060D1E0085ED7F /* RenderCapture.cpp */; };
+		F5777E1F1E7AEE5800C4F62A /* EmbyDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5777E1D1E7AEE5800C4F62A /* EmbyDirectory.cpp */; };
+		F5777E201E7AEE5800C4F62A /* EmbyDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5777E1D1E7AEE5800C4F62A /* EmbyDirectory.cpp */; };
+		F5777E211E7AEE5800C4F62A /* EmbyDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5777E1D1E7AEE5800C4F62A /* EmbyDirectory.cpp */; };
 		F57B6F801071B8B500079ACB /* JobManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F57B6F7E1071B8B500079ACB /* JobManager.cpp */; };
 		F584E12E0F257C5100DB26A5 /* HTTPDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F584E12D0F257C5100DB26A5 /* HTTPDirectory.cpp */; };
 		F58558191DBA7CD200641870 /* ActiveAEFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F58558171DBA7CD200641870 /* ActiveAEFilter.cpp */; };
@@ -5352,6 +5355,8 @@
 		F56579AD13060D1E0085ED7F /* RenderCapture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = RenderCapture.cpp; sourceTree = "<group>"; };
 		F56579AE13060D1E0085ED7F /* RenderCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RenderCapture.h; sourceTree = "<group>"; };
 		F57483611BFFCA7300D5F221 /* ios_package_dylibs2frameworks.command */ = {isa = PBXFileReference; lastKnownFileType = text; path = ios_package_dylibs2frameworks.command; sourceTree = "<group>"; };
+		F5777E1D1E7AEE5800C4F62A /* EmbyDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyDirectory.cpp; sourceTree = "<group>"; };
+		F5777E1E1E7AEE5800C4F62A /* EmbyDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyDirectory.h; sourceTree = "<group>"; };
 		F57B6F7E1071B8B500079ACB /* JobManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JobManager.cpp; sourceTree = "<group>"; };
 		F57B6F7F1071B8B500079ACB /* JobManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JobManager.h; sourceTree = "<group>"; };
 		F584E12C0F257C5100DB26A5 /* HTTPDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTTPDirectory.h; sourceTree = "<group>"; };
@@ -8525,6 +8530,8 @@
 				F559021C1C30A2BD00349249 /* DSMDirectory.h */,
 				F559021D1C30A2BD00349249 /* DSMFile.cpp */,
 				F559021E1C30A2BD00349249 /* DSMFile.h */,
+				F5777E1D1E7AEE5800C4F62A /* EmbyDirectory.cpp */,
+				F5777E1E1E7AEE5800C4F62A /* EmbyDirectory.h */,
 				DF29BD001B5D913B00904347 /* EventsDirectory.cpp */,
 				DF29BD011B5D913B00904347 /* EventsDirectory.h */,
 				0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */,
@@ -11409,6 +11416,7 @@
 				F5B722BC1C7BC10B006432AE /* kiss_fft.c in Sources */,
 				7CCDAC8619275CA70074CF51 /* NptBsdNetwork.cpp in Sources */,
 				7CCDAC8F19275CA70074CF51 /* NptBsdResolver.cpp in Sources */,
+				F5777E1F1E7AEE5800C4F62A /* EmbyDirectory.cpp in Sources */,
 				7CCDAC9219275CA70074CF51 /* NptBsdSockets.cpp in Sources */,
 				F5B724AD1C7E150C006432AE /* errhnd.cpp in Sources */,
 				F51063421BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */,
@@ -12477,6 +12485,7 @@
 				7CCDAA86192756250074CF51 /* NptPosixEnvironment.cpp in Sources */,
 				7CCDAA8C192756250074CF51 /* NptPosixNetwork.cpp in Sources */,
 				7CCDAA8F192756250074CF51 /* NptPosixQueue.cpp in Sources */,
+				F5777E201E7AEE5800C4F62A /* EmbyDirectory.cpp in Sources */,
 				7CCDAA98192756250074CF51 /* NptPosixSystem.cpp in Sources */,
 				7CCDAAA1192756250074CF51 /* NptPosixThreads.cpp in Sources */,
 				7CCDAAAA192756250074CF51 /* NptPosixTime.cpp in Sources */,
@@ -13554,6 +13563,7 @@
 				F5D1422C1BAF0B6D0075A95C /* NptSelectableMessageQueue.cpp in Sources */,
 				F5D1422D1BAF0B6D0075A95C /* NptBsdNetwork.cpp in Sources */,
 				F5D1422E1BAF0B6D0075A95C /* NptBsdResolver.cpp in Sources */,
+				F5777E211E7AEE5800C4F62A /* EmbyDirectory.cpp in Sources */,
 				F5D1422F1BAF0B6D0075A95C /* NptBsdSockets.cpp in Sources */,
 				F5D142301BAF0B6D0075A95C /* NptStdcDebug.cpp in Sources */,
 				F5D142B31BAF31FB0075A95C /* MainApplication.mm in Sources */,

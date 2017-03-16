@@ -291,7 +291,9 @@ bool URIUtils::HasEncodedHostname(const CURL& url)
 
 bool URIUtils::HasRedactedHostname(const CURL& url)
 {
-  return url.HasProtocolOption("X-Plex-Token");
+  bool redacted = url.HasProtocolOption("X-Plex-Token") ||
+                  url.HasProtocolOption("X-MediaBrowser-Token");
+  return redacted;
 }
 
 bool URIUtils::HasEncodedFilename(const CURL& url)

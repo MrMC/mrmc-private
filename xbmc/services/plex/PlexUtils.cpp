@@ -1662,8 +1662,9 @@ bool CPlexUtils::GetPlexAlbumSongs(CFileItem item, CFileItemList &items)
   
 }
 
-bool CPlexUtils::GetPlexMediaTotals(PlexMediaCount &totals)
+bool CPlexUtils::GetPlexMediaTotals(MediaServicesMediaCount &totals)
 {
+  // totals might or might not be reset to zero so add to it
   std::vector<CPlexClientPtr> clients;
   CPlexServices::GetInstance().GetClients(clients);
   for (const auto &client : clients)
@@ -1684,11 +1685,11 @@ bool CPlexUtils::GetPlexMediaTotals(PlexMediaCount &totals)
         curl.SetProtocolOption("X-Plex-Container-Size", "0");
         // get movie unwatched totals
         xml = GetPlexXML(curl.Get());
-        totals.iMovieUnwatched = totals.iMovieUnwatched + ParsePlexMediaXML(xml);
+        totals.iMovieUnwatched += ParsePlexMediaXML(xml);
         // get movie totals
         curl.SetFileName(content.section + "/all?type=1");
         xml = GetPlexXML(curl.Get());
-        totals.iMovieTotal = totals.iMovieTotal + ParsePlexMediaXML(xml);
+        totals.iMovieTotal +=ParsePlexMediaXML(xml);
       }
       // Show Totals
       contents = client->GetTvContent();
@@ -1702,19 +1703,19 @@ bool CPlexUtils::GetPlexMediaTotals(PlexMediaCount &totals)
         curl.SetProtocolOption("X-Plex-Container-Size", "0");
         // get episode unwatched totals
         xml = GetPlexXML(curl.Get());
-        totals.iEpisodeUnwatched = totals.iEpisodeUnwatched + ParsePlexMediaXML(xml);
+        totals.iEpisodeUnwatched += ParsePlexMediaXML(xml);
         // get episode totals
         curl.SetFileName(content.section + "/all?type=4");
         xml = GetPlexXML(curl.Get());
-        totals.iEpisodeTotal = totals.iEpisodeTotal + ParsePlexMediaXML(xml);
+        totals.iEpisodeTotal += ParsePlexMediaXML(xml);
         // get show totals
         curl.SetFileName(content.section + "/all?type=2");
         xml = GetPlexXML(curl.Get());
-        totals.iShowTotal = totals.iShowTotal + ParsePlexMediaXML(xml);
+        totals.iShowTotal += ParsePlexMediaXML(xml);
         // get show unwatched totals
         curl.SetFileName(content.section + "/all?type=2&unwatched=1");
         xml = GetPlexXML(curl.Get());
-        totals.iShowUnwatched = totals.iShowUnwatched + ParsePlexMediaXML(xml);
+        totals.iShowUnwatched += ParsePlexMediaXML(xml);
       }
       // Music Totals
       contents = client->GetArtistContent();
@@ -1728,15 +1729,15 @@ bool CPlexUtils::GetPlexMediaTotals(PlexMediaCount &totals)
         curl.SetProtocolOption("X-Plex-Container-Size", "0");
         // get artist totals
         xml = GetPlexXML(curl.Get());
-        totals.iMusicArtist = totals.iMusicArtist + ParsePlexMediaXML(xml);
+        totals.iMusicArtist += ParsePlexMediaXML(xml);
         // get Album totals
         curl.SetFileName(content.section + "/all?type=9");
         xml = GetPlexXML(curl.Get());
-        totals.iMusicAlbums = totals.iMusicAlbums + ParsePlexMediaXML(xml);
+        totals.iMusicAlbums += ParsePlexMediaXML(xml);
         // get Song totals
         curl.SetFileName(content.section + "/all?type=10");
         xml = GetPlexXML(curl.Get());
-        totals.iMusicSongs = totals.iMusicSongs + ParsePlexMediaXML(xml);
+        totals.iMusicSongs += ParsePlexMediaXML(xml);
       }
     }
   }

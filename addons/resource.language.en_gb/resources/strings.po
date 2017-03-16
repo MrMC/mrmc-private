@@ -5060,7 +5060,7 @@ msgctxt "#2118"
 msgid "https://emby.media/pin and enter this code -> "
 msgstr ""
 
-#empty strings from id 2120 to 9999
+#empty strings from id 2119 to 9999
 
 #: xbmc/guilib/WindowIDs.h
 msgctxt "#10000"
@@ -11557,7 +11557,10 @@ msgctxt "#20173"
 msgid "FTP server"
 msgstr ""
 
-#empty string with id 20174
+#: xbmc/network/GUIDialogNetworkSetup.cpp
+msgctxt "#20174"
+msgid "Emby server"
+msgstr ""
 
 #: xbmc/network/GUIDialogNetworkSetup.cpp
 msgctxt "#20175"

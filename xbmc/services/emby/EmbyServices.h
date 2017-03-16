@@ -85,16 +85,16 @@ private:
 
   void              SetUserSettings();
   void              GetUserSettings();
-  bool              EmbySignedIn();
 
   // IRunnable entry point for thread
   virtual void      Process() override;
 
-  bool              AuthenticateByName(std::string user, std::string pass);
-  bool              GetEmbyServers(bool includeHttps);
+  bool              AuthenticateByName(const CURL& url);
+  bool              GetEmbyServers();
   bool              PostSignInPinCode();
   bool              GetSignInByPinReply();
-  void              FindEmbyServersByBroadcast();
+  //void              FindEmbyServersByBroadcast();
+  EmbyServerInfo    GetEmbyServerInfo(const std::string &ipAddress);
 
   CEmbyClientPtr    GetClient(std::string uuid);
   bool              AddClient(CEmbyClientPtr foundClient);
@@ -105,13 +105,13 @@ private:
   CCriticalSection  m_critical;
   CEvent            m_processSleep;
 
-  std::string       m_authToken;
-  std::string       m_signInByPinId;
+  std::string       m_userId;
+  std::string       m_serverIP;
+  std::string       m_accessToken;
   std::string       m_signInByPinCode;
   bool              m_broadcast;
   SOCKETS::CSocketListener *m_broadcastListener;
   std::string       m_myHomeUser;
-  XFILE::CCurlFile  m_emby;
 
   EmbyServicePlayerState m_playState;
   CCriticalSection  m_criticalClients;
