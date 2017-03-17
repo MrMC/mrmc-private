@@ -440,12 +440,12 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
   return rtn;
 }
 
-void CEmbyUtils::GetVideoDetails(CFileItem &fileitem, const CVariant &cvaiant)
+void CEmbyUtils::GetVideoDetails(CFileItem &fileitem, const CVariant &cvariant)
 {
   
   // get all genres
   std::vector<std::string> genres;
-  const auto& streams = cvaiant["Genres"];
+  const auto& streams = cvariant["Genres"];
   for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
   {
     const auto stream = *streamIt;
@@ -455,16 +455,16 @@ void CEmbyUtils::GetVideoDetails(CFileItem &fileitem, const CVariant &cvaiant)
   
 }
 
-void CEmbyUtils::GetMusicDetails(CFileItem &fileitem, const CVariant &cvaiant)
+void CEmbyUtils::GetMusicDetails(CFileItem &fileitem, const CVariant &cvariant)
 {
 }
 
-void CEmbyUtils::GetMediaDetals(CFileItem &fileitem, CURL url, const CVariant &cvaiant, std::string id)
+void CEmbyUtils::GetMediaDetals(CFileItem &fileitem, CURL url, const CVariant &cvariant, std::string id)
 {
-  if (cvaiant.isMember("MediaStreams") && cvaiant["MediaStreams"].isArray())
+  if (cvariant.isMember("MediaStreams") && cvariant["MediaStreams"].isArray())
   {
     CStreamDetails streamDetail;
-    const auto& streams = cvaiant["MediaStreams"];
+    const auto& streams = cvariant["MediaStreams"];
     for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
     {
       const auto stream = *streamIt;

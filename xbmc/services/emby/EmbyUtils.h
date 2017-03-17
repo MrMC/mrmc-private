@@ -90,9 +90,9 @@ public:
 private:
   static void ReportToServer(std::string url, std::string filename);
   static bool GetVideoItems(CFileItemList &items,CURL url, const CVariant &object, std::string type, bool formatLabel, int season = -1);
-  static void GetVideoDetails(CFileItem &fileitem, const CVariant &cvaiant);
-  static void GetMusicDetails(CFileItem &fileitem, const CVariant &cvaiant);
-  static void GetMediaDetals(CFileItem &fileitem, CURL url, const CVariant &cvaiant, std::string id = "0");
+  static void GetVideoDetails(CFileItem &fileitem, const CVariant &cvariant);
+  static void GetMusicDetails(CFileItem &fileitem, const CVariant &cvariant);
+  static void GetMediaDetals(CFileItem &fileitem, CURL url, const CVariant &cvariant, std::string id = "0");
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
   static int ParseEmbyMediaXML(TiXmlDocument xml);
   static void RemoveSubtitleProperties(CFileItem &item);
