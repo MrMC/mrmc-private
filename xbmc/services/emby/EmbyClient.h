@@ -76,7 +76,6 @@ public:
   bool Init(const std::string &userId, const std::string &accessToken, const EmbyServerInfo &serverInfo);
 
   const bool NeedUpdate() const             { return m_needUpdate; }
-  const std::string &GetContentType() const { return m_contentType; }
   const std::string &GetServerName() const  { return m_serverInfo.ServerName; }
   const std::string &GetUuid() const        { return m_userId; }
   const std::string &GetOwned() const       { return m_owned; }
@@ -110,27 +109,26 @@ protected:
 
 private:
   bool        m_local;
-  std::string m_contentType;
   std::string m_owned;
   std::string m_userId;
   std::string m_accessToken;
   std::string m_url;
-  std::string m_httpsRequired;
   std::string m_protocol;
   std::string m_platform;
   EmbyServerInfo m_serverInfo;
   std::atomic<bool> m_presence;
   std::atomic<bool> m_needUpdate;
-  CCriticalSection  m_viewItems_lock;
+  CEmbyClientSync *m_clientSync;
+
+  CCriticalSection  m_viewItemsLock;
   std::vector<CFileItemPtr> m_viewItems;
 
-  CCriticalSection  m_viewMoviesContents_lock;
-  CCriticalSection  m_viewTVshowContents_lock;
-  CCriticalSection  m_viewArtistContents_lock;
-  CCriticalSection  m_viewPhotosContents_lock;
+  CCriticalSection  m_viewMoviesContentsLock;
+  CCriticalSection  m_viewTVshowContentsLock;
+  CCriticalSection  m_viewArtistContentsLock;
+  CCriticalSection  m_viewPhotosContentsLock;
   std::vector<EmbyViewContent> m_viewMoviesContents;
   std::vector<EmbyViewContent> m_viewTVshowContents;
   std::vector<EmbyViewContent> m_viewArtistContents;
   std::vector<EmbyViewContent> m_viewPhotosContents;
-  CEmbyClientSync *m_clientSync;
 };

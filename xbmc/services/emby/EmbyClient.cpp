@@ -97,25 +97,25 @@ int CEmbyClient::GetPort()
 
 const EmbyViewContentVector CEmbyClient::GetTvContent() const
 {
-  CSingleLock lock(m_viewTVshowContents_lock);
+  CSingleLock lock(m_viewTVshowContentsLock);
   return m_viewTVshowContents;
 }
 
 const EmbyViewContentVector CEmbyClient::GetMovieContent() const
 {
-  CSingleLock lock(m_viewMoviesContents_lock);
+  CSingleLock lock(m_viewMoviesContentsLock);
   return m_viewMoviesContents;
 }
 
 const EmbyViewContentVector CEmbyClient::GetArtistContent() const
 {
-  CSingleLock lock(m_viewArtistContents_lock);
+  CSingleLock lock(m_viewArtistContentsLock);
   return m_viewArtistContents;
 }
 
 const EmbyViewContentVector CEmbyClient::GetPhotoContent() const
 {
-  CSingleLock lock(m_viewPhotosContents_lock);
+  CSingleLock lock(m_viewPhotosContentsLock);
   return m_viewPhotosContents;
 }
 
@@ -136,7 +136,7 @@ std::string CEmbyClient::FindViewName(const std::string &path)
   if (!real_url.GetFileName().empty())
   {
     {
-      CSingleLock lock(m_viewMoviesContents_lock);
+      CSingleLock lock(m_viewMoviesContentsLock);
       for (const auto &contents : m_viewMoviesContents)
       {
         if (real_url.GetFileName().find(contents.viewprefix) != std::string::npos)
@@ -144,7 +144,7 @@ std::string CEmbyClient::FindViewName(const std::string &path)
       }
     }
     {
-      CSingleLock lock(m_viewTVshowContents_lock);
+      CSingleLock lock(m_viewTVshowContentsLock);
       for (const auto &contents : m_viewTVshowContents)
       {
         if (real_url.GetFileName().find(contents.viewprefix) != std::string::npos)
@@ -191,11 +191,11 @@ bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
     if (parser == EmbyViewParsing::updateView)
     {
       {
-        CSingleLock lock(m_viewMoviesContents_lock);
+        CSingleLock lock(m_viewMoviesContentsLock);
         m_viewMoviesContents.clear();
       }
       {
-        CSingleLock lock(m_viewTVshowContents_lock);
+        CSingleLock lock(m_viewTVshowContentsLock);
         m_viewTVshowContents.clear();
       }
       m_needUpdate = false;
@@ -262,7 +262,7 @@ bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
     {
       if (content.mediaType == "movies")
       {
-        CSingleLock lock(m_viewMoviesContents_lock);
+        CSingleLock lock(m_viewMoviesContentsLock);
         if (parser == EmbyViewParsing::checkView)
         {
           for (const auto &contents : m_viewMoviesContents)
@@ -275,7 +275,7 @@ bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
       }
       else if (content.mediaType == "tvshows")
       {
-        CSingleLock lock(m_viewTVshowContents_lock);
+        CSingleLock lock(m_viewTVshowContentsLock);
         if (parser == EmbyViewParsing::checkView)
         {
           for (const auto &contents : m_viewTVshowContents)
@@ -288,7 +288,7 @@ bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
       }
       else if (content.mediaType == "artist")
       {
-        CSingleLock lock(m_viewArtistContents_lock);
+        CSingleLock lock(m_viewArtistContentsLock);
         if (parser == EmbyViewParsing::checkView)
         {
           for (const auto &contents : m_viewArtistContents)
@@ -301,7 +301,7 @@ bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
       }
       else if (content.mediaType == "photo")
       {
-        CSingleLock lock(m_viewPhotosContents_lock);
+        CSingleLock lock(m_viewPhotosContentsLock);
         if (parser == EmbyViewParsing::checkView)
         {
           for (const auto &contents : m_viewPhotosContents)
