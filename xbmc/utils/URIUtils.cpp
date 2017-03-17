@@ -1085,6 +1085,16 @@ bool URIUtils::IsDOSPath(const std::string &path)
   return false;
 }
 
+bool URIUtils::IsPlex(const std::string& strFile)
+{
+  return IsProtocol(strFile, "plex");
+}
+
+bool URIUtils::IsEmby(const std::string& strFile)
+{
+  return IsProtocol(strFile, "emby");
+}
+
 void URIUtils::AddSlashAtEnd(std::string& strFolder)
 {
   if (IsURL(strFolder))
