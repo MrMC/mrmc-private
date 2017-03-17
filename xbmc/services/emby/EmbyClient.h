@@ -60,27 +60,9 @@ struct EmbyViewContent
   std::string viewprefix;
 };
 
-/*
-struct EmbyViewContent
-{
-  std::string type;
-  std::string title;
-  std::string agent;
-  std::string scanner;
-  std::string language;
-  std::string uuid;
-  std::string updatedAt;
-  std::string address;
-  std::string section;
-  std::string art;
-  std::string thumb;
-};
-*/
-
 class CFileItem;
 typedef std::shared_ptr<CFileItem> CFileItemPtr;
 typedef std::vector<EmbyViewContent> EmbyViewContentVector;
-
 
 class CEmbyClient
 {
@@ -103,9 +85,9 @@ public:
   const bool &IsLocal() const               { return m_local; }
   const bool IsCloud() const                { return (m_platform == "Cloud"); }
 
-  void  AddViewItem(CFileItemPtr root)      { m_view_items.push_back(root); };
-  std::vector<CFileItemPtr> GetViewItems()  { return m_view_items; };
-  void ClearViewItems()                     { m_view_items.clear(); };
+  void  AddViewItem(CFileItemPtr root)      { m_viewItems.push_back(root); };
+  std::vector<CFileItemPtr> GetViewItems()  { return m_viewItems; };
+  void ClearViewItems()                     { m_viewItems.clear(); };
 
   const EmbyViewContentVector GetTvContent() const;
   const EmbyViewContentVector GetMovieContent() const;
@@ -137,13 +119,15 @@ private:
   EmbyServerInfo m_serverInfo;
   std::atomic<bool> m_presence;
   std::atomic<bool> m_needUpdate;
-  std::vector<CFileItemPtr> m_view_items;
-  CCriticalSection  m_criticalMovies;
-  CCriticalSection  m_criticalTVShow;
-  CCriticalSection  m_criticalArtist;
-  CCriticalSection  m_criticalPhoto;
-  std::vector<EmbyViewContent> m_movieSectionsContents;
-  std::vector<EmbyViewContent> m_showSectionsContents;
-  std::vector<EmbyViewContent> m_artistSectionsContents;
-  std::vector<EmbyViewContent> m_photoSectionsContents;
+  CCriticalSection  m_viewItems_lock;
+  std::vector<CFileItemPtr> m_viewItems;
+
+  CCriticalSection  m_viewMoviesContents_lock;
+  CCriticalSection  m_viewTVshowContents_lock;
+  CCriticalSection  m_viewArtistContents_lock;
+  CCriticalSection  m_viewPhotosContents_lock;
+  std::vector<EmbyViewContent> m_viewMoviesContents;
+  std::vector<EmbyViewContent> m_viewTVshowContents;
+  std::vector<EmbyViewContent> m_viewArtistContents;
+  std::vector<EmbyViewContent> m_viewPhotosContents;
 };
