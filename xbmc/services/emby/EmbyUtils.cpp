@@ -422,7 +422,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->m_resumePoint = resumePoint;
     //newItem->m_lStartOffset = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
 
-    GetMediaDetals(newItem, url, item);
+    GetMediaDetals(*newItem, url, item);
 
     if (formatLabel)
     {
@@ -460,16 +460,16 @@ void CEmbyUtils::GetMusicDetails(CFileItemPtr pitem, const CVariant &item)
 {
 }
 
-void CEmbyUtils::GetMediaDetals(CFileItemPtr pitem, CURL url, const CVariant &item, std::string id)
+void CEmbyUtils::GetMediaDetals(CFileItem &pitem, CURL url, const CVariant &item, std::string id)
 {
   if (item.isMember("MediaStreams") && item["MediaStreams"].isArray())
   {
+    CStreamDetails streamDetail;
     const auto& streams = item["MediaStreams"];
     for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
     {
       const auto stream = *streamIt;
       const auto streamType = stream["Type"].asString();
-      CStreamDetail* streamDetail = nullptr;
       if (streamType == "Video")
       {
         CStreamDetailVideo* videoStream = new CStreamDetailVideo();
@@ -477,9 +477,9 @@ void CEmbyUtils::GetMediaDetals(CFileItemPtr pitem, CURL url, const CVariant &it
         videoStream->m_strLanguage = stream["Language"].asString();
         videoStream->m_iWidth = static_cast<int>(stream["Width"].asInteger());
         videoStream->m_iHeight = static_cast<int>(stream["Height"].asInteger());
-        videoStream->m_iDuration = pitem->GetVideoInfoTag()->m_duration;
+        videoStream->m_iDuration = pitem.GetVideoInfoTag()->m_duration;
 
-        streamDetail = videoStream;
+        streamDetail.AddStream(videoStream);
       }
       else if (streamType == "Audio")
       {
@@ -488,18 +488,19 @@ void CEmbyUtils::GetMediaDetals(CFileItemPtr pitem, CURL url, const CVariant &it
         audioStream->m_strLanguage = stream["Language"].asString();
         audioStream->m_iChannels = static_cast<int>(stream["Channels"].asInteger());
 
-        streamDetail = audioStream;
+        streamDetail.AddStream(audioStream);
       }
       else if (streamType == "Subtitle")
       {
         CStreamDetailSubtitle* subtitleStream = new CStreamDetailSubtitle();
         subtitleStream->m_strLanguage = stream["Language"].asString();
 
-        streamDetail = subtitleStream;
+        streamDetail.AddStream(subtitleStream);
       }
 
-      if (streamDetail != nullptr)
-        pitem->GetVideoInfoTag()->m_streamDetails.AddStream(streamDetail);
+    //  if (streamDetail != nullptr)
+        //pitem->GetVideoInfoTag()->m_streamDetails.AddStream(streamDetail);
+      pitem.GetVideoInfoTag()->m_streamDetails = streamDetail;
     }
   }
 }
