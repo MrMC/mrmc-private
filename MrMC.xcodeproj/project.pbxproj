@@ -1660,6 +1660,9 @@
 		EC720A8F155091BB00FFD782 /* ilog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EC720A8D155091BB00FFD782 /* ilog.cpp */; };
 		F500E35617F3412C004FC217 /* WinEvents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F500E35517F3412C004FC217 /* WinEvents.cpp */; };
 		F500E35717F3412C004FC217 /* WinEvents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F500E35517F3412C004FC217 /* WinEvents.cpp */; };
+		F501B0BE1E7C4A4A0050F4EE /* EmbyClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F501B0BC1E7C4A4A0050F4EE /* EmbyClientSync.cpp */; };
+		F501B0BF1E7C4A4A0050F4EE /* EmbyClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F501B0BC1E7C4A4A0050F4EE /* EmbyClientSync.cpp */; };
+		F501B0C01E7C4A4A0050F4EE /* EmbyClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F501B0BC1E7C4A4A0050F4EE /* EmbyClientSync.cpp */; };
 		F5022F171E2D41D5001BBF75 /* hdhomerun_channels.c in Sources */ = {isa = PBXBuildFile; fileRef = F5022EF81E2D41D5001BBF75 /* hdhomerun_channels.c */; };
 		F5022F181E2D41D5001BBF75 /* hdhomerun_channels.c in Sources */ = {isa = PBXBuildFile; fileRef = F5022EF81E2D41D5001BBF75 /* hdhomerun_channels.c */; };
 		F5022F191E2D41D5001BBF75 /* hdhomerun_channels.c in Sources */ = {isa = PBXBuildFile; fileRef = F5022EF81E2D41D5001BBF75 /* hdhomerun_channels.c */; };
@@ -5191,6 +5194,8 @@
 		EC720A8E155091BB00FFD782 /* ilog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ilog.h; path = commons/ilog.h; sourceTree = "<group>"; };
 		F500E35517F3412C004FC217 /* WinEvents.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WinEvents.cpp; sourceTree = "<group>"; };
 		F500E35917F34132004FC217 /* WinEvents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WinEvents.h; sourceTree = "<group>"; };
+		F501B0BC1E7C4A4A0050F4EE /* EmbyClientSync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EmbyClientSync.cpp; sourceTree = "<group>"; };
+		F501B0BD1E7C4A4A0050F4EE /* EmbyClientSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EmbyClientSync.h; sourceTree = "<group>"; };
 		F5022EF71E2D41D5001BBF75 /* hdhomerun.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hdhomerun.h; sourceTree = "<group>"; };
 		F5022EF81E2D41D5001BBF75 /* hdhomerun_channels.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hdhomerun_channels.c; sourceTree = "<group>"; };
 		F5022EF91E2D41D5001BBF75 /* hdhomerun_channels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hdhomerun_channels.h; sourceTree = "<group>"; };
@@ -9928,6 +9933,8 @@
 				F5FC88F51E64A8C100449E85 /* EmbyUtils.h */,
 				F5FC88EA1E648AEE00449E85 /* EmbyClient.cpp */,
 				F5FC88EB1E648AEE00449E85 /* EmbyClient.h */,
+				F501B0BC1E7C4A4A0050F4EE /* EmbyClientSync.cpp */,
+				F501B0BD1E7C4A4A0050F4EE /* EmbyClientSync.h */,
 				F5FC88EC1E648AEE00449E85 /* EmbyServices.cpp */,
 				F5FC88ED1E648AEE00449E85 /* EmbyServices.h */,
 			);
@@ -10647,6 +10654,7 @@
 				E38E22E50D25F9FE00618676 /* MusicInfoScraper.cpp in Sources */,
 				E38E22E70D25F9FE00618676 /* Network.cpp in Sources */,
 				E38E22EB0D25F9FE00618676 /* RegExp.cpp in Sources */,
+				F501B0BE1E7C4A4A0050F4EE /* EmbyClientSync.cpp in Sources */,
 				E38E22EC0D25F9FE00618676 /* RssReader.cpp in Sources */,
 				E38E22ED0D25F9FE00618676 /* ScraperParser.cpp in Sources */,
 				F5022F421E2D4404001BBF75 /* HDHomeRunDirectory.cpp in Sources */,
@@ -12249,6 +12257,7 @@
 				E499149F174E606E00741B6D /* ViewStateSettings.cpp in Sources */,
 				E49914A1174E606E00741B6D /* WinSystem.cpp in Sources */,
 				E49914A2174E607200741B6D /* GUIMediaWindow.cpp in Sources */,
+				F501B0BF1E7C4A4A0050F4EE /* EmbyClientSync.cpp in Sources */,
 				E49914A3174E607200741B6D /* GUIWindowDebugInfo.cpp in Sources */,
 				E49914A4174E607200741B6D /* GUIWindowFileManager.cpp in Sources */,
 				399442801A8DD96F006C39E9 /* VideoLibraryQueue.cpp in Sources */,
@@ -12794,6 +12803,7 @@
 				F5D13FAC1BAF0B6D0075A95C /* PlaylistFileDirectory.cpp in Sources */,
 				F5D13FAD1BAF0B6D0075A95C /* PVRDirectory.cpp in Sources */,
 				F5D13FAE1BAF0B6D0075A95C /* PVRFile.cpp in Sources */,
+				F501B0C01E7C4A4A0050F4EE /* EmbyClientSync.cpp in Sources */,
 				F5D13FAF1BAF0B6D0075A95C /* RSSDirectory.cpp in Sources */,
 				F5D13FB01BAF0B6D0075A95C /* SAPDirectory.cpp in Sources */,
 				F5022F441E2D4404001BBF75 /* HDHomeRunDirectory.cpp in Sources */,

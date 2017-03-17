@@ -61,6 +61,7 @@ struct EmbyViewContent
 };
 
 class CFileItem;
+class CEmbyClientSync;
 typedef std::shared_ptr<CFileItem> CFileItemPtr;
 typedef std::vector<EmbyViewContent> EmbyViewContentVector;
 
@@ -95,6 +96,7 @@ public:
   const EmbyViewContentVector GetPhotoContent() const;
   const std::string FormatContentTitle(const std::string contentTitle) const;
   std::string FindViewName(const std::string &path);
+  CFileItemPtr FindItemByServiceId(const std::string &Id);
 
   std::string GetHost();
   int         GetPort();
@@ -130,4 +132,5 @@ private:
   std::vector<EmbyViewContent> m_viewTVshowContents;
   std::vector<EmbyViewContent> m_viewArtistContents;
   std::vector<EmbyViewContent> m_viewPhotosContents;
+  CEmbyClientSync *m_clientSync;
 };

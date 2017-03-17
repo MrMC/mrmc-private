@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include "EmbyClient.h"
+#include "EmbyClientSync.h"
 #include "EmbyUtils.h"
 
 #include "Application.h"
@@ -30,6 +31,7 @@
 #include "filesystem/CurlFile.h"
 #include "filesystem/StackDirectory.h"
 #include "network/Network.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
@@ -37,6 +39,7 @@
 #include "utils/JSONVariantParser.h"
 #include "utils/JSONVariantWriter.h"
 #include "utils/Variant.h"
+#include "video/VideoInfoTag.h"
 
 #include <string>
 #include <sstream>
@@ -48,10 +51,12 @@ CEmbyClient::CEmbyClient()
   m_presence = true;
   m_protocol = "http";
   m_needUpdate = false;
+  m_clientSync = nullptr;
 }
 
 CEmbyClient::~CEmbyClient()
 {
+  SAFE_DELETE(m_clientSync);
 }
 
 bool CEmbyClient::Init(const std::string &userId, const std::string &accessToken, const EmbyServerInfo &serverInfo)
@@ -65,6 +70,10 @@ bool CEmbyClient::Init(const std::string &userId, const std::string &accessToken
   url.SetProtocolOptions("&X-MediaBrowser-Token=" + m_accessToken);
   m_url = url.Get();
   m_protocol = url.GetProtocol();
+
+  m_clientSync = new CEmbyClientSync(this, m_serverInfo.ServerName,
+    m_serverInfo.LocalAddress, CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), m_accessToken);
+  m_clientSync->Start();
 
   return true;
 }
@@ -350,4 +359,14 @@ bool CEmbyClient::NeedViewUpdate(const EmbyViewContent &content, const EmbyViewC
     }
   }
   return rtn;
+}
+
+CFileItemPtr CEmbyClient::FindItemByServiceId(const std::string &serviceId)
+{
+  for (const auto &item : m_viewItems)
+  {
+    if (item->GetVideoInfoTag()->m_strServiceId != serviceId)
+      return item;
+  }
+  return nullptr;
 }

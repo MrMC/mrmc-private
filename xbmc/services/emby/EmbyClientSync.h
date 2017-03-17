@@ -21,8 +21,14 @@
 
 #include <atomic>
 #include <memory>
+#include <map>
+#include <set>
+#include <string>
+#include <tuple>
+#include <vector>
 
 #include "EmbyClient.h"
+#include "FileItem.h"
 #include "threads/Thread.h"
 
 namespace easywsclient
@@ -33,25 +39,19 @@ namespace easywsclient
 class CEmbyClientSync : protected CThread
 {
 public:
-  CEmbyClientSync(const CEmbyClient& client, const std::string& name, const std::string& address, const std::string& deviceId, const std::string& accessToken);
-  ~CEmbyServerSync();
+  CEmbyClientSync(CEmbyClient *client, const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken);
+ ~CEmbyClientSync();
 
   void Start();
   void Stop();
-
-  void AddImport(const CMediaImport& import);
 
 protected:
   virtual void Process();
 
 private:
-  CFileItemPtr GetItemDetails(const std::string& itemId) const;
-  bool FindImportForItem(const CFileItemPtr item, CMediaImport& import) const;
-
+  CEmbyClient *m_client;
   std::string m_address;
   const std::string m_name;
-  const CEmbyClient m_client;
-  std::vector<CMediaImport> m_imports;
   std::unique_ptr<easywsclient::WebSocket> m_websocket;
   std::atomic<bool> m_stop;
 };
