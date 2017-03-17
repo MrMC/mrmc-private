@@ -306,10 +306,12 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     CFileItemPtr newItem(new CFileItem());
 
     CVideoInfoTag* videoInfo = newItem->GetVideoInfoTag();
-/*
+
     std::string fanart;
     std::string value;
-    // if we have season means we are listing episodes, we need to get the fanart from rootXmlNode.
+    // clear url options
+    url.SetOptions("");
+/*    // if we have season means we are listing episodes, we need to get the fanart from rootXmlNode.
     // movies has it in videoNode
     if (season > -1)
     {
@@ -350,19 +352,17 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
       std::string seasonEpisode = StringUtils::Format("S%02iE%02i", plexItem->GetVideoInfoTag()->m_iSeason, plexItem->GetVideoInfoTag()->m_iEpisode);
       newItem->SetProperty("SeasonEpisode", seasonEpisode);
     }
+ 
     else
-    {
-      fanart = XMLUtils::GetAttribute(videoNode, "art");
-      plexItem->SetLabel(XMLUtils::GetAttribute(videoNode, "title"));
-
-      value = XMLUtils::GetAttribute(videoNode, "thumb");
-      if (!value.empty() && (value[0] == '/'))
-        StringUtils::TrimLeft(value, "/");
-      url.SetFileName(value);
+*/  {
+      url.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
       newItem->SetArt("thumb", url.Get());
       newItem->SetIconImage(url.Get());
     }
-*/
+
+    url.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    newItem->SetArt("fanart", url.Get());
+    
     std::string title = item["Name"].asString();
     newItem->SetLabel(title);
     newItem->m_dateTime.SetFromW3CDateTime(item["PremiereDate"].asString());
