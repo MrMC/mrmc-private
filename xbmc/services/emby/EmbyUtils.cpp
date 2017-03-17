@@ -392,7 +392,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
     videoInfo->m_strMPAARating = item["OfficialRating"].asString();
 
-    GetVideoDetails(*newItem, item);
+    GetVideoDetails(newItem, item);
 
     videoInfo->m_duration = static_cast<int>(TicksToSeconds(item["RunTimeTicks"].asUnsignedInteger()));
     videoInfo->m_playCount = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
@@ -408,7 +408,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->m_resumePoint = resumePoint;
     //newItem->m_lStartOffset = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
 
-    GetMediaDetals(*newItem, url, item);
+    GetMediaDetals(newItem, url, item);
 
     if (formatLabel)
     {
@@ -427,16 +427,56 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
   return rtn;
 }
 
-void CEmbyUtils::GetVideoDetails(CFileItem &item, const CVariant &object)
+void CEmbyUtils::GetVideoDetails(CFileItemPtr pitem, const CVariant &item)
 {
 }
 
-void CEmbyUtils::GetMusicDetails(CFileItem &item, const CVariant &object)
+void CEmbyUtils::GetMusicDetails(CFileItemPtr pitem, const CVariant &item)
 {
 }
 
-void CEmbyUtils::GetMediaDetals(CFileItem &item, CURL url, const CVariant &object, std::string id)
+void CEmbyUtils::GetMediaDetals(CFileItemPtr pitem, CURL url, const CVariant &item, std::string id)
 {
+  if (item.isMember("MediaStreams") && item["MediaStreams"].isArray())
+  {
+    const auto& streams = item["MediaStreams"];
+    for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
+    {
+      const auto stream = *streamIt;
+      const auto streamType = stream["Type"].asString();
+      CStreamDetail* streamDetail = nullptr;
+      if (streamType == "Video")
+      {
+        CStreamDetailVideo* videoStream = new CStreamDetailVideo();
+        videoStream->m_strCodec = stream["Codec"].asString();
+        videoStream->m_strLanguage = stream["Language"].asString();
+        videoStream->m_iWidth = static_cast<int>(stream["Width"].asInteger());
+        videoStream->m_iHeight = static_cast<int>(stream["Height"].asInteger());
+        videoStream->m_iDuration = pitem->GetVideoInfoTag()->m_duration;
+
+        streamDetail = videoStream;
+      }
+      else if (streamType == "Audio")
+      {
+        CStreamDetailAudio* audioStream = new CStreamDetailAudio();
+        audioStream->m_strCodec = stream["Codec"].asString();
+        audioStream->m_strLanguage = stream["Language"].asString();
+        audioStream->m_iChannels = static_cast<int>(stream["Channels"].asInteger());
+
+        streamDetail = audioStream;
+      }
+      else if (streamType == "Subtitle")
+      {
+        CStreamDetailSubtitle* subtitleStream = new CStreamDetailSubtitle();
+        subtitleStream->m_strLanguage = stream["Language"].asString();
+
+        streamDetail = subtitleStream;
+      }
+
+      if (streamDetail != nullptr)
+        pitem->GetVideoInfoTag()->m_streamDetails.AddStream(streamDetail);
+    }
+  }
 }
 
 CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
