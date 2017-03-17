@@ -365,7 +365,7 @@ CFileItemPtr CEmbyClient::FindItemByServiceId(const std::string &serviceId)
 {
   for (const auto &item : m_viewItems)
   {
-    if (item->GetVideoInfoTag()->m_strServiceId != serviceId)
+    if (item->GetVideoInfoTag()->m_strServiceId == serviceId)
       return item;
   }
   return nullptr;
