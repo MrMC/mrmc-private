@@ -168,7 +168,7 @@ bool CEmbyServices::IsActive()
 
 bool CEmbyServices::IsEnabled()
 {
-  return (!CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_PLEXHOMEUSER).empty() ||
+  return (!CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID).empty() ||
            CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYBROADCAST));
 }
 
