@@ -560,7 +560,7 @@ bool CEmbyServices::AuthenticateByName(const CURL& url)
     return false;
   }
 
-  CVariant responseObj = CJSONVariantParser::Parse((const unsigned char*)response.c_str(), response.size());
+  CVariant responseObj = CJSONVariantParser::Parse(response);
   if (!responseObj.isObject() ||
       !responseObj.isMember("AccessToken") ||
       !responseObj.isMember("User") ||
@@ -700,15 +700,15 @@ bool CEmbyServices::PostSignInPinCode()
   CVariant data;
   data["deviceId"] = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID);
   std::string jsonBody = CJSONVariantWriter::Write(data, false);
-  std::string strResponse;
+  std::string response;
   std::string strMessage;
-  if (emby.Post(url.Get(), jsonBody, strResponse))
+  if (emby.Post(url.Get(), jsonBody, response))
   {
 #if defined(EMBY_DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "CEmbyServices:FetchSignInPin %s", strResponse.c_str());
+    CLog::Log(LOGDEBUG, "CEmbyServices:FetchSignInPin %s", response.c_str());
 #endif
     CVariant reply;
-    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+    reply = CJSONVariantParser::Parse(response);
     if (reply.isObject() && reply.isMember("Pin"))
     {
       m_signInByPinCode = reply["Pin"].asString();
@@ -783,7 +783,7 @@ bool CEmbyServices::PostSignInPinCode()
   else
   {
     strMessage = "Could not connect to retreive AuthToken";
-    CLog::Log(LOGERROR, "CEmbyServices:FetchSignInPin failed %s", strResponse.c_str());
+    CLog::Log(LOGERROR, "CEmbyServices:FetchSignInPin failed %s", response.c_str());
   }
   if (!rtn)
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Emby Services", strMessage, 3000, true);
@@ -805,18 +805,18 @@ bool CEmbyServices::GetSignInByPinReply()
   url.SetOption("pin", m_signInByPinCode);
   url.SetOption("deviceId", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));;
 
-  std::string strResponse;
+  std::string response;
   CStopWatch pollTimer;
   pollTimer.StartZero();
   while (!m_bStop)
   {
-    if (emby.Get(url.Get(), strResponse))
+    if (emby.Get(url.Get(), response))
     {
   #if defined(EMBY_DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "CEmbyServices:WaitForSignInByPin %s", strResponse.c_str());
+      CLog::Log(LOGDEBUG, "CEmbyServices:WaitForSignInByPin %s", response.c_str());
   #endif
       CVariant reply;
-      reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+      reply = CJSONVariantParser::Parse(response);
       if (reply.isObject() && reply.isMember("AccessToken"))
       {
         m_userId = reply["Id"].asString();
@@ -832,7 +832,7 @@ bool CEmbyServices::GetSignInByPinReply()
   
   if (!rtn)
   {
-    CLog::Log(LOGERROR, "CEmbyServices:WaitForSignInByPin failed %s", strResponse.c_str());
+    CLog::Log(LOGERROR, "CEmbyServices:WaitForSignInByPin failed %s", response.c_str());
   }
   return rtn;
 }
@@ -970,7 +970,7 @@ EmbyServerInfo CEmbyServices::GetEmbyServerInfo(const std::string &ipAddress)
   static const std::string ServerPropertyWanAddress = "WanAddress";
   static const std::string ServerPropertyLocalAddress = "LocalAddress";
   static const std::string ServerPropertyOperatingSystem = "OperatingSystem";
-  CVariant responseObj = CJSONVariantParser::Parse((const unsigned char*)response.c_str(), response.size());
+  CVariant responseObj = CJSONVariantParser::Parse(response);
   if (!responseObj.isObject() ||
       !responseObj.isMember(ServerPropertyId) ||
       !responseObj.isMember(ServerPropertyName) ||

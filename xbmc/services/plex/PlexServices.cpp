@@ -555,14 +555,14 @@ bool CPlexServices::GetPlexToken(std::string user, std::string pass)
   url.SetUserName(user);
   url.SetPassword(pass);
 
-  std::string strResponse;
+  std::string response;
   std::string strPostData;
-  if (plex.Post(url.Get(), strPostData, strResponse))
+  if (plex.Post(url.Get(), strPostData, response))
   {
     //CLog::Log(LOGDEBUG, "CPlexServices: myPlex %s", strResponse.c_str());
 
     CVariant reply;
-    reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
+    reply = CJSONVariantParser::Parse(response);
 
     CVariant user = reply["user"];
     m_authToken = user["authentication_token"].asString();
@@ -577,7 +577,7 @@ bool CPlexServices::GetPlexToken(std::string user, std::string pass)
   {
     std::string strMessage = "Could not connect to retreive PlexToken";
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
-    CLog::Log(LOGERROR, "CPlexServices:FetchPlexToken failed %s", strResponse.c_str());
+    CLog::Log(LOGERROR, "CPlexServices:FetchPlexToken failed %s", response.c_str());
   }
 
   return rtn;

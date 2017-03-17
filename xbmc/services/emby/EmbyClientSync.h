@@ -1,0 +1,57 @@
+#pragma once
+/*
+ *      Copyright (C) 2016 Team MrMC
+ *      https://github.com/MrMC
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with MrMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include <atomic>
+#include <memory>
+
+#include "EmbyClient.h"
+#include "threads/Thread.h"
+
+namespace easywsclient
+{
+  class WebSocket;
+}
+
+class CEmbyClientSync : protected CThread
+{
+public:
+  CEmbyClientSync(const CEmbyClient& client, const std::string& name, const std::string& address, const std::string& deviceId, const std::string& accessToken);
+  ~CEmbyServerSync();
+
+  void Start();
+  void Stop();
+
+  void AddImport(const CMediaImport& import);
+
+protected:
+  virtual void Process();
+
+private:
+  CFileItemPtr GetItemDetails(const std::string& itemId) const;
+  bool FindImportForItem(const CFileItemPtr item, CMediaImport& import) const;
+
+  std::string m_address;
+  const std::string m_name;
+  const CEmbyClient m_client;
+  std::vector<CMediaImport> m_imports;
+  std::unique_ptr<easywsclient::WebSocket> m_websocket;
+  std::atomic<bool> m_stop;
+};

@@ -192,7 +192,7 @@ bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
       m_needUpdate = false;
     }
 
-    auto resultObject = CJSONVariantParser::Parse((const unsigned char*)response.c_str(), response.size());
+    auto resultObject = CJSONVariantParser::Parse(response);
     if (!resultObject.isObject() || !resultObject.isMember("Items"))
     {
       CLog::Log(LOGERROR, "CEmbyClient::ParseViews: invalid response for library views from %s", CURL::GetRedacted(viewsUrl).c_str());
