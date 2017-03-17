@@ -405,7 +405,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
     videoInfo->m_strMPAARating = item["OfficialRating"].asString();
 
-    GetVideoDetails(newItem, item);
+    GetVideoDetails(*newItem, item);
 
     videoInfo->m_duration = static_cast<int>(TicksToSeconds(item["RunTimeTicks"].asUnsignedInteger()));
     videoInfo->m_playCount = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
@@ -440,31 +440,31 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
   return rtn;
 }
 
-void CEmbyUtils::GetVideoDetails(CFileItemPtr pitem, const CVariant &item)
+void CEmbyUtils::GetVideoDetails(CFileItem &fileitem, const CVariant &cvaiant)
 {
   
   // get all genres
   std::vector<std::string> genres;
-  const auto& streams = item["Genres"];
+  const auto& streams = cvaiant["Genres"];
   for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
   {
     const auto stream = *streamIt;
     genres.push_back(stream.asString());
   }
-  pitem->GetVideoInfoTag()->SetGenre(genres);
+  fileitem.GetVideoInfoTag()->SetGenre(genres);
   
 }
 
-void CEmbyUtils::GetMusicDetails(CFileItemPtr pitem, const CVariant &item)
+void CEmbyUtils::GetMusicDetails(CFileItem &fileitem, const CVariant &cvaiant)
 {
 }
 
-void CEmbyUtils::GetMediaDetals(CFileItem &pitem, CURL url, const CVariant &item, std::string id)
+void CEmbyUtils::GetMediaDetals(CFileItem &fileitem, CURL url, const CVariant &cvaiant, std::string id)
 {
-  if (item.isMember("MediaStreams") && item["MediaStreams"].isArray())
+  if (cvaiant.isMember("MediaStreams") && cvaiant["MediaStreams"].isArray())
   {
     CStreamDetails streamDetail;
-    const auto& streams = item["MediaStreams"];
+    const auto& streams = cvaiant["MediaStreams"];
     for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
     {
       const auto stream = *streamIt;
@@ -476,7 +476,7 @@ void CEmbyUtils::GetMediaDetals(CFileItem &pitem, CURL url, const CVariant &item
         videoStream->m_strLanguage = stream["Language"].asString();
         videoStream->m_iWidth = static_cast<int>(stream["Width"].asInteger());
         videoStream->m_iHeight = static_cast<int>(stream["Height"].asInteger());
-        videoStream->m_iDuration = pitem.GetVideoInfoTag()->m_duration;
+        videoStream->m_iDuration = fileitem.GetVideoInfoTag()->m_duration;
 
         streamDetail.AddStream(videoStream);
       }
@@ -496,11 +496,8 @@ void CEmbyUtils::GetMediaDetals(CFileItem &pitem, CURL url, const CVariant &item
 
         streamDetail.AddStream(subtitleStream);
       }
-
-    //  if (streamDetail != nullptr)
-        //pitem->GetVideoInfoTag()->m_streamDetails.AddStream(streamDetail);
-      pitem.GetVideoInfoTag()->m_streamDetails = streamDetail;
     }
+    fileitem.GetVideoInfoTag()->m_streamDetails = streamDetail;
   }
 }
 
