@@ -455,5 +455,5 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
 DIR_CACHE_TYPE CEmbyDirectory::GetCacheType(const CURL& url) const
 {
-  return DIR_CACHE_NEVER;
+  return DIR_CACHE_ALWAYS;
 }
