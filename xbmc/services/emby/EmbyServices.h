@@ -114,7 +114,7 @@ private:
   std::string       m_myHomeUser;
 
   EmbyServicePlayerState m_playState;
-  CCriticalSection  m_criticalClients;
   std::atomic<bool> m_hasClients;
+  CCriticalSection  m_clients_lock;
   std::vector<CEmbyClientPtr> m_clients;
 };

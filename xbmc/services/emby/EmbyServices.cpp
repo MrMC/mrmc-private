@@ -155,7 +155,7 @@ void CEmbyServices::Stop()
   }
 
   g_directoryCache.Clear();
-  CSingleLock lock2(m_criticalClients);
+  CSingleLock lock2(m_clients_lock);
   m_clients.clear();
   m_playState = EmbyServicePlayerState::stopped;
   m_hasClients = false;
@@ -179,14 +179,14 @@ bool CEmbyServices::HasClients() const
 
 void CEmbyServices::GetClients(std::vector<CEmbyClientPtr> &clients) const
 {
-  CSingleLock lock(m_criticalClients);
+  CSingleLock lock(m_clients_lock);
   clients = m_clients;
 }
 
 CEmbyClientPtr CEmbyServices::FindClient(const std::string &path)
 {
   CURL url(path);
-  CSingleLock lock(m_criticalClients);
+  CSingleLock lock(m_clients_lock);
   for (const auto &client : m_clients)
   {
     if (client->IsSameClientHostName(url))
@@ -307,7 +307,7 @@ void CEmbyServices::OnSettingAction(const CSetting *setting)
         m_myHomeUser = homeUserName;
         CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYHOMEUSER, m_myHomeUser);
         SetUserSettings();
-        CSingleLock lock(m_criticalClients);
+        CSingleLock lock(m_clients_lock);
         m_clients.clear();
         Start();
       }
@@ -399,7 +399,7 @@ void CEmbyServices::GetUserSettings()
 
 void CEmbyServices::UpdateLibraries(bool forced)
 {
-  CSingleLock lock(m_criticalClients);
+  CSingleLock lock(m_clients_lock);
   bool clearDirCache = false;
   for (const auto &client : m_clients)
   {
@@ -456,9 +456,8 @@ void CEmbyServices::Process()
     GetEmbyServers();
     serviceTimeoutSeconds = 60 * 15;
   }
-
-  while (!m_bStop)
-  {
+   while (!m_bStop)
+   {
     m_processSleep.WaitMSec(250);
     m_processSleep.Reset();
   }
@@ -991,7 +990,7 @@ EmbyServerInfo CEmbyServices::GetEmbyServerInfo(const std::string &ipAddress)
 
 CEmbyClientPtr CEmbyServices::GetClient(std::string uuid)
 {
-  CSingleLock lock(m_criticalClients);
+  CSingleLock lock(m_clients_lock);
   for (const auto &client : m_clients)
   {
     if (client->GetUuid() == uuid)
@@ -1003,7 +1002,7 @@ CEmbyClientPtr CEmbyServices::GetClient(std::string uuid)
 
 bool CEmbyServices::ClientIsLocal(std::string path)
 {
-  CSingleLock lock(m_criticalClients);
+  CSingleLock lock(m_clients_lock);
   for (const auto &client : m_clients)
   {
     if (StringUtils::StartsWithNoCase(client->GetUrl(), path))
@@ -1015,7 +1014,7 @@ bool CEmbyServices::ClientIsLocal(std::string path)
 
 bool CEmbyServices::AddClient(CEmbyClientPtr foundClient)
 {
-  CSingleLock lock(m_criticalClients);
+  CSingleLock lock(m_clients_lock);
   for (const auto &client : m_clients)
   {
     // do not add existing clients
@@ -1036,7 +1035,7 @@ bool CEmbyServices::AddClient(CEmbyClientPtr foundClient)
 
 bool CEmbyServices::RemoveClient(CEmbyClientPtr lostClient)
 {
-  CSingleLock lock(m_criticalClients);
+  CSingleLock lock(m_clients_lock);
   for (const auto &client : m_clients)
   {
     if (client->GetUuid() == lostClient->GetUuid())
@@ -1058,7 +1057,7 @@ bool CEmbyServices::RemoveClient(CEmbyClientPtr lostClient)
 
 bool CEmbyServices::UpdateClient(CEmbyClientPtr updateClient)
 {
-  CSingleLock lock(m_criticalClients);
+  CSingleLock lock(m_clients_lock);
   for (const auto &client : m_clients)
   {
     if (client->GetUuid() == updateClient->GetUuid())
