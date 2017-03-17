@@ -200,10 +200,24 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
   };
 
   CURL url2(url);
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  
+  const CVariant resultObject = GetEmbyCVariant(url2.Get());
+  
+  std::vector<std::string> iDS;
+  const auto& objectItems = resultObject["Items"];
+  for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+  {
+    const auto item = *objectItemIt;
+    iDS.push_back(item["Id"].asString());
+  }
 
-  const CVariant resultObject = GetEmbyCVariant(url);
-  bool rtn = GetVideoItems(items, url2, resultObject, MediaTypeMovie, false);
+  std::string testIDs = StringUtils::Join(iDS, ",");
+  url2.SetOption("Ids", testIDs);
+  url2.SetOption("Fields", "MediaStreams,ShortOverview,Taglines,Overview,Genres");
+  
+  const CVariant result = GetEmbyCVariant(url2.Get());
+  
+  bool rtn = GetVideoItems(items, url2, result, MediaTypeMovie, false);
   return rtn;
 }
 
@@ -239,12 +253,12 @@ bool CEmbyUtils::GetMoreItemInfo(CFileItem &item)
 
 bool CEmbyUtils::GetMoreResolutions(CFileItem &item)
 {
-  return false;
+  return true;
 }
 
 bool CEmbyUtils::GetURL(CFileItem &item)
 {
-  return false;
+  return true;
 }
 
 bool CEmbyUtils::SearchEmby(CFileItemList &items, std::string strSearchString)
@@ -370,10 +384,14 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->m_strTitle = title;
     videoInfo->SetSortTitle(item["SortName"].asString());
     videoInfo->SetOriginalTitle(item["OriginalTitle"].asString());
-    videoInfo->SetPath(item["Path"].asString());
+    url.SetFileName("Videos/" + item["Id"].asString() +"/stream?static=true");
+    
+    newItem->SetPath(url.Get());
+    videoInfo->m_strFileNameAndPath = url.Get();
     //videoInfo->m_strServiceId = XMLUtils::GetAttribute(videoNode, "ratingKey");
     //newItem->SetProperty("EmbyShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
     videoInfo->m_type = type;
+    //videoInfo->SetPath(url.Get());
     videoInfo->SetPlot(item["Overview"].asString());
     videoInfo->SetPlotOutline(item["ShortOverview"].asString());
 
@@ -429,6 +447,17 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
 
 void CEmbyUtils::GetVideoDetails(CFileItemPtr pitem, const CVariant &item)
 {
+  
+  // get all genres
+  std::vector<std::string> genres;
+  const auto& streams = item["Genres"];
+  for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
+  {
+    const auto stream = *streamIt;
+    genres.push_back(stream.asString());
+  }
+  pitem->GetVideoInfoTag()->SetGenre(genres);
+  
 }
 
 void CEmbyUtils::GetMusicDetails(CFileItemPtr pitem, const CVariant &item)
