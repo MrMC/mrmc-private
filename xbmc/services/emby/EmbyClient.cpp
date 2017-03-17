@@ -241,7 +241,7 @@ bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
         view[PropertyViewETag].asString(),
         view[PropertyViewServerID].asString(),
         type,
-        "Users/" + m_userId + "/Items?parentId=" + view[PropertyViewId].asString()
+        "Users/" + m_userId + "/Items?ParentId=" + view[PropertyViewId].asString()
       };
       if (libraryView.id.empty() || libraryView.name.empty())
         continue;

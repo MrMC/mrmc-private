@@ -187,16 +187,16 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
     PropertyItemMediaStreams,
     PropertyItemOverview,
     PropertyItemShortOverview,
-    PropertyItemPath,
-    PropertyItemPeople,
-    PropertyItemProviderIds,
-    PropertyItemSortName,
-    PropertyItemOriginalTitle,
-    PropertyItemStudios,
+//    PropertyItemPath,
+//    PropertyItemPeople,
+//    PropertyItemProviderIds,
+//    PropertyItemSortName,
+//    PropertyItemOriginalTitle,
+//    PropertyItemStudios,
     PropertyItemTaglines,
-    PropertyItemProductionLocations,
-    PropertyItemTags,
-    PropertyItemVoteCount
+//    PropertyItemProductionLocations,
+//    PropertyItemTags,
+//    PropertyItemVoteCount,
   };
 
   CURL url2(url);
@@ -213,8 +213,9 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
 
   std::string testIDs = StringUtils::Join(iDS, ",");
   url2.SetOption("Ids", testIDs);
-  url2.SetOption("Fields", "MediaStreams,ShortOverview,Taglines,Overview,Genres");
-  
+  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("ExcludeLocationTypes", "Virtual,Offline");
+
   const CVariant result = GetEmbyCVariant(url2.Get());
   
   bool rtn = GetVideoItems(items, url2, result, MediaTypeMovie, false);
@@ -374,9 +375,6 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
       newItem->SetIconImage(url.Get());
     }
 
-    url.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
-    newItem->SetArt("fanart", url.Get());
-    
     std::string title = item["Name"].asString();
     newItem->SetLabel(title);
     newItem->m_dateTime.SetFromW3CDateTime(item["PremiereDate"].asString());
@@ -400,12 +398,10 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->m_firstAired = premiereDate;
     videoInfo->SetPremiered(premiereDate);
     videoInfo->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
-/*
-    if (!fanart.empty() && (fanart[0] == '/'))
-      StringUtils::TrimLeft(fanart, "/");
-    url.SetFileName(fanart);
+
+    url.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
     newItem->SetArt("fanart", url.Get());
-*/
+
     videoInfo->SetYear(static_cast<int>(item["ProductionYear"].asInteger()));
     videoInfo->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
     videoInfo->m_strMPAARating = item["OfficialRating"].asString();
