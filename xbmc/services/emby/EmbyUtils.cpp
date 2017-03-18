@@ -187,7 +187,7 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
     PropertyItemMediaStreams,
     PropertyItemOverview,
     PropertyItemShortOverview,
-//    PropertyItemPath,
+    PropertyItemPath,
 //    PropertyItemPeople,
 //    PropertyItemProviderIds,
 //    PropertyItemSortName,
@@ -387,6 +387,8 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     newItem->SetPath(url.Get());
     videoInfo->m_strFileNameAndPath = url.Get();
     videoInfo->m_strServiceId = item["Id"].asString();
+    videoInfo->m_strServiceFile = item["Path"].asString();
+
     //newItem->SetProperty("EmbyShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
     videoInfo->m_type = type;
     videoInfo->SetPlot(item["Overview"].asString());
