@@ -132,23 +132,22 @@ void CEmbyUtils::SetWatched(CFileItem &item)
     return;
 
   // use the current date and time if lastPlayed is invalid
-  const auto& videoInfo = item.GetVideoInfoTag();
-  if (!videoInfo->m_lastPlayed.IsValid())
-    videoInfo->m_lastPlayed = CDateTime::GetUTCDateTime();
+  if (!item.GetVideoInfoTag()->m_lastPlayed.IsValid())
+    item.GetVideoInfoTag()->m_lastPlayed = CDateTime::GetUTCDateTime();
 
   // get the URL to updated the item's played state for this user ID
   CURL url2(url);
-  url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + videoInfo->m_strServiceId);
+  url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + item.GetVideoInfoTag()->m_strServiceId);
   url2.SetOptions("");
   // and add the DatePlayed URL parameter
   url2.SetOption("DatePlayed",
     StringUtils::Format("%04i%02i%02i%02i%02i%02i",
-      videoInfo->m_lastPlayed.GetYear(),
-      videoInfo->m_lastPlayed.GetMonth(),
-      videoInfo->m_lastPlayed.GetDay(),
-      videoInfo->m_lastPlayed.GetHour(),
-      videoInfo->m_lastPlayed.GetMinute(),
-      videoInfo->m_lastPlayed.GetSecond()));
+      item.GetVideoInfoTag()->m_lastPlayed.GetYear(),
+      item.GetVideoInfoTag()->m_lastPlayed.GetMonth(),
+      item.GetVideoInfoTag()->m_lastPlayed.GetDay(),
+      item.GetVideoInfoTag()->m_lastPlayed.GetHour(),
+      item.GetVideoInfoTag()->m_lastPlayed.GetMinute(),
+      item.GetVideoInfoTag()->m_lastPlayed.GetSecond()));
 
   std::string data;
   std::string response;
