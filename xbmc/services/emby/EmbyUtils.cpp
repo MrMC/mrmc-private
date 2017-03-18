@@ -204,9 +204,9 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
     return;
 
   // we get called from Application.cpp every 500ms
-  if ((g_playbackState == EmbyUtilsPlayerState::stopped || g_progressSec == 0 || g_progressSec > 120))
+  if ((g_playbackState == EmbyUtilsPlayerState::stopped || g_progressSec <= 0 || g_progressSec > 30))
   {
-    g_progressSec = 0;
+    
 
     std::string status;
     if (g_playbackState == EmbyUtilsPlayerState::playing )
@@ -233,11 +233,58 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
         url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
 
       std::string id = item.GetVideoInfoTag()->m_strServiceId;
-      //int totalSeconds = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
-
-      //const auto playbackPositionTicks = SecondsToTicks(currentSeconds);
-      //TODO
-
+      /*
+      # Postdata structure to send to Emby server
+      url = "{server}/emby/Sessions/Playing"
+      postdata = {
+        
+        'QueueableMediaTypes': "Video",
+        'CanSeek': True,
+        'ItemId': itemId,
+        'MediaSourceId': itemId,
+        'PlayMethod': playMethod,
+        'VolumeLevel': volume,
+        'PositionTicks': int(seekTime * 10000000),
+        'IsMuted': muted
+      }
+      */
+      
+      const auto playbackPositionTicks = SecondsToTicks(currentSeconds);
+      
+      CURL url4(item.GetPath());
+      if (status == "playing")
+      {
+        if (g_progressSec < 0)
+          // playback started
+          url4.SetFileName("emby/Sessions/Playing");
+        else
+          url4.SetFileName("emby/Sessions/Playing/Progress");
+      }
+      else if (status == "stopped")
+        url4.SetFileName("emby/Sessions/Playing/Stopped");
+      
+      url4.SetOptions("");
+      url4.SetOption("QueueableMediaTypes", "Video");
+      url4.SetOption("CanSeek", "True");
+      url4.SetOption("ItemId", id);
+      url4.SetOption("MediaSourceId", id);
+      url4.SetOption("PlayMethod", "DirectPlay");
+      url4.SetOption("PositionTicks", StringUtils::Format("%llu",playbackPositionTicks));
+      url4.SetOption("IsMuted", "False");
+      url4.SetOption("IsPaused", status == "paused" ? "True" : "False");
+      
+      std::string data;
+      std::string response;
+      // execute the DELETE request
+      XFILE::CCurlFile curl;
+      if (curl.Post(url4.Get(), data, response))
+      {
+#if defined(EMBY_DEBUG_VERBOSE)
+        if (!response.empty())
+          CLog::Log(LOGDEBUG, "CEmbyUtils::ReportProgress %s", response.c_str());
+#endif
+      }
+      g_progressSec = 0;
     }
   }
   g_progressSec++;
@@ -245,7 +292,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
 
 void CEmbyUtils::SetPlayState(EmbyUtilsPlayerState state)
 {
-  g_progressSec = 0;
+  g_progressSec = -1;
   g_playbackState = state;
 }
 
