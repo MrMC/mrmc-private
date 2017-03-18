@@ -87,7 +87,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       for (const auto &client : clients)
       {
         client->ClearViewItems();
-        std::vector<EmbyViewContent> contents = client->GetMovieContent();
+        std::vector<EmbyViewContent> contents = client->GetMoviesContent();
         if (contents.size() > 1 || ((hasMovies || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
@@ -226,7 +226,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       for (const auto &client : clients)
       {
         client->ClearViewItems();
-        std::vector<EmbyViewContent> contents = client->GetTvContent();
+        std::vector<EmbyViewContent> contents = client->GetTvShowContent();
         if (contents.size() > 1 || ((hasTvShows || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)

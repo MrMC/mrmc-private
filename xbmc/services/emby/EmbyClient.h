@@ -105,8 +105,8 @@ public:
   CFileItemPtr FindViewItemByServiceId(const std::string &Id);
   void  ClearViewItems();
 
-  const EmbyViewContentVector GetTvContent() const;
-  const EmbyViewContentVector GetMovieContent() const;
+  const EmbyViewContentVector GetTvShowContent() const;
+  const EmbyViewContentVector GetMoviesContent() const;
   const EmbyViewContentVector GetArtistContent() const;
   const EmbyViewContentVector GetPhotoContent() const;
   const std::string FormatContentTitle(const std::string contentTitle) const;

@@ -136,13 +136,13 @@ std::string CEmbyClient::GetUserID()
   return m_userId;
 }
 
-const EmbyViewContentVector CEmbyClient::GetTvContent() const
+const EmbyViewContentVector CEmbyClient::GetTvShowContent() const
 {
   CSingleLock lock(m_viewTVshowContentsLock);
   return m_viewTVshowContents;
 }
 
-const EmbyViewContentVector CEmbyClient::GetMovieContent() const
+const EmbyViewContentVector CEmbyClient::GetMoviesContent() const
 {
   CSingleLock lock(m_viewMoviesContentsLock);
   return m_viewMoviesContents;
