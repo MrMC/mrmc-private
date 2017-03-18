@@ -199,11 +199,54 @@ void CEmbyUtils::SetUnWatched(CFileItem &item)
 
 void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
 {
-  const auto playbackPositionTicks = SecondsToTicks(currentSeconds);
+  // if we are Plex music, do not report
+  if (item.IsAudio())
+    return;
+
+  // we get called from Application.cpp every 500ms
+  if ((g_playbackState == EmbyUtilsPlayerState::stopped || g_progressSec == 0 || g_progressSec > 120))
+  {
+    g_progressSec = 0;
+
+    std::string status;
+    if (g_playbackState == EmbyUtilsPlayerState::playing )
+      status = "playing";
+    else if (g_playbackState == EmbyUtilsPlayerState::paused )
+      status = "paused";
+    else if (g_playbackState == EmbyUtilsPlayerState::stopped)
+      status = "stopped";
+
+    if (!status.empty())
+    {
+      std::string url = item.GetPath();
+      if (URIUtils::IsStack(url))
+        url = XFILE::CStackDirectory::GetFirstStackedFile(url);
+      else
+      {
+        CURL url1(item.GetPath());
+        CURL url2(URIUtils::GetParentPath(url));
+        CURL url3(url2.GetWithoutFilename());
+        url3.SetProtocolOptions(url1.GetProtocolOptions());
+        url = url3.Get();
+      }
+      if (StringUtils::StartsWithNoCase(url, "emby://"))
+        url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+
+      std::string id = item.GetVideoInfoTag()->m_strServiceId;
+      //int totalSeconds = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
+
+      //const auto playbackPositionTicks = SecondsToTicks(currentSeconds);
+      //TODO
+
+    }
+  }
+  g_progressSec++;
 }
 
 void CEmbyUtils::SetPlayState(EmbyUtilsPlayerState state)
 {
+  g_progressSec = 0;
+  g_playbackState = state;
 }
 
 bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
