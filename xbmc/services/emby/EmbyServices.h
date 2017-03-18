@@ -28,6 +28,7 @@
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 #include "settings/lib/ISettingCallback.h"
+#include "services/ServicesManager.h"
 #include "interfaces/IAnnouncer.h"
 #include "utils/JobManager.h"
 
@@ -36,13 +37,6 @@ namespace SOCKETS
   class CUDPSocket;
   class CSocketListener;
 }
-
-enum class EmbyServicePlayerState
-{
-  paused = 1,
-  playing = 2,
-  stopped = 3,
-};
 
 class CEmbyClient;
 typedef std::shared_ptr<CEmbyClient> CEmbyClientPtr;
@@ -112,7 +106,7 @@ private:
   SOCKETS::CSocketListener *m_broadcastListener;
   std::string       m_myHomeUser;
 
-  EmbyServicePlayerState m_playState;
+  MediaServicesPlayerState m_playState;
   std::atomic<bool> m_hasClients;
   CCriticalSection  m_clients_lock;
   std::vector<CEmbyClientPtr> m_clients;

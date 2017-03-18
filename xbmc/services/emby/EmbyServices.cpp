@@ -109,7 +109,7 @@ private:
 
 CEmbyServices::CEmbyServices()
 : CThread("EmbyServices")
-, m_playState(EmbyServicePlayerState::stopped)
+, m_playState(MediaServicesPlayerState::stopped)
 , m_hasClients(false)
 {
   // register our redacted protocol options with CURL
@@ -157,7 +157,7 @@ void CEmbyServices::Stop()
   g_directoryCache.Clear();
   CSingleLock lock2(m_clients_lock);
   m_clients.clear();
-  m_playState = EmbyServicePlayerState::stopped;
+  m_playState = MediaServicesPlayerState::stopped;
   m_hasClients = false;
 }
 
@@ -324,13 +324,13 @@ void CEmbyServices::Announce(AnnouncementFlag flag, const char *sender, const ch
     switch(mkhash(message))
     {
       case "OnPlay"_mkhash:
-        m_playState = EmbyServicePlayerState::playing;
+        m_playState = MediaServicesPlayerState::playing;
         break;
       case "OnPause"_mkhash:
-        m_playState = EmbyServicePlayerState::paused;
+        m_playState = MediaServicesPlayerState::paused;
         break;
       case "OnStop"_mkhash:
-        m_playState = EmbyServicePlayerState::stopped;
+        m_playState = MediaServicesPlayerState::stopped;
         break;
       default:
         break;
@@ -413,7 +413,7 @@ void CEmbyServices::UpdateLibraries(bool forced)
   if (clearDirCache)
   {
     g_directoryCache.Clear();
-    if (m_playState == EmbyServicePlayerState::stopped)
+    if (m_playState == MediaServicesPlayerState::stopped)
     {
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
       g_windowManager.SendThreadMessage(msg);
