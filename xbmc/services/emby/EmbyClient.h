@@ -85,7 +85,12 @@ public:
   const bool &IsLocal() const               { return m_local; }
   const bool IsCloud() const                { return (m_platform == "Cloud"); }
 
-  void  AddViewItem(CFileItemPtr root)      { m_viewItems.push_back(root); };
+  void  AddViewItem(CFileItemPtr root)
+  {
+    auto item = std::find(m_viewItems.begin(), m_viewItems.end(), root);
+    if (item == m_viewItems.end())
+      m_viewItems.push_back(root);
+  };
   std::vector<CFileItemPtr> GetViewItems()  { return m_viewItems; };
   void ClearViewItems()                     { m_viewItems.clear(); };
 
