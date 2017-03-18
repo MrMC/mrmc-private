@@ -198,15 +198,13 @@ void CEmbyUtils::SetUnWatched(CFileItem &item)
 
 void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
 {
-  // if we are Plex music, do not report
+  // if we are Emby music, do not report
   if (item.IsAudio())
     return;
 
   // we get called from Application.cpp every 500ms
   if ((g_playbackState == EmbyUtilsPlayerState::stopped || g_progressSec <= 0 || g_progressSec > 30))
   {
-    
-
     std::string status;
     if (g_playbackState == EmbyUtilsPlayerState::playing )
       status = "playing";
@@ -231,12 +229,10 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
       if (StringUtils::StartsWithNoCase(url, "emby://"))
         url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
 
-      std::string id = item.GetVideoInfoTag()->m_strServiceId;
       /*
       # Postdata structure to send to Emby server
       url = "{server}/emby/Sessions/Playing"
       postdata = {
-        
         'QueueableMediaTypes': "Video",
         'CanSeek': True,
         'ItemId': itemId,
@@ -247,9 +243,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
         'IsMuted': muted
       }
       */
-      
-      const auto playbackPositionTicks = SecondsToTicks(currentSeconds);
-      
+
       CURL url4(item.GetPath());
       if (status == "playing")
       {
@@ -261,20 +255,21 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
       }
       else if (status == "stopped")
         url4.SetFileName("emby/Sessions/Playing/Stopped");
-      
+
+      std::string id = item.GetVideoInfoTag()->m_strServiceId;
       url4.SetOptions("");
       url4.SetOption("QueueableMediaTypes", "Video");
       url4.SetOption("CanSeek", "True");
       url4.SetOption("ItemId", id);
       url4.SetOption("MediaSourceId", id);
       url4.SetOption("PlayMethod", "DirectPlay");
-      url4.SetOption("PositionTicks", StringUtils::Format("%llu",playbackPositionTicks));
+      url4.SetOption("PositionTicks", StringUtils::Format("%llu", SecondsToTicks(currentSeconds)));
       url4.SetOption("IsMuted", "False");
       url4.SetOption("IsPaused", status == "paused" ? "True" : "False");
-      
+
       std::string data;
       std::string response;
-      // execute the DELETE request
+      // execute the POST request
       XFILE::CCurlFile curl;
       if (curl.Post(url4.Get(), data, response))
       {
@@ -364,9 +359,9 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
   };
 
   CURL url2(url);
-  
+
   const CVariant resultObject = GetEmbyCVariant(url2.Get());
-  
+
   std::vector<std::string> iDS;
   const auto& objectItems = resultObject["Items"];
   for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
@@ -381,7 +376,7 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
   url2.SetOption("ExcludeLocationTypes", "Virtual,Offline");
 
   const CVariant result = GetEmbyCVariant(url2.Get());
-  
+
   bool rtn = GetVideoItems(items, url2, result, MediaTypeMovie, false);
   return rtn;
 }
@@ -600,7 +595,6 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
 
 void CEmbyUtils::GetVideoDetails(CFileItem &fileitem, const CVariant &cvariant)
 {
-  
   // get all genres
   std::vector<std::string> genres;
   const auto& streams = cvariant["Genres"];
@@ -610,7 +604,6 @@ void CEmbyUtils::GetVideoDetails(CFileItem &fileitem, const CVariant &cvariant)
     genres.push_back(stream.asString());
   }
   fileitem.GetVideoInfoTag()->SetGenre(genres);
-  
 }
 
 void CEmbyUtils::GetMusicDetails(CFileItem &fileitem, const CVariant &cvariant)
@@ -690,7 +683,6 @@ CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
   return CVariant(CVariant::VariantTypeNull);
 }
 
-//int ParseEmbyMediaXML(TiXmlDocument xml);
 void CEmbyUtils::RemoveSubtitleProperties(CFileItem &item)
 {
 }

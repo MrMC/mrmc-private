@@ -105,6 +105,7 @@ CFileItemPtr CEmbyClient::FindViewItemByServiceId(const std::string &serviceId)
     if (item->GetVideoInfoTag()->m_strServiceId == serviceId)
       return item;
   }
+  CLog::Log(LOGERROR, "CEmbyClient::FindViewItemByServiceId: failed to get details for item with id \"%s\"", serviceId.c_str());
   return nullptr;
 }
 
@@ -380,9 +381,7 @@ bool CEmbyClient::ParseViews(enum EmbyViewParsing parser)
 void CEmbyClient::SetPresence(bool presence)
 {
   if (m_presence != presence)
-  {
     m_presence = presence;
-  }
 }
 
 bool CEmbyClient::NeedViewUpdate(const EmbyViewContent &content, const EmbyViewContent &contents, const std::string server)

@@ -169,14 +169,12 @@ void CEmbyClientSync::Process()
             CLog::Log(LOGDEBUG, "CEmbyClientSync: processing changed item with id \"%s\"...", changedLibraryItem.itemId.c_str());
 
             CFileItemPtr item;
-            if (changedLibraryItem.changesetType == MediaImportChangesetTypeAdded || changedLibraryItem.changesetType == MediaImportChangesetTypeChanged)
+            if (changedLibraryItem.changesetType == MediaImportChangesetTypeAdded ||
+                changedLibraryItem.changesetType == MediaImportChangesetTypeChanged)
             {
               item = m_client->FindViewItemByServiceId(changedLibraryItem.itemId);
               if (item == nullptr)
-              {
-                CLog::Log(LOGERROR, "CEmbyClientSync: failed to get details for changed item with id \"%s\"", changedLibraryItem.itemId.c_str());
                 continue;
-              }
             }
             else
             {
@@ -216,10 +214,7 @@ void CEmbyClientSync::Process()
 
             CFileItemPtr item = m_client->FindViewItemByServiceId(itemId);
             if (item == nullptr)
-            {
-              CLog::Log(LOGERROR, "CEmbyClientSync: failed to get details for item with id \"%s\"", itemId.c_str());
               continue;
-            }
 /*
             CMediaImport import;
             if (!FindImportForItem(item, import))

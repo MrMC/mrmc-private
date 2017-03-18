@@ -94,6 +94,5 @@ private:
   static void GetMusicDetails(CFileItem &fileitem, const CVariant &cvariant);
   static void GetMediaDetals(CFileItem &fileitem, const CVariant &cvariant, std::string id = "0");
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
-  static int ParseEmbyMediaXML(TiXmlDocument xml);
   static void RemoveSubtitleProperties(CFileItem &item);
 };

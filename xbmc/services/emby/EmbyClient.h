@@ -56,14 +56,6 @@ typedef struct EmbyServerInfo
   std::string OperatingSystem;
 } EmbyServerInfo;
 
-struct EmbyConnection
-{
-  std::string port;
-  std::string address;
-  std::string protocol;
-  int external;
-};
-
 struct EmbyViewContent
 {
   std::string id;
@@ -124,7 +116,7 @@ protected:
   bool        NeedViewUpdate(const EmbyViewContent &content, const EmbyViewContent &contents, const std::string server);
 
 private:
-  bool        m_local;
+  bool m_local;
   std::string m_owned;
   std::string m_userId;
   std::string m_accessToken;

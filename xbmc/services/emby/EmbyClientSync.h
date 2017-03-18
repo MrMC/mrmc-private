@@ -40,7 +40,7 @@ class CEmbyClientSync : protected CThread
 {
 public:
   CEmbyClientSync(CEmbyClient *client, const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken);
- ~CEmbyClientSync();
+  virtual ~CEmbyClientSync();
 
   void Start();
   void Stop();
