@@ -627,12 +627,22 @@ CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
   XFILE::CCurlFile emby;
   emby.SetRequestHeader("Cache-Control", "no-cache");
   emby.SetRequestHeader("Content-Type", "application/json");
-  //CEmbyUtils::PrepareApiCall(m_userId, m_accessToken, emby);
+  emby.SetRequestHeader("Accept-Encoding", "gzip");
 
   CURL curl(url);
+  // this is key to get back gzip encoded content
+  curl.SetProtocolOption("seekable", "0");
   std::string response;
   if (emby.Get(curl.Get(), response))
   {
+    if (emby.GetContentEncoding() == "gzip")
+    {
+      std::string buffer;
+      if (XFILE::CZipFile::DecompressGzip(response, buffer))
+        response = std::move(buffer);
+      else
+        return CVariant(CVariant::VariantTypeNull);
+    }
 #if defined(EMBY_DEBUG_VERBOSE)
     CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", response.c_str());
 #endif
