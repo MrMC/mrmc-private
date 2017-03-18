@@ -61,6 +61,7 @@ struct EmbyViewContent
 };
 
 class CFileItem;
+class CFileItemList;
 class CEmbyClientSync;
 typedef std::shared_ptr<CFileItem> CFileItemPtr;
 typedef std::vector<EmbyViewContent> EmbyViewContentVector;
@@ -85,14 +86,10 @@ public:
   const bool &IsLocal() const               { return m_local; }
   const bool IsCloud() const                { return (m_platform == "Cloud"); }
 
-  void  AddViewItem(CFileItemPtr root)
-  {
-    auto item = std::find(m_viewItems.begin(), m_viewItems.end(), root);
-    if (item == m_viewItems.end())
-      m_viewItems.push_back(root);
-  };
-  std::vector<CFileItemPtr> GetViewItems()  { return m_viewItems; };
-  void ClearViewItems()                     { m_viewItems.clear(); };
+  void  AddViewItem(const CFileItemPtr &item);
+  void  AddViewItems(const CFileItemList &items);
+  CFileItemPtr FindViewItemByServiceId(const std::string &Id);
+  void  ClearViewItems();
 
   const EmbyViewContentVector GetTvContent() const;
   const EmbyViewContentVector GetMovieContent() const;
@@ -100,7 +97,6 @@ public:
   const EmbyViewContentVector GetPhotoContent() const;
   const std::string FormatContentTitle(const std::string contentTitle) const;
   std::string FindViewName(const std::string &path);
-  CFileItemPtr FindItemByServiceId(const std::string &Id);
 
   std::string GetHost();
   int         GetPort();

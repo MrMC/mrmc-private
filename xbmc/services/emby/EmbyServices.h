@@ -99,7 +99,6 @@ private:
   CEmbyClientPtr    GetClient(std::string uuid);
   bool              AddClient(CEmbyClientPtr foundClient);
   bool              RemoveClient(CEmbyClientPtr lostClient);
-  bool              UpdateClient(CEmbyClientPtr updateClient);
 
   std::atomic<bool> m_active;
   CCriticalSection  m_critical;

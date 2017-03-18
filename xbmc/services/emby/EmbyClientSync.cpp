@@ -171,7 +171,7 @@ void CEmbyClientSync::Process()
             CFileItemPtr item;
             if (changedLibraryItem.changesetType == MediaImportChangesetTypeAdded || changedLibraryItem.changesetType == MediaImportChangesetTypeChanged)
             {
-              item = m_client->FindItemByServiceId(changedLibraryItem.itemId);
+              item = m_client->FindViewItemByServiceId(changedLibraryItem.itemId);
               if (item == nullptr)
               {
                 CLog::Log(LOGERROR, "CEmbyClientSync: failed to get details for changed item with id \"%s\"", changedLibraryItem.itemId.c_str());
@@ -214,7 +214,7 @@ void CEmbyClientSync::Process()
 
             const std::string itemId = (*userData)[NotificationUserDataChangedUserDataItemId].asString();
 
-            CFileItemPtr item = m_client->FindItemByServiceId(itemId);
+            CFileItemPtr item = m_client->FindViewItemByServiceId(itemId);
             if (item == nullptr)
             {
               CLog::Log(LOGERROR, "CEmbyClientSync: failed to get details for item with id \"%s\"", itemId.c_str());

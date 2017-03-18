@@ -78,6 +78,42 @@ bool CEmbyClient::Init(const std::string &userId, const std::string &accessToken
   return true;
 }
 
+void CEmbyClient::AddViewItem(const CFileItemPtr &item)
+{
+  CSingleLock lock(m_viewItemsLock);
+  auto finditem = std::find(m_viewItems.begin(), m_viewItems.end(), item);
+  if (finditem == m_viewItems.end())
+    m_viewItems.push_back(item);
+}
+
+void CEmbyClient::AddViewItems(const CFileItemList &items)
+{
+  CSingleLock lock(m_viewItemsLock);
+  CFileItemPtr newitem;
+  for (int i = 0; i < items.Size(); ++i)
+  {
+    auto newitem = items.Get(i);
+    AddViewItem(newitem);
+  }
+}
+
+CFileItemPtr CEmbyClient::FindViewItemByServiceId(const std::string &serviceId)
+{
+  CSingleLock lock(m_viewItemsLock);
+  for (const auto &item : m_viewItems)
+  {
+    if (item->GetVideoInfoTag()->m_strServiceId == serviceId)
+      return item;
+  }
+  return nullptr;
+}
+
+void CEmbyClient::ClearViewItems()
+{
+  CSingleLock lock(m_viewItemsLock);
+  m_viewItems.clear();
+}
+
 std::string CEmbyClient::GetUrl()
 {
   return m_url;
@@ -359,14 +395,4 @@ bool CEmbyClient::NeedViewUpdate(const EmbyViewContent &content, const EmbyViewC
     }
   }
   return rtn;
-}
-
-CFileItemPtr CEmbyClient::FindItemByServiceId(const std::string &serviceId)
-{
-  for (const auto &item : m_viewItems)
-  {
-    if (item->GetVideoInfoTag()->m_strServiceId == serviceId)
-      return item;
-  }
-  return nullptr;
 }

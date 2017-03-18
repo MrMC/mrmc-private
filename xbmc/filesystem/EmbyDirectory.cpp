@@ -112,7 +112,6 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             pItem->SetIconImage(curl.Get());
             */
             items.Add(pItem);
-            client->AddViewItem(pItem);
             CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory client(%s), title(%s)", client->GetServerName().c_str(), title.c_str());
           }
         }
@@ -190,9 +189,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.SetLabel(path);
         items.SetContent("movies");
       }
-      for (int item = 0; item < items.Size(); ++item)
-        client->AddViewItem(items[item]);
-
+      client->AddViewItems(items);
       CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory' client(%s), found %d movies", client->GetServerName().c_str(), items.Size());
     }
     return true;

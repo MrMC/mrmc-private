@@ -594,11 +594,6 @@ bool CEmbyServices::GetEmbyServers()
         // lost client
         CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server was lost %s", client->GetServerName().c_str());
       }
-      else if (UpdateClient(client))
-      {
-        // client exists and something changed
-        CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers presence changed %s", client->GetServerName().c_str());
-      }
     }
   }
 
@@ -662,11 +657,6 @@ bool CEmbyServices::GetEmbyServers()
         // lost client
         lostClients.push_back(client);
         CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", client->GetServerName().c_str());
-      }
-      else if (UpdateClient(client))
-      {
-        // client exists and something changed
-        CLog::Log(LOGNOTICE, "CPlexServices: Server presence changed %s", client->GetServerName().c_str());
       }
     }
     AddJob(new CPlexServiceJob(0, "FoundNewClient"));
@@ -922,11 +912,6 @@ void CEmbyServices::FindEmbyServersByBroadcast()
                   // lost client
                   CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server was lost %s", client->GetServerName().c_str());
                 }
-                else if (UpdateClient(client))
-                {
-                  // client exists and something changed
-                  CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers presence changed %s", client->GetServerName().c_str());
-                }
               }
             }
           }
@@ -1049,38 +1034,6 @@ bool CEmbyServices::RemoveClient(CEmbyClientPtr lostClient)
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
       g_windowManager.SendThreadMessage(msg);
       return true;
-    }
-  }
-
-  return false;
-}
-
-bool CEmbyServices::UpdateClient(CEmbyClientPtr updateClient)
-{
-  CSingleLock lock(m_clients_lock);
-  for (const auto &client : m_clients)
-  {
-    if (client->GetUuid() == updateClient->GetUuid())
-    {
-      // client needs updating
-      if (client->GetPresence() != updateClient->GetPresence())
-      {
-        client->SetPresence(updateClient->GetPresence());
-        // update any gui lists here.
-        for (const auto &item : client->GetViewItems())
-        {
-          std::string name = client->FindViewName(item->GetPath());
-          if (!name.empty())
-          {
-            item->SetLabel(client->FormatContentTitle(name));
-            CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
-            g_windowManager.SendThreadMessage(msg);
-          }
-        }
-        return true;
-      }
-      // no need to look further but an update was not needed
-      return false;
     }
   }
 
