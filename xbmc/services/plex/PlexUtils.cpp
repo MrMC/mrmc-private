@@ -47,7 +47,7 @@
 
 static int  g_progressSec = 0;
 static CFileItem m_curItem;
-static PlexUtilsPlayerState g_playbackState = PlexUtilsPlayerState::stopped;
+static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
 bool CPlexUtils::HasClients()
 {
@@ -445,16 +445,16 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentSeconds)
     return;
   
   // we get called from Application.cpp every 500ms
-  if ((g_playbackState == PlexUtilsPlayerState::stopped || g_progressSec == 0 || g_progressSec > 120))
+  if ((g_playbackState == MediaServicesPlayerState::stopped || g_progressSec == 0 || g_progressSec > 120))
   {
     g_progressSec = 0;
 
     std::string status;
-    if (g_playbackState == PlexUtilsPlayerState::playing )
+    if (g_playbackState == MediaServicesPlayerState::playing )
       status = "playing";
-    else if (g_playbackState == PlexUtilsPlayerState::paused )
+    else if (g_playbackState == MediaServicesPlayerState::paused )
       status = "paused";
-    else if (g_playbackState == PlexUtilsPlayerState::stopped)
+    else if (g_playbackState == MediaServicesPlayerState::stopped)
       status = "stopped";
 
     if (!status.empty())
@@ -488,7 +488,7 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentSeconds)
   g_progressSec++;
 }
 
-void CPlexUtils::SetPlayState(PlexUtilsPlayerState state)
+void CPlexUtils::SetPlayState(MediaServicesPlayerState state)
 {
   g_progressSec = 0;
   g_playbackState = state;

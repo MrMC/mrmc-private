@@ -116,15 +116,15 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
       {
         case "OnPlay"_mkhash:
           if (isPlex)
-            CPlexUtils::SetPlayState(PlexUtilsPlayerState::playing);
+            CPlexUtils::SetPlayState(MediaServicesPlayerState::playing);
           else if (isEmby)
-            CEmbyUtils::SetPlayState(EmbyUtilsPlayerState::playing);
+            CEmbyUtils::SetPlayState(MediaServicesPlayerState::playing);
           break;
         case "OnPause"_mkhash:
           if (isPlex)
-            CPlexUtils::SetPlayState(PlexUtilsPlayerState::paused);
+            CPlexUtils::SetPlayState(MediaServicesPlayerState::paused);
           else if (isEmby)
-            CEmbyUtils::SetPlayState(EmbyUtilsPlayerState::paused);
+            CEmbyUtils::SetPlayState(MediaServicesPlayerState::paused);
           break;
         case "OnStop"_mkhash:
         {
@@ -132,12 +132,12 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
           if (isPlex)
           {
             msg = "PlexSetProgress";
-            CPlexUtils::SetPlayState(PlexUtilsPlayerState::stopped);
+            CPlexUtils::SetPlayState(MediaServicesPlayerState::stopped);
           }
           else if (isEmby)
           {
             msg = "EmbySetProgress";
-            CEmbyUtils::SetPlayState(EmbyUtilsPlayerState::stopped);
+            CEmbyUtils::SetPlayState(MediaServicesPlayerState::stopped);
           }
           if (!msg.empty())
           {

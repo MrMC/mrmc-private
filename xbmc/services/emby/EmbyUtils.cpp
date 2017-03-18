@@ -60,7 +60,7 @@ static uint64_t SecondsToTicks(uint64_t seconds)
 
 static int  g_progressSec = 0;
 static CFileItem m_curItem;
-static EmbyUtilsPlayerState g_playbackState = EmbyUtilsPlayerState::stopped;
+static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
 bool CEmbyUtils::HasClients()
 {
@@ -203,14 +203,14 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
     return;
 
   // we get called from Application.cpp every 500ms
-  if ((g_playbackState == EmbyUtilsPlayerState::stopped || g_progressSec <= 0 || g_progressSec > 30))
+  if ((g_playbackState == MediaServicesPlayerState::stopped || g_progressSec <= 0 || g_progressSec > 30))
   {
     std::string status;
-    if (g_playbackState == EmbyUtilsPlayerState::playing )
+    if (g_playbackState == MediaServicesPlayerState::playing )
       status = "playing";
-    else if (g_playbackState == EmbyUtilsPlayerState::paused )
+    else if (g_playbackState == MediaServicesPlayerState::paused )
       status = "paused";
-    else if (g_playbackState == EmbyUtilsPlayerState::stopped)
+    else if (g_playbackState == MediaServicesPlayerState::stopped)
       status = "stopped";
 
     if (!status.empty())
@@ -284,7 +284,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
   g_progressSec++;
 }
 
-void CEmbyUtils::SetPlayState(EmbyUtilsPlayerState state)
+void CEmbyUtils::SetPlayState(MediaServicesPlayerState state)
 {
   g_progressSec = -1;
   g_playbackState = state;

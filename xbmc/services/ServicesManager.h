@@ -30,6 +30,13 @@ class CURL;
 class CFileItem;
 class CFileItemList;
 
+enum class MediaServicesPlayerState
+{
+  paused = 1,
+  playing = 2,
+  stopped = 3,
+};
+
 typedef struct MediaServicesMediaCount
 {
   int iMovieTotal = 0;

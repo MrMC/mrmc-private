@@ -38,13 +38,6 @@ typedef std::shared_ptr<CEmbyClient> CEmbyClientPtr;
 static const std::string EmbyApiKeyHeader = "X-MediaBrowser-Token";
 static const std::string EmbyAuthorizationHeader = "X-Emby-Authorization";
 
-enum class EmbyUtilsPlayerState
-{
-  paused = 1,
-  playing = 2,
-  stopped = 3,
-};
-
 class CEmbyUtils
 {
 public:
@@ -59,7 +52,7 @@ public:
   static void SetWatched(CFileItem &item);
   static void SetUnWatched(CFileItem &item);
   static void ReportProgress(CFileItem &item, double currentSeconds);
-  static void SetPlayState(EmbyUtilsPlayerState state);
+  static void SetPlayState(MediaServicesPlayerState state);
   static bool GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
   static bool GetEmbyInProgressShows(CFileItemList &items, const std::string url, int limit=25);
   static bool GetEmbyRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);

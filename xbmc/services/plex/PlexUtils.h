@@ -35,13 +35,6 @@ class CPlexClient;
 typedef std::shared_ptr<CPlexClient> CPlexClientPtr;
 
 
-enum class PlexUtilsPlayerState
-{
-  paused = 1,
-  playing = 2,
-  stopped = 3,
-};
-
 class CPlexUtils
 {
 public:
@@ -56,7 +49,7 @@ public:
   static void SetWatched(CFileItem &item);
   static void SetUnWatched(CFileItem &item);
   static void ReportProgress(CFileItem &item, double currentSeconds);
-  static void SetPlayState(PlexUtilsPlayerState state);
+  static void SetPlayState(MediaServicesPlayerState state);
   static bool GetPlexRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
   static bool GetPlexInProgressShows(CFileItemList &items, const std::string url, int limit=25);
   static bool GetPlexRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
