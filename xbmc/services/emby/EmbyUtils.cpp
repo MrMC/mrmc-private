@@ -484,8 +484,6 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
     rtn = true;
     CFileItemPtr newItem(new CFileItem());
 
-    const auto& videoInfo = newItem->GetVideoInfoTag();
-
     std::string fanart;
     std::string value;
     // clear url options
@@ -544,49 +542,42 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
     newItem->SetLabel(title);
     newItem->m_dateTime.SetFromW3CDateTime(item["PremiereDate"].asString());
 
-    videoInfo->m_strTitle = title;
-    videoInfo->SetSortTitle(item["SortName"].asString());
-    videoInfo->SetOriginalTitle(item["OriginalTitle"].asString());
+    newItem->GetVideoInfoTag()->m_strTitle = title;
+    newItem->GetVideoInfoTag()->SetSortTitle(item["SortName"].asString());
+    newItem->GetVideoInfoTag()->SetOriginalTitle(item["OriginalTitle"].asString());
 
     url2.SetFileName("Videos/" + item["Id"].asString() +"/stream?static=true");
     newItem->SetPath(url2.Get());
-    videoInfo->m_strFileNameAndPath = url2.Get();
-    videoInfo->m_strServiceId = item["Id"].asString();
-    videoInfo->m_strServiceFile = item["Path"].asString();
+    newItem->GetVideoInfoTag()->m_strFileNameAndPath = url2.Get();
+    newItem->GetVideoInfoTag()->m_strServiceId = item["Id"].asString();
+    newItem->GetVideoInfoTag()->m_strServiceFile = item["Path"].asString();
 
     //newItem->SetProperty("EmbyShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
-    videoInfo->m_type = type;
-    videoInfo->SetPlot(item["Overview"].asString());
-    videoInfo->SetPlotOutline(item["ShortOverview"].asString());
+    newItem->GetVideoInfoTag()->m_type = type;
+    newItem->GetVideoInfoTag()->SetPlot(item["Overview"].asString());
+    newItem->GetVideoInfoTag()->SetPlotOutline(item["ShortOverview"].asString());
 
     CDateTime premiereDate;
     premiereDate.SetFromW3CDateTime(item["PremiereDate"].asString());
-    videoInfo->m_firstAired = premiereDate;
-    videoInfo->SetPremiered(premiereDate);
-    videoInfo->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
+    newItem->GetVideoInfoTag()->m_firstAired = premiereDate;
+    newItem->GetVideoInfoTag()->SetPremiered(premiereDate);
+    newItem->GetVideoInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
 
     url2.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
     newItem->SetArt("fanart", url2.Get());
 
-    videoInfo->SetYear(static_cast<int>(item["ProductionYear"].asInteger()));
-    videoInfo->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
-    videoInfo->m_strMPAARating = item["OfficialRating"].asString();
+    newItem->GetVideoInfoTag()->SetYear(static_cast<int>(item["ProductionYear"].asInteger()));
+    newItem->GetVideoInfoTag()->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
+    newItem->GetVideoInfoTag()->m_strMPAARating = item["OfficialRating"].asString();
 
     GetVideoDetails(*newItem, item);
 
-    videoInfo->m_duration = static_cast<int>(TicksToSeconds(item["RunTimeTicks"].asUnsignedInteger()));
-    videoInfo->m_playCount = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
-    newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, videoInfo->m_playCount > 0);
-    videoInfo->m_lastPlayed.SetFromW3CDateTime(item["UserData"]["LastPlayedDate"].asString());
-    CBookmark resumePoint = videoInfo->m_resumePoint;
-    resumePoint.timeInSeconds = static_cast<int>(TicksToSeconds(item["UserData"]["PlaybackPositionTicks"].asUnsignedInteger()));
-    if (videoInfo->m_duration > 0 && resumePoint.timeInSeconds > 0)
-    {
-      resumePoint.totalTimeInSeconds = videoInfo->m_duration;
-      resumePoint.type = CBookmark::RESUME;
-    }
-    videoInfo->m_resumePoint = resumePoint;
-    //newItem->m_lStartOffset = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
+    newItem->GetVideoInfoTag()->m_duration = static_cast<int>(TicksToSeconds(item["RunTimeTicks"].asInteger()));
+    newItem->GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds = newItem->GetVideoInfoTag()->m_duration;
+    newItem->GetVideoInfoTag()->m_playCount = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
+    newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, newItem->GetVideoInfoTag()->m_playCount > 0);
+    newItem->GetVideoInfoTag()->m_lastPlayed.SetFromW3CDateTime(item["UserData"]["LastPlayedDate"].asString());
+    newItem->GetVideoInfoTag()->m_resumePoint.timeInSeconds = static_cast<int>(TicksToSeconds(item["UserData"]["PlaybackPositionTicks"].asUnsignedInteger()));
 
     GetMediaDetals(*newItem, item);
 
