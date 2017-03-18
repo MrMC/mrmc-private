@@ -5020,15 +5020,7 @@ msgctxt "#2110"
 msgid "Sign-out"
 msgstr ""
 
-#: system/settings/settings.xml
-msgctxt "#2111"
-msgid "Emby Server Broadcast Discovery"
-msgstr ""
-
-#: system/settings/settings.xml
-msgctxt "#2112"
-msgid "Emby Server Broadcast Discovery"
-msgstr ""
+#empty strings from id 2111 to 2112
 
 #: system/settings/settings.xml
 msgctxt "#2113"
@@ -11559,7 +11551,7 @@ msgstr ""
 
 #: xbmc/network/GUIDialogNetworkSetup.cpp
 msgctxt "#20174"
-msgid "Emby server"
+msgid "Emby server (http)"
 msgstr ""
 
 #: xbmc/network/GUIDialogNetworkSetup.cpp
@@ -11597,6 +11589,11 @@ msgstr ""
 
 msgctxt "#20183"
 msgid "Reload skin"
+msgstr ""
+
+#: xbmc/network/GUIDialogNetworkSetup.cpp
+msgctxt "#20184"
+msgid "Emby server (https)"
 msgstr ""
 
 #empty string with id 20184

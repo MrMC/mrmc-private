@@ -60,6 +60,7 @@ public:
   void GetClients(std::vector<CEmbyClientPtr> &clients) const;
   CEmbyClientPtr FindClient(const std::string &path);
   bool ClientIsLocal(std::string path);
+  EmbyServerInfo GetEmbyServerInfo(const std::string url);
 
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
@@ -87,8 +88,6 @@ private:
   bool              GetEmbyServers();
   bool              PostSignInPinCode();
   bool              GetSignInByPinReply();
-  //void              FindEmbyServersByBroadcast();
-  EmbyServerInfo    GetEmbyServerInfo(const std::string &ipAddress);
 
   CEmbyClientPtr    GetClient(std::string uuid);
   bool              AddClient(CEmbyClientPtr foundClient);
@@ -99,11 +98,13 @@ private:
   CEvent            m_processSleep;
 
   std::string       m_userId;
-  std::string       m_serverIP;
+  // m_serverURL is tagged 'emby' or 'embys' for http/https access
+  // this tag is only used to remember which protocol to use when
+  // init'ing the client. Once created, client remembers the correct
+  // protocol and we just use an 'emby' tag outside of this class.
+  std::string       m_serverURL;
   std::string       m_accessToken;
   std::string       m_signInByPinCode;
-  bool              m_broadcast;
-  SOCKETS::CSocketListener *m_broadcastListener;
   std::string       m_myHomeUser;
 
   MediaServicesPlayerState m_playState;

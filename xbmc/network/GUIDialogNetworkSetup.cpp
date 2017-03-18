@@ -67,10 +67,6 @@ bool CGUIDialogNetworkSetup::OnMessage(CGUIMessage& message)
       int iControl = message.GetSenderId();
       if (iControl == CONTROL_PROTOCOL)
       {
-        m_server.clear();
-        m_path.clear();
-        m_username.clear();
-        m_password.clear();
         OnProtocolChange();
       }
       else if (iControl == CONTROL_SERVER_BROWSE)
@@ -118,9 +114,12 @@ void CGUIDialogNetworkSetup::OnInitWindow()
 
   // Add our protocols
   std::vector< std::pair<std::string, int> > labels;
-  if (m_protocol == NET_PROTOCOL_EMBY)
+  if (m_protocol == NET_PROTOCOL_EMBY || m_protocol == NET_PROTOCOL_EMBYS)
   {
+    // only enable emby/embys if m_protocol was setup
+    //  at ShowAndGetNetworkAddress function call
     labels.push_back(make_pair(g_localizeStrings.Get(20174), NET_PROTOCOL_EMBY));
+    //labels.push_back(make_pair(g_localizeStrings.Get(20184), NET_PROTOCOL_EMBYS));
   }
   else
   {
@@ -195,6 +194,14 @@ void CGUIDialogNetworkSetup::OnProtocolChange()
   CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_PROTOCOL);
   if (!OnMessage(msg))
     return;
+
+  if ((NET_PROTOCOL)msg.GetParam1() == m_protocol)
+    return;
+
+  m_server.clear();
+  m_path.clear();
+  m_username.clear();
+  m_password.clear();
   m_protocol = (NET_PROTOCOL)msg.GetParam1();
   // set defaults for the port
   if (m_protocol == NET_PROTOCOL_FTP)
@@ -207,6 +214,10 @@ void CGUIDialogNetworkSetup::OnProtocolChange()
     m_port = "443";
   else if (m_protocol == NET_PROTOCOL_SFTP)
     m_port = "22";
+  else if (m_protocol == NET_PROTOCOL_EMBY)
+    m_port = "8096";
+  else if (m_protocol == NET_PROTOCOL_EMBYS)
+    m_port = "8920";
   else
     m_port = "0";
 
@@ -229,8 +240,10 @@ void CGUIDialogNetworkSetup::UpdateButtons()
 
   // remote path
   SET_CONTROL_LABEL2(CONTROL_REMOTE_PATH, m_path);
-  CONTROL_ENABLE_ON_CONDITION(CONTROL_REMOTE_PATH, m_protocol != NET_PROTOCOL_UPNP &&
-    m_protocol != NET_PROTOCOL_EMBY);
+  CONTROL_ENABLE_ON_CONDITION(CONTROL_REMOTE_PATH,
+    m_protocol != NET_PROTOCOL_UPNP &&
+    m_protocol != NET_PROTOCOL_EMBY &&
+    m_protocol != NET_PROTOCOL_EMBYS);
   if (m_protocol == NET_PROTOCOL_FTP ||
       m_protocol == NET_PROTOCOL_HTTP ||
       m_protocol == NET_PROTOCOL_HTTPS ||
@@ -258,6 +271,8 @@ void CGUIDialogNetworkSetup::UpdateButtons()
   // port
   SET_CONTROL_LABEL2(CONTROL_PORT_NUMBER, m_port);
   CONTROL_ENABLE_ON_CONDITION(CONTROL_PORT_NUMBER, m_protocol == NET_PROTOCOL_FTP ||
+                                                   m_protocol == NET_PROTOCOL_EMBY ||
+                                                   m_protocol == NET_PROTOCOL_EMBYS ||
                                                    m_protocol == NET_PROTOCOL_HTTP ||
                                                    m_protocol == NET_PROTOCOL_HTTPS ||
                                                    m_protocol == NET_PROTOCOL_DAV ||
@@ -276,7 +291,6 @@ void CGUIDialogNetworkSetup::UpdateButtons()
 
   // server browse should be disabled if we are in FTP, HTTP, HTTPS, RSS, DAV or DAVS
   CONTROL_ENABLE_ON_CONDITION(CONTROL_SERVER_BROWSE, !m_server.empty() || !(m_protocol == NET_PROTOCOL_FTP ||
-                                                                              m_protocol == NET_PROTOCOL_EMBY ||
                                                                               m_protocol == NET_PROTOCOL_HTTP ||
                                                                               m_protocol == NET_PROTOCOL_HTTPS ||
                                                                               m_protocol == NET_PROTOCOL_DAV ||
@@ -292,6 +306,8 @@ std::string CGUIDialogNetworkSetup::ConstructPath() const
     url.SetProtocol("smb");
   else if (m_protocol == NET_PROTOCOL_EMBY)
     url.SetProtocol("emby");
+  else if (m_protocol == NET_PROTOCOL_EMBYS)
+    url.SetProtocol("embys");
   else if (m_protocol == NET_PROTOCOL_FTP)
     url.SetProtocol("ftp");
   else if (m_protocol == NET_PROTOCOL_HTTP)
@@ -326,6 +342,8 @@ std::string CGUIDialogNetworkSetup::ConstructPath() const
        (m_protocol == NET_PROTOCOL_DAVS) ||
        (m_protocol == NET_PROTOCOL_RSS) ||
        (m_protocol == NET_PROTOCOL_SFTP) ||
+       (m_protocol == NET_PROTOCOL_EMBY) ||
+       (m_protocol == NET_PROTOCOL_EMBYS) ||
        (m_protocol == NET_PROTOCOL_NFS))
       && !m_port.empty() && atoi(m_port.c_str()) > 0)
   {
@@ -342,6 +360,14 @@ void CGUIDialogNetworkSetup::SetPath(const std::string &path)
   if (url.IsProtocol("emby"))
   {
     m_protocol = NET_PROTOCOL_EMBY;
+    if (!url.HasPort())
+      url.SetPort(8096);
+  }
+  else if (url.IsProtocol("embys"))
+  {
+    m_protocol = NET_PROTOCOL_EMBYS;
+    if (!url.HasPort())
+      url.SetPort(8920);
   }
   else
   {

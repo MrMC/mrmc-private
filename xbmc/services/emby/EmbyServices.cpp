@@ -20,27 +20,22 @@
 
 #include "EmbyServices.h"
 
+#include "EmbyUtils.h"
+#include "EmbyClient.h"
 #include "Application.h"
 #include "URL.h"
 #include "Util.h"
 #include "GUIUserMessages.h"
-#include "cores/VideoRenderers/RenderManager.h"
-#include "cores/VideoRenderers/RenderCapture.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "dialogs/GUIDialogSelect.h"
-#include "dialogs/GUIDialogNumeric.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "filesystem/DirectoryCache.h"
 #include "guilib/LocalizeStrings.h"
 #include "guilib/GUIWindowManager.h"
 #include "interfaces/AnnouncementManager.h"
 #include "network/Network.h"
-#include "network/Socket.h"
 #include "network/DNSNameCache.h"
 #include "network/GUIDialogNetworkSetup.h"
-#include "settings/lib/Setting.h"
 #include "settings/Settings.h"
-#include "profiles/dialogs/GUIDialogLockSettings.h"
 #include "utils/log.h"
 #include "utils/md5.h"
 #include "utils/sha1.hpp"
@@ -52,18 +47,9 @@
 #include "utils/JSONVariantParser.h"
 #include "utils/JSONVariantWriter.h"
 #include "utils/Variant.h"
-#include "utils/XMLUtils.h"
-
-#include "EmbyUtils.h"
-#include "EmbyClient.h"
-
-#include <regex>
 
 using namespace ANNOUNCEMENT;
 
-//static const int NS_EMBY_BROADCAST_PORT(7359);
-//static const std::string NS_EMBY_BROADCAST_ADDRESS("255.255.255.255");
-//static const std::string NS_EMBY_BROADCAST_SEARCH_MSG("who is EmbyServer?");
 //static const int NS_EMBY_SERVER_HTTP_PORT(8096);
 //static const int NS_EMBY_SERVER_HTTPS_PORT(8920);
 static const std::string NS_EMBY_URL("https://plex.tv");
@@ -168,7 +154,7 @@ bool CEmbyServices::IsActive()
 
 bool CEmbyServices::IsEnabled()
 {
-  return (!CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID).empty() ||
+  return (!CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYACESSTOKEN).empty() ||
            CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYBROADCAST));
 }
 
@@ -210,14 +196,19 @@ void CEmbyServices::OnSettingAction(const CSetting *setting)
   {
     if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYSIGNIN) == strSignIn)
     {
-      std::string path = "emby://";
+      CURL curl(m_serverURL);
+      curl.SetProtocol("emby");
+      std::string path = curl.Get();
       if (CGUIDialogNetworkSetup::ShowAndGetNetworkAddress(path))
       {
-        CURL url(path);
-        if (!url.GetHostName().empty() && !url.GetUserName().empty() && !url.GetPassWord().empty())
+        CURL curl2(path);
+        if (!curl2.GetHostName().empty() && !curl2.GetUserName().empty() && !curl2.GetPassWord().empty())
         {
-          if (AuthenticateByName(url))
+          if (AuthenticateByName(curl2))
           {
+            // never save the password
+            curl2.SetPassword("");
+            m_serverURL = curl2.Get();
             // change prompt to 'sign-out'
             CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYSIGNIN, strSignOut);
             CLog::Log(LOGDEBUG, "CEmbyServices:OnSettingAction manual sign-in ok");
@@ -285,7 +276,7 @@ void CEmbyServices::OnSettingAction(const CSetting *setting)
     SetUserSettings();
 
 
-    if (startThread || m_broadcast)
+    if (startThread)
       Start();
     else
     {
@@ -357,34 +348,22 @@ void CEmbyServices::OnSettingChanged(const CSetting *setting)
   /*
   static const std::string SETTING_SERVICES_EMBYSIGNIN;
   static const std::string SETTING_SERVICES_EMBYUSERID;
-  static const std::string SETTING_SERVICES_EMBYSERVERIP;
+  static const std::string SETTING_SERVICES_EMBYSERVERURL;
   static const std::string SETTING_SERVICES_EMBYACESSTOKEN;
 
   static const std::string SETTING_SERVICES_EMBYSIGNINPIN;
   static const std::string SETTING_SERVICES_EMBYHOMEUSER;
-  static const std::string SETTING_SERVICES_EMBYBROADCAST;
   static const std::string SETTING_SERVICES_EMBYUPDATEMINS;
   */
 
   if (setting == NULL)
     return;
-
-  const std::string& settingId = setting->GetId();
-  if (settingId == CSettings::SETTING_SERVICES_EMBYBROADCAST)
-  {
-    m_broadcast = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYBROADCAST);
-    // start or stop the service
-    if (m_broadcast || (!m_userId.empty() && !m_accessToken.empty()))
-      Start();
-    else
-      Stop();
-  }
 }
 
 void CEmbyServices::SetUserSettings()
 {
   CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYUSERID, m_userId);
-  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYSERVERIP, m_serverIP);
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYSERVERURL, m_serverURL);
   CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYACESSTOKEN, m_accessToken);
   CSettings::GetInstance().Save();
 }
@@ -392,9 +371,8 @@ void CEmbyServices::SetUserSettings()
 void CEmbyServices::GetUserSettings()
 {
   m_userId = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
-  m_serverIP  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYSERVERIP);
-  m_accessToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYACESSTOKEN);
-  m_broadcast = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYBROADCAST);
+  m_serverURL  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYSERVERURL);
+  m_accessToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYACESSTOKEN);
 }
 
 void CEmbyServices::UpdateLibraries(bool forced)
@@ -542,14 +520,15 @@ bool CEmbyServices::AuthenticateByName(const CURL& url)
   body["passwordMd5"] = passwordMd5;
   const std::string requestBody = CJSONVariantWriter::Write(body, true);
 
-  CURL url2("emby/Users/AuthenticateByName");
-  //url2.SetPort(8096);
-  //url2.SetProtocol("http");
-  url2.SetPort(8920);
-  url2.SetProtocol("https");
-  url2.SetHostName(url.GetHostName());
+  CURL curl("emby/Users/AuthenticateByName");
+  curl.SetPort(url.GetPort());
+  if (url.GetProtocol() == "embys")
+    curl.SetProtocol("https");
+  else
+    curl.SetProtocol("http");
+  curl.SetHostName(url.GetHostName());
 
-  std::string path = url2.Get();
+  std::string path = curl.Get();
   std::string response;
   if (!emby.Post(path, requestBody, response) || response.empty())
   {
@@ -567,7 +546,6 @@ bool CEmbyServices::AuthenticateByName(const CURL& url)
     return false;
 
   m_userId = responseObj["User"]["Id"].asString();
-  m_serverIP = url.GetHostName();
   m_accessToken = responseObj["AccessToken"].asString();
 
   return !m_accessToken.empty() && !m_userId.empty();
@@ -579,7 +557,7 @@ bool CEmbyServices::GetEmbyServers()
 
   std::vector<CEmbyClientPtr> clientsFound;
 
-  EmbyServerInfo embyServerInfo = GetEmbyServerInfo(m_serverIP);
+  EmbyServerInfo embyServerInfo = GetEmbyServerInfo(m_serverURL);
   if (!embyServerInfo.Id.empty())
   {
     CEmbyClientPtr client(new CEmbyClient());
@@ -587,7 +565,7 @@ bool CEmbyServices::GetEmbyServers()
     {
       if (AddClient(client))
       {
-        CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server found via GDM %s", client->GetServerName().c_str());
+        CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server found %s", client->GetServerName().c_str());
       }
       else if (GetClient(client->GetUuid()) == nullptr)
       {
@@ -596,79 +574,6 @@ bool CEmbyServices::GetEmbyServers()
       }
     }
   }
-
-/*
-  std::string strResponse;
-  CURL url(NS_PLEXTV_URL);
-  if (includeHttps)
-    url.SetFileName("pms/resources?includeHttps=1");
-  else
-    url.SetFileName("pms/resources?includeHttps=0");
-
-  if (m_emby.Get(url.Get(), strResponse))
-  {
-#if defined(EMBY_DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "CPlexServices:GetMyPlexServers %d, %s", includeHttps, strResponse.c_str());
-#endif
-    TiXmlDocument xml;
-    xml.Parse(strResponse.c_str());
-
-    TiXmlElement* MediaContainer = xml.RootElement();
-    if (MediaContainer)
-    {
-      const TiXmlElement* DeviceNode = MediaContainer->FirstChildElement("Device");
-      while (DeviceNode)
-      {
-        std::string provides = XMLUtils::GetAttribute(DeviceNode, "provides");
-        if (provides == "server")
-        {
-          CEmbyClientPtr client(new CEmbyClient());
-          if (client->Init(DeviceNode))
-          {
-            clientsFound.push_back(client);
-            // always return true if we find anything
-            rtn = true;
-          }
-        }
-        DeviceNode = DeviceNode->NextSiblingElement("Device");
-      }
-    }
-  }
-  else
-  {
-    std::string strMessage = "Error getting Plex servers";
-    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Plex Services", strMessage, 3000, true);
-    CLog::Log(LOGDEBUG, "CPlexServices::GetMyPlexServers failed %s, code %d", strResponse.c_str(), m_plextv.GetResponseCode());
-    return false;
-  }
-
-  std::vector<CPlexClientPtr> lostClients;
-  if (!clientsFound.empty())
-  {
-    for (const auto &client : clientsFound)
-    {
-      if (AddClient(client))
-      {
-        // new client
-        CLog::Log(LOGNOTICE, "CPlexServices: Server found via plex.tv %s", client->GetServerName().c_str());
-      }
-      else if (GetClient(client->GetUuid()) == nullptr)
-      {
-        // lost client
-        lostClients.push_back(client);
-        CLog::Log(LOGNOTICE, "CPlexServices: Server was lost %s", client->GetServerName().c_str());
-      }
-    }
-    AddJob(new CPlexServiceJob(0, "FoundNewClient"));
-  }
-
-  if (!lostClients.empty())
-  {
-    for (const auto &lostclient : lostClients)
-      RemoveClient(lostclient);
-  }
-*/
-
   return rtn;
 }
 
@@ -825,106 +730,8 @@ bool CEmbyServices::GetSignInByPinReply()
   }
   return rtn;
 }
-/*
-void CEmbyServices::FindEmbyServersByBroadcast()
-{
-  if (m_broadcast)
-  {
-    if (!m_broadcastListener)
-    {
-      SOCKETS::CUDPSocket *socket = SOCKETS::CSocketFactory::CreateUDPSocket();
-      if (socket)
-      {
-        CNetworkInterface *iface = g_application.getNetwork().GetFirstConnectedInterface();
-        if (iface && iface->IsConnected())
-        {
-          SOCKETS::CAddress my_addr;
-          my_addr.SetAddress(iface->GetCurrentIPAddress().c_str());
-          if (!socket->Bind(my_addr, NS_EMBY_BROADCAST_PORT, 0))
-          {
-            CLog::Log(LOGERROR, "CEmbyServices:CheckEmbyServers Could not listen on port %d", NS_EMBY_BROADCAST_PORT);
-            SAFE_DELETE(m_broadcastListener);
-            m_broadcast = false;
-            return;
-          }
 
-          if (socket)
-          {
-            socket->SetBroadCast(true);
-            // create and add our socket to the 'select' listener
-            m_broadcastListener = new SOCKETS::CSocketListener();
-            m_broadcastListener->AddSocket(socket);
-          }
-        }
-        else
-        {
-          SAFE_DELETE(socket);
-        }
-      }
-      else
-      {
-        CLog::Log(LOGERROR, "CEmbyServices:CheckEmbyServers Could not create socket for GDM");
-        m_broadcast = false;
-        return;
-      }
-    }
-
-    SOCKETS::CUDPSocket *socket = (SOCKETS::CUDPSocket*)m_broadcastListener->GetFirstSocket();
-    if (socket)
-    {
-      SOCKETS::CAddress discoverAddress;
-      discoverAddress.SetAddress(NS_EMBY_BROADCAST_ADDRESS.c_str(), NS_EMBY_BROADCAST_PORT);
-      std::string discoverMessage = NS_EMBY_BROADCAST_SEARCH_MSG;
-      int packetSize = socket->SendTo(discoverAddress, discoverMessage.length(), discoverMessage.c_str());
-      if (packetSize < 0)
-        CLog::Log(LOGERROR, "CEmbyServices::CheckEmbyServers:CheckforGDMServers discover send failed");
-    }
-
-    bool foundNewClient = false;
-    static const int DiscoveryTimeoutMs = 1000;
-    // listen for broadcast reply until we timeout
-    if (socket && m_broadcastListener->Listen(DiscoveryTimeoutMs))
-    {
-      char buffer[1024] = {0};
-      SOCKETS::CAddress sender;
-      int packetSize = socket->Read(sender, 1024, buffer);
-      if (packetSize > -1)
-      {
-        if (packetSize > 0)
-        {
-          CVariant data;
-          data = CJSONVariantParser::Parse((const unsigned char*)buffer, packetSize);
-          static const std::string ServerPropertyAddress = "Address";
-          if (data.isObject() && data.isMember(ServerPropertyAddress))
-          {
-            EmbyServerInfo embyServerInfo = GetEmbyServerInfo(data[ServerPropertyAddress].asString());
-            if (!embyServerInfo.Id.empty())
-            {
-              CEmbyClientPtr client(new CEmbyClient());
-              if (client->Init(data, sender.Address()))
-              {
-                if (AddClient(client))
-                {
-                  CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server found via GDM %s", client->GetServerName().c_str());
-                }
-                else if (GetClient(client->GetUuid()) == nullptr)
-                {
-                  // lost client
-                  CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server was lost %s", client->GetServerName().c_str());
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    if (foundNewClient)
-      AddJob(new CEmbyServiceJob(0, "FoundNewClient"));
-  }
-}
-*/
-
-EmbyServerInfo CEmbyServices::GetEmbyServerInfo(const std::string &ipAddress)
+EmbyServerInfo CEmbyServices::GetEmbyServerInfo(const std::string url)
 {
   EmbyServerInfo serverInfo;
 
@@ -933,12 +740,18 @@ EmbyServerInfo CEmbyServices::GetEmbyServerInfo(const std::string &ipAddress)
   emby.SetRequestHeader("Cache-Control", "no-cache");
   emby.SetRequestHeader("Content-Type", "application/json");
 
-  CURL url("emby/system/info/public");
-  url.SetPort(8096);
-  url.SetProtocol("http");
-  url.SetHostName(ipAddress);
+  CURL curl(url);
+  curl.SetFileName("emby/system/info/public");
+  bool useHttps = curl.GetProtocol() == "embys";
+  if (useHttps)
+    curl.SetProtocol("https");
+  else
+    curl.SetProtocol("http");
+  // do not need user/pass for server info
+  curl.SetUserName("");
+  curl.SetPassword("");
 
-  std::string path = url.Get();
+  std::string path = curl.Get();
   std::string response;
   if (!emby.Get(path, response) || response.empty())
   {
@@ -965,8 +778,9 @@ EmbyServerInfo CEmbyServices::GetEmbyServerInfo(const std::string &ipAddress)
     return serverInfo;
 
   serverInfo.Id = responseObj[ServerPropertyId].asString();
-  serverInfo.Version = responseObj[ServerPropertyName].asString();
-  serverInfo.ServerName = responseObj[ServerPropertyVersion].asString();
+  serverInfo.Version = responseObj[ServerPropertyVersion].asString();
+  serverInfo.ServerURL = curl.GetWithoutFilename();
+  serverInfo.ServerName = responseObj[ServerPropertyName].asString();
   serverInfo.WanAddress = responseObj[ServerPropertyWanAddress].asString();
   serverInfo.LocalAddress = responseObj[ServerPropertyLocalAddress].asString();
   serverInfo.OperatingSystem = responseObj[ServerPropertyOperatingSystem].asString();

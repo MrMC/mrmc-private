@@ -19,16 +19,7 @@
  *
  */
 
-#include <atomic>
-#include <memory>
-#include <map>
-#include <set>
-#include <string>
-#include <tuple>
-#include <vector>
-
 #include "EmbyClient.h"
-#include "FileItem.h"
 #include "threads/Thread.h"
 
 namespace easywsclient

@@ -21,18 +21,16 @@
  */
 
 #include "EmbyClientSync.h"
-#include "EmbyClient.h"
 
+#include "EmbyClient.h"
 #include "EmbyUtils.h"
+
+#include "contrib/easywsclient/easywsclient.hpp"
 #include "filesystem/File.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/JSONVariantParser.h"
-#include "contrib/easywsclient/easywsclient.hpp"
 #include "video/VideoInfoTag.h"
-
-#include <unordered_map>
-
 
 typedef enum MediaImportChangesetType
 {
@@ -51,12 +49,16 @@ CEmbyClientSync::CEmbyClientSync(CEmbyClient *client, const std::string &name, c
   , m_stop(true)
 {
   m_client = client;
-  CURL url(address);
-  url.SetProtocol("ws");
-  url.SetOption("api_key", accessToken);
-  url.SetOption("deviceId", deviceId);
+  CURL curl(address);
+  //if (curl.GetProtocol() == "http")
+    curl.SetProtocol("ws");
+  // only suports ws for now
+  //else if (curl.GetProtocol() == "https")
+  //  curl.SetProtocol("wss");
+  curl.SetOption("api_key", accessToken);
+  curl.SetOption("deviceId", deviceId);
 
-  m_address = url.Get();
+  m_address = curl.Get();
 }
 
 CEmbyClientSync::~CEmbyClientSync()

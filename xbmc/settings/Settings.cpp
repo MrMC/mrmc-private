@@ -485,7 +485,7 @@ const std::string CSettings::SETTING_SERVICES_PLEXMYPLEXAUTH = "plex.myplexautht
 // emby services
 const std::string CSettings::SETTING_SERVICES_EMBYSIGNIN = "emby.signin";
 const std::string CSettings::SETTING_SERVICES_EMBYUSERID = "emby.userid";
-const std::string CSettings::SETTING_SERVICES_EMBYSERVERIP = "emby.serverip";
+const std::string CSettings::SETTING_SERVICES_EMBYSERVERURL = "emby.serverurl";
 const std::string CSettings::SETTING_SERVICES_EMBYACESSTOKEN = "emby.accesstoken";
 const std::string CSettings::SETTING_SERVICES_EMBYSIGNINPIN = "emby.signinpin";
 const std::string CSettings::SETTING_SERVICES_EMBYHOMEUSER  = "emby.homeuser";
@@ -1359,7 +1359,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.clear();
   settingSet.insert(CSettings::SETTING_SERVICES_EMBYSIGNIN);
   settingSet.insert(CSettings::SETTING_SERVICES_EMBYUSERID);
-  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSERVERIP);
+  settingSet.insert(CSettings::SETTING_SERVICES_EMBYSERVERURL);
   settingSet.insert(CSettings::SETTING_SERVICES_EMBYACESSTOKEN);
   settingSet.insert(CSettings::SETTING_SERVICES_EMBYSIGNINPIN);
   settingSet.insert(CSettings::SETTING_SERVICES_EMBYHOMEUSER);

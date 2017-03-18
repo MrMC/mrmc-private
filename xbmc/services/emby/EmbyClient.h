@@ -36,7 +36,6 @@ Transcode - The client streams the file from the server with encoding
 #include <string>
 
 #include "URL.h"
-#include "utils/XMLUtils.h"
 #include "threads/CriticalSection.h"
 
 enum class EmbyViewParsing
@@ -50,6 +49,7 @@ typedef struct EmbyServerInfo
 {
   std::string Id;
   std::string Version;
+  std::string ServerURL;
   std::string ServerName;
   std::string WanAddress;
   std::string LocalAddress;

@@ -21,8 +21,6 @@
 
 #include <string>
 #include "FileItem.h"
-#include "utils/XBMCTinyXML.h"
-#include "utils/XMLUtils.h"
 #include "services/ServicesManager.h"
 
 #define EMBY_DEBUG_VERBOSE

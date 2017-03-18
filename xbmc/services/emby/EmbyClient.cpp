@@ -37,12 +37,10 @@
 #include "utils/URIUtils.h"
 #include "utils/Base64.h"
 #include "utils/JSONVariantParser.h"
-#include "utils/JSONVariantWriter.h"
 #include "utils/Variant.h"
 #include "video/VideoInfoTag.h"
 
 #include <string>
-#include <sstream>
 
 CEmbyClient::CEmbyClient()
 {
@@ -66,13 +64,14 @@ bool CEmbyClient::Init(const std::string &userId, const std::string &accessToken
   m_serverInfo = serverInfo;
   m_accessToken = accessToken;
 
-  CURL url(m_serverInfo.LocalAddress);
-  url.SetProtocolOptions("&X-MediaBrowser-Token=" + m_accessToken);
-  m_url = url.Get();
-  m_protocol = url.GetProtocol();
+  // protocol (http/https) and port will be in ServerUrl
+  CURL curl(m_serverInfo.ServerURL);
+  curl.SetProtocolOptions("&X-MediaBrowser-Token=" + m_accessToken);
+  m_url = curl.Get();
+  m_protocol = curl.GetProtocol();
 
   m_clientSync = new CEmbyClientSync(this, m_serverInfo.ServerName,
-    m_serverInfo.LocalAddress, CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), m_accessToken);
+    m_serverInfo.ServerURL, CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), m_accessToken);
   m_clientSync->Start();
 
   return true;
