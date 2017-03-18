@@ -19,6 +19,20 @@
  *
  */
 
+/*
+Direct Play - The client plays the file by accessing the file system
+  directly using the Path property. The server is bypassed with this
+  mechanism. Whenever possible this is the most desirable form of playback.
+
+Direct Stream - The client streams the file from the server as-is, in
+  its original format, without any encoding or remuxing applied.
+  Aside from Direct Play, this is the next most desirable playback method.
+
+Transcode - The client streams the file from the server with encoding
+  applied in order to convert it to a format that it can understand.
+*/
+
+
 #include <string>
 
 #include "URL.h"
@@ -98,9 +112,10 @@ public:
   const std::string FormatContentTitle(const std::string contentTitle) const;
   std::string FindViewName(const std::string &path);
 
+  std::string GetUrl();
   std::string GetHost();
   int         GetPort();
-  std::string GetUrl();
+  std::string GetUserID();
 
 protected:
   bool        IsSameClientHostName(const CURL& url);

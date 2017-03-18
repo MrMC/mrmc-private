@@ -117,14 +117,89 @@ void CEmbyUtils::SetEmbyItemsProperties(CFileItemList &items, const CEmbyClientP
 
 void CEmbyUtils::SetWatched(CFileItem &item)
 {
+  // POST to /Users/{UserId}/PlayedItems/{Id}
+  std::string url = item.GetPath();
+  if (URIUtils::IsStack(url))
+    url = XFILE::CStackDirectory::GetFirstStackedFile(url);
+  else
+    url = URIUtils::GetParentPath(url);
+  if (StringUtils::StartsWithNoCase(url, "emby://"))
+    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+
+  // need userId which only client knows
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url);
+  if (!client || !client->GetPresence())
+    return;
+
+  // use the current date and time if lastPlayed is invalid
+  const auto& videoInfo = item.GetVideoInfoTag();
+  if (!videoInfo->m_lastPlayed.IsValid())
+    videoInfo->m_lastPlayed = CDateTime::GetUTCDateTime();
+
+  // get the URL to updated the item's played state for this user ID
+  CURL url2(url);
+  url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + videoInfo->m_strServiceId);
+  url2.SetOptions("");
+  // and add the DatePlayed URL parameter
+  url2.SetOption("DatePlayed",
+    StringUtils::Format("%04i%02i%02i%02i%02i%02i",
+      videoInfo->m_lastPlayed.GetYear(),
+      videoInfo->m_lastPlayed.GetMonth(),
+      videoInfo->m_lastPlayed.GetDay(),
+      videoInfo->m_lastPlayed.GetHour(),
+      videoInfo->m_lastPlayed.GetMinute(),
+      videoInfo->m_lastPlayed.GetSecond()));
+
+  std::string data;
+  std::string response;
+  // execute the POST request
+  XFILE::CCurlFile curl;
+  if (curl.Post(url2.Get(), data, response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    if (!response.empty())
+      CLog::Log(LOGDEBUG, "CEmbyUtils::SetWatched %s", response.c_str());
+#endif
+  }
 }
 
 void CEmbyUtils::SetUnWatched(CFileItem &item)
 {
+  // DELETE to /Users/{UserId}/PlayedItems/{Id}
+  std::string url = item.GetPath();
+  if (URIUtils::IsStack(url))
+    url = XFILE::CStackDirectory::GetFirstStackedFile(url);
+  else
+    url = URIUtils::GetParentPath(url);
+  if (StringUtils::StartsWithNoCase(url, "emby://"))
+    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+
+  // need userId which only client knows
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url);
+  if (!client || !client->GetPresence())
+    return;
+
+  // get the URL to updated the item's played state for this user ID
+  CURL url2(url);
+  url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + item.GetVideoInfoTag()->m_strServiceId);
+  url2.SetOptions("");
+
+  std::string data;
+  std::string response;
+  // execute the DELETE request
+  XFILE::CCurlFile curl;
+  if (curl.Delete(url2.Get(), data, response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    if (!response.empty())
+      CLog::Log(LOGDEBUG, "CEmbyUtils::SetUnWatched %s", response.c_str());
+#endif
+  }
 }
 
 void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
 {
+  const auto playbackPositionTicks = SecondsToTicks(currentSeconds);
 }
 
 void CEmbyUtils::SetPlayState(EmbyUtilsPlayerState state)
@@ -304,7 +379,7 @@ void CEmbyUtils::ReportToServer(std::string url, std::string filename)
 {
 }
 
-bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &object, std::string type, bool formatLabel, int season)
+bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &object, std::string type, bool formatLabel, int season)
 {
   bool rtn = false;
   if (object.isNull() || !object.isObject() || !object.isMember("Items"))
@@ -320,12 +395,13 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     rtn = true;
     CFileItemPtr newItem(new CFileItem());
 
-    CVideoInfoTag* videoInfo = newItem->GetVideoInfoTag();
+    const auto& videoInfo = newItem->GetVideoInfoTag();
 
     std::string fanart;
     std::string value;
     // clear url options
-    url.SetOptions("");
+    CURL url2(url);
+    url2.SetOptions("");
 /*    // if we have season means we are listing episodes, we need to get the fanart from rootXmlNode.
     // movies has it in videoNode
     if (season > -1)
@@ -370,9 +446,9 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
  
     else
 */  {
-      url.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
-      newItem->SetArt("thumb", url.Get());
-      newItem->SetIconImage(url.Get());
+      url2.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
+      newItem->SetArt("thumb", url2.Get());
+      newItem->SetIconImage(url2.Get());
     }
 
     std::string title = item["Name"].asString();
@@ -382,10 +458,10 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->m_strTitle = title;
     videoInfo->SetSortTitle(item["SortName"].asString());
     videoInfo->SetOriginalTitle(item["OriginalTitle"].asString());
-    url.SetFileName("Videos/" + item["Id"].asString() +"/stream?static=true");
-    
-    newItem->SetPath(url.Get());
-    videoInfo->m_strFileNameAndPath = url.Get();
+
+    url2.SetFileName("Videos/" + item["Id"].asString() +"/stream?static=true");
+    newItem->SetPath(url2.Get());
+    videoInfo->m_strFileNameAndPath = url2.Get();
     videoInfo->m_strServiceId = item["Id"].asString();
     videoInfo->m_strServiceFile = item["Path"].asString();
 
@@ -400,8 +476,8 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->SetPremiered(premiereDate);
     videoInfo->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
 
-    url.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
-    newItem->SetArt("fanart", url.Get());
+    url2.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    newItem->SetArt("fanart", url2.Get());
 
     videoInfo->SetYear(static_cast<int>(item["ProductionYear"].asInteger()));
     videoInfo->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
@@ -423,7 +499,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items,CURL url, const CVariant &ob
     videoInfo->m_resumePoint = resumePoint;
     //newItem->m_lStartOffset = atoi(XMLUtils::GetAttribute(videoNode, "viewOffset").c_str())/1000;
 
-    GetMediaDetals(*newItem, url, item);
+    GetMediaDetals(*newItem, item);
 
     if (formatLabel)
     {
@@ -461,7 +537,7 @@ void CEmbyUtils::GetMusicDetails(CFileItem &fileitem, const CVariant &cvariant)
 {
 }
 
-void CEmbyUtils::GetMediaDetals(CFileItem &fileitem, CURL url, const CVariant &cvariant, std::string id)
+void CEmbyUtils::GetMediaDetals(CFileItem &fileitem, const CVariant &cvariant, std::string id)
 {
   if (cvariant.isMember("MediaStreams") && cvariant["MediaStreams"].isArray())
   {

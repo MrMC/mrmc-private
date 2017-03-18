@@ -131,6 +131,11 @@ int CEmbyClient::GetPort()
   return url.GetPort();
 }
 
+std::string CEmbyClient::GetUserID()
+{
+  return m_userId;
+}
+
 const EmbyViewContentVector CEmbyClient::GetTvContent() const
 {
   CSingleLock lock(m_viewTVshowContentsLock);

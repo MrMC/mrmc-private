@@ -92,7 +92,7 @@ private:
   static bool GetVideoItems(CFileItemList &items,CURL url, const CVariant &object, std::string type, bool formatLabel, int season = -1);
   static void GetVideoDetails(CFileItem &fileitem, const CVariant &cvariant);
   static void GetMusicDetails(CFileItem &fileitem, const CVariant &cvariant);
-  static void GetMediaDetals(CFileItem &fileitem, CURL url, const CVariant &cvariant, std::string id = "0");
+  static void GetMediaDetals(CFileItem &fileitem, const CVariant &cvariant, std::string id = "0");
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
   static int ParseEmbyMediaXML(TiXmlDocument xml);
   static void RemoveSubtitleProperties(CFileItem &item);
