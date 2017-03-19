@@ -464,10 +464,10 @@ class _RealWebSocket : public easywsclient::WebSocket
 
 
 easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, const std::string& origin) {
-	char sc[128];
-    char host[128];
-    int port;
-    char path[128];
+    char sc[128] = {0};
+    char host[128] = {0};
+    int  port;
+    char path[128] = {0};
     bool is_ssl = false;
     if (url.size() >= 128) {
       fprintf(stderr, "ERROR: url size limit exceeded: %s\n", url.c_str());
@@ -491,7 +491,7 @@ easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, 
         path[0] = '\0';
     }
     else {
-        fprintf(stderr, "ERROR: Could not parse WebSocket url: %s\n", url.c_str());
+        fprintf(stderr, "ERROR: rr, url: %s\n", url.c_str());
         return NULL;
     }
     if (sc[2]!='\0') {
@@ -504,7 +504,7 @@ easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, 
       is_ssl?"true":"false", host, port, path);
 
     ConnectionContext* ptConnCtx;
-    ptConnCtx = (ConnectionContext*)malloc(sizeof(ConnectionContext));
+    ptConnCtx = (ConnectionContext*)calloc(1, sizeof(ConnectionContext));
     ptConnCtx->sockfd = hostname_connect(host, port);
     if (ptConnCtx->sockfd == INVALID_SOCKET) {
         fprintf(stderr, "ERROR: Unable to connect to %s:%d\n", host, port);
