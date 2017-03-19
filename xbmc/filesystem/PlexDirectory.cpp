@@ -63,7 +63,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       {
         client->ClearSectionItems();
         std::vector<PlexSectionsContent> contents = client->GetMovieContent();
-        if (contents.size() > 1 || ((items.Size() > 0 || clients.size() > 1) && contents.size() == 1))
+        if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasEmbyServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
           {
@@ -179,7 +179,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       {
         client->ClearSectionItems();
         std::vector<PlexSectionsContent> contents = client->GetTvContent();
-        if (contents.size() > 1 || ((items.Size() > 0 || clients.size() > 1) && contents.size() == 1))
+        if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasEmbyServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
           {
@@ -298,7 +298,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       {
         client->ClearSectionItems();
         std::vector<PlexSectionsContent> contents = client->GetArtistContent();
-        if (contents.size() > 1 || ((items.Size() > 0 || clients.size() > 1) && contents.size() == 1))
+        if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasEmbyServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
           {

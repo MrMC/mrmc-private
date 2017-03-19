@@ -94,7 +94,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       {
         client->ClearViewItems();
         std::vector<EmbyViewContent> contents = client->GetMoviesContent();
-        if (contents.size() > 1 || ((items.Size() > 0 || clients.size() > 1) && contents.size() == 1))
+        if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasPlexServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
           {
@@ -212,7 +212,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       {
         client->ClearViewItems();
         std::vector<EmbyViewContent> contents = client->GetTvShowContent();
-        if (contents.size() > 1 || ((items.Size() > 0 || clients.size() > 1) && contents.size() == 1))
+        if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasPlexServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
           {
@@ -333,7 +333,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       {
         client->ClearViewItems();
         std::vector<EmbyViewContent> contents = client->GetArtistContent();
-        if (contents.size() > 1 || ((items.Size() > 0 || clients.size() > 1) && contents.size() == 1))
+        if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasPlexServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
           {
