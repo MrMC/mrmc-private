@@ -69,6 +69,9 @@
     #define SOCKET_EWOULDBLOCK EWOULDBLOCK
 #endif
 
+// turn off fprintf's to stderr
+#define EASYWSCLIENT_LOGGING 0
+
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
@@ -101,7 +104,9 @@ socket_t hostname_connect(const std::string& hostname, int port) {
     snprintf(sport, 16, "%d", port);
     if ((ret = getaddrinfo(hostname.c_str(), sport, &hints, &result)) != 0)
     {
+#if (EASYWSCLIENT_LOGGING==1)
       fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(ret));
+#endif
       return 1;
     }
     for(p = result; p != NULL; p = p->ai_next)
@@ -251,7 +256,9 @@ class _RealWebSocket : public easywsclient::WebSocket
                 rxbuf.resize(N);
                 klose(ptConnCtx);
                 readyState = CLOSED;
+#if (EASYWSCLIENT_LOGGING==1)
                 fputs(ret < 0 ? "Connection error!\n" : "Connection closed!\n", stderr);
+#endif
                 break;
             }
             else {
@@ -267,7 +274,9 @@ class _RealWebSocket : public easywsclient::WebSocket
             else if (ret <= 0) {
                 klose(ptConnCtx);
                 readyState = CLOSED;
+#if (EASYWSCLIENT_LOGGING==1)
                 fputs(ret < 0 ? "Connection error!\n" : "Connection closed!\n", stderr);
+#endif
                 break;
             }
             else {
@@ -371,7 +380,12 @@ class _RealWebSocket : public easywsclient::WebSocket
             }
             else if (ws.opcode == wsheader_type::PONG) { }
             else if (ws.opcode == wsheader_type::CLOSE) { close(); }
-            else { fprintf(stderr, "ERROR: Got unexpected WebSocket message. opcode=%d\n", ws.opcode); close(); }
+            else {
+#if (EASYWSCLIENT_LOGGING==1)
+                fprintf(stderr, "ERROR: Got unexpected WebSocket message. opcode=%d\n", ws.opcode);
+#endif
+                close();
+            }
 
             rxbuf.erase(rxbuf.begin(), rxbuf.begin() + ws.header_size+(size_t)ws.N);
         }
@@ -470,11 +484,15 @@ easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, 
     char path[128] = {0};
     bool is_ssl = false;
     if (url.size() >= 128) {
+#if (EASYWSCLIENT_LOGGING==1)
       fprintf(stderr, "ERROR: url size limit exceeded: %s\n", url.c_str());
+#endif
       return NULL;
     }
     if (origin.size() >= 200) {
+#if (EASYWSCLIENT_LOGGING==1)
       fprintf(stderr, "ERROR: origin size limit exceeded: %s\n", origin.c_str());
+#endif
       return NULL;
     }
     if (false) { }
@@ -491,23 +509,30 @@ easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, 
         path[0] = '\0';
     }
     else {
+#if (EASYWSCLIENT_LOGGING==1)
         fprintf(stderr, "ERROR: rr, url: %s\n", url.c_str());
+#endif
         return NULL;
     }
     if (sc[2]!='\0') {
+#if (EASYWSCLIENT_LOGGING==1)
         fprintf(stderr, "ERROR: Could not parse WebSocket url: %s\n", url.c_str());
+#endif
         return NULL;
     }
     is_ssl = sc[1]=='s';
+#if (EASYWSCLIENT_LOGGING==1)
     fprintf(stderr,
       "easywsclient: connecting: ssl=%s, host=%s port=%d path=/%s\n",
       is_ssl?"true":"false", host, port, path);
-
+#endif
     ConnectionContext* ptConnCtx;
     ptConnCtx = (ConnectionContext*)calloc(1, sizeof(ConnectionContext));
     ptConnCtx->sockfd = hostname_connect(host, port);
     if (ptConnCtx->sockfd == INVALID_SOCKET) {
+#if (EASYWSCLIENT_LOGGING==1)
         fprintf(stderr, "ERROR: Unable to connect to %s:%d\n", host, port);
+#endif
         free(ptConnCtx);
         return NULL;
     }
@@ -521,21 +546,29 @@ easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, 
 
       // New context saying we are a client, and using SSL 2 or 3
       ptConnCtx->sslContext = SSL_CTX_new (SSLv23_client_method ());
+#if (EASYWSCLIENT_LOGGING==1)
       if (ptConnCtx->sslContext == NULL)
         ERR_print_errors_fp (stderr);
-
+#endif
       // Create an SSL struct for the connection
       ptConnCtx->sslHandle = SSL_new (ptConnCtx->sslContext);
+#if (EASYWSCLIENT_LOGGING==1)
       if (ptConnCtx->sslHandle == NULL)
         ERR_print_errors_fp (stderr);
-
+#endif
       // Connect the SSL struct to our connection
-      if (!SSL_set_fd (ptConnCtx->sslHandle, ptConnCtx->sockfd))
+      if (!SSL_set_fd (ptConnCtx->sslHandle, ptConnCtx->sockfd)) {
+#if (EASYWSCLIENT_LOGGING==1)
         ERR_print_errors_fp (stderr);
+#endif
+      }
 
       // Initiate SSL handshake
-      if (SSL_connect (ptConnCtx->sslHandle) != 1)
+      if (SSL_connect (ptConnCtx->sslHandle) != 1) {
+#if (EASYWSCLIENT_LOGGING==1)
         ERR_print_errors_fp (stderr);
+#endif
+      }
     }
     {
         // XXX: this should be done non-blocking,
@@ -559,8 +592,18 @@ easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, 
         snprintf(line, 256, "\r\n"); kWrite(ptConnCtx, line, strlen(line), 0);
         for (i = 0; i < 2 || (i < 255 && line[i-2] != '\r' && line[i-1] != '\n'); ++i) { if (kRead(ptConnCtx, line+i, 1, 0) == 0) { return NULL; } }
         line[i] = 0;
-        if (i == 255) { fprintf(stderr, "ERROR: Got invalid status line connecting to: %s\n", url.c_str()); return NULL; }
-        if (sscanf(line, "HTTP/1.1 %d", &status) != 1 || status != 101) { fprintf(stderr, "ERROR: Got bad status connecting to %s: %s", url.c_str(), line); return NULL; }
+        if (i == 255) {
+#if (EASYWSCLIENT_LOGGING==1)
+            fprintf(stderr, "ERROR: Got invalid status line connecting to: %s\n", url.c_str());
+#endif
+            return NULL;
+        }
+        if (sscanf(line, "HTTP/1.1 %d", &status) != 1 || status != 101) {
+#if (EASYWSCLIENT_LOGGING==1)
+            fprintf(stderr, "ERROR: Got bad status connecting to %s: %s", url.c_str(), line);
+#endif
+            return NULL;
+        }
         while (true) {
             for (i = 0; i < 2 || (i < 255 && line[i-2] != '\r' && line[i-1] != '\n'); ++i) { if (kRead(ptConnCtx, line+i, 1, 0) == 0) { return NULL; } }
             if (line[0] == '\r' && line[1] == '\n') { break; }
@@ -574,7 +617,9 @@ easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, 
 #else
     fcntl(ptConnCtx->sockfd, F_SETFL, O_NONBLOCK);
 #endif
+#if (EASYWSCLIENT_LOGGING==1)
     fprintf(stderr, "Connected to: %s\n", url.c_str());
+#endif
     return easywsclient::WebSocket::pointer(new _RealWebSocket(ptConnCtx, useMask));
 }
 
