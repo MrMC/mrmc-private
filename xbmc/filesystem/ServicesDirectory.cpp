@@ -157,7 +157,7 @@ bool CServicesDirectory::GetDirectory(const CURL& url, CFileItemList &items)
     }
     return true;
   }
-  else if (StringUtils::StartsWithNoCase(strUrl, "emby://music/"))
+  else if (StringUtils::StartsWithNoCase(strUrl, "services://music/"))
   {
     if (section.empty())
     {
