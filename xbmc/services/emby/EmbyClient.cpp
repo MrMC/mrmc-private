@@ -45,7 +45,7 @@
 CEmbyClient::CEmbyClient()
 {
   m_local = true;
-  m_owned = true;
+  m_owned = "1";
   m_presence = true;
   m_protocol = "http";
   m_needUpdate = false;
