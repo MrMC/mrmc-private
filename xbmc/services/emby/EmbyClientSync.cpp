@@ -48,13 +48,13 @@ CEmbyClientSync::CEmbyClientSync(CEmbyClient *client, const std::string &name, c
   , m_websocket(nullptr)
   , m_stop(true)
 {
+  // ws://server.local:32400/:/websockets/notifications
   m_client = client;
   CURL curl(address);
-  //if (curl.GetProtocol() == "http")
+  if (curl.GetProtocol() == "http")
     curl.SetProtocol("ws");
-  // only suports ws for now
-  //else if (curl.GetProtocol() == "https")
-  //  curl.SetProtocol("wss");
+  else if (curl.GetProtocol() == "https")
+    curl.SetProtocol("wss");
   curl.SetOption("api_key", accessToken);
   curl.SetOption("deviceId", deviceId);
 
@@ -108,7 +108,7 @@ void CEmbyClientSync::Process()
 
   m_websocket.reset(easywsclient::WebSocket::from_url(m_address /* TODO: , origin */));
 
-  while (!m_stop && m_websocket->getReadyState() != easywsclient::WebSocket::CLOSED)
+  while (!m_stop && m_websocket && m_websocket->getReadyState() != easywsclient::WebSocket::CLOSED)
   {
     m_websocket->poll(WebSocketTimeoutMs);
     m_websocket->dispatch(
