@@ -118,8 +118,15 @@ void CPlexClientSync::Process()
   };
 
   m_websocket.reset(easywsclient::WebSocket::from_url(m_address /* TODO: , origin */));
+  if (!m_websocket)
+  {
+    CLog::Log(LOGERROR, "CPlexClientSync: failed websocket connection to %s", m_name.c_str());
+    m_stop = true;
+  }
+  else
+    CLog::Log(LOGDEBUG, "CPlexClientSync: websocket connected to %s", m_name.c_str());
 
-  while (!m_stop && m_websocket && m_websocket->getReadyState() != easywsclient::WebSocket::CLOSED)
+  while (!m_stop && m_websocket->getReadyState() != easywsclient::WebSocket::CLOSED)
   {
     m_websocket->poll(WebSocketTimeoutMs);
     m_websocket->dispatch(
