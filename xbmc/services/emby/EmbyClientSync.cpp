@@ -90,10 +90,13 @@ void CEmbyClientSync::Process()
 
   static const std::string NotificationMessageType = "MessageType";
   static const std::string NotificationData = "Data";
+  static const std::string NotificationMessageTypeUserUpdated = "UserUpdated";
+  static const std::string NotificationMessageTypeSessionEnded = "SessionEnded";
   static const std::string NotificationMessageTypeLibraryChanged = "LibraryChanged";
   static const std::string NotificationMessageTypeUserDataChanged = "UserDataChanged";
   static const std::string NotificationMessageTypePlaybackStart = "PlaybackStart";
   static const std::string NotificationMessageTypePlaybackStopped = "PlaybackStopped";
+  static const std::string NotificationMessageTypeScheduledTaskEnded = "ScheduledTaskEnded";
   static const std::string NotificationLibraryChangedItemsAdded = "ItemsAdded";
   static const std::string NotificationLibraryChangedItemsUpdated = "ItemsUpdated";
   static const std::string NotificationLibraryChangedItemsRemoved = "ItemsRemoved";
@@ -129,6 +132,23 @@ void CEmbyClientSync::Process()
         }
 
         const std::string msgType = msgObject[NotificationMessageType].asString();
+        // ignore SessionEnded (server spew)
+        if (msgType == NotificationMessageTypeSessionEnded)
+          return;
+        // ignore UserUpdated (server spew)
+        if (msgType == NotificationMessageTypeUserUpdated)
+          return;
+        // ignore PlaybackStart (server spew)
+        if (msgType == NotificationMessageTypePlaybackStart)
+          return;
+        // ignore PlaybackStopped (server spew)
+        if (msgType == NotificationMessageTypePlaybackStopped)
+          return;
+        // ignore ScheduledTaskEnded (server spew)
+        if (msgType == NotificationMessageTypeScheduledTaskEnded)
+          return;
+
+
         CLog::Log(LOGDEBUG, "[%s] %s: %s", this->m_name.c_str(), msgType.c_str(), msg.c_str());
 
         const auto msgData = msgObject[NotificationData];
@@ -195,53 +215,42 @@ void CEmbyClientSync::Process()
               CLog::Log(LOGERROR, "CEmbyClientSync: failed to process changed item with id \"%s\"", changedLibraryItem.itemId.c_str());
               continue;
             }
-/*
-            CMediaImport import;
-            if (!FindImportForItem(item, import))
-            {
-              CLog::Log(LOGWARNING, "CEmbyClientSync: received changed item with id \"%s\" from unknown media import", changedLibraryItem.itemId.c_str());
-              continue;
-            }
-*/
+            // TODO update the local items
           }
         }
         else if (msgType == NotificationMessageTypeUserDataChanged)
         {
-          const auto userDataList = msgData[NotificationUserDataChangedUserDataList];
-          if (!msgData.isArray())
+          /*
+          UserDataChanged: {"MessageType":"UserDataChanged","Data":{"UserId":"c0234e3b7f364e5da6ded482cde90f62","UserDataList":[{"PlayedPercentage":11.0171244559219,"PlaybackPositionTicks":7680000000,"PlayCount":2,"IsFavorite":false,"LastPlayedDate":"2017-03-19T17:55:21.9907250Z","Played":true,"Key":"274870","ItemId":"f822f61be1862484f5a2e4c854d244ac"},{"UnplayedItemCount":751,"PlaybackPositionTicks":0,"PlayCount":0,"IsFavorite":false,"Played":false,"Key":"207cf78d-67ba-ae9a-9328-4169cb204f16","ItemId":"207cf78d67baae9a93284169cb204f16"}]}}
+          */
+          // we see these from us or some other emby client causes changes (seems like during playback)
+          if (msgData.isArray())
           {
-            CLog::Log(LOGERROR, "CEmbyClientSync: missing \"%s\" in websocket notification of type \"%s\" from %s", NotificationUserDataChangedUserDataList.c_str(), msgType.c_str(), m_name.c_str());
-            return;
-          }
-
-          for (auto userData = userDataList.begin_array(); userData != userDataList.end_array(); ++userData)
-          {
-            if (!userData->isObject() || !userData->isMember(NotificationUserDataChangedUserDataItemId))
-              continue;
-
-            const std::string itemId = (*userData)[NotificationUserDataChangedUserDataItemId].asString();
-
-            CFileItemPtr item = m_client->FindViewItemByServiceId(itemId);
-            if (item == nullptr)
-              continue;
-/*
-            CMediaImport import;
-            if (!FindImportForItem(item, import))
+            const auto userDataList = msgData[NotificationUserDataChangedUserDataList];
+            for (auto userData = userDataList.begin_array(); userData != userDataList.end_array(); ++userData)
             {
-              CLog::Log(LOGWARNING, "CEmbyClientSync: received changed item with id \"%s\" from unknown media import", itemId.c_str());
-              continue;
+              if (!userData->isObject() || !userData->isMember(NotificationUserDataChangedUserDataItemId))
+                continue;
+
+              const std::string itemId = (*userData)[NotificationUserDataChangedUserDataItemId].asString();
+
+              CFileItemPtr item = m_client->FindViewItemByServiceId(itemId);
+              if (item == nullptr)
+                continue;
+              // TODO update the local items
             }
-*/
-            // TODO
           }
-        }
-        else if (msgType == NotificationMessageTypePlaybackStart)
-        {
-          // TODO
-        }
-        else if (msgType == NotificationMessageTypePlaybackStopped)
-        {
-          // TODO
+          else
+          {
+            const auto itemIdChanged = msgData[NotificationUserDataChangedUserDataItemId].asString();
+            if (!itemIdChanged.empty())
+            {
+              CFileItemPtr item = m_client->FindViewItemByServiceId(itemIdChanged);
+              if (item == nullptr)
+                return;
+              // TODO update the local items
+            }
+          }
         }
       });
   }
