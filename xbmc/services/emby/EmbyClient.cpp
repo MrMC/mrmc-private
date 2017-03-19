@@ -102,7 +102,10 @@ CFileItemPtr CEmbyClient::FindViewItemByServiceId(const std::string &serviceId)
   for (const auto &item : m_viewItems)
   {
     if (item->GetVideoInfoTag()->m_strServiceId == serviceId)
+    {
+      CLog::Log(LOGDEBUG, "CEmbyClient::FindViewItemByServiceId: \"%s\"", item->GetLabel().c_str());
       return item;
+    }
   }
   CLog::Log(LOGERROR, "CEmbyClient::FindViewItemByServiceId: failed to get details for item with id \"%s\"", serviceId.c_str());
   return nullptr;
