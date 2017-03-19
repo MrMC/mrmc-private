@@ -239,7 +239,10 @@ void CEmbyClientSync::Process()
       });
   }
 
-  m_websocket->close();
-  m_websocket.reset();
+  if (m_websocket)
+  {
+    m_websocket->close();
+    m_websocket.reset();
+  }
   m_stop = true;
 }
