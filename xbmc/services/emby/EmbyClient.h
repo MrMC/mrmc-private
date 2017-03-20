@@ -38,13 +38,6 @@ Transcode - The client streams the file from the server with encoding
 #include "URL.h"
 #include "threads/CriticalSection.h"
 
-enum class EmbyViewParsing
-{
-  newView,
-  checkView,
-  updateView,
-};
-
 typedef struct EmbyServerInfo
 {
   std::string Id;
@@ -92,10 +85,13 @@ public:
   const bool &IsLocal() const               { return m_local; }
   const bool IsCloud() const                { return (m_platform == "Cloud"); }
 
+  void  ClearViewItems();
   void  AddViewItem(const CFileItemPtr &item);
   void  AddViewItems(const CFileItemList &items);
-  CFileItemPtr FindViewItemByServiceId(const std::string &Id);
-  void  ClearViewItems();
+  void  AddNewViewItem(const std::string &serviceId);
+  void  UpdateViewItem(const std::string &serviceId);
+  void  RemoveViewItem(const std::string &serviceId);
+  CFileItemPtr FindViewItem(const std::string &serviceId);
 
   const EmbyViewContentVector GetTvShowContent() const;
   const EmbyViewContentVector GetMoviesContent() const;
@@ -111,9 +107,9 @@ public:
 
 protected:
   bool        IsSameClientHostName(const CURL& url);
-  bool        ParseViews(enum EmbyViewParsing parser);
+  bool        ParseViews();
   void        SetPresence(bool presence);
-  bool        NeedViewUpdate(const EmbyViewContent &content, const EmbyViewContent &contents, const std::string server);
+  const CVariant FetchItemById(const std::string &Id);
 
 private:
   bool m_local;
@@ -128,8 +124,8 @@ private:
   std::atomic<bool> m_needUpdate;
   CEmbyClientSync *m_clientSync;
 
-  CCriticalSection  m_viewItemsLock;
-  std::vector<CFileItemPtr> m_viewItems;
+  CFileItemList *m_viewItems;
+  CCriticalSection m_viewItemsLock;
 
   CCriticalSection  m_viewMoviesContentsLock;
   CCriticalSection  m_viewTVshowContentsLock;

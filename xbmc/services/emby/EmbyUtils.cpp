@@ -318,6 +318,42 @@ bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, boo
   return false;
 }
 
+CFileItemPtr ParseVideo(const CEmbyClient *client, const CVariant &object)
+{
+  return nullptr;
+}
+
+CFileItemPtr ParseMusic(const CEmbyClient *client, const CVariant &object)
+{
+  return nullptr;
+}
+
+CFileItemPtr CEmbyUtils::ToFileItemPtr(const CEmbyClient *client, const CVariant &object)
+{
+  if (object.isNull() || !object.isObject() || !object.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::ToFileItemPtr cvariant is empty");
+    return nullptr;
+  }
+
+  const auto& items = object["Items"];
+  //int totalRecordCount = object["TotalRecordCount"].asInteger();
+  for (auto itemsIt = items.begin_array(); itemsIt != items.end_array(); ++itemsIt)
+  {
+    const auto item = *itemsIt;
+    if (!item.isMember("Id"))
+      continue;
+
+    std::string mediaType = item["MediaType"].asString();
+    if (mediaType == "Video")
+      return ParseVideo(client, item);
+    else if (mediaType == "Music")
+      return ParseMusic(client, item);
+  }
+
+  return nullptr;
+}
+
 
   // Emby Movie/TV
 bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::string filter)
@@ -667,6 +703,9 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
     newItem->SetLabel(title);
     newItem->m_dateTime.SetFromW3CDateTime(item["PremiereDate"].asString());
 
+    url2.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    newItem->SetArt("fanart", url2.Get());
+
     newItem->GetVideoInfoTag()->m_strTitle = title;
     newItem->GetVideoInfoTag()->SetSortTitle(item["SortName"].asString());
     newItem->GetVideoInfoTag()->SetOriginalTitle(item["OriginalTitle"].asString());
@@ -687,9 +726,6 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
     newItem->GetVideoInfoTag()->m_firstAired = premiereDate;
     newItem->GetVideoInfoTag()->SetPremiered(premiereDate);
     newItem->GetVideoInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
-
-    url2.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
-    newItem->SetArt("fanart", url2.Get());
 
     newItem->GetVideoInfoTag()->SetYear(static_cast<int>(item["ProductionYear"].asInteger()));
     newItem->GetVideoInfoTag()->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);

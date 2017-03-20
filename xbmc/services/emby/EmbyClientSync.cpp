@@ -195,27 +195,21 @@ void CEmbyClientSync::Process()
 
           for (const auto& changedLibraryItem : changedLibraryItems)
           {
-            CLog::Log(LOGDEBUG, "CEmbyClientSync: processing changed item with id \"%s\"...", changedLibraryItem.itemId.c_str());
-
-            CFileItemPtr item;
-            if (changedLibraryItem.changesetType == MediaImportChangesetTypeAdded ||
-                changedLibraryItem.changesetType == MediaImportChangesetTypeChanged)
+            CLog::Log(LOGDEBUG, "CEmbyClientSync: processing changed item with id \"%s\" ", changedLibraryItem.itemId.c_str());
+            switch(changedLibraryItem.changesetType)
             {
-              item = m_client->FindViewItemByServiceId(changedLibraryItem.itemId);
-              if (item == nullptr)
-                continue;
+              default:
+                break;
+              case MediaImportChangesetTypeAdded:
+                m_client->AddNewViewItem(changedLibraryItem.itemId);
+                break;
+              case MediaImportChangesetTypeChanged:
+                m_client->UpdateViewItem(changedLibraryItem.itemId);
+                break;
+              case MediaImportChangesetTypeRemoved:
+                m_client->RemoveViewItem(changedLibraryItem.itemId);
+                break;
             }
-            else
-            {
-              // TODO: removed item
-            }
-
-            if (item == nullptr)
-            {
-              CLog::Log(LOGERROR, "CEmbyClientSync: failed to process changed item with id \"%s\"", changedLibraryItem.itemId.c_str());
-              continue;
-            }
-            // TODO update the local items
           }
         }
         else if (msgType == NotificationMessageTypeUserDataChanged)
@@ -233,23 +227,12 @@ void CEmbyClientSync::Process()
                 continue;
 
               const std::string itemId = (*userData)[NotificationUserDataChangedUserDataItemId].asString();
-
-              CFileItemPtr item = m_client->FindViewItemByServiceId(itemId);
-              if (item == nullptr)
-                continue;
-              // TODO update the local items
+              m_client->UpdateViewItem(itemId);
             }
           }
           else
           {
-            const auto itemIdChanged = msgData[NotificationUserDataChangedUserDataItemId].asString();
-            if (!itemIdChanged.empty())
-            {
-              CFileItemPtr item = m_client->FindViewItemByServiceId(itemIdChanged);
-              if (item == nullptr)
-                return;
-              // TODO update the local items
-            }
+            m_client->UpdateViewItem(msgData[NotificationUserDataChangedUserDataItemId].asString());
           }
         }
       });

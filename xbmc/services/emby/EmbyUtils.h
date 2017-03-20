@@ -38,6 +38,7 @@ static const std::string EmbyAuthorizationHeader = "X-Emby-Authorization";
 
 class CEmbyUtils
 {
+  friend class CEmbyClient;
 public:
   static bool HasClients();
   static bool GetIdentity(CURL url, int timeout);
@@ -57,6 +58,8 @@ public:
   static bool GetEmbyInProgressMovies(CFileItemList &items, const std::string url, int limit=25);
   static bool GetAllEmbyInProgress(CFileItemList &items, bool tvShow);
   static bool GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
+
+  static CFileItemPtr ToFileItemPtr(const CEmbyClient *client, const CVariant &object);
 
   // Emby Movie/TV
   static bool GetEmbyMovies(CFileItemList &items, std::string url, std::string filter = "");

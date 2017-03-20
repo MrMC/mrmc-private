@@ -67,12 +67,7 @@ public:
   }
   virtual bool DoWork()
   {
-    if (m_function == "UpdateLibraries")
-    {
-      CLog::Log(LOGNOTICE, "CEmbyServiceJob: UpdateLibraries");
-      CEmbyServices::GetInstance().UpdateLibraries(true);
-    }
-    else if (m_function == "FoundNewClient")
+    if (m_function == "FoundNewClient")
     {
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
       g_windowManager.SendThreadMessage(msg);
@@ -329,11 +324,7 @@ void CEmbyServices::Announce(AnnouncementFlag flag, const char *sender, const ch
   }
   else if ((flag & AnnouncementFlag::Other) && strcmp(sender, "emby") == 0)
   {
-    if (strcmp(message, "UpdateLibrary") == 0)
-    {
-      AddJob(new CEmbyServiceJob(0, "UpdateLibraries"));
-    }
-    else if (strcmp(message, "ReloadProfiles") == 0)
+    if (strcmp(message, "ReloadProfiles") == 0)
     {
       // restart if we MrMC profiles has changed
       Stop();
@@ -373,30 +364,6 @@ void CEmbyServices::GetUserSettings()
   m_userId = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
   m_serverURL  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYSERVERURL);
   m_accessToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYACESSTOKEN);
-}
-
-void CEmbyServices::UpdateLibraries(bool forced)
-{
-  CSingleLock lock(m_clients_lock);
-  bool clearDirCache = false;
-  for (const auto &client : m_clients)
-  {
-    client->ParseViews(EmbyViewParsing::checkView);
-    if (forced || client->NeedUpdate())
-    {
-      client->ParseViews(EmbyViewParsing::updateView);
-      clearDirCache = true;
-    }
-  }
-  if (clearDirCache)
-  {
-    g_directoryCache.Clear();
-    if (m_playState == MediaServicesPlayerState::stopped)
-    {
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
-      g_windowManager.SendThreadMessage(msg);
-    }
-  }
 }
 
 void CEmbyServices::Process()
@@ -440,56 +407,6 @@ void CEmbyServices::Process()
     m_processSleep.Reset();
   }
 
-/*
-  FindEmbyServersByBroadcast();
-
-  CStopWatch broadcastTimer, serviceTimer, checkUpdatesTimer;
-  broadcastTimer.StartZero();
-  serviceTimer.StartZero();
-  checkUpdatesTimer.StartZero();
-  while (!m_bStop)
-  {
-    // check for services every N seconds
-    if (serviceTimer.GetElapsedSeconds() > serviceTimeoutSeconds)
-    {
-      // try plex.tv
-      if (EmbySignedIn())
-      {
-        if (m_playState == EmbyServicePlayerState::stopped)
-        {
-          // if we get back servers, then
-          // reduce the initial polling time
-          bool foundSomething = false;
-          foundSomething = GetEmbyServers(true);
-          if (foundSomething)
-            serviceTimeoutSeconds = 60 * 15;
-        }
-      }
-      serviceTimer.Reset();
-    }
-
-    if (broadcastTimer.GetElapsedSeconds() > 5)
-    {
-      if (m_playState == EmbyServicePlayerState::stopped)
-        FindEmbyServersByBroadcast();
-      broadcastTimer.Reset();
-    }
-
-    m_processSleep.WaitMSec(250);
-    m_processSleep.Reset();
-  }
-
-  if (m_broadcastListener)
-  {
-    // before deleting listener, fetch and delete any sockets it uses.
-    SOCKETS::CUDPSocket *socket = (SOCKETS::CUDPSocket*)m_broadcastListener->GetFirstSocket();
-    // we should not have to do the close,
-    // delete 'should' do it.
-    socket->Close();
-    SAFE_DELETE(socket);
-    SAFE_DELETE(m_broadcastListener);
-  }
-*/
   CLog::Log(LOGDEBUG, "CEmbyServices::Process end");
 }
 
@@ -822,7 +739,7 @@ bool CEmbyServices::AddClient(CEmbyClientPtr foundClient)
   }
 
   // only add new clients that are present
-  if (foundClient->GetPresence() && foundClient->ParseViews(EmbyViewParsing::newView))
+  if (foundClient->GetPresence() && foundClient->ParseViews())
   {
     m_clients.push_back(foundClient);
     m_hasClients = !m_clients.empty();

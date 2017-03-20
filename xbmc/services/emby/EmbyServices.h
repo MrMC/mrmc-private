@@ -69,9 +69,6 @@ public:
   // IAnnouncer callbacks
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
 
-protected:
-  void              UpdateLibraries(bool forced);
-
 private:
   // private construction, and no assignements; use the provided singleton methods
   CEmbyServices();
