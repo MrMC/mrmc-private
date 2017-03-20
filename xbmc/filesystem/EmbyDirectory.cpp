@@ -224,7 +224,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
             curl.SetProtocol(client->GetProtocol());
-            std::string filename = StringUtils::Format("%s/%s", content.viewprefix.c_str(), (basePath == "titles"? "all":""));
+            std::string filename = contents[0].viewprefix.c_str();
             curl.SetFileName(filename);
             pItem->SetPath("emby://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
@@ -244,7 +244,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(client->GetUrl());
           curl.SetProtocol(client->GetProtocol());
-          std::string filename = StringUtils::Format("%s/%s", contents[0].viewprefix.c_str(), (basePath == "titles"? "all":""));
+          std::string filename = contents[0].viewprefix.c_str();
           curl.SetFileName(filename);
           CDirectory::GetDirectory("emby://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()), items);
           CEmbyUtils::SetEmbyItemProperties(items, client);
