@@ -379,14 +379,14 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
     PropertyItemGenres,
     PropertyItemMediaStreams,
     PropertyItemOverview,
-    PropertyItemShortOverview,
+//    PropertyItemShortOverview,
     PropertyItemPath,
 //    PropertyItemPeople,
 //    PropertyItemProviderIds,
 //    PropertyItemSortName,
 //    PropertyItemOriginalTitle,
 //    PropertyItemStudios,
-    PropertyItemTaglines,
+//    PropertyItemTaglines,
 //    PropertyItemProductionLocations,
 //    PropertyItemTags,
 //    PropertyItemVoteCount,
@@ -394,21 +394,10 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
 
   CURL url2(url);
 
-  const CVariant resultObject = GetEmbyCVariant(url2.Get());
-
-  std::vector<std::string> iDS;
-  const auto& objectItems = resultObject["Items"];
-  for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
-  {
-    const auto item = *objectItemIt;
-    iDS.push_back(item["Id"].asString());
-  }
-
-  std::string testIDs = StringUtils::Join(iDS, ",");
-  url2.SetOption("Ids", testIDs);
+  url2.SetOption("IncludeItemTypes", "Movie");
+  url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
-  url2.SetOption("ExcludeLocationTypes", "Virtual,Offline");
-
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   const CVariant result = GetEmbyCVariant(url2.Get());
 
   bool rtn = GetVideoItems(items, url2, result, MediaTypeMovie, false);
