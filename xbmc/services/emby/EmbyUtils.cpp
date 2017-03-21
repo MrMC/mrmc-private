@@ -135,7 +135,7 @@ void CEmbyUtils::SetWatched(CFileItem &item)
 
   // get the URL to updated the item's played state for this user ID
   CURL url2(url);
-  url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + item.GetVideoInfoTag()->m_strServiceId);
+  url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + item.GetMediaServiceId());
   url2.SetOptions("");
   // and add the DatePlayed URL parameter
   url2.SetOption("DatePlayed",
@@ -178,7 +178,7 @@ void CEmbyUtils::SetUnWatched(CFileItem &item)
 
   // get the URL to updated the item's played state for this user ID
   CURL url2(url);
-  url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + item.GetVideoInfoTag()->m_strServiceId);
+  url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + item.GetMediaServiceId());
   url2.SetOptions("");
 
   std::string data;
@@ -254,7 +254,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
       else if (status == "stopped")
         url4.SetFileName("emby/Sessions/Playing/Stopped");
 
-      std::string id = item.GetVideoInfoTag()->m_strServiceId;
+      std::string id = item.GetMediaServiceId();
       url4.SetOptions("");
       url4.SetOption("QueueableMediaTypes", "Video");
       url4.SetOption("CanSeek", "True");
@@ -499,6 +499,8 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
 
       url2.SetFileName("Videos/" + item["Id"].asString() +"/stream?static=true");
       newItem->SetPath("emby://tvshows/shows/" + Base64::Encode(url2.Get()));
+      newItem->SetMediaServiceId(item["Id"].asString());
+      newItem->SetMediaServiceFile(item["Path"].asString());
 
       url2.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
       newItem->SetArt("thumb", url2.Get());
@@ -516,7 +518,6 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
 
       newItem->GetVideoInfoTag()->m_type = MediaTypeMovie;
       newItem->GetVideoInfoTag()->m_strFileNameAndPath = newItem->GetPath();
-      newItem->GetVideoInfoTag()->m_strServiceId = item["Id"].asString();
       newItem->GetVideoInfoTag()->SetSortTitle(item["SortName"].asString());
       newItem->GetVideoInfoTag()->SetOriginalTitle(item["OriginalTitle"].asString());
       //newItem->SetProperty("EmbyShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
@@ -712,9 +713,9 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
 
     url2.SetFileName("Videos/" + item["Id"].asString() +"/stream?static=true");
     newItem->SetPath(url2.Get());
+    newItem->SetMediaServiceId(item["Id"].asString());
+    newItem->SetMediaServiceFile(item["Path"].asString());
     newItem->GetVideoInfoTag()->m_strFileNameAndPath = url2.Get();
-    newItem->GetVideoInfoTag()->m_strServiceId = item["Id"].asString();
-    newItem->GetVideoInfoTag()->m_strServiceFile = item["Path"].asString();
 
     //newItem->SetProperty("EmbyShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
     newItem->GetVideoInfoTag()->m_type = type;

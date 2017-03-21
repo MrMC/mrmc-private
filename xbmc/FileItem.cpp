@@ -1361,8 +1361,8 @@ bool CFileItem::IsSamePath(const CFileItem *item) const
   {
     if (item->IsMediaServiceBased())
     {
-      if (!m_videoInfoTag->m_strServiceId.empty() && !item->m_videoInfoTag->m_strServiceId.empty())
-        return (m_videoInfoTag->m_strServiceId == item->m_videoInfoTag->m_strServiceId);
+      if (!m_strServiceId.empty() && !item->GetMediaServiceId().empty())
+        return (m_strServiceId == item->GetMediaServiceId());
     }
     if (m_videoInfoTag->m_iDbId != -1 && item->m_videoInfoTag->m_iDbId != -1)
       return ((m_videoInfoTag->m_iDbId == item->m_videoInfoTag->m_iDbId) &&
@@ -1372,8 +1372,8 @@ bool CFileItem::IsSamePath(const CFileItem *item) const
   {
     if (item->IsMediaServiceBased())
     {
-      if (!m_musicInfoTag->m_strServiceId.empty() && !item->m_musicInfoTag->m_strServiceId.empty())
-        return (m_musicInfoTag->m_strServiceId == item->m_musicInfoTag->m_strServiceId);
+      if (!m_strServiceId.empty() && !item->GetMediaServiceId().empty())
+        return (m_strServiceId == item->GetMediaServiceId());
     }
   }
   if (IsMusicDb() && HasMusicInfoTag())
