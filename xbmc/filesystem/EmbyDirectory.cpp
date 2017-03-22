@@ -156,17 +156,15 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       URIUtils::RemoveSlashAtEnd(path);
       path = URIUtils::GetFileName(path);
 
-      std::string filter = "year";
+      std::string filter;
       if (path == "genres")
-        filter = "genre";
-      else if (path == "actors")
-        filter = "actor";
-      else if (path == "directors")
-        filter = "director";
+        filter = "Genres";
+      else if (path == "years")
+        filter = "Years";
       else if (path == "sets")
-        filter = "collection";
-      else if (path == "countries")
-        filter = "country";
+        filter = "Collections";
+   //   else if (path == "countries")
+   //     filter = "country";
       else if (path == "studios")
         filter = "studio";
 
@@ -188,9 +186,9 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.SetLabel(g_localizeStrings.Get(627));
         items.SetContent("movies");
       }
-      else
+      else if(!filter.empty())
       {
-        CEmbyUtils::GetEmbyFilter(items, Base64::Decode(section), "emby://movies/filter/", filter);
+        CEmbyUtils::GetEmbyMovieFilter(items, Base64::Decode(section), "emby://movies/filter/", filter);
         StringUtils::ToCapitalize(path);
         items.SetLabel(path);
         items.SetContent("movies");
@@ -311,7 +309,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       }
       else
       {
-        CEmbyUtils::GetEmbyFilter(items, Base64::Decode(section), "emby://tvshows/filter/", filter);
+        CEmbyUtils::GetEmbyTVFilter(items, Base64::Decode(section), "emby://tvshows/filter/", filter);
         StringUtils::ToCapitalize(path);
         items.SetLabel(path);
         items.SetContent("tvshows");

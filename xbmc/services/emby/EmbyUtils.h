@@ -66,7 +66,8 @@ public:
   static bool GetEmbyTvshows(CFileItemList &items, std::string url);
   static bool GetEmbySeasons(CFileItemList &items, const std::string url);
   static bool GetEmbyEpisodes(CFileItemList &items, const std::string url);
-  static bool GetEmbyFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
+  static bool GetEmbyMovieFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
+  static bool GetEmbyTVFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
   static bool GetItemSubtiles(CFileItem &item);
   static bool GetMoreItemInfo(CFileItem &item);
   static bool GetMoreResolutions(CFileItem &item);

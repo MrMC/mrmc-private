@@ -904,9 +904,88 @@ bool CEmbyUtils::GetEmbyEpisodes(CFileItemList &items, const std::string url)
   return rtn;
 }
 
-bool CEmbyUtils::GetEmbyFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
+bool CEmbyUtils::GetEmbyTVFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
 {
   return false;
+}
+
+bool CEmbyUtils::GetEmbyMovieFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
+{
+  /*
+  std::string filter = "year";
+  if (path == "genres")
+    filter = "genre";
+  else if (path == "actors")
+    filter = "actor";
+  else if (path == "directors")
+    filter = "director";
+  else if (path == "sets")
+    filter = "collection";
+  else if (path == "countries")
+    filter = "country";
+  else if (path == "studios")
+    filter = "studio";
+   
+   http://192.168.1.200:8096/emby/Genres?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Movie&Recursive=true&EnableTotalRecordCount=false&ParentId=f137a2dd21bbc1b99aa5c0f6bf02a805&userId=cf28f6d51dd54c63a27fed6600c5b6cb
+  */
+  
+  std::string userID = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
+  
+  CURL url2(url);
+  if (filter != "Collections")
+  {
+    url2.SetFileName("emby/"+ filter);
+    url2.SetOption("IncludeItemTypes", "Movie");
+  }
+  else
+  {
+    url2.SetOption("IncludeItemTypes", "BoxSet");
+    url2.SetOption("Recursive", "true");
+    url2.SetOption("ParentId", "");
+  }
+  
+  
+  url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
+  url2.SetOption("Fields", "Etag");
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
+  const CVariant result = GetEmbyCVariant(url2.Get());
+  
+  
+  bool rtn = false;
+  
+  
+  if (result.isNull() || !result.isObject() || !result.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
+    return false;
+  }
+
+  const auto& objectItems = result["Items"];
+  for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+  {
+    rtn = true;
+    const auto item = *objectItemIt;
+    CFileItemPtr newItem(new CFileItem());
+    std::string title = item["Name"].asString();
+    std::string key = item["Id"].asString();
+    newItem->m_bIsFolder = true;
+    newItem->m_bIsShareOrDrive = false;
+    
+    if (filter == "Genres")
+      url2.SetOption("GenreIds", key);
+    else if (filter == "Years")
+      url2.SetOption("Years", title);
+    else if (filter == "Collections")
+      url2.SetOption("ParentId", key);
+
+    
+    url2.SetFileName("Users/" + userID +"/Items");
+    newItem->SetPath(parentPath + Base64::Encode(url2.Get()));
+    newItem->SetLabel(title);
+    newItem->SetProperty("SkipLocalArt", true);
+    items.Add(newItem);
+  }
+  return rtn;
 }
 
 bool CEmbyUtils::GetItemSubtiles(CFileItem &item)
