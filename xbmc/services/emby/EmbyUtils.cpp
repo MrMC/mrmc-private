@@ -610,7 +610,7 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
       newItem->SetArt("fanart", url2.Get());
 
       newItem->GetVideoInfoTag()->m_playCount = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
-      newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, newItem->GetVideoInfoTag()->m_playCount > 0);
+      newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
 
       newItem->GetVideoInfoTag()->m_strTitle = title;
       newItem->GetVideoInfoTag()->m_strStatus = item["Status"].asString();
@@ -743,7 +743,7 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
       newItem->SetProperty("watchedepisodes", watchedEpisodes);
       newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
       
-      newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, watchedEpisodes >= newItem->GetVideoInfoTag()->m_iEpisode);
+      newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
       
       items.Add(newItem);
     }
@@ -976,7 +976,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
     newItem->GetVideoInfoTag()->m_duration = static_cast<int>(TicksToSeconds(item["RunTimeTicks"].asInteger()));
     newItem->GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds = newItem->GetVideoInfoTag()->m_duration;
     newItem->GetVideoInfoTag()->m_playCount = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
-    newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, newItem->GetVideoInfoTag()->m_playCount > 0);
+    newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
     newItem->GetVideoInfoTag()->m_lastPlayed.SetFromW3CDateTime(item["UserData"]["LastPlayedDate"].asString());
     newItem->GetVideoInfoTag()->m_resumePoint.timeInSeconds = static_cast<int>(TicksToSeconds(item["UserData"]["PlaybackPositionTicks"].asUnsignedInteger()));
 
