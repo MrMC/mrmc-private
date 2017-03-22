@@ -763,7 +763,8 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
 
 bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
 {
-  
+  // "Shows/\(query.seriesId)/Seasons"
+
 
   bool rtn = false;
   
@@ -773,7 +774,6 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
   url2.SetOption("Fields", "Etag,RecursiveItemCount");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
 
-  
   const CVariant object = GetEmbyCVariant(url2.Get());
   std::string seriesName;
   if (!object.isNull() || object.isObject() || object.isMember("Items"))
@@ -1330,6 +1330,7 @@ CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
         return CVariant(CVariant::VariantTypeNull);
     }
 #if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", curl.Get().c_str());
     CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", response.c_str());
 #endif
     auto resultObject = CJSONVariantParser::Parse(response);

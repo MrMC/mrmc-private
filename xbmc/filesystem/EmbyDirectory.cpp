@@ -502,8 +502,8 @@ bool CEmbyDirectory::FindByBroadcast(CFileItemList &items)
         static const std::string ServerPropertyAddress = "Address";
         if (data.isObject() && data.isMember(ServerPropertyAddress))
         {
-          EmbyServerInfo embyServerInfo = CEmbyServices::GetInstance().GetEmbyServerInfo(data[ServerPropertyAddress].asString());
-          if (!embyServerInfo.Id.empty())
+          EmbyServerInfo embyServerInfo = CEmbyServices::GetInstance().GetEmbyLocalServerInfo(data[ServerPropertyAddress].asString());
+          if (!embyServerInfo.ServerId.empty())
           {
             CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server found %s", embyServerInfo.ServerName.c_str());
             CFileItemPtr local(new CFileItem("", true));

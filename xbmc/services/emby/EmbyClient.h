@@ -40,13 +40,16 @@ Transcode - The client streams the file from the server with encoding
 
 typedef struct EmbyServerInfo
 {
-  std::string Id;
-  std::string Version;
+  std::string UserId;
+  std::string AccessToken;
+
+  std::string UserType;
+  std::string ServerId;
+  std::string AccessKey;
   std::string ServerURL;
   std::string ServerName;
   std::string WanAddress;
   std::string LocalAddress;
-  std::string OperatingSystem;
 } EmbyServerInfo;
 
 struct EmbyViewContent
@@ -73,11 +76,11 @@ public:
   CEmbyClient();
  ~CEmbyClient();
 
-  bool Init(const std::string &userId, const std::string &accessToken, const EmbyServerInfo &serverInfo);
+  bool Init(const EmbyServerInfo &serverInfo);
 
   const bool NeedUpdate() const             { return m_needUpdate; }
   const std::string &GetServerName() const  { return m_serverInfo.ServerName; }
-  const std::string &GetUuid() const        { return m_userId; }
+  const std::string &GetUuid() const        { return m_serverInfo.UserId; }
   const std::string &GetOwned() const       { return m_owned; }
   // bool GetPresence() const                  { return m_presence; }
   bool GetPresence() const                  { return true; }
@@ -113,10 +116,8 @@ protected:
 
 private:
   bool m_local;
-  std::string m_owned;
-  std::string m_userId;
-  std::string m_accessToken;
   std::string m_url;
+  std::string m_owned;
   std::string m_protocol;
   std::string m_platform;
   EmbyServerInfo m_serverInfo;

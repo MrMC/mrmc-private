@@ -60,7 +60,7 @@ public:
   void GetClients(std::vector<CEmbyClientPtr> &clients) const;
   CEmbyClientPtr FindClient(const std::string &path);
   bool ClientIsLocal(std::string path);
-  EmbyServerInfo GetEmbyServerInfo(const std::string url);
+  EmbyServerInfo GetEmbyLocalServerInfo(const std::string url);
 
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
@@ -82,9 +82,22 @@ private:
   virtual void      Process() override;
 
   bool              AuthenticateByName(const CURL& url);
-  bool              GetEmbyServers();
+  bool              GetEmbyLocalServers(const std::string &serverURL, const std::string &userId, const std::string &accessToken);
+
+                    // complicated key/token exchange for sign in by pin :)
+                    // a) get a random 6 digit pin from emby connect.
+                    // b) user enters this pin at https://emby.media/pin
+                    // c) we get a "IsConfirmed" pin reply. Now authenticate the pin.
+                    // d) authenticating gets us a connectUserId/connectAccessToken (save them)
+                    // e) using saved connectUserId/connectAccessToken, get server list.
+                    // f) each server has AccessKey. Now using connectUserId and server AccessKey,
+                    //    exchange the AccessKey for LocalUserId/AccessToken. Use these
+                    //    to access that server end points.
   bool              PostSignInPinCode();
   bool              GetSignInByPinReply();
+  bool              AuthenticatePinReply(const std::string &deviceId, const std::string &pin);
+  bool              GetConnectServerList(const std::string &connectUserId, const std::string &connectAccessToken);
+  bool              ExchangeAccessKeyForAccessToken(EmbyServerInfo &connectServerInfo);
 
   CEmbyClientPtr    GetClient(std::string uuid);
   bool              AddClient(CEmbyClientPtr foundClient);
@@ -108,4 +121,5 @@ private:
   std::atomic<bool> m_hasClients;
   CCriticalSection  m_clients_lock;
   std::vector<CEmbyClientPtr> m_clients;
+  std::vector<EmbyServerInfo> m_servers;
 };

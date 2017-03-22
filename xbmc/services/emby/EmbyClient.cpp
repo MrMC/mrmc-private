@@ -60,21 +60,20 @@ CEmbyClient::~CEmbyClient()
   SAFE_DELETE(m_viewItems);
 }
 
-bool CEmbyClient::Init(const std::string &userId, const std::string &accessToken, const EmbyServerInfo &serverInfo)
+bool CEmbyClient::Init(const EmbyServerInfo &serverInfo)
 {
   m_local = true;
-  m_userId = userId;
   m_serverInfo = serverInfo;
-  m_accessToken = accessToken;
+  m_owned = serverInfo.UserType == "Linked" ? "1":"0";
 
   // protocol (http/https) and port will be in ServerUrl
   CURL curl(m_serverInfo.ServerURL);
-  curl.SetProtocolOptions("&X-MediaBrowser-Token=" + m_accessToken);
+  curl.SetProtocolOptions("&X-MediaBrowser-Token=" + serverInfo.AccessToken);
   m_url = curl.Get();
   m_protocol = curl.GetProtocol();
 
   m_clientSync = new CEmbyClientSync(this, m_serverInfo.ServerName,
-    m_serverInfo.ServerURL, CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), m_accessToken);
+    m_serverInfo.ServerURL, CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), serverInfo.AccessToken);
   m_clientSync->Start();
 
   return true;
@@ -226,7 +225,7 @@ int CEmbyClient::GetPort()
 
 std::string CEmbyClient::GetUserID()
 {
-  return m_userId;
+  return m_serverInfo.UserId;
 }
 
 const EmbyViewContentVector CEmbyClient::GetTvShowContent() const
@@ -309,11 +308,11 @@ bool CEmbyClient::ParseViews()
   emby.SetTimeout(10);
   emby.SetRequestHeader("Cache-Control", "no-cache");
   emby.SetRequestHeader("Content-Type", "application/json");
-  CEmbyUtils::PrepareApiCall(m_userId, m_accessToken, emby);
+  CEmbyUtils::PrepareApiCall(m_serverInfo.UserId, m_serverInfo.AccessToken, emby);
 
   CURL curl(m_url);
   // /Users/{UserId}/Views
-  curl.SetFileName(curl.GetFileName() + "Users/" + m_userId + "/Views");
+  curl.SetFileName(curl.GetFileName() + "Users/" + m_serverInfo.UserId + "/Views");
   std::string viewsUrl = curl.Get();
   std::string response;
   if (emby.Get(viewsUrl, response))
@@ -371,7 +370,7 @@ bool CEmbyClient::ParseViews()
         view[PropertyViewETag].asString(),
         view[PropertyViewServerID].asString(),
         type,
-        "Users/" + m_userId + "/Items?ParentId=" + view[PropertyViewId].asString()
+        "Users/" + m_serverInfo.UserId + "/Items?ParentId=" + view[PropertyViewId].asString()
       };
       if (libraryView.id.empty() || libraryView.name.empty())
         continue;

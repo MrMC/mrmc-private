@@ -41,6 +41,7 @@
 #include "utils/sha1.hpp"
 #include "utils/StringUtils.h"
 #include "utils/StringHasher.h"
+#include "utils/SystemInfo.h"
 #include "utils/JobManager.h"
 
 #include "utils/SystemInfo.h"
@@ -50,9 +51,20 @@
 
 using namespace ANNOUNCEMENT;
 
-//static const int NS_EMBY_SERVER_HTTP_PORT(8096);
-//static const int NS_EMBY_SERVER_HTTPS_PORT(8920);
-static const std::string NS_EMBY_URL("https://plex.tv");
+static bool IsInSubNet(CURL url)
+{
+  bool rtn = false;
+  CNetworkInterface* iface = g_application.getNetwork().GetFirstConnectedInterface();
+  in_addr_t localMask = ntohl(inet_addr(iface->GetCurrentNetmask().c_str()));
+  in_addr_t testAddress = ntohl(inet_addr(url.GetHostName().c_str()));
+  in_addr_t localAddress = ntohl(inet_addr(iface->GetCurrentIPAddress().c_str()));
+
+  in_addr_t temp1 = testAddress & localMask;
+  in_addr_t temp2 = localAddress & localMask;
+  if (temp1 == temp2)
+    rtn = true;
+  return rtn;
+}
 
 class CEmbyServiceJob: public CJob
 {
@@ -396,13 +408,48 @@ void CEmbyServices::Process()
   }
 
   int serviceTimeoutSeconds = 5;
-  if (!m_accessToken.empty() && !m_userId.empty())
+  std::string strSignOut = g_localizeStrings.Get(2110);
+
+
+  if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYSIGNIN) == strSignOut)
   {
-    GetEmbyServers();
-    serviceTimeoutSeconds = 60 * 15;
+    // if set to strSignOut, we are signed in by user/pass
+    if (!m_accessToken.empty() && !m_userId.empty())
+    {
+      GetEmbyLocalServers(m_serverURL, m_userId, m_accessToken);
+      serviceTimeoutSeconds = 60 * 15;
+    }
   }
-   while (!m_bStop)
-   {
+  else if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYSIGNINPIN) == strSignOut)
+  {
+    // if set to strSignOut, we are signed in by pin
+    if (!m_accessToken.empty() && !m_userId.empty())
+    {
+      if (GetConnectServerList(m_userId, m_accessToken))
+      {
+        for (const auto &server : m_servers)
+        {
+          CEmbyClientPtr client(new CEmbyClient());
+          if (client->Init(server))
+          {
+            if (AddClient(client))
+            {
+              CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server found %s", client->GetServerName().c_str());
+            }
+            else if (GetClient(client->GetUuid()) == nullptr)
+            {
+              // lost client
+              CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server was lost %s", client->GetServerName().c_str());
+            }
+          }
+        }
+      }
+      serviceTimeoutSeconds = 60 * 15;
+    }
+  }
+
+  while (!m_bStop)
+  {
     m_processSleep.WaitMSec(250);
     m_processSleep.Reset();
   }
@@ -468,187 +515,7 @@ bool CEmbyServices::AuthenticateByName(const CURL& url)
   return !m_accessToken.empty() && !m_userId.empty();
 }
 
-bool CEmbyServices::GetEmbyServers()
-{
-  bool rtn = false;
-
-  std::vector<CEmbyClientPtr> clientsFound;
-
-  EmbyServerInfo embyServerInfo = GetEmbyServerInfo(m_serverURL);
-  if (!embyServerInfo.Id.empty())
-  {
-    CEmbyClientPtr client(new CEmbyClient());
-    if (client->Init(m_userId, m_accessToken, embyServerInfo))
-    {
-      if (AddClient(client))
-      {
-        CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server found %s", client->GetServerName().c_str());
-      }
-      else if (GetClient(client->GetUuid()) == nullptr)
-      {
-        // lost client
-        CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server was lost %s", client->GetServerName().c_str());
-      }
-    }
-  }
-  return rtn;
-}
-
-bool CEmbyServices::PostSignInPinCode()
-{
-  // on return, show user m_signInByPinCode so they can enter it at https://emby.media/pin
-
-  bool rtn = false;
-
-  XFILE::CCurlFile emby;
-  // use a lower default timeout
-  emby.SetTimeout(10);
-  emby.SetRequestHeader("Cache-Control", "no-cache");
-  emby.SetRequestHeader("Content-Type", "application/json");
-
-  CURL url("https://connect.mediabrowser.tv/service/pin");
-
-  CVariant data;
-  data["deviceId"] = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID);
-  std::string jsonBody = CJSONVariantWriter::Write(data, false);
-  std::string response;
-  std::string strMessage;
-  if (emby.Post(url.Get(), jsonBody, response))
-  {
-#if defined(EMBY_DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "CEmbyServices:FetchSignInPin %s", response.c_str());
-#endif
-    CVariant reply;
-    reply = CJSONVariantParser::Parse(response);
-    if (reply.isObject() && reply.isMember("Pin"))
-    {
-      m_signInByPinCode = reply["Pin"].asString();
-      if (m_signInByPinCode.empty())
-        strMessage = "Failed to get Pin Code";
-      rtn = !m_signInByPinCode.empty();
-    }
-
-    CGUIDialogProgress *waitPinReplyDialog;
-    waitPinReplyDialog = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
-    waitPinReplyDialog->SetHeading(g_localizeStrings.Get(2115));
-    waitPinReplyDialog->SetLine(0, g_localizeStrings.Get(2117));
-    std::string prompt = g_localizeStrings.Get(2118) + m_signInByPinCode;
-    waitPinReplyDialog->SetLine(1, prompt);
-
-    waitPinReplyDialog->Open();
-    waitPinReplyDialog->ShowProgressBar(false);
-
-    CStopWatch dieTimer;
-    dieTimer.StartZero();
-    int timeToDie = 60 * 5;
-
-    CStopWatch pingTimer;
-    pingTimer.StartZero();
-
-    m_userId.clear();
-    m_accessToken.clear();
-    while (!waitPinReplyDialog->IsCanceled())
-    {
-      waitPinReplyDialog->SetPercentage(int(float(dieTimer.GetElapsedSeconds())/float(timeToDie)*100));
-
-      if (pingTimer.GetElapsedSeconds() > 1)
-      {
-        // wait for user to run and enter pin code
-        // at https://emby.media/pin
-        if (GetSignInByPinReply())
-          break;
-        pingTimer.Reset();
-      }
-
-      if (dieTimer.GetElapsedSeconds() > timeToDie)
-      {
-        rtn = false;
-        break;
-      }
-      waitPinReplyDialog->Progress();
-    }
-    waitPinReplyDialog->Close();
-
-    if (m_accessToken.empty())
-    {
-      strMessage = "Error extracting AcessToken";
-      CLog::Log(LOGERROR, "CPlexServices:FetchSignInPin failed to get authToken");
-      m_signInByPinCode = "";
-      rtn = false;
-    }
-    else
-    {
-      rtn = true;
-/*
-      std::string homeUserName;
-      if (GetMyHomeUsers(homeUserName))
-      {
-        m_myHomeUser = homeUserName;
-        rtn = true;
-      }
-      else
-        rtn = false;
-*/
-    }
-  }
-  else
-  {
-    strMessage = "Could not connect to retreive AuthToken";
-    CLog::Log(LOGERROR, "CEmbyServices:FetchSignInPin failed %s", response.c_str());
-  }
-  if (!rtn)
-    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Emby Services", strMessage, 3000, true);
-  return rtn;
-}
-
-bool CEmbyServices::GetSignInByPinReply()
-{
-  // repeat called until we timeout or get authToken
-  bool rtn = false;
-  std::string strMessage;
-  XFILE::CCurlFile emby;
-  emby.SetTimeout(10000);
-  emby.SetRequestHeader("Cache-Control", "no-cache");
-  emby.SetRequestHeader("Content-Type", "application/json");
-
-  std::string path = "https://connect.mediabrowser.tv/service/pin";
-  CURL url(path);
-  url.SetOption("pin", m_signInByPinCode);
-  url.SetOption("deviceId", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));;
-
-  std::string response;
-  CStopWatch pollTimer;
-  pollTimer.StartZero();
-  while (!m_bStop)
-  {
-    if (emby.Get(url.Get(), response))
-    {
-  #if defined(EMBY_DEBUG_VERBOSE)
-      CLog::Log(LOGDEBUG, "CEmbyServices:WaitForSignInByPin %s", response.c_str());
-  #endif
-      CVariant reply;
-      reply = CJSONVariantParser::Parse(response);
-      if (reply.isObject() && reply.isMember("AccessToken"))
-      {
-        m_userId = reply["Id"].asString();
-        m_accessToken = reply["AccessToken"].asString();
-        rtn = !m_accessToken.empty();
-        if (rtn || (pollTimer.GetElapsedSeconds() > 60))
-          break;
-        m_processSleep.WaitMSec(250);
-        m_processSleep.Reset();
-      }
-    }
-  }
-  
-  if (!rtn)
-  {
-    CLog::Log(LOGERROR, "CEmbyServices:WaitForSignInByPin failed %s", response.c_str());
-  }
-  return rtn;
-}
-
-EmbyServerInfo CEmbyServices::GetEmbyServerInfo(const std::string url)
+EmbyServerInfo CEmbyServices::GetEmbyLocalServerInfo(const std::string url)
 {
   EmbyServerInfo serverInfo;
 
@@ -694,15 +561,312 @@ EmbyServerInfo CEmbyServices::GetEmbyServerInfo(const std::string url)
       !responseObj.isMember(ServerPropertyOperatingSystem))
     return serverInfo;
 
-  serverInfo.Id = responseObj[ServerPropertyId].asString();
-  serverInfo.Version = responseObj[ServerPropertyVersion].asString();
+  serverInfo.UserId = m_userId;
+  serverInfo.AccessToken = m_accessToken;
+  // servers found by broadcast are always local ("Linked")
+  serverInfo.UserType= "Linked";
+  serverInfo.ServerId = responseObj[ServerPropertyId].asString();
   serverInfo.ServerURL = curl.GetWithoutFilename();
   serverInfo.ServerName = responseObj[ServerPropertyName].asString();
   serverInfo.WanAddress = responseObj[ServerPropertyWanAddress].asString();
   serverInfo.LocalAddress = responseObj[ServerPropertyLocalAddress].asString();
-  serverInfo.OperatingSystem = responseObj[ServerPropertyOperatingSystem].asString();
   return serverInfo;
 }
+
+bool CEmbyServices::GetEmbyLocalServers(const std::string &serverURL, const std::string &userId, const std::string &accessToken)
+{
+  bool rtn = false;
+
+  std::vector<CEmbyClientPtr> clientsFound;
+
+  EmbyServerInfo embyServerInfo = GetEmbyLocalServerInfo(serverURL);
+  if (!embyServerInfo.ServerId.empty())
+  {
+    embyServerInfo.UserId = userId;
+    embyServerInfo.AccessToken = accessToken;
+    CEmbyClientPtr client(new CEmbyClient());
+    if (client->Init(embyServerInfo))
+    {
+      if (AddClient(client))
+      {
+        CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server found %s", client->GetServerName().c_str());
+      }
+      else if (GetClient(client->GetUuid()) == nullptr)
+      {
+        // lost client
+        CLog::Log(LOGNOTICE, "CEmbyServices::CheckEmbyServers Server was lost %s", client->GetServerName().c_str());
+      }
+    }
+  }
+  return rtn;
+}
+
+bool CEmbyServices::PostSignInPinCode()
+{
+  // on return, show user m_signInByPinCode so they can enter it at https://emby.media/pin
+  bool rtn = false;
+  std::string strMessage;
+
+  XFILE::CCurlFile curlfile;
+  // use a lower default timeout
+  curlfile.SetTimeout(10);
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+
+  CURL curl("https://connect.mediabrowser.tv");
+  curl.SetFileName("service/pin");
+  curl.SetOption("format", "json");
+
+  CVariant data;
+  data["deviceId"] = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID);
+  std::string jsonBody = CJSONVariantWriter::Write(data, false);
+  std::string response;
+  if (curlfile.Post(curl.Get(), jsonBody, response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyServices:FetchSignInPin %s", response.c_str());
+#endif
+    CVariant reply;
+    reply = CJSONVariantParser::Parse(response);
+    if (reply.isObject() && reply.isMember("Pin"))
+    {
+      m_signInByPinCode = reply["Pin"].asString();
+      if (m_signInByPinCode.empty())
+        strMessage = "Failed to get Pin Code";
+      rtn = !m_signInByPinCode.empty();
+    }
+
+    CGUIDialogProgress *waitPinReplyDialog;
+    waitPinReplyDialog = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
+    waitPinReplyDialog->SetHeading(g_localizeStrings.Get(2115));
+    waitPinReplyDialog->SetLine(0, g_localizeStrings.Get(2117));
+    std::string prompt = g_localizeStrings.Get(2118) + m_signInByPinCode;
+    waitPinReplyDialog->SetLine(1, prompt);
+
+    waitPinReplyDialog->Open();
+    waitPinReplyDialog->ShowProgressBar(false);
+
+    CStopWatch dieTimer;
+    dieTimer.StartZero();
+    int timeToDie = 60 * 5;
+
+    CStopWatch pingTimer;
+    pingTimer.StartZero();
+
+    m_userId.clear();
+    m_accessToken.clear();
+    while (!waitPinReplyDialog->IsCanceled())
+    {
+      waitPinReplyDialog->SetPercentage(int(float(dieTimer.GetElapsedSeconds())/float(timeToDie)*100));
+      if (pingTimer.GetElapsedSeconds() > 1)
+      {
+        // wait for user to run and enter pin code
+        // at https://emby.media/pin
+        if (GetSignInByPinReply())
+          break;
+        pingTimer.Reset();
+        m_processSleep.WaitMSec(250);
+        m_processSleep.Reset();
+      }
+
+      if (dieTimer.GetElapsedSeconds() > timeToDie)
+      {
+        rtn = false;
+        break;
+      }
+      waitPinReplyDialog->Progress();
+    }
+    waitPinReplyDialog->Close();
+
+    if (m_accessToken.empty())
+    {
+      strMessage = "Error extracting AcessToken";
+      CLog::Log(LOGERROR, "CPlexServices:FetchSignInPin failed to get authToken");
+      m_signInByPinCode = "";
+      rtn = false;
+    }
+  }
+  else
+  {
+    strMessage = "Could not connect to retreive AuthToken";
+    CLog::Log(LOGERROR, "CEmbyServices:FetchSignInPin failed %s", response.c_str());
+  }
+  if (!rtn)
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Emby Services", strMessage, 3000, true);
+  return rtn;
+}
+
+bool CEmbyServices::GetSignInByPinReply()
+{
+  // repeat called until we timeout or get authToken
+  bool rtn = false;
+  std::string strMessage;
+
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10000);
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+
+  CURL curl("https://connect.mediabrowser.tv");
+  curl.SetFileName("service/pin");
+  curl.SetOption("format", "json");
+  curl.SetOption("pin", m_signInByPinCode);
+  curl.SetOption("deviceId", CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID));
+
+  std::string response;
+  if (curlfile.Get(curl.Get(), response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyServices:WaitForSignInByPin %s", response.c_str());
+#endif
+    CVariant reply;
+    reply = CJSONVariantParser::Parse(response);
+    if (reply.isObject() && reply.isMember("IsConfirmed") && reply["IsConfirmed"].asString() == "true")
+    {
+      std::string pin = reply["Pin"].asString();
+      std::string deviceId = reply["DeviceId"].asString();
+      std::string id = reply["Id"].asString();
+      //std::string isConfirmed = reply["IsConfirmed"].asString();
+      //std::string isExpired = reply["IsExpired"].asString();
+      //std::string accessToken = reply["AccessToken"].asString();
+      if (!deviceId.empty() && !pin.empty())
+        rtn = AuthenticatePinReply(deviceId, pin);
+    }
+  }
+  
+  if (!rtn)
+  {
+    CLog::Log(LOGERROR, "CEmbyServices:WaitForSignInByPin failed %s", response.c_str());
+  }
+  return rtn;
+}
+
+bool CEmbyServices::AuthenticatePinReply(const std::string &deviceId, const std::string &pin)
+{
+  bool rtn = false;
+
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10000);
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+
+  CURL curl("https://connect.mediabrowser.tv");
+  curl.SetFileName("service/pin/authenticate");
+  curl.SetOption("format", "json");
+
+  CVariant data;
+  data["pin"] = pin;
+  data["deviceId"] = deviceId;
+  std::string jsondata = CJSONVariantWriter::Write(data, false);
+  std::string response;
+  if (curlfile.Post(curl.Get(), jsondata, response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyServices:AuthenticatePinReply %s", response.c_str());
+#endif
+    CVariant reply;
+    reply = CJSONVariantParser::Parse(response);
+    if (reply.isObject() && reply.isMember("AccessToken"))
+    {
+      // pin connects are parsed as UserId/AccessToken
+      // user/pass connects are parsed as ConnectUserId/ConnectAccessToken
+      const std::string connectUserId = reply["UserId"].asString();
+      const std::string connectAccessToken = reply["AccessToken"].asString();
+      if (GetConnectServerList(connectUserId, connectAccessToken))
+      {
+        m_userId = connectUserId;
+        m_accessToken = connectAccessToken;
+        rtn = true;
+      }
+    }
+  }
+  return rtn;
+}
+
+bool CEmbyServices::GetConnectServerList(const std::string &connectUserId, const std::string &connectAccessToken)
+{
+  bool rtn = false;
+
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10000);
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+
+  CURL curl("https://connect.emby.media");
+  curl.SetFileName("service/servers");
+  curl.SetOption("format", "json");
+  curl.SetOption("userId", connectUserId);
+  curl.SetProtocolOptions("&X-Connect-UserToken=" + connectAccessToken);
+
+  std::string response;
+  if (curlfile.Get(curl.Get(), response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyServices:GetConnectServerList %s", response.c_str());
+#endif
+    auto servers = CJSONVariantParser::Parse(response);
+    if (servers.isArray())
+    {
+      for (auto serverObjectIt = servers.begin_array(); serverObjectIt != servers.end_array(); ++serverObjectIt)
+      {
+        const auto server = *serverObjectIt;
+        EmbyServerInfo serverInfo;
+        serverInfo.UserId = connectUserId;
+        serverInfo.AccessToken = connectAccessToken;
+
+        serverInfo.UserType= server["UserType"].asString();
+        serverInfo.ServerId = server["SystemId"].asString();
+        serverInfo.AccessKey= server["AccessKey"].asString();
+        serverInfo.ServerName= server["Name"].asString();
+        serverInfo.WanAddress= server["Url"].asString();
+        serverInfo.LocalAddress= server["LocalAddress"].asString();
+        if (IsInSubNet(CURL(serverInfo.LocalAddress)))
+          serverInfo.ServerURL= serverInfo.LocalAddress;
+        else
+          serverInfo.ServerURL= serverInfo.WanAddress;
+        if (ExchangeAccessKeyForAccessToken(serverInfo))
+        {
+          m_servers.push_back(serverInfo);
+          rtn = true;
+        }
+      }
+    }
+  }
+  return rtn;
+}
+
+bool CEmbyServices::ExchangeAccessKeyForAccessToken(EmbyServerInfo &connectServerInfo)
+{
+  bool rtn = false;
+
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(10000);
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+  CEmbyUtils::PrepareApiCall(connectServerInfo.UserId, connectServerInfo.AccessKey, curlfile);
+
+  CURL curl(connectServerInfo.ServerURL);
+  curl.SetFileName("emby/Connect/Exchange");
+  curl.SetOption("format", "json");
+  curl.SetOption("ConnectUserId", connectServerInfo.UserId);
+
+  std::string response;
+  if (curlfile.Get(curl.Get(), response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyServices:ExchangeAccessKeyForAccessToken %s", response.c_str());
+#endif
+    auto reply = CJSONVariantParser::Parse(response);
+    if (reply.isObject() && reply.isMember("AccessToken"))
+    {
+      connectServerInfo.UserId = reply["LocalUserId"].asString();
+      connectServerInfo.AccessToken = reply["AccessToken"].asString();
+      rtn = true;
+    }
+  }
+  return rtn;
+}
+
 
 CEmbyClientPtr CEmbyServices::GetClient(std::string uuid)
 {
