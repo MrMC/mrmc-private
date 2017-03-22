@@ -534,12 +534,82 @@ bool CEmbyUtils::GetEmbyInProgressMovies(CFileItemList &items, const std::string
 
 bool CEmbyUtils::GetAllEmbyInProgress(CFileItemList &items, bool tvShow)
 {
-  return false;
+  bool rtn = false;
+  
+  if (CEmbyServices::GetInstance().HasClients())
+  {
+    CFileItemList embyItems;
+    //look through all plex clients and pull recently added for each library section
+    std::vector<CEmbyClientPtr> clients;
+    CEmbyServices::GetInstance().GetClients(clients);
+    for (const auto &client : clients)
+    {
+      EmbyViewContentVector contents;
+      if (tvShow)
+        contents = client->GetTvShowContent();
+      else
+        contents = client->GetMoviesContent();
+      for (const auto &content : contents)
+      {
+        std::string userId = client->GetUserID();
+        CURL curl(client->GetUrl());
+        curl.SetProtocol(client->GetProtocol());
+        curl.SetOption("ParentId", content.id);
+        curl.SetFileName("Users/" + userId + "/Items");
+        
+        if (tvShow)
+          rtn = GetEmbyInProgressShows(embyItems, curl.Get(), 10);
+        else
+          rtn = GetEmbyInProgressMovies(embyItems, curl.Get(), 10);
+        
+        items.Append(embyItems);
+        embyItems.ClearItems();
+      }
+    }
+    
+  }
+  
+  return rtn;
 }
 
 bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
 {
-  return false;
+  bool rtn = false;
+  
+  if (CEmbyServices::GetInstance().HasClients())
+  {
+    CFileItemList embyItems;
+    //look through all plex clients and pull recently added for each library section
+    std::vector<CEmbyClientPtr> clients;
+    CEmbyServices::GetInstance().GetClients(clients);
+    for (const auto &client : clients)
+    {
+      EmbyViewContentVector contents;
+      if (tvShow)
+        contents = client->GetTvShowContent();
+      else
+        contents = client->GetMoviesContent();
+      for (const auto &content : contents)
+      {
+        std::string userId = client->GetUserID();
+        CURL curl(client->GetUrl());
+        curl.SetProtocol(client->GetProtocol());
+        curl.SetOption("ParentId", content.id);
+        curl.SetFileName("Users/" + userId + "/Items");
+        
+        if (tvShow)
+          rtn = GetEmbyRecentlyAddedEpisodes(embyItems, curl.Get(), 10);
+        else
+          rtn = GetEmbyRecentlyAddedMovies(embyItems, curl.Get(), 10);
+        
+        items.Append(embyItems);
+        embyItems.ClearItems();
+      }
+    }
+    
+  }
+  
+  return rtn;
 }
 
 CFileItemPtr ParseVideo(const CEmbyClient *client, const CVariant &object)
