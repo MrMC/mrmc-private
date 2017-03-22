@@ -290,7 +290,58 @@ void CEmbyUtils::SetPlayState(MediaServicesPlayerState state)
 
 bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
 {
-  return false;
+  static const std::string PropertyItemPath = "Path";
+  static const std::string PropertyItemDateCreated = "DateCreated";
+  static const std::string PropertyItemGenres = "Genres";
+  static const std::string PropertyItemMediaStreams = "MediaStreams";
+  static const std::string PropertyItemOverview = "Overview";
+  static const std::string PropertyItemShortOverview = "ShortOverview";
+  static const std::string PropertyItemPeople = "People";
+  static const std::string PropertyItemSortName = "SortName";
+  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
+  static const std::string PropertyItemProviderIds = "ProviderIds";
+  static const std::string PropertyItemStudios = "Studios";
+  static const std::string PropertyItemTaglines = "Taglines";
+  static const std::string PropertyItemProductionLocations = "ProductionLocations";
+  static const std::string PropertyItemTags = "Tags";
+  static const std::string PropertyItemVoteCount = "VoteCount";
+  
+  static const std::vector<std::string> Fields = {
+    PropertyItemDateCreated,
+    PropertyItemGenres,
+    PropertyItemMediaStreams,
+    PropertyItemOverview,
+    //    PropertyItemShortOverview,
+    PropertyItemPath,
+    //    PropertyItemPeople,
+    //    PropertyItemProviderIds,
+    //    PropertyItemSortName,
+    //    PropertyItemOriginalTitle,
+    //    PropertyItemStudios,
+    //    PropertyItemTaglines,
+    //    PropertyItemProductionLocations,
+    //    PropertyItemTags,
+    //    PropertyItemVoteCount,
+  };
+  
+  CURL url2(url);
+  
+  url2.SetFileName(url2.GetFileName() + "/Latest");
+  
+  url2.SetOption("IncludeItemTypes", "Episode");
+  url2.SetOption("Limit", StringUtils::Format("%i",limit));
+  url2.SetOption("GroupItems", "False");
+  url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
+  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
+  CVariant result = GetEmbyCVariant(url2.Get());
+  
+  std::map<std::string, CVariant> variantMap;
+  variantMap["Items"] = result;
+  result = CVariant(variantMap);
+
+  bool rtn = GetVideoItems(items, url2, result, MediaTypeEpisode, false);
+  return rtn;
 }
 
 bool CEmbyUtils::GetEmbyInProgressShows(CFileItemList &items, const std::string url, int limit)
