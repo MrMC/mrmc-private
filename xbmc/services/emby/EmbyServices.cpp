@@ -61,8 +61,22 @@ static bool IsInSubNet(CURL url)
 
   in_addr_t temp1 = testAddress & localMask;
   in_addr_t temp2 = localAddress & localMask;
+
   if (temp1 == temp2)
-    rtn = true;
+  {
+    // now make sure it is a emby server
+    rtn = CEmbyUtils::GetIdentity(url, 1);
+  }
+#if defined(EMBY_DEBUG_VERBOSE)
+  char buffer[256];
+  std::string temp1IpAddress;
+  if (inet_neta(temp1, buffer, sizeof(buffer)))
+    temp1IpAddress = buffer;
+  std::string temp2IpAddress;
+  if (inet_neta(temp2, buffer, sizeof(buffer)))
+    temp2IpAddress = buffer;
+  CLog::Log(LOGDEBUG, "IsInSubNet = yes(%d), testAddress(%s), localAddress(%s)", rtn, temp1IpAddress.c_str(), temp2IpAddress.c_str());
+#endif
   return rtn;
 }
 

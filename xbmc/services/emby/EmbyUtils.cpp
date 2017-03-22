@@ -65,6 +65,25 @@ bool CEmbyUtils::HasClients()
   return CEmbyServices::GetInstance().HasClients();
 }
 
+bool CEmbyUtils::GetIdentity(CURL url, int timeout)
+{
+  XFILE::CCurlFile curlfile;
+  curlfile.SetTimeout(timeout);
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+
+  CURL curl(url);
+  curl.SetFileName("emby/system/info/public");
+  // do not need user/pass for server info
+  curl.SetUserName("");
+  curl.SetPassword("");
+  curl.SetOptions("");
+
+  std::string path = curl.Get();
+  std::string response;
+  return curlfile.Get(path, response);
+}
+
 void CEmbyUtils::PrepareApiCall(const std::string& userId, const std::string& accessToken, XFILE::CCurlFile &curl)
 {
   curl.SetRequestHeader("Accept", "application/json");
