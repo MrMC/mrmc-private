@@ -166,7 +166,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
    //   else if (path == "countries")
    //     filter = "country";
       else if (path == "studios")
-        filter = "studio";
+        filter = "Studios";
 
       if (path == "titles" || path == "filter")
       {
