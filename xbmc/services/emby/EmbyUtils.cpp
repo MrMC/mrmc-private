@@ -981,8 +981,9 @@ CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
     CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", response.c_str());
 #endif
     auto resultObject = CJSONVariantParser::Parse(response);
-    if (resultObject.isObject())
-      return resultObject;
+    // recently added does not return proper object, we make one up later
+    //if (resultObject.isObject())
+    return resultObject;
   }
   return CVariant(CVariant::VariantTypeNull);
 }
