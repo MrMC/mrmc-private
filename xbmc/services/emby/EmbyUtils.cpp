@@ -626,6 +626,7 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
   static const std::string PropertyItemProductionLocations = "ProductionLocations";
   static const std::string PropertyItemTags = "Tags";
   static const std::string PropertyItemVoteCount = "VoteCount";
+  static const std::string PropertyItemRecursiveItemCount = "RecursiveItemCount";
 
   static const std::vector<std::string> Fields = {
     PropertyItemDateCreated,
@@ -643,6 +644,7 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
 //    PropertyItemProductionLocations,
 //    PropertyItemTags,
 //    PropertyItemVoteCount,
+    PropertyItemRecursiveItemCount
   };
 
   bool rtn = false;
@@ -732,19 +734,20 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
       newItem->GetVideoInfoTag()->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
       newItem->GetVideoInfoTag()->m_strMPAARating = item["OfficialRating"].asString();
 
-      int watchedEpisodes = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
+      int totalEpisodes = item["RecursiveItemCount"].asInteger() - item["ChildCount"].asInteger();
       int unWatchedEpisodes = static_cast<int>(item["UserData"]["UnplayedItemCount"].asInteger());
+      int watchedEpisodes = totalEpisodes - unWatchedEpisodes;
       int iSeasons        = static_cast<int>(item["ChildCount"].asInteger());
       
       newItem->GetVideoInfoTag()->m_iSeason = iSeasons;
-      newItem->GetVideoInfoTag()->m_iEpisode = watchedEpisodes + unWatchedEpisodes;
+      newItem->GetVideoInfoTag()->m_iEpisode = totalEpisodes;
       newItem->GetVideoInfoTag()->m_playCount = (int)watchedEpisodes >= newItem->GetVideoInfoTag()->m_iEpisode;
 
       newItem->SetProperty("totalseasons", iSeasons);
       newItem->SetProperty("totalepisodes", newItem->GetVideoInfoTag()->m_iEpisode);
       newItem->SetProperty("numepisodes",   newItem->GetVideoInfoTag()->m_iEpisode);
       newItem->SetProperty("watchedepisodes", watchedEpisodes);
-      newItem->SetProperty("unwatchedepisodes", watchedEpisodes);
+      newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
 
       GetVideoDetails(*newItem, item);
       SetEmbyItemProperties(*newItem);
@@ -767,7 +770,7 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
   CURL url2(url);
   url2.SetOption("IncludeItemTypes", "Seasons");
   url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", "Etag");
+  url2.SetOption("Fields", "Etag,RecursiveItemCount");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
 
   
@@ -834,15 +837,16 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
       newItem->GetVideoInfoTag()->SetGenre(genres);
       //newItem->SetProperty("PlexShowKey", XMLUtils::GetAttribute(rootXmlNode, "key"));
 
-      int watchedEpisodes = item["UserData"]["PlayCount"].asInteger();
+      int totalEpisodes = item["RecursiveItemCount"].asInteger();
       int unWatchedEpisodes = item["UserData"]["UnplayedItemCount"].asInteger();
+      int watchedEpisodes = totalEpisodes - unWatchedEpisodes;
       int iSeason = item["IndexNumber"].asInteger();
       newItem->GetVideoInfoTag()->m_iSeason = iSeason;
-      newItem->GetVideoInfoTag()->m_iEpisode = watchedEpisodes + unWatchedEpisodes;
-      newItem->GetVideoInfoTag()->m_playCount = (int)watchedEpisodes >= newItem->GetVideoInfoTag()->m_iEpisode;
+      newItem->GetVideoInfoTag()->m_iEpisode = totalEpisodes;
+      newItem->GetVideoInfoTag()->m_playCount = item["UserData"]["PlayCount"].asInteger();
       
-      newItem->SetProperty("totalepisodes", newItem->GetVideoInfoTag()->m_iEpisode);
-      newItem->SetProperty("numepisodes", newItem->GetVideoInfoTag()->m_iEpisode);
+      newItem->SetProperty("totalepisodes", totalEpisodes);
+      newItem->SetProperty("numepisodes", totalEpisodes);
       newItem->SetProperty("watchedepisodes", watchedEpisodes);
       newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
       
