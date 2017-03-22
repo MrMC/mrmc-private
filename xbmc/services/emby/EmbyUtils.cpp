@@ -539,7 +539,7 @@ bool CEmbyUtils::GetAllEmbyInProgress(CFileItemList &items, bool tvShow)
   if (CEmbyServices::GetInstance().HasClients())
   {
     CFileItemList embyItems;
-    //look through all plex clients and pull recently added for each library section
+    //look through all emby clients and pull in progress for each library section
     std::vector<CEmbyClientPtr> clients;
     CEmbyServices::GetInstance().GetClients(clients);
     for (const auto &client : clients)
@@ -566,9 +566,7 @@ bool CEmbyUtils::GetAllEmbyInProgress(CFileItemList &items, bool tvShow)
         embyItems.ClearItems();
       }
     }
-    
   }
-  
   return rtn;
 }
 
@@ -579,7 +577,7 @@ bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, boo
   if (CEmbyServices::GetInstance().HasClients())
   {
     CFileItemList embyItems;
-    //look through all plex clients and pull recently added for each library section
+    //look through all emby clients and pull recently added for each library section
     std::vector<CEmbyClientPtr> clients;
     CEmbyServices::GetInstance().GetClients(clients);
     for (const auto &client : clients)
@@ -606,9 +604,7 @@ bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, boo
         embyItems.ClearItems();
       }
     }
-    
   }
-  
   return rtn;
 }
 
