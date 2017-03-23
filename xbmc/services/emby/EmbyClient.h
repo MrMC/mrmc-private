@@ -87,6 +87,7 @@ public:
   const std::string &GetProtocol() const    { return m_protocol; }
   const bool &IsLocal() const               { return m_local; }
   const bool IsCloud() const                { return (m_platform == "Cloud"); }
+  const bool IsOwned() const                { return (m_owned == "1"); }
 
   void  ClearViewItems();
   void  AddViewItem(const CFileItemPtr &item);
