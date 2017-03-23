@@ -441,6 +441,7 @@ public:
   static const std::string SETTING_SERVICES_EMBYSIGNINPIN;
   static const std::string SETTING_SERVICES_EMBYHOMEUSER;
   static const std::string SETTING_SERVICES_EMBYBROADCAST;
+  static const std::string SETTING_SERVICES_EMBYLIMITHOMETOLOCAL;
 
   /*!
    \brief Creates a new settings wrapper around a new settings manager.

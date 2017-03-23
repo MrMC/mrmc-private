@@ -2335,6 +2335,13 @@
           <visible>false</visible>
         </setting>
       </group>
+      <group id="2">
+        <setting id="emby.limithometolocal" type="boolean" label="37050" help="37051">
+          <level>0</level>
+          <default>false</default>
+          <control type="toggle" />
+        </setting>
+      </group>  
     </category>
     <category id="smb" label="1200" help="36346">
       <group id="1">

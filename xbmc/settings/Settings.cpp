@@ -490,6 +490,7 @@ const std::string CSettings::SETTING_SERVICES_EMBYACESSTOKEN = "emby.accesstoken
 const std::string CSettings::SETTING_SERVICES_EMBYSIGNINPIN = "emby.signinpin";
 const std::string CSettings::SETTING_SERVICES_EMBYHOMEUSER  = "emby.homeuser";
 const std::string CSettings::SETTING_SERVICES_EMBYBROADCAST  = "emby.broadcast";
+const std::string CSettings::SETTING_SERVICES_EMBYLIMITHOMETOLOCAL  = "emby.limithometolocal";
 
 CSettings::CSettings()
   : m_initialized(false)

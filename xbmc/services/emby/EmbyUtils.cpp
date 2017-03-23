@@ -539,11 +539,14 @@ bool CEmbyUtils::GetAllEmbyInProgress(CFileItemList &items, bool tvShow)
   if (CEmbyServices::GetInstance().HasClients())
   {
     CFileItemList embyItems;
+    bool limitToLocal = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYLIMITHOMETOLOCAL);
     //look through all emby clients and pull in progress for each library section
     std::vector<CEmbyClientPtr> clients;
     CEmbyServices::GetInstance().GetClients(clients);
     for (const auto &client : clients)
     {
+      if (limitToLocal && !client->IsOwned())
+        continue;
       EmbyViewContentVector contents;
       if (tvShow)
         contents = client->GetTvShowContent();
@@ -577,11 +580,14 @@ bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, boo
   if (CEmbyServices::GetInstance().HasClients())
   {
     CFileItemList embyItems;
+    bool limitToLocal = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYLIMITHOMETOLOCAL);
     //look through all emby clients and pull recently added for each library section
     std::vector<CEmbyClientPtr> clients;
     CEmbyServices::GetInstance().GetClients(clients);
     for (const auto &client : clients)
     {
+      if (limitToLocal && !client->IsOwned())
+        continue;
       EmbyViewContentVector contents;
       if (tvShow)
         contents = client->GetTvShowContent();
