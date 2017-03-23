@@ -1430,7 +1430,10 @@ void CEmbyUtils::GetVideoDetails(CFileItem &fileitem, const CVariant &cvariant)
         role.strName = peep["Name"].asString();
         role.strRole = peep["Role"].asString();
         // Items/acae838242b43ad786c2cae52ff412d2/Images/Primary
-        CURL url(fileitem.GetURL());
+        std::string urlStr = URIUtils::GetParentPath(fileitem.GetPath());
+        if (StringUtils::StartsWithNoCase(urlStr, "emby://"))
+          urlStr = Base64::Decode(URIUtils::GetFileName(fileitem.GetPath()));
+        CURL url(urlStr);
         url.SetFileName("Items/" + peep["Id"].asString() + "/Images/Primary");
         role.thumb = url.Get();
         roles.push_back(role);
