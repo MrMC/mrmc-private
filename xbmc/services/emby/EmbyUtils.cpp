@@ -815,6 +815,7 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
       newItem->GetVideoInfoTag()->m_strFileNameAndPath = newItem->GetPath();
       newItem->GetVideoInfoTag()->SetSortTitle(item["SortName"].asString());
       newItem->GetVideoInfoTag()->SetOriginalTitle(item["OriginalTitle"].asString());
+      newItem->SetProperty("EmbySeriesID", item["SeriesId"].asString());
       //newItem->SetProperty("EmbyShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
       newItem->GetVideoInfoTag()->SetPlot(item["Overview"].asString());
       newItem->GetVideoInfoTag()->SetPlotOutline(item["ShortOverview"].asString());
@@ -926,7 +927,7 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
         genres.push_back(stream.asString());
       }
       newItem->GetVideoInfoTag()->SetGenre(genres);
-      //newItem->SetProperty("PlexShowKey", XMLUtils::GetAttribute(rootXmlNode, "key"));
+      newItem->SetProperty("EmbySeriesID", item["SeriesId"].asString());
 
       int totalEpisodes = item["RecursiveItemCount"].asInteger();
       int unWatchedEpisodes = item["UserData"]["UnplayedItemCount"].asInteger();
@@ -1154,7 +1155,64 @@ bool CEmbyUtils::GetItemSubtiles(CFileItem &item)
 
 bool CEmbyUtils::GetMoreItemInfo(CFileItem &item)
 {
-  return false;
+  static const std::string PropertyItemPath = "Path";
+  static const std::string PropertyItemDateCreated = "DateCreated";
+  static const std::string PropertyItemGenres = "Genres";
+  static const std::string PropertyItemMediaStreams = "MediaStreams";
+  static const std::string PropertyItemOverview = "Overview";
+  static const std::string PropertyItemShortOverview = "ShortOverview";
+  static const std::string PropertyItemPeople = "People";
+  static const std::string PropertyItemSortName = "SortName";
+  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
+  static const std::string PropertyItemProviderIds = "ProviderIds";
+  static const std::string PropertyItemStudios = "Studios";
+  static const std::string PropertyItemTaglines = "Taglines";
+  static const std::string PropertyItemProductionLocations = "ProductionLocations";
+  static const std::string PropertyItemTags = "Tags";
+  static const std::string PropertyItemVoteCount = "VoteCount";
+  
+  static const std::vector<std::string> Fields = {
+    //PropertyItemDateCreated,
+    PropertyItemGenres,
+    //PropertyItemMediaStreams,
+    //PropertyItemOverview,
+    //    PropertyItemShortOverview,
+    //PropertyItemPath,
+    PropertyItemPeople,
+    //    PropertyItemProviderIds,
+    //    PropertyItemSortName,
+    //    PropertyItemOriginalTitle,
+    //    PropertyItemStudios,
+    //    PropertyItemTaglines,
+    //    PropertyItemProductionLocations,
+    //    PropertyItemTags,
+    //    PropertyItemVoteCount,
+  };
+  
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  if (StringUtils::StartsWithNoCase(url, "emby://"))
+    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+  
+  CURL url2(url);
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
+  if (!client || !client->GetPresence())
+    return false;
+  
+  std::string itemId;
+  if (item.HasProperty("EmbySeriesID") && !item.GetProperty("EmbySeriesID").asString().empty())
+    itemId = item.GetProperty("EmbySeriesID").asString();
+  else
+    itemId = item.GetMediaServiceId();
+  
+  url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
+  url2.SetOptions("");
+  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("IDs", itemId);
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
+  const CVariant result = GetEmbyCVariant(url2.Get());
+  
+  GetVideoDetails(item,result["Items"][0]);
+  return true;
 }
 
 bool CEmbyUtils::GetMoreResolutions(CFileItem &item)
@@ -1243,6 +1301,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
       newItem->GetVideoInfoTag()->m_iSeason = item["ParentIndexNumber"].asInteger();
       newItem->GetVideoInfoTag()->m_iEpisode = item["IndexNumber"].asInteger();
       items.SetLabel(item["SeasonName"].asString());
+      newItem->SetProperty("EmbySeriesID", item["SeriesId"].asString());
     }
  /*
     else if (((TiXmlElement*) videoNode)->Attribute("grandparentTitle")) // only recently added episodes have this
