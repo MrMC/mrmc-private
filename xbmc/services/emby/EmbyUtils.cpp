@@ -1342,15 +1342,45 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &o
 
 void CEmbyUtils::GetVideoDetails(CFileItem &fileitem, const CVariant &cvariant)
 {
-  // get all genres
-  std::vector<std::string> genres;
-  const auto& streams = cvariant["Genres"];
-  for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
+  if (cvariant.isMember("Genres"))
   {
-    const auto stream = *streamIt;
-    genres.push_back(stream.asString());
+    // get all genres
+    std::vector<std::string> genres;
+    const auto& streams = cvariant["Genres"];
+    for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
+    {
+      const auto stream = *streamIt;
+      genres.push_back(stream.asString());
+    }
+    fileitem.GetVideoInfoTag()->SetGenre(genres);
   }
-  fileitem.GetVideoInfoTag()->SetGenre(genres);
+  
+  if (cvariant.isMember("People"))
+  {
+    std::vector< SActorInfo > roles;
+    std::vector<std::string> directors;
+    const auto& peeps = cvariant["People"];
+    for (auto peepsIt = peeps.begin_array(); peepsIt != peeps.end_array(); ++peepsIt)
+    {
+      const auto peep = *peepsIt;
+      if (peep["Type"].asString() == "Director")
+        directors.push_back(peep["Name"].asString());
+      else if (peep["Type"].asString() == "Actor")
+      {
+        SActorInfo role;
+        role.strName = peep["Name"].asString();
+        role.strRole = peep["Role"].asString();
+        // Items/acae838242b43ad786c2cae52ff412d2/Images/Primary
+        CURL url(fileitem.GetURL());
+        url.SetFileName("Items/" + peep["Id"].asString() + "/Images/Primary");
+        role.thumb = url.Get();
+        roles.push_back(role);
+      }
+    }
+    
+    fileitem.GetVideoInfoTag()->m_cast = roles;
+    fileitem.GetVideoInfoTag()->SetDirector(directors);
+  }
 }
 
 void CEmbyUtils::GetMusicDetails(CFileItem &fileitem, const CVariant &cvariant)
