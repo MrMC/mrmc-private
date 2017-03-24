@@ -2,6 +2,7 @@ SRCS  =
 SRCS += ServicesManager.cpp
 SRCS += plex/PlexUtils.cpp
 SRCS += plex/PlexClient.cpp
+SRCS += plex/PlexClientSync.cpp
 SRCS += plex/PlexServices.cpp
 SRCS += lighteffects/LightEffectClient.cpp
 SRCS += lighteffects/LightEffectServices.cpp
