@@ -143,7 +143,7 @@ void klose(ConnectionContext* ptConnCtx) {
 	if (ptConnCtx->sockfd) {
 		closesocket(ptConnCtx->sockfd);
 	}
-	if (ptConnCtx->sslHandle==NULL) {
+	if (ptConnCtx->sslHandle) {
 		SSL_shutdown(ptConnCtx->sslHandle);
 		SSL_free(ptConnCtx->sslHandle);
 	}
@@ -590,18 +590,25 @@ easywsclient::WebSocket::pointer from_url(const std::string& url, bool useMask, 
         snprintf(line, 256, "Sec-WebSocket-Key: hLuO7MKwvHBxsv/ureQI9w==\r\n"); kWrite(ptConnCtx, line, strlen(line), 0);
         snprintf(line, 256, "Sec-WebSocket-Version: 13\r\n"); kWrite(ptConnCtx, line, strlen(line), 0);
         snprintf(line, 256, "\r\n"); kWrite(ptConnCtx, line, strlen(line), 0);
-        for (i = 0; i < 2 || (i < 255 && line[i-2] != '\r' && line[i-1] != '\n'); ++i) { if (kRead(ptConnCtx, line+i, 1, 0) == 0) { return NULL; } }
+        for (i = 0; i < 2 || (i < 255 && line[i-2] != '\r' && line[i-1] != '\n'); ++i) {
+          if (kRead(ptConnCtx, line+i, 1, 0) == 0) {
+            klose(ptConnCtx);
+            return NULL;
+          }
+        }
         line[i] = 0;
         if (i == 255) {
 #if (EASYWSCLIENT_LOGGING==1)
             fprintf(stderr, "ERROR: Got invalid status line connecting to: %s\n", url.c_str());
 #endif
+            klose(ptConnCtx);
             return NULL;
         }
         if (sscanf(line, "HTTP/1.1 %d", &status) != 1 || status != 101) {
 #if (EASYWSCLIENT_LOGGING==1)
             fprintf(stderr, "ERROR: Got bad status connecting to %s: %s", url.c_str(), line);
 #endif
+            klose(ptConnCtx);
             return NULL;
         }
         while (true) {
