@@ -82,6 +82,7 @@ void CEmbyClientSync::Stop()
 
   m_stop = true;
   CThread::StopThread();
+  SAFE_DELETE(m_websocket);
 }
 
 void CEmbyClientSync::Process()
@@ -109,7 +110,7 @@ void CEmbyClientSync::Process()
     MediaImportChangesetType changesetType;
   };
 
-  m_websocket.reset(easywsclient::WebSocket::from_url(m_address /* TODO: , origin */));
+  m_websocket = easywsclient::WebSocket::from_url(m_address /* TODO: , origin */);
   if (!m_websocket)
   {
     CLog::Log(LOGERROR, "CEmbyClientSync: websocket connection failed from %s", m_name.c_str());
@@ -239,9 +240,6 @@ void CEmbyClientSync::Process()
   }
 
   if (m_websocket)
-  {
     m_websocket->close();
-    m_websocket.reset();
-  }
   m_stop = true;
 }

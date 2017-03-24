@@ -72,6 +72,9 @@ bool CEmbyClient::Init(const EmbyServerInfo &serverInfo)
   m_url = curl.Get();
   m_protocol = curl.GetProtocol();
 
+  if (m_clientSync)
+    SAFE_DELETE(m_clientSync);
+
   m_clientSync = new CEmbyClientSync(this, m_serverInfo.ServerName,
     m_serverInfo.ServerURL, CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), serverInfo.AccessToken);
   m_clientSync->Start();

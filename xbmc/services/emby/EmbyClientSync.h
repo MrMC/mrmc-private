@@ -43,6 +43,6 @@ private:
   CEmbyClient *m_client;
   std::string m_address;
   const std::string m_name;
-  std::unique_ptr<easywsclient::WebSocket> m_websocket;
+  easywsclient::WebSocket *m_websocket;
   std::atomic<bool> m_stop;
 };
