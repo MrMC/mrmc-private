@@ -27,6 +27,7 @@
 
 #include "contrib/easywsclient/easywsclient.hpp"
 #include "filesystem/File.h"
+#include "filesystem/CurlFile.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/JSONVariantParser.h"
@@ -45,16 +46,12 @@ CPlexClientSync::CPlexClientSync(CPlexClient *client, const std::string &name, c
   , m_client(client)
   , m_address(address)
   , m_name(name)
-  , m_websocket(nullptr)
+  , m_sseSocket(nullptr)
   , m_stop(true)
 {
   m_client = client;
   CURL curl(address);
-  if (curl.GetProtocol() == "http")
-    curl.SetProtocol("ws");
-  else if (curl.GetProtocol() == "https")
-    curl.SetProtocol("wss");
-  curl.SetFileName(":/websockets/notifications?X-Plex-Token=" + accessToken);
+  curl.SetFileName(":/eventsource/notifications?X-Plex-Token=" + accessToken);
 
   m_address = curl.Get();
 }
@@ -80,193 +77,117 @@ void CPlexClientSync::Stop()
 
   m_stop = true;
   CThread::StopThread();
-  SAFE_DELETE(m_websocket);
+  SAFE_DELETE(m_sseSocket);
 }
 
 void CPlexClientSync::Process()
 {
-  static const int WebSocketTimeoutMs = 100;
+  CLog::Log(LOGDEBUG, "CPlexClientSync: created %s", m_address.c_str());
 
-  static const std::string NotificationContainer = "NotificationContainer";
-  static const std::string NotificationMessageType = "type";
-  static const std::string NotificationTypeStatus = "status";
-  static const std::string NotificationTypeActvity = "activity";
-  static const std::string NotificationTypePlaying = "playing";
-  static const std::string NotificationTypeProgress = "progress";
-  static const std::string NotificationTypeTimeLine = "timeline";
-  static const std::string NotificationTypeUpdateStateChange = "update.statechange";
-// StatusNotification
-// ActivityNotification
-// ProgressNotification
-// TimelineEntry (array)
-// AutoUpdateNotification
-  static const std::string NotificationData = "Data";
-  static const std::string NotificationMessageTypeLibraryChanged = "LibraryChanged";
-  static const std::string NotificationMessageTypeUserDataChanged = "UserDataChanged";
-  static const std::string NotificationMessageTypePlaybackStart = "PlaybackStart";
-  static const std::string NotificationMessageTypePlaybackStopped = "PlaybackStopped";
-  static const std::string NotificationLibraryChangedItemsAdded = "ItemsAdded";
-  static const std::string NotificationLibraryChangedItemsUpdated = "ItemsUpdated";
-  static const std::string NotificationLibraryChangedItemsRemoved = "ItemsRemoved";
-  static const std::string NotificationUserDataChangedUserDataList = "UserDataList";
-  static const std::string NotificationUserDataChangedUserDataItemId = "ItemId";
-
-  struct ChangedLibraryItem
+  CURL curl(m_address);
+  curl.SetProtocolOptions(curl.GetProtocolOptions() + "&format=json");
+  m_sseSocket = new XFILE::CCurlFile();
+  m_sseSocket->SetBufferSize(32768);
+  if (!m_sseSocket->OpenForServerSideEvent(curl, (const void*)this, ServerSideEventCallback))
   {
-    std::string itemId;
-    MediaImportChangesetType changesetType;
-  };
-
-  m_websocket = easywsclient::WebSocket::from_url(m_address /* TODO: , origin */);
-  if (!m_websocket)
-  {
-    CLog::Log(LOGERROR, "CPlexClientSync: failed websocket connection to %s", m_name.c_str());
+    CLog::Log(LOGERROR, "CPlexClientSync: failed eventsource open to %s", m_name.c_str());
     m_stop = true;
   }
   else
-    CLog::Log(LOGDEBUG, "CPlexClientSync: websocket connected to %s", m_name.c_str());
+    CLog::Log(LOGDEBUG, "CPlexClientSync: eventsource open to %s -> %s", m_name.c_str(), curl.Get().c_str());
 
-  while (!m_stop && m_websocket->getReadyState() != easywsclient::WebSocket::CLOSED)
+
+  const int serverSideEventTimeoutMs = 250;
+  while (!m_stop)
   {
-    m_websocket->poll(WebSocketTimeoutMs);
-    m_websocket->dispatch(
-      [this](const std::string &msg)
-      {
-//#if defined(PLEX_DEBUG_VERBOSE)
-        CLog::Log(LOGDEBUG, "CPlexClientSync: %s", msg.c_str());
-//#endif
-        CVariant msgObject;
-        if (!CJSONVariantParser::Parse(msg, msgObject))
-          return;
-        if (!msgObject.isObject() || !msgObject.isMember(NotificationContainer))
-        {
-          CLog::Log(LOGERROR, "CPlexClientSync: invalid websocket notification from %s", m_name.c_str());
-          return;
-        }
-
-        const std::string msgType = msgObject[NotificationMessageType].asString();
-        CLog::Log(LOGDEBUG, "[%s] %s: %s", this->m_name.c_str(), msgType.c_str(), msg.c_str());
-
-        if (msgType != NotificationTypeTimeLine)
-          return;
-
-        const auto msgData = msgObject[NotificationData];
-        if (!msgData.isObject())
-        {
-          CLog::Log(LOGDEBUG, "CPlexClientSync: ignoring websocket notification of type \"%s\" from %s", msgType.c_str(), m_name.c_str());
-          return;
-        }
-
-
-        if (msgType == NotificationMessageTypeLibraryChanged)
-        {
-          const auto itemsAdded = msgData[NotificationLibraryChangedItemsAdded];
-          const auto itemsUpdated = msgData[NotificationLibraryChangedItemsUpdated];
-          const auto itemsRemoved = msgData[NotificationLibraryChangedItemsRemoved];
-
-          std::vector<ChangedLibraryItem> changedLibraryItems;
-
-          if (itemsAdded.isArray())
-          {
-            for (auto item = itemsAdded.begin_array(); item != itemsAdded.end_array(); ++item)
-            {
-              if (item->isString() && !item->empty())
-                changedLibraryItems.emplace_back(ChangedLibraryItem { item->asString(), MediaImportChangesetTypeAdded });
-            }
-          }
-
-          if (itemsUpdated.isArray())
-          {
-            for (auto item = itemsUpdated.begin_array(); item != itemsUpdated.end_array(); ++item)
-            {
-              if (item->isString() && !item->empty())
-                changedLibraryItems.emplace_back(ChangedLibraryItem{ item->asString(), MediaImportChangesetTypeChanged });
-            }
-          }
-
-          if (itemsRemoved.isArray())
-          {
-            for (auto item = itemsRemoved.begin_array(); item != itemsRemoved.end_array(); ++item)
-            {
-              if (item->isString() && !item->empty())
-                changedLibraryItems.emplace_back(ChangedLibraryItem{ item->asString(), MediaImportChangesetTypeRemoved });
-            }
-          }
-
-          for (const auto& changedLibraryItem : changedLibraryItems)
-          {
-            CLog::Log(LOGDEBUG, "CPlexClientSync: processing changed item with id \"%s\"...", changedLibraryItem.itemId.c_str());
-
-            CFileItemPtr item;
-            if (changedLibraryItem.changesetType == MediaImportChangesetTypeAdded ||
-                changedLibraryItem.changesetType == MediaImportChangesetTypeChanged)
-            {
-              item = m_client->FindViewItemByServiceId(changedLibraryItem.itemId);
-              if (item == nullptr)
-                continue;
-            }
-            else
-            {
-              // TODO: removed item
-            }
-
-            if (item == nullptr)
-            {
-              CLog::Log(LOGERROR, "CPlexClientSync: failed to process changed item with id \"%s\"", changedLibraryItem.itemId.c_str());
-              continue;
-            }
-/*
-            CMediaImport import;
-            if (!FindImportForItem(item, import))
-            {
-              CLog::Log(LOGWARNING, "CEmbyClientSync: received changed item with id \"%s\" from unknown media import", changedLibraryItem.itemId.c_str());
-              continue;
-            }
-*/
-          }
-        }
-        else if (msgType == NotificationMessageTypeUserDataChanged)
-        {
-          const auto userDataList = msgData[NotificationUserDataChangedUserDataList];
-          if (!msgData.isArray())
-          {
-            CLog::Log(LOGERROR, "CPlexClientSync: missing \"%s\" in websocket notification of type \"%s\" from %s", NotificationUserDataChangedUserDataList.c_str(), msgType.c_str(), m_name.c_str());
-            return;
-          }
-
-          for (auto userData = userDataList.begin_array(); userData != userDataList.end_array(); ++userData)
-          {
-            if (!userData->isObject() || !userData->isMember(NotificationUserDataChangedUserDataItemId))
-              continue;
-
-            const std::string itemId = (*userData)[NotificationUserDataChangedUserDataItemId].asString();
-
-            CFileItemPtr item = m_client->FindViewItemByServiceId(itemId);
-            if (item == nullptr)
-              continue;
-/*
-            CMediaImport import;
-            if (!FindImportForItem(item, import))
-            {
-              CLog::Log(LOGWARNING, "CPlexClientSync: received changed item with id \"%s\" from unknown media import", itemId.c_str());
-              continue;
-            }
-*/
-            // TODO
-          }
-        }
-        else if (msgType == NotificationMessageTypePlaybackStart)
-        {
-          // TODO
-        }
-        else if (msgType == NotificationMessageTypePlaybackStopped)
-        {
-          // TODO
-        }
-      });
+    if (!m_sseSocket->ServerSideEventWait(serverSideEventTimeoutMs))
+      break;
   }
 
-  if (m_websocket)
-    m_websocket->close();
+  SAFE_DELETE(m_sseSocket);
   m_stop = true;
+}
+
+void CPlexClientSync::ProcessServerSideEvent(const std::string &sse)
+{
+  static const std::string TimelineEntry = "TimelineEntry";
+  static const std::string StatusNotification = "StatusNotification";
+  static const std::string ProgressNotification = "ProgressNotification";
+  static const std::string PlaySessionStateNotification = "PlaySessionStateNotification";
+  // sse token separator == 0x0a -> "\n"
+  std::vector<std::string> sse_parts = StringUtils::Split(sse, '\n');
+  for (auto it = sse_parts.begin(); it != sse_parts.end(); ++it)
+  {
+    std::string sse_part = *it;
+    if (sse_part.empty())
+      continue;
+
+    // event tokens are boring as the info is contained in the data token.
+    if (StringUtils::StartsWithNoCase(sse_part, "event:"))
+      continue;
+
+    CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessServerSideEvent msg %s", sse_part.c_str());
+
+    if (StringUtils::StartsWithNoCase(sse_part, "data:"))
+    {
+      // data tokens are json with "data:" prefix. strip the prefix.
+      size_t pos = sse_part.find(":");
+      if (pos != std::string::npos)
+      {
+        // parse the json into a CVariant object.
+        CVariant variant;
+        if (CJSONVariantParser::Parse(sse_part.substr(pos + 1), variant))
+        {
+          if (variant.isMember(TimelineEntry))
+          {
+            // "metadataState":"loading"
+            // "metadataState":"processing"
+            // "metadataState":"created"
+            // "metadataState":"created","mediaState":"analyzing"
+            // "metadataState":"created","mediaState":"analyzing"
+            // "metadataState":"created","mediaState":"thumbnailing"
+            CVariant timelineEntry = variant[TimelineEntry];
+            std::string metadataState = timelineEntry["metadataState"].asString();
+            CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessServerSideEvent TimelineEntry:metadataState = %s", metadataState.c_str());
+          }
+          else if (variant.isMember(StatusNotification))
+          {
+            // messages we do not care about
+            // "notificationName":"LIBRARY_UPDATE"
+            CVariant status = variant[StatusNotification];
+          }
+          else if (variant.isMember(ProgressNotification))
+          {
+            // more messages we do not care about
+            CVariant progress = variant[ProgressNotification];
+          }
+          else if (variant.isMember(PlaySessionStateNotification))
+          {
+            CVariant playSessionState = variant[PlaySessionStateNotification];
+            std::string state = playSessionState["state"].asString();
+            CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessServerSideEvent PlaySessionStateNotification:state = %s", state.c_str());
+          }
+          else
+          {
+            CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessServerSideEvent unknown %s", sse_part.c_str());
+          }
+        }
+      }
+    }
+  }
+
+}
+
+size_t CPlexClientSync::ServerSideEventCallback(char *buffer, size_t size, size_t nitems, void *userp)
+{
+  if(userp == NULL) return 0;
+
+  CPlexClientSync *ctx = (CPlexClientSync*)userp;
+  size_t amount = size * nitems;
+
+  std::string sse;
+  sse.assign(buffer, amount);
+  ctx->ProcessServerSideEvent(sse);
+  //CLog::Log(LOGDEBUG, "CPlexClientSync:ServerSideEventsCallback msg %s", sse.c_str());
+  return size * nitems;
 }

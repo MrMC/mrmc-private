@@ -22,9 +22,9 @@
 #include "PlexClient.h"
 #include "threads/Thread.h"
 
-namespace easywsclient
+namespace XFILE
 {
-  class WebSocket;
+  class CCurlFile;
 }
 
 class CPlexClientSync : protected CThread
@@ -38,11 +38,13 @@ public:
 
 protected:
   virtual void Process();
+  void         ProcessServerSideEvent(const std::string &sse);
+  static size_t ServerSideEventCallback(char *buffer, size_t size, size_t nitems, void *userp);
 
 private:
   CPlexClient *m_client;
-  std::string m_address;
+  std::string  m_address;
   const std::string m_name;
-  easywsclient::WebSocket *m_websocket;
+  XFILE::CCurlFile *m_sseSocket;
   std::atomic<bool> m_stop;
 };
