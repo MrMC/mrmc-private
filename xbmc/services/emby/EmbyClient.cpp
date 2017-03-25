@@ -46,7 +46,7 @@
 CEmbyClient::CEmbyClient()
 {
   m_local = true;
-  m_owned = "1";
+  m_owned = true;
   m_presence = true;
   m_protocol = "http";
   m_needUpdate = false;
@@ -64,7 +64,7 @@ bool CEmbyClient::Init(const EmbyServerInfo &serverInfo)
 {
   m_local = true;
   m_serverInfo = serverInfo;
-  m_owned = serverInfo.UserType == "Linked" ? "1":"0";
+  m_owned = serverInfo.UserType == "Linked";
 
   // protocol (http/https) and port will be in ServerUrl
   CURL curl(m_serverInfo.ServerURL);
@@ -257,7 +257,7 @@ const EmbyViewContentVector CEmbyClient::GetPhotoContent() const
 
 const std::string CEmbyClient::FormatContentTitle(const std::string contentTitle) const
 {
-  std::string owned = (GetOwned() == "1") ? "O":"S";
+  std::string owned = IsOwned() ? "O":"S";
   std::string title = StringUtils::Format("Emby(%s) - %s - %s %s",
               owned.c_str(), GetServerName().c_str(), contentTitle.c_str(), GetPresence()? "":"(off-line)");
   return title;

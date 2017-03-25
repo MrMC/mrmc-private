@@ -81,13 +81,12 @@ public:
   const bool NeedUpdate() const             { return m_needUpdate; }
   const std::string &GetServerName() const  { return m_serverInfo.ServerName; }
   const std::string &GetUuid() const        { return m_serverInfo.UserId; }
-  const std::string &GetOwned() const       { return m_owned; }
   // bool GetPresence() const                  { return m_presence; }
   bool GetPresence() const                  { return true; }
   const std::string &GetProtocol() const    { return m_protocol; }
   const bool &IsLocal() const               { return m_local; }
   const bool IsCloud() const                { return (m_platform == "Cloud"); }
-  const bool IsOwned() const                { return (m_owned == "1"); }
+  const bool IsOwned() const                { return m_owned; }
 
   void  ClearViewItems();
   void  AddViewItem(const CFileItemPtr &item);
@@ -118,7 +117,7 @@ protected:
 private:
   bool m_local;
   std::string m_url;
-  std::string m_owned;
+  bool m_owned;
   std::string m_protocol;
   std::string m_platform;
   EmbyServerInfo m_serverInfo;
