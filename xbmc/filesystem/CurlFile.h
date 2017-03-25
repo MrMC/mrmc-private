@@ -93,6 +93,7 @@ namespace XFILE
       void SetReferer(const std::string& referer)                { m_referer = referer; }
       void SetCookie(const std::string& cookie)                  { m_cookie = cookie; }
       void SetMimeType(std::string mimetype)                     { SetRequestHeader("Content-Type", mimetype); }
+      void SetSilent(bool silent)                                { m_silent = silent; };
       void SetRequestHeader(const std::string& header, const std::string& value);
       void SetRequestHeader(const std::string& header, long value);
       int  GetResponseCode()                                     { return m_httpresponse; };
@@ -213,6 +214,7 @@ namespace XFILE
 
       long            m_httpresponse;
 
+      bool            m_silent;
       bool            m_forServerSideEvent;
       ServerSideEventsCallBackFn m_ServerSideEventsCallBackFn = nullptr;
       const void     *m_ServerSideEventsCallBackFnCtx = nullptr;
