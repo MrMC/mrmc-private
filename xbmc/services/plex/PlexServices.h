@@ -60,6 +60,7 @@ public:
   void GetClients(std::vector<CPlexClientPtr> &clients) const;
   CPlexClientPtr FindClient(const std::string &path);
   bool ClientIsLocal(std::string path);
+  MediaServicesPlayerState GetPlayState() { return m_playState; };
 
   // ISettingCallback
   virtual void OnSettingAction(const CSetting *setting) override;
@@ -96,7 +97,6 @@ private:
   CPlexClientPtr    GetClient(std::string uuid);
   bool              AddClient(CPlexClientPtr foundClient);
   bool              RemoveClient(CPlexClientPtr lostClient);
-  bool              UpdateClient(CPlexClientPtr updateClient);
   bool              GetMyHomeUsers(std::string &homeusername);
 
   std::atomic<bool> m_active;

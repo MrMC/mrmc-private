@@ -22,16 +22,29 @@
 
 #include "PlexClientSync.h"
 
+#include "PlexServices.h"
 #include "PlexClient.h"
 #include "PlexUtils.h"
 
-#include "contrib/easywsclient/easywsclient.hpp"
+#include "GUIUserMessages.h"
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
+#include "filesystem/DirectoryCache.h"
+#include "guilib/GUIWindowManager.h"
+#include "settings/Settings.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
+#include "utils/StopWatch.h"
 #include "utils/JSONVariantParser.h"
 #include "video/VideoInfoTag.h"
+
+#include "contrib/easywsclient/easywsclient.hpp"
+
+static const std::string NotificationContainer = "NotificationContainer";
+static const std::string TimelineEntry = "TimelineEntry";
+static const std::string StatusNotification = "StatusNotification";
+static const std::string ProgressNotification = "ProgressNotification";
+static const std::string PlaySessionStateNotification = "PlaySessionStateNotification";
 
 typedef enum MediaImportChangesetType
 {
@@ -41,19 +54,16 @@ typedef enum MediaImportChangesetType
   MediaImportChangesetTypeRemoved
 } MediaImportChangesetType;
 
-CPlexClientSync::CPlexClientSync(CPlexClient *client, const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken)
+CPlexClientSync::CPlexClientSync(const bool owned, const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken)
   : CThread(StringUtils::Format("PlexClientSync[%s]", name.c_str()).c_str())
-  , m_client(client)
-  , m_address(address)
-  , m_name(name)
-  , m_sseSocket(nullptr)
   , m_stop(true)
+  , m_owned(owned)
+  , m_name(name)
+  , m_address(address)
+  , m_deviceId(deviceId)
+  , m_accessToken(accessToken)
+  , m_websocket(nullptr)
 {
-  m_client = client;
-  CURL curl(address);
-  curl.SetFileName(":/eventsource/notifications?X-Plex-Token=" + accessToken);
-
-  m_address = curl.Get();
 }
 
 CPlexClientSync::~CPlexClientSync()
@@ -76,118 +86,159 @@ void CPlexClientSync::Stop()
     return;
 
   m_stop = true;
+  m_processSleep.Set();
   CThread::StopThread();
-  SAFE_DELETE(m_sseSocket);
+}
+
+void CPlexClientSync::ProcessSyncByPolling()
+{
+  CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessSyncByPolling to %s", m_name.c_str());
+  CStopWatch checkUpdatesTimer;
+  checkUpdatesTimer.StartZero();
+  while (!m_stop)
+  {
+    int m_updateMins = 15;
+    if (m_updateMins > 0 && (checkUpdatesTimer.GetElapsedSeconds() > (60 * m_updateMins)))
+    {
+      CPlexClientPtr client = CPlexServices::GetInstance().FindClient(m_address);
+      if (client && client->GetPresence())
+      {
+        client->ParseSections(PlexSectionParsing::checkSection);
+        if (client->NeedUpdate())
+        {
+          client->ParseSections(PlexSectionParsing::updateSection);
+          g_directoryCache.Clear();
+          if (CPlexServices::GetInstance().GetPlayState() == MediaServicesPlayerState::stopped)
+          {
+            CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+            g_windowManager.SendThreadMessage(msg);
+          }
+        }
+      }
+      checkUpdatesTimer.Reset();
+    }
+
+    m_processSleep.WaitMSec(250);
+    m_processSleep.Reset();
+  }
+}
+
+void CPlexClientSync::ProcessSyncByWebSockets()
+{
+  CURL curl(m_address);
+  if (curl.GetProtocol() == "http")
+    curl.SetProtocol("ws");
+  else if (curl.GetProtocol() == "https")
+    curl.SetProtocol("wss");
+  curl.SetFileName(":/websockets/notifications?X-Plex-Token=" + m_accessToken);
+
+  static const int WebSocketTimeoutMs = 100;
+
+  static const std::string NotificationMessageType = "MessageType";
+  static const std::string NotificationData = "Data";
+  static const std::string NotificationMessageTypeUserUpdated = "UserUpdated";
+  static const std::string NotificationMessageTypeSessionEnded = "SessionEnded";
+  static const std::string NotificationMessageTypeLibraryChanged = "LibraryChanged";
+  static const std::string NotificationMessageTypeUserDataChanged = "UserDataChanged";
+  static const std::string NotificationMessageTypePlaybackStart = "PlaybackStart";
+  static const std::string NotificationMessageTypePlaybackStopped = "PlaybackStopped";
+  static const std::string NotificationMessageTypeScheduledTaskEnded = "ScheduledTaskEnded";
+  static const std::string NotificationLibraryChangedItemsAdded = "ItemsAdded";
+  static const std::string NotificationLibraryChangedItemsUpdated = "ItemsUpdated";
+  static const std::string NotificationLibraryChangedItemsRemoved = "ItemsRemoved";
+  static const std::string NotificationUserDataChangedUserDataList = "UserDataList";
+  static const std::string NotificationUserDataChangedUserDataItemId = "ItemId";
+
+  struct ChangedLibraryItem
+  {
+    std::string itemId;
+    MediaImportChangesetType changesetType;
+  };
+
+  m_websocket = easywsclient::WebSocket::from_url(curl.Get() /* TODO: , origin */);
+  if (!m_websocket)
+  {
+    CLog::Log(LOGERROR, "CPlexClientSync:ProcessSyncByWebSockets connection failed from %s", m_name.c_str());
+    m_stop = true;
+  }
+  else
+    CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessSyncByWebSockets connected to %s", m_name.c_str());
+
+  while (!m_stop && m_websocket->getReadyState() != easywsclient::WebSocket::CLOSED)
+  {
+    m_websocket->poll(WebSocketTimeoutMs);
+    m_websocket->dispatch(
+      [this](const std::string& msg)
+      {
+        CVariant msgObject;
+        if (!CJSONVariantParser::Parse(msg, msgObject) ||
+          !msgObject.isObject() ||
+          !msgObject.isMember(NotificationContainer))
+        {
+          CLog::Log(LOGERROR, "CPlexClientSync:ProcessSyncByWebSockets invalid notification from %s", m_name.c_str());
+          return;
+        }
+
+        CVariant variant = msgObject[NotificationContainer];
+        if (variant.isMember(TimelineEntry))
+        {
+          // "metadataState":"loading"
+          // "metadataState":"processing"
+          // "metadataState":"created"
+          // "metadataState":"created","mediaState":"analyzing"
+          // "metadataState":"created","mediaState":"analyzing"
+          // "metadataState":"created","mediaState":"thumbnailing"
+          CVariant timelineEntry = variant[TimelineEntry];
+          std::string metadataState = timelineEntry["metadataState"].asString();
+          CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessSyncByWebSockets TimelineEntry:metadataState = %s", metadataState.c_str());
+        }
+        else if (variant.isMember(StatusNotification))
+        {
+          // messages we do not care about
+          // "notificationName":"LIBRARY_UPDATE"
+          CVariant status = variant[StatusNotification];
+        }
+        else if (variant.isMember(ProgressNotification))
+        {
+          // more messages we do not care about
+          CVariant progress = variant[ProgressNotification];
+        }
+        else if (variant.isMember(PlaySessionStateNotification))
+        {
+          CVariant playSessionState = variant[PlaySessionStateNotification]; // is array
+          if (playSessionState.isArray())
+          {
+            for (auto item = playSessionState.begin_array(); item != playSessionState.end_array(); ++item)
+            {
+              const std::string key = (*item)["key"].asString();
+              const std::string state = (*item)["state"].asString();
+              const std::string sessionKey = (*item)["sessionKey"].asString();
+              CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessSyncByWebSockets PlaySessionStateNotification:sessionKey=%s, state=%s",
+                sessionKey.c_str(), state.c_str());
+            }
+          }
+        }
+        else
+        {
+          CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessSyncByWebSockets unknown %s", msg.c_str());
+        }
+      });
+  }
+
+  if (m_websocket)
+  {
+    m_websocket->close();
+    SAFE_DELETE(m_websocket);
+  }
+  m_stop = true;
 }
 
 void CPlexClientSync::Process()
 {
-  CLog::Log(LOGDEBUG, "CPlexClientSync: created %s", m_address.c_str());
-
-  CURL curl(m_address);
-  curl.SetProtocolOptions(curl.GetProtocolOptions() + "&format=json");
-  m_sseSocket = new XFILE::CCurlFile();
-  m_sseSocket->SetBufferSize(32768);
-  if (!m_sseSocket->OpenForServerSideEvent(curl, (const void*)this, ServerSideEventCallback))
-  {
-    CLog::Log(LOGERROR, "CPlexClientSync: failed eventsource open to %s", m_name.c_str());
-    m_stop = true;
-  }
+  if (m_owned)
+    ProcessSyncByWebSockets();
   else
-    CLog::Log(LOGDEBUG, "CPlexClientSync: eventsource open to %s -> %s", m_name.c_str(), curl.Get().c_str());
+    ProcessSyncByPolling();
 
-
-  const int serverSideEventTimeoutMs = 250;
-  while (!m_stop)
-  {
-    if (!m_sseSocket->ServerSideEventWait(serverSideEventTimeoutMs))
-      break;
-  }
-
-  SAFE_DELETE(m_sseSocket);
   m_stop = true;
-}
-
-void CPlexClientSync::ProcessServerSideEvent(const std::string &sse)
-{
-  static const std::string TimelineEntry = "TimelineEntry";
-  static const std::string StatusNotification = "StatusNotification";
-  static const std::string ProgressNotification = "ProgressNotification";
-  static const std::string PlaySessionStateNotification = "PlaySessionStateNotification";
-  // sse token separator == 0x0a -> "\n"
-  std::vector<std::string> sse_parts = StringUtils::Split(sse, '\n');
-  for (auto it = sse_parts.begin(); it != sse_parts.end(); ++it)
-  {
-    std::string sse_part = *it;
-    if (sse_part.empty())
-      continue;
-
-    // event tokens are boring as the info is contained in the data token.
-    if (StringUtils::StartsWithNoCase(sse_part, "event:"))
-      continue;
-
-    CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessServerSideEvent msg %s", sse_part.c_str());
-
-    if (StringUtils::StartsWithNoCase(sse_part, "data:"))
-    {
-      // data tokens are json with "data:" prefix. strip the prefix.
-      size_t pos = sse_part.find(":");
-      if (pos != std::string::npos)
-      {
-        // parse the json into a CVariant object.
-        CVariant variant;
-        if (CJSONVariantParser::Parse(sse_part.substr(pos + 1), variant))
-        {
-          if (variant.isMember(TimelineEntry))
-          {
-            // "metadataState":"loading"
-            // "metadataState":"processing"
-            // "metadataState":"created"
-            // "metadataState":"created","mediaState":"analyzing"
-            // "metadataState":"created","mediaState":"analyzing"
-            // "metadataState":"created","mediaState":"thumbnailing"
-            CVariant timelineEntry = variant[TimelineEntry];
-            std::string metadataState = timelineEntry["metadataState"].asString();
-            CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessServerSideEvent TimelineEntry:metadataState = %s", metadataState.c_str());
-          }
-          else if (variant.isMember(StatusNotification))
-          {
-            // messages we do not care about
-            // "notificationName":"LIBRARY_UPDATE"
-            CVariant status = variant[StatusNotification];
-          }
-          else if (variant.isMember(ProgressNotification))
-          {
-            // more messages we do not care about
-            CVariant progress = variant[ProgressNotification];
-          }
-          else if (variant.isMember(PlaySessionStateNotification))
-          {
-            CVariant playSessionState = variant[PlaySessionStateNotification];
-            std::string state = playSessionState["state"].asString();
-            CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessServerSideEvent PlaySessionStateNotification:state = %s", state.c_str());
-          }
-          else
-          {
-            CLog::Log(LOGDEBUG, "CPlexClientSync:ProcessServerSideEvent unknown %s", sse_part.c_str());
-          }
-        }
-      }
-    }
-  }
-
-}
-
-size_t CPlexClientSync::ServerSideEventCallback(char *buffer, size_t size, size_t nitems, void *userp)
-{
-  if(userp == NULL) return 0;
-
-  CPlexClientSync *ctx = (CPlexClientSync*)userp;
-  size_t amount = size * nitems;
-
-  std::string sse;
-  sse.assign(buffer, amount);
-  ctx->ProcessServerSideEvent(sse);
-  //CLog::Log(LOGDEBUG, "CPlexClientSync:ServerSideEventsCallback msg %s", sse.c_str());
-  return size * nitems;
 }

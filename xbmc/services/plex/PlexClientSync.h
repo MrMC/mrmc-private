@@ -20,17 +20,18 @@
  */
 
 #include "PlexClient.h"
+#include "PlexUtils.h"
 #include "threads/Thread.h"
 
-namespace XFILE
+namespace easywsclient
 {
-  class CCurlFile;
+  class WebSocket;
 }
 
 class CPlexClientSync : protected CThread
 {
 public:
-  CPlexClientSync(CPlexClient *client, const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken);
+  CPlexClientSync(const bool owned, const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken);
   virtual ~CPlexClientSync();
 
   void Start();
@@ -38,13 +39,17 @@ public:
 
 protected:
   virtual void Process();
-  void         ProcessServerSideEvent(const std::string &sse);
-  static size_t ServerSideEventCallback(char *buffer, size_t size, size_t nitems, void *userp);
+  void         ProcessSyncByPolling();
+  void         ProcessSyncByWebSockets();
 
 private:
-  CPlexClient *m_client;
-  std::string  m_address;
-  const std::string m_name;
-  XFILE::CCurlFile *m_sseSocket;
+  CEvent m_processSleep;
   std::atomic<bool> m_stop;
+
+  const bool m_owned;
+  const std::string m_name;
+  const std::string m_address;
+  const std::string m_deviceId;
+  const std::string m_accessToken;
+  easywsclient::WebSocket *m_websocket;
 };

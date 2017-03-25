@@ -156,13 +156,9 @@ bool CPlexClient::Init(const PlexServerInfo &serverInfo)
   if (m_clientSync)
     SAFE_DELETE(m_clientSync);
 
-  if (m_owned == "1")
-  {
-    // websockets will 401 on servers you do not own
-    m_clientSync = new CPlexClientSync(this, m_serverName,
-      url.GetWithoutFilename(), CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), m_accessToken);
-    m_clientSync->Start();
-  }
+  m_clientSync = new CPlexClientSync(IsOwned(), m_serverName, url.GetWithoutFilename(),
+    CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_UUID).c_str(), m_accessToken);
+  m_clientSync->Start();
 
   return !m_url.empty();
 }
@@ -285,7 +281,7 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
   if (plex.Get(curl.Get(), strResponse))
   {
 #if defined(PLEX_DEBUG_VERBOSE)
-    if (parser == PlexSectionParsing::newSection || parser == PlexSectionParsing::checkSection)
+    if (parser == PlexSectionParsing::newSection)
       CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %d, %s", parser, strResponse.c_str());
 #endif
     if (parser == PlexSectionParsing::updateSection)
@@ -436,14 +432,17 @@ bool CPlexClient::ParseSections(enum PlexSectionParsing parser)
         DirectoryNode = DirectoryNode->NextSiblingElement("Directory");
       }
 
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d movie sections",
-        m_serverName.c_str(), (int)m_movieSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d shows sections",
-        m_serverName.c_str(), (int)m_showSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d artist sections",
-                m_serverName.c_str(), (int)m_artistSectionsContents.size());
-      CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d photo sections",
-                m_serverName.c_str(), (int)m_photoSectionsContents.size());
+      if (parser == PlexSectionParsing::newSection)
+      {
+        CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d movie sections",
+          m_serverName.c_str(), (int)m_movieSectionsContents.size());
+        CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d shows sections",
+          m_serverName.c_str(), (int)m_showSectionsContents.size());
+        CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d artist sections",
+                  m_serverName.c_str(), (int)m_artistSectionsContents.size());
+        CLog::Log(LOGDEBUG, "CPlexClient::ParseSections %s found %d photo sections",
+                  m_serverName.c_str(), (int)m_photoSectionsContents.size());
+      }
 
       rtn = true;
     }

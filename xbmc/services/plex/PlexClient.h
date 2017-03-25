@@ -79,6 +79,7 @@ class CPlexClientSync;
 class CPlexClient
 {
   friend class CPlexServices;
+  friend class CPlexClientSync;
 
 public:
   CPlexClient();
@@ -97,6 +98,7 @@ public:
   const std::string &GetProtocol() const    { return m_protocol; }
   const bool &IsLocal() const               { return m_local; }
   const bool IsCloud() const                { return (m_platform == "Cloud"); }
+  const bool IsOwned() const                { return (m_owned == "1"); }
 
   void  AddSectionItem(CFileItemPtr root)   { m_section_items.push_back(root); };
   std::vector<CFileItemPtr> GetSectionItems()  { return m_section_items; };

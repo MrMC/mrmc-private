@@ -916,11 +916,6 @@ void CPlexServices::CheckForGDMServers()
               // lost client
               CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers Server was lost %s", client->GetServerName().c_str());
             }
-            else if (UpdateClient(client))
-            {
-              // client exists and something changed
-              CLog::Log(LOGNOTICE, "CPlexServices:CheckforGDMServers presence changed %s", client->GetServerName().c_str());
-            }
           }
         }
       }
@@ -1025,39 +1020,6 @@ bool CPlexServices::RemoveClient(CPlexClientPtr lostClient)
     }
   }
 
-  return false;
-}
-
-bool CPlexServices::UpdateClient(CPlexClientPtr updateClient)
-{
-/*
-  CSingleLock lock(m_criticalClients);
-  for (const auto &client : m_clients)
-  {
-    if (client->GetUuid() == updateClient->GetUuid())
-    {
-      // client needs updating
-      if (client->GetPresence() != updateClient->GetPresence())
-      {
-        client->SetPresence(updateClient->GetPresence());
-        // update any gui lists here.
-        for (const auto &item : client->GetSectionItems())
-        {
-          std::string title = client->FindSectionTitle(item->GetPath());
-          if (!title.empty())
-          {
-            item->SetLabel(client->FormatContentTitle(title));
-            CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
-            g_windowManager.SendThreadMessage(msg);
-          }
-        }
-        return true;
-      }
-      // no need to look further but an update was not needed
-      return false;
-    }
-  }
-*/
   return false;
 }
 
