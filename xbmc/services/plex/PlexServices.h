@@ -91,6 +91,8 @@ private:
 
   void              CheckForGDMServers();
 
+  PlexServerInfo    ParsePlexDeviceNode(const TiXmlElement* DeviceNode);
+
   CPlexClientPtr    GetClient(std::string uuid);
   bool              AddClient(CPlexClientPtr foundClient);
   bool              RemoveClient(CPlexClientPtr lostClient);

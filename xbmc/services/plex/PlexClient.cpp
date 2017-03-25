@@ -115,42 +115,24 @@ bool CPlexClient::Init(std::string data, std::string ip)
   return !m_url.empty();
 }
 
-bool CPlexClient::Init(const TiXmlElement* DeviceNode)
+bool CPlexClient::Init(const PlexServerInfo &serverInfo)
 {
   m_url = "";
-  m_presence = XMLUtils::GetAttribute(DeviceNode, "presence") == "1";
+  m_presence = serverInfo.presence == "1";
   //if (!m_presence)
   //  return false;
 
-  m_uuid = XMLUtils::GetAttribute(DeviceNode, "clientIdentifier");
-  m_owned = XMLUtils::GetAttribute(DeviceNode, "owned");
-  m_serverName = XMLUtils::GetAttribute(DeviceNode, "name");
-  m_accessToken = XMLUtils::GetAttribute(DeviceNode, "accessToken");
-  m_httpsRequired = XMLUtils::GetAttribute(DeviceNode, "httpsRequired");
-  m_platform = XMLUtils::GetAttribute(DeviceNode, "platform");
-
-  std::vector<PlexConnection> connections;
-  const TiXmlElement* ConnectionNode = DeviceNode->FirstChildElement("Connection");
-  while (ConnectionNode)
-  {
-    PlexConnection connection;
-    connection.port = XMLUtils::GetAttribute(ConnectionNode, "port");
-    connection.address = XMLUtils::GetAttribute(ConnectionNode, "address");
-    connection.protocol = XMLUtils::GetAttribute(ConnectionNode, "protocol");
-    connection.external = XMLUtils::GetAttribute(ConnectionNode, "local") == "0" ? 1 : 0;
-    connections.push_back(connection);
-
-    ConnectionNode = ConnectionNode->NextSiblingElement("Connection");
-  }
+  m_uuid = serverInfo.uuid;
+  m_owned = serverInfo.owned;
+  m_serverName = serverInfo.serverName;
+  m_accessToken = serverInfo.accessToken;
+  m_httpsRequired = serverInfo.httpsRequired;
+  m_platform = serverInfo.platform;
 
   CURL url;
-  if (!connections.empty())
+  if (!serverInfo.connections.empty())
   {
-    // sort so that all external=0 are first. These are the local connections.
-    std::sort(connections.begin(), connections.end(),
-      [] (PlexConnection const& a, PlexConnection const& b) { return a.external < b.external; });
-
-    for (const auto &connection : connections)
+    for (const auto &connection : serverInfo.connections)
     {
       url.SetHostName(connection.address);
       url.SetPort(atoi(connection.port.c_str()));
@@ -173,7 +155,8 @@ bool CPlexClient::Init(const TiXmlElement* DeviceNode)
 
   if (m_clientSync)
     SAFE_DELETE(m_clientSync);
-  //if (m_owned == "1")
+
+  if (m_owned == "1")
   {
     // websockets will 401 on servers you do not own
     m_clientSync = new CPlexClientSync(this, m_serverName,

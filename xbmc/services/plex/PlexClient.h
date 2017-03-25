@@ -40,6 +40,19 @@ struct PlexConnection
   int external;
 };
 
+typedef struct PlexServerInfo
+{
+
+  std::string uuid;
+  std::string owned;
+  std::string presence;
+  std::string platform;
+  std::string serverName;
+  std::string accessToken;
+  std::string httpsRequired;
+  std::vector<PlexConnection> connections;
+} PlexServerInfo;
+
 struct PlexSectionsContent
 {
   //int port;
@@ -71,7 +84,7 @@ public:
   CPlexClient();
  ~CPlexClient();
 
-  bool Init(const TiXmlElement* DeviceNode);
+  bool Init(const PlexServerInfo &serverInfo);
   bool Init(std::string data, std::string ip);
 
   const bool NeedUpdate() const             { return m_needUpdate; }
