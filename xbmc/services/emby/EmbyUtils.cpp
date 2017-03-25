@@ -862,7 +862,7 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
   
   CURL url2(url);
   url2.SetOption("IncludeItemTypes", "Seasons");
-  url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
+  url2.SetOption("LocationTypes", "FileSystem,Remote,Offline,Virtual");
   url2.SetOption("Fields", "Etag,RecursiveItemCount");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
 
