@@ -49,7 +49,8 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory");
   {
     assert(url.IsProtocol("emby"));
-    if (url.GetFileName().empty())
+    std::string path = url.Get();
+    if (path == "emby://")
     {
       // we are broswing network for clients.
       return FindByBroadcast(items);
