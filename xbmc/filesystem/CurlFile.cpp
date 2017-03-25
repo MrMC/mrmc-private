@@ -472,6 +472,10 @@ void CCurlFile::Close()
   m_opened = false;
   m_forWrite = false;
   m_inError = false;
+
+  m_forServerSideEvent = false;
+  m_ServerSideEventsCallBackFn = nullptr;
+  m_ServerSideEventsCallBackFnCtx = nullptr;
 }
 
 void CCurlFile::SetCommonOptions(CReadState* state)
@@ -487,8 +491,16 @@ void CCurlFile::SetCommonOptions(CReadState* state)
   else
     g_curlInterface.easy_setopt(h, CURLOPT_VERBOSE, 0l);
 
-  g_curlInterface.easy_setopt(h, CURLOPT_WRITEDATA, state);
-  g_curlInterface.easy_setopt(h, CURLOPT_WRITEFUNCTION, write_callback);
+  if (m_ServerSideEventsCallBackFnCtx && m_ServerSideEventsCallBackFn)
+  {
+    g_curlInterface.easy_setopt(h, CURLOPT_WRITEDATA, m_ServerSideEventsCallBackFnCtx);
+    g_curlInterface.easy_setopt(h, CURLOPT_WRITEFUNCTION, m_ServerSideEventsCallBackFn);
+  }
+  else
+  {
+    g_curlInterface.easy_setopt(h, CURLOPT_WRITEDATA, state);
+    g_curlInterface.easy_setopt(h, CURLOPT_WRITEFUNCTION, write_callback);
+  }
 
   g_curlInterface.easy_setopt(h, CURLOPT_READDATA, state);
   g_curlInterface.easy_setopt(h, CURLOPT_READFUNCTION, read_callback);
@@ -648,14 +660,17 @@ void CCurlFile::SetCommonOptions(CReadState* state)
   // rather than wait around just in case they might be opened again.
   g_curlInterface.easy_setopt(h, CURLOPT_FORBID_REUSE, long(1));
 
-  // We abort in case we transfer less than 1byte/second
-  g_curlInterface.easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, 1);
+  if (!m_forServerSideEvent)
+  {
+    // We abort in case we transfer less than 1byte/second
+    g_curlInterface.easy_setopt(h, CURLOPT_LOW_SPEED_LIMIT, 1);
 
-  if (m_lowspeedtime == 0)
-    m_lowspeedtime = CSettings::GetInstance().GetInt(CSettings::SETTING_NETWORK_CURLLOWSPEEDTIME);
+    if (m_lowspeedtime == 0)
+      m_lowspeedtime = CSettings::GetInstance().GetInt(CSettings::SETTING_NETWORK_CURLLOWSPEEDTIME);
 
-  // Set the lowspeed time very low as it seems Curl takes much longer to detect a lowspeed condition
-  g_curlInterface.easy_setopt(h, CURLOPT_LOW_SPEED_TIME, m_lowspeedtime);
+    // Set the lowspeed time very low as it seems Curl takes much longer to detect a lowspeed condition
+    g_curlInterface.easy_setopt(h, CURLOPT_LOW_SPEED_TIME, m_lowspeedtime);
+  }
 
   if (m_skipshout)
     // For shoutcast file, content-length should not be set, and in libcurl there is a bug, if the
@@ -1219,6 +1234,48 @@ ssize_t CCurlFile::Write(const void* lpBuf, size_t uiBufSize)
 
   m_writeOffset += m_state->m_filePos;
   return m_state->m_filePos;
+}
+
+bool CCurlFile::OpenForServerSideEvent(const CURL& url, const void *ctx, ServerSideEventsCallBackFn callback)
+{
+  // Server-Side Events (EventSource)
+  // By-pass the normal curlfile write buffers and return
+  // the sent data directly into passed function handler.
+  // m_forServerSideEvent also turns off CURLOPT_LOW_SPEED_LIMIT
+  // so socket stays open until we close it.
+  // You would think just doing CCurlFile::Open/CCurlFile::ReadString
+  // would work but something is keeping the data in internal buffers
+  // and we never get it back. Thus the hammer.
+  if (m_opened)
+    return false;
+
+  m_postdata = "";
+  m_postdataset = false;
+
+  m_forServerSideEvent = true;
+  m_ServerSideEventsCallBackFn = callback;
+  m_ServerSideEventsCallBackFnCtx = ctx;
+  if (!Open(url))
+    return false;
+
+  CLog::Log(LOGDEBUG, "CCurlFile::OpenForServerSideEvents(%p) %s", (void*)this, CURL::GetRedacted(m_url).c_str());
+
+  return true;
+}
+
+bool CCurlFile::ServerSideEventWait(int timeout)
+{
+  // massive fake just to sleep a bit. Curlfile will use
+  // the function handler (setup above). We really do not
+  // need this function except to return open/inError status.
+  // TODO: add CEvent handler for waiting so it can be
+  // triggered in CCurlFile::Cancel and bail from the sleep.
+  if (!(m_opened && m_forServerSideEvent) || m_inError)
+    return false;
+
+  Sleep(timeout);
+
+  return m_opened;
 }
 
 bool CCurlFile::CReadState::ReadString(char *szLine, int iLineLength)

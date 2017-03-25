@@ -45,11 +45,15 @@ namespace XFILE
         PROXY_SOCKS5,
         PROXY_SOCKS5_REMOTE,
       } ProxyType;
-    
+
+      typedef size_t (*ServerSideEventsCallBackFn)(char *buffer, size_t size, size_t nitems, void *userp);
+
       CCurlFile();
       virtual ~CCurlFile();
       virtual bool Open(const CURL& url);
       virtual bool OpenForWrite(const CURL& url, bool bOverWrite = false);
+      virtual bool OpenForServerSideEvent(const CURL& url, const void *ctx, ServerSideEventsCallBackFn callback);
+      virtual bool ServerSideEventWait(int timeout);
       virtual bool Exists(const CURL& url);
       virtual int64_t  Seek(int64_t iFilePosition, int iWhence=SEEK_SET);
       virtual int64_t GetPosition();
@@ -208,5 +212,9 @@ namespace XFILE
       MAPHTTPHEADERS m_requestheaders;
 
       long            m_httpresponse;
+
+      bool            m_forServerSideEvent;
+      ServerSideEventsCallBackFn m_ServerSideEventsCallBackFn = nullptr;
+      const void     *m_ServerSideEventsCallBackFnCtx = nullptr;
   };
 }
