@@ -20,6 +20,7 @@
  */
 
 #include "EmbyClient.h"
+#include "EmbyUtils.h"
 #include "threads/Thread.h"
 
 namespace easywsclient
@@ -30,7 +31,7 @@ namespace easywsclient
 class CEmbyClientSync : protected CThread
 {
 public:
-  CEmbyClientSync(CEmbyClient *client, const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken);
+  CEmbyClientSync(const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken);
   virtual ~CEmbyClientSync();
 
   void Start();
@@ -40,7 +41,6 @@ protected:
   virtual void Process();
 
 private:
-  CEmbyClient *m_client;
   std::string m_address;
   const std::string m_name;
   easywsclient::WebSocket *m_websocket;

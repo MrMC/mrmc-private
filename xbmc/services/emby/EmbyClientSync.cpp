@@ -22,6 +22,7 @@
 
 #include "EmbyClientSync.h"
 
+#include "EmbyServices.h"
 #include "EmbyClient.h"
 #include "EmbyUtils.h"
 
@@ -40,16 +41,14 @@ typedef enum MediaImportChangesetType
   MediaImportChangesetTypeRemoved
 } MediaImportChangesetType;
 
-CEmbyClientSync::CEmbyClientSync(CEmbyClient *client, const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken)
+CEmbyClientSync::CEmbyClientSync(const std::string &name, const std::string &address, const std::string &deviceId, const std::string &accessToken)
   : CThread(StringUtils::Format("EmbyClientSync[%s]", name.c_str()).c_str())
-  , m_client(client)
   , m_address(address)
   , m_name(name)
   , m_websocket(nullptr)
   , m_stop(true)
 {
   // ws://server.local:32400/:/websockets/notifications
-  m_client = client;
   CURL curl(address);
   if (curl.GetProtocol() == "http")
     curl.SetProtocol("ws");
@@ -82,7 +81,6 @@ void CEmbyClientSync::Stop()
 
   m_stop = true;
   CThread::StopThread();
-  SAFE_DELETE(m_websocket);
 }
 
 void CEmbyClientSync::Process()
@@ -199,20 +197,24 @@ void CEmbyClientSync::Process()
 
           for (const auto& changedLibraryItem : changedLibraryItems)
           {
-            CLog::Log(LOGDEBUG, "CEmbyClientSync: processing changed item with id \"%s\" ", changedLibraryItem.itemId.c_str());
-            switch(changedLibraryItem.changesetType)
+            CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(m_address);
+            if (client && client->GetPresence())
             {
-              default:
-                break;
-              case MediaImportChangesetTypeAdded:
-                m_client->AddNewViewItem(changedLibraryItem.itemId);
-                break;
-              case MediaImportChangesetTypeChanged:
-                m_client->UpdateViewItem(changedLibraryItem.itemId);
-                break;
-              case MediaImportChangesetTypeRemoved:
-                m_client->RemoveViewItem(changedLibraryItem.itemId);
-                break;
+              CLog::Log(LOGDEBUG, "CEmbyClientSync: processing changed item with id \"%s\" ", changedLibraryItem.itemId.c_str());
+              switch(changedLibraryItem.changesetType)
+              {
+                default:
+                  break;
+                case MediaImportChangesetTypeAdded:
+                  client->AddNewViewItem(changedLibraryItem.itemId);
+                  break;
+                case MediaImportChangesetTypeChanged:
+                  client->UpdateViewItem(changedLibraryItem.itemId);
+                  break;
+                case MediaImportChangesetTypeRemoved:
+                  client->RemoveViewItem(changedLibraryItem.itemId);
+                  break;
+              }
             }
           }
         }
@@ -222,27 +224,34 @@ void CEmbyClientSync::Process()
           UserDataChanged: {"MessageType":"UserDataChanged","Data":{"UserId":"c0234e3b7f364e5da6ded482cde90f62","UserDataList":[{"PlayedPercentage":11.0171244559219,"PlaybackPositionTicks":7680000000,"PlayCount":2,"IsFavorite":false,"LastPlayedDate":"2017-03-19T17:55:21.9907250Z","Played":true,"Key":"274870","ItemId":"f822f61be1862484f5a2e4c854d244ac"},{"UnplayedItemCount":751,"PlaybackPositionTicks":0,"PlayCount":0,"IsFavorite":false,"Played":false,"Key":"207cf78d-67ba-ae9a-9328-4169cb204f16","ItemId":"207cf78d67baae9a93284169cb204f16"}]}}
           */
           // we see these from us or some other emby client causes changes (seems like during playback)
-          if (msgData.isArray())
+          CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(m_address);
+          if (client && client->GetPresence())
           {
-            const auto userDataList = msgData[NotificationUserDataChangedUserDataList];
-            for (auto userData = userDataList.begin_array(); userData != userDataList.end_array(); ++userData)
+            if (msgData.isArray())
             {
-              if (!userData->isObject() || !userData->isMember(NotificationUserDataChangedUserDataItemId))
-                continue;
+              const auto userDataList = msgData[NotificationUserDataChangedUserDataList];
+              for (auto userData = userDataList.begin_array(); userData != userDataList.end_array(); ++userData)
+              {
+                if (!userData->isObject() || !userData->isMember(NotificationUserDataChangedUserDataItemId))
+                  continue;
 
-              const std::string itemId = (*userData)[NotificationUserDataChangedUserDataItemId].asString();
-              m_client->UpdateViewItem(itemId);
+                const std::string itemId = (*userData)[NotificationUserDataChangedUserDataItemId].asString();
+                client->UpdateViewItem(itemId);
+              }
             }
-          }
-          else
-          {
-            m_client->UpdateViewItem(msgData[NotificationUserDataChangedUserDataItemId].asString());
+            else
+            {
+              client->UpdateViewItem(msgData[NotificationUserDataChangedUserDataItemId].asString());
+            }
           }
         }
       });
   }
 
   if (m_websocket)
+  {
     m_websocket->close();
+    SAFE_DELETE(m_websocket);
+  }
   m_stop = true;
 }
