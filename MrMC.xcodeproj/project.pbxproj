@@ -9345,14 +9345,14 @@
 		F55BD2FF1D0A14ED0072FE3A /* plex */ = {
 			isa = PBXGroup;
 			children = (
-				18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */,
-				18D18CE71D0DC14400BBAB05 /* PlexUtils.h */,
 				F55BD30A1D18C70B0072FE3A /* PlexClient.cpp */,
 				F55BD30B1D18C70B0072FE3A /* PlexClient.h */,
 				F5471B301E85647800570A53 /* PlexClientSync.cpp */,
 				F5471B311E85647800570A53 /* PlexClientSync.h */,
 				F55BD3001D0A14ED0072FE3A /* PlexServices.cpp */,
 				F55BD3011D0A14ED0072FE3A /* PlexServices.h */,
+				18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */,
+				18D18CE71D0DC14400BBAB05 /* PlexUtils.h */,
 			);
 			path = plex;
 			sourceTree = "<group>";
