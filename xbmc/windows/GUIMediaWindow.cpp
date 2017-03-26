@@ -402,16 +402,22 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         if (newItem && IsActive())
         {
           m_vecItems->Remove(newItem.get());
-          if (message.GetParam2() == 1)
-          { // need the list updated as well
-            UpdateFileList();
-          }
+          UpdateFileList();
         }
         else if (newItem)
         { // need to remove the disc cache
           CFileItemList items;
           items.SetPath(URIUtils::GetDirectory(newItem->GetPath()));
           items.RemoveDiscCache(GetID());
+        }
+      }
+      else if (message.GetParam1()==GUI_MSG_ADD_ITEM && message.GetItem())
+      {
+        CFileItemPtr newItem = std::dynamic_pointer_cast<CFileItem>(message.GetItem());
+        if (newItem && IsActive())
+        {
+          if (m_vecItems->GetProperty("EmbyItem").asBoolean())
+            m_vecItems->Add(newItem);
         }
       }
       else if (message.GetParam1()==GUI_MSG_UPDATE_PATH)

@@ -153,6 +153,8 @@ void CEmbyClient::AddNewViewItem(const std::string &serviceId)
   CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, object);
   if (item != nullptr)
   {
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 0, item);
+    g_windowManager.SendMessage(msg);
   }
 }
 
