@@ -1277,7 +1277,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &v
     return false;
   }
 
-#if defined(EMBY_DEBUG_VERBOSE)
+#if defined(EMBY_DEBUG_TIMING)
   unsigned int currentTime = XbmcThreads::SystemClockMillis();
 #endif
   const auto& objectItems = variant["Items"];
@@ -1293,7 +1293,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &v
   items.SetProperty("library.filter", "true");
   SetEmbyItemProperties(items);
 
-#if defined(EMBY_DEBUG_VERBOSE)
+#if defined(EMBY_DEBUG_TIMING)
   CLog::Log(LOGDEBUG, "CEmbyUtils::GetVideoItems %d(msec) for %d items",
     XbmcThreads::SystemClockMillis() - currentTime, objectItems.size());
 #endif
@@ -1505,7 +1505,7 @@ void CEmbyUtils::GetMediaDetals(CFileItem &item, const CVariant &variant, std::s
 
 CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
 {
-#if defined(EMBY_DEBUG_VERBOSE)
+#if defined(EMBY_DEBUG_TIMING)
   unsigned int currentTime = XbmcThreads::SystemClockMillis();
 #endif
 
@@ -1520,7 +1520,7 @@ CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
   std::string response;
   if (emby.Get(curl.Get(), response))
   {
-#if defined(EMBY_DEBUG_VERBOSE)
+#if defined(EMBY_DEBUG_TIMING)
     CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %d(msec) for %lu bytes",
       XbmcThreads::SystemClockMillis() - currentTime, response.size());
 #endif
@@ -1535,12 +1535,14 @@ CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
 #if defined(EMBY_DEBUG_VERBOSE)
     CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", curl.Get().c_str());
     CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", response.c_str());
+#endif
+#if defined(EMBY_DEBUG_TIMING)
     currentTime = XbmcThreads::SystemClockMillis();
 #endif
     CVariant resultObject;
     if (CJSONVariantParser::Parse(response, resultObject))
     {
-#if defined(EMBY_DEBUG_VERBOSE)
+#if defined(EMBY_DEBUG_TIMING)
       CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant parsed in %d(msec)",
         XbmcThreads::SystemClockMillis() - currentTime);
 #endif

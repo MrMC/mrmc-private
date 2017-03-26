@@ -24,6 +24,7 @@
 #include "services/ServicesManager.h"
 
 #define EMBY_DEBUG_VERBOSE
+#define EMBY_DEBUG_TIMING
 
 namespace XFILE
 {
