@@ -182,6 +182,32 @@ void CEmbyClient::UpdateViewItem(const std::string &serviceId)
   CLog::Log(LOGERROR, "CEmbyClient::UpdateViewItem: failed to find/update item with id \"%s\"", serviceId.c_str());
 }
 
+void CEmbyClient::UpdateViewItems(const std::vector<std::string> &serviceIds)
+{
+  const CVariant object = FetchItemByIds(serviceIds);
+  
+  if (object.isNull() || !object.isObject() || !object.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyClient::UpdateViewItems invalid response");
+    return;
+  }
+  
+  const auto& objectItems = object["Items"];
+  for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+  {
+    auto objectItem = *objectItemIt;
+    
+    
+    std::map<std::string, CVariant> variantMap;
+    variantMap["Items"].push_back(objectItem);
+    //objectItem = CVariant(variantMap);
+
+    CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
+    g_windowManager.SendMessage(msg);
+  }
+}
+
 void CEmbyClient::RemoveViewItem(const std::string &serviceId)
 {
   CSingleLock lock(m_viewItemsLock);
@@ -443,7 +469,14 @@ void CEmbyClient::SetPresence(bool presence)
 
 const CVariant CEmbyClient::FetchItemById(const std::string &Id)
 {
-  if (Id.empty())
+  std::vector<std::string> Ids;
+  Ids.push_back(Id);
+  return FetchItemByIds(Ids);
+}
+
+const CVariant CEmbyClient::FetchItemByIds(const std::vector<std::string> &Ids)
+{
+  if (Ids.size() < 1)
     return CVariant(CVariant::VariantTypeNull);
 
   static const std::string PropertyItemPath = "Path";
@@ -483,7 +516,7 @@ const CVariant CEmbyClient::FetchItemById(const std::string &Id)
   CURL curl(m_url);
   curl.SetFileName("emby/Users/" + GetUserID() + "/Items/");
   curl.SetOptions("");
-  curl.SetOption("Ids", Id);
+  curl.SetOption("Ids", StringUtils::Join(Ids, ","));
   curl.SetOption("Fields", StringUtils::Join(Fields, ","));
   const CVariant object = CEmbyUtils::GetEmbyCVariant(curl.Get());
 

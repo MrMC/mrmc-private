@@ -93,6 +93,7 @@ public:
   void  AddViewItems(const CFileItemList &items);
   void  AddNewViewItem(const std::string &serviceId);
   void  UpdateViewItem(const std::string &serviceId);
+  void  UpdateViewItems(const std::vector<std::string> &serviceIds);
   void  RemoveViewItem(const std::string &serviceId);
   CFileItemPtr FindViewItem(const std::string &serviceId);
 
@@ -113,6 +114,7 @@ protected:
   bool        ParseViews();
   void        SetPresence(bool presence);
   const CVariant FetchItemById(const std::string &Id);
+  const CVariant FetchItemByIds(const std::vector<std::string> &Ids);
 
 private:
   bool m_local;

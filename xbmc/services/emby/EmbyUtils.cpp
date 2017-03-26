@@ -36,6 +36,7 @@
 #include "filesystem/CurlFile.h"
 #include "filesystem/ZipFile.h"
 #include "settings/Settings.h"
+#include "utils/JobManager.h"
 
 #include "video/VideoInfoTag.h"
 #include "video/windows/GUIWindowVideoBase.h"
@@ -55,6 +56,29 @@ static uint64_t SecondsToTicks(uint64_t seconds)
 {
   return seconds * TicksToSecondsFactor;
 }
+
+class CEmbyUtilsJob: public CJob
+{
+public:
+  CEmbyUtilsJob(CEmbyClientPtr client, std::vector<std::string> itemIDs)
+  :m_client(client),
+  m_itemIDs(itemIDs)
+  {
+  }
+  virtual ~CEmbyUtilsJob()
+  {
+    
+  }
+  virtual bool DoWork()
+  {
+    if (m_itemIDs.size() > 0)
+      m_client->UpdateViewItems(m_itemIDs);
+    return true;
+  }
+private:
+  CEmbyClientPtr m_client;
+  std::vector<std::string> m_itemIDs;
+};
 
 static int  g_progressSec = 0;
 static CFileItem m_curItem;
@@ -665,49 +689,42 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &obje
   // Emby Movie/TV
 bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::string filter)
 {
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-
-  static const std::vector<std::string> Fields = {
-    PropertyItemDateCreated,
-    PropertyItemGenres,
-    PropertyItemMediaStreams,
-    PropertyItemOverview,
-//    PropertyItemShortOverview,
-    PropertyItemPath,
-//    PropertyItemPeople,
-//    PropertyItemProviderIds,
-//    PropertyItemSortName,
-//    PropertyItemOriginalTitle,
-//    PropertyItemStudios,
-//    PropertyItemTaglines,
-//    PropertyItemProductionLocations,
-//    PropertyItemTags,
-//    PropertyItemVoteCount,
-  };
 
   CURL url2(url);
 
   url2.SetOption("IncludeItemTypes", "Movie");
-  //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", "Etag");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   const CVariant result = GetEmbyCVariant(url2.Get());
 
   bool rtn = GetVideoItems(items, url2, result, MediaTypeMovie);
+  
+  if (!rtn)
+    return rtn;
+  else
+  {
+    std::vector<std::string> itemIds;
+    CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
+    if (client || client->GetPresence())
+    {
+      const auto& objectItems = result["Items"];
+      int counter = 0;
+      for (unsigned int k = 0; k < objectItems.size(); ++k)
+      {
+        const auto objectItem = objectItems[k];
+        itemIds.push_back(objectItem["Id"].asString());
+        counter += 1;
+        if ( counter > 100 || k == objectItems.size() - 1)
+        {
+          // split jobs in 100 item chunks
+          CJobManager::GetInstance().AddJob(new CEmbyUtilsJob(client,itemIds), NULL);
+          itemIds.clear();
+          counter = 0;
+        }
+        CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovies counter = %i, obsize = %i ", counter, objectItems.size());
+      }
+    }
+  }
   return rtn;
 }
 
