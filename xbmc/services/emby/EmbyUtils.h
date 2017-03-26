@@ -84,10 +84,11 @@ public:
 
 private:
   static void ReportToServer(std::string url, std::string filename);
-  static bool GetVideoItems(CFileItemList &items,CURL url, const CVariant &object, std::string type, bool formatLabel, int season = -1);
-  static void GetVideoDetails(CFileItem &fileitem, const CVariant &cvariant);
-  static void GetMusicDetails(CFileItem &fileitem, const CVariant &cvariant);
-  static void GetMediaDetals(CFileItem &fileitem, const CVariant &cvariant, std::string id = "0");
+  static bool GetVideoItems(CFileItemList &items, CURL url, const CVariant &object, std::string type);
+  static CFileItemPtr ToVideoFileItemPtr(CURL url, const CVariant &variant, std::string type);
+  static void GetVideoDetails(CFileItem &item, const CVariant &variant);
+  static void GetMusicDetails(CFileItem &item, const CVariant &variant);
+  static void GetMediaDetals(CFileItem &item, const CVariant &variant, std::string id = "0");
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
   static void RemoveSubtitleProperties(CFileItem &item);
 };
