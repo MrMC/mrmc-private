@@ -622,7 +622,7 @@ CFileItemPtr ParseMusic(const CEmbyClient *client, const CVariant &object)
   return nullptr;
 }
 
-CFileItemPtr CEmbyUtils::ToFileItemPtr(const CEmbyClient *client, const CVariant &object)
+CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &object)
 {
   if (object.isNull() || !object.isObject() || !object.isMember("Items"))
   {
@@ -638,11 +638,25 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(const CEmbyClient *client, const CVariant
     if (!item.isMember("Id"))
       continue;
 
+    CFileItemList items;
+    std::map<std::string, CVariant> variantMap;
     std::string mediaType = item["MediaType"].asString();
+    std::string type = item["Type"].asString();
+    CURL url2(client->GetUrl());
+    url2.SetProtocol(client->GetProtocol());
+    url2.SetPort(client->GetPort());
+    url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
     if (mediaType == "Video")
-      return ParseVideo(client, item);
+    {
+      if (type == "Movie")
+        GetVideoItems(items, url2, object, MediaTypeMovie);
+      else
+        GetVideoItems(items, url2, object, MediaTypeEpisode);
+    }
     else if (mediaType == "Music")
       return ParseMusic(client, item);
+    
+    return items[0];
   }
 
   return nullptr;

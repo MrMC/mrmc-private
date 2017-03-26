@@ -60,7 +60,7 @@ public:
   static bool GetAllEmbyInProgress(CFileItemList &items, bool tvShow);
   static bool GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
 
-  static CFileItemPtr ToFileItemPtr(const CEmbyClient *client, const CVariant &object);
+  static CFileItemPtr ToFileItemPtr(CEmbyClient *client, const CVariant &object);
 
   // Emby Movie/TV
   static bool GetEmbyMovies(CFileItemList &items, std::string url, std::string filter = "");

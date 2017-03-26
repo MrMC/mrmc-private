@@ -28,8 +28,10 @@
 
 #include "Application.h"
 #include "URL.h"
+#include "GUIUserMessages.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/StackDirectory.h"
+#include "guilib/GUIWindowManager.h"
 #include "network/Network.h"
 #include "settings/Settings.h"
 #include "utils/log.h"
@@ -169,6 +171,8 @@ void CEmbyClient::UpdateViewItem(const std::string &serviceId)
       CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, object);
       if (item != nullptr)
       {
+        CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
+        g_windowManager.SendMessage(msg);
       }
       return;
     }
@@ -186,7 +190,8 @@ void CEmbyClient::RemoveViewItem(const std::string &serviceId)
     {
       CLog::Log(LOGDEBUG, "CEmbyClient::RemoveViewItem: \"%s\"", item->GetLabel().c_str());
       m_viewItems->Remove(i);
-      // TODO: remove the item from any window
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 0, item);
+      g_windowManager.SendMessage(msg);
       return;
     }
   }
@@ -477,6 +482,7 @@ const CVariant CEmbyClient::FetchItemById(const std::string &Id)
   curl.SetFileName("emby/Users/" + GetUserID() + "/Items/");
   curl.SetOptions("");
   curl.SetOption("Ids", Id);
+  curl.SetOption("Fields", StringUtils::Join(Fields, ","));
   const CVariant object = CEmbyUtils::GetEmbyCVariant(curl.Get());
 
   return object;

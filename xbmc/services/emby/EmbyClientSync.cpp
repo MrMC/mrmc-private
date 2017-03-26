@@ -227,7 +227,7 @@ void CEmbyClientSync::Process()
           CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(m_address);
           if (client && client->GetPresence())
           {
-            if (msgData.isArray())
+            if (1 || msgData.isArray())
             {
               const auto userDataList = msgData[NotificationUserDataChangedUserDataList];
               for (auto userData = userDataList.begin_array(); userData != userDataList.end_array(); ++userData)
