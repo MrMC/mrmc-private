@@ -143,102 +143,99 @@ void CEmbyClient::AddViewItems(const CFileItemList &items)
   }
 }
 
-void CEmbyClient::AddNewViewItem(const std::string &serviceId)
+void CEmbyClient::AddNewViewItem(const std::string &id)
 {
-  // TODO: fetch id details
-  // TODO: create new CFileItemPtr based on id details
-  // TODO: add item and add item to relavent windows
-  CLog::Log(LOGERROR, "CEmbyClient::AddNewViewItem: failed to add item with id \"%s\"", serviceId.c_str());
-  const CVariant object = FetchItemById(serviceId);
-  CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, object);
+  const CVariant variant = FetchItemById(id);
+  CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variant);
   if (item != nullptr)
   {
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 0, item);
-    g_windowManager.SendMessage(msg);
+    g_windowManager.SendThreadMessage(msg);
+    CLog::Log(LOGERROR, "CEmbyClient::AddNewViewItem: added item with id \"%s\"", id.c_str());
   }
 }
 
-void CEmbyClient::UpdateViewItem(const std::string &serviceId)
+void CEmbyClient::UpdateViewItem(const std::string &id)
 {
   CSingleLock lock(m_viewItemsLock);
   for (int i = 0; i < m_viewItems->Size(); ++i)
   {
     const CFileItemPtr &item = m_viewItems->Get(i);
-    if (IsSameEmbyID(item, serviceId))
+//    CLog::Log(LOGDEBUG, "CEmbyClient::UpdateViewItem: checkId \"%s\" name \"%s\"",
+//      item->GetMediaServiceId().c_str(), item->GetLabel().c_str());
+    if (IsSameEmbyID(item, id))
     {
       CLog::Log(LOGDEBUG, "CEmbyClient::UpdateViewItem: \"%s\"", item->GetLabel().c_str());
       // TODO: update the item
       // TODO: update any window containing the item
-      const CVariant object = FetchItemById(serviceId);
-      CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, object);
+      const CVariant variant = FetchItemById(id);
+      CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variant);
       if (item != nullptr)
       {
         CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
-        g_windowManager.SendMessage(msg);
+        g_windowManager.SendThreadMessage(msg);
       }
       return;
     }
   }
-  CLog::Log(LOGERROR, "CEmbyClient::UpdateViewItem: failed to find/update item with id \"%s\"", serviceId.c_str());
+  CLog::Log(LOGERROR, "CEmbyClient::UpdateViewItem: failed to find/update item with id \"%s\"", id.c_str());
 }
 
-void CEmbyClient::UpdateViewItems(const std::vector<std::string> &serviceIds)
+void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
 {
-  const CVariant object = FetchItemByIds(serviceIds);
-  
-  if (object.isNull() || !object.isObject() || !object.isMember("Items"))
+  const CVariant variant = FetchItemByIds(ids);
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
   {
     CLog::Log(LOGERROR, "CEmbyClient::UpdateViewItems invalid response");
     return;
   }
-  
-  const auto& objectItems = object["Items"];
-  for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
-    auto objectItem = *objectItemIt;
-    
-    
     std::map<std::string, CVariant> variantMap;
-    variantMap["Items"].push_back(objectItem);
-    //objectItem = CVariant(variantMap);
+    variantMap["Items"].push_back(*variantItemIt);
 
     CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
-    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
-    g_windowManager.SendMessage(msg);
+    if (item != nullptr)
+    {
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
+      g_windowManager.SendThreadMessage(msg);
+    }
   }
 }
 
-void CEmbyClient::RemoveViewItem(const std::string &serviceId)
+void CEmbyClient::RemoveViewItem(const std::string &id)
 {
   CSingleLock lock(m_viewItemsLock);
   for (int i = 0; i < m_viewItems->Size(); ++i)
   {
     const CFileItemPtr &item = m_viewItems->Get(i);
-    if (IsSameEmbyID(item, serviceId))
+    if (IsSameEmbyID(item, id))
     {
       CLog::Log(LOGDEBUG, "CEmbyClient::RemoveViewItem: \"%s\"", item->GetLabel().c_str());
       m_viewItems->Remove(i);
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 0, item);
-      g_windowManager.SendMessage(msg);
+      g_windowManager.SendThreadMessage(msg);
       return;
     }
   }
-  CLog::Log(LOGERROR, "CEmbyClient::RemoveViewItem: failed to find/remove item with id \"%s\"", serviceId.c_str());
+  CLog::Log(LOGERROR, "CEmbyClient::RemoveViewItem: failed to find/remove item with id \"%s\"", id.c_str());
 }
 
-CFileItemPtr CEmbyClient::FindViewItem(const std::string &serviceId)
+CFileItemPtr CEmbyClient::FindViewItem(const std::string &id)
 {
   CSingleLock lock(m_viewItemsLock);
   for (int i = 0; i < m_viewItems->Size(); ++i)
   {
     CFileItemPtr item = m_viewItems->Get(i);
-    if (IsSameEmbyID(item, serviceId))
+    if (IsSameEmbyID(item, id))
     {
       CLog::Log(LOGDEBUG, "CEmbyClient::FindViewItemByServiceId: \"%s\"", item->GetLabel().c_str());
       return item;
     }
   }
-  CLog::Log(LOGERROR, "CEmbyClient::FindViewItemByServiceId: failed to get find item with id \"%s\"", serviceId.c_str());
+  CLog::Log(LOGERROR, "CEmbyClient::FindViewItemByServiceId: failed to get find item with id \"%s\"", id.c_str());
   return nullptr;
 }
 
@@ -479,38 +476,14 @@ const CVariant CEmbyClient::FetchItemByIds(const std::vector<std::string> &Ids)
   if (Ids.size() < 1)
     return CVariant(CVariant::VariantTypeNull);
 
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-
   static const std::vector<std::string> Fields = {
-    PropertyItemDateCreated,
-    PropertyItemGenres,
-    PropertyItemMediaStreams,
-    PropertyItemOverview,
-    PropertyItemShortOverview,
-    PropertyItemPath,
-//    PropertyItemPeople,
-//    PropertyItemProviderIds,
-//    PropertyItemSortName,
-//    PropertyItemOriginalTitle,
-//    PropertyItemStudios,
-    PropertyItemTaglines,
-//    PropertyItemProductionLocations,
-//    PropertyItemTags,
-//    PropertyItemVoteCount,
+    "DateCreated",
+    "Genres",
+    "MediaStreams",
+    "Overview",
+    "ShortOverview",
+    "Path",
+    "Taglines",
   };
 
   CURL curl(m_url);
@@ -518,7 +491,6 @@ const CVariant CEmbyClient::FetchItemByIds(const std::vector<std::string> &Ids)
   curl.SetOptions("");
   curl.SetOption("Ids", StringUtils::Join(Ids, ","));
   curl.SetOption("Fields", StringUtils::Join(Fields, ","));
-  const CVariant object = CEmbyUtils::GetEmbyCVariant(curl.Get());
-
-  return object;
+  const CVariant variant = CEmbyUtils::GetEmbyCVariant(curl.Get());
+  return variant;
 }

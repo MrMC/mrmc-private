@@ -67,7 +67,6 @@ public:
   }
   virtual ~CEmbyUtilsJob()
   {
-    
   }
   virtual bool DoWork()
   {
@@ -80,7 +79,7 @@ private:
   std::vector<std::string> m_itemIDs;
 };
 
-static int  g_progressSec = 0;
+static int g_progressSec = 0;
 static CFileItem m_curItem;
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
@@ -333,42 +332,16 @@ void CEmbyUtils::SetPlayState(MediaServicesPlayerState state)
 
 bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
 {
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-  
   static const std::vector<std::string> Fields = {
-    PropertyItemDateCreated,
-    PropertyItemGenres,
-    PropertyItemMediaStreams,
-    PropertyItemOverview,
-    //    PropertyItemShortOverview,
-    PropertyItemPath,
-    //    PropertyItemPeople,
-    //    PropertyItemProviderIds,
-    //    PropertyItemSortName,
-    //    PropertyItemOriginalTitle,
-    //    PropertyItemStudios,
-    //    PropertyItemTaglines,
-    //    PropertyItemProductionLocations,
-    //    PropertyItemTags,
-    //    PropertyItemVoteCount,
+    "DateCreated",
+    "Genres",
+    "MediaStreams",
+    "Overview",
+    "Path",
   };
-  
+
   CURL url2(url);
-  
+
   url2.SetFileName(url2.GetFileName() + "/Latest");
   
   url2.SetOption("IncludeItemTypes", "Episode");
@@ -378,7 +351,7 @@ bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::s
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   CVariant result = GetEmbyCVariant(url2.Get());
-  
+
   std::map<std::string, CVariant> variantMap;
   variantMap["Items"] = result;
   result = CVariant(variantMap);
@@ -390,43 +363,17 @@ bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::s
 bool CEmbyUtils::GetEmbyInProgressShows(CFileItemList &items, const std::string url, int limit)
 {
   // SortBy=DatePlayed&SortOrder=Descending&Filters=IsResumable&Limit=5
-  
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-  
+
   static const std::vector<std::string> Fields = {
-    PropertyItemDateCreated,
-    PropertyItemGenres,
-    PropertyItemMediaStreams,
-    PropertyItemOverview,
-    //    PropertyItemShortOverview,
-    PropertyItemPath,
-    //    PropertyItemPeople,
-    //    PropertyItemProviderIds,
-    //    PropertyItemSortName,
-    //    PropertyItemOriginalTitle,
-    //    PropertyItemStudios,
-    //    PropertyItemTaglines,
-    //    PropertyItemProductionLocations,
-    //    PropertyItemTags,
-    //    PropertyItemVoteCount,
+    "DateCreated",
+    "Genres",
+    "MediaStreams",
+    "Overview",
+    "Path",
   };
-  
+
   CURL url2(url);
-  
+
   url2.SetOption("IncludeItemTypes", "Episode");
   url2.SetOption("SortBy", "DatePlayed");
   url2.SetOption("SortOrder", "Descending");
@@ -437,108 +384,54 @@ bool CEmbyUtils::GetEmbyInProgressShows(CFileItemList &items, const std::string 
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   CVariant result = GetEmbyCVariant(url2.Get());
-  
+
   bool rtn = GetVideoItems(items, url2, result, MediaTypeEpisode);
   return rtn;
 }
 
 bool CEmbyUtils::GetEmbyRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
 {
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-  
   static const std::vector<std::string> Fields = {
-    PropertyItemDateCreated,
-    PropertyItemGenres,
-    PropertyItemMediaStreams,
-    PropertyItemOverview,
-    //    PropertyItemShortOverview,
-    PropertyItemPath,
-    //    PropertyItemPeople,
-    //    PropertyItemProviderIds,
-    //    PropertyItemSortName,
-    //    PropertyItemOriginalTitle,
-    //    PropertyItemStudios,
-    //    PropertyItemTaglines,
-    //    PropertyItemProductionLocations,
-    //    PropertyItemTags,
-    //    PropertyItemVoteCount,
+    "DateCreated",
+    "Genres",
+    "MediaStreams",
+    "Overview",
+    "Path",
   };
-  
+
   CURL url2(url);
-  
+
   url2.SetFileName(url2.GetFileName() + "/Latest");
-  
+
   url2.SetOption("IncludeItemTypes", "Movie");
   url2.SetOption("Limit", StringUtils::Format("%i",limit));
   url2.SetOption("GroupItems", "False");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  CVariant result = GetEmbyCVariant(url2.Get());
-  
+  CVariant variant = GetEmbyCVariant(url2.Get());
+
   std::map<std::string, CVariant> variantMap;
-  variantMap["Items"] = result;
-  result = CVariant(variantMap);
-  
-  bool rtn = GetVideoItems(items, url2, result, MediaTypeMovie);
+  variantMap["Items"] = variant;
+  variant = CVariant(variantMap);
+
+  bool rtn = GetVideoItems(items, url2, variant, MediaTypeMovie);
   return rtn;
 }
 
 bool CEmbyUtils::GetEmbyInProgressMovies(CFileItemList &items, const std::string url, int limit)
 {
-  
   // SortBy=DatePlayed&SortOrder=Descending&Filters=IsResumable&Limit=5
-  
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-  
   static const std::vector<std::string> Fields = {
-    PropertyItemDateCreated,
-    PropertyItemGenres,
-    PropertyItemMediaStreams,
-    PropertyItemOverview,
-    //    PropertyItemShortOverview,
-    PropertyItemPath,
-    //    PropertyItemPeople,
-    //    PropertyItemProviderIds,
-    //    PropertyItemSortName,
-    //    PropertyItemOriginalTitle,
-    //    PropertyItemStudios,
-    //    PropertyItemTaglines,
-    //    PropertyItemProductionLocations,
-    //    PropertyItemTags,
-    //    PropertyItemVoteCount,
+    "DateCreated",
+    "Genres",
+    "MediaStreams",
+    "Overview",
+    "Path",
   };
   
   CURL url2(url);
-  
+
   url2.SetOption("IncludeItemTypes", "Movie");
   url2.SetOption("SortBy", "DatePlayed");
   url2.SetOption("SortOrder", "Descending");
@@ -549,7 +442,7 @@ bool CEmbyUtils::GetEmbyInProgressMovies(CFileItemList &items, const std::string
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   CVariant result = GetEmbyCVariant(url2.Get());
-  
+
   bool rtn = GetVideoItems(items, url2, result, MediaTypeMovie);
   return rtn;
 }
@@ -557,7 +450,7 @@ bool CEmbyUtils::GetEmbyInProgressMovies(CFileItemList &items, const std::string
 bool CEmbyUtils::GetAllEmbyInProgress(CFileItemList &items, bool tvShow)
 {
   bool rtn = false;
-  
+
   if (CEmbyServices::GetInstance().HasClients())
   {
     CFileItemList embyItems;
@@ -569,6 +462,7 @@ bool CEmbyUtils::GetAllEmbyInProgress(CFileItemList &items, bool tvShow)
     {
       if (limitToLocal && !client->IsOwned())
         continue;
+
       EmbyViewContentVector contents;
       if (tvShow)
         contents = client->GetTvShowContent();
@@ -581,12 +475,12 @@ bool CEmbyUtils::GetAllEmbyInProgress(CFileItemList &items, bool tvShow)
         curl.SetProtocol(client->GetProtocol());
         curl.SetOption("ParentId", content.id);
         curl.SetFileName("Users/" + userId + "/Items");
-        
+
         if (tvShow)
           rtn = GetEmbyInProgressShows(embyItems, curl.Get(), 10);
         else
           rtn = GetEmbyInProgressMovies(embyItems, curl.Get(), 10);
-        
+
         items.Append(embyItems);
         embyItems.ClearItems();
       }
@@ -598,7 +492,7 @@ bool CEmbyUtils::GetAllEmbyInProgress(CFileItemList &items, bool tvShow)
 bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow)
 {
   bool rtn = false;
-  
+
   if (CEmbyServices::GetInstance().HasClients())
   {
     CFileItemList embyItems;
@@ -610,6 +504,7 @@ bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, boo
     {
       if (limitToLocal && !client->IsOwned())
         continue;
+
       EmbyViewContentVector contents;
       if (tvShow)
         contents = client->GetTvShowContent();
@@ -622,23 +517,18 @@ bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, boo
         curl.SetProtocol(client->GetProtocol());
         curl.SetOption("ParentId", content.id);
         curl.SetFileName("Users/" + userId + "/Items");
-        
+
         if (tvShow)
           rtn = GetEmbyRecentlyAddedEpisodes(embyItems, curl.Get(), 10);
         else
           rtn = GetEmbyRecentlyAddedMovies(embyItems, curl.Get(), 10);
-        
+
         items.Append(embyItems);
         embyItems.ClearItems();
       }
     }
   }
   return rtn;
-}
-
-CFileItemPtr ParseVideo(const CEmbyClient *client, const CVariant &object)
-{
-  return nullptr;
 }
 
 CFileItemPtr ParseMusic(const CEmbyClient *client, const CVariant &object)
@@ -655,7 +545,6 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &obje
   }
 
   const auto& items = object["Items"];
-  //int totalRecordCount = object["TotalRecordCount"].asInteger();
   for (auto itemsIt = items.begin_array(); itemsIt != items.end_array(); ++itemsIt)
   {
     const auto item = *itemsIt;
@@ -679,7 +568,7 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &obje
     }
     else if (mediaType == "Music")
       return ParseMusic(client, item);
-    
+
     return items[0];
   }
 
@@ -689,25 +578,21 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &obje
   // Emby Movie/TV
 bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::string filter)
 {
-
+  bool rtn = false;
   CURL url2(url);
 
   url2.SetOption("IncludeItemTypes", "Movie");
-  url2.SetOption("Fields", "Etag");
+  url2.SetOption("Fields", "Etag,DateCreated");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  const CVariant result = GetEmbyCVariant(url2.Get());
+  const CVariant variant = GetEmbyCVariant(url2.Get());
 
-  bool rtn = GetVideoItems(items, url2, result, MediaTypeMovie);
-  
-  if (!rtn)
-    return rtn;
-  else
+  if (GetVideoItems(items, url2, variant, MediaTypeMovie))
   {
-    std::vector<std::string> itemIds;
     CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
     if (client || client->GetPresence())
     {
-      const auto& objectItems = result["Items"];
+      std::vector<std::string> itemIds;
+      const auto& objectItems = variant["Items"];
       int counter = 0;
       for (unsigned int k = 0; k < objectItems.size(); ++k)
       {
@@ -730,40 +615,14 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
 
 bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
 {
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-  static const std::string PropertyItemRecursiveItemCount = "RecursiveItemCount";
-
   static const std::vector<std::string> Fields = {
-    PropertyItemDateCreated,
-    PropertyItemGenres,
-    PropertyItemMediaStreams,
-    PropertyItemOverview,
-    PropertyItemShortOverview,
-    PropertyItemPath,
-//    PropertyItemPeople,
-//    PropertyItemProviderIds,
-//    PropertyItemSortName,
-//    PropertyItemOriginalTitle,
-//    PropertyItemStudios,
-//    PropertyItemTaglines,
-//    PropertyItemProductionLocations,
-//    PropertyItemTags,
-//    PropertyItemVoteCount,
-    PropertyItemRecursiveItemCount
+    "DateCreated",
+    "Genres",
+    "MediaStreams",
+    "Overview",
+    "ShortOverview",
+    "Path",
+    "RecursiveItemCount",
   };
 
   bool rtn = false;
@@ -774,9 +633,7 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
 
-
  /*
-  
    params = {
    
    'ParentId': parentid,
@@ -789,17 +646,16 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
    'Recursive': True,
    'Limit': 1
    }
-   
   */
-  
-  const CVariant object = GetEmbyCVariant(url2.Get());
 
-  if (!object.isNull() || object.isObject() || object.isMember("Items"))
+  const CVariant variant = GetEmbyCVariant(url2.Get());
+
+  if (!variant.isNull() || variant.isObject() || variant.isMember("Items"))
   {
-    const auto& objectItems = object["Items"];
-    for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+    const auto& variantItems = variant["Items"];
+    for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
     {
-      const auto item = *objectItemIt;
+      const auto item = *variantItemIt;
       rtn = true;
 
       std::string value;
@@ -860,7 +716,7 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
       int unWatchedEpisodes = static_cast<int>(item["UserData"]["UnplayedItemCount"].asInteger());
       int watchedEpisodes = totalEpisodes - unWatchedEpisodes;
       int iSeasons        = static_cast<int>(item["ChildCount"].asInteger());
-      
+
       newItem->GetVideoInfoTag()->m_iSeason = iSeasons;
       newItem->GetVideoInfoTag()->m_iEpisode = totalEpisodes;
       newItem->GetVideoInfoTag()->m_playCount = (int)watchedEpisodes >= newItem->GetVideoInfoTag()->m_iEpisode;
@@ -886,19 +742,17 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
 bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
 {
   // "Shows/\(query.seriesId)/Seasons"
-
-
   bool rtn = false;
-  
+
   CURL url2(url);
   url2.SetOption("IncludeItemTypes", "Seasons");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline,Virtual");
-  url2.SetOption("Fields", "Etag,RecursiveItemCount");
+  url2.SetOption("Fields", "Etag,DateCreated,RecursiveItemCount");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
 
-  const CVariant object = GetEmbyCVariant(url2.Get());
+  const CVariant variant = GetEmbyCVariant(url2.Get());
   std::string seriesName;
-  if (!object.isNull() || object.isObject() || object.isMember("Items"))
+  if (!variant.isNull() || variant.isObject() || variant.isMember("Items"))
   {
     CURL url3(url);
     std::string seriesID = url3.GetOption("ParentId");
@@ -908,13 +762,12 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
     url3.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
     const CVariant seriesObject = CEmbyUtils::GetEmbyCVariant(url3.Get());
     const auto& seriesItem = seriesObject["Items"][0];
-    const auto& objectItems = object["Items"];
-    for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+    const auto& variantItems = variant["Items"];
+    for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
     {
-      
-      const auto item = *objectItemIt;
+      const auto item = *variantItemIt;
       rtn = true;
-      
+
       std::string value;
       std::string fanart;
       std::string itemId = item["Id"].asString();
@@ -923,18 +776,18 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
       CURL url2(url);
       url2.SetOptions("");
       url2.SetOption("ParentId", itemId);
-      
+
       CFileItemPtr newItem(new CFileItem());
       // set m_bIsFolder to true to indicate we are tvshow list
       newItem->m_bIsFolder = true;
-      
+
       //CURL url1(url);
       //url1.SetFileName("/Users/" + itemId + "/Items");
       newItem->SetLabel(itemId);
       newItem->SetPath("emby://tvshows/seasons/" + Base64::Encode(url2.Get()));
       newItem->SetMediaServiceId(itemId);
       newItem->SetMediaServiceFile(item["Path"].asString());
-      
+
       url2.SetFileName("Items/" + item["ImageTags"]["Primary"].asString() + "/Images/Primary");
       newItem->SetArt("thumb", url2.Get());
       newItem->SetIconImage(url2.Get());
@@ -942,7 +795,7 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
       newItem->SetArt("banner", url2.Get());
       url2.SetFileName("Items/" + seriesId + "/Images/Backdrop");
       newItem->SetArt("fanart", url2.Get());
-      
+
       newItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
       newItem->GetVideoInfoTag()->m_strTitle = item["Name"].asString();
       // we get these from rootXmlNode, where all show info is
@@ -968,67 +821,42 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
       newItem->GetVideoInfoTag()->m_iSeason = iSeason;
       newItem->GetVideoInfoTag()->m_iEpisode = totalEpisodes;
       newItem->GetVideoInfoTag()->m_playCount = item["UserData"]["PlayCount"].asInteger();
-      
+
       newItem->SetProperty("totalepisodes", totalEpisodes);
       newItem->SetProperty("numepisodes", totalEpisodes);
       newItem->SetProperty("watchedepisodes", watchedEpisodes);
       newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
-      
+
       newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
-      
+
       items.Add(newItem);
     }
   }
   items.SetLabel(seriesName);
   items.SetProperty("library.filter", "true");
+
   return rtn;
 }
 
 bool CEmbyUtils::GetEmbyEpisodes(CFileItemList &items, const std::string url)
 {
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-  
   static const std::vector<std::string> Fields = {
-    PropertyItemDateCreated,
-    PropertyItemGenres,
-    PropertyItemMediaStreams,
-    PropertyItemOverview,
-    //    PropertyItemShortOverview,
-    PropertyItemPath,
-    //    PropertyItemPeople,
-    //    PropertyItemProviderIds,
-    //    PropertyItemSortName,
-    //    PropertyItemOriginalTitle,
-    //    PropertyItemStudios,
-    //    PropertyItemTaglines,
-    //    PropertyItemProductionLocations,
-    //    PropertyItemTags,
-    //    PropertyItemVoteCount,
+    "DateCreated",
+    "Genres",
+    "MediaStreams",
+    "Overview",
+    "Path",
   };
-  
+
   CURL url2(url);
 
   url2.SetOption("IncludeItemTypes", "Episode");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  const CVariant result = GetEmbyCVariant(url2.Get());
-  
-  bool rtn = GetVideoItems(items, url2, result, MediaTypeEpisode);
+  const CVariant variant = GetEmbyCVariant(url2.Get());
+
+  bool rtn = GetVideoItems(items, url2, variant, MediaTypeEpisode);
   return rtn;
 }
 
@@ -1048,50 +876,46 @@ bool CEmbyUtils::GetEmbyTVFilter(CFileItemList &items, std::string url, std::str
    filter = "country";
    else if (path == "studios")
    filter = "studio";
-   
+
    http://192.168.1.200:8096/emby/Genres?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Movie&Recursive=true&EnableTotalRecordCount=false&ParentId=f137a2dd21bbc1b99aa5c0f6bf02a805&userId=cf28f6d51dd54c63a27fed6600c5b6cb
    */
-  
+
   std::string userID = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
-  
+
   CURL url2(url);
 
   url2.SetFileName("emby/"+ filter);
   url2.SetOption("IncludeItemTypes", "Series");
 
-  
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", "Etag");
+  url2.SetOption("Fields", "Etag,DateCreated");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  const CVariant result = GetEmbyCVariant(url2.Get());
-  
-  
+  const CVariant variant = GetEmbyCVariant(url2.Get());
+
   bool rtn = false;
   
-  
-  if (result.isNull() || !result.isObject() || !result.isMember("Items"))
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
   {
     CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
     return false;
   }
-  
-  const auto& objectItems = result["Items"];
-  for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
     rtn = true;
-    const auto item = *objectItemIt;
+    const auto item = *variantItemIt;
     CFileItemPtr newItem(new CFileItem());
     std::string title = item["Name"].asString();
     std::string key = item["Id"].asString();
     newItem->m_bIsFolder = true;
     newItem->m_bIsShareOrDrive = false;
-    
+
     if (filter == "Genres")
       url2.SetOption("GenreIds", key);
     else if (filter == "Years")
       url2.SetOption("Years", title);
-    
-    
+
     url2.SetFileName("Users/" + userID +"/Items");
     newItem->SetPath(parentPath + Base64::Encode(url2.Get()));
     newItem->SetLabel(title);
@@ -1120,9 +944,9 @@ bool CEmbyUtils::GetEmbyMovieFilter(CFileItemList &items, std::string url, std::
    
    http://192.168.1.200:8096/emby/Genres?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Movie&Recursive=true&EnableTotalRecordCount=false&ParentId=f137a2dd21bbc1b99aa5c0f6bf02a805&userId=cf28f6d51dd54c63a27fed6600c5b6cb
   */
-  
+
   std::string userID = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
-  
+
   CURL url2(url);
   if (filter != "Collections")
   {
@@ -1135,34 +959,31 @@ bool CEmbyUtils::GetEmbyMovieFilter(CFileItemList &items, std::string url, std::
     url2.SetOption("Recursive", "true");
     url2.SetOption("ParentId", "");
   }
-  
-  
+
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", "Etag");
+  url2.SetOption("Fields", "Etag,DateCreated");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  const CVariant result = GetEmbyCVariant(url2.Get());
-  
-  
+  const CVariant variant = GetEmbyCVariant(url2.Get());
+
   bool rtn = false;
-  
-  
-  if (result.isNull() || !result.isObject() || !result.isMember("Items"))
+
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
   {
     CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
     return false;
   }
 
-  const auto& objectItems = result["Items"];
-  for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
     rtn = true;
-    const auto item = *objectItemIt;
+    const auto item = *variantItemIt;
     CFileItemPtr newItem(new CFileItem());
     std::string title = item["Name"].asString();
     std::string key = item["Id"].asString();
     newItem->m_bIsFolder = true;
     newItem->m_bIsShareOrDrive = false;
-    
+
     if (filter == "Genres")
       url2.SetOption("GenreIds", key);
     else if (filter == "Years")
@@ -1170,7 +991,6 @@ bool CEmbyUtils::GetEmbyMovieFilter(CFileItemList &items, std::string url, std::
     else if (filter == "Collections")
       url2.SetOption("ParentId", key);
 
-    
     url2.SetFileName("Users/" + userID +"/Items");
     newItem->SetPath(parentPath + Base64::Encode(url2.Get()));
     newItem->SetLabel(title);
@@ -1187,63 +1007,34 @@ bool CEmbyUtils::GetItemSubtiles(CFileItem &item)
 
 bool CEmbyUtils::GetMoreItemInfo(CFileItem &item)
 {
-  static const std::string PropertyItemPath = "Path";
-  static const std::string PropertyItemDateCreated = "DateCreated";
-  static const std::string PropertyItemGenres = "Genres";
-  static const std::string PropertyItemMediaStreams = "MediaStreams";
-  static const std::string PropertyItemOverview = "Overview";
-  static const std::string PropertyItemShortOverview = "ShortOverview";
-  static const std::string PropertyItemPeople = "People";
-  static const std::string PropertyItemSortName = "SortName";
-  static const std::string PropertyItemOriginalTitle = "OriginalTitle";
-  static const std::string PropertyItemProviderIds = "ProviderIds";
-  static const std::string PropertyItemStudios = "Studios";
-  static const std::string PropertyItemTaglines = "Taglines";
-  static const std::string PropertyItemProductionLocations = "ProductionLocations";
-  static const std::string PropertyItemTags = "Tags";
-  static const std::string PropertyItemVoteCount = "VoteCount";
-  
   static const std::vector<std::string> Fields = {
-    //PropertyItemDateCreated,
-    PropertyItemGenres,
-    //PropertyItemMediaStreams,
-    //PropertyItemOverview,
-    //    PropertyItemShortOverview,
-    //PropertyItemPath,
-    PropertyItemPeople,
-    //    PropertyItemProviderIds,
-    //    PropertyItemSortName,
-    //    PropertyItemOriginalTitle,
-    //    PropertyItemStudios,
-    //    PropertyItemTaglines,
-    //    PropertyItemProductionLocations,
-    //    PropertyItemTags,
-    //    PropertyItemVoteCount,
+    "Genres",
+    "People",
   };
-  
+
   std::string url = URIUtils::GetParentPath(item.GetPath());
   if (StringUtils::StartsWithNoCase(url, "emby://"))
     url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
-  
+
   CURL url2(url);
   CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
   if (!client || !client->GetPresence())
     return false;
-  
+
   std::string itemId;
   if (item.HasProperty("EmbySeriesID") && !item.GetProperty("EmbySeriesID").asString().empty())
     itemId = item.GetProperty("EmbySeriesID").asString();
   else
     itemId = item.GetMediaServiceId();
-  
+
   url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
   url2.SetOptions("");
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetOption("IDs", itemId);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  const CVariant result = GetEmbyCVariant(url2.Get());
-  
-  GetVideoDetails(item, result["Items"][0]);
+  const CVariant variant = GetEmbyCVariant(url2.Get());
+
+  GetVideoDetails(item, variant["Items"][0]);
   return true;
 }
 
@@ -1311,10 +1102,10 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &v
 #if defined(EMBY_DEBUG_TIMING)
   unsigned int currentTime = XbmcThreads::SystemClockMillis();
 #endif
-  const auto& objectItems = variant["Items"];
-  for (auto objectItemIt = objectItems.begin_array(); objectItemIt != objectItems.end_array(); ++objectItemIt)
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
-    const auto objectItem = *objectItemIt;
+    const auto objectItem = *variantItemIt;
     CFileItemPtr item = ToVideoFileItemPtr(url, objectItem, type);
     items.Add(item);
     rtn = true;
@@ -1325,8 +1116,12 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &v
   SetEmbyItemProperties(items);
 
 #if defined(EMBY_DEBUG_TIMING)
-  CLog::Log(LOGDEBUG, "CEmbyUtils::GetVideoItems %d(msec) for %d items",
-    XbmcThreads::SystemClockMillis() - currentTime, objectItems.size());
+  int delta = XbmcThreads::SystemClockMillis() - currentTime;
+  if (delta > 1)
+  {
+    CLog::Log(LOGDEBUG, "CEmbyUtils::GetVideoItems %d(msec) for %d items",
+      XbmcThreads::SystemClockMillis() - currentTime, variantItems.size());
+  }
 #endif
   return rtn;
 }
@@ -1456,7 +1251,7 @@ void CEmbyUtils::GetVideoDetails(CFileItem &item, const CVariant &variant)
     }
     item.GetVideoInfoTag()->SetGenre(genres);
   }
-  
+
   if (variant.isMember("People"))
   {
     std::vector< SActorInfo > roles;
@@ -1482,7 +1277,7 @@ void CEmbyUtils::GetVideoDetails(CFileItem &item, const CVariant &variant)
         roles.push_back(role);
       }
     }
-    
+
     item.GetVideoInfoTag()->m_cast = roles;
     item.GetVideoInfoTag()->SetDirector(directors);
   }
@@ -1588,4 +1383,3 @@ CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
 void CEmbyUtils::RemoveSubtitleProperties(CFileItem &item)
 {
 }
-

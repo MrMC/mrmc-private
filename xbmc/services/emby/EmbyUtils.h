@@ -23,7 +23,7 @@
 #include "FileItem.h"
 #include "services/ServicesManager.h"
 
-#define EMBY_DEBUG_VERBOSE
+//#define EMBY_DEBUG_VERBOSE
 #define EMBY_DEBUG_TIMING
 
 namespace XFILE
@@ -74,7 +74,7 @@ public:
   static bool GetMoreResolutions(CFileItem &item);
   static bool GetURL(CFileItem &item);
   static bool SearchEmby(CFileItemList &items, std::string strSearchString);
-  
+
   // Emby Music
   static bool GetEmbyArtistsOrAlbum(CFileItemList &items, std::string url, bool album);
   static bool GetEmbySongs(CFileItemList &items, std::string url);

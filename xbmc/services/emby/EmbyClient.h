@@ -91,11 +91,11 @@ public:
   void  ClearViewItems();
   void  AddViewItem(const CFileItemPtr &item);
   void  AddViewItems(const CFileItemList &items);
-  void  AddNewViewItem(const std::string &serviceId);
-  void  UpdateViewItem(const std::string &serviceId);
-  void  UpdateViewItems(const std::vector<std::string> &serviceIds);
-  void  RemoveViewItem(const std::string &serviceId);
-  CFileItemPtr FindViewItem(const std::string &serviceId);
+  void  AddNewViewItem(const std::string &id);
+  void  UpdateViewItem(const std::string &id);
+  void  UpdateViewItems(const std::vector<std::string> &ids);
+  void  RemoveViewItem(const std::string &id);
+  CFileItemPtr FindViewItem(const std::string &id);
 
   const EmbyViewContentVector GetTvShowContent() const;
   const EmbyViewContentVector GetMoviesContent() const;

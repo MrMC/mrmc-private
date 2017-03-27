@@ -296,7 +296,6 @@ void CEmbyServices::OnSettingAction(const CSetting *setting)
     }
     SetUserSettings();
 
-
     if (startThread)
       Start();
     else
@@ -423,7 +422,6 @@ void CEmbyServices::Process()
 
   int serviceTimeoutSeconds = 5;
   std::string strSignOut = g_localizeStrings.Get(2110);
-
 
   if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYSIGNIN) == strSignOut)
   {
@@ -757,7 +755,7 @@ bool CEmbyServices::GetSignInByPinReply()
         rtn = AuthenticatePinReply(deviceId, pin);
     }
   }
-  
+
   if (!rtn)
   {
     CLog::Log(LOGERROR, "CEmbyServices:WaitForSignInByPin failed %s", response.c_str());
@@ -919,7 +917,7 @@ bool CEmbyServices::ClientIsLocal(std::string path)
     if (StringUtils::StartsWithNoCase(client->GetUrl(), path))
       return client->IsLocal();
   }
-  
+
   return false;
 }
 
