@@ -85,6 +85,8 @@ public:
 
 private:
   static void ReportToServer(std::string url, std::string filename);
+  static bool ParseEmbySeries(CFileItemList &items, const CURL &url, const CVariant &variant);
+  static bool ParseEmbySeasons(CFileItemList &items, const CURL &url, const CVariant &series, const CVariant &variant);
   static bool GetVideoItems(CFileItemList &items, CURL url, const CVariant &object, std::string type);
   static CFileItemPtr ToVideoFileItemPtr(CURL url, const CVariant &variant, std::string type);
   static void GetVideoDetails(CFileItem &item, const CVariant &variant);

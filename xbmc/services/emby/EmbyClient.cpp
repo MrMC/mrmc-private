@@ -166,8 +166,6 @@ void CEmbyClient::UpdateViewItem(const std::string &id)
     if (IsSameEmbyID(item, id))
     {
       CLog::Log(LOGDEBUG, "CEmbyClient::UpdateViewItem: \"%s\"", item->GetLabel().c_str());
-      // TODO: update the item
-      // TODO: update any window containing the item
       const CVariant variant = FetchItemById(id);
       CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variant);
       if (item != nullptr)
@@ -484,6 +482,7 @@ const CVariant CEmbyClient::FetchItemByIds(const std::vector<std::string> &Ids)
     "ShortOverview",
     "Path",
     "Taglines",
+    "ParentId",
   };
 
   CURL curl(m_url);

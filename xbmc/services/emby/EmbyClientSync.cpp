@@ -119,7 +119,7 @@ void CEmbyClientSync::Process()
         if (msgType == "ScheduledTaskEnded")
           return;
 
-        CLog::Log(LOGDEBUG, "[%s] %s: %s", this->m_name.c_str(), msgType.c_str(), msg.c_str());
+        //CLog::Log(LOGDEBUG, "[%s] %s: %s", this->m_name.c_str(), msgType.c_str(), msg.c_str());
 
         const auto msgData = msgObject["Data"];
         if (!msgData.isObject())
@@ -130,14 +130,13 @@ void CEmbyClientSync::Process()
 
         if (msgType == "LibraryChanged")
         {
-          const auto itemsAdded = msgData["ItemsAdded"];
-          const auto itemsUpdated = msgData["ItemsUpdated"];
-          const auto itemsRemoved = msgData["ItemsRemoved"];
-
           CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(m_address);
           if (client && client->GetPresence())
           {
             CLog::Log(LOGDEBUG, "CEmbyClientSync: processing LibraryChanged");
+            CLog::Log(LOGDEBUG, "[%s] %s: %s", this->m_name.c_str(), msgType.c_str(), msg.c_str());
+
+            const auto itemsAdded = msgData["ItemsAdded"];
             if (itemsAdded.isArray())
             {
               for (auto item = itemsAdded.begin_array(); item != itemsAdded.end_array(); ++item)
@@ -147,6 +146,7 @@ void CEmbyClientSync::Process()
               }
             }
 
+            const auto itemsUpdated = msgData["ItemsUpdated"];
             if (itemsUpdated.isArray())
             {
               std::vector<std::string> ids;
@@ -159,6 +159,7 @@ void CEmbyClientSync::Process()
                 client->UpdateViewItems(ids);
             }
 
+            const auto itemsRemoved = msgData["ItemsRemoved"];
             if (itemsRemoved.isArray())
             {
               for (auto item = itemsRemoved.begin_array(); item != itemsRemoved.end_array(); ++item)
@@ -187,6 +188,10 @@ void CEmbyClientSync::Process()
               client->UpdateViewItems(ids);
           }
           */
+        }
+        else
+        {
+          CLog::Log(LOGDEBUG, "[%s] %s: %s", this->m_name.c_str(), msgType.c_str(), msg.c_str());
         }
       });
   }

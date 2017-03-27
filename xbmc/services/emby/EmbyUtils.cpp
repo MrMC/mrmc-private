@@ -350,13 +350,13 @@ bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::s
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
   url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  CVariant result = GetEmbyCVariant(url2.Get());
+  CVariant variant = GetEmbyCVariant(url2.Get());
 
   std::map<std::string, CVariant> variantMap;
-  variantMap["Items"] = result;
-  result = CVariant(variantMap);
+  variantMap["Items"] = variant;
+  variant = CVariant(variantMap);
 
-  bool rtn = GetVideoItems(items, url2, result, MediaTypeEpisode);
+  bool rtn = GetVideoItems(items, url2, variant, MediaTypeEpisode);
   return rtn;
 }
 
@@ -531,43 +531,61 @@ bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, boo
   return rtn;
 }
 
-CFileItemPtr ParseMusic(const CEmbyClient *client, const CVariant &object)
+CFileItemPtr ParseMusic(const CEmbyClient *client, const CVariant &variant)
 {
   return nullptr;
 }
 
-CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &object)
+CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &variant)
 {
-  if (object.isNull() || !object.isObject() || !object.isMember("Items"))
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
   {
     CLog::Log(LOGERROR, "CEmbyUtils::ToFileItemPtr cvariant is empty");
     return nullptr;
   }
 
-  const auto& items = object["Items"];
-  for (auto itemsIt = items.begin_array(); itemsIt != items.end_array(); ++itemsIt)
+  const auto& variantItems = variant["Items"];
+  for (auto variantitemsIt = variantItems.begin_array(); variantitemsIt != variantItems.end_array(); ++variantitemsIt)
   {
-    const auto item = *itemsIt;
-    if (!item.isMember("Id"))
+    const auto variantItem = *variantitemsIt;
+    if (!variantItem.isMember("Id"))
       continue;
 
     CFileItemList items;
-    std::map<std::string, CVariant> variantMap;
-    std::string mediaType = item["MediaType"].asString();
-    std::string type = item["Type"].asString();
+    std::string type = variantItem["Type"].asString();
+    std::string mediaType = variantItem["MediaType"].asString();
     CURL url2(client->GetUrl());
     url2.SetProtocol(client->GetProtocol());
     url2.SetPort(client->GetPort());
     url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
-    if (mediaType == "Video")
+
+    if (type == "Movie")
     {
-      if (type == "Movie")
-        GetVideoItems(items, url2, object, MediaTypeMovie);
-      else
-        GetVideoItems(items, url2, object, MediaTypeEpisode);
+      GetVideoItems(items, url2, variant, MediaTypeMovie);
     }
-    else if (mediaType == "Music")
-      return ParseMusic(client, item);
+    else if (type == "Series")
+    {
+      ParseEmbySeries(items, url2, variant);
+    }
+    else if (type == "Season")
+    {
+      CURL url3(url2);
+      std::string seriesID = variantItem["ParentId"].asString();
+      url3.SetOptions("");
+      url3.SetOption("Ids", seriesID);
+      url3.SetOption("Fields", "Overview,Genres");
+      url3.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
+      const CVariant seriesObject = CEmbyUtils::GetEmbyCVariant(url3.Get());
+      ParseEmbySeasons(items, url2, seriesObject, variant);
+    }
+    else if (type == "Episode")
+    {
+      GetVideoItems(items, url2, variant, MediaTypeEpisode);
+    }
+    //else if (type == "Music")
+    //{
+    //  return ParseMusic(client, variantItem);
+    //}
 
     return items[0];
   }
@@ -638,8 +656,6 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
     "RecursiveItemCount",
   };
 
-  bool rtn = false;
-
   CURL url2(url);
   url2.SetOption("IncludeItemTypes", "Series");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
@@ -663,92 +679,8 @@ bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
 
   const CVariant variant = GetEmbyCVariant(url2.Get());
 
-  if (!variant.isNull() || variant.isObject() || variant.isMember("Items"))
-  {
-    const auto& variantItems = variant["Items"];
-    for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
-    {
-      const auto item = *variantItemIt;
-      rtn = true;
-
-      std::string value;
-      std::string fanart;
-      std::string itemId = item["Id"].asString();
-      std::string seriesId = item["SeriesId"].asString();
-      // clear url options
-      CURL url2(url);
-      url2.SetOption("ParentId", itemId);
- //     url2.SetOptions("");
-
-      CFileItemPtr newItem(new CFileItem());
-      // set m_bIsFolder to true to indicate we are tvshow list
-      newItem->m_bIsFolder = true;
-
-      std::string title = item["Name"].asString();
-      newItem->SetLabel(title);
-
-      CDateTime premiereDate;
-      premiereDate.SetFromW3CDateTime(item["PremiereDate"].asString());
-      newItem->m_dateTime = premiereDate;
-
-     // url2.SetFileName("Users/" + itemId + "/Items");
-      newItem->SetPath("emby://tvshows/shows/" + Base64::Encode(url2.Get()));
-      newItem->SetMediaServiceId(itemId);
-      newItem->SetMediaServiceFile(item["Path"].asString());
-
-      url2.SetFileName("Items/" + itemId + "/Images/Primary");
-      newItem->SetArt("thumb", url2.Get());
-      newItem->SetIconImage(url2.Get());
-      url2.SetFileName("Items/" + itemId + "/Images/Banner");
-      newItem->SetArt("banner", url2.Get());
-      url2.SetFileName("Items/" + itemId + "/Images/Backdrop");
-      newItem->SetArt("fanart", url2.Get());
-
-      newItem->GetVideoInfoTag()->m_playCount = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
-      newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
-
-      newItem->GetVideoInfoTag()->m_strTitle = title;
-      newItem->GetVideoInfoTag()->m_strStatus = item["Status"].asString();
-
-      newItem->GetVideoInfoTag()->m_type = MediaTypeMovie;
-      newItem->GetVideoInfoTag()->m_strFileNameAndPath = newItem->GetPath();
-      newItem->GetVideoInfoTag()->SetSortTitle(item["SortName"].asString());
-      newItem->GetVideoInfoTag()->SetOriginalTitle(item["OriginalTitle"].asString());
-      newItem->SetProperty("EmbySeriesID", seriesId);
-      //newItem->SetProperty("EmbyShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
-      newItem->GetVideoInfoTag()->SetPlot(item["Overview"].asString());
-      newItem->GetVideoInfoTag()->SetPlotOutline(item["ShortOverview"].asString());
-      newItem->GetVideoInfoTag()->m_firstAired = premiereDate;
-      newItem->GetVideoInfoTag()->SetPremiered(premiereDate);
-      newItem->GetVideoInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
-      newItem->GetVideoInfoTag()->SetYear(static_cast<int>(item["ProductionYear"].asInteger()));
-      newItem->GetVideoInfoTag()->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
-      newItem->GetVideoInfoTag()->m_strMPAARating = item["OfficialRating"].asString();
-
-      int totalEpisodes = item["RecursiveItemCount"].asInteger() - item["ChildCount"].asInteger();
-      int unWatchedEpisodes = static_cast<int>(item["UserData"]["UnplayedItemCount"].asInteger());
-      int watchedEpisodes = totalEpisodes - unWatchedEpisodes;
-      int iSeasons        = static_cast<int>(item["ChildCount"].asInteger());
-
-      newItem->GetVideoInfoTag()->m_iSeason = iSeasons;
-      newItem->GetVideoInfoTag()->m_iEpisode = totalEpisodes;
-      newItem->GetVideoInfoTag()->m_playCount = (int)watchedEpisodes >= newItem->GetVideoInfoTag()->m_iEpisode;
-
-      newItem->SetProperty("totalseasons", iSeasons);
-      newItem->SetProperty("totalepisodes", newItem->GetVideoInfoTag()->m_iEpisode);
-      newItem->SetProperty("numepisodes",   newItem->GetVideoInfoTag()->m_iEpisode);
-      newItem->SetProperty("watchedepisodes", watchedEpisodes);
-      newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
-
-      GetVideoDetails(*newItem, item);
-      SetEmbyItemProperties(*newItem);
-      items.Add(newItem);
-    }
-    // this is needed to display movies/episodes properly ... dont ask
-    // good thing it didnt take 2 days to figure it out
-    items.SetProperty("library.filter", "true");
-    SetEmbyItemProperties(items);
-  }
+  CURL url3(url);
+  bool rtn = ParseEmbySeries(items, url3, variant);
   return rtn;
 }
 
@@ -774,80 +706,9 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
     url3.SetOption("Fields", "Overview,Genres");
     url3.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
     const CVariant seriesObject = CEmbyUtils::GetEmbyCVariant(url3.Get());
-    const auto& seriesItem = seriesObject["Items"][0];
-    const auto& variantItems = variant["Items"];
-    for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
-    {
-      const auto item = *variantItemIt;
-      rtn = true;
 
-      std::string value;
-      std::string fanart;
-      std::string itemId = item["Id"].asString();
-      std::string seriesId = item["SeriesId"].asString();
-      // clear url options
-      CURL url2(url);
-      url2.SetOptions("");
-      url2.SetOption("ParentId", itemId);
-
-      CFileItemPtr newItem(new CFileItem());
-      // set m_bIsFolder to true to indicate we are tvshow list
-      newItem->m_bIsFolder = true;
-
-      //CURL url1(url);
-      //url1.SetFileName("/Users/" + itemId + "/Items");
-      newItem->SetLabel(itemId);
-      newItem->SetPath("emby://tvshows/seasons/" + Base64::Encode(url2.Get()));
-      newItem->SetMediaServiceId(itemId);
-      newItem->SetMediaServiceFile(item["Path"].asString());
-
-      url2.SetFileName("Items/" + item["ImageTags"]["Primary"].asString() + "/Images/Primary");
-      newItem->SetArt("thumb", url2.Get());
-      newItem->SetIconImage(url2.Get());
-      url2.SetFileName("Items/" + seriesId + "/Images/Banner");
-      newItem->SetArt("banner", url2.Get());
-      url2.SetFileName("Items/" + seriesId + "/Images/Backdrop");
-      newItem->SetArt("fanart", url2.Get());
-
-      newItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
-      newItem->GetVideoInfoTag()->m_strTitle = item["Name"].asString();
-      // we get these from rootXmlNode, where all show info is
-      seriesName = item["SeriesName"].asString();
-      newItem->GetVideoInfoTag()->m_strShowTitle = item["SeriesName"].asString();
-      newItem->GetVideoInfoTag()->SetPlotOutline(seriesItem["Overview"].asString());
-      newItem->GetVideoInfoTag()->SetPlot(seriesItem["Overview"].asString());
-      newItem->GetVideoInfoTag()->SetYear(seriesItem["ProductionYear"].asInteger());
-      std::vector<std::string> genres;
-      const auto& streams = seriesItem["Genres"];
-      for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
-      {
-        const auto stream = *streamIt;
-        genres.push_back(stream.asString());
-      }
-      newItem->GetVideoInfoTag()->SetGenre(genres);
-      newItem->SetProperty("EmbySeriesID", seriesId);
-
-      int totalEpisodes = item["RecursiveItemCount"].asInteger();
-      int unWatchedEpisodes = item["UserData"]["UnplayedItemCount"].asInteger();
-      int watchedEpisodes = totalEpisodes - unWatchedEpisodes;
-      int iSeason = item["IndexNumber"].asInteger();
-      newItem->GetVideoInfoTag()->m_iSeason = iSeason;
-      newItem->GetVideoInfoTag()->m_iEpisode = totalEpisodes;
-      newItem->GetVideoInfoTag()->m_playCount = item["UserData"]["PlayCount"].asInteger();
-
-      newItem->SetProperty("totalepisodes", totalEpisodes);
-      newItem->SetProperty("numepisodes", totalEpisodes);
-      newItem->SetProperty("watchedepisodes", watchedEpisodes);
-      newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
-
-      newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
-
-      items.Add(newItem);
-    }
+    rtn = ParseEmbySeasons(items, url2, seriesObject, variant);
   }
-  items.SetLabel(seriesName);
-  items.SetProperty("library.filter", "true");
-
   return rtn;
 }
 
@@ -1101,6 +962,178 @@ bool CEmbyUtils::GetEmbyMediaTotals(MediaServicesMediaCount &totals)
 
 void CEmbyUtils::ReportToServer(std::string url, std::string filename)
 {
+}
+
+bool CEmbyUtils::ParseEmbySeries(CFileItemList &items, const CURL &url, const CVariant &variant)
+{
+  bool rtn = false;
+  if (!variant.isNull() || variant.isObject() || variant.isMember("Items"))
+  {
+    const auto& variantItems = variant["Items"];
+    for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
+    {
+      const auto item = *variantItemIt;
+      rtn = true;
+
+      std::string value;
+      std::string fanart;
+      std::string itemId = item["Id"].asString();
+      std::string seriesId = item["SeriesId"].asString();
+      // clear url options
+      CURL url2(url);
+      url2.SetOption("ParentId", itemId);
+ //     url2.SetOptions("");
+
+      CFileItemPtr newItem(new CFileItem());
+      // set m_bIsFolder to true to indicate we are tvshow list
+      newItem->m_bIsFolder = true;
+
+      std::string title = item["Name"].asString();
+      newItem->SetLabel(title);
+
+      CDateTime premiereDate;
+      premiereDate.SetFromW3CDateTime(item["PremiereDate"].asString());
+      newItem->m_dateTime = premiereDate;
+
+     // url2.SetFileName("Users/" + itemId + "/Items");
+      newItem->SetPath("emby://tvshows/shows/" + Base64::Encode(url2.Get()));
+      newItem->SetMediaServiceId(itemId);
+      newItem->SetMediaServiceFile(item["Path"].asString());
+
+      url2.SetFileName("Items/" + itemId + "/Images/Primary");
+      newItem->SetArt("thumb", url2.Get());
+      newItem->SetIconImage(url2.Get());
+      url2.SetFileName("Items/" + itemId + "/Images/Banner");
+      newItem->SetArt("banner", url2.Get());
+      url2.SetFileName("Items/" + itemId + "/Images/Backdrop");
+      newItem->SetArt("fanart", url2.Get());
+
+      newItem->GetVideoInfoTag()->m_playCount = static_cast<int>(item["UserData"]["PlayCount"].asInteger());
+      newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
+
+      newItem->GetVideoInfoTag()->m_strTitle = title;
+      newItem->GetVideoInfoTag()->m_strStatus = item["Status"].asString();
+
+      newItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
+      newItem->GetVideoInfoTag()->m_strFileNameAndPath = newItem->GetPath();
+      newItem->GetVideoInfoTag()->SetSortTitle(item["SortName"].asString());
+      newItem->GetVideoInfoTag()->SetOriginalTitle(item["OriginalTitle"].asString());
+      newItem->SetProperty("EmbySeriesID", seriesId);
+      //newItem->SetProperty("EmbyShowKey", XMLUtils::GetAttribute(rootXmlNode, "grandparentRatingKey"));
+      newItem->GetVideoInfoTag()->SetPlot(item["Overview"].asString());
+      newItem->GetVideoInfoTag()->SetPlotOutline(item["ShortOverview"].asString());
+      newItem->GetVideoInfoTag()->m_firstAired = premiereDate;
+      newItem->GetVideoInfoTag()->SetPremiered(premiereDate);
+      newItem->GetVideoInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
+      newItem->GetVideoInfoTag()->SetYear(static_cast<int>(item["ProductionYear"].asInteger()));
+      newItem->GetVideoInfoTag()->SetRating(item["CommunityRating"].asFloat(), static_cast<int>(item["VoteCount"].asInteger()), "", true);
+      newItem->GetVideoInfoTag()->m_strMPAARating = item["OfficialRating"].asString();
+
+      int totalEpisodes = item["RecursiveItemCount"].asInteger() - item["ChildCount"].asInteger();
+      int unWatchedEpisodes = static_cast<int>(item["UserData"]["UnplayedItemCount"].asInteger());
+      int watchedEpisodes = totalEpisodes - unWatchedEpisodes;
+      int iSeasons        = static_cast<int>(item["ChildCount"].asInteger());
+
+      newItem->GetVideoInfoTag()->m_iSeason = iSeasons;
+      newItem->GetVideoInfoTag()->m_iEpisode = totalEpisodes;
+      newItem->GetVideoInfoTag()->m_playCount = (int)watchedEpisodes >= newItem->GetVideoInfoTag()->m_iEpisode;
+
+      newItem->SetProperty("totalseasons", iSeasons);
+      newItem->SetProperty("totalepisodes", newItem->GetVideoInfoTag()->m_iEpisode);
+      newItem->SetProperty("numepisodes",   newItem->GetVideoInfoTag()->m_iEpisode);
+      newItem->SetProperty("watchedepisodes", watchedEpisodes);
+      newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
+
+      GetVideoDetails(*newItem, item);
+      SetEmbyItemProperties(*newItem);
+      items.Add(newItem);
+    }
+    // this is needed to display movies/episodes properly ... dont ask
+    // good thing it didnt take 2 days to figure it out
+    items.SetProperty("library.filter", "true");
+    SetEmbyItemProperties(items);
+  }
+  return rtn;
+}
+
+bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const CVariant &series, const CVariant &variant)
+{
+  bool rtn = false;
+
+  std::string seriesName;
+  const auto& seriesItem = series["Items"][0];
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
+  {
+    const auto item = *variantItemIt;
+
+    std::string value;
+    std::string fanart;
+    std::string itemId = item["Id"].asString();
+    std::string seriesId = item["SeriesId"].asString();
+    // clear url options
+    CURL url2(url);
+    url2.SetOptions("");
+    url2.SetOption("ParentId", itemId);
+
+    CFileItemPtr newItem(new CFileItem());
+    // set m_bIsFolder to true to indicate we are tvshow list
+    newItem->m_bIsFolder = true;
+
+    //CURL url1(url);
+    //url1.SetFileName("/Users/" + itemId + "/Items");
+    newItem->SetLabel(itemId);
+    newItem->SetPath("emby://tvshows/seasons/" + Base64::Encode(url2.Get()));
+    newItem->SetMediaServiceId(itemId);
+    newItem->SetMediaServiceFile(item["Path"].asString());
+
+    url2.SetFileName("Items/" + item["ImageTags"]["Primary"].asString() + "/Images/Primary");
+    newItem->SetArt("thumb", url2.Get());
+    newItem->SetIconImage(url2.Get());
+    url2.SetFileName("Items/" + seriesId + "/Images/Banner");
+    newItem->SetArt("banner", url2.Get());
+    url2.SetFileName("Items/" + seriesId + "/Images/Backdrop");
+    newItem->SetArt("fanart", url2.Get());
+
+    newItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
+    newItem->GetVideoInfoTag()->m_strTitle = item["Name"].asString();
+    // we get these from rootXmlNode, where all show info is
+    seriesName = item["SeriesName"].asString();
+    newItem->GetVideoInfoTag()->m_strShowTitle = item["SeriesName"].asString();
+    newItem->GetVideoInfoTag()->SetPlotOutline(seriesItem["Overview"].asString());
+    newItem->GetVideoInfoTag()->SetPlot(seriesItem["Overview"].asString());
+    newItem->GetVideoInfoTag()->SetYear(seriesItem["ProductionYear"].asInteger());
+    std::vector<std::string> genres;
+    const auto& streams = seriesItem["Genres"];
+    for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
+    {
+      const auto stream = *streamIt;
+      genres.push_back(stream.asString());
+    }
+    newItem->GetVideoInfoTag()->SetGenre(genres);
+    newItem->SetProperty("EmbySeriesID", seriesId);
+
+    int totalEpisodes = item["RecursiveItemCount"].asInteger();
+    int unWatchedEpisodes = item["UserData"]["UnplayedItemCount"].asInteger();
+    int watchedEpisodes = totalEpisodes - unWatchedEpisodes;
+    int iSeason = item["IndexNumber"].asInteger();
+    newItem->GetVideoInfoTag()->m_iSeason = iSeason;
+    newItem->GetVideoInfoTag()->m_iEpisode = totalEpisodes;
+    newItem->GetVideoInfoTag()->m_playCount = item["UserData"]["PlayCount"].asInteger();
+
+    newItem->SetProperty("totalepisodes", totalEpisodes);
+    newItem->SetProperty("numepisodes", totalEpisodes);
+    newItem->SetProperty("watchedepisodes", watchedEpisodes);
+    newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
+
+    newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
+
+    items.Add(newItem);
+  }
+  items.SetLabel(seriesName);
+  items.SetProperty("library.filter", "true");
+
+  return rtn;
 }
 
 bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &variant, std::string type)
