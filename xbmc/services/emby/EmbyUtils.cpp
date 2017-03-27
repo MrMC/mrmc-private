@@ -129,13 +129,13 @@ void CEmbyUtils::PrepareApiCall(const std::string& userId, const std::string& ac
       CSysInfo::GetVersionShort().c_str(), userId.c_str()));
 }
 
-void CEmbyUtils::SetEmbyItemProperties(CFileItem &item)
+void CEmbyUtils::SetEmbyItemProperties(CFileItem &item, const char *content)
 {
   CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(item.GetPath());
-  SetEmbyItemProperties(item, client);
+  SetEmbyItemProperties(item, content, client);
 }
 
-void CEmbyUtils::SetEmbyItemProperties(CFileItem &item, const CEmbyClientPtr &client)
+void CEmbyUtils::SetEmbyItemProperties(CFileItem &item, const char *content, const CEmbyClientPtr &client)
 {
   item.SetProperty("EmbyItem", true);
   item.SetProperty("MediaServicesItem", true);
@@ -143,24 +143,8 @@ void CEmbyUtils::SetEmbyItemProperties(CFileItem &item, const CEmbyClientPtr &cl
     return;
   if (client->IsCloud())
     item.SetProperty("MediaServicesCloudItem", true);
+  item.SetProperty("MediaServicesContent", content);
   item.SetProperty("MediaServicesClientID", client->GetUuid());
-}
-
-void CEmbyUtils::SetEmbyItemsProperties(CFileItemList &items)
-{
-  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(items.GetPath());
-  SetEmbyItemsProperties(items, client);
-}
-
-void CEmbyUtils::SetEmbyItemsProperties(CFileItemList &items, const CEmbyClientPtr &client)
-{
-  items.SetProperty("EmbyItem", true);
-  items.SetProperty("MediaServicesItem", true);
-  if (!client)
-    return;
-  if (client->IsCloud())
-    items.SetProperty("MediaServicesCloudItem", true);
-  items.SetProperty("MediaServicesClientID", client->GetUuid());
 }
 
 void CEmbyUtils::SetWatched(CFileItem &item)
@@ -988,13 +972,13 @@ bool CEmbyUtils::ParseEmbySeries(CFileItemList &items, const CURL &url, const CV
       newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
 
       GetVideoDetails(*newItem, item);
-      SetEmbyItemProperties(*newItem);
+      SetEmbyItemProperties(*newItem, "tvshows");
       items.Add(newItem);
     }
     // this is needed to display movies/episodes properly ... dont ask
     // good thing it didnt take 2 days to figure it out
     items.SetProperty("library.filter", "true");
-    SetEmbyItemProperties(items);
+    SetEmbyItemProperties(items, "tvshows");
   }
   return rtn;
 }
@@ -1070,12 +1054,12 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
     newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
 
     newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
-    SetEmbyItemProperties(*newItem);
+    SetEmbyItemProperties(*newItem, "seasons");
     items.Add(newItem);
   }
   items.SetLabel(seriesName);
+  SetEmbyItemProperties(items, "seasons");
   items.SetProperty("showplot", seriesItem["Overview"].asString());
-  SetEmbyItemProperties(items);
   items.SetProperty("library.filter", "true");
 
   return rtn;
@@ -1105,7 +1089,10 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &v
   // good thing it didnt take 2 days to figure it out
   items.SetLabel(variantItems[0]["SeasonName"].asString());
   items.SetProperty("library.filter", "true");
-  SetEmbyItemProperties(items);
+  if (type == MediaTypeTvShow)
+    SetEmbyItemProperties(items, "episodes");
+  else
+    SetEmbyItemProperties(items, "movies");
 
 #if defined(EMBY_DEBUG_TIMING)
   int delta = XbmcThreads::SystemClockMillis() - currentTime;
@@ -1225,7 +1212,10 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
 
   GetMediaDetals(*item, variant);
 
-  SetEmbyItemProperties(*item);
+  if (type == MediaTypeTvShow)
+    SetEmbyItemProperties(*item, "episodes");
+  else
+    SetEmbyItemProperties(*item, "movies");
   return item;
 }
 

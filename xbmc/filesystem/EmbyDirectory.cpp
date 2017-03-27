@@ -102,7 +102,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
-            CEmbyUtils::SetEmbyItemProperties(*pItem, client);
+            CEmbyUtils::SetEmbyItemProperties(*pItem, "movies", client);
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
             curl.SetProtocol(client->GetProtocol());
@@ -129,9 +129,9 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           curl.SetFileName(filename);
           CDirectory::GetDirectory("emby://movies/" + basePath + "/" + Base64::Encode(curl.Get()), items);
           items.SetContent("movies");
-          CEmbyUtils::SetEmbyItemProperties(items, client);
+          CEmbyUtils::SetEmbyItemProperties(items, "movies", client);
           for (int item = 0; item < items.Size(); ++item)
-            CEmbyUtils::SetEmbyItemProperties(*items[item], client);
+            CEmbyUtils::SetEmbyItemProperties(*items[item], "movies", client);
         }
         std::string label = basePath;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedmovies")
@@ -217,7 +217,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
-            CEmbyUtils::SetEmbyItemProperties(*pItem, client);
+            CEmbyUtils::SetEmbyItemProperties(*pItem, "tvshows", client);
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
             curl.SetProtocol(client->GetProtocol());
@@ -244,9 +244,9 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           std::string filename = contents[0].viewprefix.c_str();
           curl.SetFileName(filename);
           CDirectory::GetDirectory("emby://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()), items);
-          CEmbyUtils::SetEmbyItemProperties(items, client);
+          CEmbyUtils::SetEmbyItemProperties(items, "tvshows", client);
           for (int item = 0; item < items.Size(); ++item)
-            CEmbyUtils::SetEmbyItemProperties(*items[item], client);
+            CEmbyUtils::SetEmbyItemProperties(*items[item], "tvshows", client);
         }
         std::string label = basePath;
         if (URIUtils::GetFileName(basePath) == "recentlyaddedepisodes")
@@ -341,7 +341,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             CFileItemPtr pItem(new CFileItem(title));
             pItem->m_bIsFolder = true;
             pItem->m_bIsShareOrDrive = true;
-            CEmbyUtils::SetEmbyItemProperties(*pItem, client);
+            CEmbyUtils::SetEmbyItemProperties(*pItem, "music", client);
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
             curl.SetProtocol(client->GetProtocol());
@@ -369,9 +369,9 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
           CEmbyUtils::GetEmbyArtistsOrAlbum(items, curl.Get(), false);
           items.SetContent("artists");
           items.SetPath("emby://music/albums/");
-          CEmbyUtils::SetEmbyItemProperties(items, client);
+          CEmbyUtils::SetEmbyItemProperties(items, "music", client);
           for (int item = 0; item < items.Size(); ++item)
-            CEmbyUtils::SetEmbyItemProperties(*items[item], client);
+            CEmbyUtils::SetEmbyItemProperties(*items[item], "music", client);
           CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory '/all' client(%s), shows(%d)", client->GetServerName().c_str(), items.Size());
         }
       }

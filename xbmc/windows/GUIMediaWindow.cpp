@@ -418,8 +418,12 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         {
           if (m_vecItems->IsMediaServiceBased() && newItem->IsMediaServiceBased())
           {
-            if (m_vecItems->GetProperty("MediaServicesClientID").asString() == newItem->GetProperty("MediaServicesClientID").asString())
+            // item must match view type and client id.
+            if (m_vecItems->GetContent() == newItem->GetProperty("MediaServicesContent").asString() &&
+                m_vecItems->GetProperty("MediaServicesClientID").asString() == newItem->GetProperty("MediaServicesClientID").asString())
+            {
               m_vecItems->Add(newItem);
+            }
           }
         }
       }

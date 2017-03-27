@@ -44,10 +44,8 @@ public:
   static bool HasClients();
   static bool GetIdentity(CURL url, int timeout);
   static void PrepareApiCall(const std::string& userId, const std::string& accessToken, XFILE::CCurlFile &curl);
-  static void SetEmbyItemProperties(CFileItem &item);
-  static void SetEmbyItemProperties(CFileItem &item, const CEmbyClientPtr &client);
-  static void SetEmbyItemsProperties(CFileItemList &items);
-  static void SetEmbyItemsProperties(CFileItemList &items, const CEmbyClientPtr &client);
+  static void SetEmbyItemProperties(CFileItem &item, const char *content);
+  static void SetEmbyItemProperties(CFileItem &item, const char *content, const CEmbyClientPtr &client);
 
   static void SetWatched(CFileItem &item);
   static void SetUnWatched(CFileItem &item);
