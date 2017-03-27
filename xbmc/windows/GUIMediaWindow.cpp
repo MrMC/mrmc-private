@@ -416,8 +416,11 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         CFileItemPtr newItem = std::dynamic_pointer_cast<CFileItem>(message.GetItem());
         if (newItem && IsActive())
         {
-          if (m_vecItems->GetProperty("EmbyItem").asBoolean())
-            m_vecItems->Add(newItem);
+          if (m_vecItems->IsMediaServiceBased() && newItem->IsMediaServiceBased())
+          {
+            if (m_vecItems->GetProperty("MediaServicesClientID").asString() == newItem->GetProperty("MediaServicesClientID").asString())
+              m_vecItems->Add(newItem);
+          }
         }
       }
       else if (message.GetParam1()==GUI_MSG_UPDATE_PATH)
