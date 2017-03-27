@@ -578,14 +578,26 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &obje
   // Emby Movie/TV
 bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::string filter)
 {
+  static const std::vector<std::string> Fields = {
+    "DateCreated",
+    "Genres",
+    "MediaStreams",
+    "Overview",
+    "Path",
+  };
+
   bool rtn = false;
   CURL url2(url);
 
   url2.SetOption("IncludeItemTypes", "Movie");
-  url2.SetOption("Fields", "Etag,DateCreated");
+  //url2.SetOption("Fields", "Etag,DateCreated");
+  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   const CVariant variant = GetEmbyCVariant(url2.Get());
 
+  rtn = GetVideoItems(items, url2, variant, MediaTypeMovie);
+
+  /*
   if (GetVideoItems(items, url2, variant, MediaTypeMovie))
   {
     CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
@@ -610,6 +622,7 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
       }
     }
   }
+  */
   return rtn;
 }
 
