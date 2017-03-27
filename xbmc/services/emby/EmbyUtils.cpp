@@ -1025,12 +1025,12 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
 
     //CURL url1(url);
     //url1.SetFileName("/Users/" + itemId + "/Items");
-    newItem->SetLabel(itemId);
+    newItem->SetLabel(item["Name"].asString());
     newItem->SetPath("emby://tvshows/seasons/" + Base64::Encode(url2.Get()));
     newItem->SetMediaServiceId(itemId);
     newItem->SetMediaServiceFile(item["Path"].asString());
 
-    url2.SetFileName("Items/" + item["ImageTags"]["Primary"].asString() + "/Images/Primary");
+    url2.SetFileName("Items/" + seriesId + "/Images/Primary");
     newItem->SetArt("thumb", url2.Get());
     newItem->SetIconImage(url2.Get());
     url2.SetFileName("Items/" + seriesId + "/Images/Banner");
@@ -1038,7 +1038,7 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
     url2.SetFileName("Items/" + seriesId + "/Images/Backdrop");
     newItem->SetArt("fanart", url2.Get());
 
-    newItem->GetVideoInfoTag()->m_type = MediaTypeTvShow;
+    newItem->GetVideoInfoTag()->m_type = MediaTypeSeason;
     newItem->GetVideoInfoTag()->m_strTitle = item["Name"].asString();
     // we get these from rootXmlNode, where all show info is
     seriesName = item["SeriesName"].asString();
@@ -1070,10 +1070,12 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
     newItem->SetProperty("unwatchedepisodes", unWatchedEpisodes);
 
     newItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, item["UserData"]["Played"].asBoolean());
-
+    SetEmbyItemProperties(*newItem);
     items.Add(newItem);
   }
   items.SetLabel(seriesName);
+  items.SetProperty("showplot", seriesItem["Overview"].asString());
+  SetEmbyItemProperties(items);
   items.SetProperty("library.filter", "true");
 
   return rtn;
@@ -1101,6 +1103,7 @@ bool CEmbyUtils::GetVideoItems(CFileItemList &items, CURL url, const CVariant &v
   }
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
+  items.SetLabel(variantItems[0]["SeasonName"].asString());
   items.SetProperty("library.filter", "true");
   SetEmbyItemProperties(items);
 

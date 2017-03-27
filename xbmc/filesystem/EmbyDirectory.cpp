@@ -293,7 +293,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       else if (path == "shows")
       {
         CEmbyUtils::GetEmbySeasons(items,Base64::Decode(section));
-        items.SetContent("tvshows");
+        items.SetContent("seasons");
       }
       else if (path == "seasons")
       {
