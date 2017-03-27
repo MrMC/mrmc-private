@@ -474,22 +474,15 @@ const CVariant CEmbyClient::FetchItemByIds(const std::vector<std::string> &Ids)
   if (Ids.size() < 1)
     return CVariant(CVariant::VariantTypeNull);
 
-  static const std::vector<std::string> Fields = {
-    "DateCreated",
-    "Genres",
-    "MediaStreams",
-    "Overview",
-    "ShortOverview",
-    "Path",
-    "Taglines",
-    "ParentId",
+  static const std::string Fields = {
+    "DateCreated,Genres,MediaStreams,Overview,ShortOverview,Path,Taglines,ParentId"
   };
 
   CURL curl(m_url);
   curl.SetFileName("emby/Users/" + GetUserID() + "/Items/");
   curl.SetOptions("");
   curl.SetOption("Ids", StringUtils::Join(Ids, ","));
-  curl.SetOption("Fields", StringUtils::Join(Fields, ","));
+  curl.SetOption("Fields", Fields);
   const CVariant variant = CEmbyUtils::GetEmbyCVariant(curl.Get());
   return variant;
 }

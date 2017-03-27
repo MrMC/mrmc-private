@@ -46,6 +46,14 @@
 #include "music/dialogs/GUIDialogMusicInfo.h"
 #include "guilib/GUIWindowManager.h"
 
+static const std::string StandardFields = {
+  "DateCreated,Genres,MediaStreams,Overview,Path"
+};
+
+static const std::string TVShowsFields = {
+  "DateCreated,Genres,MediaStreams,Overview,ShortOverview,Path,RecursiveItemCount"
+};
+
 // one tick is 0.1 microseconds
 static const uint64_t TicksToSecondsFactor = 10000000;
 static uint64_t TicksToSeconds(uint64_t ticks)
@@ -332,14 +340,6 @@ void CEmbyUtils::SetPlayState(MediaServicesPlayerState state)
 
 bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
 {
-  static const std::vector<std::string> Fields = {
-    "DateCreated",
-    "Genres",
-    "MediaStreams",
-    "Overview",
-    "Path",
-  };
-
   CURL url2(url);
 
   url2.SetFileName(url2.GetFileName() + "/Latest");
@@ -348,7 +348,7 @@ bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::s
   url2.SetOption("Limit", StringUtils::Format("%i",limit));
   url2.SetOption("GroupItems", "False");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", StandardFields);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   CVariant variant = GetEmbyCVariant(url2.Get());
 
@@ -363,15 +363,6 @@ bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::s
 bool CEmbyUtils::GetEmbyInProgressShows(CFileItemList &items, const std::string url, int limit)
 {
   // SortBy=DatePlayed&SortOrder=Descending&Filters=IsResumable&Limit=5
-
-  static const std::vector<std::string> Fields = {
-    "DateCreated",
-    "Genres",
-    "MediaStreams",
-    "Overview",
-    "Path",
-  };
-
   CURL url2(url);
 
   url2.SetOption("IncludeItemTypes", "Episode");
@@ -381,7 +372,7 @@ bool CEmbyUtils::GetEmbyInProgressShows(CFileItemList &items, const std::string 
   url2.SetOption("Limit", StringUtils::Format("%i",limit));
   url2.SetOption("Recursive", "true");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", StandardFields);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   CVariant result = GetEmbyCVariant(url2.Get());
 
@@ -391,14 +382,6 @@ bool CEmbyUtils::GetEmbyInProgressShows(CFileItemList &items, const std::string 
 
 bool CEmbyUtils::GetEmbyRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
 {
-  static const std::vector<std::string> Fields = {
-    "DateCreated",
-    "Genres",
-    "MediaStreams",
-    "Overview",
-    "Path",
-  };
-
   CURL url2(url);
 
   url2.SetFileName(url2.GetFileName() + "/Latest");
@@ -407,7 +390,7 @@ bool CEmbyUtils::GetEmbyRecentlyAddedMovies(CFileItemList &items, const std::str
   url2.SetOption("Limit", StringUtils::Format("%i",limit));
   url2.SetOption("GroupItems", "False");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", StandardFields);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   CVariant variant = GetEmbyCVariant(url2.Get());
 
@@ -422,14 +405,6 @@ bool CEmbyUtils::GetEmbyRecentlyAddedMovies(CFileItemList &items, const std::str
 bool CEmbyUtils::GetEmbyInProgressMovies(CFileItemList &items, const std::string url, int limit)
 {
   // SortBy=DatePlayed&SortOrder=Descending&Filters=IsResumable&Limit=5
-  static const std::vector<std::string> Fields = {
-    "DateCreated",
-    "Genres",
-    "MediaStreams",
-    "Overview",
-    "Path",
-  };
-  
   CURL url2(url);
 
   url2.SetOption("IncludeItemTypes", "Movie");
@@ -439,7 +414,7 @@ bool CEmbyUtils::GetEmbyInProgressMovies(CFileItemList &items, const std::string
   url2.SetOption("Limit", StringUtils::Format("%i",limit));
   url2.SetOption("GroupItems", "False");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", StandardFields);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   CVariant result = GetEmbyCVariant(url2.Get());
 
@@ -596,20 +571,12 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &vari
   // Emby Movie/TV
 bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::string filter)
 {
-  static const std::vector<std::string> Fields = {
-    "DateCreated",
-    "Genres",
-    "MediaStreams",
-    "Overview",
-    "Path",
-  };
-
   bool rtn = false;
   CURL url2(url);
 
   url2.SetOption("IncludeItemTypes", "Movie");
   //url2.SetOption("Fields", "Etag,DateCreated");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", StandardFields);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   const CVariant variant = GetEmbyCVariant(url2.Get());
 
@@ -646,20 +613,9 @@ bool CEmbyUtils::GetEmbyMovies(CFileItemList &items, std::string url, std::strin
 
 bool CEmbyUtils::GetEmbyTvshows(CFileItemList &items, std::string url)
 {
-  static const std::vector<std::string> Fields = {
-    "DateCreated",
-    "Genres",
-    "MediaStreams",
-    "Overview",
-    "ShortOverview",
-    "Path",
-    "RecursiveItemCount",
-  };
-
   CURL url2(url);
   url2.SetOption("IncludeItemTypes", "Series");
-  //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", TVShowsFields);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
 
  /*
@@ -714,19 +670,11 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
 
 bool CEmbyUtils::GetEmbyEpisodes(CFileItemList &items, const std::string url)
 {
-  static const std::vector<std::string> Fields = {
-    "DateCreated",
-    "Genres",
-    "MediaStreams",
-    "Overview",
-    "Path",
-  };
-
   CURL url2(url);
 
   url2.SetOption("IncludeItemTypes", "Episode");
   //url2.SetOption("LocationTypes", "FileSystem,Remote,Offline");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", StandardFields);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   const CVariant variant = GetEmbyCVariant(url2.Get());
 
@@ -881,11 +829,6 @@ bool CEmbyUtils::GetItemSubtiles(CFileItem &item)
 
 bool CEmbyUtils::GetMoreItemInfo(CFileItem &item)
 {
-  static const std::vector<std::string> Fields = {
-    "Genres",
-    "People",
-  };
-
   std::string url = URIUtils::GetParentPath(item.GetPath());
   if (StringUtils::StartsWithNoCase(url, "emby://"))
     url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
@@ -903,7 +846,7 @@ bool CEmbyUtils::GetMoreItemInfo(CFileItem &item)
 
   url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
   url2.SetOptions("");
-  url2.SetOption("Fields", StringUtils::Join(Fields, ","));
+  url2.SetOption("Fields", "Genres,People");
   url2.SetOption("IDs", itemId);
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   const CVariant variant = GetEmbyCVariant(url2.Get());
