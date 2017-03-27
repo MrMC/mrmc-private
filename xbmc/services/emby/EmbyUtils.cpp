@@ -1014,7 +1014,7 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
     newItem->SetMediaServiceId(itemId);
     newItem->SetMediaServiceFile(item["Path"].asString());
 
-    url2.SetFileName("Items/" + seriesId + "/Images/Primary");
+    url2.SetFileName("Items/" + itemId + "/Images/Primary");
     newItem->SetArt("thumb", url2.Get());
     newItem->SetIconImage(url2.Get());
     url2.SetFileName("Items/" + seriesId + "/Images/Banner");
