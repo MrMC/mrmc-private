@@ -525,14 +525,20 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &vari
 
     if (type == "Movie")
     {
+      CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr Movie: %s",
+        variantItem["Name"].asString().c_str());
       GetVideoItems(items, url2, variant, MediaTypeMovie);
     }
     else if (type == "Series")
     {
+      CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr Series: %s",
+        variantItem["Name"].asString().c_str());
       ParseEmbySeries(items, url2, variant);
     }
     else if (type == "Season")
     {
+      CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr Season: %s",
+        variantItem["Name"].asString().c_str());
       CURL url3(url2);
       std::string seriesID = variantItem["ParentId"].asString();
       url3.SetOptions("");
@@ -544,12 +550,21 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &vari
     }
     else if (type == "Episode")
     {
+      CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr Episode: %s",
+        variantItem["Name"].asString().c_str());;
       GetVideoItems(items, url2, variant, MediaTypeEpisode);
     }
-    //else if (type == "Music")
-    //{
+    else if (type == "Music")
+    {
+      CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr Music: %s",
+        variantItem["Name"].asString().c_str());;
     //  return ParseMusic(client, variantItem);
-    //}
+    }
+    else
+    {
+      CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr type: %s: %s",
+        type.c_str(), variantItem["Name"].asString().c_str());;
+    }
 
     return items[0];
   }

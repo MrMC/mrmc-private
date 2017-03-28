@@ -145,6 +145,7 @@ void CEmbyClient::AddViewItems(const CFileItemList &items)
 
 void CEmbyClient::AddNewViewItem(const std::string &id)
 {
+  CLog::Log(LOGDEBUG, "CEmbyClient::AddNewViewItem");
   const CVariant variant = FetchItemById(id);
   CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variant);
   if (item != nullptr)
@@ -158,6 +159,7 @@ void CEmbyClient::AddNewViewItem(const std::string &id)
 
 void CEmbyClient::UpdateViewItem(const std::string &id)
 {
+  CLog::Log(LOGDEBUG, "CEmbyClient::UpdateViewItem");
   CSingleLock lock(m_viewItemsLock);
   for (int i = 0; i < m_viewItems->Size(); ++i)
   {
@@ -183,6 +185,7 @@ void CEmbyClient::UpdateViewItem(const std::string &id)
 
 void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
 {
+  CLog::Log(LOGDEBUG, "CEmbyClient::UpdateViewItems");
   const CVariant variant = FetchItemByIds(ids);
   if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
   {
@@ -213,6 +216,7 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
 
 void CEmbyClient::RemoveViewItem(const std::string &id)
 {
+  CLog::Log(LOGDEBUG, "CEmbyClient::RemoveViewItem");
   CSingleLock lock(m_viewItemsLock);
   for (int i = 0; i < m_viewItems->Size(); ++i)
   {

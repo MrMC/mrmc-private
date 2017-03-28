@@ -176,6 +176,9 @@ void CEmbyClientSync::Process()
           CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(m_address);
           if (client && client->GetPresence())
           {
+            CLog::Log(LOGDEBUG, "CEmbyClientSync: processing UserDataChanged");
+            CLog::Log(LOGDEBUG, "[%s] %s: %s", this->m_name.c_str(), msgType.c_str(), msg.c_str());
+
             const auto userDataList = msgData["UserDataList"];
             std::vector<std::string> ids;
             for (auto userData = userDataList.begin_array(); userData != userDataList.end_array(); ++userData)
