@@ -199,6 +199,11 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
     CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
     if (item != nullptr)
     {
+      // hack, if season state has changed, maybe show state has changed as well. seems like emby bug
+      if (item->GetVideoInfoTag()->m_type == MediaTypeSeason &&  item->HasProperty("EmbySeriesID"))
+        UpdateViewItem(item->GetProperty("EmbySeriesID").asString());
+      // -------------
+      
       CEmbyUtils::ClearCache(*item);
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, item->GetVideoInfoTag()->m_type == MediaTypeMovie ? 0:1, item);
       g_windowManager.SendThreadMessage(msg);
