@@ -333,7 +333,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       CEmbyServices::GetInstance().GetClients(clients);
       for (const auto &client : clients)
       {
-        std::vector<EmbyViewContent> contents = client->GetArtistContent();
+        std::vector<EmbyViewContent> contents = client->GetMusicContent();
         if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasPlexServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
@@ -346,8 +346,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
             curl.SetProtocol(client->GetProtocol());
-            std::string filename = StringUtils::Format("%s/%s", content.viewprefix.c_str(), (basePath == "root" || basePath == "artists"? "all":basePath.c_str()));
-            curl.SetFileName(filename);
+            curl.SetFileName(content.viewprefix.c_str());
             pItem->SetPath("emby://music/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
             /*
@@ -366,8 +365,8 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(client->GetUrl());
           curl.SetProtocol(client->GetProtocol());
-          curl.SetFileName(contents[0].viewprefix + "/all");
-          CEmbyUtils::GetEmbyArtistsOrAlbum(items, curl.Get(), false);
+          curl.SetFileName(contents[0].viewprefix);
+          CEmbyUtils::GetEmbyArtists(items, curl.Get());
           items.SetContent("artists");
           items.SetPath("emby://music/albums/");
           CEmbyUtils::SetEmbyItemProperties(items, "music", client);
@@ -397,13 +396,13 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       
       if (path == "root" || path == "artists")
       {
-        CEmbyUtils::GetEmbyArtistsOrAlbum(items,Base64::Decode(section), false);
+        CEmbyUtils::GetEmbyArtists(items,Base64::Decode(section));
         items.SetLabel(g_localizeStrings.Get(36917));
         items.SetContent("artist");
       }
       if (path == "albums")
       {
-        CEmbyUtils::GetEmbyArtistsOrAlbum(items,Base64::Decode(section), true);
+        CEmbyUtils::GetEmbyAlbum(items,Base64::Decode(section));
         items.SetLabel(g_localizeStrings.Get(36919));
         items.SetContent("albums");
       }

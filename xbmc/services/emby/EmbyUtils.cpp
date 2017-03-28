@@ -872,8 +872,90 @@ bool CEmbyUtils::SearchEmby(CFileItemList &items, std::string strSearchString)
 
 
   // Emby Music
-bool CEmbyUtils::GetEmbyArtistsOrAlbum(CFileItemList &items, std::string url, bool album)
+bool CEmbyUtils::GetEmbyArtists(CFileItemList &items, std::string url)
 {
+  //url = "{server}/emby/Artists?UserId={UserId}&format=json
+  bool rtn = false;
+  CURL url2(url);
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
+  if (!client || !client->GetPresence())
+    return false;
+  
+  url2.SetFileName("emby/Artists");
+  //url2.SetOption("IncludeItemTypes", "Movie");
+  url2.SetOption("Fields", "Etag,Genres");
+  //url2.SetOption("Fields", StandardFields);
+  //url3.GetOption("ParentId");
+  url2.SetProtocolOption("userId",client->GetUserID());
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
+  const CVariant variant = GetEmbyCVariant(url2.Get());
+  
+  
+  //std::string strMediaType = album ? MediaTypeAlbum : MediaTypeArtist;
+  //std::string strMediaTypeUrl = album ? "emby://music/songs/" : "emby://music/albums/";
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
+    return false;
+  }
+  
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
+  {
+    const auto item = *variantItemIt;
+    rtn = true;
+    CFileItemPtr embyItem(new CFileItem());
+    // set m_bIsFolder to true to indicate we are artist list
+
+    embyItem->m_bIsFolder = true;
+    embyItem->SetLabel(item["Name"].asString());
+    CURL url1(url);
+    url1.SetProtocolOption("ArtistIds",item["Id"].asString());
+    url1.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
+    embyItem->SetPath("emby://music/albums/" + Base64::Encode(url1.Get()));
+    embyItem->SetMediaServiceId(item["Id"].asString());
+    
+    embyItem->GetMusicInfoTag()->m_type = MediaTypeArtist;
+    embyItem->GetMusicInfoTag()->SetTitle(item["Name"].asString());
+   // if (album)
+   // {
+   //   embyItem->GetMusicInfoTag()->SetArtistDesc(item["Name"].asString());
+   //   embyItem->SetProperty("artist", item["Name"].asString());
+   //   embyItem->SetProperty("EmbyAlbumKey", XMLUtils::GetAttribute(directoryNode, "ratingKey"));
+   // }
+   // else
+    {
+      embyItem->GetMusicInfoTag()->SetArtistDesc(item["Name"].asString());
+      embyItem->SetProperty("EmbyArtistKey", item["Id"].asString());
+    }
+ //   embyItem->GetMusicInfoTag()->SetAlbum(XMLUtils::GetAttribute(directoryNode, "title"));
+    embyItem->GetMusicInfoTag()->SetYear(item["ProductionYear"].asInteger());
+    
+    
+    url1.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
+    embyItem->SetArt("thumb", url1.Get());
+    embyItem->SetProperty("thumb", url1.Get());
+    
+    url1.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    embyItem->SetArt("fanart", url1.Get());
+    embyItem->SetProperty("fanart", url1.Get());
+    
+    embyItem->GetVideoInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
+    
+    GetVideoDetails(*embyItem, item);
+    SetEmbyItemProperties(items, MediaTypeArtist,client);
+    items.Add(embyItem);
+  }
+  items.SetProperty("library.filter", "true");
+  items.GetVideoInfoTag()->m_type = MediaTypeArtist;
+  SetEmbyItemProperties(items, MediaTypeArtist,client);
+  
+  return rtn;
+}
+
+bool CEmbyUtils::GetEmbyAlbum(CFileItemList &items, std::string url)
+{
+
   return false;
 }
 
@@ -1173,7 +1255,7 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
     newItem->SetArt("tvshow.poster", url.Get());
     newItem->SetArt("tvshow.thumb", url.Get());
     newItem->SetIconImage(url.Get());
-    std::string seasonEpisode = StringUtils::Format("S%02iE%02i", plexItem->GetVideoInfoTag()->m_iSeason, plexItem->GetVideoInfoTag()->m_iEpisode);
+    std::string seasonEpisode = StringUtils::Format("S%02iE%02i", embyItem->GetVideoInfoTag()->m_iSeason, embyItem->GetVideoInfoTag()->m_iEpisode);
     newItem->SetProperty("SeasonEpisode", seasonEpisode);
   }
 */

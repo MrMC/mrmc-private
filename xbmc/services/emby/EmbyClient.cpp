@@ -280,10 +280,10 @@ const EmbyViewContentVector CEmbyClient::GetMoviesContent() const
   return m_viewMoviesContents;
 }
 
-const EmbyViewContentVector CEmbyClient::GetArtistContent() const
+const EmbyViewContentVector CEmbyClient::GetMusicContent() const
 {
-  CSingleLock lock(m_viewArtistContentsLock);
-  return m_viewArtistContents;
+  CSingleLock lock(m_viewMusicContentsLock);
+  return m_viewMusicContents;
 }
 
 const EmbyViewContentVector CEmbyClient::GetPhotoContent() const
@@ -430,10 +430,10 @@ bool CEmbyClient::ParseViews()
         CSingleLock lock(m_viewTVshowContentsLock);
         m_viewTVshowContents.push_back(content);
       }
-      else if (content.mediaType == "artist")
+      else if (content.mediaType == "music")
       {
-        CSingleLock lock(m_viewArtistContentsLock);
-        m_viewArtistContents.push_back(content);
+        CSingleLock lock(m_viewMusicContentsLock);
+        m_viewMusicContents.push_back(content);
       }
       else if (content.mediaType == "photo")
       {
@@ -453,8 +453,8 @@ bool CEmbyClient::ParseViews()
         m_serverInfo.ServerName.c_str(), (int)m_viewMoviesContents.size());
       CLog::Log(LOGDEBUG, "CEmbyClient::ParseView %s found %d tvshows view",
         m_serverInfo.ServerName.c_str(), (int)m_viewTVshowContents.size());
-      CLog::Log(LOGDEBUG, "CEmbyClient::ParseView %s found %d artist view",
-        m_serverInfo.ServerName.c_str(), (int)m_viewArtistContents.size());
+      CLog::Log(LOGDEBUG, "CEmbyClient::ParseView %s found %d Music view",
+        m_serverInfo.ServerName.c_str(), (int)m_viewMusicContents.size());
       CLog::Log(LOGDEBUG, "CEmbyClient::ParseView %s found %d photos view",
         m_serverInfo.ServerName.c_str(), (int)m_viewPhotosContents.size());
       rtn = true;

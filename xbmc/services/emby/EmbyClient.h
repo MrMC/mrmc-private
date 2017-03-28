@@ -99,7 +99,7 @@ public:
 
   const EmbyViewContentVector GetTvShowContent() const;
   const EmbyViewContentVector GetMoviesContent() const;
-  const EmbyViewContentVector GetArtistContent() const;
+  const EmbyViewContentVector GetMusicContent() const;
   const EmbyViewContentVector GetPhotoContent() const;
   const std::string FormatContentTitle(const std::string contentTitle) const;
   std::string FindViewName(const std::string &path);
@@ -132,10 +132,10 @@ private:
 
   CCriticalSection  m_viewMoviesContentsLock;
   CCriticalSection  m_viewTVshowContentsLock;
-  CCriticalSection  m_viewArtistContentsLock;
+  CCriticalSection  m_viewMusicContentsLock;
   CCriticalSection  m_viewPhotosContentsLock;
   std::vector<EmbyViewContent> m_viewMoviesContents;
   std::vector<EmbyViewContent> m_viewTVshowContents;
-  std::vector<EmbyViewContent> m_viewArtistContents;
+  std::vector<EmbyViewContent> m_viewMusicContents;
   std::vector<EmbyViewContent> m_viewPhotosContents;
 };
