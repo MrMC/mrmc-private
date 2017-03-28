@@ -427,9 +427,12 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 DIR_CACHE_TYPE CEmbyDirectory::GetCacheType(const CURL& url) const
 {
   // testing only
-  //return DIR_CACHE_ALWAYS;
-  //return DIR_CACHE_NEVER;
-  return DIR_CACHE_ONCE;
+  std::string test = url.GetWithoutOptions();
+  if (StringUtils::StartsWithNoCase(test, "emby://movies"))
+    return DIR_CACHE_ALWAYS;
+  else
+    return DIR_CACHE_NEVER;
+  //return DIR_CACHE_ONCE;
 }
 
 bool CEmbyDirectory::FindByBroadcast(CFileItemList &items)

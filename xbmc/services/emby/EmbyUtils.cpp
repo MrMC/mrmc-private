@@ -559,8 +559,11 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &vari
 
 void CEmbyUtils::ClearCache(CFileItem &item)
 {
-  if (item.GetVideoInfoTag()->m_type == MediaTypeSeason || item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
+  if (item.GetVideoInfoTag()->m_type == MediaTypeTvShow || item.GetVideoInfoTag()->m_type == MediaTypeSeason || item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
+  {
     g_directoryCache.ClearSubPaths("emby://tvshows/titles");
+    g_directoryCache.ClearSubPaths("emby://tvshows/shows");
+  }
   if (item.GetVideoInfoTag()->m_type == MediaTypeMovie)
     g_directoryCache.ClearSubPaths("emby://movies/titles");
 }
