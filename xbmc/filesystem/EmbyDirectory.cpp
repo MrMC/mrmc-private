@@ -319,6 +319,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.SetLabel(path);
         items.SetContent("tvshows");
       }
+      client->AddViewItems(items);
       CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory' client(%s), found %d shows", client->GetServerName().c_str(), items.Size());
     }
     return true;
