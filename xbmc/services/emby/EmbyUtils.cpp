@@ -560,7 +560,9 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &vari
 void CEmbyUtils::ClearCache(CFileItem &item)
 {
   if (item.GetVideoInfoTag()->m_type == MediaTypeSeason || item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
-    g_directoryCache.ClearDirectory("emby://tvshows/titles");
+    g_directoryCache.ClearSubPaths("emby://tvshows/titles");
+  if (item.GetVideoInfoTag()->m_type == MediaTypeMovie)
+    g_directoryCache.ClearSubPaths("emby://movies/titles");
 }
 
   // Emby Movie/TV

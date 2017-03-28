@@ -171,9 +171,9 @@ void CEmbyClient::UpdateViewItem(const std::string &id)
       CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variant);
       if (item != nullptr)
       {
-        CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
-        g_windowManager.SendThreadMessage(msg);
         CEmbyUtils::ClearCache(*item);
+        CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, item->GetVideoInfoTag()->m_type == MediaTypeMovie ? 0:1, item);
+        g_windowManager.SendThreadMessage(msg);
       }
       return;
     }
@@ -199,9 +199,9 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
     CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
     if (item != nullptr)
     {
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
-      g_windowManager.SendThreadMessage(msg);
       CEmbyUtils::ClearCache(*item);
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, item->GetVideoInfoTag()->m_type == MediaTypeMovie ? 0:1, item);
+      g_windowManager.SendThreadMessage(msg);
     }
   }
 }
@@ -214,11 +214,11 @@ void CEmbyClient::RemoveViewItem(const std::string &id)
     const CFileItemPtr &item = m_viewItems->Get(i);
     if (IsSameEmbyID(item, id))
     {
+      CEmbyUtils::ClearCache(*item);
       CLog::Log(LOGDEBUG, "CEmbyClient::RemoveViewItem: \"%s\"", item->GetLabel().c_str());
       m_viewItems->Remove(i);
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
-      CEmbyUtils::ClearCache(*item);
       return;
     }
   }

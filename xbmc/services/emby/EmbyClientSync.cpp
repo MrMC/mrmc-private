@@ -172,7 +172,6 @@ void CEmbyClientSync::Process()
         }
         else if (msgType == "UserDataChanged")
         {
-          /*
           // we see these from us or some other emby client causes changes (seems like during playback)
           CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(m_address);
           if (client && client->GetPresence())
@@ -187,7 +186,6 @@ void CEmbyClientSync::Process()
             if (!ids.empty())
               client->UpdateViewItems(ids);
           }
-          */
         }
         else
         {

@@ -387,6 +387,7 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
           if (m_vecItems->UpdateItem(newItem.get()) && message.GetParam2() == 1)
           { // need the list updated as well
             UpdateFileList();
+            Refresh();
           }
         }
         else if (newItem)
