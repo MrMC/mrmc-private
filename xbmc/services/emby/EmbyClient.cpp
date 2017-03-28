@@ -340,7 +340,6 @@ bool CEmbyClient::ParseViews()
 {
   bool rtn = false;
   XFILE::CCurlFile emby;
-  emby.SetTimeout(10);
   emby.SetRequestHeader("Cache-Control", "no-cache");
   emby.SetRequestHeader("Content-Type", "application/json");
   CEmbyUtils::PrepareApiCall(m_serverInfo.UserId, m_serverInfo.AccessToken, emby);

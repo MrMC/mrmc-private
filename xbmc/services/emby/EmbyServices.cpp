@@ -472,7 +472,6 @@ void CEmbyServices::Process()
 bool CEmbyServices::AuthenticateByName(const CURL& url)
 {
   XFILE::CCurlFile emby;
-  emby.SetTimeout(10);
   emby.SetRequestHeader("Cache-Control", "no-cache");
   emby.SetRequestHeader("Content-Type", "application/json");
   CEmbyUtils::PrepareApiCall("", "", emby);
@@ -536,7 +535,6 @@ EmbyServerInfo CEmbyServices::GetEmbyLocalServerInfo(const std::string url)
   EmbyServerInfo serverInfo;
 
   XFILE::CCurlFile emby;
-  emby.SetTimeout(10);
   emby.SetRequestHeader("Cache-Control", "no-cache");
   emby.SetRequestHeader("Content-Type", "application/json");
 
@@ -626,8 +624,6 @@ bool CEmbyServices::PostSignInPinCode()
   std::string strMessage;
 
   XFILE::CCurlFile curlfile;
-  // use a lower default timeout
-  curlfile.SetTimeout(10);
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
 
@@ -724,7 +720,6 @@ bool CEmbyServices::GetSignInByPinReply()
   std::string strMessage;
 
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(10000);
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
 
@@ -768,7 +763,6 @@ bool CEmbyServices::AuthenticatePinReply(const std::string &deviceId, const std:
   bool rtn = false;
 
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(10000);
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
 
@@ -813,7 +807,6 @@ bool CEmbyServices::GetConnectServerList(const std::string &connectUserId, const
   bool rtn = false;
 
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(10000);
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
 
@@ -867,7 +860,6 @@ bool CEmbyServices::ExchangeAccessKeyForAccessToken(EmbyServerInfo &connectServe
   bool rtn = false;
 
   XFILE::CCurlFile curlfile;
-  curlfile.SetTimeout(10000);
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
   CEmbyUtils::PrepareApiCall(connectServerInfo.UserId, connectServerInfo.AccessKey, curlfile);
