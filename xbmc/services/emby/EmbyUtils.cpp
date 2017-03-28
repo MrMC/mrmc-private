@@ -24,6 +24,7 @@
 #include "ContextMenuManager.h"
 #include "Util.h"
 #include "URL.h"
+#include "filesystem/DirectoryCache.h"
 #include "filesystem/StackDirectory.h"
 #include "network/Network.h"
 #include "utils/Base64.h"
@@ -167,6 +168,8 @@ void CEmbyUtils::SetWatched(CFileItem &item)
   if (!item.GetVideoInfoTag()->m_lastPlayed.IsValid())
     item.GetVideoInfoTag()->m_lastPlayed = CDateTime::GetUTCDateTime();
 
+  ClearCache(item);
+  
   // get the URL to updated the item's played state for this user ID
   CURL url2(url);
   url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + item.GetMediaServiceId());
@@ -210,6 +213,8 @@ void CEmbyUtils::SetUnWatched(CFileItem &item)
   if (!client || !client->GetPresence())
     return;
 
+  ClearCache(item);
+  
   // get the URL to updated the item's played state for this user ID
   CURL url2(url);
   url2.SetFileName("emby/Users/" + client->GetUserID() + "/PlayedItems/" + item.GetMediaServiceId());
@@ -550,6 +555,12 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &vari
   }
 
   return nullptr;
+}
+
+void CEmbyUtils::ClearCache(CFileItem &item)
+{
+  if (item.GetVideoInfoTag()->m_type == MediaTypeSeason || item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
+    g_directoryCache.ClearDirectory("emby://tvshows/titles");
 }
 
   // Emby Movie/TV

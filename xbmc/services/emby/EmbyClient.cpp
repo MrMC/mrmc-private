@@ -152,6 +152,7 @@ void CEmbyClient::AddNewViewItem(const std::string &id)
     CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 0, item);
     g_windowManager.SendThreadMessage(msg);
     CLog::Log(LOGERROR, "CEmbyClient::AddNewViewItem: added item with id \"%s\"", id.c_str());
+    CEmbyUtils::ClearCache(*item);
   }
 }
 
@@ -172,6 +173,7 @@ void CEmbyClient::UpdateViewItem(const std::string &id)
       {
         CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
         g_windowManager.SendThreadMessage(msg);
+        CEmbyUtils::ClearCache(*item);
       }
       return;
     }
@@ -199,6 +201,7 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
     {
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
+      CEmbyUtils::ClearCache(*item);
     }
   }
 }
@@ -215,6 +218,7 @@ void CEmbyClient::RemoveViewItem(const std::string &id)
       m_viewItems->Remove(i);
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
+      CEmbyUtils::ClearCache(*item);
       return;
     }
   }

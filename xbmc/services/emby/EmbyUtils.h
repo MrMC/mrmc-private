@@ -59,6 +59,7 @@ public:
   static bool GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
 
   static CFileItemPtr ToFileItemPtr(CEmbyClient *client, const CVariant &object);
+  static void ClearCache(CFileItem &item);
 
   // Emby Movie/TV
   static bool GetEmbyMovies(CFileItemList &items, std::string url, std::string filter = "");
@@ -92,4 +93,5 @@ private:
   static void GetMediaDetals(CFileItem &item, const CVariant &variant, std::string id = "0");
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
   static void RemoveSubtitleProperties(CFileItem &item);
+  
 };
