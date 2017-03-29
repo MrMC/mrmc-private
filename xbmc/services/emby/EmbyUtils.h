@@ -77,7 +77,9 @@ public:
   // Emby Music
   static bool GetEmbyArtists(CFileItemList &items, std::string url);
   static bool GetEmbyAlbum(CFileItemList &items, std::string url);
+  static bool GetEmbyArtistAlbum(CFileItemList &items, std::string url);
   static bool GetEmbySongs(CFileItemList &items, std::string url);
+  static bool GetEmbyAlbumSongs(CFileItemList &items, std::string url);
   static bool ShowMusicInfo(CFileItem item);
   static bool GetEmbyRecentlyAddedAlbums(CFileItemList &items,int limit);
   static bool GetEmbyAlbumSongs(CFileItem item, CFileItemList &items);
