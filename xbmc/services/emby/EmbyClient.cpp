@@ -119,6 +119,14 @@ void CEmbyClient::SetWatched(CFileItem &item)
 {
   std::string itemId = item.GetMediaServiceId();
   std::string content = item.GetProperty("MediaServicesContent").asString();
+  CDateTime lastPlayed;
+  if (item.IsVideo())
+    lastPlayed = item.GetVideoInfoTag()->m_lastPlayed;
+  else if (item.IsAudio())
+    lastPlayed = item.GetMusicInfoTag()->m_lastPlayed;
+  else
+    lastPlayed = CDateTime::GetUTCDateTime();
+
   if (content == "movies")
   {
     for (auto &view : m_viewMovies)
@@ -147,12 +155,12 @@ void CEmbyClient::SetWatched(CFileItem &item)
   // and add the DatePlayed URL parameter
   curl.SetOption("DatePlayed",
     StringUtils::Format("%04i%02i%02i%02i%02i%02i",
-      item.GetVideoInfoTag()->m_lastPlayed.GetYear(),
-      item.GetVideoInfoTag()->m_lastPlayed.GetMonth(),
-      item.GetVideoInfoTag()->m_lastPlayed.GetDay(),
-      item.GetVideoInfoTag()->m_lastPlayed.GetHour(),
-      item.GetVideoInfoTag()->m_lastPlayed.GetMinute(),
-      item.GetVideoInfoTag()->m_lastPlayed.GetSecond()));
+      lastPlayed.GetYear(),
+      lastPlayed.GetMonth(),
+      lastPlayed.GetDay(),
+      lastPlayed.GetHour(),
+      lastPlayed.GetMinute(),
+      lastPlayed.GetSecond()));
 
   std::string data;
   std::string response;
@@ -188,6 +196,9 @@ void CEmbyClient::SetUnWatched(CFileItem &item)
       if (hit)
         break;
     }
+  }
+  else if (content == "song")
+  {
   }
 
   // DELETE to /Users/{UserId}/PlayedItems/{Id}
