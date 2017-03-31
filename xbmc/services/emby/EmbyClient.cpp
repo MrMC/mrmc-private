@@ -247,7 +247,7 @@ bool CEmbyClient::GetMusicArtists(CFileItemList &items, std::string url)
   //TODO: fix this for multiple view contents
   bool rtn = false;
   CURL curl(url);
-  for (auto &view : m_viewTVShows)
+  for (auto &view : m_viewMusic)
   {
     if (view->GetItems().isNull())
       FetchViewItems(view, EmbyTypeMusicArtist);
