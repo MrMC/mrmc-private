@@ -623,7 +623,7 @@ const CVariant CEmbyClient::FetchItemByIds(const std::vector<std::string> &Ids)
     return CVariant(CVariant::VariantTypeNull);
 
   static const std::string Fields = {
-    "DateCreated,Genres,MediaStreams,Overview,ShortOverview,Path,ImageTags,Taglines"
+    "DateCreated,Genres,MediaStreams,Overview,ShortOverview,Path,ImageTags,Taglines,RecursiveItemCount"
   };
 
   CURL curl(m_url);
