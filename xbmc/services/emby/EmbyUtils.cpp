@@ -967,7 +967,7 @@ bool CEmbyUtils::GetEmbyAlbum(CFileItemList &items, std::string url, int limit)
   
   url2.SetOption("IncludeItemTypes", "Audio");
   url2.SetOption("Limit", StringUtils::Format("%i",limit));
-  url2.SetOption("Fields", "Etag");
+  url2.SetOption("Fields", "BasicSyncInfo");
   url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
   CVariant variant = GetEmbyCVariant(url2.Get());
   
