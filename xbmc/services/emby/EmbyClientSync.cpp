@@ -139,11 +139,14 @@ void CEmbyClientSync::Process()
             const auto itemsAdded = msgData["ItemsAdded"];
             if (itemsAdded.isArray())
             {
+              std::vector<std::string> ids;
               for (auto item = itemsAdded.begin_array(); item != itemsAdded.end_array(); ++item)
               {
                 if (item->isString())
-                  client->AddNewViewItem(item->asString());
+                  ids.push_back(item->asString());
               }
+              if (!ids.empty())
+                client->AddNewViewItems(ids);
             }
 
             const auto itemsUpdated = msgData["ItemsUpdated"];
@@ -162,11 +165,14 @@ void CEmbyClientSync::Process()
             const auto itemsRemoved = msgData["ItemsRemoved"];
             if (itemsRemoved.isArray())
             {
+              std::vector<std::string> ids;
               for (auto item = itemsRemoved.begin_array(); item != itemsRemoved.end_array(); ++item)
               {
                 if (item->isString())
-                  client->RemoveViewItem(item->asString());
+                  ids.push_back(item->asString());
               }
+              if (!ids.empty())
+                client->RemoveViewItems(ids);
             }
           }
         }

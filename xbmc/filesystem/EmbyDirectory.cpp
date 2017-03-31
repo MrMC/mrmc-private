@@ -28,6 +28,7 @@
 #include "filesystem/Directory.h"
 #include "guilib/LocalizeStrings.h"
 #include "services/emby/EmbyUtils.h"
+#include "services/emby/EmbyViewCache.h"
 #include "services/emby/EmbyServices.h"
 #include "utils/log.h"
 #include "utils/Base64.h"
@@ -93,7 +94,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       CEmbyServices::GetInstance().GetClients(clients);
       for (const auto &client : clients)
       {
-        std::vector<EmbyViewContent> contents = client->GetMoviesContent();
+        const std::vector<EmbyViewInfo> contents = client->GetViewInfoForMovieContent();
         if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasPlexServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
@@ -106,8 +107,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
             curl.SetProtocol(client->GetProtocol());
-            std::string filename = contents[0].viewprefix.c_str();
-            curl.SetFileName(filename);
+            curl.SetFileName(content.prefix);
             pItem->SetPath("emby://movies/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
             /*
@@ -125,8 +125,8 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(client->GetUrl());
           curl.SetProtocol(client->GetProtocol());
-          std::string filename = contents[0].viewprefix.c_str();
-          curl.SetFileName(filename);
+          curl.SetFileName(contents[0].prefix);
+          //client->GetMovies(items, curl.Get()); ????
           CDirectory::GetDirectory("emby://movies/" + basePath + "/" + Base64::Encode(curl.Get()), items);
           items.SetContent("movies");
           CEmbyUtils::SetEmbyItemProperties(items, "movies", client);
@@ -171,7 +171,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
       if (path == "titles" || path == "filter")
       {
-        CEmbyUtils::GetEmbyMovies(items, Base64::Decode(section));
+        client->GetMovies(items, Base64::Decode(section));
         items.SetLabel(g_localizeStrings.Get(369));
         items.SetContent("movies");
       }
@@ -194,7 +194,6 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.SetLabel(path);
         items.SetContent("movies");
       }
-      client->AddViewItems(items);
       CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory' client(%s), found %d movies", client->GetServerName().c_str(), items.Size());
     }
     return true;
@@ -208,7 +207,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       CEmbyServices::GetInstance().GetClients(clients);
       for (const auto &client : clients)
       {
-        std::vector<EmbyViewContent> contents = client->GetTvShowContent();
+        const std::vector<EmbyViewInfo> contents = client->GetViewInfoForTVShowContent();
         if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasPlexServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
@@ -221,8 +220,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
             curl.SetProtocol(client->GetProtocol());
-            std::string filename = contents[0].viewprefix.c_str();
-            curl.SetFileName(filename);
+            curl.SetFileName(content.prefix);
             pItem->SetPath("emby://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
             /*
@@ -233,7 +231,6 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             pItem->SetIconImage(curl.Get());
             */
             items.Add(pItem);
-            client->AddViewItem(pItem);
             CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory client(%s), title(%s)", client->GetServerName().c_str(), title.c_str());
           }
         }
@@ -241,8 +238,8 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(client->GetUrl());
           curl.SetProtocol(client->GetProtocol());
-          std::string filename = contents[0].viewprefix.c_str();
-          curl.SetFileName(filename);
+          curl.SetFileName(contents[0].prefix);
+          //client->GetTVShows(items, curl.Get()); ????
           CDirectory::GetDirectory("emby://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()), items);
           CEmbyUtils::SetEmbyItemProperties(items, "tvshows", client);
           for (int item = 0; item < items.Size(); ++item)
@@ -286,7 +283,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
       if (path == "titles" || path == "filter")
       {
-        CEmbyUtils::GetEmbyTvshows(items,Base64::Decode(section));
+        client->GetTVShows(items, Base64::Decode(section));
         items.SetLabel(g_localizeStrings.Get(369));
         items.SetContent("tvshows");
       }
@@ -314,12 +311,11 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       }
       else if(!filter.empty())
       {
-        CEmbyUtils::GetEmbyTVFilter(items, Base64::Decode(section), "emby://tvshows/filter/", filter);
+        CEmbyUtils::GetEmbyTVShowFilter(items, Base64::Decode(section), "emby://tvshows/filter/", filter);
         StringUtils::ToCapitalize(path);
         items.SetLabel(path);
         items.SetContent("tvshows");
       }
-      client->AddViewItems(items);
       CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory' client(%s), found %d shows", client->GetServerName().c_str(), items.Size());
     }
     return true;
@@ -333,7 +329,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       CEmbyServices::GetInstance().GetClients(clients);
       for (const auto &client : clients)
       {
-        std::vector<EmbyViewContent> contents = client->GetMusicContent();
+        const std::vector<EmbyViewInfo> contents = client->GetViewInfoForMusicContent();
         if (contents.size() > 1 || ((items.Size() > 0 || CServicesManager::GetInstance().HasPlexServices() || clients.size() > 1) && contents.size() == 1))
         {
           for (const auto &content : contents)
@@ -346,7 +342,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             // have to do it this way because raw url has authToken as protocol option
             CURL curl(client->GetUrl());
             curl.SetProtocol(client->GetProtocol());
-            curl.SetFileName(content.viewprefix.c_str());
+            curl.SetFileName(content.prefix);
             pItem->SetPath("emby://music/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
             /*
@@ -357,7 +353,6 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             pItem->SetIconImage(curl.Get());
             */
             items.Add(pItem);
-            client->AddViewItem(pItem);
             CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory client(%s), title(%s)", client->GetServerName().c_str(), title.c_str());
           }
         }
@@ -365,8 +360,8 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         {
           CURL curl(client->GetUrl());
           curl.SetProtocol(client->GetProtocol());
-          curl.SetFileName(contents[0].viewprefix);
-          CEmbyUtils::GetEmbyArtists(items, curl.Get());
+          curl.SetFileName(contents[0].prefix);
+          client->GetMusicArtists(items, curl.Get());
           items.SetContent("artists");
           items.SetPath("emby://music/albums/");
           CEmbyUtils::SetEmbyItemProperties(items, "music", client);
@@ -396,7 +391,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       
       if (path == "root" || path == "artists")
       {
-        CEmbyUtils::GetEmbyArtists(items,Base64::Decode(section));
+        client->GetMusicArtists(items, Base64::Decode(section));
         items.SetLabel(g_localizeStrings.Get(36917));
         items.SetContent("artist");
       }
@@ -437,13 +432,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
 DIR_CACHE_TYPE CEmbyDirectory::GetCacheType(const CURL& url) const
 {
-  // testing only
-  std::string test = url.GetWithoutOptions();
-  if (StringUtils::StartsWithNoCase(test, "emby://movies"))
-    return DIR_CACHE_ALWAYS;
-  else
-    return DIR_CACHE_NEVER;
-  //return DIR_CACHE_ONCE;
+  return DIR_CACHE_NEVER;
 }
 
 bool CEmbyDirectory::FindByBroadcast(CFileItemList &items)

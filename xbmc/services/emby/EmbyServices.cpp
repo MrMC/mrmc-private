@@ -924,7 +924,7 @@ bool CEmbyServices::AddClient(CEmbyClientPtr foundClient)
   }
 
   // only add new clients that are present
-  if (foundClient->GetPresence() && foundClient->ParseViews())
+  if (foundClient->GetPresence() && foundClient->FetchViews())
   {
     m_clients.push_back(foundClient);
     m_hasClients = !m_clients.empty();
