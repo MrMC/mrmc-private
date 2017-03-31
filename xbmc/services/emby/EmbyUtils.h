@@ -97,12 +97,8 @@ public:
   static bool ParseEmbySeries(CFileItemList &items, const CURL &url, const CVariant &variant);
   static bool ParseEmbySeasons(CFileItemList &items, const CURL &url, const CVariant &series, const CVariant &variant);
   static bool ParseEmbyAudio(CFileItemList &items, const CURL &url, const CVariant &variant);
-  
   static bool ParseEmbyAlbum(CFileItemList &items, const CURL &url, const CVariant &variant);
-
-  static bool ParseEmbyMusicAlbum(CFileItemList &items, const CURL &url, const CVariant &variant);
-  static bool ParseEmbyArtistAlbum(CFileItemList &items, const CURL &url, const CVariant &variant);
-  static bool ParseEmbyMusicArtists(CFileItemList &items, const CURL &url, const CVariant &variant);
+  static bool ParseEmbyArtists(CFileItemList &items, const CURL &url, const CVariant &variant);
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
 
 private:
