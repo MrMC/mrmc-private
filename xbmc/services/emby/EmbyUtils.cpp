@@ -957,10 +957,81 @@ bool CEmbyUtils::GetEmbyArtists(CFileItemList &items, std::string url)
   return rtn;
 }
 
-bool CEmbyUtils::GetEmbyAlbum(CFileItemList &items, std::string url)
+bool CEmbyUtils::GetEmbyAlbum(CFileItemList &items, std::string url, int limit)
 {
+  bool rtn = false;
+  CURL url2(url);
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
+  if (!client || !client->GetPresence())
+    return false;
+  
+  url2.SetOption("IncludeItemTypes", "Audio");
+  url2.SetOption("Limit", StringUtils::Format("%i",limit));
+  url2.SetOption("Fields", "Etag");
+  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
+  CVariant variant = GetEmbyCVariant(url2.Get());
+  
+  if(!variant.isMember("Items"))
+  {
+    std::map<std::string, CVariant> variantMap;
+    variantMap["Items"] = variant;
+    variant = CVariant(variantMap);
+  }
+  
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
+    return false;
+  }
+  
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
+  {
+    const auto item = *variantItemIt;
+    rtn = true;
+    CFileItemPtr embyItem(new CFileItem());
+    // set m_bIsFolder to true to indicate we are artist list
+    
+    embyItem->m_bIsFolder = true;
+    embyItem->SetLabel(item["Name"].asString());
+    CURL url1(url);
+    //url1.SetProtocolOption("ArtistIds",item["ArtistItems"]["Id"].asString());
+    url1.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
+    url1.SetOption("ParentId", item["Id"].asString());
+    embyItem->SetPath("emby://music/albumsongs/" + Base64::Encode(url1.Get()));
+    embyItem->SetMediaServiceId(item["Id"].asString());
+    
+    embyItem->GetMusicInfoTag()->m_type = MediaTypeAlbum;
+    embyItem->GetMusicInfoTag()->SetTitle(item["Name"].asString());
+    
+    embyItem->GetMusicInfoTag()->SetArtistDesc(item["ArtistItems"]["Name"].asString());
+    embyItem->SetProperty("artist", item["ArtistItems"]["Name"].asString());
+    embyItem->SetProperty("EmbyAlbumKey", item["Id"].asString());
+    
+    embyItem->GetMusicInfoTag()->SetAlbum(item["Name"].asString());
+    embyItem->GetMusicInfoTag()->SetYear(item["ProductionYear"].asInteger());
+    
+    url1.SetOptions("");
+    url1.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
+    embyItem->SetArt("thumb", url1.Get());
+    embyItem->SetProperty("thumb", url1.Get());
+    
+    url1.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    embyItem->SetArt("fanart", url1.Get());
+    embyItem->SetProperty("fanart", url1.Get());
+    
+    embyItem->GetMusicInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
+    
+    GetMusicDetails(*embyItem, item);
+    SetEmbyItemProperties(*embyItem, MediaTypeAlbum,client);
+    items.Add(embyItem);
+  }
+  items.SetProperty("library.filter", "true");
+  items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
+  SetEmbyItemProperties(items, MediaTypeAlbum,client);
+  
+  return rtn;
 
-  return false;
 }
 
 bool CEmbyUtils::GetEmbyArtistAlbum(CFileItemList &items, std::string url)
@@ -1141,12 +1212,48 @@ bool CEmbyUtils::ShowMusicInfo(CFileItem item)
 
 bool CEmbyUtils::GetEmbyRecentlyAddedAlbums(CFileItemList &items,int limit)
 {
-  return false;
+  
+  bool rtn = false;
+  
+  if (CEmbyServices::GetInstance().HasClients())
+  {
+    CFileItemList embyItems;
+    bool limitToLocal = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYLIMITHOMETOLOCAL);
+    //look through all emby clients and pull recently added for each library section
+    std::vector<CEmbyClientPtr> clients;
+    CEmbyServices::GetInstance().GetClients(clients);
+    for (const auto &client : clients)
+    {
+      if (limitToLocal && !client->IsOwned())
+        continue;
+      
+      EmbyViewContentVector contents;
+      contents = client->GetMusicContent();
+      for (const auto &content : contents)
+      {
+        std::string userId = client->GetUserID();
+        CURL curl(client->GetUrl());
+        curl.SetProtocol(client->GetProtocol());
+        curl.SetOption("ParentId", content.id);
+        curl.SetFileName("emby/Users/" + userId + "/Items/Latest");
+
+        rtn = GetEmbyAlbum(embyItems, curl.Get(), 10);
+        
+        items.Append(embyItems);
+        embyItems.ClearItems();
+      }
+    }
+  }
+  return rtn;
 }
 
 bool CEmbyUtils::GetEmbyAlbumSongs(CFileItem item, CFileItemList &items)
 {
-  return false;
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  if (StringUtils::StartsWithNoCase(url, "emby://"))
+    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+  
+  return GetEmbyAlbumSongs(items, url);
 }
 
 bool CEmbyUtils::GetEmbyMediaTotals(MediaServicesMediaCount &totals)
