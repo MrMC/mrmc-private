@@ -1494,8 +1494,7 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
 
   std::string value;
   std::string fanart;
-  // if we have season means we are listing episodes, we need to get the fanart from rootXmlNode.
-  // movies has it in videoNode
+  // if we have "ParentIndexNumber" means we are listing episodes
   if (variant.isMember("ParentIndexNumber"))
   {
     url2.SetFileName("Items/" + itemId + "/Images/Primary");
@@ -1509,33 +1508,6 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
     item->SetLabel(variant["SeasonName"].asString());
     item->SetProperty("EmbySeriesID", seriesId);
   }
-/*
-  else if (((TiXmlElement*) videoNode)->Attribute("grandparentTitle")) // only recently added episodes have this
-  {
-    fanart = XMLUtils::GetAttribute(videoNode, "art");
-    videoInfo->m_strShowTitle = XMLUtils::GetAttribute(videoNode, "grandparentTitle");
-    videoInfo->m_iSeason = atoi(XMLUtils::GetAttribute(videoNode, "parentIndex").c_str());
-    videoInfo->m_iEpisode = atoi(XMLUtils::GetAttribute(videoNode, "index").c_str());
-
-    value = XMLUtils::GetAttribute(videoNode, "thumb");
-    if (!value.empty() && (value[0] == '/'))
-      StringUtils::TrimLeft(value, "/");
-    url.SetFileName(value);
-    newItem->SetArt("thumb", url.Get());
-
-    value = XMLUtils::GetAttribute(videoNode, "parentThumb");
-    if (value.empty())
-      value = XMLUtils::GetAttribute(videoNode, "grandparentThumb");
-    if (!value.empty() && (value[0] == '/'))
-      StringUtils::TrimLeft(value, "/");
-    url.SetFileName(value);
-    newItem->SetArt("tvshow.poster", url.Get());
-    newItem->SetArt("tvshow.thumb", url.Get());
-    newItem->SetIconImage(url.Get());
-    std::string seasonEpisode = StringUtils::Format("S%02iE%02i", embyItem->GetVideoInfoTag()->m_iSeason, embyItem->GetVideoInfoTag()->m_iEpisode);
-    newItem->SetProperty("SeasonEpisode", seasonEpisode);
-  }
-*/
   else
   {
     url2.SetFileName("Items/" + itemId + "/Images/Primary");
