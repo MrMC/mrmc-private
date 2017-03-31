@@ -928,6 +928,7 @@ bool CEmbyServices::AddClient(CEmbyClientPtr foundClient)
   {
     m_clients.push_back(foundClient);
     m_hasClients = !m_clients.empty();
+    AddJob(new CEmbyServiceJob(0, "FoundNewClient"));
     return true;
   }
 
