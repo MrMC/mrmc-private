@@ -252,7 +252,7 @@ bool CEmbyClient::GetMusicArtists(CFileItemList &items, std::string url)
     if (view->GetItems().isNull())
       FetchViewItems(view, EmbyTypeMusicArtist);
 
-    rtn = CEmbyUtils::ParseEmbyArtists(items, curl, view->GetItems());
+    rtn = CEmbyUtils::ParseEmbyMusicArtists(items, curl, view->GetItems());
     if (rtn)
       break;
   }

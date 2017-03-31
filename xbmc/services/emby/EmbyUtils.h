@@ -37,13 +37,15 @@ typedef std::shared_ptr<CEmbyClient> CEmbyClientPtr;
 static const std::string EmbyApiKeyHeader = "X-MediaBrowser-Token";
 static const std::string EmbyAuthorizationHeader = "X-Emby-Authorization";
 
+static const std::string EmbyTypeVideo = "Video";
+static const std::string EmbyTypeAudio = "Audio";
 static const std::string EmbyTypeMovie = "Movie";
 static const std::string EmbyTypeSeries = "Series";
 static const std::string EmbyTypeSeason = "Season";
 static const std::string EmbyTypeSeasons = "Seasons";
 static const std::string EmbyTypeEpisode = "Episode";
 static const std::string EmbyTypeMusicArtist = "MusicArtist";
-static const std::string EmbyTypeAudio = "Audio";
+static const std::string EmbyTypeMusicAlbum = "MusicAlbum";
 static const std::string EmbyTypeBoxSet = "BoxSet";
 
 class CEmbyUtils
@@ -94,7 +96,13 @@ public:
   static bool ParseEmbyVideos(CFileItemList &items, CURL url, const CVariant &object, std::string type);
   static bool ParseEmbySeries(CFileItemList &items, const CURL &url, const CVariant &variant);
   static bool ParseEmbySeasons(CFileItemList &items, const CURL &url, const CVariant &series, const CVariant &variant);
-  static bool ParseEmbyArtists(CFileItemList &items, const CURL &url, const CVariant &variant);
+  static bool ParseEmbyAudio(CFileItemList &items, const CURL &url, const CVariant &variant);
+  
+  static bool ParseEmbyAlbum(CFileItemList &items, const CURL &url, const CVariant &variant);
+
+  static bool ParseEmbyMusicAlbum(CFileItemList &items, const CURL &url, const CVariant &variant);
+  static bool ParseEmbyArtistAlbum(CFileItemList &items, const CURL &url, const CVariant &variant);
+  static bool ParseEmbyMusicArtists(CFileItemList &items, const CURL &url, const CVariant &variant);
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
 
 private:

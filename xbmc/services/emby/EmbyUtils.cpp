@@ -646,17 +646,15 @@ bool CEmbyUtils::SearchEmby(CFileItemList &items, std::string strSearchString)
   // Emby Music
 bool CEmbyUtils::GetEmbyAlbum(CFileItemList &items, std::string url, int limit)
 {
-  bool rtn = false;
-  CURL url2(url);
-  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
+  CURL curl(url);
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(curl.Get());
   if (!client || !client->GetPresence())
     return false;
   
-  url2.SetOption("IncludeItemTypes", EmbyTypeAudio);
-  url2.SetOption("Limit", StringUtils::Format("%i",limit));
-  url2.SetOption("Fields", "BasicSyncInfo");
-  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  CVariant variant = GetEmbyCVariant(url2.Get());
+  curl.SetOption("IncludeItemTypes", EmbyTypeAudio);
+  curl.SetOption("Limit", StringUtils::Format("%i",limit));
+  curl.SetOption("Fields", "BasicSyncInfo");
+  CVariant variant = GetEmbyCVariant(curl.Get());
   
   if(!variant.isMember("Items"))
   {
@@ -664,134 +662,30 @@ bool CEmbyUtils::GetEmbyAlbum(CFileItemList &items, std::string url, int limit)
     variantMap["Items"] = variant;
     variant = CVariant(variantMap);
   }
-  
-  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
-  {
-    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
-    return false;
-  }
-  
-  const auto& variantItems = variant["Items"];
-  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
-  {
-    const auto item = *variantItemIt;
-    rtn = true;
-    CFileItemPtr embyItem(new CFileItem());
-    // set m_bIsFolder to true to indicate we are artist list
-    
-    embyItem->m_bIsFolder = true;
-    embyItem->SetLabel(item["Name"].asString());
-    CURL url1(url);
-    //url1.SetProtocolOption("ArtistIds",item["ArtistItems"]["Id"].asString());
-    url1.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
-    url1.SetOption("ParentId", item["Id"].asString());
-    embyItem->SetPath("emby://music/albumsongs/" + Base64::Encode(url1.Get()));
-    embyItem->SetMediaServiceId(item["Id"].asString());
 
-    embyItem->GetMusicInfoTag()->m_type = MediaTypeAlbum;
-    embyItem->GetMusicInfoTag()->SetTitle(item["Name"].asString());
-
-    embyItem->GetMusicInfoTag()->SetArtistDesc(item["ArtistItems"]["Name"].asString());
-    embyItem->SetProperty("artist", item["ArtistItems"]["Name"].asString());
-    embyItem->SetProperty("EmbyAlbumKey", item["Id"].asString());
-
-    embyItem->GetMusicInfoTag()->SetAlbum(item["Name"].asString());
-    embyItem->GetMusicInfoTag()->SetYear(item["ProductionYear"].asInteger());
-
-    url1.SetOptions("");
-    url1.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
-    embyItem->SetArt("thumb", url1.Get());
-    embyItem->SetProperty("thumb", url1.Get());
-
-    url1.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
-    embyItem->SetArt("fanart", url1.Get());
-    embyItem->SetProperty("fanart", url1.Get());
-
-    embyItem->GetMusicInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
-
-    GetMusicDetails(*embyItem, item);
-    SetEmbyItemProperties(*embyItem, MediaTypeAlbum,client);
-    items.Add(embyItem);
-  }
-  items.SetProperty("library.filter", "true");
-  items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
-  SetEmbyItemProperties(items, MediaTypeAlbum,client);
-  
+  curl.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
+  bool rtn = ParseEmbyAlbum(items, curl, variant);
   return rtn;
 
 }
 
 bool CEmbyUtils::GetEmbyArtistAlbum(CFileItemList &items, std::string url)
 {
-  
-  bool rtn = false;
-  CURL url2(url);
-  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
+  CURL curl(url);
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(curl.Get());
   if (!client || !client->GetPresence())
     return false;
   
-  //url2.GetProtocolOption("ArtistIds");
-  url2.SetOptions("");
-  url2.SetOption("Recursive", "true");
-  url2.SetOption("Fields", "Etag,Genres");
-  url2.SetOption("IncludeItemTypes", EmbyTypeMusicArtist);
-  url2.SetOption("ArtistIds", url2.GetProtocolOption("ArtistIds"));
-  url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
-  url2.SetProtocolOptions(url2.GetProtocolOptions() + "&format=json");
-  const CVariant variant = GetEmbyCVariant(url2.Get());
-  
-  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
-  {
-    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
-    return false;
-  }
-  
-  const auto& variantItems = variant["Items"];
-  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
-  {
-    const auto item = *variantItemIt;
-    rtn = true;
-    CFileItemPtr embyItem(new CFileItem());
-    // set m_bIsFolder to true to indicate we are artist list
-    
-    embyItem->m_bIsFolder = true;
-    embyItem->SetLabel(item["Name"].asString());
-    CURL url1(url);
-    //url1.SetProtocolOption("ArtistIds",item["ArtistItems"]["Id"].asString());
-    url1.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
-    url1.SetOption("ParentId", item["Id"].asString());
-    embyItem->SetPath("emby://music/albumsongs/" + Base64::Encode(url1.Get()));
-    embyItem->SetMediaServiceId(item["Id"].asString());
-    
-    embyItem->GetMusicInfoTag()->m_type = MediaTypeAlbum;
-    embyItem->GetMusicInfoTag()->SetTitle(item["Name"].asString());
+  curl.SetOptions("");
+  curl.SetOption("Recursive", "true");
+  curl.SetOption("Fields", "Etag,Genres");
+  curl.SetOption("IncludeItemTypes", EmbyTypeMusicAlbum);
+  curl.SetOption("ArtistIds", curl.GetProtocolOption("ArtistIds"));
+  curl.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
+  const CVariant variant = GetEmbyCVariant(curl.Get());
 
-    embyItem->GetMusicInfoTag()->SetArtistDesc(item["ArtistItems"]["Name"].asString());
-    embyItem->SetProperty("artist", item["ArtistItems"]["Name"].asString());
-    embyItem->SetProperty("EmbyAlbumKey", item["Id"].asString());
-
-    embyItem->GetMusicInfoTag()->SetAlbum(item["Name"].asString());
-    embyItem->GetMusicInfoTag()->SetYear(item["ProductionYear"].asInteger());
-    
-    url1.SetOptions("");
-    url1.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
-    embyItem->SetArt("thumb", url1.Get());
-    embyItem->SetProperty("thumb", url1.Get());
-    
-    url1.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
-    embyItem->SetArt("fanart", url1.Get());
-    embyItem->SetProperty("fanart", url1.Get());
-    
-    embyItem->GetMusicInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
-    
-    GetMusicDetails(*embyItem, item);
-    SetEmbyItemProperties(*embyItem, MediaTypeAlbum,client);
-    items.Add(embyItem);
-  }
-  items.SetProperty("library.filter", "true");
-  items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
-  SetEmbyItemProperties(items, MediaTypeAlbum,client);
-  
+  curl.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
+  bool rtn = ParseEmbyArtistAlbum(items, curl, variant);
   return rtn;
 }
 
@@ -802,25 +696,23 @@ bool CEmbyUtils::GetEmbySongs(CFileItemList &items, std::string url)
 
 bool CEmbyUtils::GetEmbyAlbumSongs(CFileItemList &items, std::string url)
 {
-  bool rtn = false;
-  CURL url2(url);
-
-//  url2.SetOption("ParentId", "");
-  
-  url2.SetOption("Fields", "Etag,DateCreated,MediaStreams,ItemCounts,Genres");
-  url2.SetProtocolOptions("X-MediaBrowser-Token=" + url2.GetProtocolOption("X-MediaBrowser-Token") + "&format=json");
-  const CVariant variant = GetEmbyCVariant(url2.Get());
+  CURL curl(url);
+  curl.SetOption("Fields", "Etag,DateCreated,MediaStreams,ItemCounts,Genres");
+  const CVariant variant = GetEmbyCVariant(curl.Get());
   
   if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
   {
-    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
+    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", curl.GetRedacted().c_str());
     return false;
   }
   
-  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(curl.Get());
   if (!client || !client->GetPresence())
     return false;
   
+  curl.SetOptions("");
+
+  bool rtn = false;
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
@@ -828,9 +720,8 @@ bool CEmbyUtils::GetEmbyAlbumSongs(CFileItemList &items, std::string url)
     rtn = true;
     CFileItemPtr embyItem(new CFileItem());
     embyItem->SetLabel(item["Name"].asString());
-    url2.SetOptions("");
-    url2.SetFileName("Audio/" + item["Id"].asString() +"/stream?static=true");
-    embyItem->SetPath(url2.Get());
+    curl.SetFileName("Audio/" + item["Id"].asString() +"/stream?static=true");
+    embyItem->SetPath(curl.Get());
     embyItem->SetMediaServiceId(item["Id"].asString());
     embyItem->SetProperty("EmbySongKey", item["Id"].asString());
     embyItem->GetMusicInfoTag()->m_type = MediaTypeSong;
@@ -841,14 +732,14 @@ bool CEmbyUtils::GetEmbyAlbumSongs(CFileItemList &items, std::string url)
     embyItem->GetMusicInfoTag()->SetTrackNumber(item["IndexNumber"].asInteger());
     embyItem->GetMusicInfoTag()->SetDuration(TicksToSeconds(variant["RunTimeTicks"].asInteger()));
     
-    url2.SetOptions("");
-    url2.SetFileName("Items/" + item["AlbumId"].asString() + "/Images/Primary");
-    embyItem->SetArt("thumb", url2.Get());
-    embyItem->SetProperty("thumb", url2.Get());
+    curl.SetOptions("");
+    curl.SetFileName("Items/" + item["AlbumId"].asString() + "/Images/Primary");
+    embyItem->SetArt("thumb", curl.Get());
+    embyItem->SetProperty("thumb", curl.Get());
     
-    url2.SetFileName("Items/" + item["AlbumId"].asString() + "/Images/Backdrop");
-    embyItem->SetArt("fanart", url2.Get());
-    embyItem->SetProperty("fanart", url2.Get());
+    curl.SetFileName("Items/" + item["AlbumId"].asString() + "/Images/Backdrop");
+    embyItem->SetArt("fanart", curl.Get());
+    embyItem->SetProperty("fanart", curl.Get());
     
     GetMusicDetails(*embyItem, item);
     
@@ -1001,11 +892,23 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &vari
         variantItem["Name"].asString().c_str());
       ParseEmbyVideos(items, url2, variant, MediaTypeEpisode);
     }
+    else if (type == EmbyTypeAudio)
+    {
+      CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr Music: %s",
+        variantItem["Name"].asString().c_str());
+      ParseEmbyAudio(items, url2, variant);
+    }
+    else if (type == EmbyTypeMusicAlbum)
+    {
+      CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr Music: %s",
+        variantItem["Name"].asString().c_str());
+      ParseEmbyMusicAlbum(items, url2, variant);
+    }
     else if (type == EmbyTypeMusicArtist)
     {
       CLog::Log(LOGDEBUG, "CEmbyUtils::ToFileItemPtr Music: %s",
         variantItem["Name"].asString().c_str());
-      ParseEmbyArtists(items, url2, variant);
+      ParseEmbyMusicArtists(items, url2, variant);
     }
     else
     {
@@ -1234,8 +1137,143 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
   return rtn;
 }
 
-bool CEmbyUtils::ParseEmbyArtists(CFileItemList &items, const CURL &url, const CVariant &variant)
+bool CEmbyUtils::ParseEmbyAudio(CFileItemList &items, const CURL &url, const CVariant &variant)
 {
+  bool rtn = false;
+
+  if (variant.isNull() || !variant.isObject())
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::ParseEmbyAudio invalid response from %s", url.GetRedacted().c_str());
+    return false;
+  }
+
+  return rtn;
+}
+
+bool CEmbyUtils::ParseEmbyAlbum(CFileItemList &items, const CURL &url, const CVariant &variant)
+{
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::ParseEmbyAlbum invalid response from %s", url.GetRedacted().c_str());
+    return false;
+  }
+  
+  // clear base url options
+  CURL curl(url);
+  curl.SetOptions("");
+
+  bool rtn = false;
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
+  {
+    const auto item = *variantItemIt;
+    rtn = true;
+    CFileItemPtr embyItem(new CFileItem());
+    // set m_bIsFolder to true to indicate we are artist list
+    
+    embyItem->m_bIsFolder = true;
+    embyItem->SetLabel(item["Name"].asString());
+    curl.SetOption("ParentId", item["Id"].asString());
+    embyItem->SetPath("emby://music/albumsongs/" + Base64::Encode(curl.Get()));
+    embyItem->SetMediaServiceId(item["Id"].asString());
+
+    embyItem->GetMusicInfoTag()->m_type = MediaTypeAlbum;
+    embyItem->GetMusicInfoTag()->SetTitle(item["Name"].asString());
+
+    embyItem->GetMusicInfoTag()->SetArtistDesc(item["ArtistItems"]["Name"].asString());
+    embyItem->SetProperty("artist", item["ArtistItems"]["Name"].asString());
+    embyItem->SetProperty("EmbyAlbumKey", item["Id"].asString());
+
+    embyItem->GetMusicInfoTag()->SetAlbum(item["Name"].asString());
+    embyItem->GetMusicInfoTag()->SetYear(item["ProductionYear"].asInteger());
+
+    curl.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
+    embyItem->SetArt("thumb", curl.Get());
+    embyItem->SetProperty("thumb", curl.Get());
+
+    curl.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    embyItem->SetArt("fanart", curl.Get());
+    embyItem->SetProperty("fanart", curl.Get());
+
+    embyItem->GetMusicInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
+
+    GetMusicDetails(*embyItem, item);
+    SetEmbyItemProperties(*embyItem, MediaTypeAlbum);
+    items.Add(embyItem);
+  }
+  items.SetProperty("library.filter", "true");
+  items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
+  SetEmbyItemProperties(items, MediaTypeAlbum);
+
+  return rtn;
+}
+
+bool CEmbyUtils::ParseEmbyArtistAlbum(CFileItemList &items, const CURL &url, const CVariant &variant)
+{
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::ParseEmbyArtistAlbum invalid response from %s", url.GetRedacted().c_str());
+    return false;
+  }
+  
+  // clear base url options
+  CURL curl(url);
+  curl.SetOptions("");
+
+  bool rtn = false;
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
+  {
+    const auto item = *variantItemIt;
+    rtn = true;
+    CFileItemPtr embyItem(new CFileItem());
+    // set m_bIsFolder to true to indicate we are artist list
+    
+    embyItem->m_bIsFolder = true;
+    embyItem->SetLabel(item["Name"].asString());
+    curl.SetOption("ParentId", item["Id"].asString());
+    embyItem->SetPath("emby://music/albumsongs/" + Base64::Encode(curl.Get()));
+    embyItem->SetMediaServiceId(item["Id"].asString());
+    
+    embyItem->GetMusicInfoTag()->m_type = MediaTypeAlbum;
+    embyItem->GetMusicInfoTag()->SetTitle(item["Name"].asString());
+
+    embyItem->GetMusicInfoTag()->SetArtistDesc(item["ArtistItems"]["Name"].asString());
+    embyItem->SetProperty("artist", item["ArtistItems"]["Name"].asString());
+    embyItem->SetProperty("EmbyAlbumKey", item["Id"].asString());
+
+    embyItem->GetMusicInfoTag()->SetAlbum(item["Name"].asString());
+    embyItem->GetMusicInfoTag()->SetYear(item["ProductionYear"].asInteger());
+    
+    curl.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
+    embyItem->SetArt("thumb", curl.Get());
+    embyItem->SetProperty("thumb", curl.Get());
+    
+    curl.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    embyItem->SetArt("fanart", curl.Get());
+    embyItem->SetProperty("fanart", curl.Get());
+    
+    embyItem->GetMusicInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
+    
+    GetMusicDetails(*embyItem, item);
+    SetEmbyItemProperties(*embyItem, MediaTypeAlbum);
+    items.Add(embyItem);
+  }
+  items.SetProperty("library.filter", "true");
+  items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
+  SetEmbyItemProperties(items, MediaTypeAlbum);
+
+  return rtn;
+}
+
+bool CEmbyUtils::ParseEmbyMusicArtists(CFileItemList &items, const CURL &url, const CVariant &variant)
+{
+  if (variant.isNull() || !variant.isObject())
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::ParseEmbyArtistAlbum invalid response from %s", url.GetRedacted().c_str());
+    return false;
+  }
+
   // clear base url options
   CURL curl(url);
   curl.SetOptions("");
@@ -1278,6 +1316,13 @@ bool CEmbyUtils::ParseEmbyArtists(CFileItemList &items, const CURL &url, const C
   items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeArtist;
   SetEmbyItemProperties(items, MediaTypeArtist);
+
+  return rtn;
+}
+
+bool CEmbyUtils::ParseEmbyMusicAlbum(CFileItemList &items, const CURL &url, const CVariant &variant)
+{
+  bool rtn = false;
 
   return rtn;
 }
