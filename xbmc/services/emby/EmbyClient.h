@@ -60,6 +60,8 @@ typedef struct EmbyServerInfo
   std::string WanAddress;
   std::string LocalAddress;
 } EmbyServerInfo;
+typedef std::vector<EmbyServerInfo> EmbyServerInfoVector;
+
 
 class CEmbyClient
 {

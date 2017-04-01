@@ -96,7 +96,7 @@ private:
   bool              PostSignInPinCode();
   bool              GetSignInByPinReply();
   bool              AuthenticatePinReply(const std::string &deviceId, const std::string &pin);
-  bool              GetConnectServerList(const std::string &connectUserId, const std::string &connectAccessToken);
+  EmbyServerInfoVector GetConnectServerList(const std::string &connectUserId, const std::string &connectAccessToken);
   bool              ExchangeAccessKeyForAccessToken(EmbyServerInfo &connectServerInfo);
 
   CEmbyClientPtr    GetClient(std::string uuid);
@@ -121,5 +121,4 @@ private:
   std::atomic<bool> m_hasClients;
   CCriticalSection  m_clients_lock;
   std::vector<CEmbyClientPtr> m_clients;
-  std::vector<EmbyServerInfo> m_servers;
 };
