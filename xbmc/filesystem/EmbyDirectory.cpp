@@ -110,13 +110,9 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(content.prefix);
             pItem->SetPath("emby://movies/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
-            /*
-            std::string value = content.thumb;
-            if (!value.empty() && (value[0] == '/'))
-              StringUtils::TrimLeft(value, "/");
-            curl.SetFileName(value);
+            curl.SetFileName("Items/" + content.id + "/Images/Primary");
+            pItem->SetArt("thumb", curl.Get());
             pItem->SetIconImage(curl.Get());
-            */
             items.Add(pItem);
             CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory client(%s), title(%s)", client->GetServerName().c_str(), title.c_str());
           }
@@ -223,13 +219,9 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(content.prefix);
             pItem->SetPath("emby://tvshows/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
-            /*
-            std::string value = content.thumb;
-            if (!value.empty() && (value[0] == '/'))
-              StringUtils::TrimLeft(value, "/");
-            curl.SetFileName(value);
+            curl.SetFileName("Items/" + content.id + "/Images/Primary");
+            pItem->SetArt("thumb", curl.Get());
             pItem->SetIconImage(curl.Get());
-            */
             items.Add(pItem);
             CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory client(%s), title(%s)", client->GetServerName().c_str(), title.c_str());
           }
@@ -345,13 +337,9 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
             curl.SetFileName(content.prefix);
             pItem->SetPath("emby://music/" + basePath + "/" + Base64::Encode(curl.Get()));
             pItem->SetLabel(title);
-            /*
-            std::string value = content.thumb;
-            if (!value.empty() && (value[0] == '/'))
-              StringUtils::TrimLeft(value, "/");
-            curl.SetFileName(value);
+            curl.SetFileName("Items/" + content.id + "/Images/Primary");
+            pItem->SetArt("thumb", curl.Get());
             pItem->SetIconImage(curl.Get());
-            */
             items.Add(pItem);
             CLog::Log(LOGDEBUG, "CEmbyDirectory::GetDirectory client(%s), title(%s)", client->GetServerName().c_str(), title.c_str());
           }

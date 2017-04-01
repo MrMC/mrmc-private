@@ -503,7 +503,8 @@ bool CEmbyClient::FetchViews()
       libraryView.name = view[PropertyViewName].asString();
       libraryView.etag = view[PropertyViewETag].asString();
       libraryView.prefix = "Users/" + m_serverInfo.UserId + "/Items?ParentId=" + view[PropertyViewId].asString();
-      libraryView.serverid = view[PropertyViewServerID].asString();
+      libraryView.serverId = view[PropertyViewServerID].asString();
+      libraryView.iconId = view["ImageTags"]["Primary"].asString();
       libraryView.mediaType = type;
       if (libraryView.id.empty() || libraryView.name.empty())
         continue;
@@ -595,6 +596,7 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCache *view, const std::string &type)
   }
   else
   {
+    CLog::Log(LOGDEBUG, "CEmbyClient::FetchViewItems unknown type: %s", type.c_str());
     return false;
   }
   //CEmbyUtils::GetEmbyCVariant 3801(msec) for 123524 bytes

@@ -39,8 +39,9 @@ typedef struct EmbyViewContent
   std::string name;
   std::string etag;
   std::string prefix;
-  std::string serverid;
+  std::string serverId;
   std::string mediaType;
+  std::string iconId;
   CVariant items;
 } EmbyViewContent;
 
