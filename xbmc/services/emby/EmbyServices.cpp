@@ -26,6 +26,7 @@
 #include "URL.h"
 #include "Util.h"
 #include "GUIUserMessages.h"
+#include "dialogs/GUIDialogBusy.h"
 #include "dialogs/GUIDialogKaiToast.h"
 #include "dialogs/GUIDialogProgress.h"
 #include "dialogs/GUIDialogSelect.h"
@@ -862,6 +863,10 @@ EmbyServerInfoVector CEmbyServices::GetConnectServerList(const std::string &conn
 {
   EmbyServerInfoVector servers;
 
+  CGUIDialogBusy *m_busyDialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+  if (m_busyDialog)
+    m_busyDialog->Open();
+  
   XFILE::CCurlFile curlfile;
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
@@ -905,6 +910,8 @@ EmbyServerInfoVector CEmbyServices::GetConnectServerList(const std::string &conn
       }
     }
   }
+  if (m_busyDialog)
+    m_busyDialog->Close();
   return servers;
 }
 
