@@ -31,6 +31,8 @@
 #include "Application.h"
 #include "URL.h"
 #include "GUIUserMessages.h"
+#include "TextureCache.h"
+
 #include "filesystem/CurlFile.h"
 #include "filesystem/StackDirectory.h"
 #include "guilib/GUIWindowManager.h"
@@ -291,7 +293,7 @@ void CEmbyClient::AddNewViewItems(const std::vector<std::string> &ids)
     CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
     if (item != nullptr)
     {
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 0, item);
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 1, item);
       g_windowManager.SendThreadMessage(msg);
     }
   }
@@ -325,8 +327,35 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
         seriesIds.push_back(item->GetProperty("EmbySeriesID").asString());
         UpdateViewItems(seriesIds);
       }
+
+      bool needArtRefresh = false;
+      std::string thumb = item->GetArt("thumb");
+      if (!thumb.empty() && CTextureCache::GetInstance().HasCachedImage(thumb))
+      {
+        needArtRefresh = true;
+        CTextureCache::GetInstance().ClearCachedImage(thumb);
+      }
+
+      std::string banner = item->GetArt("banner");
+      if (!banner.empty() && CTextureCache::GetInstance().HasCachedImage(banner))
+      {
+        needArtRefresh = true;
+        CTextureCache::GetInstance().ClearCachedImage(banner);
+      }
+
+      std::string fanart = item->GetArt("fanart");
+      if (!fanart.empty() && CTextureCache::GetInstance().HasCachedImage(fanart))
+      {
+        needArtRefresh = true;
+        CTextureCache::GetInstance().ClearCachedImage(fanart);
+      }
       // -------------
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, item->GetVideoInfoTag()->m_type == MediaTypeMovie ? 0:1, item);
+      if (needArtRefresh)
+      {
+        CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REFRESH_THUMBS);
+        g_windowManager.SendThreadMessage(msg);
+      }
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 1, item);
       g_windowManager.SendThreadMessage(msg);
     }
   }
@@ -354,7 +383,7 @@ void CEmbyClient::RemoveViewItems(const std::vector<std::string> &ids)
     if (item != nullptr)
     {
       // -------------
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 0, item);
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 1, item);
       g_windowManager.SendThreadMessage(msg);
     }
   }
