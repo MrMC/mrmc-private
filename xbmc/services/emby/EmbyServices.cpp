@@ -357,6 +357,8 @@ void CEmbyServices::OnSettingAction(const CSetting *setting)
 
     if (embySavedSources.size() == serverInfos.size())
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYSERVERSOURCES, "All Sources");
+    else if (embySavedSources.size() == 0)
+      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYSERVERSOURCES, "None");
     else
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_EMBYSERVERSOURCES, "Selected Sources");
 
