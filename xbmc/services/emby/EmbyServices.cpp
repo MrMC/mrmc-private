@@ -318,7 +318,7 @@ void CEmbyServices::OnSettingAction(const CSetting *setting)
       for (auto &serverInfo : serverInfos)
       {
         CFileItemPtr embyServer(new CFileItem());
-        // set m_bIsFolder to true to indicate we are tvshow list
+        // set m_bIsFolder to true to indicate we are a folder
         embyServer->m_bIsFolder = true;
         embyServer->SetProperty("title", serverInfo.ServerName);
         embyServer->SetProperty("id", serverInfo.ServerId);
