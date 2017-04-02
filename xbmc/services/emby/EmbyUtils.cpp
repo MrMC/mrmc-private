@@ -545,7 +545,8 @@ bool CEmbyUtils::GetEmbyMovieFilter(CFileItemList &items, std::string url, std::
    http://192.168.1.200:8096/emby/Genres?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Movie&Recursive=true&EnableTotalRecordCount=false&ParentId=f137a2dd21bbc1b99aa5c0f6bf02a805&userId=cf28f6d51dd54c63a27fed6600c5b6cb
   */
 
-  std::string userID = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
+  //std::string userID = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
+  
 
   CURL url2(url);
   if (filter != "Collections")
@@ -578,16 +579,19 @@ bool CEmbyUtils::GetEmbyMovieFilter(CFileItemList &items, std::string url, std::
     std::string key = item["Id"].asString();
     newItem->m_bIsFolder = true;
     newItem->m_bIsShareOrDrive = false;
-
+    
+    CURL url1(url);
+    url1.SetOption("Fields", "DateCreated,Genres,MediaStreams,Overview,Path");
     if (filter == "Genres")
-      url2.SetOption("GenreIds", key);
+      url1.SetOption("Genres", title);
     else if (filter == "Years")
-      url2.SetOption("Years", title);
+      url1.SetOption("Years", title);
     else if (filter == "Collections")
-      url2.SetOption("ParentId", key);
+      url1.SetOption("ParentId", key);
 
-    url2.SetFileName("Users/" + userID +"/Items");
-    newItem->SetPath(parentPath + Base64::Encode(url2.Get()));
+    //url1.SetFileName("Users/" + userID +"/Items");
+    std::string testURL = url1.Get();
+    newItem->SetPath(parentPath + Base64::Encode(url1.Get()));
     newItem->SetLabel(title);
     newItem->SetProperty("SkipLocalArt", true);
     items.Add(newItem);

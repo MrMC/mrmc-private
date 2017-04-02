@@ -87,7 +87,7 @@ public:
   void  SetUnWatched(CFileItem &item);
 
   // main view entry points (from CEmbyDirectory)
-  bool  GetMovies(CFileItemList &items, std::string url);
+  bool  GetMovies(CFileItemList &items, std::string url, bool passOptions = false);
   bool  GetTVShows(CFileItemList &items, std::string url);
   bool  GetMusicArtists(CFileItemList &items, std::string url);
 
@@ -109,7 +109,7 @@ public:
 protected:
   bool        IsSameClientHostName(const CURL& url);
   bool        FetchViews();
-  bool        FetchViewItems(CEmbyViewCache *view, const std::string &type);
+  bool        FetchViewItems(CEmbyViewCache *view, const std::string &type, const std::string &options = "");
   void        SetPresence(bool presence);
   const CVariant FetchItemById(const std::string &Id);
   const CVariant FetchItemByIds(const std::vector<std::string> &Ids);

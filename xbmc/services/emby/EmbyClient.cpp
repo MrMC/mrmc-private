@@ -221,7 +221,7 @@ void CEmbyClient::SetUnWatched(CFileItem &item)
   }
 }
 
-bool CEmbyClient::GetMovies(CFileItemList &items, std::string url)
+bool CEmbyClient::GetMovies(CFileItemList &items, std::string url, bool passOptions)
 {
   //TODO: fix this for multiple view contents
   bool rtn = false;
@@ -229,7 +229,7 @@ bool CEmbyClient::GetMovies(CFileItemList &items, std::string url)
   for (auto &view : m_viewMovies)
   {
     if (view->GetItems().isNull())
-      FetchViewItems(view, EmbyTypeMovie);
+      FetchViewItems(view, EmbyTypeMovie, passOptions ? curl.GetOptions() : "");
 
     rtn = CEmbyUtils::ParseEmbyVideos(items, curl, view->GetItems(), MediaTypeMovie);
     if (rtn)
@@ -591,7 +591,7 @@ bool CEmbyClient::FetchViews()
   return rtn;
 }
 
-bool CEmbyClient::FetchViewItems(CEmbyViewCache *view, const std::string &type)
+bool CEmbyClient::FetchViewItems(CEmbyViewCache *view, const std::string &type, const std::string &options)
 {
   CLog::Log(LOGDEBUG, "CEmbyClient::FetchViewItems");
   bool rtn = false;
@@ -633,6 +633,8 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCache *view, const std::string &type)
   curl.SetFileName(view->prefix);
   //CEmbyUtils::GetEmbyCVariant 3376(msec) for 105713 bytes
 #endif
+  if (!options.empty())
+    curl.SetOptions(options);
   std::string path = curl.Get();
   CVariant variant = CEmbyUtils::GetEmbyCVariant(path);
   if (variant.isNull())

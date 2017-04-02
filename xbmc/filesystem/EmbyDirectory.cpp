@@ -167,7 +167,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 
       if (path == "titles" || path == "filter")
       {
-        client->GetMovies(items, Base64::Decode(section));
+        client->GetMovies(items, Base64::Decode(section), path == "filter");
         items.SetLabel(g_localizeStrings.Get(369));
         items.SetContent("movies");
       }
