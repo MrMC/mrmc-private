@@ -1283,6 +1283,8 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
     item->SetProperty("EmbySeriesID", seriesId);
     std::string seasonEpisode = StringUtils::Format("S%02iE%02i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
     item->SetProperty("SeasonEpisode", seasonEpisode);
+    url2.SetFileName("Items/" + variant["SeasonId"].asString() + "/Images/Primary");
+    item->SetArt("tvshow.thumb", url2.Get());
   }
   else
   {
