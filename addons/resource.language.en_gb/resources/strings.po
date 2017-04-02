@@ -5002,12 +5002,12 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#2107"
-msgid "Emby Manual Sign-in"
+msgid "Emby Manual Sign-in (local)"
 msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#2108"
-msgid "Emby Manual Sign-in"
+msgid "Emby Manual Sign-in (via local broadcast)"
 msgstr ""
 
 #: system/settings/settings.xml
@@ -5017,7 +5017,7 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#2110"
-msgid "Emby Pin Request Sign-in"
+msgid "Emby Pin Request Sign-in (via https://emby.media/pin)"
 msgstr ""
 
 #: system/settings/settings.xml

@@ -2290,7 +2290,7 @@
           </dependencies>
           <control type="button" format="action"/>
         </setting>
-        <setting id="emby.serversources" type="string" label="2111" help="2112">
+        <setting id="emby.serversources" type="string" parent="emby.signinpin" label="2111" help="2112">
           <level>0</level>
           <default>All Sources</default>
           <constraints>
