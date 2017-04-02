@@ -1,6 +1,6 @@
 #### About
 
-MrMC is an award-winning free and open source (GPL) software media player and
+MrMC is an award-winning open source (GPLv2) software media player and
 entertainment hub for digital media. MrMC is available for multiple platforms,
 in more than 65 languages.
 
