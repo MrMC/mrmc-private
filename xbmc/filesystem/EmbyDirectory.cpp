@@ -165,7 +165,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       else if (path == "studios")
         filter = "Studios";
 
-      if (path == "titles" || path == "filter")
+      if (path == "" || path == "titles" || path == "filter")
       {
         client->GetMovies(items, Base64::Decode(section), path == "filter");
         items.SetLabel(g_localizeStrings.Get(369));
@@ -273,7 +273,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       else if (path == "studios")
         filter = "Studios";
 
-      if (path == "titles" || path == "filter")
+      if (path == "" || path == "titles" || path == "filter")
       {
         client->GetTVShows(items, Base64::Decode(section), path == "filter");
         items.SetLabel(g_localizeStrings.Get(369));
@@ -377,7 +377,7 @@ bool CEmbyDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       if (path == "albums")
         filter = "albums";
       
-      if (path == "root" || path == "artists")
+      if (path == "" || path == "root" || path == "artists")
       {
         client->GetMusicArtists(items, Base64::Decode(section));
         items.SetLabel(g_localizeStrings.Get(36917));
