@@ -696,6 +696,7 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const
   CURL curl(url);
   if (type == EmbyTypeMovie)
   {
+    curl.SetFileName("Users/" + GetUserID() + "/Items");
     curl.SetOption("IncludeItemTypes", type);
     curl.SetOption("Fields", MoviesFields);
     // must be last, wtf?
@@ -704,7 +705,8 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const
   }
   else if (type == EmbyTypeSeries)
   {
-    // also konow as TVShows for non-eu'ers
+    // also known as TVShows for non-eu'ers
+    curl.SetFileName("Users/" + GetUserID() + "/Items");
     curl.SetOption("IncludeItemTypes", type);
     curl.SetOption("Fields", TVShowsFields);
     // must be last, wtf?
@@ -717,6 +719,7 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const
     // maybe should be using "MusicArtist" ?
     curl.SetFileName("/emby/Artists");
     curl.SetOption("Fields", "Etag,Genres");
+    curl.SetProtocolOption("userId", GetUserID());
   }
   else
   {
