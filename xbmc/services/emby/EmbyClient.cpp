@@ -85,11 +85,13 @@ private:
 class CThreadedFetchViewItems : public CThread
 {
 public:
-  CThreadedFetchViewItems(CEmbyClient *client, CEmbyViewCachePtr &view, const CURL &url, const std::string &type)
+  CThreadedFetchViewItems(CEmbyClient *client, CEvent &event, CEmbyViewCachePtr &view, const CURL &url, const std::string &type)
   : CThread("CThreadedFetchViewItems")
   , m_url(url)
+  , m_client(client)
   , m_type(type)
   , m_view(view)
+  , m_event(event)
   {
     Create();
   }
@@ -105,11 +107,13 @@ protected:
   virtual void Process()
   {
     m_client->FetchViewItems(m_view, m_url, m_type);
+    m_event.Set();
   }
   const CURL m_url;
   CEmbyClient *m_client;
   const std::string m_type;
   CEmbyViewCachePtr m_view;
+  CEvent &m_event;
 };
 
 CEmbyClient::CEmbyClient()
@@ -275,7 +279,7 @@ bool CEmbyClient::GetMovies(CFileItemList &items, std::string url, bool fromfilt
     for (auto &view : m_viewMovies)
     {
       if (view->GetItems().isNull())
-        FetchViewItems(view, curl, EmbyTypeMovie);
+        DoThreadedFetchViewItems(view, curl, EmbyTypeMovie);
       rtn = CEmbyUtils::ParseEmbyVideos(items, curl, view->GetItems(), MediaTypeMovie);
       if (rtn)
         break;
@@ -315,7 +319,7 @@ bool CEmbyClient::GetTVShows(CFileItemList &items, std::string url, bool fromfil
     for (auto &view : m_viewTVShows)
     {
       if (view->GetItems().isNull())
-        FetchViewItems(view, curl, EmbyTypeSeries);
+        DoThreadedFetchViewItems(view, curl, EmbyTypeSeries);
       rtn = CEmbyUtils::ParseEmbySeries(items, curl, view->GetItems());
       if (rtn)
         break;
@@ -347,7 +351,7 @@ bool CEmbyClient::GetMusicArtists(CFileItemList &items, std::string url)
   for (auto &view : m_viewMusic)
   {
     if (view->GetItems().isNull())
-      FetchViewItems(view, curl, EmbyTypeMusicArtist);
+      DoThreadedFetchViewItems(view, curl, EmbyTypeMusicArtist);
 
     rtn = CEmbyUtils::ParseEmbyArtists(items, curl, view->GetItems());
     if (rtn)
@@ -702,7 +706,6 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const
   else if (type == EmbyTypeSeries)
   {
     // also konow as TVShows for non-eu'ers
-    curl.SetFileName("Users/" + GetUserID() + "/Items");
     curl.SetOption("IncludeItemTypes", type);
     curl.SetOption("Fields", TVShowsFields);
     // must be last, wtf?
@@ -715,7 +718,6 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const
     // maybe should be using "MusicArtist" ?
     curl.SetFileName("/emby/Artists");
     curl.SetOption("Fields", "Etag,Genres");
-    curl.SetProtocolOption("userId", GetUserID());
   }
   else
   {
@@ -736,13 +738,15 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const
 
 bool CEmbyClient::DoThreadedFetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const std::string &type)
 {
-  CThreadedFetchViewItems threadedFetchViewItems(this, view, url, type);
+  CEvent threadDone;
+  threadDone.Reset();
+  CThreadedFetchViewItems threadedFetchViewItems(this, threadDone, view, url, type);
 
   CGUIDialogBusy *busyDialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
   if (busyDialog)
   {
     busyDialog->Open();
-    while (threadedFetchViewItems.IsRunning())
+    while(!threadDone.WaitMSec(10))
     {
       g_windowManager.ProcessRenderLoop(false);
     }
