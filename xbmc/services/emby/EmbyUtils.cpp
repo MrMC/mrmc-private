@@ -1312,7 +1312,7 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
   item->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, variant["UserData"]["Played"].asBoolean());
   item->GetVideoInfoTag()->m_resumePoint.timeInSeconds = static_cast<int>(TicksToSeconds(variant["UserData"]["PlaybackPositionTicks"].asUnsignedInteger()));
 
-  GetMediaDetals(*item, variant);
+  GetMediaDetals(*item, variant, itemId);
 
   if (type == MediaTypeTvShow)
     SetEmbyItemProperties(*item, "episodes");
@@ -1404,6 +1404,7 @@ void CEmbyUtils::GetMediaDetals(CFileItem &item, const CVariant &variant, std::s
   {
     CStreamDetails streamDetail;
     const auto& streams = variant["MediaStreams"];
+    int iSubPart = 1;
     for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
     {
       const auto stream = *streamIt;
@@ -1430,10 +1431,22 @@ void CEmbyUtils::GetMediaDetals(CFileItem &item, const CVariant &variant, std::s
       }
       else if (streamType == "Subtitle")
       {
+        // http://94.203.10.174:8096/Videos/d922997f1b64da588f885ec7b4275222/d922997f1b64da588f885ec7b4275222/Subtitles/2/Stream.srt 
         CStreamDetailSubtitle* subtitleStream = new CStreamDetailSubtitle();
         subtitleStream->m_strLanguage = stream["Language"].asString();
 
         streamDetail.AddStream(subtitleStream);
+        
+        if (stream["IsExternal"].asBoolean() && stream["IsTextSubtitleStream"].asBoolean())
+        {
+          CURL url(item.GetPath());
+          url.SetFileName("Videos/" + id + "/" + id + "/Subtitles/" + stream["Index"].asString() + "/Stream.srt");
+          std::string propertyKey = StringUtils::Format("subtitle:%i", iSubPart);
+          std::string propertyLangKey = StringUtils::Format("subtitle:%i_language", iSubPart);
+          item.SetProperty(propertyKey, url.Get());
+          item.SetProperty(propertyLangKey, stream["Language"].asString());
+          iSubPart ++;
+        }
       }
     }
     item.GetVideoInfoTag()->m_streamDetails = streamDetail;
