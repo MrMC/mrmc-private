@@ -279,7 +279,7 @@ bool CEmbyClient::GetMovies(CFileItemList &items, std::string url, bool fromfilt
     for (auto &view : m_viewMovies)
     {
       if (view->GetItems().isNull())
-        DoThreadedFetchViewItems(view, curl, EmbyTypeMovie);
+        FetchViewItems(view, curl, EmbyTypeMovie);
       rtn = CEmbyUtils::ParseEmbyVideos(items, curl, view->GetItems(), MediaTypeMovie);
       if (rtn)
         break;
@@ -319,7 +319,7 @@ bool CEmbyClient::GetTVShows(CFileItemList &items, std::string url, bool fromfil
     for (auto &view : m_viewTVShows)
     {
       if (view->GetItems().isNull())
-        DoThreadedFetchViewItems(view, curl, EmbyTypeSeries);
+        FetchViewItems(view, curl, EmbyTypeSeries);
       rtn = CEmbyUtils::ParseEmbySeries(items, curl, view->GetItems());
       if (rtn)
         break;
@@ -351,7 +351,7 @@ bool CEmbyClient::GetMusicArtists(CFileItemList &items, std::string url)
   for (auto &view : m_viewMusic)
   {
     if (view->GetItems().isNull())
-      DoThreadedFetchViewItems(view, curl, EmbyTypeMusicArtist);
+      FetchViewItems(view, curl, EmbyTypeMusicArtist);
 
     rtn = CEmbyUtils::ParseEmbyArtists(items, curl, view->GetItems());
     if (rtn)
@@ -416,7 +416,6 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
         UpdateViewItems(seriesIds);
       }
 
-/*
       bool needArtRefresh = false;
       std::string thumb = item->GetArt("thumb");
       if (!thumb.empty() && CTextureCache::GetInstance().HasCachedImage(thumb))
@@ -444,8 +443,8 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
         CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REFRESH_THUMBS);
         g_windowManager.SendThreadMessage(msg);
       }
-*/
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
+
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 1, item);
       g_windowManager.SendThreadMessage(msg);
     }
   }
