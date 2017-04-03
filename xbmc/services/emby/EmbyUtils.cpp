@@ -438,8 +438,12 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
   CURL url2(url);
   url2.SetOption("IncludeItemTypes", EmbyTypeSeasons);
   url2.SetOption("Fields", "Etag,DateCreated,ImageTags,RecursiveItemCount");
+  std::string parentId = url2.GetOption("ParentId");
+  url2.SetOptions("");
+  url2.SetOption("ParentId", parentId);
 
   const CVariant variant = GetEmbyCVariant(url2.Get());
+
   if (!variant.isNull() || variant.isObject() || variant.isMember("Items"))
   {
     CURL url3(url);
@@ -463,139 +467,6 @@ bool CEmbyUtils::GetEmbyEpisodes(CFileItemList &items, const std::string url)
   const CVariant variant = GetEmbyCVariant(url2.Get());
 
   bool rtn = ParseEmbyVideos(items, url2, variant, MediaTypeEpisode);
-  return rtn;
-}
-
-bool CEmbyUtils::GetEmbyTVShowFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
-{
-  /*
-   std::string filter = "year";
-   if (path == "genres")
-   filter = "genre";
-   else if (path == "actors")
-   filter = "actor";
-   else if (path == "directors")
-   filter = "director";
-   else if (path == "sets")
-   filter = "collection";
-   else if (path == "countries")
-   filter = "country";
-   else if (path == "studios")
-   filter = "studio";
-
-   http://192.168.1.200:8096/emby/Genres?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Movie&Recursive=true&EnableTotalRecordCount=false&ParentId=f137a2dd21bbc1b99aa5c0f6bf02a805&userId=cf28f6d51dd54c63a27fed6600c5b6cb
-   */
-
-  std::string userID = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
-
-  CURL url2(url);
-  url2.SetFileName("emby/"+ filter);
-  url2.SetOption("IncludeItemTypes", EmbyTypeSeries);
-  url2.SetOption("Fields", "Etag,DateCreated,ImageTags");
-  const CVariant variant = GetEmbyCVariant(url2.Get());
-  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
-  {
-    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
-    return false;
-  }
-
-  bool rtn = false;
-  const auto& variantItems = variant["Items"];
-  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
-  {
-    rtn = true;
-    const auto item = *variantItemIt;
-    CFileItemPtr newItem(new CFileItem());
-    std::string title = item["Name"].asString();
-    std::string key = item["Id"].asString();
-    newItem->m_bIsFolder = true;
-    newItem->m_bIsShareOrDrive = false;
-
-    if (filter == "Genres")
-      url2.SetOption("GenreIds", key);
-    else if (filter == "Years")
-      url2.SetOption("Years", title);
-
-    url2.SetFileName("Users/" + userID +"/Items");
-    newItem->SetPath(parentPath + Base64::Encode(url2.Get()));
-    newItem->SetLabel(title);
-    newItem->SetProperty("SkipLocalArt", true);
-    items.Add(newItem);
-  }
-  return rtn;
-}
-
-bool CEmbyUtils::GetEmbyMovieFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter)
-{
-  /*
-  std::string filter = "year";
-  if (path == "genres")
-    filter = "genre";
-  else if (path == "actors")
-    filter = "actor";
-  else if (path == "directors")
-    filter = "director";
-  else if (path == "sets")
-    filter = "collection";
-  else if (path == "countries")
-    filter = "country";
-  else if (path == "studios")
-    filter = "studio";
-   
-   http://192.168.1.200:8096/emby/Genres?SortBy=SortName&SortOrder=Ascending&IncludeItemTypes=Movie&Recursive=true&EnableTotalRecordCount=false&ParentId=f137a2dd21bbc1b99aa5c0f6bf02a805&userId=cf28f6d51dd54c63a27fed6600c5b6cb
-  */
-
-  //std::string userID = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_EMBYUSERID);
-  
-
-  CURL url2(url);
-  if (filter != "Collections")
-  {
-    url2.SetFileName("emby/"+ filter);
-    url2.SetOption("IncludeItemTypes", EmbyTypeMovie);
-  }
-  else
-  {
-    url2.SetOption("IncludeItemTypes", EmbyTypeBoxSet);
-    url2.SetOption("Recursive", "true");
-    url2.SetOption("ParentId", "");
-  }
-  url2.SetOption("Fields", "Etag,DateCreated,ImageTags");
-  const CVariant variant = GetEmbyCVariant(url2.Get());
-  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
-  {
-    CLog::Log(LOGERROR, "CEmbyUtils::GetEmbyMovieFilter invalid response from %s", url2.GetRedacted().c_str());
-    return false;
-  }
-
-  bool rtn = false;
-  const auto& variantItems = variant["Items"];
-  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
-  {
-    rtn = true;
-    const auto item = *variantItemIt;
-    CFileItemPtr newItem(new CFileItem());
-    std::string title = item["Name"].asString();
-    std::string key = item["Id"].asString();
-    newItem->m_bIsFolder = true;
-    newItem->m_bIsShareOrDrive = false;
-    
-    CURL url1(url);
-    url1.SetOption("Fields", "DateCreated,Genres,MediaStreams,Overview,Path");
-    if (filter == "Genres")
-      url1.SetOption("Genres", title);
-    else if (filter == "Years")
-      url1.SetOption("Years", title);
-    else if (filter == "Collections")
-      url1.SetOption("ParentId", key);
-
-    //url1.SetFileName("Users/" + userID +"/Items");
-    std::string testURL = url1.Get();
-    newItem->SetPath(parentPath + Base64::Encode(url1.Get()));
-    newItem->SetLabel(title);
-    newItem->SetProperty("SkipLocalArt", true);
-    items.Add(newItem);
-  }
   return rtn;
 }
 
@@ -890,10 +761,14 @@ bool CEmbyUtils::ParseEmbyVideos(CFileItemList &items, CURL url, const CVariant 
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
+    if (*variantItemIt == CVariant::VariantTypeNull)
+      continue;
+
     const auto objectItem = *variantItemIt;
+    rtn = true;
+
     CFileItemPtr item = ToVideoFileItemPtr(url, objectItem, type);
     items.Add(item);
-    rtn = true;
   }
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
@@ -923,6 +798,9 @@ bool CEmbyUtils::ParseEmbySeries(CFileItemList &items, const CURL &url, const CV
     const auto& variantItems = variant["Items"];
     for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
     {
+      if (*variantItemIt == CVariant::VariantTypeNull)
+        continue;
+
       const auto item = *variantItemIt;
       rtn = true;
 
@@ -933,7 +811,6 @@ bool CEmbyUtils::ParseEmbySeries(CFileItemList &items, const CURL &url, const CV
       // clear url options
       CURL url2(url);
       url2.SetOption("ParentId", itemId);
- //     url2.SetOptions("");
 
       CFileItemPtr newItem(new CFileItem());
       // set m_bIsFolder to true to indicate we are tvshow list
@@ -946,7 +823,6 @@ bool CEmbyUtils::ParseEmbySeries(CFileItemList &items, const CURL &url, const CV
       premiereDate.SetFromW3CDateTime(item["PremiereDate"].asString());
       newItem->m_dateTime = premiereDate;
 
-     // url2.SetFileName("Users/" + itemId + "/Items");
       newItem->SetPath("emby://tvshows/shows/" + Base64::Encode(url2.Get()));
       newItem->SetMediaServiceId(itemId);
       newItem->SetMediaServiceFile(item["Path"].asString());
@@ -1017,7 +893,11 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
+    if (*variantItemIt == CVariant::VariantTypeNull)
+      continue;
+
     const auto item = *variantItemIt;
+    rtn = true;
 
     std::string value;
     std::string fanart;
@@ -1106,8 +986,12 @@ bool CEmbyUtils::ParseEmbyAudio(CFileItemList &items, const CURL &url, const CVa
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
+    if (*variantItemIt == CVariant::VariantTypeNull)
+      continue;
+
     const auto item = *variantItemIt;
     rtn = true;
+
     CFileItemPtr embyItem(new CFileItem());
     embyItem->SetLabel(item["Name"].asString());
     curl.SetFileName("Audio/" + item["Id"].asString() +"/stream?static=true");
@@ -1161,8 +1045,12 @@ bool CEmbyUtils::ParseEmbyAlbum(CFileItemList &items, const CURL &url, const CVa
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
+    if (*variantItemIt == CVariant::VariantTypeNull)
+      continue;
+
     const auto item = *variantItemIt;
     rtn = true;
+
     CFileItemPtr embyItem(new CFileItem());
     // set m_bIsFolder to true to indicate we are artist list
 
@@ -1219,8 +1107,12 @@ bool CEmbyUtils::ParseEmbyArtists(CFileItemList &items, const CURL &url, const C
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
+    if (*variantItemIt == CVariant::VariantTypeNull)
+      continue;
+
     const auto item = *variantItemIt;
     rtn = true;
+
     CFileItemPtr embyItem(new CFileItem());
     // set m_bIsFolder to true to indicate we are artist list
 
@@ -1254,6 +1146,88 @@ bool CEmbyUtils::ParseEmbyArtists(CFileItemList &items, const CURL &url, const C
   items.GetMusicInfoTag()->m_type = MediaTypeArtist;
   SetEmbyItemProperties(items, MediaTypeArtist);
 
+  return rtn;
+}
+
+bool CEmbyUtils::ParseEmbyMoviesFilter(CFileItemList &items, CURL url, const CVariant &variant, const std::string &filter)
+{
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::ParseEmbyMoviesFilter invalid response from %s", url.GetRedacted().c_str());
+    return false;
+  }
+
+  bool rtn = false;
+  CURL curl(url);
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
+  {
+    if (*variantItemIt == CVariant::VariantTypeNull)
+      continue;
+
+    const auto item = *variantItemIt;
+    rtn = true;
+
+    CFileItemPtr newItem(new CFileItem());
+    std::string title = item["Name"].asString();
+    std::string key = item["Id"].asString();
+    newItem->m_bIsFolder = true;
+    newItem->m_bIsShareOrDrive = false;
+
+    CURL curl1(url);
+    curl1.SetOption("Fields", "DateCreated,Genres,MediaStreams,Overview,Path");
+    if (filter == "Genres")
+      curl1.SetOption("Genres", title);
+    else if (filter == "Years")
+      curl1.SetOption("Years", title);
+    else if (filter == "Collections")
+      curl1.SetOption("ParentId", key);
+
+    newItem->SetPath("emby://movies/filter/" + Base64::Encode(curl1.Get()));
+    newItem->SetLabel(title);
+    newItem->SetProperty("SkipLocalArt", true);
+    items.Add(newItem);
+  }
+  return rtn;
+}
+
+bool CEmbyUtils::ParseEmbyTVShowsFilter(CFileItemList &items, const CURL url, const CVariant &variant, const std::string &filter)
+{
+  if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
+  {
+    CLog::Log(LOGERROR, "CEmbyUtils::ParseEmbyTVShowsFilter invalid response from %s", url.GetRedacted().c_str());
+    return false;
+  }
+
+  bool rtn = false;
+  CURL curl1(url);
+  const auto& variantItems = variant["Items"];
+  for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
+  {
+    if (*variantItemIt == CVariant::VariantTypeNull)
+      continue;
+
+    const auto item = *variantItemIt;
+    rtn = true;
+
+    CFileItemPtr newItem(new CFileItem());
+    std::string title = item["Name"].asString();
+    std::string key = item["Id"].asString();
+    newItem->m_bIsFolder = true;
+    newItem->m_bIsShareOrDrive = false;
+
+    if (filter == "Genres")
+      curl1.SetOption("Genres", title);
+    else if (filter == "Years")
+      curl1.SetOption("Years", title);
+    else if (filter == "Collections")
+      curl1.SetOption("ParentId", key);
+
+    newItem->SetPath("emby://tvshows/filter/" + Base64::Encode(curl1.Get()));
+    newItem->SetLabel(title);
+    newItem->SetProperty("SkipLocalArt", true);
+    items.Add(newItem);
+  }
   return rtn;
 }
 

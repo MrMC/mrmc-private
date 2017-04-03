@@ -73,8 +73,6 @@ public:
   static bool GetEmbySeasons(CFileItemList &items, const std::string url);
   static bool GetEmbyEpisodes(CFileItemList &items, const std::string url);
   // -------------
-  static bool GetEmbyMovieFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
-  static bool GetEmbyTVShowFilter(CFileItemList &items, std::string url, std::string parentPath, std::string filter);
   static bool GetItemSubtiles(CFileItem &item);
   static bool GetMoreItemInfo(CFileItem &item);
   static bool GetMoreResolutions(CFileItem &item);
@@ -93,12 +91,14 @@ public:
 
   static CFileItemPtr ToFileItemPtr(CEmbyClient *client, const CVariant &object);
 
-  static bool ParseEmbyVideos(CFileItemList &items, CURL url, const CVariant &object, std::string type);
+  static bool ParseEmbyVideos(CFileItemList &items, const CURL url, const CVariant &object, std::string type);
   static bool ParseEmbySeries(CFileItemList &items, const CURL &url, const CVariant &variant);
   static bool ParseEmbySeasons(CFileItemList &items, const CURL &url, const CVariant &series, const CVariant &variant);
   static bool ParseEmbyAudio(CFileItemList &items, const CURL &url, const CVariant &variant);
   static bool ParseEmbyAlbum(CFileItemList &items, const CURL &url, const CVariant &variant);
   static bool ParseEmbyArtists(CFileItemList &items, const CURL &url, const CVariant &variant);
+  static bool ParseEmbyMoviesFilter(CFileItemList &items, const CURL url, const CVariant &object, const std::string &filter);
+  static bool ParseEmbyTVShowsFilter(CFileItemList &items, const CURL url, const CVariant &object, const std::string &filter);
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
 
 private:

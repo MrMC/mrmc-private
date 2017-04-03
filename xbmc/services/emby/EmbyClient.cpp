@@ -88,6 +88,8 @@ CEmbyClient::CEmbyClient()
   m_protocol = "http";
   m_needUpdate = false;
   m_clientSync = nullptr;
+  m_viewMoviesFilter = nullptr;
+  m_viewTVShowsFilter = nullptr;
 }
 
 CEmbyClient::~CEmbyClient()
@@ -221,37 +223,78 @@ void CEmbyClient::SetUnWatched(CFileItem &item)
   }
 }
 
-bool CEmbyClient::GetMovies(CFileItemList &items, std::string url, bool passOptions)
+bool CEmbyClient::GetMovies(CFileItemList &items, std::string url, bool fromfilter)
 {
-  //TODO: fix this for multiple view contents
   bool rtn = false;
   CURL curl(url);
-  for (auto &view : m_viewMovies)
+  if (fromfilter)
   {
-    if (view->GetItems().isNull())
-      FetchViewItems(view, EmbyTypeMovie, passOptions ? curl.GetOptions() : "");
+    FetchViewItems(m_viewMoviesFilter, curl, EmbyTypeMovie);
+    rtn = CEmbyUtils::ParseEmbyVideos(items, curl, m_viewMoviesFilter->GetItems(), MediaTypeMovie);
+  }
+  else
+  {
+    for (auto &view : m_viewMovies)
+    {
+      if (view->GetItems().isNull())
+        FetchViewItems(view, curl, EmbyTypeMovie);
 
-    rtn = CEmbyUtils::ParseEmbyVideos(items, curl, view->GetItems(), MediaTypeMovie);
-    if (rtn)
-      break;
+      rtn = CEmbyUtils::ParseEmbyVideos(items, curl, view->GetItems(), MediaTypeMovie);
+      if (rtn)
+        break;
+    }
   }
   return rtn;
 }
 
-bool CEmbyClient::GetTVShows(CFileItemList &items, std::string url)
+bool CEmbyClient::GetMoviesFilter(CFileItemList &items, std::string url, std::string filter)
 {
-  //TODO: fix this for multiple view contents
+  EmbyViewContent filterView;
+  filterView.id = m_viewMovies[0]->GetId();
+  filterView.name = filter;
+  m_viewMoviesFilter = CEmbyViewCachePtr(new CEmbyViewCache());
+  m_viewMoviesFilter->Init(filterView);
+
+  CURL curl(url);
+  FetchFilterItems(m_viewMoviesFilter, curl, EmbyTypeMovie, filter);
+  bool rtn = CEmbyUtils::ParseEmbyMoviesFilter(items, curl, m_viewMoviesFilter->GetItems(), filter);
+  return rtn;
+}
+
+bool CEmbyClient::GetTVShows(CFileItemList &items, std::string url, bool fromfilter)
+{
   bool rtn = false;
   CURL curl(url);
-  for (auto &view : m_viewTVShows)
+  if (fromfilter)
   {
-    if (view->GetItems().isNull())
-      FetchViewItems(view, EmbyTypeSeries);
-
-    rtn = CEmbyUtils::ParseEmbySeries(items, curl, view->GetItems());
-    if (rtn)
-      break;
+    FetchViewItems(m_viewTVShowsFilter, curl, EmbyTypeSeries);
+    rtn = CEmbyUtils::ParseEmbySeries(items, curl, m_viewTVShowsFilter->GetItems());
   }
+  else
+  {
+    for (auto &view : m_viewTVShows)
+    {
+      if (view->GetItems().isNull())
+        FetchViewItems(view, curl, EmbyTypeSeries);
+
+      rtn = CEmbyUtils::ParseEmbySeries(items, curl, view->GetItems());
+      if (rtn)
+        break;
+    }
+  }
+  return rtn;
+}
+
+bool CEmbyClient::GetTVShowsFilter(CFileItemList &items, std::string url, std::string filter)
+{
+  EmbyViewContent filterView;
+  filterView.name = filter;
+  m_viewTVShowsFilter = CEmbyViewCachePtr(new CEmbyViewCache());
+  m_viewTVShowsFilter->Init(filterView);
+
+  CURL curl(url);
+  FetchFilterItems(m_viewTVShowsFilter, curl, EmbyTypeSeries, filter);
+  bool rtn = CEmbyUtils::ParseEmbyTVShowsFilter(items, curl, m_viewTVShowsFilter->GetItems(), filter);
   return rtn;
 }
 
@@ -263,7 +306,7 @@ bool CEmbyClient::GetMusicArtists(CFileItemList &items, std::string url)
   for (auto &view : m_viewMusic)
   {
     if (view->GetItems().isNull())
-      FetchViewItems(view, EmbyTypeMusicArtist);
+      FetchViewItems(view, curl, EmbyTypeMusicArtist);
 
     rtn = CEmbyUtils::ParseEmbyArtists(items, curl, view->GetItems());
     if (rtn)
@@ -545,25 +588,25 @@ bool CEmbyClient::FetchViews()
     {
       if (content.mediaType == "movies")
       {
-        CEmbyViewCache *viewCache = new CEmbyViewCache();
+        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache());
         viewCache->Init(content);
         m_viewMovies.push_back(viewCache);
       }
       else if (content.mediaType == "tvshows")
       {
-        CEmbyViewCache *viewCache = new CEmbyViewCache();
+        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache());
         viewCache->Init(content);
         m_viewTVShows.push_back(viewCache);
       }
       else if (content.mediaType == "music")
       {
-        CEmbyViewCache *viewCache = new CEmbyViewCache();
+        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache());
         viewCache->Init(content);
         m_viewMusic.push_back(viewCache);
       }
       else if (content.mediaType == "photo")
       {
-        CEmbyViewCache *viewCache = new CEmbyViewCache();
+        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache());
         viewCache->Init(content);
         m_viewPhotos.push_back(viewCache);
       }
@@ -591,20 +634,19 @@ bool CEmbyClient::FetchViews()
   return rtn;
 }
 
-bool CEmbyClient::FetchViewItems(CEmbyViewCache *view, const std::string &type, const std::string &options)
+bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const std::string &type)
 {
   CLog::Log(LOGDEBUG, "CEmbyClient::FetchViewItems");
   bool rtn = false;
 
-  CURL curl(m_url);
-#if 1
+  CURL curl(url);
   if (type == EmbyTypeMovie)
   {
-    curl.SetFileName("Users/" + GetUserID() + "/Items");
     curl.SetOption("IncludeItemTypes", type);
     curl.SetOption("Fields", MoviesFields);
     // must be last, wtf?
-    curl.SetOption("ParentId", view->GetId());
+    if (view && !view->GetId().empty())
+      curl.SetOption("ParentId", view->GetId());
   }
   else if (type == EmbyTypeSeries)
   {
@@ -613,7 +655,8 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCache *view, const std::string &type, 
     curl.SetOption("IncludeItemTypes", type);
     curl.SetOption("Fields", TVShowsFields);
     // must be last, wtf?
-    curl.SetOption("ParentId", view->GetId());
+    if (view && !view->GetId().empty())
+      curl.SetOption("ParentId", view->GetId());
   }
   else if (type == EmbyTypeMusicArtist)
   {
@@ -628,18 +671,57 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCache *view, const std::string &type, 
     CLog::Log(LOGDEBUG, "CEmbyClient::FetchViewItems unknown type: %s", type.c_str());
     return false;
   }
-  //CEmbyUtils::GetEmbyCVariant 3801(msec) for 123524 bytes
-#else
-  curl.SetFileName(view->prefix);
-  //CEmbyUtils::GetEmbyCVariant 3376(msec) for 105713 bytes
-#endif
-  if (!options.empty())
-    curl.SetOptions(options);
   std::string path = curl.Get();
   CVariant variant = CEmbyUtils::GetEmbyCVariant(path);
   if (variant.isNull())
   {
     CLog::Log(LOGERROR, "CEmbyClient::FetchViewItems: invalid response for views items from %s", CURL::GetRedacted(path).c_str());
+    return false;
+  }
+
+  view->SetItems(variant);
+
+  return rtn;
+}
+
+bool CEmbyClient::FetchFilterItems(CEmbyViewCachePtr &view, const CURL &url, const std::string &type, const std::string &filter)
+{
+  CLog::Log(LOGDEBUG, "CEmbyClient::FetchFilterItems");
+  bool rtn = false;
+
+  CURL curl(url);
+  if (type == EmbyTypeMovie)
+  {
+    if (filter != "Collections")
+    {
+      curl.SetFileName("emby/"+ filter);
+      curl.SetOption("IncludeItemTypes", EmbyTypeMovie);
+    }
+    else
+    {
+      curl.SetFileName("Users/" + GetUserID() + "/Items");
+      curl.SetOption("IncludeItemTypes", EmbyTypeBoxSet);
+      curl.SetOption("Recursive", "true");
+      curl.SetOption("ParentId", "");
+    }
+    curl.SetOption("Fields", "Etag,DateCreated,ImageTags");
+  }
+  else if (type == EmbyTypeSeries)
+  {
+    curl.SetFileName("emby/" + filter);
+    curl.SetOption("IncludeItemTypes", EmbyTypeSeries);
+    curl.SetOption("Fields", "Etag,DateCreated,ImageTags");
+  }
+  else
+  {
+    CLog::Log(LOGDEBUG, "CEmbyClient::FetchFilterItems unknown type: %s", type.c_str());
+    return false;
+  }
+  std::string path = curl.Get();
+  CVariant variant = CEmbyUtils::GetEmbyCVariant(path);
+  if (variant.isNull())
+  {
+    CLog::Log(LOGERROR, "CEmbyClient::FetchFilterItems: invalid response for views items from %s", CURL::GetRedacted(path).c_str());
     return false;
   }
 

@@ -53,6 +53,7 @@ public:
 
   void  Init(const EmbyViewContent &content);
   const std::string GetId() const { return m_cache.id; };
+  const std::string GetName() const { return m_cache.name; };
   void  SetItems(CVariant &variant) {m_cache.items = std::move(variant);};
   CVariant &GetItems() { return m_cache.items; };
   bool  AppendItem(const CVariant &variant);

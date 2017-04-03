@@ -46,6 +46,7 @@ class CEmbyClientSync;
 typedef struct EmbyViewInfo EmbyViewInfo;
 typedef struct EmbyViewContent EmbyViewContent;
 typedef std::shared_ptr<CFileItem> CFileItemPtr;
+typedef std::shared_ptr<CEmbyViewCache> CEmbyViewCachePtr;
 
 typedef struct EmbyServerInfo
 {
@@ -87,8 +88,10 @@ public:
   void  SetUnWatched(CFileItem &item);
 
   // main view entry points (from CEmbyDirectory)
-  bool  GetMovies(CFileItemList &items, std::string url, bool passOptions = false);
-  bool  GetTVShows(CFileItemList &items, std::string url);
+  bool  GetMovies(CFileItemList &items, std::string url, bool fromfilter);
+  bool  GetMoviesFilter(CFileItemList &items, std::string url, std::string filter);
+  bool  GetTVShows(CFileItemList &items, std::string url, bool fromfilter);
+  bool  GetTVShowsFilter(CFileItemList &items, std::string url, std::string filter);
   bool  GetMusicArtists(CFileItemList &items, std::string url);
 
   void  AddNewViewItems(const std::vector<std::string> &ids);
@@ -109,7 +112,8 @@ public:
 protected:
   bool        IsSameClientHostName(const CURL& url);
   bool        FetchViews();
-  bool        FetchViewItems(CEmbyViewCache *view, const std::string &type, const std::string &options = "");
+  bool        FetchViewItems(CEmbyViewCachePtr &view, const CURL& url, const std::string &type);
+  bool        FetchFilterItems(CEmbyViewCachePtr &view, const CURL &url, const std::string &type, const std::string &filter);
   void        SetPresence(bool presence);
   const CVariant FetchItemById(const std::string &Id);
   const CVariant FetchItemByIds(const std::vector<std::string> &Ids);
@@ -128,8 +132,10 @@ private:
   std::atomic<bool> m_presence;
   std::atomic<bool> m_needUpdate;
   CEmbyClientSync  *m_clientSync;
-  std::vector<CEmbyViewCache*> m_viewMusic;
-  std::vector<CEmbyViewCache*> m_viewMovies;
-  std::vector<CEmbyViewCache*> m_viewPhotos;
-  std::vector<CEmbyViewCache*> m_viewTVShows;
+  CEmbyViewCachePtr m_viewMoviesFilter;
+  CEmbyViewCachePtr m_viewTVShowsFilter;
+  std::vector<CEmbyViewCachePtr> m_viewMusic;
+  std::vector<CEmbyViewCachePtr> m_viewMovies;
+  std::vector<CEmbyViewCachePtr> m_viewPhotos;
+  std::vector<CEmbyViewCachePtr> m_viewTVShows;
 };
