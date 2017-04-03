@@ -133,7 +133,9 @@ private:
   std::atomic<bool> m_needUpdate;
   CEmbyClientSync  *m_clientSync;
   CEmbyViewCachePtr m_viewMoviesFilter;
+  CCriticalSection m_viewMoviesFilterLock;
   CEmbyViewCachePtr m_viewTVShowsFilter;
+  CCriticalSection m_viewTVShowsFilterLock;
   std::vector<CEmbyViewCachePtr> m_viewMusic;
   std::vector<CEmbyViewCachePtr> m_viewMovies;
   std::vector<CEmbyViewCachePtr> m_viewPhotos;

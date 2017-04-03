@@ -229,6 +229,7 @@ bool CEmbyClient::GetMovies(CFileItemList &items, std::string url, bool fromfilt
   CURL curl(url);
   if (fromfilter)
   {
+    CSingleLock lock(m_viewMoviesFilterLock);
     FetchViewItems(m_viewMoviesFilter, curl, EmbyTypeMovie);
     rtn = CEmbyUtils::ParseEmbyVideos(items, curl, m_viewMoviesFilter->GetItems(), MediaTypeMovie);
   }
@@ -249,10 +250,11 @@ bool CEmbyClient::GetMovies(CFileItemList &items, std::string url, bool fromfilt
 
 bool CEmbyClient::GetMoviesFilter(CFileItemList &items, std::string url, std::string filter)
 {
+  CSingleLock lock(m_viewMoviesFilterLock);
   EmbyViewContent filterView;
   filterView.id = m_viewMovies[0]->GetId();
   filterView.name = filter;
-  m_viewMoviesFilter = CEmbyViewCachePtr(new CEmbyViewCache());
+  m_viewMoviesFilter = CEmbyViewCachePtr(new CEmbyViewCache);
   m_viewMoviesFilter->Init(filterView);
 
   CURL curl(url);
@@ -267,6 +269,7 @@ bool CEmbyClient::GetTVShows(CFileItemList &items, std::string url, bool fromfil
   CURL curl(url);
   if (fromfilter)
   {
+    CSingleLock lock(m_viewTVShowsFilterLock);
     FetchViewItems(m_viewTVShowsFilter, curl, EmbyTypeSeries);
     rtn = CEmbyUtils::ParseEmbySeries(items, curl, m_viewTVShowsFilter->GetItems());
   }
@@ -287,9 +290,10 @@ bool CEmbyClient::GetTVShows(CFileItemList &items, std::string url, bool fromfil
 
 bool CEmbyClient::GetTVShowsFilter(CFileItemList &items, std::string url, std::string filter)
 {
+  CSingleLock lock(m_viewTVShowsFilterLock);
   EmbyViewContent filterView;
   filterView.name = filter;
-  m_viewTVShowsFilter = CEmbyViewCachePtr(new CEmbyViewCache());
+  m_viewTVShowsFilter = CEmbyViewCachePtr(new CEmbyViewCache);
   m_viewTVShowsFilter->Init(filterView);
 
   CURL curl(url);
@@ -588,25 +592,25 @@ bool CEmbyClient::FetchViews()
     {
       if (content.mediaType == "movies")
       {
-        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache());
+        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache);
         viewCache->Init(content);
         m_viewMovies.push_back(viewCache);
       }
       else if (content.mediaType == "tvshows")
       {
-        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache());
+        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache);
         viewCache->Init(content);
         m_viewTVShows.push_back(viewCache);
       }
       else if (content.mediaType == "music")
       {
-        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache());
+        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache);
         viewCache->Init(content);
         m_viewMusic.push_back(viewCache);
       }
       else if (content.mediaType == "photo")
       {
-        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache());
+        CEmbyViewCachePtr viewCache = CEmbyViewCachePtr(new CEmbyViewCache);
         viewCache->Init(content);
         m_viewPhotos.push_back(viewCache);
       }
