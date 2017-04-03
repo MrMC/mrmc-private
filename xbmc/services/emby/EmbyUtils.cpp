@@ -767,6 +767,12 @@ bool CEmbyUtils::ParseEmbyVideos(CFileItemList &items, CURL url, const CVariant 
     const auto objectItem = *variantItemIt;
     rtn = true;
 
+    // ignore raw blueray rips, these are designed to be
+    // direct played (ie via mounted filesystem)
+    // and we do not do that yet.
+    if (objectItem["VideoType"].asString() == "BluRay")
+      continue;
+
     CFileItemPtr item = ToVideoFileItemPtr(url, objectItem, type);
     items.Add(item);
   }
