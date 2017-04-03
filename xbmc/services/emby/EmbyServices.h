@@ -59,6 +59,7 @@ public:
   bool HasClients() const;
   void GetClients(std::vector<CEmbyClientPtr> &clients) const;
   CEmbyClientPtr FindClient(const std::string &path);
+  CEmbyClientPtr FindClient(const CEmbyClient *client);
   bool ClientIsLocal(std::string path);
   EmbyServerInfo GetEmbyLocalServerInfo(const std::string url);
 

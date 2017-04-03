@@ -67,6 +67,7 @@ typedef std::vector<EmbyServerInfo> EmbyServerInfoVector;
 class CEmbyClient
 {
   friend class CEmbyServices;
+  friend class CThreadedFetchViewItems;
 
 public:
   CEmbyClient();
@@ -113,6 +114,7 @@ protected:
   bool        IsSameClientHostName(const CURL& url);
   bool        FetchViews();
   bool        FetchViewItems(CEmbyViewCachePtr &view, const CURL& url, const std::string &type);
+  bool        DoThreadedFetchViewItems(CEmbyViewCachePtr &view, const CURL& url, const std::string &type);
   bool        FetchFilterItems(CEmbyViewCachePtr &view, const CURL &url, const std::string &type, const std::string &filter);
   void        SetPresence(bool presence);
   const CVariant FetchItemById(const std::string &Id);
@@ -132,12 +134,19 @@ private:
   std::atomic<bool> m_presence;
   std::atomic<bool> m_needUpdate;
   CEmbyClientSync  *m_clientSync;
+
   CEmbyViewCachePtr m_viewMoviesFilter;
-  CCriticalSection m_viewMoviesFilterLock;
   CEmbyViewCachePtr m_viewTVShowsFilter;
+  CCriticalSection m_viewMoviesFilterLock;
   CCriticalSection m_viewTVShowsFilterLock;
+
+  CCriticalSection m_viewMusicLock;
+  CCriticalSection m_viewMoviesLock;
+  CCriticalSection m_viewPhotosLock;
+  CCriticalSection m_viewTVShowsLock;
   std::vector<CEmbyViewCachePtr> m_viewMusic;
   std::vector<CEmbyViewCachePtr> m_viewMovies;
   std::vector<CEmbyViewCachePtr> m_viewPhotos;
   std::vector<CEmbyViewCachePtr> m_viewTVShows;
+
 };

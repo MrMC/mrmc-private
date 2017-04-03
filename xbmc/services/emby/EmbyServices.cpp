@@ -204,6 +204,18 @@ CEmbyClientPtr CEmbyServices::FindClient(const std::string &path)
   return nullptr;
 }
 
+CEmbyClientPtr CEmbyServices::FindClient(const CEmbyClient *testclient)
+{
+  CSingleLock lock(m_clients_lock);
+  for (const auto &client : m_clients)
+  {
+    if (testclient == client.get())
+      return client;
+  }
+
+  return nullptr;
+}
+
 void CEmbyServices::OnSettingAction(const CSetting *setting)
 {
   if (setting == nullptr)
@@ -865,9 +877,9 @@ EmbyServerInfoVector CEmbyServices::GetConnectServerList(const std::string &conn
 {
   EmbyServerInfoVector servers;
 
-  CGUIDialogBusy *m_busyDialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
-  if (m_busyDialog)
-    m_busyDialog->Open();
+  CGUIDialogBusy *busyDialog = (CGUIDialogBusy*)g_windowManager.GetWindow(WINDOW_DIALOG_BUSY);
+  if (busyDialog)
+    busyDialog->Open();
   
   XFILE::CCurlFile curlfile;
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
@@ -887,7 +899,11 @@ EmbyServerInfoVector CEmbyServices::GetConnectServerList(const std::string &conn
 #endif
     CVariant vservers;
     if (!CJSONVariantParser::Parse(response, vservers))
+    {
+      if (busyDialog)
+        busyDialog->Close();
       return servers;
+    }
     if (vservers.isArray())
     {
       for (auto serverObjectIt = vservers.begin_array(); serverObjectIt != vservers.end_array(); ++serverObjectIt)
@@ -912,8 +928,8 @@ EmbyServerInfoVector CEmbyServices::GetConnectServerList(const std::string &conn
       }
     }
   }
-  if (m_busyDialog)
-    m_busyDialog->Close();
+  if (busyDialog)
+    busyDialog->Close();
   return servers;
 }
 
