@@ -706,6 +706,7 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const
   {
     curl.SetFileName("Users/" + GetUserID() + "/Items");
     curl.SetOption("IncludeItemTypes", type);
+    curl.SetOption("Recursive", "true");
     curl.SetOption("Fields", MoviesFields);
     // must be last, wtf?
     if (view && !view->GetId().empty())
