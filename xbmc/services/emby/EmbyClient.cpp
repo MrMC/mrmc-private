@@ -389,9 +389,14 @@ void CEmbyClient::AddNewViewItems(const std::vector<std::string> &ids)
     CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
     if (item != nullptr)
     {
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 1, item);
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
     }
+  }
+  if (!variantItems.empty())
+  {
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+    g_windowManager.SendThreadMessage(msg);
   }
 }
 
@@ -437,8 +442,8 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
       std::string fanart = item->GetArt("fanart");
       if (!fanart.empty() && CTextureCache::GetInstance().HasCachedImage(fanart))
         CTextureCache::GetInstance().ClearCachedImage(fanart);
-      // -------------
 
+      // -------------
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
     }
@@ -466,10 +471,14 @@ void CEmbyClient::RemoveViewItems(const std::vector<std::string> &ids)
     CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
     if (item != nullptr)
     {
-      // -------------
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 1, item);
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
     }
+  }
+  if (!variantItems.empty())
+  {
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+    g_windowManager.SendThreadMessage(msg);
   }
 }
 

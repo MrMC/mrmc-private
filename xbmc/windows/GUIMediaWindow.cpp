@@ -405,7 +405,11 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
         {
           CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnMessage GUI_MSG_REMOVE_ITEM IsActive/removed");
           m_vecItems->Remove(newItem.get());
-          UpdateFileList();
+          if (message.GetParam2() == 1)
+          {
+            UpdateFileList();
+            Refresh();
+          }
         }
         else if (newItem)
         { // need to remove the disc cache
@@ -433,6 +437,11 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
             {
               CLog::Log(LOGDEBUG, "CGUIMediaWindow::OnMessage GUI_MSG_ADD_ITEM match");
               m_vecItems->Add(newItem);
+              if (message.GetParam2() == 1)
+              {
+                UpdateFileList();
+                Refresh();
+              }
             }
           }
         }
