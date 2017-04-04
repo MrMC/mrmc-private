@@ -57,40 +57,42 @@ public:
   static void SetEmbyItemProperties(CFileItem &item, const char *content);
   static void SetEmbyItemProperties(CFileItem &item, const char *content, const CEmbyClientPtr &client);
 
+  #pragma mark - Emby Server Utils
   static void SetWatched(CFileItem &item);
   static void SetUnWatched(CFileItem &item);
   static void ReportProgress(CFileItem &item, double currentSeconds);
   static void SetPlayState(MediaServicesPlayerState state);
-
-  static bool GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
-  static bool GetEmbyInProgressShows(CFileItemList &items, const std::string url, int limit=25);
-  static bool GetEmbyRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
-  static bool GetEmbyInProgressMovies(CFileItemList &items, const std::string url, int limit=25);
-  static bool GetAllEmbyInProgress(CFileItemList &items, bool tvShow);
-  static bool GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
-
-  // Emby Movie/TV
-  static bool GetEmbySeasons(CFileItemList &items, const std::string url);
-  static bool GetEmbyEpisodes(CFileItemList &items, const std::string url);
-  // -------------
   static bool GetItemSubtiles(CFileItem &item);
   static bool GetMoreItemInfo(CFileItem &item);
   static bool GetMoreResolutions(CFileItem &item);
   static bool GetURL(CFileItem &item);
   static bool SearchEmby(CFileItemList &items, std::string strSearchString);
 
-  // Emby Music
+  #pragma mark - Emby Recently Added and InProgress
+  static bool GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit=25);
+  static bool GetEmbyInProgressShows(CFileItemList &items, const std::string url, int limit=25);
+  static bool GetEmbyRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit=25);
+  static bool GetEmbyInProgressMovies(CFileItemList &items, const std::string url, int limit=25);
+  static bool GetAllEmbyInProgress(CFileItemList &items, bool tvShow);
+  static bool GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, bool tvShow=false);
+  static bool GetEmbyRecentlyAddedAlbums(CFileItemList &items,int limit);
+
+  #pragma mark - Emby TV
+  static bool GetEmbySeasons(CFileItemList &items, const std::string url);
+  static bool GetEmbyEpisodes(CFileItemList &items, const std::string url);
+
+  #pragma mark - Emby Music
   static bool GetEmbyAlbum(CFileItemList &items, std::string url, int limit = 100);
   static bool GetEmbyArtistAlbum(CFileItemList &items, std::string url);
   static bool GetEmbySongs(CFileItemList &items, std::string url);
   static bool GetEmbyAlbumSongs(CFileItemList &items, std::string url);
   static bool ShowMusicInfo(CFileItem item);
-  static bool GetEmbyRecentlyAddedAlbums(CFileItemList &items,int limit);
   static bool GetEmbyAlbumSongs(CFileItem item, CFileItemList &items);
   static bool GetEmbyMediaTotals(MediaServicesMediaCount &totals);
 
   static CFileItemPtr ToFileItemPtr(CEmbyClient *client, const CVariant &object);
 
+  #pragma mark - Emby parsers
   static bool ParseEmbyVideos(CFileItemList &items, const CURL url, const CVariant &object, std::string type);
   static bool ParseEmbySeries(CFileItemList &items, const CURL &url, const CVariant &variant);
   static bool ParseEmbySeasons(CFileItemList &items, const CURL &url, const CVariant &series, const CVariant &variant);
@@ -102,6 +104,7 @@ public:
   static CVariant GetEmbyCVariant(std::string url, std::string filter = "");
 
 private:
+  #pragma mark - Emby private
   static CFileItemPtr ToVideoFileItemPtr(CURL url, const CVariant &variant, std::string type);
   static void GetVideoDetails(CFileItem &item, const CVariant &variant);
   static void GetMusicDetails(CFileItem &item, const CVariant &variant);

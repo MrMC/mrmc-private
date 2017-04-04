@@ -133,6 +133,7 @@ void CEmbyUtils::SetEmbyItemProperties(CFileItem &item, const char *content, con
   item.SetProperty("MediaServicesClientID", client->GetUuid());
 }
 
+#pragma mark - Emby Server Utils
 void CEmbyUtils::SetWatched(CFileItem &item)
 {
   // use the current date and time if lastPlayed is invalid
@@ -265,6 +266,54 @@ void CEmbyUtils::SetPlayState(MediaServicesPlayerState state)
   g_playbackState = state;
 }
 
+bool CEmbyUtils::GetItemSubtiles(CFileItem &item)
+{
+  return false;
+}
+
+bool CEmbyUtils::GetMoreItemInfo(CFileItem &item)
+{
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  if (StringUtils::StartsWithNoCase(url, "emby://"))
+    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
+  
+  CURL url2(url);
+  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
+  if (!client || !client->GetPresence())
+    return false;
+  
+  std::string itemId;
+  if (item.HasProperty("EmbySeriesID") && !item.GetProperty("EmbySeriesID").asString().empty())
+    itemId = item.GetProperty("EmbySeriesID").asString();
+  else
+    itemId = item.GetMediaServiceId();
+  
+  url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
+  url2.SetOptions("");
+  url2.SetOption("Fields", "Genres,People");
+  url2.SetOption("IDs", itemId);
+  const CVariant variant = GetEmbyCVariant(url2.Get());
+  
+  GetVideoDetails(item, variant["Items"][0]);
+  return true;
+}
+
+bool CEmbyUtils::GetMoreResolutions(CFileItem &item)
+{
+  return true;
+}
+
+bool CEmbyUtils::GetURL(CFileItem &item)
+{
+  return true;
+}
+
+bool CEmbyUtils::SearchEmby(CFileItemList &items, std::string strSearchString)
+{
+  return false;
+}
+
+#pragma mark - Emby Recently Added and InProgress
 bool CEmbyUtils::GetEmbyRecentlyAddedEpisodes(CFileItemList &items, const std::string url, int limit)
 {
   CURL url2(url);
@@ -425,25 +474,58 @@ bool CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(CFileItemList &items, boo
   return rtn;
 }
 
-CFileItemPtr ParseMusic(const CEmbyClient *client, const CVariant &variant)
+bool CEmbyUtils::GetEmbyRecentlyAddedAlbums(CFileItemList &items,int limit)
 {
-  return nullptr;
+  
+  bool rtn = false;
+  
+  if (CEmbyServices::GetInstance().HasClients())
+  {
+    CFileItemList embyItems;
+    bool limitToLocal = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYLIMITHOMETOLOCAL);
+    //look through all emby clients and pull recently added for each library section
+    std::vector<CEmbyClientPtr> clients;
+    CEmbyServices::GetInstance().GetClients(clients);
+    for (const auto &client : clients)
+    {
+      if (limitToLocal && !client->IsOwned())
+        continue;
+      
+      std::vector<EmbyViewInfo> viewinfos;
+      viewinfos = client->GetViewInfoForMusicContent();
+      for (const auto &viewinfo : viewinfos)
+      {
+        std::string userId = client->GetUserID();
+        CURL curl(client->GetUrl());
+        curl.SetProtocol(client->GetProtocol());
+        curl.SetOption("ParentId", viewinfo.id);
+        curl.SetFileName("emby/Users/" + userId + "/Items/Latest");
+        
+        rtn = GetEmbyAlbum(embyItems, curl.Get(), 10);
+        
+        items.Append(embyItems);
+        embyItems.ClearItems();
+      }
+    }
+  }
+  return rtn;
 }
 
+#pragma mark - Emby TV
 bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
 {
   // "Shows/\(query.seriesId)/Seasons"
   bool rtn = false;
-
+  
   CURL url2(url);
   url2.SetOption("IncludeItemTypes", EmbyTypeSeasons);
   url2.SetOption("Fields", "Etag,DateCreated,ImageTags,RecursiveItemCount");
   std::string parentId = url2.GetOption("ParentId");
   url2.SetOptions("");
   url2.SetOption("ParentId", parentId);
-
+  
   const CVariant variant = GetEmbyCVariant(url2.Get());
-
+  
   if (!variant.isNull() || variant.isObject() || variant.isMember("Items"))
   {
     CURL url3(url);
@@ -452,7 +534,7 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
     url3.SetOption("Ids", seriesID);
     url3.SetOption("Fields", "Overview,Genres");
     const CVariant seriesObject = CEmbyUtils::GetEmbyCVariant(url3.Get());
-
+    
     rtn = ParseEmbySeasons(items, url2, seriesObject, variant);
   }
   return rtn;
@@ -461,64 +543,21 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
 bool CEmbyUtils::GetEmbyEpisodes(CFileItemList &items, const std::string url)
 {
   CURL url2(url);
-
+  
   url2.SetOption("IncludeItemTypes", EmbyTypeEpisode);
   url2.SetOption("Fields", StandardFields);
   const CVariant variant = GetEmbyCVariant(url2.Get());
-
+  
   bool rtn = ParseEmbyVideos(items, url2, variant, MediaTypeEpisode);
   return rtn;
 }
 
-bool CEmbyUtils::GetItemSubtiles(CFileItem &item)
+#pragma mark - Emby Music
+CFileItemPtr ParseMusic(const CEmbyClient *client, const CVariant &variant)
 {
-  return false;
+  return nullptr;
 }
 
-bool CEmbyUtils::GetMoreItemInfo(CFileItem &item)
-{
-  std::string url = URIUtils::GetParentPath(item.GetPath());
-  if (StringUtils::StartsWithNoCase(url, "emby://"))
-    url = Base64::Decode(URIUtils::GetFileName(item.GetPath()));
-
-  CURL url2(url);
-  CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url2.Get());
-  if (!client || !client->GetPresence())
-    return false;
-
-  std::string itemId;
-  if (item.HasProperty("EmbySeriesID") && !item.GetProperty("EmbySeriesID").asString().empty())
-    itemId = item.GetProperty("EmbySeriesID").asString();
-  else
-    itemId = item.GetMediaServiceId();
-
-  url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
-  url2.SetOptions("");
-  url2.SetOption("Fields", "Genres,People");
-  url2.SetOption("IDs", itemId);
-  const CVariant variant = GetEmbyCVariant(url2.Get());
-
-  GetVideoDetails(item, variant["Items"][0]);
-  return true;
-}
-
-bool CEmbyUtils::GetMoreResolutions(CFileItem &item)
-{
-  return true;
-}
-
-bool CEmbyUtils::GetURL(CFileItem &item)
-{
-  return true;
-}
-
-bool CEmbyUtils::SearchEmby(CFileItemList &items, std::string strSearchString)
-{
-  return false;
-}
-
-
-  // Emby Music
 bool CEmbyUtils::GetEmbyAlbum(CFileItemList &items, std::string url, int limit)
 {
   CURL curl(url);
@@ -611,43 +650,6 @@ bool CEmbyUtils::ShowMusicInfo(CFileItem item)
   return true;
 }
 
-bool CEmbyUtils::GetEmbyRecentlyAddedAlbums(CFileItemList &items,int limit)
-{
-  
-  bool rtn = false;
-  
-  if (CEmbyServices::GetInstance().HasClients())
-  {
-    CFileItemList embyItems;
-    bool limitToLocal = CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_EMBYLIMITHOMETOLOCAL);
-    //look through all emby clients and pull recently added for each library section
-    std::vector<CEmbyClientPtr> clients;
-    CEmbyServices::GetInstance().GetClients(clients);
-    for (const auto &client : clients)
-    {
-      if (limitToLocal && !client->IsOwned())
-        continue;
-      
-      std::vector<EmbyViewInfo> viewinfos;
-      viewinfos = client->GetViewInfoForMusicContent();
-      for (const auto &viewinfo : viewinfos)
-      {
-        std::string userId = client->GetUserID();
-        CURL curl(client->GetUrl());
-        curl.SetProtocol(client->GetProtocol());
-        curl.SetOption("ParentId", viewinfo.id);
-        curl.SetFileName("emby/Users/" + userId + "/Items/Latest");
-
-        rtn = GetEmbyAlbum(embyItems, curl.Get(), 10);
-        
-        items.Append(embyItems);
-        embyItems.ClearItems();
-      }
-    }
-  }
-  return rtn;
-}
-
 bool CEmbyUtils::GetEmbyAlbumSongs(CFileItem item, CFileItemList &items)
 {
   std::string url = URIUtils::GetParentPath(item.GetPath());
@@ -662,6 +664,7 @@ bool CEmbyUtils::GetEmbyMediaTotals(MediaServicesMediaCount &totals)
   return false;
 }
 
+#pragma mark - Emby parsers
 CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &variant)
 {
   if (variant.isNull() || !variant.isObject() || !variant.isMember("Items"))
@@ -1242,6 +1245,60 @@ bool CEmbyUtils::ParseEmbyTVShowsFilter(CFileItemList &items, const CURL url, co
   return rtn;
 }
 
+CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
+{
+#if defined(EMBY_DEBUG_TIMING)
+  unsigned int currentTime = XbmcThreads::SystemClockMillis();
+#endif
+  
+  XFILE::CCurlFile emby;
+  emby.SetRequestHeader("Cache-Control", "no-cache");
+  emby.SetRequestHeader("Content-Type", "application/json");
+  emby.SetRequestHeader("Accept-Encoding", "gzip");
+  
+  CURL curl(url);
+  // this is key to get back gzip encoded content
+  curl.SetProtocolOption("seekable", "0");
+  // we always want json back
+  curl.SetProtocolOptions(curl.GetProtocolOptions() + "&format=json");
+  std::string response;
+  if (emby.Get(curl.Get(), response))
+  {
+#if defined(EMBY_DEBUG_TIMING)
+    CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %d(msec) for %lu bytes",
+              XbmcThreads::SystemClockMillis() - currentTime, response.size());
+#endif
+    if (emby.GetContentEncoding() == "gzip")
+    {
+      std::string buffer;
+      if (XFILE::CZipFile::DecompressGzip(response, buffer))
+        response = std::move(buffer);
+      else
+        return CVariant(CVariant::VariantTypeNull);
+    }
+#if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", curl.Get().c_str());
+    CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", response.c_str());
+#endif
+#if defined(EMBY_DEBUG_TIMING)
+    currentTime = XbmcThreads::SystemClockMillis();
+#endif
+    CVariant resultObject;
+    if (CJSONVariantParser::Parse(response, resultObject))
+    {
+#if defined(EMBY_DEBUG_TIMING)
+      CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant parsed in %d(msec)",
+                XbmcThreads::SystemClockMillis() - currentTime);
+#endif
+      // recently added does not return proper object, we make one up later
+      if (resultObject.isObject() || resultObject.isArray())
+        return resultObject;
+    }
+  }
+  return CVariant(CVariant::VariantTypeNull);
+}
+
+#pragma mark - Emby private
 CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, std::string type)
 {
   // clear base url options
@@ -1462,59 +1519,6 @@ void CEmbyUtils::GetMediaDetals(CFileItem &item, const CVariant &variant, std::s
     }
     item.GetVideoInfoTag()->m_streamDetails = streamDetail;
   }
-}
-
-CVariant CEmbyUtils::GetEmbyCVariant(std::string url, std::string filter)
-{
-#if defined(EMBY_DEBUG_TIMING)
-  unsigned int currentTime = XbmcThreads::SystemClockMillis();
-#endif
-
-  XFILE::CCurlFile emby;
-  emby.SetRequestHeader("Cache-Control", "no-cache");
-  emby.SetRequestHeader("Content-Type", "application/json");
-  emby.SetRequestHeader("Accept-Encoding", "gzip");
-
-  CURL curl(url);
-  // this is key to get back gzip encoded content
-  curl.SetProtocolOption("seekable", "0");
-  // we always want json back
-  curl.SetProtocolOptions(curl.GetProtocolOptions() + "&format=json");
-  std::string response;
-  if (emby.Get(curl.Get(), response))
-  {
-#if defined(EMBY_DEBUG_TIMING)
-    CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %d(msec) for %lu bytes",
-      XbmcThreads::SystemClockMillis() - currentTime, response.size());
-#endif
-    if (emby.GetContentEncoding() == "gzip")
-    {
-      std::string buffer;
-      if (XFILE::CZipFile::DecompressGzip(response, buffer))
-        response = std::move(buffer);
-      else
-        return CVariant(CVariant::VariantTypeNull);
-    }
-#if defined(EMBY_DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", curl.Get().c_str());
-    CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant %s", response.c_str());
-#endif
-#if defined(EMBY_DEBUG_TIMING)
-    currentTime = XbmcThreads::SystemClockMillis();
-#endif
-    CVariant resultObject;
-    if (CJSONVariantParser::Parse(response, resultObject))
-    {
-#if defined(EMBY_DEBUG_TIMING)
-      CLog::Log(LOGDEBUG, "CEmbyUtils::GetEmbyCVariant parsed in %d(msec)",
-        XbmcThreads::SystemClockMillis() - currentTime);
-#endif
-      // recently added does not return proper object, we make one up later
-      if (resultObject.isObject() || resultObject.isArray())
-        return resultObject;
-    }
-  }
-  return CVariant(CVariant::VariantTypeNull);
 }
 
 void CEmbyUtils::RemoveSubtitleProperties(CFileItem &item)
