@@ -407,7 +407,7 @@ void CEmbyClient::AddNewViewItems(const std::vector<std::string> &ids)
     return;
   }
 
-  std::vector<std::string> propertys;
+  std::vector<std::string> properties;
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
@@ -420,17 +420,25 @@ void CEmbyClient::AddNewViewItems(const std::vector<std::string> &ids)
     if (item != nullptr)
     {
       std::string property = item->GetProperty("MediaServicesContent").asString();
-      auto findResults = std::find(propertys.begin(), propertys.end(), property);
-      if (findResults != propertys.end())
-        propertys.push_back(property);
+      if (properties.empty())
+      {
+        properties.push_back(property);
+      }
+      else
+      {
+        std::string property = item->GetProperty("MediaServicesContent").asString();
+        auto findResults = std::find(properties.begin(), properties.end(), property);
+        if (findResults != properties.end())
+          properties.push_back(property);
+      }
       // -------------
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
     }
   }
-  if (!propertys.empty())
+  if (!properties.empty())
   {
-    for (const auto &property : propertys)
+    for (const auto &property : properties)
     {
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_PROPERTYMATCH);
       msg.SetStringParam(property);
@@ -449,6 +457,7 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
     return;
   }
 
+  std::vector<std::string> properties;
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
@@ -466,6 +475,18 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
         std::vector<std::string> seriesIds;
         seriesIds.push_back(item->GetProperty("EmbySeriesID").asString());
         UpdateViewItems(seriesIds);
+      }
+
+      std::string property = item->GetProperty("MediaServicesContent").asString();
+      if (properties.empty())
+      {
+        properties.push_back(property);
+      }
+      else
+      {
+        auto findResults = std::find(properties.begin(), properties.end(), property);
+        if (findResults != properties.end())
+          properties.push_back(property);
       }
 
       // artwork might have changed, just pop the image cache so next
@@ -487,6 +508,15 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
       g_windowManager.SendThreadMessage(msg);
     }
   }
+  if (!properties.empty())
+  {
+    for (const auto &property : properties)
+    {
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_PROPERTYMATCH);
+      msg.SetStringParam(property);
+      g_windowManager.SendThreadMessage(msg);
+    }
+  }
 }
 
 void CEmbyClient::RemoveViewItems(const std::vector<std::string> &ids)
@@ -499,7 +529,7 @@ void CEmbyClient::RemoveViewItems(const std::vector<std::string> &ids)
     return;
   }
 
-  std::vector<std::string> propertys;
+  std::vector<std::string> properties;
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
@@ -512,17 +542,24 @@ void CEmbyClient::RemoveViewItems(const std::vector<std::string> &ids)
     if (item != nullptr)
     {
       std::string property = item->GetProperty("MediaServicesContent").asString();
-      auto findResults = std::find(propertys.begin(), propertys.end(), property);
-      if (findResults != propertys.end())
-        propertys.push_back(property);
+      if (properties.empty())
+      {
+        properties.push_back(property);
+      }
+      else
+      {
+        auto findResults = std::find(properties.begin(), properties.end(), property);
+        if (findResults != properties.end())
+          properties.push_back(property);
+      }
       // -------------
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
     }
   }
-  if (!propertys.empty())
+  if (!properties.empty())
   {
-    for (const auto &property : propertys)
+    for (const auto &property : properties)
     {
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_PROPERTYMATCH);
       msg.SetStringParam(property);
