@@ -312,7 +312,57 @@ bool CEmbyUtils::GetURL(CFileItem &item)
 
 bool CEmbyUtils::SearchEmby(CFileItemList &items, std::string strSearchString)
 {
-  return false;
+  
+  // http://94.203.10.174:8096/emby/Search/Hints?userId=cf28f6d51dd54c63a27fed6600c5b6cb&searchTerm=mila%20kunis
+  
+  // http://94.203.10.174:8096/emby/Users/cf28f6d51dd54c63a27fed6600c5b6cb/Items?IncludeItemTypes=Movie,Series&Recursive=true&Fields=AudioInfo%2CSeriesInfo%2CParentId%2CPrimaryImageAspectRatio%2CBasicSyncInfo%2CAudioInfo%2CSeriesInfo%2CParentId%2CPrimaryImageAspectRatio%2CBasicSyncInfo&PersonIds=5f632dedc5d8a965d8c57daf50763c41
+  
+  bool rtn = false;
+  
+  if (CEmbyServices::GetInstance().HasClients())
+  {
+    CFileItemList embyItems;
+    std::string personID;
+    //look through all emby clients and search
+    std::vector<CEmbyClientPtr> clients;
+    CEmbyServices::GetInstance().GetClients(clients);
+    for (const auto &client : clients)
+    {
+      CURL curl(client->GetUrl());
+      curl.SetProtocol(client->GetProtocol());
+      curl.SetOption("userId", client->GetUserID());
+      curl.SetOption("searchTerm", strSearchString);
+      curl.SetFileName("emby/Search/Hints");
+      CVariant variant = GetEmbyCVariant(curl.Get());
+      
+      personID = variant["SearchHints"][0]["ItemId"].asString();
+
+      if (personID.empty())
+        return false;
+      
+      // get all tvshows with selected actor
+      variant.clear();
+      curl.SetOptions("");
+      curl.SetFileName("Users/" + client->GetUserID() + "/Items");
+      curl.SetOption("IncludeItemTypes", "Series");
+      curl.SetOption("Fields", TVShowsFields);
+      curl.SetOption("Recursive","true");
+      curl.SetOption("PersonIds", personID);
+      variant = GetEmbyCVariant(curl.Get());
+      
+      ParseEmbySeries(embyItems, curl, variant);
+      CGUIWindowVideoBase::AppendAndClearSearchItems(embyItems, "[" + g_localizeStrings.Get(20343) + "] ", items);
+      
+      // get all movies with selected actor
+      variant.clear();
+      curl.SetOption("IncludeItemTypes", "Movie");
+      variant = GetEmbyCVariant(curl.Get());
+      ParseEmbyVideos(embyItems, curl, variant, MediaTypeMovie);
+      CGUIWindowVideoBase::AppendAndClearSearchItems(embyItems, "[" + g_localizeStrings.Get(20338) + "] ", items);
+    }
+    rtn = items.Size() > 0;
+  }
+  return rtn;
 }
 
 #pragma mark - Emby Recently Added and InProgress
