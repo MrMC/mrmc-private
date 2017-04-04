@@ -88,6 +88,8 @@ public:
   void  SetWatched(CFileItem &item);
   void  SetUnWatched(CFileItem &item);
 
+  void  UpdateLibrary(const std::string &content);
+
   // main view entry points (from CEmbyDirectory)
   bool  GetMovies(CFileItemList &items, std::string url, bool fromfilter);
   bool  GetMoviesFilter(CFileItemList &items, std::string url, std::string filter);

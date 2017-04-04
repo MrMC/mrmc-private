@@ -400,7 +400,17 @@ void CEmbyServices::Announce(AnnouncementFlag flag, const char *sender, const ch
   }
   else if ((flag & AnnouncementFlag::Other) && strcmp(sender, "emby") == 0)
   {
-    if (strcmp(message, "ReloadProfiles") == 0)
+    if (strcmp(message, "UpdateLibrary") == 0)
+    {
+      std::string content = data["MediaServicesContent"].asString();
+      std::string clientId = data["MediaServicesClientID"].asString();
+      for (const auto &client : m_clients)
+      {
+        if (client->GetUuid() == clientId)
+          client->UpdateLibrary(content);
+      }
+    }
+    else if (strcmp(message, "ReloadProfiles") == 0)
     {
       // restart if we MrMC profiles has changed
       Stop();

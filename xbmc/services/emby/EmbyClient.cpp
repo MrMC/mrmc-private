@@ -263,6 +263,35 @@ void CEmbyClient::SetUnWatched(CFileItem &item)
   }
 }
 
+void CEmbyClient::UpdateLibrary(const std::string &content)
+{
+  bool viewHit = false;
+  CVariant nullvariant(CVariant::VariantTypeNull);
+  if (content == "movies")
+  {
+    CSingleLock lock(m_viewMoviesLock);
+    for (auto &view : m_viewMovies)
+    {
+      viewHit = true;
+      view->SetItems(nullvariant);
+    }
+  }
+  else if (content == "tvshows")
+  {
+    CSingleLock lock(m_viewTVShowsLock);
+    for (auto &view : m_viewTVShows)
+    {
+      viewHit = true;
+      view->SetItems(nullvariant);
+    }
+  }
+  if (viewHit)
+  {
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+    g_windowManager.SendThreadMessage(msg);
+  }
+}
+
 bool CEmbyClient::GetMovies(CFileItemList &items, std::string url, bool fromfilter)
 {
   bool rtn = false;
