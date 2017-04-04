@@ -424,35 +424,22 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
         UpdateViewItems(seriesIds);
       }
 
-      bool needArtRefresh = false;
+      // artwork might have changed, just pop the image cache so next
+      // time a user nav's to the item, they will be updated.
       std::string thumb = item->GetArt("thumb");
       if (!thumb.empty() && CTextureCache::GetInstance().HasCachedImage(thumb))
-      {
-        needArtRefresh = true;
         CTextureCache::GetInstance().ClearCachedImage(thumb);
-      }
 
       std::string banner = item->GetArt("banner");
       if (!banner.empty() && CTextureCache::GetInstance().HasCachedImage(banner))
-      {
-        needArtRefresh = true;
         CTextureCache::GetInstance().ClearCachedImage(banner);
-      }
 
       std::string fanart = item->GetArt("fanart");
       if (!fanart.empty() && CTextureCache::GetInstance().HasCachedImage(fanart))
-      {
-        needArtRefresh = true;
         CTextureCache::GetInstance().ClearCachedImage(fanart);
-      }
       // -------------
-      if (needArtRefresh)
-      {
-        CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REFRESH_THUMBS);
-        g_windowManager.SendThreadMessage(msg);
-      }
 
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 1, item);
+      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
     }
   }
