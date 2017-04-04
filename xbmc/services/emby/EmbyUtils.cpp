@@ -559,7 +559,6 @@ bool CEmbyUtils::GetEmbyArtistAlbum(CFileItemList &items, std::string url)
   curl.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
   const CVariant variant = GetEmbyCVariant(curl.Get());
 
-  curl.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
   bool rtn = ParseEmbyAlbum(items, curl, variant);
   return rtn;
 }
