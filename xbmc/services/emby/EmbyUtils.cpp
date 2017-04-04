@@ -899,6 +899,7 @@ bool CEmbyUtils::ParseEmbySeries(CFileItemList &items, const CURL &url, const CV
     // this is needed to display movies/episodes properly ... dont ask
     // good thing it didnt take 2 days to figure it out
     items.SetProperty("library.filter", "true");
+    items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
     SetEmbyItemProperties(items, "tvshows");
   }
   return rtn;
@@ -993,6 +994,7 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
   SetEmbyItemProperties(items, "seasons");
   items.SetProperty("showplot", seriesItem["Overview"].asString());
   items.SetProperty("library.filter", "true");
+  items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
 
   return rtn;
 }
@@ -1056,6 +1058,7 @@ bool CEmbyUtils::ParseEmbyAudio(CFileItemList &items, const CURL &url, const CVa
   }
   items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeSong;
+  items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetEmbyItemProperties(items, MediaTypeSong);
 
   return rtn;
@@ -1127,6 +1130,7 @@ bool CEmbyUtils::ParseEmbyAlbum(CFileItemList &items, const CURL &url, const CVa
   }
   items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
+  items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetEmbyItemProperties(items, MediaTypeAlbum);
 
   return rtn;
@@ -1195,6 +1199,7 @@ bool CEmbyUtils::ParseEmbyArtists(CFileItemList &items, const CURL &url, const C
   }
   items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeArtist;
+  items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetEmbyItemProperties(items, MediaTypeArtist);
 
   return rtn;
@@ -1241,6 +1246,8 @@ bool CEmbyUtils::ParseEmbyMoviesFilter(CFileItemList &items, CURL url, const CVa
     newItem->SetProperty("SkipLocalArt", true);
     items.Add(newItem);
   }
+  items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
+
   return rtn;
 }
 
@@ -1283,6 +1290,8 @@ bool CEmbyUtils::ParseEmbyTVShowsFilter(CFileItemList &items, const CURL url, co
     newItem->SetProperty("SkipLocalArt", true);
     items.Add(newItem);
   }
+  items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
+
   return rtn;
 }
 
