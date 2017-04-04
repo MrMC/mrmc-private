@@ -1075,14 +1075,17 @@ bool CEmbyUtils::ParseEmbyAlbum(CFileItemList &items, const CURL &url, const CVa
 
     embyItem->GetMusicInfoTag()->SetAlbum(item["Name"].asString());
     embyItem->GetMusicInfoTag()->SetYear(item["ProductionYear"].asInteger());
+    
+    CURL curl2(url);
+    curl2.SetOptions("");
+    curl2.RemoveProtocolOption("ArtistIds");
+    curl2.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
+    embyItem->SetArt("thumb", curl2.Get());
+    embyItem->SetProperty("thumb", curl2.Get());
 
-    curl.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
-    embyItem->SetArt("thumb", curl.Get());
-    embyItem->SetProperty("thumb", curl.Get());
-
-    curl.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
-    embyItem->SetArt("fanart", curl.Get());
-    embyItem->SetProperty("fanart", curl.Get());
+    curl2.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    embyItem->SetArt("fanart", curl2.Get());
+    embyItem->SetProperty("fanart", curl2.Get());
 
     embyItem->GetMusicInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
 
@@ -1125,7 +1128,7 @@ bool CEmbyUtils::ParseEmbyArtists(CFileItemList &items, const CURL &url, const C
     embyItem->m_bIsFolder = true;
     embyItem->SetLabel(item["Name"].asString());
     curl.SetProtocolOption("ArtistIds", item["Id"].asString());
-    curl.SetFileName("/Items");
+    curl.SetFileName("Items");
     embyItem->SetPath("emby://music/artistalbums/" + Base64::Encode(curl.Get()));
     embyItem->SetMediaServiceId(item["Id"].asString());
 
@@ -1134,13 +1137,16 @@ bool CEmbyUtils::ParseEmbyArtists(CFileItemList &items, const CURL &url, const C
 
     embyItem->GetMusicInfoTag()->SetYear(item["ProductionYear"].asInteger());
 
-    curl.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
-    embyItem->SetArt("thumb", curl.Get());
-    embyItem->SetProperty("thumb", curl.Get());
+    CURL curl2(url);
+    curl2.SetOptions("");
+    curl2.RemoveProtocolOption("ArtistIds");
+    curl2.SetFileName("Items/" + item["Id"].asString() + "/Images/Primary");
+    embyItem->SetArt("thumb", curl2.Get());
+    embyItem->SetProperty("thumb", curl2.Get());
 
-    curl.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
-    embyItem->SetArt("fanart", curl.Get());
-    embyItem->SetProperty("fanart", curl.Get());
+    curl2.SetFileName("Items/" + item["Id"].asString() + "/Images/Backdrop");
+    embyItem->SetArt("fanart", curl2.Get());
+    embyItem->SetProperty("fanart", curl2.Get());
 
     embyItem->GetMusicInfoTag()->m_dateAdded.SetFromW3CDateTime(item["DateCreated"].asString());
 
