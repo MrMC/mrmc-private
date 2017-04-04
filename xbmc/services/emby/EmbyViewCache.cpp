@@ -20,16 +20,10 @@
 
 #include "EmbyViewCache.h"
 
+#include "EmbyUtils.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 
-
-// one tick is 0.1 microseconds
-static const uint64_t EmbyTicksToSecondsFactor = 10000000;
-static uint64_t SecondsToEmbyTicks(uint64_t seconds)
-{
-  return seconds * EmbyTicksToSecondsFactor;
-}
 
 CEmbyViewCache::CEmbyViewCache()
 {
@@ -114,7 +108,7 @@ bool CEmbyViewCache::SetWatched(const std::string id, int playcount, double resu
       // do it the long way or the value will not get updated
       m_cache.items["Items"][k]["UserData"]["Played"] = true;
       m_cache.items["Items"][k]["UserData"]["PlayCount"] = playcount;
-      m_cache.items["Items"][k]["UserData"]["PlaybackPositionTicks"] = SecondsToEmbyTicks(resumetime);
+      m_cache.items["Items"][k]["UserData"]["PlaybackPositionTicks"] = CEmbyUtils::SecondsToTicks(resumetime);
       return true;
     }
   }

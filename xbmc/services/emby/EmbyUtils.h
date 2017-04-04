@@ -56,6 +56,8 @@ public:
   static void PrepareApiCall(const std::string& userId, const std::string& accessToken, XFILE::CCurlFile &curl);
   static void SetEmbyItemProperties(CFileItem &item, const char *content);
   static void SetEmbyItemProperties(CFileItem &item, const char *content, const CEmbyClientPtr &client);
+  static uint64_t TicksToSeconds(uint64_t ticks);
+  static uint64_t SecondsToTicks(uint64_t seconds);
 
   #pragma mark - Emby Server Utils
   static void SetWatched(CFileItem &item);

@@ -61,19 +61,12 @@ static const std::string TVShowsFields = {
   "DateCreated,Genres,MediaStreams,Overview,ShortOverview,Path,ImageTags,BackdropImageTags,RecursiveItemCount"
 };
 
-// one tick is 0.1 microseconds
-static const uint64_t TicksToSecondsFactor = 10000000;
-static uint64_t TicksToSeconds(uint64_t ticks)
-{
-  return ticks / TicksToSecondsFactor;
-}
-static uint64_t SecondsToTicks(uint64_t seconds)
-{
-  return seconds * TicksToSecondsFactor;
-}
 
 static int g_progressSec = 0;
 static CFileItem m_curItem;
+// one tick is 0.1 microseconds
+static const uint64_t TicksToSecondsFactor = 10000000;
+
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
 bool CEmbyUtils::HasClients()
@@ -131,6 +124,15 @@ void CEmbyUtils::SetEmbyItemProperties(CFileItem &item, const char *content, con
     item.SetProperty("MediaServicesCloudItem", true);
   item.SetProperty("MediaServicesContent", content);
   item.SetProperty("MediaServicesClientID", client->GetUuid());
+}
+
+uint64_t CEmbyUtils::TicksToSeconds(uint64_t ticks)
+{
+  return ticks / TicksToSecondsFactor;
+}
+uint64_t CEmbyUtils::SecondsToTicks(uint64_t seconds)
+{
+  return seconds * TicksToSecondsFactor;
 }
 
 #pragma mark - Emby Server Utils
