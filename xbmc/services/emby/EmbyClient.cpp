@@ -407,43 +407,18 @@ void CEmbyClient::AddNewViewItems(const std::vector<std::string> &ids)
     return;
   }
 
-  std::vector<std::string> properties;
+  int itemsAdded = 0;
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
-    AppendItemToCache(*variantItemIt);
-
-    std::map<std::string, CVariant> variantMap;
-    variantMap["Items"].push_back(*variantItemIt);
-
-    CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
-    if (item != nullptr)
-    {
-      std::string property = item->GetProperty("MediaServicesContent").asString();
-      if (properties.empty())
-      {
-        properties.push_back(property);
-      }
-      else
-      {
-        std::string property = item->GetProperty("MediaServicesContent").asString();
-        auto findResults = std::find(properties.begin(), properties.end(), property);
-        if (findResults != properties.end())
-          properties.push_back(property);
-      }
-      // -------------
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_ADD_ITEM, 0, item);
-      g_windowManager.SendThreadMessage(msg);
-    }
+    itemsAdded += AppendItemToCache(*variantItemIt) ? 1:0;
   }
-  if (!properties.empty())
+  if (itemsAdded)
   {
-    for (const auto &property : properties)
-    {
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_PROPERTYMATCH);
-      msg.SetStringParam(property);
-      g_windowManager.SendThreadMessage(msg);
-    }
+    // GUI_MSG_UPDATE will Refresh and that will pull a new list of items for display
+    // and keep the same selection point.
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+    g_windowManager.SendThreadMessage(msg);
   }
 }
 
@@ -457,7 +432,7 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
     return;
   }
 
-  std::vector<std::string> properties;
+  bool updateArtwork = false;
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
@@ -477,45 +452,38 @@ void CEmbyClient::UpdateViewItems(const std::vector<std::string> &ids)
         UpdateViewItems(seriesIds);
       }
 
-      std::string property = item->GetProperty("MediaServicesContent").asString();
-      if (properties.empty())
-      {
-        properties.push_back(property);
-      }
-      else
-      {
-        auto findResults = std::find(properties.begin(), properties.end(), property);
-        if (findResults != properties.end())
-          properties.push_back(property);
-      }
-
       // artwork might have changed, just pop the image cache so next
       // time a user nav's to the item, they will be updated.
       std::string thumb = item->GetArt("thumb");
       if (!thumb.empty() && CTextureCache::GetInstance().HasCachedImage(thumb))
+      {
+        updateArtwork = true;
         CTextureCache::GetInstance().ClearCachedImage(thumb);
+      }
 
       std::string banner = item->GetArt("banner");
       if (!banner.empty() && CTextureCache::GetInstance().HasCachedImage(banner))
+      {
+        updateArtwork = true;
         CTextureCache::GetInstance().ClearCachedImage(banner);
+      }
 
       std::string fanart = item->GetArt("fanart");
       if (!fanart.empty() && CTextureCache::GetInstance().HasCachedImage(fanart))
+      {
+        updateArtwork = true;
         CTextureCache::GetInstance().ClearCachedImage(fanart);
+      }
 
       // -------------
       CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_ITEM, 0, item);
       g_windowManager.SendThreadMessage(msg);
     }
   }
-  if (!properties.empty())
+  if (updateArtwork)
   {
-    for (const auto &property : properties)
-    {
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_PROPERTYMATCH);
-      msg.SetStringParam(property);
-      g_windowManager.SendThreadMessage(msg);
-    }
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REFRESH_THUMBS);
+    g_windowManager.SendThreadMessage(msg);
   }
 }
 
@@ -529,42 +497,18 @@ void CEmbyClient::RemoveViewItems(const std::vector<std::string> &ids)
     return;
   }
 
-  std::vector<std::string> properties;
+  int itemsAdded = 0;
   const auto& variantItems = variant["Items"];
   for (auto variantItemIt = variantItems.begin_array(); variantItemIt != variantItems.end_array(); ++variantItemIt)
   {
-    RemoveItemFromCache(*variantItemIt);
-
-    std::map<std::string, CVariant> variantMap;
-    variantMap["Items"].push_back(*variantItemIt);
-
-    CFileItemPtr item = CEmbyUtils::ToFileItemPtr(this, variantMap);
-    if (item != nullptr)
-    {
-      std::string property = item->GetProperty("MediaServicesContent").asString();
-      if (properties.empty())
-      {
-        properties.push_back(property);
-      }
-      else
-      {
-        auto findResults = std::find(properties.begin(), properties.end(), property);
-        if (findResults != properties.end())
-          properties.push_back(property);
-      }
-      // -------------
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_REMOVE_ITEM, 0, item);
-      g_windowManager.SendThreadMessage(msg);
-    }
+    itemsAdded += RemoveItemFromCache(*variantItemIt) ? 1:0;
   }
-  if (!properties.empty())
+  if (itemsAdded)
   {
-    for (const auto &property : properties)
-    {
-      CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE_PROPERTYMATCH);
-      msg.SetStringParam(property);
-      g_windowManager.SendThreadMessage(msg);
-    }
+    // GUI_MSG_UPDATE will Refresh and that will pull a new list of items for display
+    // and keep the same selection point.
+    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UPDATE);
+    g_windowManager.SendThreadMessage(msg);
   }
 }
 
