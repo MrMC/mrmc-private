@@ -1459,11 +1459,11 @@ void CFileItem::UpdateInfo(const CFileItem &item, bool replaceLabels /*=true*/)
     SetLabel(item.GetLabel());
   if (replaceLabels && !item.GetLabel2().empty())
     SetLabel2(item.GetLabel2());
-  if (!item.GetArt("thumb").empty())
+  //if (!item.GetArt("thumb").empty())
     SetArt("thumb", item.GetArt("thumb"));
-  if (!item.GetIconImage().empty())
+  //if (!item.GetIconImage().empty())
     SetIconImage(item.GetIconImage());
-  if (item.HasArt("fanart"))
+  //if (!item.HasArt("fanart"))
     SetArt("fanart", item.GetArt("fanart"));
   AppendProperties(item);
 }
@@ -1899,6 +1899,7 @@ bool CFileItemList::Copy(const CFileItemList& items, bool copyItems /* = true */
   m_replaceListing  = items.m_replaceListing;
   m_content         = items.m_content;
   m_mapProperties   = items.m_mapProperties;
+  m_fastLookup      = items.m_fastLookup;
   m_cacheToDisc     = items.m_cacheToDisc;
   m_sortDetails     = items.m_sortDetails;
   m_sortDescription = items.m_sortDescription;
