@@ -523,7 +523,9 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   if (item.IsAudio())
     return;
   
-  CLog::Log(LOGDEBUG, "CEmbyUtils::ReportProgress - IMDB %s", item.GetVideoInfoTag()->GetUniqueID("imdb").c_str());
+  // we need to sleep a bit to let the player settle, times are all over the place
+  // since we are a job, this shoudl not be too bad
+  Sleep(2000);
   
   std::string status;
   if (g_playbackState == MediaServicesPlayerState::playing )
@@ -536,7 +538,7 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   CURL url(item.GetURL());
   CVariant data;
   
-  int percentage;
+  int percentage = 0;
   if (g_application.m_pPlayer->GetTotalTime())
   {
     int totalTime = g_application.m_pPlayer->GetTotalTime()/1000;
@@ -545,7 +547,7 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   }
   else
   {
-    percentage = currentSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
+    percentage = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
   }
   
   // if percentage < 0, do not report it
