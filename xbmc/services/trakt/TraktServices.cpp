@@ -408,81 +408,106 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
 {
   CVariant data;
   CDateTime now = CDateTime::GetUTCDateTime();
-  if (!item.IsMediaServiceBased())
+
+  if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
   {
-    if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
+    std::string timenow = now.GetAsW3CDateTime(true);
+    CVariant movie;
+    
+    movie["title"]      = item.GetVideoInfoTag()->m_strTitle;
+    movie["year"]       = item.GetVideoInfoTag()->GetYear();
+    movie["watched_at"] = now.GetAsW3CDateTime(true);
+    movie["ids"]        = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
+    data["movies"].push_back(movie);
+  }
+  else if (item.HasVideoInfoTag() &&
+           (item.GetVideoInfoTag()->m_type == MediaTypeTvShow || item.GetVideoInfoTag()->m_type == MediaTypeSeason))
+  {
+    CFileItem showItem;
+    if (!item.IsMediaServiceBased())
     {
-      /// https://api.trakt.tv/shows/top-gear/seasons/24
-      // to get a list of episodes, there we will find what we need
-      
-      std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
-      removeCharsFromString(showName);
-      StringUtils::Replace(showName, " ", "-");
-      std::string showNameT;
-      std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
-      CVariant episodes = GetEmbyCVariant(episodesUrl);
-      CVariant episodeIds;
-      CVariant episode;
-      if (episodes.isArray())
-      {
-        for (CVariant::iterator_array it = episodes.begin_array(); it != episodes.end_array(); it++)
-        {
-          CVariant &episodeItem = *it;
-          if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
-          {
-            episodeIds = episodeItem["ids"];
-            break;
-          }
-        }
-      }
-      episode["watched_at"] = now.GetAsW3CDateTime(true);
-      episode["ids"]        = episodeIds;
-      data["episodes"].push_back(episode);
-      
-    }
-    else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
-    {
-      std::string timenow = now.GetAsW3CDateTime(true);
-      CVariant movie;
-      
-      movie["title"]      = item.GetVideoInfoTag()->m_strTitle;
-      movie["year"]       = item.GetVideoInfoTag()->GetYear();
-      movie["watched_at"] = now.GetAsW3CDateTime(true);
-      movie["ids"]        = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
-      data["movies"].push_back(movie);
-    }
-    else if (item.HasVideoInfoTag() &&
-             (item.GetVideoInfoTag()->m_type == MediaTypeTvShow || item.GetVideoInfoTag()->m_type == MediaTypeSeason))
-    {
-      
       CVideoDatabase videodatabase;
       if (!videodatabase.Open())
         return;
-      CFileItem showItem;
+      
       std::string basePath = StringUtils::Format("videodb://tvshows/titles/%i/%i/%i",item.GetVideoInfoTag()->m_iIdShow, item.GetVideoInfoTag()->m_iSeason, item.GetVideoInfoTag()->m_iDbId);
       videodatabase.GetTvShowInfo(basePath, *showItem.GetVideoInfoTag(), item.GetVideoInfoTag()->m_iIdShow);
       
       videodatabase.Close();
       
-      CVariant show;
-      show["title"]      = item.GetVideoInfoTag()->m_strShowTitle;
-      show["year"]       = item.GetVideoInfoTag()->GetYear();
-      show["watched_at"] = now.GetAsW3CDateTime(true);
-      show["ids"]        = ParseIds(showItem.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
-      
-      if(item.GetVideoInfoTag()->m_type == MediaTypeSeason)
-      {
-        CVariant season;
-        season["number"] = item.GetVideoInfoTag()->m_iSeason;
-        show["seasons"].push_back(season);
-      }
-      data["shows"].push_back(show);
     }
+    else
+    {
+      if(item.HasProperty("PlexItem"))
+      {
+           
+      }
+      else if (item.HasProperty("EmbyItem"))
+      {
+        CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(item.GetPath());
+        if (client && client->GetPresence())
+        {
+          CVariant paramsseries;
+          std::string seriesId = item.GetProperty("EmbySeriesID").asString();
+          paramsseries = client->FetchItemById(seriesId);
+          CVariant paramsProvID = paramsseries["Items"][0]["ProviderIds"];
+          if (paramsProvID.isObject())
+          {
+            for (CVariant::iterator_map it = paramsProvID.begin_map(); it != paramsProvID.end_map(); it++)
+            {
+              std::string strFirst = it->first;
+              StringUtils::ToLower(strFirst);
+              showItem.GetVideoInfoTag()->SetUniqueID(it->second.asString(),strFirst);
+            }
+          }
+        }
+      }
+    }
+    CVariant show;
+    show["title"]      = item.GetVideoInfoTag()->m_strShowTitle;
+    show["year"]       = item.GetVideoInfoTag()->GetYear();
+    show["watched_at"] = now.GetAsW3CDateTime(true);
+    show["ids"]        = ParseIds(showItem.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
+    
+    if(item.GetVideoInfoTag()->m_type == MediaTypeSeason)
+    {
+      CVariant season;
+      season["number"] = item.GetVideoInfoTag()->m_iSeason;
+      show["seasons"].push_back(season);
+    }
+    data["shows"].push_back(show);
   }
-  else // non mysql/sqlite video.. emby/plex.. etc. but i think taht with minimal checks, we can adapt above to work.
+  else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
   {
+    /// https://api.trakt.tv/shows/top-gear/seasons/24
+    // to get a list of episodes, there we will find what we need
+    
+    std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
+    removeCharsFromString(showName);
+    StringUtils::Replace(showName, " ", "-");
+    std::string showNameT;
+    std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
+    CVariant episodes = GetEmbyCVariant(episodesUrl);
+    CVariant episodeIds;
+    CVariant episode;
+    if (episodes.isArray())
+    {
+      for (CVariant::iterator_array it = episodes.begin_array(); it != episodes.end_array(); it++)
+      {
+        CVariant &episodeItem = *it;
+        if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
+        {
+          episodeIds = episodeItem["ids"];
+          break;
+        }
+      }
+    }
+    episode["watched_at"] = now.GetAsW3CDateTime(true);
+    episode["ids"]        = episodeIds;
+    data["episodes"].push_back(episode);
     
   }
+
   std::string unwatched = watched ? "":"/remove";
   // send it to server
   ServerChat("https://api.trakt.tv/sync/history" + unwatched,data);
@@ -517,63 +542,62 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   CURL url(item.GetURL());
   CVariant data;
   
-  if (!item.IsMediaServiceBased())
+  if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
   {
-    if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
+    /// https://api.trakt.tv/shows/top-gear/seasons/24
+    // to get a list of episodes, there we will find what we need
+    
+    std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
+    removeCharsFromString(showName);
+    StringUtils::Replace(showName, " ", "-");
+    std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
+    CVariant episodes = GetEmbyCVariant(episodesUrl);
+    
+    if (episodes.isArray())
     {
-      /// https://api.trakt.tv/shows/top-gear/seasons/24
-      // to get a list of episodes, there we will find what we need
-      
-      std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
-      removeCharsFromString(showName);
-      StringUtils::Replace(showName, " ", "-");
-      std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
-      CVariant episodes = GetEmbyCVariant(episodesUrl);
-      
-      if (episodes.isArray())
+      for (CVariant::iterator_array it = episodes.begin_array(); it != episodes.end_array(); it++)
       {
-        for (CVariant::iterator_array it = episodes.begin_array(); it != episodes.end_array(); it++)
+        CVariant &episodeItem = *it;
+        if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
         {
-          CVariant &episodeItem = *it;
-          if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
-          {
-            data["episode"] = episodeItem;
-            break;
-          }
+          data["episode"] = episodeItem;
+          break;
         }
       }
-      int percentage = currentSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
-      data["progress"] = percentage;
-      data["app_version"] = CSysInfo::GetVersion();
-      data["app_date"] = CSysInfo::GetBuildDate();
     }
-    else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
-    {
-      /*{
-        "movie": {
-          "title": "Guardians of the Galaxy",
-          "year": 2014,
-          "ids": {
-            "trakt": 28,
-            "slug": "guardians-of-the-galaxy-2014",
-            "imdb": "tt2015381",
-            "tmdb": 118340
-          }
-        },
-        "progress": 75,
-        "app_version": "1.0",
-        "app_date": "2014-09-22"
-      }
-       */
-      data["movie"]["title"] = item.GetVideoInfoTag()->m_strTitle;
-      data["movie"]["year"] = item.GetVideoInfoTag()->GetYear();
-      data["movie"]["ids"] = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
-      int percentage = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
-      data["progress"] = percentage;
-      data["app_version"] = CSysInfo::GetVersion();
-      data["app_date"] = CSysInfo::GetBuildDate();
-    }  
+    int percentage = currentSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
+    data["progress"] = percentage;
+    data["app_version"] = CSysInfo::GetVersion();
+    data["app_date"] = CSysInfo::GetBuildDate();
   }
+  else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
+  {
+    /*{
+      "movie": {
+        "title": "Guardians of the Galaxy",
+        "year": 2014,
+        "ids": {
+          "trakt": 28,
+          "slug": "guardians-of-the-galaxy-2014",
+          "imdb": "tt2015381",
+          "tmdb": 118340
+        }
+      },
+      "progress": 75,
+      "app_version": "1.0",
+      "app_date": "2014-09-22"
+    }
+     */
+    data["movie"]["title"] = item.GetVideoInfoTag()->m_strTitle;
+    data["movie"]["year"] = item.GetVideoInfoTag()->GetYear();
+    data["movie"]["ids"] = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
+    int percentage = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
+    data["progress"] = percentage;
+    data["app_version"] = CSysInfo::GetVersion();
+    data["app_date"] = CSysInfo::GetBuildDate();
+  }  
+
+/*
   else
   {
     /// we are Service, Emby or Plex... plex doesnt have any IMDB ot tvdb info.
@@ -603,7 +627,7 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
 
     }
   }
-  
+*/  
   // now that we have "data" talk to trakt server
   if (!status.empty())
     ServerChat("https://api.trakt.tv/scrobble/" + status,data);
