@@ -152,7 +152,7 @@ CTraktServices& CTraktServices::GetInstance()
 
 bool CTraktServices::IsEnabled()
 {
-  return (!CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN).empty());
+  return !CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN).empty();
 }
 
 void CTraktServices::OnSettingAction(const CSetting *setting)
@@ -218,8 +218,6 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
       default:
         break;
     }
-    
-
   }
   else if ((flag & AnnouncementFlag::Other) && strcmp(sender, "trakt") == 0)
   {
@@ -255,7 +253,6 @@ void CTraktServices::GetUserSettings()
   m_authToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN);
   m_refreshAuthToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSREFRESHTOKEN);
 }
-
 
 bool CTraktServices::MyTraktSignedIn()
 {
@@ -347,7 +344,6 @@ bool CTraktServices::GetSignInPinCode()
     {
       strMessage = "Error extracting AcessToken";
       CLog::Log(LOGERROR, "CTraktServices::FetchSignInPin failed to get authToken");
-      //m_signInByPinCode = "";
       rtn = false;
     }
   }
@@ -432,7 +428,6 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
       
       std::string basePath = StringUtils::Format("videodb://tvshows/titles/%i/%i/%i",item.GetVideoInfoTag()->m_iIdShow, item.GetVideoInfoTag()->m_iSeason, item.GetVideoInfoTag()->m_iDbId);
       videodatabase.GetTvShowInfo(basePath, *showItem.GetVideoInfoTag(), item.GetVideoInfoTag()->m_iIdShow);
-      
       videodatabase.Close();
       
     }
@@ -440,7 +435,8 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
     {
       if(item.HasProperty("PlexItem"))
       {
-           
+           // plex dosnt have any tvdb or imdb IDs so we just send the show name and the season
+          // less reliable but seems to work
       }
       else if (item.HasProperty("EmbyItem"))
       {
@@ -572,22 +568,6 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   }
   else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
   {
-    /*{
-      "movie": {
-        "title": "Guardians of the Galaxy",
-        "year": 2014,
-        "ids": {
-          "trakt": 28,
-          "slug": "guardians-of-the-galaxy-2014",
-          "imdb": "tt2015381",
-          "tmdb": 118340
-        }
-      },
-      "progress": 75,
-      "app_version": "1.0",
-      "app_date": "2014-09-22"
-    }
-     */
     data["movie"]["title"] = item.GetVideoInfoTag()->m_strTitle;
     data["movie"]["year"] = item.GetVideoInfoTag()->GetYear();
     data["movie"]["ids"] = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
@@ -595,39 +575,8 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
     data["progress"] = percentage;
     data["app_version"] = CSysInfo::GetVersion();
     data["app_date"] = CSysInfo::GetBuildDate();
-  }  
-
-/*
-  else
-  {
-    /// we are Service, Emby or Plex... plex doesnt have any IMDB ot tvdb info.
-    /// we need to check for that. more on that later
-    if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
-    {
-      CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url.Get());
-      if (client && client->GetPresence())
-      {
-        CVariant paramsseries;
-        std::string seriesId = item.GetProperty("EmbySeriesID").asString();
-        paramsseries = client->FetchItemById(seriesId);
-        CVariant paramsProvID = paramsseries["Items"][0]["ProviderIds"];
-        if (paramsProvID.isObject())
-        {
-          for (CVariant::iterator_map it = paramsProvID.begin_map(); it != paramsProvID.end_map(); it++)
-          {
-            std::string strFirst = it->first;
-            StringUtils::ToLower(strFirst);
-            item.GetVideoInfoTag()->SetUniqueID(it->second.asString(),strFirst);
-          }
-        }
-      }
-    }
-    else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
-    {
-
-    }
   }
-*/  
+  
   // now that we have "data" talk to trakt server
   if (!status.empty())
     ServerChat("https://api.trakt.tv/scrobble/" + status,data);
