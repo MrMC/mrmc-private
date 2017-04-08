@@ -1,0 +1,695 @@
+/*
+ *      Copyright (C) 2016 Team MrMC
+ *      https://github.com/MrMC
+ *
+ *  This Program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2, or (at your option)
+ *  any later version.
+ *
+ *  This Program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with MrMC; see the file COPYING.  If not, see
+ *  <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include "TraktServices.h"
+
+#include "Application.h"
+#include "URL.h"
+#include "Util.h"
+#include "GUIUserMessages.h"
+#include "cores/VideoRenderers/RenderManager.h"
+#include "cores/VideoRenderers/RenderCapture.h"
+#include "dialogs/GUIDialogKaiToast.h"
+#include "dialogs/GUIDialogSelect.h"
+#include "dialogs/GUIDialogNumeric.h"
+#include "dialogs/GUIDialogProgress.h"
+#include "filesystem/DirectoryCache.h"
+#include "filesystem/StackDirectory.h"
+#include "filesystem/VideoDatabaseDirectory.h"
+#include "filesystem/VideoDatabaseDirectory/QueryParams.h"
+#include "filesystem/ZipFile.h"
+#include "guilib/LocalizeStrings.h"
+#include "guilib/GUIWindowManager.h"
+#include "interfaces/AnnouncementManager.h"
+#include "network/Network.h"
+#include "network/Socket.h"
+#include "network/DNSNameCache.h"
+#include "settings/lib/Setting.h"
+#include "settings/Settings.h"
+#include "profiles/dialogs/GUIDialogLockSettings.h"
+#include "utils/log.h"
+#include "utils/StringUtils.h"
+#include "utils/StringHasher.h"
+#include "utils/JobManager.h"
+
+#include "utils/JSONVariantParser.h"
+#include "utils/JSONVariantWriter.h"
+#include "utils/URIUtils.h"
+#include "utils/Variant.h"
+#include "utils/SystemInfo.h"
+#include "utils/Variant.h"
+
+#include "video/VideoInfoTag.h"
+#include "video/VideoDatabase.h"
+
+#include "music/tags/MusicInfoTag.h"
+
+#include "services/emby/EmbyClient.h"
+#include "services/emby/EmbyServices.h"
+
+
+#include <regex>
+
+static CFileItem m_curItem;
+static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
+
+static char chars[] = "'/!";
+void removeCharsFromString( std::string &str)
+{
+  for ( unsigned int i = 0; i < strlen(chars); ++i ) {
+    str.erase( remove(str.begin(), str.end(), chars[i]), str.end() );
+  }
+}
+
+using namespace ANNOUNCEMENT;
+
+static const std::string NS_TRAKT_CLIENTID("fdf32abb08db6b163f31cb6be8b06ede301b4d883b7c050f88efcd82ca9a2dbc");
+// 3583018b909bc3d47f11c40fdf445c1e58940eb835afbfdd1d22fccbfcc9cffd
+static const std::string NS_TRAKT_CLIENTSECRET("0cb37612e9c2fcdcb22f1dc7504465ebc34c155256c52597c0cd524bc082c7c7");
+
+class CTraktServiceJob: public CJob
+{
+public:
+  CTraktServiceJob(CFileItem &item, double currentTime, std::string strFunction)
+  : m_item(item)
+  , m_function(strFunction)
+  , m_currentTime(currentTime)
+  {
+  }
+  virtual ~CTraktServiceJob()
+  {
+  }
+  virtual bool DoWork()
+  {
+    using namespace StringHasher;
+    switch(mkhash(m_function.c_str()))
+    {
+      case "OnPlay"_mkhash:
+        CTraktServices::SetPlayState(MediaServicesPlayerState::playing);
+        CTraktServices::ReportProgress(m_item,m_currentTime);
+        break;
+      case "OnPause"_mkhash:
+        CTraktServices::SetPlayState(MediaServicesPlayerState::paused);
+        CTraktServices::ReportProgress(m_item,m_currentTime);
+        break;
+      case "OnStop"_mkhash:
+        CTraktServices::SetPlayState(MediaServicesPlayerState::stopped);
+        CTraktServices::ReportProgress(m_item,m_currentTime);
+        break;
+      case "watched"_mkhash:
+      case "unwatched"_mkhash:
+        CTraktServices::SetItemWatchedJob(m_item, (m_function == "watched"));
+        break;
+      default:
+        return false;
+    }
+    return true;
+  }
+  virtual bool operator==(const CJob *job) const
+  {
+    return true;
+  }
+private:
+  CFileItem      m_item;
+  std::string    m_function;
+  double         m_currentTime;
+};
+
+
+CTraktServices::CTraktServices()
+{
+  CAnnouncementManager::GetInstance().AddAnnouncer(this);
+  GetUserSettings();
+}
+
+CTraktServices::~CTraktServices()
+{
+  CAnnouncementManager::GetInstance().RemoveAnnouncer(this);
+}
+
+CTraktServices& CTraktServices::GetInstance()
+{
+  static CTraktServices sTraktServices;
+  return sTraktServices;
+}
+
+bool CTraktServices::IsEnabled()
+{
+  return (!CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN).empty());
+}
+
+void CTraktServices::OnSettingAction(const CSetting *setting)
+{
+  if (setting == nullptr)
+    return;
+
+  bool startThread = false;
+  std::string strMessage;
+  std::string strSignIn = g_localizeStrings.Get(1240);
+  std::string strSignOut = g_localizeStrings.Get(1241);
+  const std::string& settingId = setting->GetId();
+
+  if (settingId == CSettings::SETTING_SERVICES_TRAKTSIGNINPIN)
+  {
+    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN) == strSignIn)
+    {
+      if (GetSignInPinCode())
+      {
+        // change prompt to 'sign-out'
+        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN, strSignOut);
+        CLog::Log(LOGDEBUG, "CTraktServices:OnSettingAction pin sign-in ok");
+        startThread = true;
+      }
+      else
+      {
+        std::string strMessage = "Could not get authToken via pin request sign-in";
+        CLog::Log(LOGERROR, "CTraktServices: %s", strMessage.c_str());
+      }
+    }
+    else
+    {
+      // prompt is 'sign-out'
+      // clear authToken and change prompt to 'sign-in'
+      m_authToken.clear();
+      CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN, strSignIn);
+      CLog::Log(LOGDEBUG, "CTraktServices:OnSettingAction sign-out ok");
+    }
+    SetUserSettings();
+  }
+}
+
+void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data)
+{
+  if (!IsEnabled())
+    return;
+  
+  if ((flag & AnnouncementFlag::Player) && strcmp(sender, "xbmc") == 0)
+  {
+    CFileItem &item = g_application.CurrentFileItem();
+    using namespace StringHasher;
+    switch(mkhash(message))
+    {
+      case "OnPlay"_mkhash:
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, "OnPlay"));
+        break;
+      case "OnPause"_mkhash:
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, "OnPause"));
+        break;
+      case "OnStop"_mkhash:
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, "OnStop"));
+        break;
+      default:
+        break;
+    }
+    
+
+  }
+  else if ((flag & AnnouncementFlag::Other) && strcmp(sender, "trakt") == 0)
+  {
+    if (strcmp(message, "ReloadProfiles") == 0)
+    {
+      // restart if MrMC profiles has changed
+      GetUserSettings();
+    }
+  }
+}
+
+void CTraktServices::OnSettingChanged(const CSetting *setting)
+{
+  // All Trakt settings so far
+  /*
+  static const std::string SETTING_SERVICES_TRAKTSIGNINPIN;
+  static const std::string SETTING_SERVICES_TRAKTACESSTOKEN;
+  */
+
+  if (setting == NULL)
+    return;
+}
+
+void CTraktServices::SetUserSettings()
+{
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN, m_authToken);
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTACESSREFRESHTOKEN, m_refreshAuthToken);
+  CSettings::GetInstance().Save();
+}
+
+void CTraktServices::GetUserSettings()
+{
+  m_authToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN);
+  m_refreshAuthToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSREFRESHTOKEN);
+}
+
+
+bool CTraktServices::MyTraktSignedIn()
+{
+  return !m_authToken.empty();
+}
+
+bool CTraktServices::GetSignInPinCode()
+{
+  // on return, show user m_signInByPinCode so they can enter it at https://emby.media/pin
+  bool rtn = false;
+  std::string strMessage;
+  
+  XFILE::CCurlFile curlfile;
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+  
+  CURL curl("https://trakt.tv");
+  curl.SetFileName("oauth/device/code");
+  curl.SetOption("format", "json");
+  
+  CVariant data;
+  data["client_id"] = NS_TRAKT_CLIENTID;
+  std::string jsonBody;
+  if (!CJSONVariantWriter::Write(data, jsonBody, false))
+    return rtn;
+  std::string response;
+  if (curlfile.Post(curl.Get(), jsonBody, response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyServices:FetchSignInPin %s", response.c_str());
+#endif
+    CVariant reply;
+    std::string verification_url;
+    std::string user_code;
+    int expires_in;
+    int interval;
+    if (!CJSONVariantParser::Parse(response, reply))
+      return rtn;
+    
+    if (!reply.isObject() && !reply.isMember("user_code"))
+      return rtn;
+ 
+    m_deviceCode = reply["device_code"].asString();
+    verification_url = reply["verification_url"].asString();
+    expires_in = reply["expires_in"].asInteger();
+    interval = reply["interval"].asInteger();
+    user_code = reply["user_code"].asString();
+
+    CGUIDialogProgress *waitPinReplyDialog;
+    waitPinReplyDialog = (CGUIDialogProgress*)g_windowManager.GetWindow(WINDOW_DIALOG_PROGRESS);
+    waitPinReplyDialog->SetHeading(g_localizeStrings.Get(2115));
+    waitPinReplyDialog->SetLine(0, g_localizeStrings.Get(2117));
+    std::string prompt = verification_url + g_localizeStrings.Get(2119) + user_code;
+    waitPinReplyDialog->SetLine(1, prompt);
+    
+    waitPinReplyDialog->Open();
+    waitPinReplyDialog->ShowProgressBar(false);
+    
+    CStopWatch dieTimer;
+    dieTimer.StartZero();
+    
+    CStopWatch pingTimer;
+    pingTimer.StartZero();
+    
+    m_authToken.clear();
+    while (!waitPinReplyDialog->IsCanceled())
+    {
+      waitPinReplyDialog->SetPercentage(int(float(dieTimer.GetElapsedSeconds())/float(expires_in)*100));
+      if (pingTimer.GetElapsedSeconds() > interval)
+      {
+        // wait for user to run and enter pin code
+        if (GetSignInByPinReply())
+          break;
+        pingTimer.Reset();
+        m_processSleep.WaitMSec(250);
+        m_processSleep.Reset();
+      }
+      
+      if (dieTimer.GetElapsedSeconds() > expires_in)
+      {
+        rtn = false;
+        break;
+      }
+      waitPinReplyDialog->Progress();
+    }
+    waitPinReplyDialog->Close();
+    
+    if (m_authToken.empty())
+    {
+      strMessage = "Error extracting AcessToken";
+      CLog::Log(LOGERROR, "CTraktServices::FetchSignInPin failed to get authToken");
+      //m_signInByPinCode = "";
+      rtn = false;
+    }
+  }
+  else
+  {
+    strMessage = "Could not connect to retreive AuthToken";
+    CLog::Log(LOGERROR, "CTraktServices::FetchSignInPin failed %s", response.c_str());
+  }
+  if (!rtn)
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, "Emby Services", strMessage, 3000, true);
+  return rtn;
+}
+
+bool CTraktServices::GetSignInByPinReply()
+{
+  bool rtn = false;
+  
+  XFILE::CCurlFile curlfile;
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+  
+  CURL curl("https://trakt.tv");
+  curl.SetFileName("oauth/device/token");
+  curl.SetOption("format", "json");
+  
+  CVariant data;
+  data["code"] = m_deviceCode;
+  data["client_id"] = NS_TRAKT_CLIENTID;
+  data["client_secret"] = NS_TRAKT_CLIENTSECRET;
+  std::string jsondata;
+  if (!CJSONVariantWriter::Write(data, jsondata, false))
+    return rtn;
+  std::string response;
+  if (curlfile.Post(curl.Get(), jsondata, response))
+  {
+#if defined(EMBY_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CEmbyServices:AuthenticatePinReply %s", response.c_str());
+#endif
+    CVariant reply;
+    if (!CJSONVariantParser::Parse(response, reply))
+      return rtn;
+    if (reply.isObject() && reply.isMember("access_token"))
+    {
+      m_authToken = reply["access_token"].asString();
+      m_refreshAuthToken = reply["refresh_token"].asString();
+      rtn = true;
+    }
+  }
+  return rtn;
+}
+
+void CTraktServices::SetItemWatched(CFileItem &item, bool watched)
+{
+  AddJob(new CTraktServiceJob(item, 0, watched ? "watched":"unwatched"));
+}
+
+void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
+{
+  CVariant data;
+  CDateTime now = CDateTime::GetUTCDateTime();
+  if (!item.IsMediaServiceBased())
+  {
+    if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
+    {
+      /// https://api.trakt.tv/shows/top-gear/seasons/24
+      // to get a list of episodes, there we will find what we need
+      
+      std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
+      removeCharsFromString(showName);
+      StringUtils::Replace(showName, " ", "-");
+      std::string showNameT;
+      std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
+      CVariant episodes = GetEmbyCVariant(episodesUrl);
+      CVariant episodeIds;
+      CVariant episode;
+      if (episodes.isArray())
+      {
+        for (CVariant::iterator_array it = episodes.begin_array(); it != episodes.end_array(); it++)
+        {
+          CVariant &episodeItem = *it;
+          if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
+          {
+            episodeIds = episodeItem["ids"];
+            break;
+          }
+        }
+      }
+      episode["watched_at"] = now.GetAsW3CDateTime(true);
+      episode["ids"]        = episodeIds;
+      data["episodes"].push_back(episode);
+      
+    }
+    else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
+    {
+      std::string timenow = now.GetAsW3CDateTime(true);
+      CVariant movie;
+      
+      movie["title"]      = item.GetVideoInfoTag()->m_strTitle;
+      movie["year"]       = item.GetVideoInfoTag()->GetYear();
+      movie["watched_at"] = now.GetAsW3CDateTime(true);
+      movie["ids"]        = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
+      data["movies"].push_back(movie);
+    }
+    else if (item.HasVideoInfoTag() &&
+             (item.GetVideoInfoTag()->m_type == MediaTypeTvShow || item.GetVideoInfoTag()->m_type == MediaTypeSeason))
+    {
+      
+      CVideoDatabase videodatabase;
+      if (!videodatabase.Open())
+        return;
+      CFileItem showItem;
+      std::string basePath = StringUtils::Format("videodb://tvshows/titles/%i/%i/%i",item.GetVideoInfoTag()->m_iIdShow, item.GetVideoInfoTag()->m_iSeason, item.GetVideoInfoTag()->m_iDbId);
+      videodatabase.GetTvShowInfo(basePath, *showItem.GetVideoInfoTag(), item.GetVideoInfoTag()->m_iIdShow);
+      
+      videodatabase.Close();
+      
+      CVariant show;
+      show["title"]      = item.GetVideoInfoTag()->m_strShowTitle;
+      show["year"]       = item.GetVideoInfoTag()->GetYear();
+      show["watched_at"] = now.GetAsW3CDateTime(true);
+      show["ids"]        = ParseIds(showItem.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
+      
+      if(item.GetVideoInfoTag()->m_type == MediaTypeSeason)
+      {
+        CVariant season;
+        season["number"] = item.GetVideoInfoTag()->m_iSeason;
+        show["seasons"].push_back(season);
+      }
+      data["shows"].push_back(show);
+    }
+  }
+  else // non mysql/sqlite video.. emby/plex.. etc. but i think taht with minimal checks, we can adapt above to work.
+  {
+    
+  }
+  std::string unwatched = watched ? "":"/remove";
+  // send it to server
+  ServerChat("https://api.trakt.tv/sync/history" + unwatched,data);
+}
+
+void CTraktServices::SetWatched(CFileItem &item)
+{
+
+}
+
+void CTraktServices::SetUnWatched(CFileItem &item)
+{
+  
+}
+
+void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
+{
+  // if we are music, do not report
+  if (item.IsAudio())
+    return;
+  
+  CLog::Log(LOGDEBUG, "CEmbyUtils::ReportProgress - IMDB %s", item.GetVideoInfoTag()->GetUniqueID("imdb").c_str());
+  
+  std::string status;
+  if (g_playbackState == MediaServicesPlayerState::playing )
+    status = "start";
+  else if (g_playbackState == MediaServicesPlayerState::paused )
+    status = "pause";
+  else if (g_playbackState == MediaServicesPlayerState::stopped)
+    status = "stop";
+  
+  CURL url(item.GetURL());
+  CVariant data;
+  
+  if (!item.IsMediaServiceBased())
+  {
+    if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
+    {
+      /// https://api.trakt.tv/shows/top-gear/seasons/24
+      // to get a list of episodes, there we will find what we need
+      
+      std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
+      removeCharsFromString(showName);
+      StringUtils::Replace(showName, " ", "-");
+      std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
+      CVariant episodes = GetEmbyCVariant(episodesUrl);
+      
+      if (episodes.isArray())
+      {
+        for (CVariant::iterator_array it = episodes.begin_array(); it != episodes.end_array(); it++)
+        {
+          CVariant &episodeItem = *it;
+          if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
+          {
+            data["episode"] = episodeItem;
+            break;
+          }
+        }
+      }
+      int percentage = currentSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
+      data["progress"] = percentage;
+      data["app_version"] = CSysInfo::GetVersion();
+      data["app_date"] = CSysInfo::GetBuildDate();
+    }
+    else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
+    {
+      /*{
+        "movie": {
+          "title": "Guardians of the Galaxy",
+          "year": 2014,
+          "ids": {
+            "trakt": 28,
+            "slug": "guardians-of-the-galaxy-2014",
+            "imdb": "tt2015381",
+            "tmdb": 118340
+          }
+        },
+        "progress": 75,
+        "app_version": "1.0",
+        "app_date": "2014-09-22"
+      }
+       */
+      data["movie"]["title"] = item.GetVideoInfoTag()->m_strTitle;
+      data["movie"]["year"] = item.GetVideoInfoTag()->GetYear();
+      data["movie"]["ids"] = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
+      int percentage = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
+      data["progress"] = percentage;
+      data["app_version"] = CSysInfo::GetVersion();
+      data["app_date"] = CSysInfo::GetBuildDate();
+    }  
+  }
+  else
+  {
+    /// we are Service, Emby or Plex... plex doesnt have any IMDB ot tvdb info.
+    /// we need to check for that. more on that later
+    if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
+    {
+      CEmbyClientPtr client = CEmbyServices::GetInstance().FindClient(url.Get());
+      if (client && client->GetPresence())
+      {
+        CVariant paramsseries;
+        std::string seriesId = item.GetProperty("EmbySeriesID").asString();
+        paramsseries = client->FetchItemById(seriesId);
+        CVariant paramsProvID = paramsseries["Items"][0]["ProviderIds"];
+        if (paramsProvID.isObject())
+        {
+          for (CVariant::iterator_map it = paramsProvID.begin_map(); it != paramsProvID.end_map(); it++)
+          {
+            std::string strFirst = it->first;
+            StringUtils::ToLower(strFirst);
+            item.GetVideoInfoTag()->SetUniqueID(it->second.asString(),strFirst);
+          }
+        }
+      }
+    }
+    else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
+    {
+
+    }
+  }
+  
+  // now that we have "data" talk to trakt server
+  if (!status.empty())
+    ServerChat("https://api.trakt.tv/scrobble/" + status,data);
+}
+
+void CTraktServices::SetPlayState(MediaServicesPlayerState state)
+{
+  g_playbackState = state;
+}
+
+CVariant CTraktServices::ParseIds(std::map<std::string, std::string> Ids, std::string type)
+{
+  CVariant variantIDs;
+ // for (int i = 0; i < Ids.size(); ++i)
+  for (std::map<std::string, std::string>::const_iterator i = Ids.begin(); i != Ids.end(); ++i)
+  {
+    if (i->first == "unknown")
+    {
+      std::string id = i->second;
+      if (StringUtils::StartsWithNoCase(id, "tt"))
+        variantIDs["imdb"] = id;
+      else if (isdigit(*id.c_str()) && type == MediaTypeMovie)
+        variantIDs["tmdb"] = atoi(id.c_str());
+      else if (isdigit(*id.c_str()) && (type == MediaTypeEpisode || type == MediaTypeSeason || type == MediaTypeTvShow))
+        variantIDs["tvdb"] = atoi(id.c_str());
+      else
+        variantIDs["slug"] = id;
+    }
+    else
+      variantIDs[i->first] = i->second;
+  }
+  return variantIDs;
+}
+
+CVariant CTraktServices::GetEmbyCVariant(std::string url)
+{
+  
+  XFILE::CCurlFile trakt;
+  trakt.SetRequestHeader("Cache-Control", "no-cache");
+  trakt.SetRequestHeader("Content-Type", "application/json");
+  trakt.SetRequestHeader("Accept-Encoding", "gzip");
+  trakt.SetRequestHeader("trakt-api-version", "2");
+  trakt.SetRequestHeader("trakt-api-key", NS_TRAKT_CLIENTID);
+  
+  CURL curl(url);
+  // this is key to get back gzip encoded content
+  curl.SetProtocolOption("seekable", "0");
+  // we always want json back
+  curl.SetProtocolOptions(curl.GetProtocolOptions() + "&format=json");
+  std::string response;
+  if (trakt.Get(curl.Get(), response))
+  {
+    if (trakt.GetContentEncoding() == "gzip")
+    {
+      std::string buffer;
+      if (XFILE::CZipFile::DecompressGzip(response, buffer))
+        response = std::move(buffer);
+      else
+        return CVariant(CVariant::VariantTypeNull);
+    }
+    CVariant resultObject;
+    if (CJSONVariantParser::Parse(response, resultObject))
+    {
+      if (resultObject.isObject() || resultObject.isArray())
+        return resultObject;
+    }
+  }
+  return CVariant(CVariant::VariantTypeNull);
+}
+
+void CTraktServices::ServerChat(std::string url, CVariant data)
+{
+  XFILE::CCurlFile curlfile;
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+  curlfile.SetRequestHeader("trakt-api-version", "2");
+  curlfile.SetRequestHeader("trakt-api-key", NS_TRAKT_CLIENTID);
+  curlfile.SetRequestHeader("Authorization", "Bearer " + CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN));
+  
+  CURL curl(url);
+  
+  std::string jsondata;
+  if (!CJSONVariantWriter::Write(data, jsondata, false))
+    return;
+  std::string response;
+  curlfile.Post(curl.Get(), jsondata, response);
+  CLog::Log(LOGDEBUG, "CTraktServices::ServerChat - response %s", response.c_str());
+}
+

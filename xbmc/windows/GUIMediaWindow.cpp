@@ -59,6 +59,7 @@
 #include "settings/AdvancedSettings.h"
 #include "settings/Settings.h"
 #include "services/ServicesManager.h"
+#include "services/trakt/TraktServices.h"
 #include "storage/MediaManager.h"
 #include "threads/SystemClock.h"
 #include "utils/FileUtils.h"
@@ -1607,6 +1608,10 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
   case CONTEXT_BUTTON_MARK_UNWATCHED:
     {
       CFileItemPtr item = m_vecItems->Get(itemNumber);
+      
+      if (CTraktServices().GetInstance().IsEnabled())
+        CTraktServices().GetInstance().SetItemWatched(*item.get(),(button == CONTEXT_BUTTON_MARK_WATCHED));
+      
       if (item->IsMediaServiceBased())
       {
         if (button == CONTEXT_BUTTON_MARK_WATCHED)

@@ -2360,6 +2360,38 @@
         </setting>
       </group>
     </category>
+    <category id="trakt" label="2120" help="2121">
+      <group id="1">
+        <setting id="trakt.signinpin" type="string" label="2122" help="2123">
+          <level>0</level>
+          <default>Sign-in</default>
+          <dependencies>
+            <dependency type="enable">
+              <condition on="property" name="traktsigninpin" setting="trakt.signinpin" />
+            </dependency>
+          </dependencies>
+          <control type="button" format="action"/>
+        </setting>
+        <setting id="trakt.accesstoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="trakt.accessrefreshtoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+      </group>
+    </category>
     <category id="smb" label="1200" help="36346">
       <group id="1">
         <setting id="smb.winsserver" type="string" label="1207" help="36347">

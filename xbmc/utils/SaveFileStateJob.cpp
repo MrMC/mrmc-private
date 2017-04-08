@@ -36,6 +36,7 @@
 #include "music/MusicDatabase.h"
 #include "cores/AudioEngine/DSPAddons/ActiveAEDSP.h"
 #include "services/ServicesManager.h"
+#include "services/trakt/TraktServices.h"
 
 bool CSaveFileStateJob::DoWork()
 {
@@ -245,6 +246,12 @@ bool CSaveFileStateJob::DoWork()
         audiodatabase.Close();
       }
     }
+  }
+  
+  if (CTraktServices::GetInstance().IsEnabled())
+  {
+    CTraktServices::GetInstance().SetPlayState(MediaServicesPlayerState::stopped);
+    CTraktServices::GetInstance().ReportProgress(m_item, m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
   }
   return true;
 }
