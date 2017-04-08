@@ -5072,7 +5072,32 @@ msgctxt "#2118"
 msgid "https://emby.media/pin and enter this code -> "
 msgstr ""
 
-#empty strings from id 2119 to 9999
+#: system/settings/settings.xml
+msgctxt "#2119"
+msgid " and enter this code -> "
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2120"
+msgid "Trakt.tv client"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2121"
+msgid "Enable Trakt.tv server sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2122"
+msgid "Trakt.tv Pin Request Sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#2123"
+msgid "Trakt.tv Pin Request Sign-in (via https://trakt.tv/activate)"
+msgstr ""
+
+#empty strings from id 2124 to 9999
 
 #: xbmc/guilib/WindowIDs.h
 msgctxt "#10000"
