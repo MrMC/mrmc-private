@@ -102,6 +102,7 @@ public:
     switch(mkhash(m_function.c_str()))
     {
       case "OnPlay"_mkhash:
+      case "OnSeek"_mkhash:
         CTraktServices::SetPlayState(MediaServicesPlayerState::playing);
         CTraktServices::ReportProgress(m_item,m_currentTime);
         break;
@@ -207,13 +208,10 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
     switch(mkhash(message))
     {
       case "OnPlay"_mkhash:
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, "OnPlay"));
-        break;
       case "OnPause"_mkhash:
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, "OnPause"));
-        break;
       case "OnStop"_mkhash:
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, "OnStop"));
+      case "OnSeek"_mkhash:
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, message));
         break;
       default:
         break;
@@ -538,6 +536,22 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   CURL url(item.GetURL());
   CVariant data;
   
+  int percentage;
+  if (g_application.m_pPlayer->GetTotalTime())
+  {
+    int totalTime = g_application.m_pPlayer->GetTotalTime()/1000;
+    int currentTime = g_application.m_pPlayer->GetTime()/1000;
+    percentage = currentTime * 100 / totalTime;
+  }
+  else
+  {
+    percentage = currentSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
+  }
+  
+  // if percentage < 0, do not report it
+  if (percentage < 0)
+    return;
+  
   if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
   {
     /// https://api.trakt.tv/shows/top-gear/seasons/24
@@ -561,7 +575,6 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
         }
       }
     }
-    int percentage = currentSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
     data["progress"] = percentage;
     data["app_version"] = CSysInfo::GetVersion();
     data["app_date"] = CSysInfo::GetBuildDate();
@@ -571,7 +584,6 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
     data["movie"]["title"] = item.GetVideoInfoTag()->m_strTitle;
     data["movie"]["year"] = item.GetVideoInfoTag()->GetYear();
     data["movie"]["ids"] = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
-    int percentage = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
     data["progress"] = percentage;
     data["app_version"] = CSysInfo::GetVersion();
     data["app_date"] = CSysInfo::GetBuildDate();
