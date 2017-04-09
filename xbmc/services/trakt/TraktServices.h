@@ -25,6 +25,8 @@
 #include "interfaces/IAnnouncer.h"
 #include "utils/JobManager.h"
 
+#define TRAKT_DEBUG_VERBOSE
+
 class CTraktServices
 : public CJobQueue
 , public ISettingCallback
@@ -66,7 +68,7 @@ private:
   bool              GetSignInPinCode();
   bool              GetSignInByPinReply();
   static CVariant   ParseIds(std::map<std::string, std::string> Ids, std::string type);
-  static CVariant   GetEmbyCVariant(std::string url);
+  static CVariant   GetTraktCVariant(std::string url);
   static void       ServerChat(std::string url, CVariant data);
   static void       SetItemWatchedJob(CFileItem &item, bool watched);
 

@@ -255,8 +255,8 @@ bool CTraktServices::GetSignInPinCode()
   std::string response;
   if (curlfile.Post(curl.Get(), jsonBody, response))
   {
-#if defined(EMBY_DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "CEmbyServices:FetchSignInPin %s", response.c_str());
+#if defined(TRAKT_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CTraktServices:FetchSignInPin %s", response.c_str());
 #endif
     CVariant reply;
     std::string verification_url;
@@ -298,7 +298,8 @@ bool CTraktServices::GetSignInPinCode()
       if (pingTimer.GetElapsedSeconds() > interval)
       {
         // wait for user to run and enter pin code
-        if (GetSignInByPinReply())
+        rtn = GetSignInByPinReply();
+        if (rtn)
           break;
         pingTimer.Reset();
         m_processSleep.WaitMSec(250);
@@ -338,6 +339,7 @@ bool CTraktServices::GetSignInByPinReply()
   XFILE::CCurlFile curlfile;
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
+  curlfile.SetSilent(true);
   
   CURL curl("https://trakt.tv");
   curl.SetFileName("oauth/device/token");
@@ -353,8 +355,8 @@ bool CTraktServices::GetSignInByPinReply()
   std::string response;
   if (curlfile.Post(curl.Get(), jsondata, response))
   {
-#if defined(EMBY_DEBUG_VERBOSE)
-    CLog::Log(LOGDEBUG, "CEmbyServices:AuthenticatePinReply %s", response.c_str());
+#if defined(TRAKT_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CTraktServices:AuthenticatePinReply %s", response.c_str());
 #endif
     CVariant reply;
     if (!CJSONVariantParser::Parse(response, reply))
@@ -457,7 +459,7 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
     StringUtils::Replace(showName, " ", "-");
     std::string showNameT;
     std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
-    CVariant episodes = GetEmbyCVariant(episodesUrl);
+    CVariant episodes = GetTraktCVariant(episodesUrl);
     CVariant episodeIds;
     CVariant episode;
     if (episodes.isArray())
@@ -539,7 +541,7 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
     removeCharsFromString(showName);
     StringUtils::Replace(showName, " ", "-");
     std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
-    CVariant episodes = GetEmbyCVariant(episodesUrl);
+    CVariant episodes = GetTraktCVariant(episodesUrl);
     
     if (episodes.isArray())
     {
@@ -601,7 +603,7 @@ CVariant CTraktServices::ParseIds(std::map<std::string, std::string> Ids, std::s
   return variantIDs;
 }
 
-CVariant CTraktServices::GetEmbyCVariant(std::string url)
+CVariant CTraktServices::GetTraktCVariant(std::string url)
 {
   
   XFILE::CCurlFile trakt;
