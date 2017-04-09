@@ -40,6 +40,11 @@
 
 bool CSaveFileStateJob::DoWork()
 {
+  if (CTraktServices::GetInstance().IsEnabled())
+  {
+    CTraktServices::GetInstance().UpdateItemState(m_item, m_bookmark.timeInSeconds);
+  }
+
   // if its serivces item, skip database update for it
   if (m_item.IsMediaServiceBased())
   {
@@ -246,13 +251,6 @@ bool CSaveFileStateJob::DoWork()
         audiodatabase.Close();
       }
     }
-  }
-  
-  if (CTraktServices::GetInstance().IsEnabled())
-  {
-    CTraktServices::GetInstance().SetPlayState(MediaServicesPlayerState::stopped);
-    m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
-    CTraktServices::GetInstance().ReportProgress(m_item, m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
   }
   return true;
 }

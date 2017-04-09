@@ -53,6 +53,7 @@ public:
   void        SetItemUnWatched(CFileItem &item);
   void        UpdateItemState(CFileItem &item, double currentTime);
 
+protected:
   static void ReportProgress(CFileItem &item, double currentSeconds);
   static void SetPlayState(MediaServicesPlayerState state);
 
