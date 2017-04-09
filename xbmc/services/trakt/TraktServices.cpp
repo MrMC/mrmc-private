@@ -64,11 +64,10 @@ static const std::string NS_TRAKT_CLIENTSECRET("0cb37612e9c2fcdcb22f1dc7504465eb
 class CTraktServiceJob: public CJob
 {
 public:
-  CTraktServiceJob(CFileItem &item, double currentTime, double totalTime, std::string strFunction)
+  CTraktServiceJob(CFileItem &item, int percentage, std::string strFunction)
   : m_item(item)
   , m_function(strFunction)
-  , m_totalTime(totalTime)
-  , m_currentTime(currentTime)
+  , m_percentage(percentage)
   {
   }
   virtual ~CTraktServiceJob()
@@ -82,21 +81,21 @@ public:
       case "OnPlay"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPlay currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::playing);
-        CTraktServices::ReportProgress(m_item, m_currentTime, m_totalTime);
+        CTraktServices::ReportProgress(m_item, m_percentage);
         break;
       case "OnSeek"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnSeek currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::seeking);
-        CTraktServices::ReportProgress(m_item, m_currentTime, m_totalTime);
+        CTraktServices::ReportProgress(m_item, m_percentage);
         break;
       case "OnPause"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPause currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::paused);
-        CTraktServices::ReportProgress(m_item, m_currentTime, m_totalTime);
+        CTraktServices::ReportProgress(m_item, m_percentage);
         break;
       case "TraktSetStopped"_mkhash:
         CTraktServices::SetPlayState(MediaServicesPlayerState::stopped);
-        CTraktServices::ReportProgress(m_item, m_currentTime, m_totalTime);
+        CTraktServices::ReportProgress(m_item, m_percentage);
         break;
       case "TraktSetWatched"_mkhash:
         CTraktServices::SetItemWatchedJob(m_item, true);
@@ -116,7 +115,7 @@ public:
 private:
   CFileItem      m_item;
   std::string    m_function;
-  double         m_totalTime;
+  int            m_percentage;
   double         m_currentTime;
 };
 
@@ -190,7 +189,7 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
   
   if ((flag & AnnouncementFlag::Player) && strcmp(sender, "xbmc") == 0)
   {
-    double totalSeconds, currentSeconds;
+    int percentage;
     CFileItem &item = g_application.CurrentFileItem();
     using namespace StringHasher;
     switch(mkhash(message))
@@ -203,30 +202,22 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
         // So we track the state internally and fetch the correct play time.
         // Note: m_resumePoint is ONLY good for playback startup.
         if (g_playbackState == MediaServicesPlayerState::paused)
-        {
-          currentSeconds = g_application.GetTime();
-          totalSeconds = g_application.GetTotalTime();
-        }
+          percentage = 100.0 * g_application.GetTime() / g_application.GetTotalTime();
         else
-        {
-          currentSeconds = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds;
-          totalSeconds = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
-        }
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPlay currentSeconds = %f", currentSeconds);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), currentSeconds, totalSeconds, message));
+          percentage = 100.0 * item.GetVideoInfoTag()->m_resumePoint.timeInSeconds / item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPlay currentSeconds = %d", percentage);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), percentage, message));
         break;
       case "OnPause"_mkhash:
-        currentSeconds = g_application.GetTime();
-        totalSeconds = g_application.GetTotalTime();
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPause currentSeconds = %f", currentSeconds);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), currentSeconds, totalSeconds, message));
+        percentage = 100.0 * g_application.GetTime() / g_application.GetTotalTime();
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPause currentSeconds = %d", percentage);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), percentage, message));
         break;
       case "OnSeek"_mkhash:
         // Ahh, finally someone actually gives us the right playtime.
-        currentSeconds = JSONRPC::CJSONUtils::TimeObjectToMilliseconds(data["player"]["time"]);
-        totalSeconds = g_application.GetTotalTime();
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnSeek currentSeconds = %f", currentSeconds);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), currentSeconds, totalSeconds, message));
+        percentage = 100.0 * JSONRPC::CJSONUtils::TimeObjectToMilliseconds(data["player"]["time"]) / g_application.GetTotalTime();
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnSeek currentSeconds = %d", percentage);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), percentage, message));
         break;
       default:
         break;
@@ -521,21 +512,21 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
 
 void CTraktServices::SetItemWatched(CFileItem &item)
 {
-  AddJob(new CTraktServiceJob(item, 0, 0, "TraktSetWatched"));
+  AddJob(new CTraktServiceJob(item, 100, "TraktSetWatched"));
 }
 
 void CTraktServices::SetItemUnWatched(CFileItem &item)
 {
-  AddJob(new CTraktServiceJob(item, 0, 0, "TraktSetUnWatched"));
+  AddJob(new CTraktServiceJob(item, 0, "TraktSetUnWatched"));
 }
 
-void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds, double totalSeconds)
+void CTraktServices::ReportProgress(CFileItem &item, int percentage)
 {
   // if we are music, do not report
   if (item.IsAudio())
     return;
 
-  CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress1 status = %d, currentTime = %f", g_playbackState, currentSeconds);
+  CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress1 status = %d, percentage = %d", g_playbackState, percentage);
 
   if (g_playbackStateOld == g_playbackState)
     return;
@@ -562,10 +553,9 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds, doub
 
   if (!status.empty())
   {
-    CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress2 status = %s, currentTime = %f", status.c_str(), currentSeconds);
+    CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress2 status = %s, percentage = %d", status.c_str(), percentage);
 
     CVariant data;
-    int percentage = 100.0 * currentSeconds / totalSeconds;
     if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
     {
       /// https://api.trakt.tv/shows/top-gear/seasons/24
@@ -621,7 +611,8 @@ void CTraktServices::SetPlayState(MediaServicesPlayerState state)
 
 void CTraktServices::SaveFileState(CFileItem &item, double currentTime, double totalTime)
 {
-  AddJob(new CTraktServiceJob(item, currentTime, totalTime, "TraktSetStopped"));
+  int percentage = 100.0 * g_application.GetTime() / g_application.GetTotalTime();
+  AddJob(new CTraktServiceJob(item, percentage, "TraktSetStopped"));
 }
 
 CVariant CTraktServices::ParseIds(const std::map<std::string, std::string> &Ids, const std::string &type)

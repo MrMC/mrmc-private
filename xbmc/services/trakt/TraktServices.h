@@ -54,7 +54,7 @@ public:
   void              SaveFileState(CFileItem &item, double currentTime, double totalTime);
 
 protected:
-  static void       ReportProgress(CFileItem &item, double currentSeconds, double totalSeconds);
+  static void       ReportProgress(CFileItem &item, int percentage);
   static void       SetPlayState(MediaServicesPlayerState state);
 
 private:
