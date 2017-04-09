@@ -502,7 +502,7 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
     return;
   
   // we need to sleep a bit to let the player settle, times are all over the place
-  // since we are a job, this shoudl not be too bad
+  // since we are a job, this should not be too bad
   Sleep(2000);
   
   std::string status;
