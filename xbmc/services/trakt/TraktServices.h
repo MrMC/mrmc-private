@@ -40,22 +40,22 @@ public:
   virtual ~CTraktServices();
   static CTraktServices &GetInstance();
 
-  bool IsEnabled();
+  bool              IsEnabled();
 
   // ISettingCallback
-  virtual void OnSettingAction(const CSetting *setting) override;
-  virtual void OnSettingChanged(const CSetting *setting) override;
+  virtual void      OnSettingAction(const CSetting *setting) override;
+  virtual void      OnSettingChanged(const CSetting *setting) override;
 
   // IAnnouncer callbacks
-  virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
+  virtual void      Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
   
-  void        SetItemWatched(CFileItem &item);
-  void        SetItemUnWatched(CFileItem &item);
-  void        SaveFileState(CFileItem &item, double currentTime);
+  void              SetItemWatched(CFileItem &item);
+  void              SetItemUnWatched(CFileItem &item);
+  void              SaveFileState(CFileItem &item, double currentTime, double totalTime);
 
 protected:
-  static void ReportProgress(CFileItem &item, double currentSeconds);
-  static void SetPlayState(MediaServicesPlayerState state);
+  static void       ReportProgress(CFileItem &item, double currentSeconds, double totalSeconds);
+  static void       SetPlayState(MediaServicesPlayerState state);
 
 private:
   // private construction, and no assignements; use the provided singleton methods
@@ -65,13 +65,11 @@ private:
   void              GetUserSettings();
   bool              MyTraktSignedIn();
 
-  bool              GetTraktToken(std::string user, std::string pass);
- // bool              GetMyTraktServers(bool includeHttps);
   bool              GetSignInPinCode();
   bool              GetSignInByPinReply();
-  static CVariant   ParseIds(std::map<std::string, std::string> Ids, std::string type);
-  static CVariant   GetTraktCVariant(std::string url);
-  static void       ServerChat(std::string url, CVariant data);
+  static CVariant   ParseIds(const std::map<std::string, std::string> &Ids, const std::string &type);
+  static CVariant   GetTraktCVariant(const std::string &url);
+  static void       ServerChat(const std::string &url, const CVariant &data);
   static void       SetItemWatchedJob(CFileItem &item, bool watched);
 
 

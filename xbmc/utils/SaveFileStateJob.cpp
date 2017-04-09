@@ -40,9 +40,14 @@
 
 bool CSaveFileStateJob::DoWork()
 {
-  if (CTraktServices::GetInstance().IsEnabled())
+  if (!m_item.GetPath().empty() && CTraktServices::GetInstance().IsEnabled())
   {
-    CTraktServices::GetInstance().SaveFileState(m_item, m_bookmark.timeInSeconds);
+    if (m_bookmark.timeInSeconds >= 0)
+      CTraktServices::GetInstance().SaveFileState(
+        m_item, m_bookmark.timeInSeconds, m_bookmark.totalTimeInSeconds);
+    else
+      CTraktServices::GetInstance().SaveFileState(m_item,
+        m_item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds, m_item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds);
   }
 
   // if its serivces item, skip database update for it

@@ -64,9 +64,10 @@ static const std::string NS_TRAKT_CLIENTSECRET("0cb37612e9c2fcdcb22f1dc7504465eb
 class CTraktServiceJob: public CJob
 {
 public:
-  CTraktServiceJob(CFileItem &item, double currentTime, std::string strFunction)
+  CTraktServiceJob(CFileItem &item, double currentTime, double totalTime, std::string strFunction)
   : m_item(item)
   , m_function(strFunction)
+  , m_totalTime(totalTime)
   , m_currentTime(currentTime)
   {
   }
@@ -81,21 +82,21 @@ public:
       case "OnPlay"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPlay currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::playing);
-        CTraktServices::ReportProgress(m_item, m_currentTime);
+        CTraktServices::ReportProgress(m_item, m_currentTime, m_totalTime);
         break;
       case "OnSeek"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnSeek currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::seeking);
-        CTraktServices::ReportProgress(m_item, m_currentTime);
+        CTraktServices::ReportProgress(m_item, m_currentTime, m_totalTime);
         break;
       case "OnPause"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPause currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::paused);
-        CTraktServices::ReportProgress(m_item, m_currentTime);
+        CTraktServices::ReportProgress(m_item, m_currentTime, m_totalTime);
         break;
       case "TraktSetStopped"_mkhash:
         CTraktServices::SetPlayState(MediaServicesPlayerState::stopped);
-        CTraktServices::ReportProgress(m_item, m_currentTime);
+        CTraktServices::ReportProgress(m_item, m_currentTime, m_totalTime);
         break;
       case "TraktSetWatched"_mkhash:
         CTraktServices::SetItemWatchedJob(m_item, true);
@@ -115,6 +116,7 @@ public:
 private:
   CFileItem      m_item;
   std::string    m_function;
+  double         m_totalTime;
   double         m_currentTime;
 };
 
@@ -188,7 +190,7 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
   
   if ((flag & AnnouncementFlag::Player) && strcmp(sender, "xbmc") == 0)
   {
-    double seconds;
+    double totalSeconds, currentSeconds;
     CFileItem &item = g_application.CurrentFileItem();
     using namespace StringHasher;
     switch(mkhash(message))
@@ -201,22 +203,30 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
         // So we track the state internally and fetch the correct play time.
         // Note: m_resumePoint is ONLY good for playback startup.
         if (g_playbackState == MediaServicesPlayerState::paused)
-          seconds = g_application.GetTime();
+        {
+          currentSeconds = g_application.GetTime();
+          totalSeconds = g_application.GetTotalTime();
+        }
         else
-          seconds = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds;
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPlay currentTime = %f", seconds);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), seconds, message));
+        {
+          currentSeconds = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds;
+          totalSeconds = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
+        }
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPlay currentSeconds = %f", currentSeconds);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), currentSeconds, totalSeconds, message));
         break;
       case "OnPause"_mkhash:
-        seconds = g_application.GetTime();
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPause currentTime = %f", seconds);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), seconds, message));
+        currentSeconds = g_application.GetTime();
+        totalSeconds = g_application.GetTotalTime();
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPause currentSeconds = %f", currentSeconds);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), currentSeconds, totalSeconds, message));
         break;
       case "OnSeek"_mkhash:
         // Ahh, finally someone actually gives us the right playtime.
-        seconds = JSONRPC::CJSONUtils::TimeObjectToMilliseconds(data["player"]["time"]);
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnSeek currentTime = %f", seconds);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), seconds, message));
+        currentSeconds = JSONRPC::CJSONUtils::TimeObjectToMilliseconds(data["player"]["time"]);
+        totalSeconds = g_application.GetTotalTime();
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnSeek currentSeconds = %f", currentSeconds);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), currentSeconds, totalSeconds, message));
         break;
       default:
         break;
@@ -511,15 +521,15 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
 
 void CTraktServices::SetItemWatched(CFileItem &item)
 {
-  AddJob(new CTraktServiceJob(item, 0, "TraktSetWatched"));
+  AddJob(new CTraktServiceJob(item, 0, 0, "TraktSetWatched"));
 }
 
 void CTraktServices::SetItemUnWatched(CFileItem &item)
 {
-  AddJob(new CTraktServiceJob(item, 0, "TraktSetUnWatched"));
+  AddJob(new CTraktServiceJob(item, 0, 0, "TraktSetUnWatched"));
 }
 
-void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
+void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds, double totalSeconds)
 {
   // if we are music, do not report
   if (item.IsAudio())
@@ -539,7 +549,10 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   if (g_playbackState == MediaServicesPlayerState::playing)
     status = "start";
   else if (g_playbackState == MediaServicesPlayerState::seeking)
+  {
+    g_playbackStateOld = MediaServicesPlayerState::playing;
     status = "start";
+  }
   else if (g_playbackState == MediaServicesPlayerState::paused)
     status = "pause";
   else if (g_playbackState == MediaServicesPlayerState::stopped)
@@ -551,19 +564,8 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   {
     CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress2 status = %s, currentTime = %f", status.c_str(), currentSeconds);
 
-    int percentage = 0;
-    int totalTime = g_application.GetTotalTime();
-    if (totalTime)
-      percentage = currentSeconds * 100 / totalTime;
-    else
-      percentage = currentSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
-
-    // if percentage < 0, do not report it
-    if (percentage < 0)
-      return;
-
-    CURL url(item.GetURL());
     CVariant data;
+    int percentage = 100.0 * currentSeconds / totalSeconds;
     if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
     {
       /// https://api.trakt.tv/shows/top-gear/seasons/24
@@ -605,6 +607,8 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
     if (!data.isNull())
     {
       // now that we have "data" talk to trakt server
+      // If the progress is above 80%, the video will be scrobbled
+      // and we will get a 409 on stop. Ignore it :)
       ServerChat("https://api.trakt.tv/scrobble/" + status, data);
     }
   }
@@ -615,15 +619,12 @@ void CTraktServices::SetPlayState(MediaServicesPlayerState state)
   g_playbackState = state;
 }
 
-void CTraktServices::SaveFileState(CFileItem &item, double currentTime)
+void CTraktServices::SaveFileState(CFileItem &item, double currentTime, double totalTime)
 {
-  // we get called at playback startup, wtf ?
-  // see CApplication::SaveFileState
-  if (g_playbackState != MediaServicesPlayerState::stopped)
-    AddJob(new CTraktServiceJob(item, currentTime, "TraktSetStopped"));
+  AddJob(new CTraktServiceJob(item, currentTime, totalTime, "TraktSetStopped"));
 }
 
-CVariant CTraktServices::ParseIds(std::map<std::string, std::string> Ids, std::string type)
+CVariant CTraktServices::ParseIds(const std::map<std::string, std::string> &Ids, const std::string &type)
 {
   CVariant variantIDs;
  // for (int i = 0; i < Ids.size(); ++i)
@@ -647,7 +648,7 @@ CVariant CTraktServices::ParseIds(std::map<std::string, std::string> Ids, std::s
   return variantIDs;
 }
 
-CVariant CTraktServices::GetTraktCVariant(std::string url)
+CVariant CTraktServices::GetTraktCVariant(const std::string &url)
 {
   
   XFILE::CCurlFile trakt;
@@ -683,9 +684,10 @@ CVariant CTraktServices::GetTraktCVariant(std::string url)
   return CVariant(CVariant::VariantTypeNull);
 }
 
-void CTraktServices::ServerChat(std::string url, CVariant data)
+void CTraktServices::ServerChat(const std::string &url, const CVariant &data)
 {
   XFILE::CCurlFile curlfile;
+  curlfile.SetSilent(true);
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
   curlfile.SetRequestHeader("trakt-api-version", "2");
@@ -698,7 +700,20 @@ void CTraktServices::ServerChat(std::string url, CVariant data)
   if (!CJSONVariantWriter::Write(data, jsondata, false))
     return;
   std::string response;
-  curlfile.Post(curl.Get(), jsondata, response);
-  CLog::Log(LOGDEBUG, "CTraktServices::ServerChat - response %s", response.c_str());
+  if (curlfile.Post(curl.Get(), jsondata, response))
+  {
+#if defined(TRAKT_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CTraktServices::ServerChat %s", curl.Get().c_str());
+    CLog::Log(LOGDEBUG, "CTraktServices::ServerChat - response %s", response.c_str());
+#endif
+  }
+  else
+  {
+    // If the same item was just scrobbled, a 409 HTTP status code
+    // will returned to avoid scrobbling a duplicate
+    if (curlfile.GetResponseCode() != 409)
+      CLog::Log(LOGDEBUG, "CTraktServices::ServerChat - failed, response %s", response.c_str());
+  }
+
 }
 
