@@ -26,6 +26,7 @@
 #include "filesystem/ZipFile.h"
 #include "guilib/GUIWindowManager.h"
 #include "interfaces/AnnouncementManager.h"
+#include "interfaces/json-rpc/JSONUtils.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "utils/JSONVariantParser.h"
@@ -43,8 +44,8 @@
 #include "services/emby/EmbyClient.h"
 #include "services/emby/EmbyServices.h"
 
-static std::string OldStatusString;
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
+static MediaServicesPlayerState g_playbackStateOld = MediaServicesPlayerState::stopped;
 
 static char chars[] = "'/!";
 void removeCharsFromString( std::string &str)
@@ -84,28 +85,23 @@ public:
         break;
       case "OnSeek"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnSeek currentTime = %f", m_currentTime);
-        OldStatusString = "";
-        CTraktServices::SetPlayState(MediaServicesPlayerState::playing);
+        CTraktServices::SetPlayState(MediaServicesPlayerState::seeking);
         CTraktServices::ReportProgress(m_item, m_currentTime);
         break;
       case "OnPause"_mkhash:
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPause currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::paused);
         CTraktServices::ReportProgress(m_item, m_currentTime);
         break;
-      case "OnStop"_mkhash:
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnStop currentTime = %f", m_currentTime);
+      case "TraktSetStopped"_mkhash:
         CTraktServices::SetPlayState(MediaServicesPlayerState::stopped);
         CTraktServices::ReportProgress(m_item, m_currentTime);
-        OldStatusString = "";
         break;
       case "TraktSetWatched"_mkhash:
         CTraktServices::SetItemWatchedJob(m_item, true);
         break;
       case "TraktSetUnWatched"_mkhash:
         CTraktServices::SetItemWatchedJob(m_item, false);
-        break;
-      case "TraktSetProgress"_mkhash:
-        CTraktServices::ReportProgress(m_item, m_currentTime);
         break;
       default:
         return false;
@@ -192,17 +188,35 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
   
   if ((flag & AnnouncementFlag::Player) && strcmp(sender, "xbmc") == 0)
   {
+    double seconds;
     CFileItem &item = g_application.CurrentFileItem();
     using namespace StringHasher;
     switch(mkhash(message))
     {
+      // Announce of "OnStop" has wrong timestamp, so we pick it up from
+      // CApplication::SaveFileState which calls our SaveFileState
       case "OnPlay"_mkhash:
-      case "OnPause"_mkhash:
-      case "OnSeek"_mkhash:
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, message));
+        // "OnPlay" could be playback startup, or after pause. We really
+        // cannot tell from the Announce message or passed CVariant data.
+        // So we track the state internally and fetch the correct play time.
+        // Note: m_resumePoint is ONLY good for playback startup.
+        if (g_playbackState == MediaServicesPlayerState::paused)
+          seconds = g_application.GetTime();
+        else
+          seconds = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds;
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPlay currentTime = %f", seconds);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), seconds, message));
         break;
-      case "OnStop"_mkhash:
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, message));
+      case "OnPause"_mkhash:
+        seconds = g_application.GetTime();
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPause currentTime = %f", seconds);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), seconds, message));
+        break;
+      case "OnSeek"_mkhash:
+        // Ahh, finally someone actually gives us the right playtime.
+        seconds = JSONRPC::CJSONUtils::TimeObjectToMilliseconds(data["player"]["time"]);
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnSeek currentTime = %f", seconds);
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), seconds, message));
         break;
       default:
         break;
@@ -510,26 +524,35 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   // if we are music, do not report
   if (item.IsAudio())
     return;
-  
+
+  CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress1 status = %d, currentTime = %f", g_playbackState, currentSeconds);
+
+  if (g_playbackStateOld == g_playbackState)
+    return;
+
+  g_playbackStateOld = g_playbackState;
+
+  // Trakt API only as start/pause/stop. It is unclear what
+  // to do about if you are seeking, others seem to just do
+  // start again. We can too.
   std::string status;
-  if (g_playbackState == MediaServicesPlayerState::playing )
+  if (g_playbackState == MediaServicesPlayerState::playing)
     status = "start";
-  else if (g_playbackState == MediaServicesPlayerState::paused )
+  else if (g_playbackState == MediaServicesPlayerState::seeking)
+    status = "start";
+  else if (g_playbackState == MediaServicesPlayerState::paused)
     status = "pause";
   else if (g_playbackState == MediaServicesPlayerState::stopped)
     status = "stop";
+  else
+    return;
 
-  CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress1 status = %s, currentTime = %f", status.c_str(), currentSeconds);
   if (!status.empty())
   {
-    // only update trakt is status changes
-    if (status == OldStatusString)
-      return;
-
     CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress2 status = %s, currentTime = %f", status.c_str(), currentSeconds);
-    OldStatusString = status;
+
     int percentage = 0;
-    int totalTime = g_application.m_pPlayer->GetTotalTime() / 1000;
+    int totalTime = g_application.GetTotalTime();
     if (totalTime)
       percentage = currentSeconds * 100 / totalTime;
     else
@@ -592,9 +615,12 @@ void CTraktServices::SetPlayState(MediaServicesPlayerState state)
   g_playbackState = state;
 }
 
-void CTraktServices::UpdateItemState(CFileItem &item, double currentTime)
+void CTraktServices::SaveFileState(CFileItem &item, double currentTime)
 {
-  AddJob(new CTraktServiceJob(item, currentTime, "TraktSetProgress"));
+  // we get called at playback startup, wtf ?
+  // see CApplication::SaveFileState
+  if (g_playbackState != MediaServicesPlayerState::stopped)
+    AddJob(new CTraktServiceJob(item, currentTime, "TraktSetStopped"));
 }
 
 CVariant CTraktServices::ParseIds(std::map<std::string, std::string> Ids, std::string type)

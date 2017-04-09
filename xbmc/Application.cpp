@@ -3778,8 +3778,6 @@ void CApplication::UpdateFileState()
 
         if (m_progressTrackingItem->IsMediaServiceBased())
           CServicesManager::GetInstance().UpdateItemState(*m_progressTrackingItem.get(), GetTime());
-        if (CTraktServices::GetInstance().IsEnabled())
-          CTraktServices::GetInstance().UpdateItemState(*m_progressTrackingItem.get(), GetTime());
       }
     }
   }

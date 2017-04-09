@@ -42,7 +42,7 @@ bool CSaveFileStateJob::DoWork()
 {
   if (CTraktServices::GetInstance().IsEnabled())
   {
-    CTraktServices::GetInstance().UpdateItemState(m_item, m_bookmark.timeInSeconds);
+    CTraktServices::GetInstance().SaveFileState(m_item, m_bookmark.timeInSeconds);
   }
 
   // if its serivces item, skip database update for it
