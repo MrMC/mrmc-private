@@ -90,6 +90,7 @@
 #include "settings/MediaSettings.h"
 #include "settings/SkinSettings.h"
 #include "services/ServicesManager.h"
+#include "services/trakt/TraktServices.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/CPUInfo.h"
 #include "utils/SeekHandler.h"
@@ -3777,6 +3778,8 @@ void CApplication::UpdateFileState()
 
         if (m_progressTrackingItem->IsMediaServiceBased())
           CServicesManager::GetInstance().UpdateItemState(*m_progressTrackingItem.get(), GetTime());
+        if (CTraktServices::GetInstance().IsEnabled())
+          CTraktServices::GetInstance().ReportProgress(*m_progressTrackingItem.get(), GetTime());
       }
     }
   }

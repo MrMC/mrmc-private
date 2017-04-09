@@ -43,7 +43,7 @@
 #include "services/emby/EmbyClient.h"
 #include "services/emby/EmbyServices.h"
 
-static CFileItem m_curItem;
+static int  g_progressSec = 0;
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
 static char chars[] = "'/!";
@@ -79,20 +79,24 @@ public:
     {
       case "OnPlay"_mkhash:
       case "OnSeek"_mkhash:
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPlay/OnSeek currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::playing);
-        CTraktServices::ReportProgress(m_item,m_currentTime);
         break;
       case "OnPause"_mkhash:
         CTraktServices::SetPlayState(MediaServicesPlayerState::paused);
-        CTraktServices::ReportProgress(m_item,m_currentTime);
         break;
       case "OnStop"_mkhash:
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnStop currentTime = %f", m_currentTime);
         CTraktServices::SetPlayState(MediaServicesPlayerState::stopped);
-        CTraktServices::ReportProgress(m_item,m_currentTime);
         break;
-      case "watched"_mkhash:
-      case "unwatched"_mkhash:
-        CTraktServices::SetItemWatchedJob(m_item, (m_function == "watched"));
+      case "TraktSetWatched"_mkhash:
+        CTraktServices::SetItemWatchedJob(m_item, true);
+        break;
+      case "TraktSetUnWatched"_mkhash:
+        CTraktServices::SetItemWatchedJob(m_item, false);
+        break;
+      case "TraktSetProgress"_mkhash:
+        CTraktServices::ReportProgress(m_item, m_currentTime);
         break;
       default:
         return false;
@@ -185,8 +189,10 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
     {
       case "OnPlay"_mkhash:
       case "OnPause"_mkhash:
-      case "OnStop"_mkhash:
       case "OnSeek"_mkhash:
+        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, message));
+        break;
+      case "OnStop"_mkhash:
         AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), item.GetVideoInfoTag()->m_resumePoint.timeInSeconds, message));
         break;
       default:
@@ -371,11 +377,6 @@ bool CTraktServices::GetSignInByPinReply()
   return rtn;
 }
 
-void CTraktServices::SetItemWatched(CFileItem &item, bool watched)
-{
-  AddJob(new CTraktServiceJob(item, 0, watched ? "watched":"unwatched"));
-}
-
 void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
 {
   CVariant data;
@@ -485,14 +486,14 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
   ServerChat("https://api.trakt.tv/sync/history" + unwatched,data);
 }
 
-void CTraktServices::SetWatched(CFileItem &item)
+void CTraktServices::SetItemWatched(CFileItem &item)
 {
-
+  AddJob(new CTraktServiceJob(item, 0, "TraktSetWatched"));
 }
 
-void CTraktServices::SetUnWatched(CFileItem &item)
+void CTraktServices::SetItemUnWatched(CFileItem &item)
 {
-  
+  AddJob(new CTraktServiceJob(item, 0, "TraktSetUnWatched"));
 }
 
 void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
@@ -501,82 +502,91 @@ void CTraktServices::ReportProgress(CFileItem &item, double currentSeconds)
   if (item.IsAudio())
     return;
   
-  // we need to sleep a bit to let the player settle, times are all over the place
-  // since we are a job, this should not be too bad
-  Sleep(2000);
-  
-  std::string status;
-  if (g_playbackState == MediaServicesPlayerState::playing )
-    status = "start";
-  else if (g_playbackState == MediaServicesPlayerState::paused )
-    status = "pause";
-  else if (g_playbackState == MediaServicesPlayerState::stopped)
-    status = "stop";
-  
-  CURL url(item.GetURL());
-  CVariant data;
-  
-  int percentage = 0;
-  if (g_application.m_pPlayer->GetTotalTime())
+  // we get called from Application.cpp every 500ms
+  if ((g_playbackState == MediaServicesPlayerState::stopped || g_progressSec == 0 || g_progressSec > 120))
   {
-    int totalTime = g_application.m_pPlayer->GetTotalTime()/1000;
-    int currentTime = g_application.m_pPlayer->GetTime()/1000;
-    percentage = currentTime * 100 / totalTime;
-  }
-  else
-  {
-    percentage = item.GetVideoInfoTag()->m_resumePoint.timeInSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
-  }
-  
-  // if percentage < 0, do not report it
-  if (percentage < 0)
-    return;
-  
-  if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
-  {
-    /// https://api.trakt.tv/shows/top-gear/seasons/24
-    // to get a list of episodes, there we will find what we need
-    
-    std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
-    removeCharsFromString(showName);
-    StringUtils::Replace(showName, " ", "-");
-    std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),item.GetVideoInfoTag()->m_iSeason);
-    CVariant episodes = GetTraktCVariant(episodesUrl);
-    
-    if (episodes.isArray())
+    CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress currentTime = %f", currentSeconds);
+    g_progressSec = 0;
+
+    std::string status;
+    if (g_playbackState == MediaServicesPlayerState::playing )
+      status = "start";
+    else if (g_playbackState == MediaServicesPlayerState::paused )
+      status = "pause";
+    else if (g_playbackState == MediaServicesPlayerState::stopped)
+      status = "stop";
+
+    if (!status.empty())
     {
-      for (CVariant::iterator_array it = episodes.begin_array(); it != episodes.end_array(); it++)
+      int percentage = 0;
+      int totalTime = g_application.m_pPlayer->GetTotalTime() / 1000;
+      if (totalTime)
+        percentage = currentSeconds * 100 / totalTime;
+      else
+        percentage = currentSeconds * 100 / item.GetVideoInfoTag()->GetDuration();
+
+      // if percentage < 0, do not report it
+      if (percentage < 0)
+        return;
+
+      CURL url(item.GetURL());
+      CVariant data;
+      if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
       {
-        CVariant &episodeItem = *it;
-        if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
+        /// https://api.trakt.tv/shows/top-gear/seasons/24
+        // to get a list of episodes, there we will find what we need
+
+        std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
+        removeCharsFromString(showName);
+        StringUtils::Replace(showName, " ", "-");
+        std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",
+          showName.c_str(), item.GetVideoInfoTag()->m_iSeason);
+        CVariant episodes = GetTraktCVariant(episodesUrl);
+
+        if (episodes.isArray())
         {
-          data["episode"] = episodeItem;
-          break;
+          for (CVariant::iterator_array it = episodes.begin_array(); it != episodes.end_array(); it++)
+          {
+            CVariant &episodeItem = *it;
+            if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
+            {
+              data["episode"] = episodeItem;
+              break;
+            }
+          }
         }
+        data["progress"] = percentage;
+        data["app_version"] = CSysInfo::GetVersion();
+        data["app_date"] = CSysInfo::GetBuildDate();
+      }
+      else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
+      {
+        data["movie"]["title"] = item.GetVideoInfoTag()->m_strTitle;
+        data["movie"]["year"] = item.GetVideoInfoTag()->GetYear();
+        data["movie"]["ids"] = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
+        data["progress"] = percentage;
+        data["app_version"] = CSysInfo::GetVersion();
+        data["app_date"] = CSysInfo::GetBuildDate();
+      }
+
+      if (!data.isNull())
+      {
+        // now that we have "data" talk to trakt server
+        ServerChat("https://api.trakt.tv/scrobble/" + status, data);
       }
     }
-    data["progress"] = percentage;
-    data["app_version"] = CSysInfo::GetVersion();
-    data["app_date"] = CSysInfo::GetBuildDate();
   }
-  else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
-  {
-    data["movie"]["title"] = item.GetVideoInfoTag()->m_strTitle;
-    data["movie"]["year"] = item.GetVideoInfoTag()->GetYear();
-    data["movie"]["ids"] = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
-    data["progress"] = percentage;
-    data["app_version"] = CSysInfo::GetVersion();
-    data["app_date"] = CSysInfo::GetBuildDate();
-  }
-  
-  // now that we have "data" talk to trakt server
-  if (!status.empty())
-    ServerChat("https://api.trakt.tv/scrobble/" + status,data);
+  g_progressSec++;
 }
 
 void CTraktServices::SetPlayState(MediaServicesPlayerState state)
 {
   g_playbackState = state;
+}
+
+void CTraktServices::UpdateItemState(CFileItem &item, double currentTime)
+{
+  AddJob(new CTraktServiceJob(item, currentTime, "TraktSetProgress"));
 }
 
 CVariant CTraktServices::ParseIds(std::map<std::string, std::string> Ids, std::string type)

@@ -1610,7 +1610,12 @@ bool CGUIMediaWindow::OnContextButton(int itemNumber, CONTEXT_BUTTON button)
       CFileItemPtr item = m_vecItems->Get(itemNumber);
       
       if (CTraktServices().GetInstance().IsEnabled())
-        CTraktServices().GetInstance().SetItemWatched(*item.get(),(button == CONTEXT_BUTTON_MARK_WATCHED));
+      {
+         if (button == CONTEXT_BUTTON_MARK_WATCHED)
+          CTraktServices::GetInstance().SetItemWatched(*item.get());
+        else
+          CTraktServices::GetInstance().SetItemUnWatched(*item.get());
+      }
       
       if (item->IsMediaServiceBased())
       {

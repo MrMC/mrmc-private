@@ -49,9 +49,10 @@ public:
   // IAnnouncer callbacks
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data) override;
   
-  void SetItemWatched(CFileItem &item, bool watched);
-  static void SetWatched(CFileItem &item);
-  static void SetUnWatched(CFileItem &item);
+  void        SetItemWatched(CFileItem &item);
+  void        SetItemUnWatched(CFileItem &item);
+  void        UpdateItemState(CFileItem &item, double currentTime);
+
   static void ReportProgress(CFileItem &item, double currentSeconds);
   static void SetPlayState(MediaServicesPlayerState state);
 

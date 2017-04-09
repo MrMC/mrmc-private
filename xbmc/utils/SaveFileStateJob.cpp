@@ -251,6 +251,7 @@ bool CSaveFileStateJob::DoWork()
   if (CTraktServices::GetInstance().IsEnabled())
   {
     CTraktServices::GetInstance().SetPlayState(MediaServicesPlayerState::stopped);
+    m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
     CTraktServices::GetInstance().ReportProgress(m_item, m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds);
   }
   return true;
