@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2016 Team MrMC
+ *      Copyright (C) 2017 Team MrMC
  *      https://github.com/MrMC
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -19,13 +19,7 @@
  *
  */
 
-#include <atomic>
-#include <memory>
-
-#include "URL.h"
 #include "filesystem/CurlFile.h"
-#include "threads/Thread.h"
-#include "threads/CriticalSection.h"
 #include "services/ServicesManager.h"
 #include "settings/lib/ISettingCallback.h"
 #include "interfaces/IAnnouncer.h"

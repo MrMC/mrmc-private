@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2016 Team MrMC
+ *      Copyright (C) 2017 Team MrMC
  *      https://github.com/MrMC
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -21,51 +21,27 @@
 #include "TraktServices.h"
 
 #include "Application.h"
-#include "URL.h"
-#include "Util.h"
-#include "GUIUserMessages.h"
-#include "cores/VideoRenderers/RenderManager.h"
-#include "cores/VideoRenderers/RenderCapture.h"
 #include "dialogs/GUIDialogKaiToast.h"
-#include "dialogs/GUIDialogSelect.h"
-#include "dialogs/GUIDialogNumeric.h"
 #include "dialogs/GUIDialogProgress.h"
-#include "filesystem/DirectoryCache.h"
-#include "filesystem/StackDirectory.h"
-#include "filesystem/VideoDatabaseDirectory.h"
-#include "filesystem/VideoDatabaseDirectory/QueryParams.h"
 #include "filesystem/ZipFile.h"
-#include "guilib/LocalizeStrings.h"
 #include "guilib/GUIWindowManager.h"
 #include "interfaces/AnnouncementManager.h"
-#include "network/Network.h"
-#include "network/Socket.h"
-#include "network/DNSNameCache.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
-#include "profiles/dialogs/GUIDialogLockSettings.h"
-#include "utils/log.h"
-#include "utils/StringUtils.h"
-#include "utils/StringHasher.h"
-#include "utils/JobManager.h"
-
 #include "utils/JSONVariantParser.h"
 #include "utils/JSONVariantWriter.h"
-#include "utils/URIUtils.h"
-#include "utils/Variant.h"
+#include "utils/log.h"
+#include "utils/StringHasher.h"
 #include "utils/SystemInfo.h"
+#include "utils/StringUtils.h"
+#include "utils/URIUtils.h"
 #include "utils/Variant.h"
 
 #include "video/VideoInfoTag.h"
 #include "video/VideoDatabase.h"
 
-#include "music/tags/MusicInfoTag.h"
-
 #include "services/emby/EmbyClient.h"
 #include "services/emby/EmbyServices.h"
-
-
-#include <regex>
 
 static CFileItem m_curItem;
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
