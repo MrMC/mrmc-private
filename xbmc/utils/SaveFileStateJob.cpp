@@ -52,15 +52,14 @@ bool CSaveFileStateJob::DoWork()
     double total_s_90percent = total_s * 0.9;
     double total_s_minus_5mins = total_s - (60 * 5);
     double resume_s =  m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds;
+    
+    CTraktServices::GetInstance().SaveFileState(m_item, resume_s, total_s);
+    
     if (resume_s < 0 || resume_s > std::min(total_s_90percent, total_s_minus_5mins))
     {
       m_item.GetVideoInfoTag()->m_playCount++;
       m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = 0;
       CTraktServices::GetInstance().SetItemWatched(m_item);
-    }
-    else
-    {
-      CTraktServices::GetInstance().SaveFileState(m_item, resume_s, total_s);
     }
   }
 
