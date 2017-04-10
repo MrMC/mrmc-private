@@ -55,7 +55,6 @@ void removeCharsFromString( std::string &str)
 using namespace ANNOUNCEMENT;
 
 static const std::string NS_TRAKT_CLIENTID("fdf32abb08db6b163f31cb6be8b06ede301b4d883b7c050f88efcd82ca9a2dbc");
-// 3583018b909bc3d47f11c40fdf445c1e58940eb835afbfdd1d22fccbfcc9cffd
 static const std::string NS_TRAKT_CLIENTSECRET("0cb37612e9c2fcdcb22f1dc7504465ebc34c155256c52597c0cd524bc082c7c7");
 
 class CTraktServiceJob: public CJob
@@ -631,7 +630,6 @@ void CTraktServices::SaveFileState(CFileItem &item, double currentTime, double t
 CVariant CTraktServices::ParseIds(const std::map<std::string, std::string> &Ids, const std::string &type)
 {
   CVariant variantIDs;
- // for (int i = 0; i < Ids.size(); ++i)
   for (std::map<std::string, std::string>::const_iterator i = Ids.begin(); i != Ids.end(); ++i)
   {
     if (i->first == "unknown")
