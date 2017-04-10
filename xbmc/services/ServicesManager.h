@@ -34,7 +34,6 @@ enum class MediaServicesPlayerState
 {
   paused = 1,
   playing = 2,
-  seeking = 3,
   stopped = 4,
 };
 

@@ -44,9 +44,6 @@
 #include "services/emby/EmbyClient.h"
 #include "services/emby/EmbyServices.h"
 
-static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
-static MediaServicesPlayerState g_playbackStateOld = MediaServicesPlayerState::stopped;
-
 static char chars[] = "'/!";
 void removeCharsFromString( std::string &str)
 {
@@ -64,7 +61,7 @@ static const std::string NS_TRAKT_CLIENTSECRET("0cb37612e9c2fcdcb22f1dc7504465eb
 class CTraktServiceJob: public CJob
 {
 public:
-  CTraktServiceJob(CFileItem &item, int percentage, std::string strFunction)
+  CTraktServiceJob(CFileItem &item, double percentage, std::string strFunction)
   : m_item(item)
   , m_function(strFunction)
   , m_percentage(percentage)
@@ -80,22 +77,21 @@ public:
     {
       case "OnPlay"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPlay currentTime = %f", m_currentTime);
-        CTraktServices::SetPlayState(MediaServicesPlayerState::playing);
-        CTraktServices::ReportProgress(m_item, m_percentage);
+        CTraktServices::ReportProgress(m_item, "start", m_percentage);
         break;
       case "OnSeek"_mkhash:
+        // Trakt API only as start/pause/stop. It is unclear what
+        // to do about if you are seeking, others seem to just do
+        // start again. We can too.
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnSeek currentTime = %f", m_currentTime);
-        CTraktServices::SetPlayState(MediaServicesPlayerState::seeking);
-        CTraktServices::ReportProgress(m_item, m_percentage);
+        CTraktServices::ReportProgress(m_item, "start", m_percentage);
         break;
       case "OnPause"_mkhash:
         CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPause currentTime = %f", m_currentTime);
-        CTraktServices::SetPlayState(MediaServicesPlayerState::paused);
-        CTraktServices::ReportProgress(m_item, m_percentage);
+        CTraktServices::ReportProgress(m_item, "pause", m_percentage);
         break;
       case "TraktSetStopped"_mkhash:
-        CTraktServices::SetPlayState(MediaServicesPlayerState::stopped);
-        CTraktServices::ReportProgress(m_item, m_percentage);
+        CTraktServices::ReportProgress(m_item, "stop", m_percentage);
         break;
       case "TraktSetWatched"_mkhash:
         CTraktServices::SetItemWatchedJob(m_item, true);
@@ -113,10 +109,10 @@ public:
     return true;
   }
 private:
-  CFileItem      m_item;
-  std::string    m_function;
-  int            m_percentage;
-  double         m_currentTime;
+  CFileItem   m_item;
+  std::string m_function;
+  double      m_percentage;
+  double      m_currentTime;
 };
 
 
@@ -189,7 +185,7 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
   
   if ((flag & AnnouncementFlag::Player) && strcmp(sender, "xbmc") == 0)
   {
-    int percentage;
+    double percentage;
     CFileItem &item = g_application.CurrentFileItem();
     using namespace StringHasher;
     switch(mkhash(message))
@@ -201,23 +197,34 @@ void CTraktServices::Announce(AnnouncementFlag flag, const char *sender, const c
         // cannot tell from the Announce message or passed CVariant data.
         // So we track the state internally and fetch the correct play time.
         // Note: m_resumePoint is ONLY good for playback startup.
-        if (g_playbackState == MediaServicesPlayerState::paused)
+        if (GetPlayState(item) == MediaServicesPlayerState::paused)
           percentage = 100.0 * g_application.GetTime() / g_application.GetTotalTime();
         else
-          percentage = 100.0 * item.GetVideoInfoTag()->m_resumePoint.timeInSeconds / item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPlay currentSeconds = %d", percentage);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), percentage, message));
+        {
+          percentage = 0;
+          if (item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds > 0)
+            percentage = 100.0 * item.GetVideoInfoTag()->m_resumePoint.timeInSeconds / item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
+        }
+        if (percentage < 0.0)
+          percentage = 0.0;
+        SetPlayState(item, MediaServicesPlayerState::playing);
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPlay currentSeconds = %f", percentage);
+        AddJob(new CTraktServiceJob(item, percentage, message));
         break;
       case "OnPause"_mkhash:
+        SetPlayState(item, MediaServicesPlayerState::paused);
         percentage = 100.0 * g_application.GetTime() / g_application.GetTotalTime();
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPause currentSeconds = %d", percentage);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), percentage, message));
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnPause currentSeconds = %f", percentage);
+        AddJob(new CTraktServiceJob(item, percentage, message));
         break;
       case "OnSeek"_mkhash:
         // Ahh, finally someone actually gives us the right playtime.
         percentage = 100.0 * JSONRPC::CJSONUtils::TimeObjectToMilliseconds(data["player"]["time"]) / g_application.GetTotalTime();
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnSeek currentSeconds = %d", percentage);
-        AddJob(new CTraktServiceJob(g_application.CurrentFileItem(), percentage, message));
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::Announce OnSeek currentSeconds = %f", percentage);
+        AddJob(new CTraktServiceJob(item, percentage, message));
+        break;
+      case "OnStop"_mkhash:
+        SetPlayState(item, MediaServicesPlayerState::stopped);
         break;
       default:
         break;
@@ -401,6 +408,42 @@ bool CTraktServices::GetSignInByPinReply()
   return rtn;
 }
 
+const MediaServicesPlayerState CTraktServices::GetPlayState(CFileItem &item)
+{
+  // will create a new playstate if nothing matches
+  CSingleLock lock(m_playStatesLock);
+  std::string path = item.GetPath();
+  for (const auto &playState : m_playStates)
+  {
+    if (path == playState.path)
+    {
+      return playState.state;
+    }
+  }
+  TraktPlayState newPlayState;
+  newPlayState.path = item.GetPath();
+  m_playStates.push_back(newPlayState);
+  return newPlayState.state;
+}
+
+void CTraktServices::SetPlayState(CFileItem &item, const MediaServicesPlayerState &state)
+{
+  // will erase existing playstate if matches and state is stopped
+  CSingleLock lock(m_playStatesLock);
+  std::string path = item.GetPath();
+  for (auto playStateIt = m_playStates.begin(); playStateIt != m_playStates.end() ; ++playStateIt)
+  {
+    if (path == playStateIt->path)
+    {
+      if (state == MediaServicesPlayerState::stopped)
+        m_playStates.erase(playStateIt);
+      else
+        playStateIt->state = state;
+      break;
+    }
+  }
+}
+
 void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
 {
   CVariant data;
@@ -520,40 +563,15 @@ void CTraktServices::SetItemUnWatched(CFileItem &item)
   AddJob(new CTraktServiceJob(item, 0, "TraktSetUnWatched"));
 }
 
-void CTraktServices::ReportProgress(CFileItem &item, int percentage)
+void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, double percentage)
 {
   // if we are music, do not report
   if (item.IsAudio())
     return;
 
-  CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress1 status = %d, percentage = %d", g_playbackState, percentage);
-
-  if (g_playbackStateOld == g_playbackState)
-    return;
-
-  g_playbackStateOld = g_playbackState;
-
-  // Trakt API only as start/pause/stop. It is unclear what
-  // to do about if you are seeking, others seem to just do
-  // start again. We can too.
-  std::string status;
-  if (g_playbackState == MediaServicesPlayerState::playing)
-    status = "start";
-  else if (g_playbackState == MediaServicesPlayerState::seeking)
-  {
-    g_playbackStateOld = MediaServicesPlayerState::playing;
-    status = "start";
-  }
-  else if (g_playbackState == MediaServicesPlayerState::paused)
-    status = "pause";
-  else if (g_playbackState == MediaServicesPlayerState::stopped)
-    status = "stop";
-  else
-    return;
-
   if (!status.empty())
   {
-    CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress2 status = %s, percentage = %d", status.c_str(), percentage);
+    CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = %s, percentage = %f", status.c_str(), percentage);
 
     CVariant data;
     if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
@@ -604,14 +622,9 @@ void CTraktServices::ReportProgress(CFileItem &item, int percentage)
   }
 }
 
-void CTraktServices::SetPlayState(MediaServicesPlayerState state)
-{
-  g_playbackState = state;
-}
-
 void CTraktServices::SaveFileState(CFileItem &item, double currentTime, double totalTime)
 {
-  int percentage = 100.0 * g_application.GetTime() / g_application.GetTotalTime();
+  double percentage = 100.0 * currentTime / totalTime;
   AddJob(new CTraktServiceJob(item, percentage, "TraktSetStopped"));
 }
 

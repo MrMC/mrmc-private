@@ -27,6 +27,13 @@
 
 #define TRAKT_DEBUG_VERBOSE
 
+
+typedef struct TraktPlayState
+{
+  std::string path;
+  MediaServicesPlayerState state = MediaServicesPlayerState::stopped;
+} TraktPlayState;
+
 class CTraktServices
 : public CJobQueue
 , public ISettingCallback
@@ -54,8 +61,7 @@ public:
   void              SaveFileState(CFileItem &item, double currentTime, double totalTime);
 
 protected:
-  static void       ReportProgress(CFileItem &item, int percentage);
-  static void       SetPlayState(MediaServicesPlayerState state);
+  static void       ReportProgress(CFileItem &item, const std::string &status, double percentage);
 
 private:
   // private construction, and no assignements; use the provided singleton methods
@@ -67,6 +73,8 @@ private:
 
   bool              GetSignInPinCode();
   bool              GetSignInByPinReply();
+  const MediaServicesPlayerState GetPlayState(CFileItem &item);
+  void              SetPlayState(CFileItem &item, const MediaServicesPlayerState &state);
   static CVariant   ParseIds(const std::map<std::string, std::string> &Ids, const std::string &type);
   static CVariant   GetTraktCVariant(const std::string &url);
   static void       ServerChat(const std::string &url, const CVariant &data);
@@ -81,5 +89,7 @@ private:
   std::string       m_refreshAuthToken;
   std::string       m_deviceCode;
   XFILE::CCurlFile  m_Trakttv;
-
+  CCriticalSection  m_playStatesLock;
+  // needed to track play/pause via "OnPlay" Announce msgs
+  std::vector<TraktPlayState> m_playStates;
 };
