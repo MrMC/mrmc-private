@@ -79,6 +79,8 @@ private:
   static CVariant   GetTraktCVariant(const std::string &url);
   static void       ServerChat(const std::string &url, const CVariant &data);
   static void       SetItemWatchedJob(CFileItem &item, bool watched);
+  void              RefreshAccessToken();
+  void              CheckAccessToken();
 
 
   std::atomic<bool> m_active;
@@ -86,6 +88,7 @@ private:
   CEvent            m_processSleep;
 
   std::string       m_authToken;
+  int               m_authTokenValidity;
   std::string       m_refreshAuthToken;
   std::string       m_deviceCode;
   XFILE::CCurlFile  m_Trakttv;

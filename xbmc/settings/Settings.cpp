@@ -500,6 +500,7 @@ const std::string CSettings::SETTING_SERVICES_EMBYLIMITHOMETOLOCAL  = "emby.limi
 const std::string CSettings::SETTING_SERVICES_TRAKTSIGNINPIN = "trakt.signinpin";
 const std::string CSettings::SETTING_SERVICES_TRAKTACESSTOKEN = "trakt.accesstoken";
 const std::string CSettings::SETTING_SERVICES_TRAKTACESSREFRESHTOKEN = "trakt.accessrefreshtoken";
+const std::string CSettings::SETTING_SERVICES_TRAKTACESSTOKENVALIDITY = "trakt.accesstokenvalidity";
 
 CSettings::CSettings()
   : m_initialized(false)

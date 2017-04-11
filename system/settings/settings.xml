@@ -2390,6 +2390,15 @@
           <control type="edit" format="string" />
           <visible>false</visible>
         </setting>
+        <setting id="trakt.accesstokenvalidity" type="integer" label="" help="">
+          <level>0</level>
+          <default>0</default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="integer" />
+          <visible>false</visible>
+        </setting>
       </group>
     </category>
     <category id="smb" label="1200" help="36346">

@@ -170,6 +170,8 @@ void CTraktServices::OnSettingAction(const CSetting *setting)
       // prompt is 'sign-out'
       // clear authToken and change prompt to 'sign-in'
       m_authToken.clear();
+      m_authTokenValidity = 0;
+      m_refreshAuthToken.clear();
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN, strSignIn);
       CLog::Log(LOGDEBUG, "CTraktServices:OnSettingAction sign-out ok");
     }
@@ -245,6 +247,7 @@ void CTraktServices::OnSettingChanged(const CSetting *setting)
   /*
   static const std::string SETTING_SERVICES_TRAKTSIGNINPIN;
   static const std::string SETTING_SERVICES_TRAKTACESSTOKEN;
+  static const std::string SETTING_SERVICES_TRAKTACESSTOKENVALIDITY;
   */
 
   if (setting == NULL)
@@ -255,6 +258,7 @@ void CTraktServices::SetUserSettings()
 {
   CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN, m_authToken);
   CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTACESSREFRESHTOKEN, m_refreshAuthToken);
+  CSettings::GetInstance().SetInt(CSettings::SETTING_SERVICES_TRAKTACESSTOKENVALIDITY, m_authTokenValidity);
   CSettings::GetInstance().Save();
 }
 
@@ -262,6 +266,7 @@ void CTraktServices::GetUserSettings()
 {
   m_authToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN);
   m_refreshAuthToken  = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSREFRESHTOKEN);
+  m_authTokenValidity  = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_TRAKTACESSTOKENVALIDITY);
 }
 
 bool CTraktServices::MyTraktSignedIn()
@@ -401,6 +406,8 @@ bool CTraktServices::GetSignInByPinReply()
     {
       m_authToken = reply["access_token"].asString();
       m_refreshAuthToken = reply["refresh_token"].asString();
+      m_authTokenValidity = reply["created_at"].asInteger() + reply["expires_in"].asInteger();
+      SetUserSettings();
       rtn = true;
     }
   }
@@ -652,6 +659,8 @@ CVariant CTraktServices::ParseIds(const std::map<std::string, std::string> &Ids,
 
 CVariant CTraktServices::GetTraktCVariant(const std::string &url)
 {
+  // check if token expired
+  CTraktServices::GetInstance().CheckAccessToken();
   
   XFILE::CCurlFile trakt;
   trakt.SetRequestHeader("Cache-Control", "no-cache");
@@ -688,6 +697,9 @@ CVariant CTraktServices::GetTraktCVariant(const std::string &url)
 
 void CTraktServices::ServerChat(const std::string &url, const CVariant &data)
 {
+  // check if token expired
+  CTraktServices::GetInstance().CheckAccessToken();
+  
   XFILE::CCurlFile curlfile;
   curlfile.SetSilent(true);
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
@@ -719,3 +731,59 @@ void CTraktServices::ServerChat(const std::string &url, const CVariant &data)
 
 }
 
+void CTraktServices::RefreshAccessToken()
+{
+  https://api.trakt.tv/oauth/token
+  
+  XFILE::CCurlFile curlfile;
+  curlfile.SetSilent(true);
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+  curlfile.SetRequestHeader("trakt-api-version", "2");
+  curlfile.SetRequestHeader("trakt-api-key", NS_TRAKT_CLIENTID);
+  curlfile.SetRequestHeader("Authorization", "Bearer " + CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN));
+  
+  CURL curl("https://api.trakt.tv/oauth/token");
+  
+  CVariant data;
+  data["refresh_token"] = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSREFRESHTOKEN);
+  data["client_id"] = NS_TRAKT_CLIENTID;
+  data["client_secret"] = NS_TRAKT_CLIENTSECRET;
+  data["redirect_uri"] = "urn:ietf:wg:oauth:2.0:oob";
+  data["grant_type"] = "refresh_token";
+  std::string jsondata;
+  if (!CJSONVariantWriter::Write(data, jsondata, false))
+    return;
+  std::string response;
+  if (curlfile.Post(curl.Get(), jsondata, response))
+  {
+#if defined(TRAKT_DEBUG_VERBOSE)
+    CLog::Log(LOGDEBUG, "CTraktServices::ServerChat %s", curl.Get().c_str());
+    CLog::Log(LOGDEBUG, "CTraktServices::ServerChat - response %s", response.c_str());
+#endif
+    CVariant reply;
+    if (!CJSONVariantParser::Parse(response, reply))
+      return;
+    if (reply.isObject() && reply.isMember("access_token"))
+    {
+      m_authToken = reply["access_token"].asString();
+      m_refreshAuthToken = reply["refresh_token"].asString();
+      m_authTokenValidity = reply["created_at"].asInteger() + reply["expires_in"].asInteger();
+      SetUserSettings();
+    }
+  }
+}
+
+void CTraktServices::CheckAccessToken()
+{
+  CDateTime now = CDateTime::GetUTCDateTime();
+  time_t tNow = 0;
+  time_t tExpiry = (time_t)CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_TRAKTACESSTOKENVALIDITY);
+  now.GetAsTime(tNow);
+  if (tNow > tExpiry)
+  {
+    RefreshAccessToken();
+    CLog::Log(LOGDEBUG, "CTraktServices::CheckAccessToken() refreshed");
+  }
+  
+}
