@@ -136,12 +136,128 @@ static int interrupt_cb(void* ctx)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
-/*
-static int dvd_file_open(URLContext *h, const char *filename, int flags)
+std::vector<XFILE::CFile*> g_cached_m2ts_files;
+CCriticalSection g_cached_m2ts_files_lock;
+
+static int hls_file_read(void *h, uint8_t* buf, int size)
 {
-  return -1;
+  //CLog::Log(LOGDEBUG, "%s - hls_file_read", __FUNCTION__);
+  //if(interrupt_cb(h))
+  //  return AVERROR_EXIT;
+
+  XFILE::CFile *cfile = static_cast<XFILE::CFile*>(h);
+  return cfile->Read(buf, size);
 }
+static int64_t hls_file_seek(void *h, int64_t pos, int whence)
+{
+  //CLog::Log(LOGDEBUG, "%s - hls_file_seek", __FUNCTION__);
+  //if (interrupt_cb(h))
+  //  return AVERROR_EXIT;
+
+  XFILE::CFile *cfile = static_cast<XFILE::CFile*>(h);
+  if(whence == AVSEEK_SIZE)
+    return cfile->GetLength();
+  else
+    return cfile->Seek(pos, whence & ~AVSEEK_FORCE);
+}
+static void hls_file_close(struct AVFormatContext *s, AVIOContext *pb)
+{
+  CLog::Log(LOGDEBUG, "%s - hls_file_close1", __FUNCTION__);
+  if (pb && pb->opaque)
+  {
+    CLog::Log(LOGDEBUG, "%s - hls_file_close2", __FUNCTION__);
+    XFILE::CFile *cfile = static_cast<XFILE::CFile*>(pb->opaque);
+    delete cfile;
+    pb->opaque = nullptr;
+    av_freep(&pb->buffer);
+    av_freep(&pb);
+  }
+}
+static int hls_file_open(struct AVFormatContext *s,
+  AVIOContext **pb, const char *url, int flags, AVDictionary **options)
+{
+  CLog::Log(LOGDEBUG, "%s - hls_file_open %s", __FUNCTION__, url);
+
+  CURL curl(url);
+  AVDictionaryEntry *entry = NULL;
+  while ((entry = av_dict_get(*options, "", entry, AV_DICT_IGNORE_SUFFIX)))
+  {
+    //CLog::Log(LOGDEBUG, "%s - hls_file_open options, key %s, value %s", __FUNCTION__, entry->key, entry->value);
+    // copy our options over into AVFormatContext, FFMpeg will not do that for us.
+    av_dict_set(&s->metadata, entry->key, entry->value, 0);
+    /*
+    std::string key = entry->key;
+    if (key == "headers")
+    {
+      // copy the headers form options into our CURL so they propogate too.
+      // this must match how GetFFMpegOptionsFromURL works.
+      std::vector<std::string> values = StringUtils::Split(entry->value, "\r\n");
+      for (auto &value : values)
+      {
+        // stupid FFMpeg has a dangling space, strip it.
+        StringUtils::Replace(value, ": ",":");
+        std::vector<std::string> header = StringUtils::Split(value, ":");
+        if (header.size() == 2)
+          curl.SetProtocolOption(header[0], header[1]);
+      }
+    }
+    */
+  }
+
+  entry = NULL;
+  while ((entry = av_dict_get(s->metadata, "", entry, AV_DICT_IGNORE_SUFFIX)))
+  {
+    //CLog::Log(LOGDEBUG, "%s - hls_file_open metadata, key %s, value %s", __FUNCTION__, entry->key, entry->value);
+    // copy our options over into AVFormatContext, FFMpeg will not do that for us.
+    std::string key = entry->key;
+    if (key == "headers")
+    {
+      // copy the headers form options into our CURL so they propogate too.
+      // this must match how GetFFMpegOptionsFromURL works.
+      std::vector<std::string> values = StringUtils::Split(entry->value, "\r\n");
+      for (auto &value : values)
+      {
+        // stupid FFMpeg has a dangling space, strip it.
+        StringUtils::Replace(value, ": ",":");
+        std::vector<std::string> header = StringUtils::Split(value, ":");
+        if (header.size() == 2)
+          curl.SetProtocolOption(header[0], header[1]);
+      }
+    }
+  }
+  CLog::Log(LOGDEBUG, "%s - hls_file_open, curl %s", __FUNCTION__, curl.Get().c_str());
+/*
+  entry = NULL;
+  while ((entry = av_dict_get(s->metadata, "", entry, AV_DICT_IGNORE_SUFFIX)))
+  {
+    CLog::Log(LOGDEBUG, "%s - hls_file_open metadata, key %s, value %s", __FUNCTION__, entry->key, entry->value);
+  }
 */
+  int looper = 0;
+  if (!XFILE::CFile::Exists(curl))
+  {
+    CLog::Log(LOGDEBUG, "%s - hls_file_open looper %d", __FUNCTION__, looper);
+    return AVERROR(ENOENT);
+  }
+
+  int cfileflags = 0;
+  cfileflags |= READ_BITRATE | READ_CHUNKED | READ_CACHED;
+  XFILE::CFile *cfile = new XFILE::CFile();
+  if (cfile->Open(curl, cfileflags))
+  {
+    //CDVDDemuxFFmpeg *ctx = static_cast<CDVDDemuxFFmpeg*>(s->opaque);
+    //int blocksize = ctx->m_pInput->GetBlockSize();
+    int blocksize = 8 * 32768;
+    // large blocksize buffer transfers
+    unsigned char* buffer = (unsigned char*)av_malloc(blocksize);
+    *pb = avio_alloc_context(buffer, blocksize, 0, cfile, hls_file_read, NULL, hls_file_seek);
+    (*pb)->max_packet_size = blocksize;
+    return 0;
+  }
+
+  return AVERROR(EINVAL);
+}
+
 
 static int dvd_file_read(void *h, uint8_t* buf, int size)
 {
@@ -265,6 +381,15 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
         strFile = url.Get();
       } 
     }
+#if 0
+    if (url.IsFileType("m3u8"))
+    {
+      // have to explicity set the AVFMT_FLAG_CUSTOM_IO flag or die when closing.
+      m_pFormatContext->flags |= AVFMT_FLAG_CUSTOM_IO;
+      m_pFormatContext->io_open = hls_file_open;
+      m_pFormatContext->io_close = hls_file_close;
+    }
+#endif
     if (result < 0 && avformat_open_input(&m_pFormatContext, strFile.c_str(), iformat, &options) < 0 )
     {
       CLog::Log(LOGDEBUG, "Error, could not open file %s", CURL::GetRedacted(strFile).c_str());
@@ -739,6 +864,7 @@ DemuxPacket* CDVDDemuxFFmpeg::Read()
     }
     else if (m_pkt.result < 0)
     {
+      CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::Read() returned %s", av_err2str(m_pkt.result));
       Flush();
     }
     else if (IsProgramChange())
