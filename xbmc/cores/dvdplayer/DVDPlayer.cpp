@@ -83,6 +83,8 @@
 using namespace PVR;
 using namespace KODI::MESSAGING;
 
+#define StandardDemuxerQueueTime (8000.0)
+
 void CSelectionStreams::Clear(StreamType type, StreamSource source)
 {
   CSingleLock lock(m_section);
@@ -627,7 +629,8 @@ CDVDPlayer::CDVDPlayer(IPlayerCallback& callback)
   m_offset_pts = 0.0;
   m_playSpeed = DVD_PLAYSPEED_NORMAL;
   m_streamPlayerSpeed = DVD_PLAYSPEED_NORMAL;
-  m_caching = CACHESTATE_DONE;
+  m_caching = CACHESTATE_WAITFILL;
+  LogCacheState(m_caching);
   m_HasVideo = false;
   m_HasAudio = false;
 
@@ -1767,14 +1770,22 @@ void CDVDPlayer::ProcessRadioRDSData(CDemuxStream* pStream, DemuxPacket* pPacket
   m_dvdPlayerRadioRDS->SendMessage(new CDVDMsgDemuxerPacket(pPacket, drop));
 }
 
-bool CDVDPlayer::GetCachingTimes(double& level, double& delay, double& offset)
+bool CDVDPlayer::GetStreamCachingTimes(double& level, double& delay, double& offset)
 {
-  if(!m_pInputStream || !m_pDemuxer)
     return false;
+
+  if (!m_pInputStream || !m_pDemuxer)
+  {
+    CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - no m_pInputStream, no m_pDemuxer");
+    return false;
+  }
 
   XFILE::SCacheStatus status;
   if (!m_pInputStream->GetCacheStatus(&status))
+  {
+    CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - m_pInputStream->GetCacheStatus == false");
     return false;
+  }
 
   uint64_t &cached = status.forward;
   unsigned &currate = status.currate;
@@ -1785,7 +1796,10 @@ bool CDVDPlayer::GetCachingTimes(double& level, double& delay, double& offset)
   int64_t remain = length - m_pInputStream->Seek(0, SEEK_CUR);
 
   if (length <= 0 || remain < 0)
+  {
+    CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - length %lld, remain %lld", length, remain);
     return false;
+  }
 
   double play_sbp = DVD_MSEC_TO_TIME(m_pDemuxer->GetStreamLength()) / length;
   double queued = 1000.0 * GetQueueTime() / play_sbp;
@@ -1795,7 +1809,10 @@ bool CDVDPlayer::GetCachingTimes(double& level, double& delay, double& offset)
   offset = (double)(cached + queued) / length;
 
   if (currate == 0)
+  {
+    CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - currate %u, level %f, delay %f, offset %f)", currate, level, delay, offset);
     return true;
+  }
 
   double cache_sbp = 1.1 * (double)DVD_TIME_BASE / currate;          /* underestimate by 10 % */
   double play_left = play_sbp  * (remain + queued);                  /* time to play out all remaining bytes */
@@ -1818,6 +1835,7 @@ bool CDVDPlayer::GetCachingTimes(double& level, double& delay, double& offset)
   else
     level = (cached + queued) / (cache_need + queued);
 
+  CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - level %f, delay %f, offset %f)", level, delay, offset);
   return true;
 }
 
@@ -1826,37 +1844,44 @@ void CDVDPlayer::HandlePlaySpeed()
   bool isInMenu = IsInMenuInternal();
 
   if (isInMenu && m_caching != CACHESTATE_DONE)
-    SetCaching(CACHESTATE_DONE);
-
-  if (m_caching == CACHESTATE_FULL)
   {
+    SetCaching(CACHESTATE_DONE);
+    LogCacheLevels("1");
+  }
+
+  if (m_caching == CACHESTATE_WAITFILL)
+  {
+/*
     double level, delay, offset;
-    if (GetCachingTimes(level, delay, offset))
+    if (GetStreamCachingTimes(level, delay, offset))
     {
       if (level < 0.0)
       {
         CGUIDialogKaiToast::QueueNotification(g_localizeStrings.Get(21454), g_localizeStrings.Get(21455));
-        SetCaching(CACHESTATE_INIT);
+        SetCaching(CACHESTATE_WAITSTREAM);
       }
       if (level >= 1.0)
-        SetCaching(CACHESTATE_INIT);
+        SetCaching(CACHESTATE_WAITSTREAM);
     }
     else
+*/
     {
       if ((!m_dvdPlayerAudio->AcceptsData() && m_CurrentAudio.id >= 0)
       ||  (!m_dvdPlayerVideo->AcceptsData() && m_CurrentVideo.id >= 0))
-        SetCaching(CACHESTATE_INIT);
+        SetCaching(CACHESTATE_WAITSTREAM);
+      LogCacheLevels("2");
     }
   }
 
-  if (m_caching == CACHESTATE_INIT)
+  if (m_caching == CACHESTATE_WAITSTREAM)
   {
     // if all enabled streams have been inited we are done
     if ((m_CurrentVideo.id >= 0 || m_CurrentAudio.id >= 0) &&
         (m_CurrentVideo.id < 0 || m_CurrentVideo.syncState != IDVDStreamPlayer::SYNC_STARTING) &&
         (m_CurrentAudio.id < 0 || m_CurrentAudio.syncState != IDVDStreamPlayer::SYNC_STARTING))
-      SetCaching(CACHESTATE_PLAY);
-
+      SetCaching(CACHESTATE_WAITCODEC);
+    LogCacheLevels("3");
+/*
     // handle exceptions
     if (m_CurrentAudio.id >= 0 && m_CurrentVideo.id >= 0)
     {
@@ -1866,14 +1891,19 @@ void CDVDPlayer::HandlePlaySpeed()
         SetCaching(CACHESTATE_DONE);
       }
     }
+*/
   }
 
-  if (m_caching == CACHESTATE_PLAY)
+  if (m_caching == CACHESTATE_WAITCODEC)
   {
     // if all enabled streams have started playing we are done
     if ((m_CurrentVideo.id < 0 || !m_dvdPlayerVideo->IsStalled()) &&
         (m_CurrentAudio.id < 0 || !m_dvdPlayerAudio->IsStalled()))
+    {
       SetCaching(CACHESTATE_DONE);
+      LogCacheLevels("9");
+    }
+    LogCacheLevels("4");
   }
 
   if (m_caching == CACHESTATE_DONE)
@@ -1882,8 +1912,8 @@ void CDVDPlayer::HandlePlaySpeed()
     {
       // take action is audio or video stream is stalled
       if (((m_dvdPlayerAudio->IsStalled() && m_CurrentAudio.inited) ||
-           (m_dvdPlayerVideo->IsStalled() && m_CurrentVideo.inited)) &&
-          m_syncTimer.IsTimePast())
+           (m_dvdPlayerVideo->IsStalled() && m_CurrentVideo.inited))) // &&
+          //m_syncTimer.IsTimePast())
       {
         if (m_pInputStream->IsRealtime())
         {
@@ -1901,7 +1931,8 @@ void CDVDPlayer::HandlePlaySpeed()
           if (m_dvdPlayerAudio->GetLevel() <= 50 &&
               m_dvdPlayerVideo->GetLevel() <= 50)
           {
-            SetCaching(CACHESTATE_FULL);
+            SetCaching(CACHESTATE_WAITFILL);
+            LogCacheLevels("9");
           }
           else if (m_CurrentAudio.id >= 0 && m_CurrentAudio.inited &&
                    m_CurrentAudio.syncState == IDVDStreamPlayer::SYNC_INSYNC &&
@@ -2027,9 +2058,10 @@ void CDVDPlayer::HandlePlaySpeed()
       m_dvdPlayerAudio->SendMessage(new CDVDMsgDouble(CDVDMsg::GENERAL_RESYNC, clock), 1);
       m_dvdPlayerVideo->SendMessage(new CDVDMsgDouble(CDVDMsg::GENERAL_RESYNC, clock), 1);
       SetCaching(CACHESTATE_DONE);
+      LogCacheLevels("5");
       UpdatePlayState(0);
 
-      m_syncTimer.Set(3000);
+      //m_syncTimer.Set(3000);
     }
     else
     {
@@ -2791,6 +2823,8 @@ void CDVDPlayer::HandleMessages()
         // 2. skip frames and adjust their pts or the clock
         m_playSpeed = speed;
         m_caching = CACHESTATE_DONE;
+        LogCacheState(m_caching);
+        LogCacheLevels("6");
         m_clock.SetSpeed(speed);
         m_dvdPlayerAudio->SetSpeed(speed);
         m_dvdPlayerVideo->SetSpeed(speed);
@@ -2973,41 +3007,26 @@ void CDVDPlayer::HandleMessages()
 
 void CDVDPlayer::SetCaching(ECacheState state)
 {
-  if(state == CACHESTATE_FLUSH)
+  if (state == CACHESTATE_FLUSH)
   {
+/*
     double level, delay, offset;
-    if(GetCachingTimes(level, delay, offset))
-      state = CACHESTATE_FULL;
+    if(GetStreamCachingTimes(level, delay, offset))
+      state = CACHESTATE_WAITFILL;
     else
-      state = CACHESTATE_INIT;
+      state = CACHESTATE_WAITSTREAM;
+*/
+    state = CACHESTATE_WAITFILL;
   }
 
-  if(m_caching == state)
-    return;
-
-  std::string state_str;
-  switch(state)
+  if (m_caching == state)
   {
-    case CACHESTATE_DONE:
-      state_str = "CACHESTATE_DONE";
-      break;
-    case CACHESTATE_FULL:
-      state_str = "CACHESTATE_FULL";
-      break;
-    case CACHESTATE_INIT:
-      state_str = "CACHESTATE_INIT";
-      break;
-    case CACHESTATE_PLAY:
-      state_str = "CACHESTATE_PLAY";
-      break;
-    case CACHESTATE_FLUSH:
-      state_str = "CACHESTATE_FLUSH";
-      break;
+    LogCacheState(m_caching);
+    return;
   }
-  CLog::Log(LOGDEBUG, "CDVDPlayer::SetCaching - %s", state_str.c_str());
 
-  if (state == CACHESTATE_FULL ||
-      state == CACHESTATE_INIT)
+  if (state == CACHESTATE_WAITFILL ||
+      state == CACHESTATE_WAITSTREAM)
   {
     m_clock.SetSpeed(DVD_PLAYSPEED_PAUSE);
 
@@ -3020,11 +3039,11 @@ void CDVDPlayer::SetCaching(ECacheState state)
 
     m_pInputStream->ResetScanTimeout((unsigned int) CSettings::GetInstance().GetInt(CSettings::SETTING_PVRPLAYBACK_SCANTIME) * 1000);
 
-    m_cachingTimer.Set(5000);
+    //m_cachingTimer.Set(5000);
   }
 
-  if (state == CACHESTATE_PLAY ||
-     (state == CACHESTATE_DONE && m_caching != CACHESTATE_PLAY))
+  if (state == CACHESTATE_WAITCODEC ||
+     (state == CACHESTATE_DONE && m_caching != CACHESTATE_WAITCODEC))
   {
     m_clock.SetSpeed(m_playSpeed);
     m_dvdPlayerAudio->SetSpeed(m_playSpeed);
@@ -3033,10 +3052,43 @@ void CDVDPlayer::SetCaching(ECacheState state)
     m_pInputStream->ResetScanTimeout(0);
   }
   m_caching = state;
+  LogCacheState(m_caching);
+  LogCacheLevels("7");
 
   m_clock.SetSpeedAdjust(0);
   if (m_omxplayer_mode)
     m_OmxPlayerState.av_clock.OMXSetSpeedAdjust(0);
+}
+
+void CDVDPlayer::LogCacheState(ECacheState state)
+{
+  std::string state_str;
+  switch(state)
+  {
+    case CACHESTATE_DONE:
+      state_str = "CACHESTATE_DONE";
+      break;
+    case CACHESTATE_WAITFILL:
+      state_str = "CACHESTATE_WAITFILL";
+      break;
+    case CACHESTATE_WAITSTREAM:
+      state_str = "CACHESTATE_WAITSTREAM";
+      break;
+    case CACHESTATE_WAITCODEC:
+      state_str = "CACHESTATE_WAITCODEC";
+      break;
+    case CACHESTATE_FLUSH:
+      state_str = "CACHESTATE_FLUSH";
+      break;
+  }
+  CLog::Log(LOGDEBUG, "CDVDPlayer::SetCaching - %s", state_str.c_str());
+}
+
+void CDVDPlayer::LogCacheLevels(const std::string &msg)
+{
+  int audioLevel = m_dvdPlayerAudio->GetLevel();
+  int videoLevel = m_dvdPlayerVideo->GetLevel();
+  CLog::Log(LOGDEBUG, "CDVDPlayer::LogCacheLevels(%s) - audioLevel %d, videoLevel %d", msg.c_str(), audioLevel, videoLevel);
 }
 
 void CDVDPlayer::SetPlaySpeed(int speed)
@@ -3066,6 +3118,7 @@ void CDVDPlayer::Pause()
   if(m_playSpeed != DVD_PLAYSPEED_PAUSE && IsCaching())
   {
     SetCaching(CACHESTATE_DONE);
+    LogCacheLevels("8");
     return;
   }
 
@@ -3286,7 +3339,7 @@ void CDVDPlayer::GetGeneralInfo(std::string& strGeneralInfo)
         strBuf += StringUtils::Format(" forward:%s %2.0f%%"
                                       , StringUtils::SizeToString(m_State.cache_bytes).c_str()
                                       , m_State.cache_level * 100);
-        if(m_playSpeed == 0 || m_caching == CACHESTATE_FULL)
+        if(m_playSpeed == 0 || m_caching == CACHESTATE_WAITFILL)
           strBuf += StringUtils::Format(" %d sec", DVD_TIME_TO_SEC(m_State.cache_delay));
       }
 
@@ -3319,7 +3372,7 @@ void CDVDPlayer::GetGeneralInfo(std::string& strGeneralInfo)
         strBuf += StringUtils::Format(" forward:%s %2.0f%%"
                                       , StringUtils::SizeToString(m_State.cache_bytes).c_str()
                                       , m_State.cache_level * 100);
-        if(m_playSpeed == 0 || m_caching == CACHESTATE_FULL)
+        if(m_playSpeed == 0 || m_caching == CACHESTATE_WAITFILL)
           strBuf += StringUtils::Format(" %d sec", DVD_TIME_TO_SEC(m_State.cache_delay));
       }
 
@@ -4654,7 +4707,7 @@ double CDVDPlayer::GetQueueTime()
 {
   int a = m_dvdPlayerAudio->GetLevel();
   int v = m_dvdPlayerVideo->GetLevel();
-  return std::max(a, v) * 8000.0 / 100;
+  return std::max(a, v) * StandardDemuxerQueueTime / 100;
 }
 
 void CDVDPlayer::GetVideoStreamInfo(SPlayerVideoStreamInfo &info)
@@ -4923,17 +4976,19 @@ void CDVDPlayer::UpdatePlayState(double timeout)
   else
     state.demux_video = "";
 
+/*
   double level, delay, offset;
-  if(GetCachingTimes(level, delay, offset))
+  if (GetStreamCachingTimes(level, delay, offset))
   {
     state.cache_delay  = std::max(0.0, delay);
     state.cache_level  = std::max(0.0, std::min(1.0, level));
     state.cache_offset = offset;
   }
   else
+*/
   {
     state.cache_delay  = 0.0;
-    state.cache_level  = std::min(1.0, GetQueueTime() / 8000.0);
+    state.cache_level  = std::min(1.0, GetQueueTime() / StandardDemuxerQueueTime);
     state.cache_offset = GetQueueTime() / state.time_total;
   }
 

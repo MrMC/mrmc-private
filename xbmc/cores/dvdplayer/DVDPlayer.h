@@ -314,13 +314,13 @@ public:
 
   enum ECacheState
   { CACHESTATE_DONE = 0
-  , CACHESTATE_FULL     // player is filling up the demux queue
-  , CACHESTATE_INIT     // player is waiting for first packet of each stream
-  , CACHESTATE_PLAY     // player is waiting for players to not be stalled
-  , CACHESTATE_FLUSH    // temporary state player will choose startup between init or full
+  , CACHESTATE_WAITFILL     // player is filling up the demux queue
+  , CACHESTATE_WAITSTREAM   // player is waiting for first packet of each stream
+  , CACHESTATE_WAITCODEC    // player is waiting for players to not be stalled
+  , CACHESTATE_FLUSH        // temporary state player will choose startup CACHESTATE_WAITFILL or CACHESTATE_WAITSTREAM
   };
 
-  virtual bool IsCaching() const { return m_caching > CACHESTATE_DONE && m_caching < CACHESTATE_PLAY; }
+  virtual bool IsCaching() const { return m_caching > CACHESTATE_DONE && m_caching < CACHESTATE_WAITCODEC; }
   virtual int GetCacheLevel() const ;
 
   virtual int OnDVDNavResult(void* pData, int iMessage);
@@ -371,11 +371,13 @@ protected:
   void SetPlaySpeed(int iSpeed);
   int GetPlaySpeed()                                                { return m_playSpeed; }
   void SetCaching(ECacheState state);
+  void LogCacheState(ECacheState state);
+  void LogCacheLevels(const std::string &msg);
 
   int64_t GetTotalTimeInMsec();
 
   double GetQueueTime();
-  bool GetCachingTimes(double& play_left, double& cache_left, double& file_offset);
+  bool GetStreamCachingTimes(double& play_left, double& cache_left, double& file_offset);
 
 
   void FlushBuffers(bool queued, double pts = DVD_NOPTS_VALUE, bool accurate = true, bool sync = true);
