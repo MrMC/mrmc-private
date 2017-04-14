@@ -83,7 +83,7 @@
 using namespace PVR;
 using namespace KODI::MESSAGING;
 
-#define StandardDemuxerQueueTime (8000.0)
+#define StandardDemuxerQueueTime (4 * 8000.0)
 
 void CSelectionStreams::Clear(StreamType type, StreamSource source)
 {
