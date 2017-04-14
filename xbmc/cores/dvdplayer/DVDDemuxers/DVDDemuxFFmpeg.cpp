@@ -381,7 +381,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
         strFile = url.Get();
       } 
     }
-#if 0
+#if 1
     if (url.IsFileType("m3u8"))
     {
       // have to explicity set the AVFMT_FLAG_CUSTOM_IO flag or die when closing.
