@@ -1841,6 +1841,7 @@ bool CPlexUtils::GetURL(CFileItem &item)
   curl.SetOption("videoQuality", "100");
   curl.SetOption("videoResolution", resolution);
   curl.SetOption("directStream", "1");
+  curl.SetOption("waitForSegments", "1");
   curl.SetOption("directPlay", "0");
   curl.SetOption("audioBoost", "0");
   curl.SetOption("fastSeek", "1");
