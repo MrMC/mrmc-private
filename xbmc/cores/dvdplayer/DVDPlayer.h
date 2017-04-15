@@ -370,9 +370,9 @@ protected:
    */
   void SetPlaySpeed(int iSpeed);
   int GetPlaySpeed()                                                { return m_playSpeed; }
-  void SetCaching(ECacheState state);
-  void LogCacheState(ECacheState state);
-  void LogCacheLevels(const std::string &msg);
+  void SetCaching(ECacheState state, const std::string &logmsg);
+  void LogCacheState(ECacheState state, const std::string &logmsg);
+  void LogCacheLevels(const std::string &logmsg);
 
   int64_t GetTotalTimeInMsec();
 
