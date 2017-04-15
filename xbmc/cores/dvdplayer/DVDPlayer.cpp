@@ -1443,7 +1443,7 @@ void CDVDPlayer::Process()
       {
         SAFE_DELETE(m_pDemuxer);
 
-        SetCaching(CACHESTATE_DONE, std::string(__FUNCTION__) + "NEXTSTREAM_OPEN");
+        SetCaching(CACHESTATE_DONE, std::string(__FUNCTION__) + ", NEXTSTREAM_OPEN");
         CLog::Log(LOGNOTICE, "DVDPlayerPlayer: next stream, wait for old streams to be finished");
         CloseStream(m_CurrentAudio, true);
         CloseStream(m_CurrentVideo, true);
@@ -1491,7 +1491,7 @@ void CDVDPlayer::Process()
       m_CurrentRadioRDS.inited = false;
 
       // if we are caching, start playing it again
-      SetCaching(CACHESTATE_DONE, std::string(__FUNCTION__) + "if we are caching, start playing it again");
+      SetCaching(CACHESTATE_DONE, std::string(__FUNCTION__) + ", if we are caching, start playing it again");
 
       // while players are still playing, keep going to allow seekbacks
       if(m_dvdPlayerAudio->HasData()
@@ -1972,7 +1972,7 @@ void CDVDPlayer::HandlePlaySpeed()
       m_CurrentVideo.avsync = CCurrentStream::AV_SYNC_NONE;
       m_dvdPlayerAudio->SendMessage(new CDVDMsgDouble(CDVDMsg::GENERAL_RESYNC, clock), 1);
       m_dvdPlayerVideo->SendMessage(new CDVDMsgDouble(CDVDMsg::GENERAL_RESYNC, clock), 1);
-      SetCaching(CACHESTATE_DONE, __FUNCTION__);
+      SetCaching(CACHESTATE_DONE, std::string(__FUNCTION__) + ", GENERAL_RESYNC");
       LogCacheLevels("5");
       UpdatePlayState(0);
 
@@ -2537,7 +2537,7 @@ void CDVDPlayer::HandleMessages()
                                                           && m_messenger.GetPacketCount(CDVDMsg::PLAYER_SEEK_CHAPTER) == 0)
       {
         g_infoManager.SetDisplayAfterSeek(100000);
-        SetCaching(CACHESTATE_FLUSH, std::string(__FUNCTION__) + "PLAYER_SEEK");
+        SetCaching(CACHESTATE_FLUSH, std::string(__FUNCTION__) + ", PLAYER_SEEK");
 
         CDVDMsgPlayerSeekChapter &msg(*((CDVDMsgPlayerSeekChapter*)pMsg));
         double start = DVD_NOPTS_VALUE;
@@ -2650,7 +2650,7 @@ void CDVDPlayer::HandleMessages()
       else if (pMsg->IsType(CDVDMsg::PLAYER_SET_STATE))
       {
         g_infoManager.SetDisplayAfterSeek(100000);
-        SetCaching(CACHESTATE_FLUSH, std::string(__FUNCTION__) + "PLAYER_SET_STATE");
+        SetCaching(CACHESTATE_FLUSH, std::string(__FUNCTION__) + ", PLAYER_SET_STATE");
 
         CDVDMsgPlayerSetState* pMsgPlayerSetState = (CDVDMsgPlayerSetState*)pMsg;
 
