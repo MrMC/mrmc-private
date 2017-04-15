@@ -1770,75 +1770,6 @@ void CDVDPlayer::ProcessRadioRDSData(CDemuxStream* pStream, DemuxPacket* pPacket
   m_dvdPlayerRadioRDS->SendMessage(new CDVDMsgDemuxerPacket(pPacket, drop));
 }
 
-bool CDVDPlayer::GetStreamCachingTimes(double& level, double& delay, double& offset)
-{
-    return false;
-
-  if (!m_pInputStream || !m_pDemuxer)
-  {
-    CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - no m_pInputStream, no m_pDemuxer");
-    return false;
-  }
-
-  XFILE::SCacheStatus status;
-  if (!m_pInputStream->GetCacheStatus(&status))
-  {
-    CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - m_pInputStream->GetCacheStatus == false");
-    return false;
-  }
-
-  uint64_t &cached = status.forward;
-  unsigned &currate = status.currate;
-  unsigned &maxrate = status.maxrate;
-  float &cache_level = status.level;
-
-  int64_t length = m_pInputStream->GetLength();
-  int64_t remain = length - m_pInputStream->Seek(0, SEEK_CUR);
-
-  if (length <= 0 || remain < 0)
-  {
-    CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - length %lld, remain %lld", length, remain);
-    return false;
-  }
-
-  double play_sbp = DVD_MSEC_TO_TIME(m_pDemuxer->GetStreamLength()) / length;
-  double queued = 1000.0 * GetQueueTime() / play_sbp;
-
-  delay  = 0.0;
-  level  = 0.0;
-  offset = (double)(cached + queued) / length;
-
-  if (currate == 0)
-  {
-    CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - currate %u, level %f, delay %f, offset %f)", currate, level, delay, offset);
-    return true;
-  }
-
-  double cache_sbp = 1.1 * (double)DVD_TIME_BASE / currate;          /* underestimate by 10 % */
-  double play_left = play_sbp  * (remain + queued);                  /* time to play out all remaining bytes */
-  double cache_left = cache_sbp * (remain - cached);                 /* time to cache the remaining bytes */
-  double cache_need = std::max(0.0, remain - play_left / cache_sbp); /* bytes needed until play_left == cache_left */
-
-   delay = cache_left - play_left;
-
-  /* NOTE: We can only reliably test for low readrate, when the cache is not
-   * already *near* full. This is because as soon as it's full the average-
-   * rate will become approximately the current-rate which can flag false
-   * low read-rate conditions. To work around this we don't check the currate at 100%
-   * but between 80% and 90%
-   */
-  if (cache_level > 0.8 && cache_level < 0.9 && currate < maxrate)
-  {
-    //CLog::Log(LOGDEBUG, "Readrate %u is too low with %u required", currate, maxrate);
-    level = -1.0;                          /* buffer is full & our read rate is too low  */
-  }
-  else
-    level = (cached + queued) / (cache_need + queued);
-
-  CLog::Log(LOGDEBUG, "CDVDPlayer::GetCachingTimes - level %f, delay %f, offset %f)", level, delay, offset);
-  return true;
-}
-
 void CDVDPlayer::HandlePlaySpeed()
 {
   bool isInMenu = IsInMenuInternal();
@@ -1851,26 +1782,10 @@ void CDVDPlayer::HandlePlaySpeed()
 
   if (m_caching == CACHESTATE_WAITFILL)
   {
-/*
-    double level, delay, offset;
-    if (GetStreamCachingTimes(level, delay, offset))
-    {
-      if (level < 0.0)
-      {
-        CGUIDialogKaiToast::QueueNotification(g_localizeStrings.Get(21454), g_localizeStrings.Get(21455));
-        SetCaching(CACHESTATE_WAITSTREAM);
-      }
-      if (level >= 1.0)
-        SetCaching(CACHESTATE_WAITSTREAM);
-    }
-    else
-*/
-    {
-      if ((!m_dvdPlayerAudio->AcceptsData() && m_CurrentAudio.id >= 0)
-      ||  (!m_dvdPlayerVideo->AcceptsData() && m_CurrentVideo.id >= 0))
-        SetCaching(CACHESTATE_WAITSTREAM, __FUNCTION__);
+    if ((!m_dvdPlayerAudio->AcceptsData() && m_CurrentAudio.id >= 0)
+    ||  (!m_dvdPlayerVideo->AcceptsData() && m_CurrentVideo.id >= 0))
+      SetCaching(CACHESTATE_WAITSTREAM, __FUNCTION__);
       LogCacheLevels("2");
-    }
   }
 
   if (m_caching == CACHESTATE_WAITSTREAM)
@@ -3009,13 +2924,6 @@ void CDVDPlayer::SetCaching(ECacheState state, const std::string &logmsg)
 {
   if (state == CACHESTATE_FLUSH)
   {
-/*
-    double level, delay, offset;
-    if(GetStreamCachingTimes(level, delay, offset))
-      state = CACHESTATE_WAITFILL;
-    else
-      state = CACHESTATE_WAITSTREAM;
-*/
     state = CACHESTATE_WAITFILL;
   }
 
@@ -4976,21 +4884,9 @@ void CDVDPlayer::UpdatePlayState(double timeout)
   else
     state.demux_video = "";
 
-/*
-  double level, delay, offset;
-  if (GetStreamCachingTimes(level, delay, offset))
-  {
-    state.cache_delay  = std::max(0.0, delay);
-    state.cache_level  = std::max(0.0, std::min(1.0, level));
-    state.cache_offset = offset;
-  }
-  else
-*/
-  {
-    state.cache_delay  = 0.0;
-    state.cache_level  = std::min(1.0, GetQueueTime() / StandardDemuxerQueueTime);
-    state.cache_offset = GetQueueTime() / state.time_total;
-  }
+  state.cache_delay  = 0.0;
+  state.cache_level  = std::min(1.0, GetQueueTime() / StandardDemuxerQueueTime);
+  state.cache_offset = GetQueueTime() / state.time_total;
 
   XFILE::SCacheStatus status;
   if(m_pInputStream && m_pInputStream->GetCacheStatus(&status))
