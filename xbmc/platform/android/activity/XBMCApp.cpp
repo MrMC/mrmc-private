@@ -119,6 +119,7 @@ bool CXBMCApp::m_wasPlayingVideoWhenPaused = false;
 double CXBMCApp::m_wasPlayingVideoWhenPausedTime = 0.0;
 bool CXBMCApp::m_wasPlayingWhenTransientLoss = false;
 bool CXBMCApp::m_headsetPlugged = false;
+bool CXBMCApp::m_hdmiPlugged = true;
 CCriticalSection CXBMCApp::m_applicationsMutex;
 std::vector<androidPackage> CXBMCApp::m_applications;
 std::vector<CActivityResultEvent*> CXBMCApp::m_activityResultEvents;
@@ -227,6 +228,7 @@ void CXBMCApp::onResume()
   intentFilter.addAction("android.intent.action.SCREEN_ON");
   intentFilter.addAction("android.intent.action.SCREEN_OFF");
   intentFilter.addAction("android.intent.action.HEADSET_PLUG");
+  intentFilter.addAction("android.media.action.HDMI_AUDIO_PLUG");
   intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
   registerReceiver(*this, intentFilter);
 
@@ -506,6 +508,11 @@ void CXBMCApp::CheckHeadsetPlugged()
 bool CXBMCApp::IsHeadsetPlugged()
 {
   return m_headsetPlugged;
+}
+
+bool CXBMCApp::IsHDMIPlugged()
+{
+  return m_hdmiPlugged;
 }
 
 void CXBMCApp::run()
@@ -976,7 +983,7 @@ void CXBMCApp::SetSystemVolume(float percent)
 void CXBMCApp::onReceive(CJNIIntent intent)
 {
   std::string action = intent.getAction();
-  android_printf("CXBMCApp::onReceive Got intent. Action: %s", action.c_str());
+  CLog::Log(LOGDEBUG, "CXBMCApp::onReceive Got intent. Action: %s", action.c_str());
   if (action == "android.intent.action.BATTERY_CHANGED")
     m_batteryLevel = intent.getIntExtra("level",-1);
   else if (action == "android.intent.action.DREAMING_STOPPED" || action == "android.intent.action.SCREEN_ON")
@@ -1007,6 +1014,18 @@ void CXBMCApp::onReceive(CJNIIntent intent)
       CNetwork& net = g_application.getNetwork();
       CNetworkAndroid* netdroid = static_cast<CNetworkAndroid*>(&net);
       netdroid->RetrieveInterfaces();
+    }
+  }
+  else if (action == "android.media.action.HDMI_AUDIO_PLUG")
+  {
+    bool newstate;
+    newstate = (intent.getIntExtra("android.media.extra.AUDIO_PLUG_STATE", 0) != 0);
+
+    if (newstate != m_hdmiPlugged)
+    {
+      CLog::Log(LOGDEBUG, "-- HDMI state: %s",  newstate ? "on" : "off");
+      m_hdmiPlugged = newstate;
+      CAEFactory::DeviceChange();
     }
   }
   else if (action == "android.intent.action.MEDIA_BUTTON")
