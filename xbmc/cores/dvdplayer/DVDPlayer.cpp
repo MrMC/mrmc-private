@@ -658,6 +658,10 @@ bool CDVDPlayer::OpenFile(const CFileItem& file, const CPlayerOptions &options)
   Create();
 
   // wait for the ready event
+  int videoBusyDialogDelay = g_advancedSettings.m_videoBusyDialogDelay_ms;
+  if (m_item.IsMediaServiceBased())
+    videoBusyDialogDelay = 15000;
+
   CGUIDialogBusy::WaitOnEvent(m_ready, g_advancedSettings.m_videoBusyDialogDelay_ms, false);
 
   // Playback might have been stopped due to some error
