@@ -521,11 +521,11 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
 
   // print some extra information
   av_dump_format(m_pFormatContext, 0, strFile.c_str(), 0);
-
+/*
   CURL url(strFile);
   if (StringUtils::StartsWithNoCase(url.GetFileName(), "video/:/transcode/universal"))
     m_retainStartTime = true;
-  
+*/
   UpdateCurrentPTS();
 
   // in case of mpegts and we have not seen pat/pmt, defer creation of streams
