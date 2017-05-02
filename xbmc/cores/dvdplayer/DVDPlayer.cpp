@@ -2794,7 +2794,7 @@ void CDVDPlayer::SetCaching(ECacheState state, const std::string &msg)
 {
   if(state == CACHESTATE_FLUSH)
   {
-    state = CACHESTATE_WAITSTREAM;
+    state = CACHESTATE_WAITFILL;
   }
 
   if(m_caching == state)
