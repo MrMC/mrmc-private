@@ -80,7 +80,6 @@ protected:
   virtual void OnExit();
   virtual void Process();
 
-  void UpdatePlayerInfo();
   void OpenStream(CDVDStreamInfo &hints, CDVDAudioCodec* codec);
   //! Switch codec if needed. Called when the sample rate gotten from the
   //! codec changes, in which case we may want to switch passthrough on/off.
@@ -165,10 +164,8 @@ protected:
     : pts(DVD_NOPTS_VALUE)
     , passthrough(false)
     {}
-
-    std::string      info;
-    double           pts;
-    bool             passthrough;
+    double pts;
+    bool passthrough;
   };
 
   CCriticalSection m_info_section;
