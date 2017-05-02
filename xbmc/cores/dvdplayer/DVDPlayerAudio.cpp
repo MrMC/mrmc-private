@@ -231,7 +231,7 @@ void CDVDPlayerAudio::OnStartup()
 void CDVDPlayerAudio::UpdatePlayerInfo()
 {
   std::ostringstream s;
-  s << "aq:"     << std::setw(2) << std::min(99,m_messageQueue.GetLevel()) << "%";
+  s << "aq:"     << std::setw(2) << std::min(99, GetLevel()) << "%";
   s << ", Kb/s:" << std::fixed << std::setprecision(2) << (double)GetAudioBitrate() / 1024.0;
 
   //print the inverse of the resample ratio, since that makes more sense
@@ -402,7 +402,11 @@ void CDVDPlayerAudio::Process()
       }
 
       m_audioStats.AddSampleBytes(pPacket->iSize);
-      UpdatePlayerInfo();
+      {
+        CSingleLock lock(m_info_section);
+        m_info.pts = m_dvdAudio.GetPlayingPts();
+        m_info.passthrough = m_pAudioCodec && m_pAudioCodec->NeedPassthrough();
+      }
 
       // loop while no error and decoder produces output
       while (!m_bStop)
@@ -645,6 +649,7 @@ bool CDVDPlayerAudio::SwitchCodecIfNeeded()
 std::string CDVDPlayerAudio::GetPlayerInfo()
 {
   CSingleLock lock(m_info_section);
+  UpdatePlayerInfo();
   return m_info.info;
 }
 
