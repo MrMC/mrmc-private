@@ -266,7 +266,7 @@ bool CDVDDemuxFFmpeg::Open(CDVDInputStream* pInput, bool streaminfo, bool filein
         strFile = url.Get();
       } 
     }
- #if 1
+ #if 0
     if (url.IsFileType("m3u8"))
     {
       static_cast<CDVDInputStreamFFmpeg*>(m_pInput)->UseHLSCustomIO(m_pFormatContext);
