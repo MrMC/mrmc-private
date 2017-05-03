@@ -380,8 +380,11 @@ void CDVDPlayerAudio::Process()
 
       m_audioStats.AddSampleBytes(pPacket->iSize);
       {
-        CSingleLock lock(m_info_section);
+        // m_info is read only elsewhere and only written here
         m_info.pts = m_dvdAudio.GetPlayingPts();
+        m_info.bitrate = m_audioStats.GetBitrate();
+        m_info.resamplerate = m_dvdAudio.GetResampleRatio();
+        m_info.attenuation = m_dvdAudio.GetCurrentAttenuation();
         m_info.passthrough = m_pAudioCodec && m_pAudioCodec->NeedPassthrough();
       }
 
@@ -626,15 +629,15 @@ bool CDVDPlayerAudio::SwitchCodecIfNeeded()
 std::string CDVDPlayerAudio::GetPlayerInfo()
 {
   std::ostringstream s;
-  s << "aq:"     << std::setw(2) << std::min(99, GetLevel()) << "%";
-  s << ", Kb/s:" << std::fixed << std::setprecision(2) << (double)GetAudioBitrate() / 1024.0;
+  s << "aq:"     << std::setw(2) << std::min(99, m_messageQueue.GetLevel()) << "%";
+  s << ", Kb/s:" << std::fixed << std::setprecision(2) << m_info.bitrate / 1024.0;
 
-  //print the inverse of the resample ratio, since that makes more sense
-  //if the resample ratio is 0.5, then we're playing twice as fast
+  // print the inverse of the resample ratio, since that makes more sense
+  // if the resample ratio is 0.5, then we're playing twice as fast
   if (m_synctype == SYNC_RESAMPLE)
-    s << ", rr:" << std::fixed << std::setprecision(5) << 1.0 / m_dvdAudio.GetResampleRatio();
+    s << ", rr:" << std::fixed << std::setprecision(5) << 1.0 / m_info.resamplerate;
 
-  s << ", att:" << std::fixed << std::setprecision(1) << log(GetCurrentAttenuation()) * 20.0f << " dB";
+  s << ", att:" << std::fixed << std::setprecision(1) << log(m_info.attenuation) * 20.0f << " dB";
 
   return s.str();
 }
@@ -651,6 +654,5 @@ int CDVDPlayerAudio::GetAudioChannels()
 
 bool CDVDPlayerAudio::IsPassthrough() const
 {
-  CSingleLock lock(m_info_section);
   return m_info.passthrough;
 }
