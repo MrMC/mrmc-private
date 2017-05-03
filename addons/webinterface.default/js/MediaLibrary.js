@@ -240,6 +240,7 @@ MediaLibrary.prototype = {
   },
   pressLogKey: function (iframeName) {
     $('#spinner').show();
+
     if (window.frames && window.frames[iframeName] &&
       window.frames[iframeName].document &&
       window.frames[iframeName].document.body &&
@@ -255,31 +256,38 @@ MediaLibrary.prototype = {
         {
             logDetail = "MrMC (Old) Log";
         }
+
+        // Need to revisit this, iOS wont let us select and copy....
+        if (navigator.userAgent.match(/ipad|ipod|iphone/i))
+        {
+          window.alert(logDetail + " was NOT copied to clipboard, select all content and copy manually");
+          return;
+        }
         var textArea = document.createElement("textarea");
-            var textAreaHeader = "##############################################################\nContent of " + logDetail +"\n##############################################################\n\n"
-            textArea.style.position = 'fixed';
-            textArea.style.top = 0;
-            textArea.style.left = 0;
-            textArea.style.width = '2em';
-            textArea.style.height = '2em';
-            textArea.style.padding = 0;
-            textArea.style.border = 'none';
-            textArea.style.outline = 'none';
-            textArea.style.boxShadow = 'none';
-            textArea.style.background = 'transparent';
-            textArea.value = textAreaHeader + txt;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try
-            {
-              var successful = document.execCommand('copy');
-              window.alert(logDetail + " was copied to clipboard");
-            }
-            catch (err)
-            {
-              window.alert(logDetail + " was NOT copied to clipboard, select all content and copy manually");
-            }
-            document.body.removeChild(textArea);
+        var textAreaHeader = "##############################################################\nContent of " + logDetail +"\n##############################################################\n\n"
+        textArea.style.position = 'fixed';
+        textArea.style.top = 0;
+        textArea.style.left = 0;
+        textArea.style.width = '2em';
+        textArea.style.height = '2em';
+        textArea.style.padding = 0;
+        textArea.style.border = 'none';
+        textArea.style.outline = 'none';
+        textArea.style.boxShadow = 'none';
+        textArea.style.background = 'transparent';
+        textArea.value = textAreaHeader + txt;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try
+        {
+          var successful = document.execCommand('copy');
+          window.alert(logDetail + " was copied to clipboard");
+        }
+        catch (err)
+        {
+          window.alert(logDetail + " was NOT copied to clipboard, select all content and copy manually");
+        }
+        document.body.removeChild(textArea);
     }
     $('#spinner').hide();
   },
