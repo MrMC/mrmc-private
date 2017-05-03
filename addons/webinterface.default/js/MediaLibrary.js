@@ -261,6 +261,7 @@ MediaLibrary.prototype = {
         if (navigator.userAgent.match(/ipad|ipod|iphone/i))
         {
           window.alert(logDetail + " was NOT copied to clipboard, select all content and copy manually");
+          $('#spinner').hide();
           return;
         }
         var textArea = document.createElement("textarea");
