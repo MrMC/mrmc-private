@@ -49,6 +49,8 @@ MediaLibrary.prototype = {
     $('#profiles').removeClass('selected');
     $('#log').removeClass('selected');
     $('#logold').removeClass('selected');
+    $('iframe').remove();
+    $('button').remove();
     this.hideOverlay();
   },
   replaceAll: function (haystack, needle, thread) {
@@ -126,26 +128,56 @@ MediaLibrary.prototype = {
   },
   logOpen: function (event) {
     this.resetPage();
-    $('#log').addClass('selected');
+    var logUrl = 'vfs%2Fspecial%3A%2F%2Flogs%2Fmrmc.log?';
+    $('#log').addClass('selected');    
     $('.contentContainer').hide();
-    var w = window.open('vfs%2Fspecial%3A%2F%2Flogs%2Fmrmc.log');
-    w.onload = function(){
-    setTimeout(function(){
-       $(w.document).find('html').append('<head><title>MrMC log</title></head>');
-      }, 500);
-    }
-  },  
+    var html = document.documentElement;
+    var body = document.getElementsByTagName("body")[0];
+    var height = Math.max( body.scrollHeight, body.offsetHeight, 
+                       html.clientHeight, html.scrollHeight, html.offsetHeight );
+
+    var button = document.createElement("button");
+    button.innerHTML = "Copy Log Content";
+    button.style.marginTop = "5px";
+
+    $('#content').append(button);
+
+    button.addEventListener ("click", jQuery.proxy(this.pressLogKey,this, "log"));
+
+    var iframe = document.createElement('iframe');
+    iframe.src = logUrl + new Date().getTime();
+    iframe.width="95%";
+    iframe.height=height;
+    iframe.name="log";
+    iframe.id='iframe';
+    $('#content').append(iframe);
+  }, 
   oldLogOpen: function (event) {
     this.resetPage();
+    var logUrl = 'vfs%2Fspecial%3A%2F%2Flogs%2Fmrmc.old.log?';;
     $('#logold').addClass('selected');
     $('.contentContainer').hide();
-    var w = window.open('vfs%2Fspecial%3A%2F%2Flogs%2Fmrmc.old.log');
-    w.onload = function(){
-    setTimeout(function(){
-       $(w.document).find('html').append('<head><title>MrMC old log</title></head>');
-    }, 500);
-  }
-  },  
+    var html = document.documentElement;
+    var body = document.getElementsByTagName("body")[0];
+    var height = Math.max( body.scrollHeight, body.offsetHeight, 
+                       html.clientHeight, html.scrollHeight, html.offsetHeight );
+
+    var button = document.createElement('button');
+    button.innerHTML = "Copy Log (Old) Content";
+    button.style.marginTop = "5px";
+
+    $('#content').append(button);
+
+    button.addEventListener ("click", jQuery.proxy(this.pressLogKey,this, "logold"));
+
+    var iframe = document.createElement('iframe');
+    iframe.src = logUrl + new Date().getTime();
+    iframe.width="95%";
+    iframe.height=height;
+    iframe.name="logold";
+    iframe.id='iframeOld';
+    $('#content').append(iframe);
+  },
   shouldHandleEvent: function (event) {
     var inRemoteControl = $('#remoteControl').hasClass('selected');
     return (!event.ctrlKey && !event.altKey && inRemoteControl);
@@ -205,6 +237,51 @@ MediaLibrary.prototype = {
     var callObj = {'method': method};
     if (params) { callObj.params = params; }
     return xbmc.rpc.request(callObj);
+  },
+  pressLogKey: function (iframeName) {
+    $('#spinner').show();
+    if (window.frames && window.frames[iframeName] &&
+      window.frames[iframeName].document &&
+      window.frames[iframeName].document.body &&
+      window.frames[iframeName].document.body.innerText)
+      {
+        var txt = window.frames[iframeName].document.body.innerText;
+        var logDetail;
+        if(iframeName == "log")
+        {
+            logDetail = "MrMC Log";
+        }
+        else
+        {
+            logDetail = "MrMC (Old) Log";
+        }
+        var textArea = document.createElement("textarea");
+            var textAreaHeader = "##############################################################\nContent of " + logDetail +"\n##############################################################\n\n"
+            textArea.style.position = 'fixed';
+            textArea.style.top = 0;
+            textArea.style.left = 0;
+            textArea.style.width = '2em';
+            textArea.style.height = '2em';
+            textArea.style.padding = 0;
+            textArea.style.border = 'none';
+            textArea.style.outline = 'none';
+            textArea.style.boxShadow = 'none';
+            textArea.style.background = 'transparent';
+            textArea.value = textAreaHeader + txt;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try
+            {
+              var successful = document.execCommand('copy');
+              window.alert(logDetail + " was copied to clipboard");
+            }
+            catch (err)
+            {
+              window.alert(logDetail + " was NOT copied to clipboard, select all content and copy manually");
+            }
+            document.body.removeChild(textArea);
+    }
+    $('#spinner').hide();
   },
   pressRemoteKey: function (event) {
     var player = -1,
