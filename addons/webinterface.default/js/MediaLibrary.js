@@ -147,7 +147,7 @@ MediaLibrary.prototype = {
     var iframe = document.createElement('iframe');
     iframe.src = logUrl + new Date().getTime();
     iframe.width="95%";
-    iframe.height=height;
+    iframe.height=height - 115;
     iframe.name="log";
     iframe.id='iframe';
     $('#content').append(iframe);
@@ -173,7 +173,7 @@ MediaLibrary.prototype = {
     var iframe = document.createElement('iframe');
     iframe.src = logUrl + new Date().getTime();
     iframe.width="95%";
-    iframe.height=height;
+    iframe.height=height - 115;
     iframe.name="logold";
     iframe.id='iframeOld';
     $('#content').append(iframe);

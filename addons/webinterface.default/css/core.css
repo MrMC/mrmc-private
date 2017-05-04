@@ -771,6 +771,7 @@ div.imgWrapper div.inner {
 
 iframe {
   margin-top: 5px;
+  margin-left: 10px;
   border-top: #c00 2px solid;
   border-right: #c00 2px solid;
   border-left: #c00 2px solid;
