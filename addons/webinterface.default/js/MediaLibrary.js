@@ -33,8 +33,8 @@ MediaLibrary.prototype = {
     $('#pictureLibrary').click(jQuery.proxy(this.pictureLibraryOpen, this));
     $('#remoteControl').click(jQuery.proxy(this.remoteControlOpen, this));
     $('#profiles').click(jQuery.proxy(this.profilesOpen, this));
-    $('#log').click(jQuery.proxy(this.logOpen, this));
-    $('#logold').click(jQuery.proxy(this.oldLogOpen, this));
+    $('#log').click(jQuery.proxy(this.logOpen, this, "log"));
+    $('#logold').click(jQuery.proxy(this.logOpen, this, "logOld"));
     $('#overlay').click(jQuery.proxy(this.hideOverlay, this));
     $(window).resize(jQuery.proxy(this.updatePlayButtonLocation, this));
     $(document).on('keydown', jQuery.proxy(this.handleKeyPress, this));
@@ -128,34 +128,21 @@ MediaLibrary.prototype = {
   },
   logOpen: function (event) {
     this.resetPage();
-    var logUrl = 'vfs%2Fspecial%3A%2F%2Flogs%2Fmrmc.log?';
-    $('#log').addClass('selected');    
-    $('.contentContainer').hide();
-    var html = document.documentElement;
-    var body = document.getElementsByTagName("body")[0];
-    var height = Math.max( body.scrollHeight, body.offsetHeight, 
-                       html.clientHeight, html.scrollHeight, html.offsetHeight );
+    var logUrl;
+    var btnLabel;
+    if(event == "log")
+    {
+      logUrl = 'vfs%2Fspecial%3A%2F%2Flogs%2Fmrmc.log?';
+      $('#log').addClass('selected');
+      btnLabel = "Copy Log Content";
+    }
+    else
+    {
+      logUrl = 'vfs%2Fspecial%3A%2F%2Flogs%2Fmrmc.old.log?';
+      $('#logold').addClass('selected');
+      btnLabel = "Copy Log (Old) Content";
+    }
 
-    var button = document.createElement("button");
-    button.innerHTML = "Copy Log Content";
-    button.style.marginTop = "5px";
-
-    $('#content').append(button);
-
-    button.addEventListener ("click", jQuery.proxy(this.pressLogKey,this, "log"));
-
-    var iframe = document.createElement('iframe');
-    iframe.src = logUrl + new Date().getTime();
-    iframe.width="95%";
-    iframe.height=height - 115;
-    iframe.name="log";
-    iframe.id='iframe';
-    $('#content').append(iframe);
-  }, 
-  oldLogOpen: function (event) {
-    this.resetPage();
-    var logUrl = 'vfs%2Fspecial%3A%2F%2Flogs%2Fmrmc.old.log?';;
-    $('#logold').addClass('selected');
     $('.contentContainer').hide();
     var html = document.documentElement;
     var body = document.getElementsByTagName("body")[0];
@@ -163,19 +150,19 @@ MediaLibrary.prototype = {
                        html.clientHeight, html.scrollHeight, html.offsetHeight );
 
     var button = document.createElement('button');
-    button.innerHTML = "Copy Log (Old) Content";
+    button.innerHTML = btnLabel;
     button.style.marginTop = "5px";
 
     $('#content').append(button);
 
-    button.addEventListener ("click", jQuery.proxy(this.pressLogKey,this, "logold"));
+    button.addEventListener ("click", jQuery.proxy(this.pressLogKey,this, event));
 
     var iframe = document.createElement('iframe');
     iframe.src = logUrl + new Date().getTime();
     iframe.width="95%";
     iframe.height=height - 115;
-    iframe.name="logold";
-    iframe.id='iframeOld';
+    iframe.name=event;
+    iframe.id=event;
     $('#content').append(iframe);
   },
   shouldHandleEvent: function (event) {
