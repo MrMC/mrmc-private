@@ -257,15 +257,8 @@ MediaLibrary.prototype = {
             logDetail = "MrMC (Old) Log";
         }
 
-        // Need to revisit this, iOS wont let us select and copy....
-        if (navigator.userAgent.match(/ipad|ipod|iphone/i))
-        {
-          window.alert(logDetail + " was NOT copied to clipboard, select all content and copy manually");
-          $('#spinner').hide();
-          return;
-        }
-        var textArea = document.createElement("textarea");
         var textAreaHeader = "##############################################################\nContent of " + logDetail +"\n##############################################################\n\n"
+        var textArea = document.createElement("textarea");
         textArea.style.position = 'fixed';
         textArea.style.top = 0;
         textArea.style.left = 0;
@@ -278,7 +271,23 @@ MediaLibrary.prototype = {
         textArea.style.background = 'transparent';
         textArea.value = textAreaHeader + txt;
         document.body.appendChild(textArea);
-        textArea.select();
+
+        // below from http://stackoverflow.com/questions/34045777/copy-to-clipboard-using-javascript-in-ios
+        var editable = textArea.contentEditable; // Record contentEditable status of element
+        var readOnly = textArea.readOnly; // Record readOnly status of element
+        textArea.contentEditable = true; // iOS will only select text on non-form elements if contentEditable = true;
+        textArea.readOnly = false; // iOS will not select in a read only form element
+        var range = document.createRange();
+        range.selectNodeContents(textArea);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range); // Does not work for Firefox if a textarea or input
+        if (textArea.nodeName == "TEXTAREA" || textArea.nodeName == "INPUT") 
+          textArea.select(); // Firefox will only select a form element with select()
+        if (textArea.setSelectionRange && navigator.userAgent.match(/ipad|ipod|iphone/i))
+          textArea.setSelectionRange(0, 999999); // iOS only selects "form" elements with SelectionRange
+        textArea.contentEditable = editable; // Restore previous contentEditable status
+        textArea.readOnly = readOnly; // Restore previous readOnly status
         try
         {
           var successful = document.execCommand('copy');
