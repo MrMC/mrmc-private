@@ -88,7 +88,8 @@ namespace XFILE
     virtual bool OpenForWrite(const CURL& url, bool bOverWrite = false);
     virtual bool Delete(const CURL& url);
     virtual bool Rename(const CURL& url, const CURL& urlnew);
-    virtual int  GetChunkSize() {return 2048 * 1024;};
+    virtual int  GetChunkSize() {return 1;};
+    //virtual int  GetChunkSize() {return 2048 * 1024;};
 
   protected:
     bool IsValidFile(const std::string& strFileName);
