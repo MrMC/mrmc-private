@@ -1796,31 +1796,14 @@ void CDVDPlayer::HandlePlaySpeed()
   if ((m_CurrentVideo.syncState == IDVDStreamPlayer::SYNC_WAITSYNC) ||
       (m_CurrentAudio.syncState == IDVDStreamPlayer::SYNC_WAITSYNC))
   {
-    bool audio = false;
-    bool video = false;
     unsigned int threshold = 20;
     if (m_pInputStream->IsRealtime())
-    {
-      // for realtime, threshold is number of packets (demux msgs) that have been
-      // sent to the stream. The number of packets starts at zero when the stream is opened.
       threshold = 40;
-      video = m_CurrentVideo.id < 0 || (m_CurrentVideo.syncState == IDVDStreamPlayer::SYNC_WAITSYNC) ||
+
+    bool video = m_CurrentVideo.id < 0 || (m_CurrentVideo.syncState == IDVDStreamPlayer::SYNC_WAITSYNC) ||
                  (m_CurrentVideo.packets == 0 && m_CurrentAudio.packets > threshold);
-      audio = m_CurrentAudio.id < 0 || (m_CurrentAudio.syncState == IDVDStreamPlayer::SYNC_WAITSYNC) ||
+    bool audio = m_CurrentAudio.id < 0 || (m_CurrentAudio.syncState == IDVDStreamPlayer::SYNC_WAITSYNC) ||
                  (m_CurrentAudio.packets == 0 && m_CurrentVideo.packets > threshold);
-    }
-    else
-    {
-      // for non-realtime, threashold is the fill level of demux buffers. While well behaved media
-      // could use realtime triggering, real world encountered media can have all sorts of bad quirks
-      // such as large initial audio pts vs video pts offsets. The player has to drop packets to get a/v sync
-      // and this can drain aq/vq quick if the inital fill is small. 8 secs * 20 percent is 1.6 seconds, plenty
-      // of time to get a/v sync without risking empty aq/vq and stopping playback right after starting.
-      video = m_CurrentVideo.id >= 0 && (m_CurrentVideo.syncState == IDVDStreamPlayer::SYNC_WAITSYNC) &&
-                 (m_dvdPlayerVideo->GetLevel() > (int)threshold);
-      audio = m_CurrentAudio.id >= 0 && (m_CurrentAudio.syncState == IDVDStreamPlayer::SYNC_WAITSYNC) &&
-                 (m_dvdPlayerAudio->GetLevel() > (int)threshold);
-    }
 
     if (m_CurrentAudio.syncState == IDVDStreamPlayer::SYNC_WAITSYNC &&
         (m_CurrentAudio.avsync == CCurrentStream::AV_SYNC_CONT ||
