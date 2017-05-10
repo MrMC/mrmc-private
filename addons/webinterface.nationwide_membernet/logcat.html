@@ -50,12 +50,27 @@
         <div class="content">
             <div id="list">
               <p>
-                <button name="Copy" value="Copy" OnClick="DoCopy('log')">Copy Log Content</button>
-                <iframe name="log" src="vfs%2Fspecial%3A%2F%2Flogs%2Fmembernettvultra.log" frameborder="0" style="height: 100em" width="100%"></iframe></p>
+                <button name="Generate" value="Generate" OnClick="GenerateLogcat('logcat')">Generate Logcat</button>
+                <button name="Copy" value="Copy" OnClick="CopyLogcat('logcat')">Copy Logcat</button>
+
+                <iframe name="logcat" src="" frameborder="0" style="height: 100em" width="100%"></iframe>
+              </p>
             </div>
         </div> <!-- /content -->
         <script>
-          function DoCopy (iframeName)
+          function GenerateLogcat (iframeName)
+          {
+            var result,logUrl;
+            xbmc.rpc.request({
+              'method': 'MN.DumpLogcat',
+              'success': function(data) {
+                if (data && data.result) {
+                  window.frames[iframeName].location = "vfs%2Fspecial%3A%2F%2Flogs%2F" + data.result;
+                  }
+                }
+              });            
+          }
+          function CopyLogcat (iframeName)
           {
             if (window.frames && window.frames[iframeName] &&
             window.frames[iframeName].document &&
@@ -69,7 +84,7 @@
           function copyTextToClipboard(text)
           {
             var textArea = document.createElement("textarea");
-            var textAreaHeader = "##############################################################\nContent of MemberNetTV Log\n##############################################################\n\n"
+            var textAreaHeader = "##############################################################\nContent of Logcat\n##############################################################\n\n"
             textArea.style.position = 'fixed';
             textArea.style.top = 0;
             textArea.style.left = 0;
@@ -86,11 +101,11 @@
             try
             {
               var successful = document.execCommand('copy');
-              window.alert("MemberNetTV Log was copied to clipboard");
+              window.alert("Logcat was copied to clipboard");
             }
             catch (err)
             {
-              window.alert("MemberNetTV Log was NOT copied to clipboard, select all content and copy manually");
+              window.alert("Logcat was NOT copied to clipboard, select all content and copy manually");
             }
             document.body.removeChild(textArea);
           }

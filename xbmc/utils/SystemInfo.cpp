@@ -30,6 +30,7 @@
 #endif
 #include "guiinfo/GUIInfoLabels.h"
 #include "filesystem/CurlFile.h"
+#include "filesystem/SpecialProtocol.h"
 #include "network/Network.h"
 #include "Application.h"
 #include "windowing/WindowingFactory.h"
@@ -37,6 +38,7 @@
 #include "CPUInfo.h"
 #include "CompileInfo.h"
 #include "settings/Settings.h"
+#include "utils/log.h"
 
 #if defined(TARGET_DARWIN)
 #include "platform/darwin/DarwinUtils.h"
@@ -1078,6 +1080,32 @@ std::string CSysInfo::GetVersion()
 std::string CSysInfo::GetBuildDate()
 {
   return StringUtils::Format("%s", __DATE__);
+}
+
+std::string CSysInfo::SaveSystemLog()
+{
+#if !defined(TARGET_DARWIN_IOS)
+  const CDateTime now(CDateTime::GetCurrentDateTime());
+  std::string timesamp = "special://logs/logcat-" + now.GetAsSaveString() + ".log";
+  std::string path = CSpecialProtocol::TranslatePath(timesamp);
+
+  char cmd_line [1024];
+#if defined(TARGET_ANDROID)
+  sprintf(cmd_line, "logcat -df %s", path.c_str());
+#else
+  sprintf(cmd_line, "echo %s > %s", path.c_str(), path.c_str());
+#endif
+  int status = system(cmd_line);
+  int result = WIFEXITED(status) ? WEXITSTATUS(status) : -1;
+
+  if (result < 0 || result > 1)
+    CLog::Log(LOGERROR, "DumpSystemLog failed : status = %d, errno = %d : '%s'", status, errno, cmd_line);
+
+  if (result ==0)
+    return "logcat-" + now.GetAsSaveString() + ".log";
+  else
+#endif
+    return "";
 }
 
 std::string CSysInfo::GetBuildTargetPlatformName(void)

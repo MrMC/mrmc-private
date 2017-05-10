@@ -237,7 +237,8 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
   { "XBMC.GetInfoLabels",                           CXBMCOperations::GetInfoLabels },
   { "XBMC.GetInfoBooleans",                         CXBMCOperations::GetInfoBooleans },
 
-  { "MN.SaveSettings",                              CMNJSONOperations::SetPlayerSettings }
+  { "MN.SaveSettings",                              CMNJSONOperations::SetPlayerSettings },
+  { "MN.DumpLogcat",                                CMNJSONOperations::DumpLogcat }
 };
 
 JSONSchemaTypeDefinition::JSONSchemaTypeDefinition()

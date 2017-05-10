@@ -113,6 +113,7 @@ public:
   static std::string GetVersion();
   static std::string GetVersionShort();
   static std::string GetBuildDate();
+  static std::string SaveSystemLog();
 
   bool HasInternet();
   bool IsAeroDisabled();

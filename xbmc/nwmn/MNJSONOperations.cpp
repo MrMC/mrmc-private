@@ -28,8 +28,10 @@
 
 #include "filesystem/File.h"
 #include "utils/log.h"
+#include "utils/SystemInfo.h"
 #include "settings/Settings.h"
 #include "dialogs/GUIDialogKaiToast.h"
+#include "filesystem/SpecialProtocol.h"
 
 using namespace JSONRPC;
 
@@ -111,3 +113,11 @@ JSONRPC_STATUS CMNJSONOperations::SetPlayerSettings(const std::string &method, I
   }
   return OK;
 }
+
+JSONRPC_STATUS CMNJSONOperations::DumpLogcat(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  std::string somestr = g_sysinfo.SaveSystemLog();
+  result = somestr;
+  return OK;
+}
+

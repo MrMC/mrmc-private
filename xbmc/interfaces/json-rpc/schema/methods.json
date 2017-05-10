@@ -2264,6 +2264,24 @@
     ],
     "returns": "string"
   },
+  "MN.DumpLogcat": {
+    "type": "method",
+    "description": "Returns all existing playlists",
+    "transport": "Response",
+    "permission": "ReadData",
+    "params": [],
+    "returns": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "properties": {
+          "playlistid": { "$ref": "Playlist.Id", "required": true },
+          "type": { "$ref": "Playlist.Type", "required": true }
+        }
+      }
+    }
+  },
   "Favourites.GetFavourites": {
     "type": "method",
     "description": "Retrieve all favourites",
