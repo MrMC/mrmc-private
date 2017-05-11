@@ -58,14 +58,22 @@
             </div>
         </div> <!-- /content -->
         <script>
+          function randomIntFromInterval(min,max)
+          {
+              return Math.floor(Math.random()*(max-min+1)+min);
+          }
           function GenerateLogcat (iframeName)
           {
+            var doc = window.frames[iframeName].document;
+            var $body = $('body',doc);
+            $body.html('<h1>Generating Logcat, please wait...</h1>');
             var result,logUrl;
             xbmc.rpc.request({
               'method': 'MN.DumpLogcat',
               'success': function(data) {
                 if (data && data.result) {
-                  window.frames[iframeName].location = "vfs%2Fspecial%3A%2F%2Flogs%2F" + data.result;
+                   var pathToFile = "vfs%2Fspecial%3A%2F%2Flogs%2F" + data.result + "?r=" +randomIntFromInterval(7,1457890);
+                  window.frames[iframeName].location = pathToFile;
                   }
                 }
               });            

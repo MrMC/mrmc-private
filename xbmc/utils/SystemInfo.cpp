@@ -1086,9 +1086,8 @@ std::string CSysInfo::GetBuildDate()
 std::string CSysInfo::SaveSystemLog()
 {
 #if !defined(TARGET_DARWIN_IOS)
-  const CDateTime now(CDateTime::GetCurrentDateTime());
-  std::string timesamp = "special://logs/logcat-" + now.GetAsSaveString() + ".log";
-  std::string path = CSpecialProtocol::TranslatePath(timesamp);
+  std::string log = "special://logs/logcat.log";
+  std::string path = CSpecialProtocol::TranslatePath(log);
 
   char cmd_line [1024];
 #if defined(TARGET_ANDROID)
@@ -1103,7 +1102,7 @@ std::string CSysInfo::SaveSystemLog()
     CLog::Log(LOGERROR, "DumpSystemLog failed : status = %d, errno = %d : '%s'", status, errno, cmd_line);
 
   if (result ==0)
-    return "logcat-" + now.GetAsSaveString() + ".log";
+    return "logcat.log";
   else
 #endif
     return "";
