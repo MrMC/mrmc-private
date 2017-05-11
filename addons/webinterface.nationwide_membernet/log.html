@@ -1,4 +1,53 @@
 <!DOCTYPE html>
+<script>
+  function randomIntFromInterval(min,max)
+  {
+      return Math.floor(Math.random()*(max-min+1)+min);
+  }
+  function updateIframe (iframeName)
+  {
+    window.frames[iframeName].location = "vfs%2Fspecial%3A%2F%2Flogs%2Fmembernettvultra.log" + "?r=" +randomIntFromInterval(7,1457890);
+  }
+  function DoCopy (iframeName)
+  {
+    if (window.frames && window.frames[iframeName] &&
+    window.frames[iframeName].document &&
+    window.frames[iframeName].document.body &&
+    window.frames[iframeName].document.body.innerText)
+    {
+      var txt = window.frames[iframeName].document.body.innerText;
+      copyTextToClipboard(txt);
+    }
+  }
+  function copyTextToClipboard(text)
+  {
+    var textArea = document.createElement("textarea");
+    var textAreaHeader = "##############################################################\nContent of MemberNetTV Log\n##############################################################\n\n"
+    textArea.style.position = 'fixed';
+    textArea.style.top = 0;
+    textArea.style.left = 0;
+    textArea.style.width = '2em';
+    textArea.style.height = '2em';
+    textArea.style.padding = 0;
+    textArea.style.border = 'none';
+    textArea.style.outline = 'none';
+    textArea.style.boxShadow = 'none';
+    textArea.style.background = 'transparent';
+    textArea.value = textAreaHeader + text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try
+    {
+      var successful = document.execCommand('copy');
+      window.alert("MemberNetTV Log was copied to clipboard");
+    }
+    catch (err)
+    {
+      window.alert("MemberNetTV Log was NOT copied to clipboard, select all content and copy manually");
+    }
+    document.body.removeChild(textArea);
+  }
+</script>
 <html xml:lang="en" lang="en">
 	<head>
 		<title>MemberNetTV</title>
@@ -51,50 +100,12 @@
             <div id="list">
               <p>
                 <button name="Copy" value="Copy" OnClick="DoCopy('log')">Copy Log Content</button>
-                <iframe name="log" src="vfs%2Fspecial%3A%2F%2Flogs%2Fmembernettvultra.log" frameborder="0" style="height: 100em" width="100%"></iframe></p>
+                <iframe name="log" src="" frameborder="0" style="height: 100em" width="100%"></iframe></p>
+                <script>updateIframe ("log");</script>
+                
             </div>
         </div> <!-- /content -->
-        <script>
-          function DoCopy (iframeName)
-          {
-            if (window.frames && window.frames[iframeName] &&
-            window.frames[iframeName].document &&
-            window.frames[iframeName].document.body &&
-            window.frames[iframeName].document.body.innerText)
-            {
-              var txt = window.frames[iframeName].document.body.innerText;
-              copyTextToClipboard(txt);
-            }
-          }
-          function copyTextToClipboard(text)
-          {
-            var textArea = document.createElement("textarea");
-            var textAreaHeader = "##############################################################\nContent of MemberNetTV Log\n##############################################################\n\n"
-            textArea.style.position = 'fixed';
-            textArea.style.top = 0;
-            textArea.style.left = 0;
-            textArea.style.width = '2em';
-            textArea.style.height = '2em';
-            textArea.style.padding = 0;
-            textArea.style.border = 'none';
-            textArea.style.outline = 'none';
-            textArea.style.boxShadow = 'none';
-            textArea.style.background = 'transparent';
-            textArea.value = textAreaHeader + text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try
-            {
-              var successful = document.execCommand('copy');
-              window.alert("MemberNetTV Log was copied to clipboard");
-            }
-            catch (err)
-            {
-              window.alert("MemberNetTV Log was NOT copied to clipboard, select all content and copy manually");
-            }
-            document.body.removeChild(textArea);
-          }
-        </script>
+
         <!-- JS files -->
         <script type="text/javascript" src="scripts/jquery-1.9.0.min.js"></script>
         <script type="text/javascript" src="scripts/bootstrap.min.js"></script>
