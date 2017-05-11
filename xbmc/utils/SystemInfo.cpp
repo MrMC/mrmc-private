@@ -51,6 +51,7 @@
 #include "platform/android/jni/Build.h"
 #include "utils/SysfsUtils.h"
 #include "utils/AMLUtils.h"
+#include <sys/wait.h>
 #endif
 
 /* Platform identification */
