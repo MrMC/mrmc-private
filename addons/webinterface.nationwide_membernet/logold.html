@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <script>
+  function resizeIframe(obj)
+  {
+    var html = document.documentElement;
+    var body = document.getElementsByTagName("body")[0];
+    var height = Math.max( body.scrollHeight, body.offsetHeight, 
+                       html.clientHeight, html.scrollHeight, html.offsetHeight );
+    obj.style.height = height - 220 + 'px';
+  }
   function randomIntFromInterval(min,max)
   {
       return Math.floor(Math.random()*(max-min+1)+min);
@@ -100,7 +108,7 @@
             <div id="list">
               <p>
                 <button name="Copy" value="Copy" OnClick="DoCopy('logold')">Copy Old Log Content</button>
-                <iframe name="logold" src="" frameborder="0" style="height: 100em" width="100%"></iframe>
+                <iframe name="logold" src="" onload="resizeIframe(this)" width="95%"></iframe>
                 <script>updateIframe ("logold");</script>
               </p>
             </div>
