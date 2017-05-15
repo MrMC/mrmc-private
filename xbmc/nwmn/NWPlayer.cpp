@@ -245,8 +245,21 @@ void CNWPlayer::Process()
                 (*m_PlayerCallBackFn)(m_PlayerCallBackCtx, 0, asset);
 
               player_lock.Leave();
+
+              // wait for playback to startup, fail if we wait longer
+              // than playbackFailedTimeoutSeconds.
+              int playbackFailedTimeoutSeconds = 5;
+              CStopWatch playbackFailed;
               while (!m_bStop && m_playing && !g_application.m_pPlayer->IsPlaying())
-                Sleep(100);
+              {
+                if (playbackFailed.GetElapsedSeconds() > playbackFailedTimeoutSeconds)
+                {
+                  CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::playback failed to start after %d seconds", playbackFailedTimeoutSeconds);
+                  break;
+                }
+                else
+                  Sleep(100);
+              }
             }
           }
         }
