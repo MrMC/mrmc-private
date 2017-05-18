@@ -652,20 +652,22 @@ void CNWClient::SendFilesPlayed()
   if (!m_HasNetwork)
     return;
 
-  std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_playback.log";
-  XFILE::CFile file;
-  XFILE::auto_buffer buffer;
 
-  CSingleLock lock(m_reportLock);
+  std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_playback.log";
   if (XFILE::CFile::Exists(filename))
   {
+    CSingleLock lock(m_reportLock);
+
+    XFILE::CFile file;
+    XFILE::auto_buffer buffer;
     file.LoadFile(filename, buffer);
-    std::string charbuffer(buffer.get());
+    file.Close();
 
     TVAPI_Files playedFiles;
     playedFiles.apiKey = m_PlayerInfo.apiKey;
     playedFiles.apiSecret = m_PlayerInfo.apiSecret;
 
+    std::string charbuffer(buffer.get());
     std::vector<std::string> lines = StringUtils::Split(charbuffer, '\n');
     for (auto line: lines)
     {
@@ -693,16 +695,15 @@ void CNWClient::LogFilesPlayed(std::string assetID)
   //  2015-02-05 12:01:40-0500,58350
   //  2015-02-05 12:05:40-0500,57116
 
-  std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_playback.log";
-  XFILE::CFile file;
-  XFILE::auto_buffer buffer;
-
   CSingleLock lock(m_reportLock);
   CDateTime time = CDateTime::GetCurrentDateTime();
   std::string strData = StringUtils::Format("%s,%s\n",
     time.GetAsDBDateTime().c_str(),
     assetID.c_str()
   );
+
+  std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_playback.log";
+  XFILE::CFile file;
   file.OpenForWrite(filename);
   file.Seek(0, SEEK_END);
   file.Write(strData.c_str(), strData.size());
@@ -715,19 +716,20 @@ void CNWClient::SendFilesDownloaded()
     return;
 
   std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_download.log";
-  XFILE::CFile file;
-  XFILE::auto_buffer buffer;
-
-  CSingleLock lock(m_reportLock);
   if (XFILE::CFile::Exists(filename))
   {
+    CSingleLock lock(m_reportLock);
+
+    XFILE::CFile file;
+    XFILE::auto_buffer buffer;
     file.LoadFile(filename, buffer);
-    std::string charbuffer(buffer.get());
+    file.Close();
 
     TVAPI_Files downloadedFiles;
     downloadedFiles.apiKey = m_PlayerInfo.apiKey;
     downloadedFiles.apiSecret = m_PlayerInfo.apiSecret;
 
+    std::string charbuffer(buffer.get());
     std::vector<std::string> lines = StringUtils::Split(charbuffer, '\n');
     for (auto line: lines)
     {
@@ -757,9 +759,6 @@ void CNWClient::LogFilesDownLoaded(std::string assetID)
   //  date,assetID
   //  2015-02-05 12:01:40-0500,58350
   //  2015-02-05 12:05:40-0500,57116
-  std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_download.log";
-  XFILE::CFile file;
-  XFILE::auto_buffer buffer;
 
   CSingleLock lock(m_reportLock);
   CDateTime time = CDateTime::GetCurrentDateTime();
@@ -767,6 +766,9 @@ void CNWClient::LogFilesDownLoaded(std::string assetID)
     time.GetAsDBDateTime().c_str(),
     assetID.c_str()
   );
+
+  XFILE::CFile file;
+  std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_download.log";
   file.OpenForWrite(filename);
   file.Seek(0, SEEK_END);
   file.Write(strData.c_str(), strData.size());
