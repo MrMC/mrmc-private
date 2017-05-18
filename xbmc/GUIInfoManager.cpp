@@ -4642,6 +4642,9 @@ void CGUIInfoManager::ResetCurrentItem()
 
 void CGUIInfoManager::SetCurrentItem(CFileItem &item)
 {
+  // we are MemberNet ... nothing to set :)
+  return;
+  
   ResetCurrentItem();
 
   if (item.IsAudio())
