@@ -3270,7 +3270,7 @@ PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
     options.starttime = item.m_lStartOffset / 75.0;
     LoadVideoSettings(item);
 
-    if (item.IsVideo())
+    if (!item.IsMembernet() && item.IsVideo())
     {
       // open the d/b and retrieve the bookmarks for the current movie
       CVideoDatabase dbs;
@@ -3769,6 +3769,9 @@ void CApplication::UpdateFileState()
 
 void CApplication::LoadVideoSettings(const CFileItem& item)
 {
+  if(item.IsMembernet())
+    CMediaSettings::GetInstance().GetCurrentVideoSettings() = CMediaSettings::GetInstance().GetDefaultVideoSettings();
+  
   CVideoDatabase dbs;
   if (dbs.Open())
   {
