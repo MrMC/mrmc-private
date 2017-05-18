@@ -1083,6 +1083,11 @@ bool CFileItem::IsMediaServiceBased() const
   return CServicesManager::GetInstance().IsMediaServicesItem(*this);
 }
 
+bool CFileItem::IsMembernet() const
+{
+  return GetProperty("Membernet").asBoolean();
+}
+
 bool CFileItem::IsMediaServicesCloudItem() const
 {
   return CServicesManager::GetInstance().IsMediaServicesCloudItem(*this);

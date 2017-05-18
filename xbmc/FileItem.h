@@ -226,6 +226,7 @@ public:
   bool IsPVR() const;
   bool IsLiveTV() const;
   bool IsMediaServiceBased() const;
+  bool IsMembernet() const;
   bool IsMediaServicesCloudItem() const;
   bool IsRSS() const;
   bool IsAndroidApp() const;

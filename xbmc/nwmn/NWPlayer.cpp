@@ -31,6 +31,7 @@
 #include "video/VideoThumbLoader.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
+#include "utils/Variant.h"
 
 using namespace KODI::MESSAGING;
 
@@ -220,7 +221,7 @@ void CNWPlayer::Process()
               CFileItemPtr item(new CFileItem());
               item->SetLabel2(asset.name);
               item->SetPath(asset.video_localpath);
-
+              item->SetProperty("Membernet", true);
               item->GetVideoInfoTag()->m_strTitle = asset.name;
               item->GetVideoInfoTag()->m_streamDetails.Reset();
               item->GetVideoInfoTag()->m_iDbId = -1;
