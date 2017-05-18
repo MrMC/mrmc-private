@@ -66,6 +66,10 @@ bool CSaveFileStateJob::DoWork()
     return true;
   }
 
+  // if its membernet item, skip database update for it also
+  if (m_item.IsMembernet())
+    return true;
+  
   std::string progressTrackingFile = m_item.GetPath();
 
   if (StringUtils::StartsWith(progressTrackingFile, "videodb://recentlyadded"))
