@@ -4642,8 +4642,9 @@ void CGUIInfoManager::ResetCurrentItem()
 
 void CGUIInfoManager::SetCurrentItem(CFileItem &item)
 {
-  // we are MemberNet ... nothing to set :)
-  return;
+  // if we are MemberNet ... nothing to set :)
+  if (item.IsMembernet())
+    return;
   
   ResetCurrentItem();
 
