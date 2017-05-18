@@ -796,7 +796,8 @@ bool CDVDPlayer::OpenInputStream()
   // find any available external subtitles for non dvd files
   if (!m_pInputStream->IsStreamType(DVDSTREAM_TYPE_DVD)
   &&  !m_pInputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER)
-  &&  !m_pInputStream->IsStreamType(DVDSTREAM_TYPE_TV))
+  &&  !m_pInputStream->IsStreamType(DVDSTREAM_TYPE_TV)
+  &&  !m_item.IsMembernet())
   {
     // find any available external subtitles
     std::vector<std::string> filenames;
@@ -1221,7 +1222,7 @@ void CDVDPlayer::Process()
   // look for any EDL files
   m_Edl.Clear();
   m_EdlAutoSkipMarkers.Clear();
-  if (m_CurrentVideo.id >= 0 && m_CurrentVideo.hint.fpsrate > 0 && m_CurrentVideo.hint.fpsscale > 0)
+  if (!m_item.IsMembernet() && m_CurrentVideo.id >= 0 && m_CurrentVideo.hint.fpsrate > 0 && m_CurrentVideo.hint.fpsscale > 0)
   {
     float fFramesPerSecond = (float)m_CurrentVideo.hint.fpsrate / (float)m_CurrentVideo.hint.fpsscale;
     m_Edl.ReadEditDecisionLists(m_item.GetPath(), fFramesPerSecond, m_CurrentVideo.hint.height);
