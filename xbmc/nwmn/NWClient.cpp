@@ -698,22 +698,13 @@ void CNWClient::LogFilesPlayed(std::string assetID)
   XFILE::auto_buffer buffer;
 
   CSingleLock lock(m_reportLock);
-  if (XFILE::CFile::Exists(filename))
-  {
-    file.LoadFile(filename, buffer);
-    file.OpenForWrite(filename);
-    file.Write(buffer.get(), buffer.size());
-  }
-  else
-  {
-    file.OpenForWrite(filename);
-    file.Write(buffer.get(), buffer.size());
-  }
   CDateTime time = CDateTime::GetCurrentDateTime();
   std::string strData = StringUtils::Format("%s,%s\n",
     time.GetAsDBDateTime().c_str(),
     assetID.c_str()
   );
+  file.OpenForWrite(filename);
+  file.Seek(0, SEEK_END);
   file.Write(strData.c_str(), strData.size());
   file.Close();
 }
@@ -771,23 +762,13 @@ void CNWClient::LogFilesDownLoaded(std::string assetID)
   XFILE::auto_buffer buffer;
 
   CSingleLock lock(m_reportLock);
-  if (XFILE::CFile::Exists(filename))
-  {
-    file.LoadFile(filename, buffer);
-    file.OpenForWrite(filename);
-    file.Write(buffer.get(), buffer.size());
-  }
-  else
-  {
-    file.OpenForWrite(filename);
-    file.Write(buffer.get(), buffer.size());
-  }
-
   CDateTime time = CDateTime::GetCurrentDateTime();
   std::string strData = StringUtils::Format("%s,%s\n",
     time.GetAsDBDateTime().c_str(),
     assetID.c_str()
   );
+  file.OpenForWrite(filename);
+  file.Seek(0, SEEK_END);
   file.Write(strData.c_str(), strData.size());
   file.Close();
 }
