@@ -127,11 +127,9 @@ bool CGUIWindowMediaSources::Update(const std::string &strDirectory, bool update
 
 bool CGUIWindowMediaSources::GetDirectory(const std::string &strDirectory, CFileItemList &items)
 {
- 
   items.Clear();
-  
   bool result;
-  
+
   if (strDirectory.empty() || strDirectory == "mediasources://")
   {
     CFileItemPtr vItem(new CFileItem("Video"));
@@ -140,21 +138,21 @@ bool CGUIWindowMediaSources::GetDirectory(const std::string &strDirectory, CFile
     vItem->SetPath("mediasources://video/");
     vItem->SetLabel(g_localizeStrings.Get(157));
     items.Add(vItem);
-    
+
     CFileItemPtr mItem(new CFileItem("Music"));
     mItem->m_bIsFolder = true;
     mItem->m_bIsShareOrDrive = true;
     mItem->SetPath("mediasources://music/");
     mItem->SetLabel(g_localizeStrings.Get(2));
     items.Add(mItem);
-    
+
     CFileItemPtr pItem(new CFileItem("Pictures"));
     pItem->m_bIsFolder = true;
     pItem->m_bIsShareOrDrive = true;
     pItem->SetPath("mediasources://pictures/");
     pItem->SetLabel(g_localizeStrings.Get(1213));
     items.Add(pItem);
-    
+
 //    items.SetLabel(g_localizeStrings.Get(20094));
     items.SetPath("mediasources://");
     result = true;
@@ -166,21 +164,39 @@ bool CGUIWindowMediaSources::GetDirectory(const std::string &strDirectory, CFile
       std::string strParentPath;
       URIUtils::GetParentPath(strDirectory, strParentPath);
       SetHistoryForPath(strParentPath);
-      g_windowManager.ActivateWindow(WINDOW_VIDEO_NAV,"sources://video/");
+      std::vector<std::string> params;
+      params.push_back("sources://video/");
+      params.push_back("return");
+      // going to ".." will put us
+      // at 'sources://' and we want to go back here.
+      params.push_back("parent_redirect=" + strParentPath);
+      g_windowManager.ActivateWindow(WINDOW_VIDEO_NAV, params);
     }
     else if (StringUtils::StartsWithNoCase(strDirectory, "mediasources://music/"))
     {
       std::string strParentPath;
       URIUtils::GetParentPath(strDirectory, strParentPath);
       SetHistoryForPath(strParentPath);
-      g_windowManager.ActivateWindow(WINDOW_MUSIC_NAV,"sources://music/");
+      std::vector<std::string> params;
+      params.push_back("sources://music/");
+      params.push_back("return");
+      // going to ".." will put us
+      // at 'sources://' and we want to go back here.
+      params.push_back("parent_redirect=" + strParentPath);
+      g_windowManager.ActivateWindow(WINDOW_MUSIC_NAV, params);
     }
     else if (StringUtils::StartsWithNoCase(strDirectory, "mediasources://pictures/"))
     {
       std::string strParentPath;
       URIUtils::GetParentPath(strDirectory, strParentPath);
       SetHistoryForPath(strParentPath);
-      g_windowManager.ActivateWindow(WINDOW_PICTURES,"sources://pictures/");
+      std::vector<std::string> params;
+      params.push_back("sources://pictures/");
+      params.push_back("return");
+      // going to ".." will put us
+      // at 'sources://' and we want to go back here.
+      params.push_back("parent_redirect=" + strParentPath);
+      g_windowManager.ActivateWindow(WINDOW_PICTURES, params);
     }
     result = true;
   }
