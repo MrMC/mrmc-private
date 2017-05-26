@@ -501,8 +501,6 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
       if (StringUtils::IsInteger(fileName))
         dir = path;
       bool returning = false;
-      m_hideRootDotDot = false;
-      m_parentRedirect = "";
       // 1st string param is always the path
       // search for "return", "hiderootdotdot" and/or "parent_redirect="
       int stringParamCount = message.GetNumStringParams();
@@ -539,6 +537,8 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
       { // first time to this window - make sure we set the root path
         m_startDirectory = returning ? dir : "";
       }
+      if (!m_parentRedirect.empty())
+        m_history.AddPathFront(m_parentRedirect);
     }
     break;
   }
@@ -717,10 +717,14 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
     if (m_hideRootDotDot && URIUtils::PathEquals(m_vecItems->GetPath(), m_startDirectory, true))
       hideRootDotDot = true;
 
+    std::string parentPath = strParentPath;
+    if (!m_parentRedirect.empty() && URIUtils::PathEquals(m_vecItems->GetPath(), m_startDirectory, true))
+        parentPath = m_parentRedirect;
+
     if (!hideRootDotDot && items.GetLabel() != "Services")
     {
       CFileItemPtr pItem(new CFileItem(".."));
-      pItem->SetPath(strParentPath);
+      pItem->SetPath(parentPath);
       pItem->m_bIsFolder = true;
       pItem->m_bIsShareOrDrive = false;
       items.AddFront(pItem, 0);
