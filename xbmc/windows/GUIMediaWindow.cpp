@@ -321,6 +321,8 @@ bool CGUIMediaWindow::OnMessage(CGUIMessage& message)
       if (message.GetParam1() == GUI_MSG_WINDOW_RESET)
       {
         m_vecItems->SetPath("?");
+        m_parentRedirect = "";
+        m_hideRootDotDot = false;
         return true;
       }
       else if ( message.GetParam1() == GUI_MSG_REFRESH_THUMBS )
