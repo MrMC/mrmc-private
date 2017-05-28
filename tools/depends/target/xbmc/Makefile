@@ -16,6 +16,9 @@ CONFIGURE = cp -f $(CONFIG_SUB) $(CONFIG_GUESS) build-aux/ ;\
 ifeq ($(OS),android)
 CONFIGURE += --disable-libcec
 endif
+ifeq ($(OS),ios)
+CONFIGURE += --enable-player=avfplayer
+endif
 
 ifeq ($(Configuration),Release)
 DEBUG = --enable-debug=no

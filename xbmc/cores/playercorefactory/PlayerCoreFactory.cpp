@@ -18,6 +18,8 @@
  *
  */
 
+#include "config.h"
+
 #include "PlayerCoreFactory.h"
 #include "threads/SingleLock.h"
 #include "cores/dvdplayer/DVDPlayer.h"
@@ -332,6 +334,13 @@ bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
     paplayer->m_bPlaysAudio = true;
     m_vecCoreConfigs.push_back(paplayer);
 
+#if defined(HAS_AVFPLAYER)
+    CPlayerCoreConfig* avfplayer = new CPlayerCoreConfig("AVFPlayer", EPC_AVFPLAYER, NULL);
+    avfplayer->m_bPlaysAudio = false;
+    avfplayer->m_bPlaysVideo = true;
+    m_vecCoreConfigs.push_back(avfplayer);
+#endif
+
     for(std::vector<CPlayerSelectionRule *>::iterator it = m_vecCoreSelectionRules.begin(); it != m_vecCoreSelectionRules.end(); ++it)
       delete *it;
     m_vecCoreSelectionRules.clear();
@@ -356,7 +365,10 @@ bool CPlayerCoreFactory::LoadConfiguration(const std::string &file, bool clear)
 
       EPLAYERCORES eCore = EPC_NONE;
       if (type == "dvdplayer" || type == "mplayer") eCore = EPC_DVDPLAYER;
-      if (type == "paplayer" ) eCore = EPC_PAPLAYER;
+      if (type == "paplayer" )       eCore = EPC_PAPLAYER;
+#if defined(HAS_AVFPLAYER)
+      if (type == "avfplayer" )      eCore = EPC_AVFPLAYER;
+#endif
       if (type == "externalplayer" ) eCore = EPC_EXTPLAYER;
 
       if (eCore != EPC_NONE)

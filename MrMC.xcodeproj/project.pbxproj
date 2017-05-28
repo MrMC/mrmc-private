@@ -1953,6 +1953,15 @@
 		F5AE40A613415D9E0004BD79 /* SystemOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE409613415D9E0004BD79 /* SystemOperations.cpp */; };
 		F5AE40A713415D9E0004BD79 /* VideoLibrary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE409813415D9E0004BD79 /* VideoLibrary.cpp */; };
 		F5AE40A813415D9E0004BD79 /* XBMCOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AE409A13415D9E0004BD79 /* XBMCOperations.cpp */; };
+		F5AFC1B11ED73B3500AD2149 /* AVFPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1A61ED73B3500AD2149 /* AVFPlayer.mm */; };
+		F5AFC1B21ED73B3500AD2149 /* CustomURLProtocol.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1A81ED73B3500AD2149 /* CustomURLProtocol.mm */; };
+		F5AFC1B41ED73B3600AD2149 /* FileResourceLoader.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1AC1ED73B3500AD2149 /* FileResourceLoader.mm */; };
+		F5AFC1B71ED992E200AD2149 /* AVFPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1A61ED73B3500AD2149 /* AVFPlayer.mm */; };
+		F5AFC1B81ED992E300AD2149 /* AVFPlayer.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1A61ED73B3500AD2149 /* AVFPlayer.mm */; };
+		F5AFC1B91ED992E700AD2149 /* CustomURLProtocol.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1A81ED73B3500AD2149 /* CustomURLProtocol.mm */; };
+		F5AFC1BA1ED992E800AD2149 /* CustomURLProtocol.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1A81ED73B3500AD2149 /* CustomURLProtocol.mm */; };
+		F5AFC1BB1ED992ED00AD2149 /* FileResourceLoader.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1AC1ED73B3500AD2149 /* FileResourceLoader.mm */; };
+		F5AFC1BC1ED992ED00AD2149 /* FileResourceLoader.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AFC1AC1ED73B3500AD2149 /* FileResourceLoader.mm */; };
 		F5B721FF1C52917D006432AE /* TVOSFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B721FD1C52917D006432AE /* TVOSFile.cpp */; };
 		F5B722021C52962F006432AE /* NSData+GZIP.m in Sources */ = {isa = PBXBuildFile; fileRef = F5B722011C52962F006432AE /* NSData+GZIP.m */; };
 		F5B722051C584C80006432AE /* PreflightHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5B722041C584C80006432AE /* PreflightHandler.mm */; };
@@ -5521,6 +5530,12 @@
 		F5AE409913415D9E0004BD79 /* VideoLibrary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoLibrary.h; sourceTree = "<group>"; };
 		F5AE409A13415D9E0004BD79 /* XBMCOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = XBMCOperations.cpp; sourceTree = "<group>"; };
 		F5AE409B13415D9E0004BD79 /* XBMCOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XBMCOperations.h; sourceTree = "<group>"; };
+		F5AFC1A51ED73B3500AD2149 /* AVFPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVFPlayer.h; sourceTree = "<group>"; };
+		F5AFC1A61ED73B3500AD2149 /* AVFPlayer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AVFPlayer.mm; sourceTree = "<group>"; };
+		F5AFC1A71ED73B3500AD2149 /* CustomURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomURLProtocol.h; sourceTree = "<group>"; };
+		F5AFC1A81ED73B3500AD2149 /* CustomURLProtocol.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CustomURLProtocol.mm; sourceTree = "<group>"; };
+		F5AFC1AB1ED73B3500AD2149 /* FileResourceLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileResourceLoader.h; sourceTree = "<group>"; };
+		F5AFC1AC1ED73B3500AD2149 /* FileResourceLoader.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FileResourceLoader.mm; sourceTree = "<group>"; };
 		F5B413131065900C0035D105 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		F5B721FC1C4ED68F006432AE /* Info.plist.in */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Info.plist.in; sourceTree = "<group>"; };
 		F5B721FD1C52917D006432AE /* TVOSFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TVOSFile.cpp; sourceTree = "<group>"; };
@@ -8216,6 +8231,7 @@
 			children = (
 				DFB65F6315373AE7006B8FF1 /* AudioEngine */,
 				E38E149D0D25F9F900618676 /* DllLoader */,
+				F5AFC1A41ED73B3500AD2149 /* avfplayer */,
 				E38E14F80D25F9F900618676 /* dvdplayer */,
 				7C5608C30F1754930056433A /* ExternalPlayer */,
 				E38E15D20D25F9FA00618676 /* paplayer */,
@@ -9627,6 +9643,19 @@
 			path = "json-rpc";
 			sourceTree = "<group>";
 		};
+		F5AFC1A41ED73B3500AD2149 /* avfplayer */ = {
+			isa = PBXGroup;
+			children = (
+				F5AFC1A51ED73B3500AD2149 /* AVFPlayer.h */,
+				F5AFC1A61ED73B3500AD2149 /* AVFPlayer.mm */,
+				F5AFC1A71ED73B3500AD2149 /* CustomURLProtocol.h */,
+				F5AFC1A81ED73B3500AD2149 /* CustomURLProtocol.mm */,
+				F5AFC1AB1ED73B3500AD2149 /* FileResourceLoader.h */,
+				F5AFC1AC1ED73B3500AD2149 /* FileResourceLoader.mm */,
+			);
+			path = avfplayer;
+			sourceTree = "<group>";
+		};
 		F5B722941C7BBFBF006432AE /* cdrip */ = {
 			isa = PBXGroup;
 			children = (
@@ -10633,6 +10662,7 @@
 				E38E20B40D25F9FD00618676 /* GUIDialogMusicInfo.cpp in Sources */,
 				18BBE8DF1E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */,
 				E38E20B50D25F9FD00618676 /* GUIWindowMusicNav.cpp in Sources */,
+				F5AFC1B11ED73B3500AD2149 /* AVFPlayer.mm in Sources */,
 				F5B724961C7E150C006432AE /* cmddata.cpp in Sources */,
 				F5B723061C7C894F006432AE /* LibraryBuiltins.cpp in Sources */,
 				E38E20B70D25F9FD00618676 /* GUIWindowMusicPlaylist.cpp in Sources */,
@@ -11051,6 +11081,7 @@
 				F558F27F13ABD57400631E12 /* DirtyRegionTracker.cpp in Sources */,
 				F59045781BA372A600DB589A /* CocoaInterface.mm in Sources */,
 				F558F29613ABD7DF00631E12 /* GUIWindowDebugInfo.cpp in Sources */,
+				F5AFC1B21ED73B3500AD2149 /* CustomURLProtocol.mm in Sources */,
 				DF0DF15C13A3ADA7008ED511 /* NFSDirectory.cpp in Sources */,
 				F5022F171E2D41D5001BBF75 /* hdhomerun_channels.c in Sources */,
 				7C89619213B6A16F003631FE /* GUIWindowScreensaverDim.cpp in Sources */,
@@ -11172,6 +11203,7 @@
 				184565C21EA1F45400C5DABB /* Base64URL.cpp in Sources */,
 				C84828DC156CFCD8005A996F /* PVRTimers.cpp in Sources */,
 				189448B41CD905B70036E391 /* LightEffectClient.cpp in Sources */,
+				F5AFC1B41ED73B3600AD2149 /* FileResourceLoader.mm in Sources */,
 				C84828DD156CFCD8005A996F /* GUIViewStatePVR.cpp in Sources */,
 				C84828DE156CFCD8005A996F /* GUIWindowPVRBase.cpp in Sources */,
 				C84828DF156CFCD8005A996F /* GUIWindowPVRChannels.cpp in Sources */,
@@ -11672,6 +11704,7 @@
 				F5B722EF1C7C894F006432AE /* AddonBuiltins.cpp in Sources */,
 				E4991230174E5D6800741B6D /* EpgInfoTag.cpp in Sources */,
 				F55BD30D1D18C70B0072FE3A /* PlexClient.cpp in Sources */,
+				F5AFC1BA1ED992E800AD2149 /* CustomURLProtocol.mm in Sources */,
 				F51D17041E29950600A03C93 /* dvd_udf.c in Sources */,
 				E4991231174E5D6800741B6D /* EpgSearchFilter.cpp in Sources */,
 				F5A4F2A51BB086FE0083FC69 /* JpegParse.cpp in Sources */,
@@ -11916,6 +11949,7 @@
 				F5B723581C7C99A6006432AE /* GUIDialogVisualisationPresetList.cpp in Sources */,
 				F5B723C21C7C9D1B006432AE /* Vector.cpp in Sources */,
 				E4991305174E5DAD00741B6D /* GUIMultiImage.cpp in Sources */,
+				F5AFC1BC1ED992ED00AD2149 /* FileResourceLoader.mm in Sources */,
 				F5B723011C7C894F006432AE /* GUIContainerBuiltins.cpp in Sources */,
 				E4991306174E5DAD00741B6D /* GUIMultiSelectText.cpp in Sources */,
 				F5B723E31C7C9FAF006432AE /* PluginSource.cpp in Sources */,
@@ -12283,6 +12317,7 @@
 				E4991474174E605900741B6D /* Stopwatch.cpp in Sources */,
 				E4991475174E605900741B6D /* StreamDetails.cpp in Sources */,
 				E4991476174E605900741B6D /* StreamUtils.cpp in Sources */,
+				F5AFC1B81ED992E300AD2149 /* AVFPlayer.mm in Sources */,
 				E4991477174E605900741B6D /* StringUtils.cpp in Sources */,
 				F5B724C01C7E150C006432AE /* filestr.cpp in Sources */,
 				E4991478174E605900741B6D /* SystemInfo.cpp in Sources */,
@@ -12792,6 +12827,7 @@
 				18BBE8E11E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */,
 				F5D13F671BAF0B6D0075A95C /* GUIDialogSubMenu.cpp in Sources */,
 				F5D13F681BAF0B6D0075A95C /* HTTPFileHandler.cpp in Sources */,
+				F5AFC1B71ED992E200AD2149 /* AVFPlayer.mm in Sources */,
 				F5D13F691BAF0B6D0075A95C /* GUIDialogTextViewer.cpp in Sources */,
 				F5D13F6A1BAF0B6D0075A95C /* GUIDialogVolumeBar.cpp in Sources */,
 				F5B722F91C7C894F006432AE /* Builtins.cpp in Sources */,
@@ -12877,6 +12913,7 @@
 				F5D13FAD1BAF0B6D0075A95C /* PVRDirectory.cpp in Sources */,
 				F5D13FAE1BAF0B6D0075A95C /* PVRFile.cpp in Sources */,
 				F5D13FAF1BAF0B6D0075A95C /* RSSDirectory.cpp in Sources */,
+				F5AFC1BB1ED992ED00AD2149 /* FileResourceLoader.mm in Sources */,
 				F5D13FB01BAF0B6D0075A95C /* SAPDirectory.cpp in Sources */,
 				F5022F441E2D4404001BBF75 /* HDHomeRunDirectory.cpp in Sources */,
 				F5D13FB11BAF0B6D0075A95C /* SAPFile.cpp in Sources */,
@@ -13210,6 +13247,7 @@
 				F5D140C71BAF0B6D0075A95C /* GUIWindowPrograms.cpp in Sources */,
 				F5D140C81BAF0B6D0075A95C /* PVRClient.cpp in Sources */,
 				F5D140C91BAF0B6D0075A95C /* PVRClients.cpp in Sources */,
+				F5AFC1B91ED992E700AD2149 /* CustomURLProtocol.mm in Sources */,
 				F5022F191E2D41D5001BBF75 /* hdhomerun_channels.c in Sources */,
 				F5B724951C7E150C006432AE /* arcread.cpp in Sources */,
 				F5D140CA1BAF0B6D0075A95C /* PVRChannel.cpp in Sources */,
