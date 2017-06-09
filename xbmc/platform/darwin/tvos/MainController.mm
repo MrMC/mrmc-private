@@ -29,9 +29,14 @@
 #import "cores/AudioEngine/AEFactory.h"
 #import "guilib/GUIWindowManager.h"
 #import "input/Key.h"
+#import "input/ButtonTranslator.h"
+#import "input/InputManager.h"
+#import "input/touch/ITouchActionHandler.h"
+#import "input/touch/generic/GenericTouchActionHandler.h"
 #import "interfaces/AnnouncementManager.h"
 #import "network/NetworkServices.h"
 #import "messaging/ApplicationMessenger.h"
+#import "platform/darwin/FocusEngineHandler.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/MainController.h"
@@ -44,6 +49,7 @@
 #import "settings/Settings.h"
 #import "services/lighteffects/LightEffectServices.h"
 #import "utils/SeekHandler.h"
+#import "utils/log.h"
 
 #import <MediaPlayer/MPMediaItem.h>
 #import <MediaPlayer/MediaPlayer.h>
@@ -51,6 +57,34 @@
 
 #import <AVFoundation/AVAudioPlayer.h>
 #import <AudioToolbox/AudioToolbox.h>
+#import <GameController/GameController.h>
+
+// these MUST match those in system/keymaps/customcontroller.SiriRemote.xml
+typedef enum SiriRemoteTypes
+{
+  SiriRemote_UpTap = 1,
+  SiriRemote_DownTap = 2,
+  SiriRemote_LeftTap = 3,
+  SiriRemote_RightTap = 4,
+  SiriRemote_CenterClick = 5,
+  SiriRemote_MenuClick = 6,
+  SiriRemote_CenterHold = 7,
+  SiriRemote_UpSwipe = 8,
+  SiriRemote_DownSwipe = 9,
+  SiriRemote_LeftSwipe = 10,
+  SiriRemote_RightSwipe = 11,
+  SiriRemote_PausePlayClick = 12,
+  SiriRemote_IR_Play = 13,
+  SiriRemote_IR_Pause= 14,
+  SiriRemote_IR_Stop = 15,
+  SiriRemote_IR_NextTrack = 16,
+  SiriRemote_IR_PreviousTrack = 17,
+  SiriRemote_IR_FastForward = 18,
+  SiriRemote_IR_Rewind = 19,
+  SiriRemote_MenuClickAtHome = 20,
+  SiriRemote_UpScroll = 21,
+  SiriRemote_DownScroll = 22,
+} SiriRemoteTypes;
 
 using namespace KODI::MESSAGING;
 
@@ -61,53 +95,34 @@ MainController *g_xbmcController;
 @interface MainController ()
 @property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
 @property (strong, nonatomic) NSTimer *remoteIdleTimer;
+@property (strong) GCController* gcController;
+
 @end
 
 #pragma mark - MainController implementation
 @implementation MainController
 
-@synthesize m_lastGesturePoint;
 @synthesize m_screenScale;
 @synthesize m_screenIdx;
 @synthesize m_screensize;
 @synthesize m_nowPlayingInfo;
-@synthesize m_directionOverride;
-@synthesize m_direction;
-@synthesize m_currentKey;
-@synthesize m_clickResetPan;
-@synthesize m_mimicAppleSiri;
 @synthesize m_remoteIdleState;
 @synthesize m_remoteIdleTimeout;
 @synthesize m_shouldRemoteIdle;
-@synthesize m_RemoteOSDSwipes;
 
 #pragma mark - internal key press methods
-//--------------------------------------------------------------
-//--------------------------------------------------------------
-- (void)sendKeyDownUp:(XBMCKey)key
+- (void)sendButtonPressed:(int)buttonId
 {
-  XBMC_Event newEvent = {0};
-  newEvent.key.keysym.sym = key;
-
-  newEvent.type = XBMC_KEYDOWN;
-  CWinEvents::MessagePush(&newEvent);
-
-  newEvent.type = XBMC_KEYUP;
-  CWinEvents::MessagePush(&newEvent);
-}
-- (void)sendKeyDown:(XBMCKey)key
-{
-  XBMC_Event newEvent = {0};
-  newEvent.type = XBMC_KEYDOWN;
-  newEvent.key.keysym.sym = key;
-  CWinEvents::MessagePush(&newEvent);
-}
-- (void)sendKeyUp:(XBMCKey)key
-{
-  XBMC_Event newEvent = {0};
-  newEvent.type = XBMC_KEYUP;
-  newEvent.key.keysym.sym = key;
-  CWinEvents::MessagePush(&newEvent);
+  int actionID;
+  std::string actionName;
+  // Translate using custom controller translator.
+  if (CButtonTranslator::GetInstance().TranslateCustomControllerString(g_windowManager.GetActiveWindowID(),
+    "SiriRemote", buttonId, actionID, actionName))
+  {
+    CInputManager::GetInstance().QueueAction(CAction(actionID, 1.0f, 0.0f, actionName), true);
+  }
+  else
+    CLog::Log(LOGDEBUG, "sendButtonPressed, ERROR mapping customcontroller action. CustomController: %s %i", "SiriRemote", buttonId);
 }
 
 #pragma mark - remote idle timer
@@ -156,31 +171,35 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 // start repeating after 0.25s
-#define REPEATED_KEYPRESS_DELAY_S 0.50
+#define REPEATED_KEYPRESS_DELAY_S 0.25
 // pause 0.05s (50ms) between keypresses
 #define REPEATED_KEYPRESS_PAUSE_S 0.05
 //--------------------------------------------------------------
 
-- (void)startKeyPressTimer:(XBMCKey)keyId
+//- (void)startKeyPressTimer:(XBMCKey)keyId
+- (void)startKeyPressTimer:(int)keyId
 {
-  [self startKeyPressTimer:keyId clickTime:REPEATED_KEYPRESS_PAUSE_S];
+  [self startKeyPressTimer:keyId doBeforeWait:true withdelay:REPEATED_KEYPRESS_DELAY_S];
 }
 
-- (void)startKeyPressTimer:(XBMCKey)keyId clickTime:(NSTimeInterval)interval
+static int keyPressTimerFiredCount = 0;
+- (void)startKeyPressTimer:(int)keyId doBeforeWait:(bool)doBeforeWait withdelay:(NSTimeInterval)interval
 {
   //PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
     [self stopKeyPressTimer];
 
-  [self sendKeyDown:keyId];
+  if (doBeforeWait)
+    [self sendButtonPressed:keyId];
 
   NSNumber *number = [NSNumber numberWithInt:keyId];
-  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:REPEATED_KEYPRESS_DELAY_S];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:interval];
 
+  keyPressTimerFiredCount = 0;
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
   NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
-    interval:interval
+    interval:REPEATED_KEYPRESS_PAUSE_S
     target:self
     selector:@selector(keyPressTimerCallback:)
     userInfo:number
@@ -199,6 +218,10 @@ MainController *g_xbmcController;
     self.pressAutoRepeatTimer = nil;
   }
 }
+- (int)getKeyPressTimerCount
+{
+  return keyPressTimerFiredCount;
+}
 - (void)keyPressTimerCallback:(NSTimer*)theTimer
 {
   //PRINT_SIGNATURE();
@@ -207,123 +230,45 @@ MainController *g_xbmcController;
     return;
 
   NSNumber *keyId = [theTimer userInfo];
-  [self sendKeyDown:(XBMCKey)[keyId intValue]];
+  [self sendButtonPressed:[keyId intValue]];
+  keyPressTimerFiredCount++;
 }
 
 #pragma mark - remote helpers
 
 //--------------------------------------------------------------
-- (XBMCKey)getPanDirectionKey:(CGPoint)translation
-{
-  int x = (int)translation.x;
-  int y = (int)translation.y;
-  int absX = x;
-  int absY = y;
-  
-  if (absX < 0)
-    absX *= -1;
-  
-  if (absY < 0)
-    absY *= -1;
-  
-  bool horizontal, veritical;
-  horizontal = ( absX > absY ) ;
-  veritical = !horizontal;
-  
-  // Determine up, down, right, or left:
-  bool swipe_up, swipe_down, swipe_left, swipe_right;
-  swipe_left = (horizontal && x < 0);
-  swipe_right = (horizontal && x >= 0);
-  swipe_up = (veritical && y < 0);
-  swipe_down = (veritical && y >= 0);
-  
-  if (swipe_down)
-    return XBMCK_DOWN;
-  if (swipe_up)
-    return XBMCK_UP;
-  if (swipe_left)
-    return XBMCK_LEFT;
-  if (swipe_right)
-    return XBMCK_RIGHT;
-  
-  return XBMCK_UNKNOWN;
-}
-
-//--------------------------------------------------------------
-- (UIPanGestureRecognizerDirection)getPanDirection:(CGPoint)translation
-{
-  int x = (int)translation.x;
-  int y = (int)translation.y;
-  int absX = x;
-  int absY = y;
-  
-  if (absX < 0)
-    absX *= -1;
-  
-  if (absY < 0)
-    absY *= -1;
-  
-  bool horizontal, veritical;
-  horizontal = ( absX > absY ) ;
-  veritical = !horizontal;
-  
-  // Determine up, down, right, or left:
-  bool swipe_up, swipe_down, swipe_left, swipe_right;
-  swipe_left = (horizontal && x < 0);
-  swipe_right = (horizontal && x >= 0);
-  swipe_up = (veritical && y < 0);
-  swipe_down = (veritical && y >= 0);
-  
-  if (swipe_down)
-    return UIPanGestureRecognizerDirectionDown;
-  if (swipe_up)
-    return UIPanGestureRecognizerDirectionUp;
-  if (swipe_left)
-    return UIPanGestureRecognizerDirectionLeft;
-  if (swipe_right)
-    return UIPanGestureRecognizerDirectionRight;
-  
-  return UIPanGestureRecognizerDirectionUndefined;
-  
-}
-
-//--------------------------------------------------------------
--(BOOL) shouldFastScroll
+-(bool)shouldFastScroll
 {
   // we dont want fast scroll in below windows, no point in going 15 places in home screen
-  int window = g_windowManager.GetActiveWindow();
-  
+  int window = g_windowManager.GetFocusedWindow();
+
   if (window == WINDOW_HOME ||
       window == WINDOW_FULLSCREEN_LIVETV ||
       window == WINDOW_FULLSCREEN_VIDEO ||
       window == WINDOW_FULLSCREEN_RADIO ||
       (window >= WINDOW_SETTINGS_START && window <= WINDOW_SETTINGS_APPEARANCE)
       )
-    return NO;
+    return false;
   
-  return YES;
+  return true;
 }
 
-//--------------------------------------------------------------
--(BOOL) shouldOSDScroll
+-(ORIENTATION)getFocusedOrientation
 {
-  // we might not want to scroll in below windows, fullscreen video playback is one
-  int window = g_windowManager.GetActiveWindow();
-  
-  if (m_RemoteOSDSwipes &&
-      (window == WINDOW_FULLSCREEN_LIVETV ||
-      window == WINDOW_FULLSCREEN_VIDEO ||
-      window == WINDOW_FULLSCREEN_RADIO
-      ))
-    return NO;
-  
-  return YES;
-}
-
-//--------------------------------------------------------------
-- (void)setSiriRemote:(BOOL)enable
-{
-  m_mimicAppleSiri = enable;
+  // we dont want fast scroll in below windows, no point in going 15 places in home screen
+  CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
+  CGUIControl *focusedControl = pWindow->GetFocusedControl();
+  if (focusedControl)
+  {
+    if (focusedControl->GetControlType() == CGUIControl::GUICONTROL_BUTTON)
+    {
+      CGUIControl *parentFocusedControl = focusedControl->GetParentControl();
+      if (parentFocusedControl)
+      return parentFocusedControl->GetOrientation();
+    }
+    return focusedControl->GetOrientation();
+  }
+  return UNDEFINED;
 }
 
 //--------------------------------------------------------------
@@ -340,45 +285,13 @@ MainController *g_xbmcController;
   [self startRemoteTimer];
 }
 
-- (void)setSiriRemoteOSDSwipes:(BOOL)enable
-{
-  //PRINT_SIGNATURE();
-  m_RemoteOSDSwipes = enable;
-}
-
-
-//--------------------------------------------------------------
 //--------------------------------------------------------------
 #pragma mark - gesture methods
 //--------------------------------------------------------------
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-  //PRINT_SIGNATURE();
+  // important, this lets our view get touch events
   return YES;
-}
-
-//--------------------------------------------------------------
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{  
-  if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-    return YES;
-  }
-  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
-    return YES;
-  }
-  if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-    return YES;
-  }
-  return NO;
-}
-
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{
-  if (!m_mimicAppleSiri && [gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && ([otherGestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] || [otherGestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]))
-  {
-    return YES;
-  }
-  return NO;
 }
 
 //--------------------------------------------------------------
@@ -422,85 +335,6 @@ MainController *g_xbmcController;
 }
 
 //--------------------------------------------------------------
-- (void)createSwipeGestureRecognizers
-{
-  UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc]
-                                         initWithTarget:self action:@selector(handleSwipe:)];
-
-  swipeLeft.delaysTouchesBegan = NO;
-  swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
-  swipeLeft.delegate = self;
-  [m_glView addGestureRecognizer:swipeLeft];
-
-  //single finger swipe right
-  UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc]
-                                          initWithTarget:self action:@selector(handleSwipe:)];
-
-  swipeRight.delaysTouchesBegan = NO;
-  swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
-  swipeRight.delegate = self;
-  [m_glView addGestureRecognizer:swipeRight];
-
-  //single finger swipe up
-  UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc]
-                                       initWithTarget:self action:@selector(handleSwipe:)];
-
-  swipeUp.delaysTouchesBegan = NO;
-  swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
-  swipeUp.delegate = self;
-  [m_glView addGestureRecognizer:swipeUp];
-
-  //single finger swipe down
-  UISwipeGestureRecognizer *swipeDown = [[UISwipeGestureRecognizer alloc]
-                                         initWithTarget:self action:@selector(handleSwipe:)];
-
-  swipeDown.delaysTouchesBegan = NO;
-  swipeDown.direction = UISwipeGestureRecognizerDirectionDown;
-  swipeDown.delegate = self;
-  [m_glView addGestureRecognizer:swipeDown];
-}
-  
-//--------------------------------------------------------------
-- (void)createPanGestureRecognizers
-{
-  //PRINT_SIGNATURE();
-  // for pan gestures with one finger
-  auto pan = [[UIPanGestureRecognizer alloc]
-    initWithTarget:self action:@selector(handlePan:)];
-  pan.delegate = self;
-  [m_glView addGestureRecognizer:pan];
-  m_clickResetPan = false;
-}
-//--------------------------------------------------------------
-- (void)createTapGesturecognizers
-{
-  //PRINT_SIGNATURE();
-  // tap side of siri remote pad
-  auto upRecognizer = [[UITapGestureRecognizer alloc]
-                       initWithTarget: self action: @selector(tapUpArrowPressed:)];
-  upRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
-  upRecognizer.delegate = self;
-  [m_glView addGestureRecognizer: upRecognizer];
-  
-  auto downRecognizer = [[UITapGestureRecognizer alloc]
-                         initWithTarget: self action: @selector(tapDownArrowPressed:)];
-  downRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
-  downRecognizer.delegate = self;
-  [m_glView addGestureRecognizer: downRecognizer];
-  
-  auto leftRecognizer = [[UITapGestureRecognizer alloc]
-                         initWithTarget: self action: @selector(tapLeftArrowPressed:)];
-  leftRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
-  leftRecognizer.delegate = self;
-  [m_glView addGestureRecognizer: leftRecognizer];
-  
-  auto rightRecognizer = [[UITapGestureRecognizer alloc]
-                          initWithTarget: self action: @selector(tapRightArrowPressed:)];
-  rightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
-  rightRecognizer.delegate = self;
-  [m_glView addGestureRecognizer: rightRecognizer];
-}
-//--------------------------------------------------------------
 - (void)createPressGesturecognizers
 {
   //PRINT_SIGNATURE();
@@ -536,7 +370,7 @@ MainController *g_xbmcController;
   rightRecognizer.delegate = self;
   [self.view addGestureRecognizer: rightRecognizer];
   
-  // we always have these under tvos
+  // we always have these under tvos, both ir and siri remotes respond to these
   auto menuRecognizer = [[UITapGestureRecognizer alloc]
                          initWithTarget: self action: @selector(menuPressed:)];
   menuRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeMenu]];
@@ -552,19 +386,11 @@ MainController *g_xbmcController;
   auto selectRecognizer = [[UILongPressGestureRecognizer alloc]
                           initWithTarget: self action: @selector(selectPressed:)];
   selectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
-  selectRecognizer.minimumPressDuration = 0.001;
+  selectRecognizer.minimumPressDuration = 0.01;
   selectRecognizer.delegate = self;
   [self.view addGestureRecognizer: selectRecognizer];
-  
 }
 
-//--------------------------------------------------------------
-- (void)buttonHoldSelect
-{
-  self.m_holdCounter++;
-  [self.m_holdTimer invalidate];
-  [self sendKeyDownUp:XBMCK_c];
-}
 //--------------------------------------------------------------
 - (void) activateKeyboard:(UIView *)view
 {
@@ -580,9 +406,13 @@ MainController *g_xbmcController;
   m_glView.userInteractionEnabled = YES; 
   [self becomeFirstResponder];
 }
+
 //--------------------------------------------------------------
+//--------------------------------------------------------------
+#pragma mark - gesture handlers
 - (void)menuPressed:(UITapGestureRecognizer *)sender
 {
+  PRINT_SIGNATURE();
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -595,11 +425,12 @@ MainController *g_xbmcController;
         if (CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRIBACK))
           CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP);
         else
-          [self sendKeyDownUp:XBMCK_ESCAPE];
+          [self sendButtonPressed:SiriRemote_MenuClickAtHome];
       }
       else
-        [self sendKeyDownUp:XBMCK_BACKSPACE];
-      
+      {
+        [self sendButtonPressed:SiriRemote_MenuClick];
+      }
       // start remote timeout
       [self startRemoteTimer];
       break;
@@ -608,29 +439,34 @@ MainController *g_xbmcController;
   }
 }
 //--------------------------------------------------------------
-- (void)selectPressed:(UILongPressGestureRecognizer *)sender
+- (void)selectButtonHold
 {
-  // if we have clicked select while scrolling up/down we need to reset direction of pan
-  m_clickResetPan = true;
+  self.m_holdCounter++;
+  [self.m_holdTimer invalidate];
+  [self sendButtonPressed:SiriRemote_CenterHold];
+}
+//--------------------------------------------------------------
+- (void)selectPressed:(UITapGestureRecognizer *)sender
+{
+  PRINT_SIGNATURE();
   
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
       self.m_holdCounter = 0;
-      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(buttonHoldSelect) userInfo:nil repeats:YES];
+      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(selectButtonHold) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateChanged:
       if (self.m_holdCounter > 1)
       {
         [self.m_holdTimer invalidate];
-        [self sendKeyDownUp:XBMCK_c];
+        [self sendButtonPressed:SiriRemote_CenterHold];
       }
       break;
     case UIGestureRecognizerStateEnded:
       [self.m_holdTimer invalidate];
       if (self.m_holdCounter < 1)
-        [self sendKeyDownUp:XBMCK_RETURN];
-      
+        [self sendButtonPressed:SiriRemote_CenterClick];
       // start remote timeout
       [self startRemoteTimer];
       break;
@@ -641,6 +477,7 @@ MainController *g_xbmcController;
 
 - (void)playPausePressed:(UITapGestureRecognizer *) sender
 {
+  PRINT_SIGNATURE();
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -648,7 +485,7 @@ MainController *g_xbmcController;
     case UIGestureRecognizerStateChanged:
       break;
     case UIGestureRecognizerStateEnded:
-      [self sendKeyDownUp:XBMCK_MEDIA_PLAY_PAUSE];
+      [self sendButtonPressed:SiriRemote_PausePlayClick];
       // start remote timeout
       [self startRemoteTimer];
       break;
@@ -658,84 +495,160 @@ MainController *g_xbmcController;
 }
 
 //--------------------------------------------------------------
+- (void)repeatUpArrowPressed
+{
+  if (self.m_holdCounter < 1)
+    [self sendButtonPressed:SiriRemote_UpTap];
+  else
+  {
+    if ([self shouldFastScroll] && [self getFocusedOrientation] == VERTICAL)
+      [self sendButtonPressed:SiriRemote_UpScroll];
+  }
+  self.m_holdCounter++;
+}
+//--------------------------------------------------------------
 - (IBAction)IRRemoteUpArrowPressed:(UIGestureRecognizer *)sender
 {
+  NSTimeInterval repeatDelay = 0.25;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      [self startKeyPressTimer:XBMCK_UP];
-      break;
-    case UIGestureRecognizerStateChanged:
+      self.m_holdCounter = 0;
+      if ([self shouldFastScroll])
+        repeatDelay = 0.10;
+      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
+        target:self selector:@selector(repeatUpArrowPressed) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateEnded:
-      [self stopKeyPressTimer];
-      [self sendKeyUp:XBMCK_UP];
-      
+      [self.m_holdTimer invalidate];
+      if (self.m_holdCounter < 1)
+        [self sendButtonPressed:SiriRemote_UpTap];
       // start remote timeout
       [self startRemoteTimer];
+      break;
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
+      [self.m_holdTimer invalidate];
       break;
     default:
       break;
   }
+}
+//--------------------------------------------------------------
+- (void)repeatDownArrowPressed
+{
+  if (self.m_holdCounter < 1)
+    [self sendButtonPressed:SiriRemote_DownTap];
+  else
+  {
+    if ([self shouldFastScroll] && [self getFocusedOrientation] == VERTICAL)
+      [self sendButtonPressed:SiriRemote_DownScroll];
+  }
+  self.m_holdCounter++;
 }
 //--------------------------------------------------------------
 - (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer *)sender
 {
+  NSTimeInterval repeatDelay = 0.25;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      [self startKeyPressTimer:XBMCK_DOWN];
-      break;
-    case UIGestureRecognizerStateChanged:
+      self.m_holdCounter = 0;
+      if ([self shouldFastScroll])
+        repeatDelay = 0.10;
+      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
+        target:self selector:@selector(repeatDownArrowPressed) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateEnded:
-      [self stopKeyPressTimer];
-      [self sendKeyUp:XBMCK_DOWN];
-      
+      [self.m_holdTimer invalidate];
+      if (self.m_holdCounter < 1)
+        [self sendButtonPressed:SiriRemote_DownTap];
       // start remote timeout
       [self startRemoteTimer];
+      break;
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
+      [self.m_holdTimer invalidate];
       break;
     default:
       break;
   }
+}
+//--------------------------------------------------------------
+- (void)repeatLeftArrowPressed
+{
+  if (self.m_holdCounter < 1)
+    [self sendButtonPressed:SiriRemote_LeftTap];
+  else
+  {
+    if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
+      [self sendButtonPressed:SiriRemote_UpScroll];
+  }
+  self.m_holdCounter++;
 }
 //--------------------------------------------------------------
 - (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
 {
+  NSTimeInterval repeatDelay = 0.25;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      [self startKeyPressTimer:XBMCK_LEFT];
-      break;
-    case UIGestureRecognizerStateChanged:
+      self.m_holdCounter = 0;
+      if ([self shouldFastScroll])
+        repeatDelay = 0.10;
+      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
+        target:self selector:@selector(repeatLeftArrowPressed) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateEnded:
-      [self stopKeyPressTimer];
-      [self sendKeyUp:XBMCK_LEFT];
-      
+      [self.m_holdTimer invalidate];
+      if (self.m_holdCounter < 1)
+        [self sendButtonPressed:SiriRemote_LeftTap];
       // start remote timeout
       [self startRemoteTimer];
+      break;
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
+      [self.m_holdTimer invalidate];
       break;
     default:
       break;
   }
+}
+//--------------------------------------------------------------
+- (void)repeatRightArrowPressed
+{
+  if (self.m_holdCounter < 1)
+    [self sendButtonPressed:SiriRemote_RightTap];
+  else
+  {
+    if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
+      [self sendButtonPressed:SiriRemote_DownScroll];
+  }
+  self.m_holdCounter++;
 }
 //--------------------------------------------------------------
 - (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
 {
+  NSTimeInterval repeatDelay = 0.25;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      [self startKeyPressTimer:XBMCK_RIGHT];
-      break;
-    case UIGestureRecognizerStateChanged:
+      self.m_holdCounter = 0;
+      if ([self shouldFastScroll])
+        repeatDelay = 0.10;
+      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
+        target:self selector:@selector(repeatRightArrowPressed) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateEnded:
-      [self stopKeyPressTimer];
-      [self sendKeyUp:XBMCK_RIGHT];
-      
+      [self.m_holdTimer invalidate];
+      if (self.m_holdCounter < 1)
+        [self sendButtonPressed:SiriRemote_RightTap];
       // start remote timeout
       [self startRemoteTimer];
+      break;
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
+      [self.m_holdTimer invalidate];
       break;
     default:
       break;
@@ -743,286 +656,577 @@ MainController *g_xbmcController;
 }
 
 //--------------------------------------------------------------
-- (IBAction)tapUpArrowPressed:(UIGestureRecognizer *)sender
-{
-  if (!m_remoteIdleState)
-    [self sendKeyDownUp:XBMCK_UP];
-  [self startRemoteTimer];
-}
 //--------------------------------------------------------------
-- (IBAction)tapDownArrowPressed:(UIGestureRecognizer *)sender
+#pragma mark - microGamepad methods
+typedef enum SiriRemoteState
 {
-  if (!m_remoteIdleState)
-    [self sendKeyDownUp:XBMCK_DOWN];
-  [self startRemoteTimer];
+  SiriRemoteIdle,
+  SiriRemoteTapTimer,
+  SiriRemotePanSwipe,
+  SiriRemotePan,
+} SiriRemoteState;
+
+typedef struct
+{
+  float dt, dx, dy;
+  bool  debug = true;
+  CGPoint startPoint;
+  CGPoint movedPoint;
+  CGRect  panningRect;
+  CFAbsoluteTime startSeconds;
+  CFAbsoluteTime movedSeconds;
+  float ignoreAfterSwipeSeconds;
+  SiriRemoteState state = SiriRemoteIdle;
+} SiriRemoteInfo;
+static SiriRemoteInfo siriRemoteInfo;
+
+-(void)startTapRepeatTimer:(SiriRemoteInfo&)remote withdelay:(NSTimeInterval)delayTime
+{
+  if (![self shouldFastScroll])
+    return;
+
+  // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
+  // transform coordinates to left/bottom = (-1, -1) to make checks easy
+  CGPoint centerStart = CGPointMake(
+    remote.startPoint.x - 1.0,
+    remote.startPoint.y - 1.0);
+  if (fabs(centerStart.x) < 0.4f && fabs(centerStart.y) < 0.4f)
+  {
+    // tap in center, ignore it.
+    if (remote.debug)
+      NSLog(@"microGamepad: tap center ignored");
+  }
+  else
+  {
+    NSLog(@"microGamepad: tap timer started");
+    // tap detected, use staring location to determine
+    // where tap occurred, ending location could be a slip of the finger
+    if (fabs(centerStart.x) >= fabs(centerStart.y))
+    {
+      if (remote.startPoint.x < 1.0)
+      {
+        if (remote.debug)
+          NSLog(@"microGamepad: tap repeat left");
+        if ([self getFocusedOrientation] == HORIZONTAL)
+          [self startKeyPressTimer:SiriRemote_UpScroll doBeforeWait:false withdelay:delayTime];
+      }
+      else
+      {
+        if (remote.debug)
+          NSLog(@"microGamepad: tap repeat right");
+        if ([self getFocusedOrientation] == HORIZONTAL)
+          [self startKeyPressTimer:SiriRemote_DownScroll doBeforeWait:false withdelay:delayTime];
+      }
+    }
+    else
+    {
+      if (remote.startPoint.y >= 1.0)
+      {
+        if (remote.debug)
+          NSLog(@"microGamepad: tap repeat up");
+        if ([self getFocusedOrientation] == VERTICAL)
+          [self startKeyPressTimer:SiriRemote_UpScroll doBeforeWait:false withdelay:delayTime];
+      }
+      else
+      {
+        if (remote.debug)
+          NSLog(@"microGamepad: tap repeat down");
+        if ([self getFocusedOrientation] == VERTICAL)
+          [self startKeyPressTimer:SiriRemote_DownScroll doBeforeWait:false withdelay:delayTime];
+      }
+    }
+  }
 }
-//--------------------------------------------------------------
-- (IBAction)tapLeftArrowPressed:(UIGestureRecognizer *)sender
+-(bool)isTapRepeatTimerActive
 {
-  if (!m_remoteIdleState)
-    [self sendKeyDownUp:XBMCK_LEFT];
-  [self startRemoteTimer];
-}
-//--------------------------------------------------------------
-- (IBAction)tapRightArrowPressed:(UIGestureRecognizer *)sender
-{
-  if (!m_remoteIdleState)
-    [self sendKeyDownUp:XBMCK_RIGHT];
-  [self startRemoteTimer];
+  return self.pressAutoRepeatTimer != nil;
 }
 
-//--------------------------------------------------------------
-- (IBAction)handlePan:(UIPanGestureRecognizer *)sender 
+-(void)stopTapRepeatTimer
 {
-  if (!m_remoteIdleState)
+  if (self.pressAutoRepeatTimer != nil)
   {
-    if (m_appAlive == YES) //NO GESTURES BEFORE WE ARE UP AND RUNNING
+    if (siriRemoteInfo.debug)
+      NSLog(@"microGamepad: tap timer stopped");
+    [self stopKeyPressTimer];
+  }
+}
+
+-(void)processPanEvent:(SiriRemoteInfo&)remote
+{
+  // check if moved point is outside panning rect
+  // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
+  // use SiriRemote_xxxxSwipe here so we can block them when playing videos
+  // check if inside panning rect. if not, we moved outside and need to move focus.
+  if (!CGRectContainsPoint(siriRemoteInfo.panningRect, siriRemoteInfo.movedPoint))
+  {
+    if (remote.debug)
     {
-      if (m_mimicAppleSiri)
+      NSLog(@"microGamepad: x(%f), y(%f), L(%f), R(%f), T(%f), B(%f)",
+        remote.movedPoint.x, remote.movedPoint.y,
+        CGRectGetMinX(remote.panningRect),
+        CGRectGetMaxX(remote.panningRect),
+        CGRectGetMaxY(remote.panningRect),
+        CGRectGetMinY(remote.panningRect));
+    }
+
+    bool moved = false;
+    // check if moving left/right or up/down ?
+    if (remote.dx >= remote.dy)
+    {
+      if (remote.movedPoint.x <= CGRectGetMinX(remote.panningRect))
       {
-        if ([self shouldOSDScroll])
+        if (remote.debug)
         {
-          static UIPanGestureRecognizerDirection direction = UIPanGestureRecognizerDirectionUndefined;
-          // speed       == how many clicks full swipe will give us(1000x1000px)
-          // minVelocity == min velocity to trigger fast scroll, add this to settings?
-          float speed = 240.0;
-          float minVelocity = 1300.0;
-          switch (sender.state) {
-              
-            case UIGestureRecognizerStateBegan: {
-              
-              if (direction == UIPanGestureRecognizerDirectionUndefined)
-              {
-                m_lastGesturePoint = [sender translationInView:sender.view];
-                m_lastGesturePoint.x = m_lastGesturePoint.x/1.92;
-                m_lastGesturePoint.y = m_lastGesturePoint.y/1.08;
-                
-                m_direction = [self getPanDirection:m_lastGesturePoint];
-                m_directionOverride = false;
-              }
-              
-              break;
-            }
-              
-            case UIGestureRecognizerStateChanged:
-            {
-              CGPoint gesturePoint = [sender translationInView:sender.view];
-              gesturePoint.x = gesturePoint.x/1.92;
-              gesturePoint.y = gesturePoint.y/1.08;
-              
-              CGPoint gestureMovement;
-              gestureMovement.x = gesturePoint.x - m_lastGesturePoint.x;
-              gestureMovement.y = gesturePoint.y - m_lastGesturePoint.y;
-              direction = [self getPanDirection:gestureMovement];
-              
-              CGPoint velocity = [sender velocityInView:sender.view];
-              CGFloat velocityX = (0.2*velocity.x);
-              CGFloat velocityY = (0.2*velocity.y);
-              
-              if (ABS(velocityY) > minVelocity || ABS(velocityX) > minVelocity || m_directionOverride)
-              {
-                direction = m_direction;
-                // Override direction to correct swipe errors
-                m_directionOverride = true;
-              }
-              
-              switch (direction)
-              {
-                case UIPanGestureRecognizerDirectionUp:
-                {
-                  if ((ABS(m_lastGesturePoint.y - gesturePoint.y) > speed) || ABS(velocityY) > minVelocity )
-                  {
-                    [self sendKeyDownUp:XBMCK_UP];
-                    if (ABS(velocityY) > minVelocity && [self shouldFastScroll])
-                      [self sendKeyDownUp:XBMCK_UP];
-                    m_lastGesturePoint = gesturePoint;
-                  }
-                  break;
-                }
-                case UIPanGestureRecognizerDirectionDown:
-                {
-                  if ((ABS(m_lastGesturePoint.y - gesturePoint.y) > speed) || ABS(velocityY) > minVelocity)
-                  {
-                    [self sendKeyDownUp:XBMCK_DOWN];
-                    if (ABS(velocityY) > minVelocity && [self shouldFastScroll])
-                      [self sendKeyDownUp:XBMCK_DOWN];
-                    m_lastGesturePoint = gesturePoint;
-                  }
-                  break;
-                }
-                case UIPanGestureRecognizerDirectionLeft:
-                {
-                  // add 80 px to slow left/right swipes, it matched up down better
-                  if ((ABS(m_lastGesturePoint.x - gesturePoint.x) > speed+80) || ABS(velocityX) > minVelocity)
-                  {
-                    [self sendKeyDownUp:XBMCK_LEFT];
-                    if (ABS(velocityX) > minVelocity && [self shouldFastScroll])
-                      [self sendKeyDownUp:XBMCK_LEFT];
-                    m_lastGesturePoint = gesturePoint;
-                  }
-                  break;
-                }
-                case UIPanGestureRecognizerDirectionRight:
-                {
-                  // add 80 px to slow left/right swipes, it matched up down better
-                  if ((ABS(m_lastGesturePoint.x - gesturePoint.x) > speed+80) || ABS(velocityX) > minVelocity)
-                  {
-                    [self sendKeyDownUp:XBMCK_RIGHT];
-                    if (ABS(velocityX) > minVelocity && [self shouldFastScroll])
-                      [self sendKeyDownUp:XBMCK_RIGHT];
-                    m_lastGesturePoint = gesturePoint;
-                  }
-                  break;
-                }
-                default:
-                {
-                  break;
-                }
-              }
-            }
-              
-            case UIGestureRecognizerStateEnded: {
-              direction = UIPanGestureRecognizerDirectionUndefined;
-              // start remote idle timer
-              [self startRemoteTimer];
-              break;
-            }
-              
-            default:
-              break;
-          }
+          NSLog(@"microGamepad: pan left  dt(%f), dx(%f), dy(%f)",
+          remote.dt, remote.dx, remote.dy);
         }
+        moved = true;
+        [self sendButtonPressed:SiriRemote_LeftSwipe];
       }
-      else // dont mimic apple siri remote
+      else if (remote.movedPoint.x >= CGRectGetMaxX(remote.panningRect))
       {
-        XBMCKey key;
-        switch (sender.state)
+        if (remote.debug)
         {
-          case UIGestureRecognizerStateBegan:
+          NSLog(@"microGamepad: pan right  dt(%f), dx(%f), dy(%f)",
+            remote.dt, remote.dx, remote.dy);
+        }
+        moved = true;
+        [self sendButtonPressed:SiriRemote_RightSwipe];
+      }
+    }
+    else
+    {
+      if (remote.movedPoint.y >= CGRectGetMaxY(remote.panningRect))
+      {
+        if (remote.debug)
+        {
+          NSLog(@"microGamepad: pan up  dt(%f), dx(%f), dy(%f)",
+            remote.dt, remote.dx, remote.dy);
+        }
+        moved = true;
+        [self sendButtonPressed:SiriRemote_UpSwipe];
+      }
+      else if (remote.movedPoint.y <= CGRectGetMinY(remote.panningRect))
+      {
+        if (remote.debug)
+        {
+          NSLog(@"microGamepad: pan down  dt(%f), dx(%f), dy(%f)",
+            remote.dt, remote.dx, remote.dy);
+        }
+        moved = true;
+        [self sendButtonPressed:SiriRemote_DownSwipe];
+      }
+    }
+    if (moved)
+    {
+      // only update if we actually moved focus
+      CGFloat dx = remote.movedPoint.x - CGRectGetMidX(remote.panningRect);
+      CGFloat dy = remote.movedPoint.y - CGRectGetMidY(remote.panningRect);
+      remote.panningRect = CGRectOffset(remote.panningRect, dx, dy);
+    }
+  }
+}
+
+-(void)processSwipeEvent:(SiriRemoteInfo&)remote withRepeat:(int)repeat
+{
+  // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
+  // use SiriRemote_xxxxSwipe here so we can block them when playing videos
+  float delaySeconds = 0.2f;
+  if ([self shouldFastScroll])
+    delaySeconds = 0.05f;
+
+  // check for swipe left/right or up/down ?
+  if (remote.dx >= remote.dy)
+  {
+    if ([self getFocusedOrientation] != HORIZONTAL)
+    {
+      repeat = 1;
+      delaySeconds = 0.0f;
+    }
+
+    float vx = (remote.movedPoint.x - remote.startPoint.x) / remote.dt;
+    if (remote.movedPoint.x < remote.startPoint.x)
+    {
+      if (remote.debug)
+      {
+        NSLog(@"microGamepad: swipe left  dt(%f), dx(%f), dy(%f), vx(%f)",
+          remote.dt, remote.dx, remote.dy, vx);
+      }
+      for (int i = 0; i < repeat; ++i)
+      {
+        [self sendButtonPressed:SiriRemote_LeftSwipe];
+        usleep((int)(delaySeconds * 1000) * 1000);
+      }
+    }
+    else
+    {
+      if (remote.debug)
+      {
+        NSLog(@"microGamepad: swipe right dt(%f), dx(%f), dy(%f), vx(%f)",
+          remote.dt, remote.dx, remote.dy, vx);
+      }
+      for (int i = 0; i < repeat; ++i)
+      {
+        [self sendButtonPressed:SiriRemote_RightSwipe];
+        usleep((int)(delaySeconds * 1000) * 1000);
+      }
+    }
+  }
+  else
+  {
+    if ([self getFocusedOrientation] != VERTICAL)
+    {
+      repeat = 1;
+      delaySeconds = 0.0f;
+    }
+
+    float vy = (remote.movedPoint.y - remote.startPoint.y) / remote.dt;
+    if (remote.movedPoint.y > remote.startPoint.y)
+    {
+      if (remote.debug)
+      {
+        NSLog(@"microGamepad: swipe up    dt(%f), dx(%f), dy(%f), vy(%f)",
+          remote.dt, remote.dx, remote.dy, vy);
+      }
+      for (int i = 0; i < repeat; ++i)
+      {
+        [self sendButtonPressed:SiriRemote_UpSwipe];
+        usleep((int)(delaySeconds * 1000) * 1000);
+      }
+    }
+    else
+    {
+      if (remote.debug)
+      {
+        NSLog(@"microGamepad: swipe down  dt(%f), dx(%f), dy(%f), vy(%f)",
+          remote.dt, remote.dx, remote.dy, vy);
+      }
+      for (int i = 0; i < repeat; ++i)
+      {
+        [self sendButtonPressed:SiriRemote_DownSwipe];
+        usleep((int)(delaySeconds * 1000) * 1000);
+      }
+    }
+  }
+}
+
+-(void)processTapEvent:(SiriRemoteInfo&)remote
+{
+  // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
+  // transform coordinates to left/bottom = (-1, -1) to make checks easy
+  CGPoint centerStart = CGPointMake(
+    remote.startPoint.x - 1.0,
+    remote.startPoint.y - 1.0);
+  if (fabs(centerStart.x) < 0.4f && fabs(centerStart.y) < 0.4f)
+  {
+    // tap in center, ignore it.
+    if (remote.debug)
+      NSLog(@"microGamepad: tap center, ignored  dt(%f)", remote.dt);
+  }
+  else
+  {
+    // tap detected, use begining location to determine
+    // where tap occurred, ending location could be a slip of the finger
+    if (fabs(centerStart.x) >= fabs(centerStart.y))
+    {
+      if (remote.startPoint.x < 1.0)
+      {
+        if (remote.debug)
+          NSLog(@"microGamepad: tap left  dt(%f)", remote.dt);
+        [self sendButtonPressed:SiriRemote_LeftTap];
+      }
+      else
+      {
+        if (remote.debug)
+          NSLog(@"microGamepad: tap right dt(%f)", remote.dt);
+        [self sendButtonPressed:SiriRemote_RightTap];
+      }
+    }
+    else
+    {
+      if (remote.startPoint.y >= 1.0)
+      {
+        if (remote.debug)
+          NSLog(@"microGamepad: tap up    dt(%f)", remote.dt);
+        [self sendButtonPressed:SiriRemote_UpTap];
+      }
+      else
+      {
+        if (remote.debug)
+          NSLog(@"microGamepad: tap down  dt(%f)", remote.dt);
+        [self sendButtonPressed:SiriRemote_DownTap];
+      }
+    }
+  }
+}
+
+-(void)updateRemoteStartInfo:(SiriRemoteInfo&)remote withGamePad:(GCMicroGamepad*)gamepad
+{
+  // dpad values range from 0.0 to 1.0
+  // convert begining up/down/left/right into horizontal/vertical axis (-1, +1)
+  // and transform to 0 to +2 with left/bottom = (0,0), makes calcs easy
+  remote.startPoint = CGPointMake(
+    -gamepad.dpad.left.value + gamepad.dpad.right.value,
+    -gamepad.dpad.down.value + gamepad.dpad.up.value);
+  remote.startPoint.x += 1.0;
+  remote.startPoint.y += 1.0;
+  /*
+  NSLog(@"microGamepad: U(%d), D(%d), L(%d), R(%d), point %@",
+    gamepad.dpad.up.pressed,
+    gamepad.dpad.down.pressed,
+    gamepad.dpad.left.pressed,
+    gamepad.dpad.right.pressed,
+    NSStringFromCGPoint(siriRemoteInfo.startPoint));
+  */
+  remote.movedPoint = siriRemoteInfo.startPoint;
+  remote.panningRect = CGRectMake(remote.startPoint.x, remote.startPoint.y, 0.75, 0.75);
+  remote.startSeconds = CFAbsoluteTimeGetCurrent();
+  remote.movedSeconds = siriRemoteInfo.startSeconds;
+  remote.ignoreAfterSwipeSeconds = 0.0f;
+  remote.dt = 0.0f;
+  remote.dx = 0.0f;
+  remote.dy = 0.0f;
+}
+
+-(void)updateRemoteMovedInfo:(SiriRemoteInfo&)remote withGamePad:(GCMicroGamepad*)gamepad
+{
+  // dpad values range from 0.0 to 1.0
+  // referenced from center of touchpad.
+  // convert begining up/down/left/right into horizontal/vertical axis (-1, +1)
+  // and transform to 0 to +2 with left/bottom = (0,0), makes calcs easy
+  remote.movedPoint = CGPointMake(
+    -gamepad.dpad.left.value + gamepad.dpad.right.value,
+    -gamepad.dpad.down.value + gamepad.dpad.up.value);
+  remote.movedPoint.x += 1.0;
+  remote.movedPoint.y += 1.0;
+  remote.movedSeconds = CFAbsoluteTimeGetCurrent();
+  remote.dt = siriRemoteInfo.movedSeconds - siriRemoteInfo.startSeconds;
+  remote.dx = fabs(siriRemoteInfo.movedPoint.x - siriRemoteInfo.startPoint.x);
+  remote.dy = fabs(siriRemoteInfo.movedPoint.y - siriRemoteInfo.startPoint.y);
+}
+
+-(void)cgControllerDidDisconnect:(NSNotification *)notification
+{
+  self.gcController = nil;
+  if (siriRemoteInfo.debug)
+    NSLog(@"microGamepad: did disconnect");
+}
+
+-(void)cgControllerDidConnect:(NSNotification*)notification
+{
+  if( notification.object != nil )
+  {
+    self.gcController = notification.object;
+    if (self.gcController.microGamepad)
+    {
+      siriRemoteInfo.state = SiriRemoteIdle;
+      siriRemoteInfo.startSeconds = CFAbsoluteTimeGetCurrent();
+      siriRemoteInfo.movedSeconds = siriRemoteInfo.startSeconds;
+      // Capturing 'self' strongly in this block is likely to lead to a retain cycle
+      // so creating a weak reference to self for access inside the block
+      __weak MainController *weakSelf = self;
+
+      //self.gcController.microGamepad.allowsRotation = allowsRotation ? YES : NO;
+      self.gcController.microGamepad.reportsAbsoluteDpadValues = YES;
+#if 0
+      self.gcController.microGamepad.valueChangedHandler = ^(GCMicroGamepad *gamepad, GCControllerElement *element)
+      {
+        siriRemoteInfo.startPoint = CGPointMake(
+          -gamepad.dpad.left.value + gamepad.dpad.right.value,
+          -gamepad.dpad.down.value + gamepad.dpad.up.value);
+        siriRemoteInfo.startPoint.x += 1.0;
+        siriRemoteInfo.startPoint.y += 1.0;
+        NSLog(@"microGamepad: A(%d), U(%d), D(%d), L(%d), R(%d), point %@",
+          gamepad.buttonA.pressed,
+          gamepad.dpad.up.pressed,
+          gamepad.dpad.down.pressed,
+          gamepad.dpad.left.pressed,
+          gamepad.dpad.right.pressed,
+          NSStringFromCGPoint(siriRemoteInfo.startPoint));
+      };
+#else
+      self.gcController.microGamepad.valueChangedHandler = ^(GCMicroGamepad *gamepad, GCControllerElement *element)
+      {
+        // buttonA is the 'select' button, if pressed
+        // return and bypass any touch handling
+        if (gamepad.buttonA.pressed)
+        {
+          [weakSelf stopTapRepeatTimer];
+          siriRemoteInfo.state = SiriRemoteIdle;
+          return;
+        }
+
+        // check for other 'ignore' conditions
+        if (siriRemoteInfo.state == SiriRemoteIdle)
+        {
+          // check for spurious touch after swipe
+          // not sure why this can sometimes happen
+          if (siriRemoteInfo.ignoreAfterSwipeSeconds > 0.0f)
           {
-            m_currentClick = -1;
-            m_currentKey = XBMCK_UNKNOWN;
-            break;
+            float dt = CFAbsoluteTimeGetCurrent() - siriRemoteInfo.movedSeconds;
+            if (dt > siriRemoteInfo.ignoreAfterSwipeSeconds)
+              siriRemoteInfo.ignoreAfterSwipeSeconds = 0.0f;
+            else
+              return;
           }
-          case UIGestureRecognizerStateChanged:
-          {
-            CGPoint gesturePoint = [sender translationInView:m_glView];
-            gesturePoint.x = gesturePoint.x/1.92;
-            gesturePoint.y = gesturePoint.y/1.08;
-            
-            key = [self getPanDirectionKey:gesturePoint];
-            
-            // ignore UP/DOWN swipes while in full screen playback
-            if (g_windowManager.GetFocusedWindow() != WINDOW_FULLSCREEN_VIDEO ||
-                key == XBMCK_LEFT ||
-                key == XBMCK_RIGHT)
+          // if siri remote idle timeout is active,
+          // ignore the 1st touch and pretend to wake up
+          if (weakSelf.m_remoteIdleState)
+            return;
+        }
+
+        // we only care that some dpad is pressed or not. touch directions are
+        // determined by the dpad values. The reason for this is when a finger
+        // is down, we get two signaling down and we have to track all four.
+        BOOL pressed = gamepad.dpad.up.pressed ||
+                       gamepad.dpad.down.pressed ||
+                       gamepad.dpad.left.pressed ||
+                       gamepad.dpad.right.pressed;
+
+
+        if (pressed && siriRemoteInfo.state != SiriRemoteIdle)
+          [weakSelf updateRemoteMovedInfo:siriRemoteInfo withGamePad:gamepad];
+
+        switch(siriRemoteInfo.state)
+        {
+          case SiriRemoteIdle:
+            if (siriRemoteInfo.debug)
+              NSLog(@"microGamepad: idle, pressed(%d), dt(%f)", pressed, siriRemoteInfo.dt);
+            [weakSelf stopTapRepeatTimer];
+            if (pressed)
             {
-              int click;
-              int absX = gesturePoint.x;
-              int absY = gesturePoint.y;
-              
-              if (absX < 0)
-                absX *= -1;
-              
-              if (absY < 0)
-                absY *= -1;
-              
-              if (key == XBMCK_RIGHT || key == XBMCK_LEFT)
+              [weakSelf updateRemoteStartInfo:siriRemoteInfo withGamePad:gamepad];
+              // fire off tap hold/repeat timer
+              [weakSelf startTapRepeatTimer:siriRemoteInfo withdelay:0.75];
+              siriRemoteInfo.state = SiriRemoteTapTimer;
+            }
+            break;
+          case SiriRemoteTapTimer:
+            if (siriRemoteInfo.debug)
+            {
+              NSLog(@"microGamepad: tap timer, pressed(%d), dt(%f), dx(%f), dy(%f)",
+                pressed, siriRemoteInfo.dt, siriRemoteInfo.dx, siriRemoteInfo.dy);
+            }
+            // finger moved from initial start position (value changed fired)
+            if (pressed)
+            {
+              // check if we are moving and outside tap bounds
+              if (siriRemoteInfo.dx > 0.2f || siriRemoteInfo.dy > 0.2f)
               {
-                if (absX > 200)
-                  click = 2;
-                else if (absX > 70)
-                  click = 1;
-                else
-                  click = 0;
+                // cancel tap hold/repeat timer
+                [weakSelf stopTapRepeatTimer];
+                // could be pan or start of swipe
+                // we can not tell which yet so update moved info and move to pan/swipe state
+                siriRemoteInfo.state = SiriRemotePanSwipe;
+              }
+            }
+            else
+            {
+              // finger lifted, check guardSeconds. The touch pad is very sensitive
+              // and will register glancing hits which we want to ignore.
+              float guardSeconds = CFAbsoluteTimeGetCurrent() - siriRemoteInfo.startSeconds;
+              if (guardSeconds > 0.05f)
+              {
+                // guardSeconds is ok, check for tap bounds
+                if (siriRemoteInfo.dx < 0.2f && siriRemoteInfo.dy < 0.2f)
+                {
+                  // if we did not move at all, dt will not get updated and will be
+                  // zero on touch release, so use guardSeconds to calc tap duration.
+                  // if tap duration is longer than limit, ignore it
+                  if (guardSeconds < 1.0f)
+                    [weakSelf processTapEvent:siriRemoteInfo];
+                  else if (![weakSelf isTapRepeatTimerActive])
+                  {
+                    // if pressAutoRepeatTimer is not alive, it got invalidated
+                    // during call to startTapRepeatTimer in touch pressed
+                    // from a match to [self getFocusedOrientation], i.e
+                    // tried to autorepeat in a non valid direction. Normally
+                    // we just ignore taps if tap duration is longer than limit,
+                    // but in this case, permit a tap.
+                    [weakSelf processTapEvent:siriRemoteInfo];
+                  }
+                }
+              }
+            }
+            break;
+          case SiriRemotePanSwipe:
+            if (siriRemoteInfo.debug)
+            {
+              NSLog(@"microGamepad: pan or swipe?, pressed(%d), dt(%f), dx(%f), dy(%f)",
+                pressed, siriRemoteInfo.dt, siriRemoteInfo.dx, siriRemoteInfo.dy);
+            }
+            if (pressed)
+            {
+              // swipes are complete by 0.5 seconds, so this must be a pan
+              if (siriRemoteInfo.dt >= 0.50f)
+                siriRemoteInfo.state = SiriRemotePan;
+            }
+            else
+            {
+              // check if this looks like a swipe, which have a min distance then
+              // the finger is down. Also swipes that take longer than 1 second are ignored.
+              // should not need the time check, if touch is down longer than 0.5 seconds, it is a pan.
+              if (siriRemoteInfo.dt <= 1.0f && (siriRemoteInfo.dx >= 0.2f || siriRemoteInfo.dy >= 0.2f))
+              {
+                // swipe
+                // vx, xy range is typically 0 to 12+
+                // swiping down is typically a slower operation so
+                // give it a little more velocity help
+                float vx = (siriRemoteInfo.movedPoint.x - siriRemoteInfo.startPoint.x) / siriRemoteInfo.dt;
+                float vy = (siriRemoteInfo.movedPoint.y - siriRemoteInfo.startPoint.y) / siriRemoteInfo.dt;
+                int vcycles = fmaxf(fabsf(vx) / 4.0f, fabsf(vy) / 2.5f);
+                // a swipe should generate repeats
+                // if swipe length is long and/or the swipe was fast
+                int cycles = vcycles + (fmaxf(fabsf(siriRemoteInfo.dx), fabsf(siriRemoteInfo.dy)) / 0.9f);
+                if (cycles <= 0) cycles = 1;
+                if (siriRemoteInfo.debug)
+                  NSLog(@"microGamepad: dt(%f), vcycles(%d), cycles(%d)", siriRemoteInfo.dt, vcycles, cycles);
+
+                [weakSelf processSwipeEvent:siriRemoteInfo withRepeat:cycles];
+                siriRemoteInfo.ignoreAfterSwipeSeconds = 0.25;
               }
               else
               {
-                if (absY > 200)
-                  click = 2;
-                else if (absY > 100)
-                  click = 1;
-                else
-                  click = 0;
-              }
-              
-              if (m_clickResetPan || m_currentKey != key || click != m_currentClick)
-              {
-                [self stopKeyPressTimer];
-                [self sendKeyUp:m_currentKey];
-                
-                if (click != m_currentClick)
-                {
-                  m_currentClick = click;
-                }
-                if (m_currentKey == XBMCK_UNKNOWN || m_clickResetPan ||
-                    ((m_currentKey == XBMCK_RIGHT && key == XBMCK_LEFT) ||
-                     (m_currentKey == XBMCK_LEFT && key == XBMCK_RIGHT) ||
-                     (m_currentKey == XBMCK_UP && key == XBMCK_DOWN) ||
-                     (m_currentKey == XBMCK_DOWN && key == XBMCK_UP))
-                    )
-                {
-                  m_clickResetPan = false;
-                  m_currentKey = key;
-                }
-                
-                if (m_currentClick == 2)
-                {
-                  //fast click
-                  [self startKeyPressTimer:m_currentKey clickTime:0.20];
-                  LOG("fast click");
-                }
-                else if (m_currentClick == 1)
-                {
-                  // slow click
-                  [self startKeyPressTimer:m_currentKey clickTime:0.80];
-                  LOG("slow click");
-                }
+                if (siriRemoteInfo.debug)
+                  NSLog(@"microGamepad: should never get here, pressed(%d)", pressed);
               }
             }
             break;
-          }
-          case UIGestureRecognizerStateEnded:
-          case UIGestureRecognizerStateCancelled:
-            [self stopKeyPressTimer];
-            // start remote idle timer
-            [self startRemoteTimer];
-            break;
-          default:
+          case SiriRemotePan:
+            if (siriRemoteInfo.debug)
+            {
+              NSLog(@"microGamepad: pan, pressed(%d), dt(%f), dx(%f), dy(%f)",
+                pressed, siriRemoteInfo.dt, siriRemoteInfo.dx, siriRemoteInfo.dy);
+            }
+            // pans only happen when pressed, we could (in future) add auto-scroll if
+            // pan is pinned to same panningRect or some other check.
+            if (pressed)
+              [weakSelf processPanEvent:siriRemoteInfo];
             break;
         }
-      }
+
+        // if not pressed, we are done and will not
+        // get called again until the next touch changed event
+        if (!pressed)
+        {
+          // start remote idle timer
+          [weakSelf startRemoteTimer];
+          // always cancel tap repeat timer
+          [weakSelf stopTapRepeatTimer];
+          // always return to SiriRemoteIdle2
+          siriRemoteInfo.state = SiriRemoteIdle;
+          if (siriRemoteInfo.debug)
+            NSLog(@"microGamepad: idle");
+        }
+      };
+#endif
     }
+    if (siriRemoteInfo.debug)
+      NSLog(@"microGamepad: did connect");
   }
 }
 
-//--------------------------------------------------------------
-- (IBAction)handleSwipe:(UISwipeGestureRecognizer *)sender
-{
-  if (!m_remoteIdleState)
-  {
-    if(!m_mimicAppleSiri && m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
-    {
-      switch ([sender direction])
-      {
-        case UISwipeGestureRecognizerDirectionRight:
-          [self sendKeyDownUp:XBMCK_RIGHT];
-          break;
-        case UISwipeGestureRecognizerDirectionLeft:
-          [self sendKeyDownUp:XBMCK_LEFT];
-          break;
-        case UISwipeGestureRecognizerDirectionUp:
-          [self sendKeyDownUp:XBMCK_UP];
-          break;
-        case UISwipeGestureRecognizerDirectionDown:
-          [self sendKeyDownUp:XBMCK_DOWN];
-          break;
-      }
-    }
-  }
-  // start remote idle timer
-  [self startRemoteTimer];
-}
 
 #pragma mark -
 - (void) insertVideoView:(UIView*)view
@@ -1064,9 +1268,6 @@ MainController *g_xbmcController;
   g_xbmcController = self;  
 
   CAnnounceReceiver::GetInstance().Initialize();
-  //NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-  //[center addObserver: self
-  //   selector: @selector(observeDefaultCenterStuff:) name: nil object: nil];
 
   return self;
 }
@@ -1099,13 +1300,14 @@ MainController *g_xbmcController;
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  
-  [self createSwipeGestureRecognizers];
-  [self createPanGestureRecognizers];
+
+  // for IR remotes
   [self createPressGesturecognizers];
-  [self createTapGesturecognizers];
   [self createCustomControlCenter];
   
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cgControllerDidConnect:) name:GCControllerDidConnectNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cgControllerDidDisconnect:) name:GCControllerDidDisconnectNotification object:nil];
+  [GCController startWirelessControllerDiscoveryWithCompletionHandler:nil];
 }
 //--------------------------------------------------------------
 - (void)viewWillAppear:(BOOL)animated
@@ -1117,14 +1319,17 @@ MainController *g_xbmcController;
 - (void)viewDidAppear:(BOOL)animated
 {
   [super viewDidAppear:animated];
-  [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
   [self becomeFirstResponder];
+  [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
+  [GCController startWirelessControllerDiscoveryWithCompletionHandler:nil];
 }
 //--------------------------------------------------------------
 - (void)viewWillDisappear:(BOOL)animated
 {  
   [self pauseAnimation];
   [super viewWillDisappear:animated];
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:GCControllerDidConnectNotification object:nil];
+  [[NSNotificationCenter defaultCenter] removeObserver:self name:GCControllerDidDisconnectNotification object:nil];  
 }
 //--------------------------------------------------------------
 - (void)viewDidUnload
@@ -1532,35 +1737,27 @@ MainController *g_xbmcController;
           CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAYPAUSE)));
         break;
       case UIEventSubtypeRemoteControlPlay:
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
+        [self sendButtonPressed:SiriRemote_IR_Play];
         break;
       case UIEventSubtypeRemoteControlPause:
-        // ACTION_PAUSE sometimes cause unpause, use MediaPauseIfPlaying to make sure pause only
-        //CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE);
-        // warning, something is wacky, in tvOS we only get this if play/pause button is pushed
-        // the playPausePressed method should be getting called and it does, sometimes. WTF ?
         // check if not in background, we can get this if sleep is forced
         if (m_controllerState < MC_BACKGROUND)
-          CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAYPAUSE)));
+          [self sendButtonPressed:SiriRemote_IR_Pause];
         break;
       case UIEventSubtypeRemoteControlStop:
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP);
+        [self sendButtonPressed:SiriRemote_IR_Stop];
         break;
       case UIEventSubtypeRemoteControlNextTrack:
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_NEXT_ITEM)));
+        [self sendButtonPressed:SiriRemote_IR_NextTrack];
         break;
       case UIEventSubtypeRemoteControlPreviousTrack:
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PREV_ITEM)));
+        [self sendButtonPressed:SiriRemote_IR_PreviousTrack];
         break;
       case UIEventSubtypeRemoteControlBeginSeekingForward:
-        // use 4X speed forward.
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_FORWARD)));
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_FORWARD)));
+        [self sendButtonPressed:SiriRemote_IR_FastForward];
         break;
       case UIEventSubtypeRemoteControlBeginSeekingBackward:
-        // use 4X speed rewind.
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_REWIND)));
-        CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_REWIND)));
+        [self sendButtonPressed:SiriRemote_IR_Rewind];
         break;
       case UIEventSubtypeRemoteControlEndSeekingForward:
       case UIEventSubtypeRemoteControlEndSeekingBackward:
@@ -1631,18 +1828,21 @@ MainController *g_xbmcController;
     }
   }
   
-  NSNumber *elapsed = [NSNumber numberWithDouble:g_application.GetTime()];
-  if (elapsed)
-    [dict setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
-  NSNumber *speed = [item objectForKey:@"speed"];
-  if (speed)
-    [dict setObject:speed forKey:MPNowPlayingInfoPropertyDefaultPlaybackRate];
-  NSNumber *current = [item objectForKey:@"current"];
-  if (current)
-    [dict setObject:current forKey:MPNowPlayingInfoPropertyPlaybackQueueIndex];
-  NSNumber *total = [item objectForKey:@"total"];
-  if (total)
-    [dict setObject:total forKey:MPNowPlayingInfoPropertyPlaybackQueueCount];
+  if (NSClassFromString(@"MPNowPlayingInfoCenter"))
+  {
+    NSNumber *elapsed = [item objectForKey:@"elapsed"];
+    if (elapsed)
+      [dict setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+    NSNumber *speed = [item objectForKey:@"speed"];
+    if (speed)
+      [dict setObject:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
+    NSNumber *current = [item objectForKey:@"current"];
+    if (current)
+      [dict setObject:current forKey:MPNowPlayingInfoPropertyPlaybackQueueIndex];
+    NSNumber *total = [item objectForKey:@"total"];
+    if (total)
+      [dict setObject:total forKey:MPNowPlayingInfoPropertyPlaybackQueueCount];
+  }
   /*
    other properities can be set:
    MPMediaItemPropertyAlbumTrackCount
@@ -1662,16 +1862,19 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 - (void)onSpeedChanged:(NSDictionary *)item
 {
-  //PRINT_SIGNATURE();
-  NSMutableDictionary *info = [self.m_nowPlayingInfo mutableCopy];
-  NSNumber *elapsed = [NSNumber numberWithDouble:g_application.GetTime()];
-  if (elapsed)
-    [info setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
-  NSNumber *speed = [item objectForKey:@"speed"];
-  if (speed)
-    [info setObject:speed forKey:MPNowPlayingInfoPropertyDefaultPlaybackRate];
+  PRINT_SIGNATURE();
+  if (NSClassFromString(@"MPNowPlayingInfoCenter"))
+  {
+    NSMutableDictionary *info = [self.m_nowPlayingInfo mutableCopy];
+    NSNumber *elapsed = [item objectForKey:@"elapsed"];
+    if (elapsed)
+      [info setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+    NSNumber *speed = [item objectForKey:@"speed"];
+    if (speed)
+      [info setObject:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
 
-  [self setIOSNowPlayingInfo:info];
+    [self setIOSNowPlayingInfo:info];
+  }
 }
 
 - (void)onSeekDelayed:(id)arg
@@ -1702,14 +1905,17 @@ MainController *g_xbmcController;
 - (void)onPausePlaying:(NSDictionary *)item
 {
   PRINT_SIGNATURE();
-  NSMutableDictionary *info = [self.m_nowPlayingInfo mutableCopy];
-  NSNumber *speed = [NSNumber numberWithDouble:0.000001f];
-  if (speed)
-    [info setObject:speed forKey:MPNowPlayingInfoPropertyDefaultPlaybackRate];
-  NSNumber *elapsed = [NSNumber numberWithDouble:g_application.GetTime()];
-  if (elapsed)
-    [info setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
-  [self setIOSNowPlayingInfo:info];
+  if (NSClassFromString(@"MPNowPlayingInfoCenter"))
+  {
+    NSMutableDictionary *info = [self.m_nowPlayingInfo mutableCopy];
+    NSNumber *speed = [NSNumber numberWithDouble:0.000001f];
+    if (speed)
+      [info setObject:speed forKey:MPNowPlayingInfoPropertyDefaultPlaybackRate];
+    NSNumber *elapsed = [NSNumber numberWithDouble:g_application.GetTime()];
+    if (elapsed)
+      [info setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
+    [self setIOSNowPlayingInfo:info];
+  }
 }
 //--------------------------------------------------------------
 - (void)onStopPlaying:(NSDictionary *)item
@@ -1719,12 +1925,6 @@ MainController *g_xbmcController;
 }
 
 #pragma mark - control center
-
-- (void)observeDefaultCenterStuff: (NSNotification *) notification
-{
-  //LOG(@"default: %@", [notification name]);
-  //LOG(@"userInfo: %@", [notification userInfo]);
-}
 
 - (void)createCustomControlCenter
 {
