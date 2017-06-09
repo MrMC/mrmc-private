@@ -99,19 +99,6 @@
         <setting id="input.appleremotesequencetime">
           <visible>false</visible>
         </setting>
-        <setting id="input.applesiri" type="boolean" label="24152" help="24153">
-          <level>1</level>
-          <default>false</default>
-          <control type="toggle" />
-        </setting>
-        <setting id="input.applesiriosdswipe" type="boolean" parent="input.applesiri" label="24162" help="24163">
-          <level>1</level>
-          <default>true</default>
-          <control type="toggle" />
-          <dependencies>
-            <dependency type="visible" setting="input.applesiri">true</dependency>
-          </dependencies>
-        </setting>
         <setting id="input.applesiriback" type="boolean" label="884" help="885">
           <level>1</level>
           <default>true</default>

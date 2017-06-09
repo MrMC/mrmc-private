@@ -54,10 +54,8 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   MainEAGLView               *m_glView;
   // Touch handling
   CGSize                      m_screensize;
-  CGPoint                     m_lastGesturePoint;
   CGFloat                     m_screenScale;
   int                         m_screenIdx;
-  int                         m_currentClick;
 
 
   UIBackgroundTaskIdentifier  m_bgTask;
@@ -71,33 +69,21 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   BOOL                        m_disableIdleTimer;
   NSConditionLock            *m_animationThreadLock;
   NSThread                   *m_animationThread;
-  BOOL                        m_directionOverride;
   BOOL                        m_mimicAppleSiri;
-  XBMCKey                     m_currentKey;
-  BOOL                        m_clickResetPan;
   BOOL                        m_remoteIdleState;
   CGFloat                     m_remoteIdleTimeout;
   BOOL                        m_shouldRemoteIdle;
-  BOOL                        m_RemoteOSDSwipes;
-  UIPanGestureRecognizerDirection m_direction;
 }
 // why are these properties ?
 @property (nonatomic, strong) NSTimer *m_holdTimer;
 @property (nonatomic, retain) NSDictionary *m_nowPlayingInfo;
 @property int                 m_holdCounter;
-@property CGPoint             m_lastGesturePoint;
 @property CGFloat             m_screenScale;
-@property XBMCKey             m_currentKey;
 @property int                 m_screenIdx;
 @property CGSize              m_screensize;
-@property BOOL                m_directionOverride;
-@property BOOL                m_mimicAppleSiri;
-@property BOOL                m_clickResetPan;
 @property BOOL                m_remoteIdleState;
 @property CGFloat             m_remoteIdleTimeout;
 @property BOOL                m_shouldRemoteIdle;
-@property BOOL                m_RemoteOSDSwipes;
-@property UIPanGestureRecognizerDirection m_direction;
 
 - (void)onPlayDelayed:(NSDictionary *)item;
 - (void)onSpeedChanged:(NSDictionary *)item;
@@ -118,7 +104,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void) audioRouteChanged;
 - (EAGLContext*) getEAGLContextObj;
 
-- (void) sendKeyDownUp:(XBMCKey)key;
 - (void) setFramebuffer;
 - (bool) presentFramebuffer;
 - (CGSize) getScreenSize;
@@ -133,10 +118,8 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void) disableScreenSaver;
 - (void) enableScreenSaver;
 - (bool) resetSystemIdleTimer;
-- (void) setSiriRemote:(BOOL)enable;
 - (void) setRemoteIdleTimeout:(int)timeout;
 - (void) setShouldRemoteIdle:(BOOL)idle;
-- (void) setSiriRemoteOSDSwipes:(BOOL)enable;
 
 - (NSArray<UIScreenMode *> *) availableScreenModes:(UIScreen*) screen;
 - (UIScreenMode*) preferredScreenMode:(UIScreen*) screen;
