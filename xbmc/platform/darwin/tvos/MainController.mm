@@ -1073,7 +1073,11 @@ static SiriRemoteInfo siriRemoteInfo;
           // if siri remote idle timeout is active,
           // ignore the 1st touch and pretend to wake up
           if (weakSelf.m_remoteIdleState)
+          {
+            // start remote idle timer
+            [weakSelf startRemoteTimer];
             return;
+          }
         }
 
         // we only care that some dpad is pressed or not. touch directions are
