@@ -501,6 +501,8 @@ static int keyPressTimerFiredCount = 0;
   }
 }
 
+#define ARROW_PRESS_DELAY_S 0.25
+#define ARROW_PRESS_DELAY_FAST_S 0.10
 //--------------------------------------------------------------
 - (void)repeatUpArrowPressed
 {
@@ -516,13 +518,13 @@ static int keyPressTimerFiredCount = 0;
 //--------------------------------------------------------------
 - (IBAction)IRRemoteUpArrowPressed:(UIGestureRecognizer *)sender
 {
-  NSTimeInterval repeatDelay = 0.25;
+  NSTimeInterval repeatDelay = ARROW_PRESS_DELAY_S;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
       self.m_holdCounter = 0;
       if ([self shouldFastScroll])
-        repeatDelay = 0.10;
+        repeatDelay = ARROW_PRESS_DELAY_FAST_S;
       self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
         target:self selector:@selector(repeatUpArrowPressed) userInfo:nil repeats:YES];
       break;
@@ -556,13 +558,13 @@ static int keyPressTimerFiredCount = 0;
 //--------------------------------------------------------------
 - (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer *)sender
 {
-  NSTimeInterval repeatDelay = 0.25;
+  NSTimeInterval repeatDelay = ARROW_PRESS_DELAY_S;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
       self.m_holdCounter = 0;
       if ([self shouldFastScroll])
-        repeatDelay = 0.10;
+        repeatDelay = ARROW_PRESS_DELAY_FAST_S;
       self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
         target:self selector:@selector(repeatDownArrowPressed) userInfo:nil repeats:YES];
       break;
@@ -596,13 +598,13 @@ static int keyPressTimerFiredCount = 0;
 //--------------------------------------------------------------
 - (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
 {
-  NSTimeInterval repeatDelay = 0.25;
+  NSTimeInterval repeatDelay = ARROW_PRESS_DELAY_S;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
       self.m_holdCounter = 0;
       if ([self shouldFastScroll])
-        repeatDelay = 0.10;
+        repeatDelay = ARROW_PRESS_DELAY_FAST_S;
       self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
         target:self selector:@selector(repeatLeftArrowPressed) userInfo:nil repeats:YES];
       break;
@@ -636,13 +638,13 @@ static int keyPressTimerFiredCount = 0;
 //--------------------------------------------------------------
 - (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
 {
-  NSTimeInterval repeatDelay = 0.25;
+  NSTimeInterval repeatDelay = ARROW_PRESS_DELAY_S;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
       self.m_holdCounter = 0;
       if ([self shouldFastScroll])
-        repeatDelay = 0.10;
+        repeatDelay = ARROW_PRESS_DELAY_FAST_S;
       self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
         target:self selector:@selector(repeatRightArrowPressed) userInfo:nil repeats:YES];
       break;
