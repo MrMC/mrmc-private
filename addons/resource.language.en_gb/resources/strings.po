@@ -3713,7 +3713,17 @@ msgctxt "#887"
 msgid "Time in seconds after which OSD will auto hide"
 msgstr ""
 
-#empty strings from id 853 to 996
+#: settings_tvos.xml
+msgctxt "#888"
+msgid "Enable Swipe"
+msgstr ""
+
+#: settings_tvos.xml
+msgctxt "#889"
+msgid "Enable Siri remote swipe action"
+msgstr ""
+
+#empty strings from id 890 to 996
 
 #: lighteffects
 msgctxt "#853"

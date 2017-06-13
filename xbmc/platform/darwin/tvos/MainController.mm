@@ -285,6 +285,13 @@ static int keyPressTimerFiredCount = 0;
   [self startRemoteTimer];
 }
 
+- (void)setShouldRemoteSwipe:(BOOL)swipe
+{
+  //PRINT_SIGNATURE();
+  siriRemoteInfo.shouldRemoteSwipe = swipe;
+  
+}
+
 //--------------------------------------------------------------
 #pragma mark - gesture methods
 //--------------------------------------------------------------
@@ -676,6 +683,7 @@ typedef struct
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
   float ignoreAfterSwipeSeconds;
+  bool shouldRemoteSwipe;
   SiriRemoteState state = SiriRemoteIdle;
 } SiriRemoteInfo;
 static SiriRemoteInfo siriRemoteInfo;
@@ -754,6 +762,8 @@ static SiriRemoteInfo siriRemoteInfo;
 
 -(void)processPanEvent:(SiriRemoteInfo&)remote
 {
+  if (!siriRemoteInfo.shouldRemoteSwipe)
+    return;
   // check if moved point is outside panning rect
   // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
   // use SiriRemote_xxxxSwipe here so we can block them when playing videos
@@ -830,6 +840,9 @@ static SiriRemoteInfo siriRemoteInfo;
 
 -(void)processSwipeEvent:(SiriRemoteInfo&)remote withRepeat:(int)repeat
 {
+  if (!siriRemoteInfo.shouldRemoteSwipe)
+    return;
+  
   // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
   // use SiriRemote_xxxxSwipe here so we can block them when playing videos
   float delaySeconds = 0.2f;
@@ -1079,7 +1092,6 @@ static SiriRemoteInfo siriRemoteInfo;
             return;
           }
         }
-
         // we only care that some dpad is pressed or not. touch directions are
         // determined by the dpad values. The reason for this is when a finger
         // is down, we get two signaling down and we have to track all four.

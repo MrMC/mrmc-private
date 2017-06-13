@@ -120,6 +120,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (bool) resetSystemIdleTimer;
 - (void) setRemoteIdleTimeout:(int)timeout;
 - (void) setShouldRemoteIdle:(BOOL)idle;
+- (void) setShouldRemoteSwipe:(BOOL)swipe;
 
 - (NSArray<UIScreenMode *> *) availableScreenModes:(UIScreen*) screen;
 - (UIScreenMode*) preferredScreenMode:(UIScreen*) screen;
