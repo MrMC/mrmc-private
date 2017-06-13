@@ -179,27 +179,42 @@ MainController *g_xbmcController;
 //- (void)startKeyPressTimer:(XBMCKey)keyId
 - (void)startKeyPressTimer:(int)keyId
 {
-  [self startKeyPressTimer:keyId doBeforeWait:true withdelay:REPEATED_KEYPRESS_DELAY_S];
+  [self startKeyPressTimer:keyId doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+}
+
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay
+{
+  [self startKeyPressTimer:keyId doBeforeDelay:doBeforeDelay withDelay:REPEATED_KEYPRESS_DELAY_S withInterval:REPEATED_KEYPRESS_PAUSE_S];
+}
+
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay
+{
+  [self startKeyPressTimer:keyId doBeforeDelay:doBeforeDelay withDelay:delay withInterval:REPEATED_KEYPRESS_PAUSE_S];
+}
+
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withInterval:(NSTimeInterval)interval
+{
+  [self startKeyPressTimer:keyId doBeforeDelay:doBeforeDelay withDelay:REPEATED_KEYPRESS_DELAY_S withInterval:interval];
 }
 
 static int keyPressTimerFiredCount = 0;
-- (void)startKeyPressTimer:(int)keyId doBeforeWait:(bool)doBeforeWait withdelay:(NSTimeInterval)interval
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay withInterval:(NSTimeInterval)interval
 {
   //PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
     [self stopKeyPressTimer];
 
-  if (doBeforeWait)
+  if (doBeforeDelay)
     [self sendButtonPressed:keyId];
 
   NSNumber *number = [NSNumber numberWithInt:keyId];
-  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:interval];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
 
   keyPressTimerFiredCount = 0;
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
   NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
-    interval:REPEATED_KEYPRESS_PAUSE_S
+    interval:interval
     target:self
     selector:@selector(keyPressTimerCallback:)
     userInfo:number
@@ -271,6 +286,19 @@ static int keyPressTimerFiredCount = 0;
   return UNDEFINED;
 }
 
+-(bool)canDoScrollUpDown
+{
+  // we dont want fast scroll in below windows, no point in going 15 places in home screen
+  CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
+  CGUIControl *focusedControl = pWindow->GetFocusedControl();
+  if (focusedControl)
+  {
+    if (focusedControl->GetControlType() == CGUIControl::GUICONTROL_SCROLLBAR)
+      return false;
+  }
+  return true;
+}
+
 //--------------------------------------------------------------
 - (void)setRemoteIdleTimeout:(int)timeout
 {
@@ -289,7 +317,6 @@ static int keyPressTimerFiredCount = 0;
 {
   //PRINT_SIGNATURE();
   siriRemoteInfo.shouldRemoteSwipe = swipe;
-  
 }
 
 //--------------------------------------------------------------
@@ -501,163 +528,95 @@ static int keyPressTimerFiredCount = 0;
   }
 }
 
-#define ARROW_PRESS_DELAY_S 0.25
-#define ARROW_PRESS_DELAY_FAST_S 0.10
-//--------------------------------------------------------------
-- (void)repeatUpArrowPressed
-{
-  if (self.m_holdCounter < 1)
-    [self sendButtonPressed:SiriRemote_UpTap];
-  else
-  {
-    if ([self shouldFastScroll] && [self getFocusedOrientation] == VERTICAL)
-      [self sendButtonPressed:SiriRemote_UpScroll];
-  }
-  self.m_holdCounter++;
-}
-//--------------------------------------------------------------
+#define REPEATED_IRPRESS_DELAY_S 0.35
 - (IBAction)IRRemoteUpArrowPressed:(UIGestureRecognizer *)sender
 {
-  NSTimeInterval repeatDelay = ARROW_PRESS_DELAY_S;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      self.m_holdCounter = 0;
-      if ([self shouldFastScroll])
-        repeatDelay = ARROW_PRESS_DELAY_FAST_S;
-      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
-        target:self selector:@selector(repeatUpArrowPressed) userInfo:nil repeats:YES];
+      [self sendButtonPressed:SiriRemote_UpTap];
+      if ([self shouldFastScroll] && [self getFocusedOrientation] == VERTICAL)
+      {
+        int keyId = [self canDoScrollUpDown] ? SiriRemote_UpScroll:SiriRemote_UpTap;
+        [self startKeyPressTimer:keyId doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      }
       break;
     case UIGestureRecognizerStateEnded:
-      [self.m_holdTimer invalidate];
-      if (self.m_holdCounter < 1)
-        [self sendButtonPressed:SiriRemote_UpTap];
-      // start remote timeout
-      [self startRemoteTimer];
-      break;
     case UIGestureRecognizerStateChanged:
     case UIGestureRecognizerStateCancelled:
-      [self.m_holdTimer invalidate];
+      [self stopKeyPressTimer];
+      // restart remote timeout
+      [self startRemoteTimer];
       break;
     default:
       break;
   }
-}
-//--------------------------------------------------------------
-- (void)repeatDownArrowPressed
-{
-  if (self.m_holdCounter < 1)
-    [self sendButtonPressed:SiriRemote_DownTap];
-  else
-  {
-    if ([self shouldFastScroll] && [self getFocusedOrientation] == VERTICAL)
-      [self sendButtonPressed:SiriRemote_DownScroll];
-  }
-  self.m_holdCounter++;
 }
 //--------------------------------------------------------------
 - (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer *)sender
 {
-  NSTimeInterval repeatDelay = ARROW_PRESS_DELAY_S;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      self.m_holdCounter = 0;
-      if ([self shouldFastScroll])
-        repeatDelay = ARROW_PRESS_DELAY_FAST_S;
-      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
-        target:self selector:@selector(repeatDownArrowPressed) userInfo:nil repeats:YES];
+      [self sendButtonPressed:SiriRemote_DownTap];
+      if ([self shouldFastScroll] && [self getFocusedOrientation] == VERTICAL)
+      {
+        int keyId = [self canDoScrollUpDown] ? SiriRemote_DownScroll:SiriRemote_DownTap;
+        [self startKeyPressTimer:keyId doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      }
       break;
     case UIGestureRecognizerStateEnded:
-      [self.m_holdTimer invalidate];
-      if (self.m_holdCounter < 1)
-        [self sendButtonPressed:SiriRemote_DownTap];
-      // start remote timeout
-      [self startRemoteTimer];
-      break;
     case UIGestureRecognizerStateChanged:
     case UIGestureRecognizerStateCancelled:
-      [self.m_holdTimer invalidate];
+      [self stopKeyPressTimer];
+      // restart remote timeout
+      [self startRemoteTimer];
       break;
     default:
       break;
   }
 }
-//--------------------------------------------------------------
-- (void)repeatLeftArrowPressed
-{
-  if (self.m_holdCounter < 1)
-    [self sendButtonPressed:SiriRemote_LeftTap];
-  else
-  {
-    if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
-      [self sendButtonPressed:SiriRemote_UpScroll];
-  }
-  self.m_holdCounter++;
-}
-//--------------------------------------------------------------
 - (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
 {
-  NSTimeInterval repeatDelay = ARROW_PRESS_DELAY_S;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      self.m_holdCounter = 0;
-      if ([self shouldFastScroll])
-        repeatDelay = ARROW_PRESS_DELAY_FAST_S;
-      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
-        target:self selector:@selector(repeatLeftArrowPressed) userInfo:nil repeats:YES];
+     [self sendButtonPressed:SiriRemote_LeftTap];
+      if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
+      {
+        int keyId = [self canDoScrollUpDown] ? SiriRemote_UpScroll:SiriRemote_LeftTap;
+        [self startKeyPressTimer:keyId doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      }
       break;
     case UIGestureRecognizerStateEnded:
-      [self.m_holdTimer invalidate];
-      if (self.m_holdCounter < 1)
-        [self sendButtonPressed:SiriRemote_LeftTap];
-      // start remote timeout
-      [self startRemoteTimer];
-      break;
     case UIGestureRecognizerStateChanged:
     case UIGestureRecognizerStateCancelled:
-      [self.m_holdTimer invalidate];
+      [self stopKeyPressTimer];
+      // restart remote timeout
+      [self startRemoteTimer];
       break;
     default:
       break;
   }
 }
-//--------------------------------------------------------------
-- (void)repeatRightArrowPressed
-{
-  if (self.m_holdCounter < 1)
-    [self sendButtonPressed:SiriRemote_RightTap];
-  else
-  {
-    if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
-      [self sendButtonPressed:SiriRemote_DownScroll];
-  }
-  self.m_holdCounter++;
-}
-//--------------------------------------------------------------
 - (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
 {
-  NSTimeInterval repeatDelay = ARROW_PRESS_DELAY_S;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      self.m_holdCounter = 0;
-      if ([self shouldFastScroll])
-        repeatDelay = ARROW_PRESS_DELAY_FAST_S;
-      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:repeatDelay
-        target:self selector:@selector(repeatRightArrowPressed) userInfo:nil repeats:YES];
+      [self sendButtonPressed:SiriRemote_RightTap];
+      if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
+      {
+        int keyId = [self canDoScrollUpDown] ? SiriRemote_DownScroll:SiriRemote_RightTap;
+        [self startKeyPressTimer:keyId doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      }
       break;
     case UIGestureRecognizerStateEnded:
-      [self.m_holdTimer invalidate];
-      if (self.m_holdCounter < 1)
-        [self sendButtonPressed:SiriRemote_RightTap];
-      // start remote timeout
-      [self startRemoteTimer];
-      break;
     case UIGestureRecognizerStateChanged:
     case UIGestureRecognizerStateCancelled:
-      [self.m_holdTimer invalidate];
+      [self stopKeyPressTimer];
+      // restart remote timeout
+      [self startRemoteTimer];
       break;
     default:
       break;
@@ -670,6 +629,7 @@ static int keyPressTimerFiredCount = 0;
 typedef enum SiriRemoteState
 {
   SiriRemoteIdle,
+  SiriRemoteSelect,
   SiriRemoteTapTimer,
   SiriRemotePanSwipe,
   SiriRemotePan,
@@ -684,6 +644,7 @@ typedef struct
   CGRect  panningRect;
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
+  bool ignoreAfterSelect;
   float ignoreAfterSwipeSeconds;
   bool shouldRemoteSwipe;
   SiriRemoteState state = SiriRemoteIdle;
@@ -718,14 +679,14 @@ static SiriRemoteInfo siriRemoteInfo;
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat left");
         if ([self getFocusedOrientation] == HORIZONTAL)
-          [self startKeyPressTimer:SiriRemote_UpScroll doBeforeWait:false withdelay:delayTime];
+          [self startKeyPressTimer:SiriRemote_UpScroll doBeforeDelay:false withDelay:delayTime];
       }
       else
       {
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat right");
         if ([self getFocusedOrientation] == HORIZONTAL)
-          [self startKeyPressTimer:SiriRemote_DownScroll doBeforeWait:false withdelay:delayTime];
+          [self startKeyPressTimer:SiriRemote_DownScroll doBeforeDelay:false withDelay:delayTime];
       }
     }
     else
@@ -735,14 +696,14 @@ static SiriRemoteInfo siriRemoteInfo;
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat up");
         if ([self getFocusedOrientation] == VERTICAL)
-          [self startKeyPressTimer:SiriRemote_UpScroll doBeforeWait:false withdelay:delayTime];
+          [self startKeyPressTimer:SiriRemote_UpScroll doBeforeDelay:false withDelay:delayTime];
       }
       else
       {
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat down");
         if ([self getFocusedOrientation] == VERTICAL)
-          [self startKeyPressTimer:SiriRemote_DownScroll doBeforeWait:false withdelay:delayTime];
+          [self startKeyPressTimer:SiriRemote_DownScroll doBeforeDelay:false withDelay:delayTime];
       }
     }
   }
@@ -766,11 +727,12 @@ static SiriRemoteInfo siriRemoteInfo;
 {
   if (!siriRemoteInfo.shouldRemoteSwipe)
     return;
+
   // check if moved point is outside panning rect
   // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
   // use SiriRemote_xxxxSwipe here so we can block them when playing videos
   // check if inside panning rect. if not, we moved outside and need to move focus.
-  if (!CGRectContainsPoint(siriRemoteInfo.panningRect, siriRemoteInfo.movedPoint))
+  if (!CGRectContainsPoint(remote.panningRect, remote.movedPoint))
   {
     if (remote.debug)
     {
@@ -833,9 +795,8 @@ static SiriRemoteInfo siriRemoteInfo;
     if (moved)
     {
       // only update if we actually moved focus
-      CGFloat dx = remote.movedPoint.x - CGRectGetMidX(remote.panningRect);
-      CGFloat dy = remote.movedPoint.y - CGRectGetMidY(remote.panningRect);
-      remote.panningRect = CGRectOffset(remote.panningRect, dx, dy);
+      remote.panningRect.origin.x = remote.movedPoint.x - CGRectGetWidth(remote.panningRect) / 2.0;
+      remote.panningRect.origin.y = remote.movedPoint.y - CGRectGetHeight(remote.panningRect) / 2.0;
     }
   }
 }
@@ -844,7 +805,7 @@ static SiriRemoteInfo siriRemoteInfo;
 {
   if (!siriRemoteInfo.shouldRemoteSwipe)
     return;
-  
+
   // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
   // use SiriRemote_xxxxSwipe here so we can block them when playing videos
   float delaySeconds = 0.2f;
@@ -933,7 +894,7 @@ static SiriRemoteInfo siriRemoteInfo;
   CGPoint centerStart = CGPointMake(
     remote.startPoint.x - 1.0,
     remote.startPoint.y - 1.0);
-  if (fabs(centerStart.x) < 0.4f && fabs(centerStart.y) < 0.4f)
+  if (fabs(centerStart.x) < 0.2f && fabs(centerStart.y) < 0.2f)
   {
     // tap in center, ignore it.
     if (remote.debug)
@@ -992,12 +953,16 @@ static SiriRemoteInfo siriRemoteInfo;
     gamepad.dpad.down.pressed,
     gamepad.dpad.left.pressed,
     gamepad.dpad.right.pressed,
-    NSStringFromCGPoint(siriRemoteInfo.startPoint));
+    NSStringFromCGPoint(remote));
   */
-  remote.movedPoint = siriRemoteInfo.startPoint;
-  remote.panningRect = CGRectMake(remote.startPoint.x, remote.startPoint.y, 0.75, 0.75);
+  remote.movedPoint = remote.startPoint;
+  remote.panningRect = CGRectMake(0.0, 0.0, 0.35, 0.35);
+  remote.panningRect.origin.x = remote.startPoint.x - CGRectGetWidth(remote.panningRect) / 2.0;
+  remote.panningRect.origin.y = remote.startPoint.y - CGRectGetHeight(remote.panningRect) / 2.0;
+
   remote.startSeconds = CFAbsoluteTimeGetCurrent();
-  remote.movedSeconds = siriRemoteInfo.startSeconds;
+  remote.movedSeconds = remote.startSeconds;
+  remote.ignoreAfterSelect = false;
   remote.ignoreAfterSwipeSeconds = 0.0f;
   remote.dt = 0.0f;
   remote.dx = 0.0f;
@@ -1016,9 +981,9 @@ static SiriRemoteInfo siriRemoteInfo;
   remote.movedPoint.x += 1.0;
   remote.movedPoint.y += 1.0;
   remote.movedSeconds = CFAbsoluteTimeGetCurrent();
-  remote.dt = siriRemoteInfo.movedSeconds - siriRemoteInfo.startSeconds;
-  remote.dx = fabs(siriRemoteInfo.movedPoint.x - siriRemoteInfo.startPoint.x);
-  remote.dy = fabs(siriRemoteInfo.movedPoint.y - siriRemoteInfo.startPoint.y);
+  remote.dt = remote.movedSeconds - remote.startSeconds;
+  remote.dx = fabs(remote.movedPoint.x - remote.startPoint.x);
+  remote.dy = fabs(remote.movedPoint.y - remote.startPoint.y);
 }
 
 -(void)cgControllerDidDisconnect:(NSNotification *)notification
@@ -1063,13 +1028,12 @@ static SiriRemoteInfo siriRemoteInfo;
 #else
       self.gcController.microGamepad.valueChangedHandler = ^(GCMicroGamepad *gamepad, GCControllerElement *element)
       {
-        // buttonA is the 'select' button, if pressed
-        // return and bypass any touch handling
+        // buttonA is the 'select' button,
+        // if pressed bypass any touch handling
         if (gamepad.buttonA.pressed)
         {
           [weakSelf stopTapRepeatTimer];
-          siriRemoteInfo.state = SiriRemoteIdle;
-          return;
+          siriRemoteInfo.state = SiriRemoteSelect;
         }
 
         // check for other 'ignore' conditions
@@ -1084,6 +1048,14 @@ static SiriRemoteInfo siriRemoteInfo;
               siriRemoteInfo.ignoreAfterSwipeSeconds = 0.0f;
             else
               return;
+          }
+          // after a select (click on trackpad) we will
+          // get a pressed event as finger is still on trackpad.
+          // ingore under finger is lifted.
+          if (siriRemoteInfo.ignoreAfterSelect)
+          {
+            siriRemoteInfo.ignoreAfterSelect = false;
+            return;
           }
           // if siri remote idle timeout is active,
           // ignore the 1st touch and pretend to wake up
@@ -1119,6 +1091,10 @@ static SiriRemoteInfo siriRemoteInfo;
               [weakSelf startTapRepeatTimer:siriRemoteInfo withdelay:0.75];
               siriRemoteInfo.state = SiriRemoteTapTimer;
             }
+            break;
+          case SiriRemoteSelect:
+            // Selects are handled by gesture handler, ignore them
+            siriRemoteInfo.ignoreAfterSelect = true;
             break;
           case SiriRemoteTapTimer:
             if (siriRemoteInfo.debug)
