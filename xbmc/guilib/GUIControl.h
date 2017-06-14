@@ -231,11 +231,14 @@ public:
 
   void SetAnimations(const std::vector<CAnimation> &animations);
   const std::vector<CAnimation> &GetAnimations() const { return m_animations; };
+  void        SetDynamicAnimations(const std::vector<CAnimation> &animations);
+  void        ClearDynamicAnimations();
+  const std::vector<CAnimation> &GetDynamicAnimations() const { return m_dynamicAnimations; };
 
   virtual void QueueAnimation(ANIMATION_TYPE anim);
   virtual bool IsAnimating(ANIMATION_TYPE anim);
   virtual bool HasAnimation(ANIMATION_TYPE anim);
-  CAnimation *GetAnimation(ANIMATION_TYPE type, bool checkConditions = true);
+  CAnimation  *GetAnimation(ANIMATION_TYPE type, bool checkConditions = true);
   virtual void ResetAnimation(ANIMATION_TYPE type);
   virtual void ResetAnimations();
 
@@ -361,6 +364,7 @@ protected:
 
   // animation effects
   std::vector<CAnimation> m_animations;
+  std::vector<CAnimation> m_dynamicAnimations;
   CPoint m_camera;
   bool m_hasCamera;
   float m_stereo;

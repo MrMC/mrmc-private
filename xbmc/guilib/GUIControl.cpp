@@ -112,6 +112,7 @@ void CGUIControl::FreeResources(bool immediately)
       if (anim.GetType() != ANIM_TYPE_CONDITIONAL)
         anim.ResetAnimation();
     }
+    m_dynamicAnimations.clear();
     m_bAllocated=false;
   }
   m_hasProcessed = false;
@@ -620,6 +621,14 @@ void CGUIControl::UpdateVisibility(const CGUIListItem *item)
     if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
       anim.UpdateCondition(item);
   }
+  // check for conditional dynamic animations
+  for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    CAnimation &anim = m_dynamicAnimations[i];
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
+      anim.UpdateCondition(item);
+  }
+  
   // and check for conditional enabling - note this overrides SetEnabled() from the code currently
   // this may need to be reviewed at a later date
   bool enabled = m_enabled;
@@ -659,6 +668,14 @@ void CGUIControl::SetInitialVisibility()
     if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
       anim.SetInitialCondition();
   }
+  // and handle dynamic animation conditions as well
+  for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    CAnimation &anim = m_dynamicAnimations[i];
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
+      anim.SetInitialCondition();
+  }
+  
   // and check for conditional enabling - note this overrides SetEnabled() from the code currently
   // this may need to be reviewed at a later date
   if (m_enableCondition)
@@ -686,6 +703,19 @@ void CGUIControl::SetAnimations(const std::vector<CAnimation> &animations)
   MarkDirtyRegion();
 }
 
+void CGUIControl::SetDynamicAnimations(const std::vector<CAnimation> &animations)
+{
+  m_dynamicAnimations = animations;
+  MarkDirtyRegion();
+}
+
+void CGUIControl::ClearDynamicAnimations()
+{
+  MarkDirtyRegion();
+  m_dynamicAnimations.clear();
+  MarkDirtyRegion();
+}
+
 void CGUIControl::ResetAnimation(ANIMATION_TYPE type)
 {
   MarkDirtyRegion();
@@ -695,6 +725,11 @@ void CGUIControl::ResetAnimation(ANIMATION_TYPE type)
     if (m_animations[i].GetType() == type)
       m_animations[i].ResetAnimation();
   }
+  for (size_t i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    if (m_dynamicAnimations[i].GetType() == type)
+      m_dynamicAnimations[i].ResetAnimation();
+  }
 }
 
 void CGUIControl::ResetAnimations()
@@ -703,6 +738,9 @@ void CGUIControl::ResetAnimations()
 
   for (unsigned int i = 0; i < m_animations.size(); i++)
     m_animations[i].ResetAnimation();
+
+  for (size_t i = 0; i < m_dynamicAnimations.size(); i++)
+    m_dynamicAnimations[i].ResetAnimation();
 
   MarkDirtyRegion();
 }
@@ -764,6 +802,15 @@ CAnimation *CGUIControl::GetAnimation(ANIMATION_TYPE type, bool checkConditions 
   for (unsigned int i = 0; i < m_animations.size(); i++)
   {
     CAnimation &anim = m_animations[i];
+    if (anim.GetType() == type)
+    {
+      if (!checkConditions || anim.CheckCondition())
+        return &anim;
+    }
+  }
+  for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    CAnimation &anim = m_dynamicAnimations[i];
     if (anim.GetType() == type)
     {
       if (!checkConditions || anim.CheckCondition())
@@ -872,7 +919,16 @@ bool CGUIControl::Animate(unsigned int currentTime)
       }
     }*/
   }
-
+  for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    CAnimation &anim = m_dynamicAnimations[i];
+    anim.Animate(currentTime, HasProcessed() || visible == DELAYED);
+    // Update the control states (such as visibility)
+    UpdateStates(anim.GetType(), anim.GetProcess(), anim.GetState());
+    // and render the animation effect
+    changed |= (anim.GetProcess() != ANIM_PROCESS_NONE);
+    anim.RenderAnimation(m_transform, center);
+  }
   return changed;
 }
 
@@ -881,6 +937,24 @@ bool CGUIControl::IsAnimating(ANIMATION_TYPE animType)
   for (unsigned int i = 0; i < m_animations.size(); i++)
   {
     CAnimation &anim = m_animations[i];
+    if (anim.GetType() == animType)
+    {
+      if (anim.GetQueuedProcess() == ANIM_PROCESS_NORMAL)
+        return true;
+      if (anim.GetProcess() == ANIM_PROCESS_NORMAL)
+        return true;
+    }
+    else if (anim.GetType() == -animType)
+    {
+      if (anim.GetQueuedProcess() == ANIM_PROCESS_REVERSE)
+        return true;
+      if (anim.GetProcess() == ANIM_PROCESS_REVERSE)
+        return true;
+    }
+  }
+  for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
+  {
+    CAnimation &anim = m_dynamicAnimations[i];
     if (anim.GetType() == animType)
     {
       if (anim.GetQueuedProcess() == ANIM_PROCESS_NORMAL)
