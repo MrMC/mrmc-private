@@ -797,6 +797,15 @@ static SiriRemoteInfo siriRemoteInfo;
       // only update if we actually moved focus
       remote.panningRect.origin.x = remote.movedPoint.x - CGRectGetWidth(remote.panningRect) / 2.0;
       remote.panningRect.origin.y = remote.movedPoint.y - CGRectGetHeight(remote.panningRect) / 2.0;
+      if (remote.debug)
+      {
+        NSLog(@"microGamepad: x(%f), y(%f), L(%f), R(%f), T(%f), B(%f)",
+          remote.movedPoint.x, remote.movedPoint.y,
+          CGRectGetMinX(remote.panningRect),
+          CGRectGetMaxX(remote.panningRect),
+          CGRectGetMaxY(remote.panningRect),
+          CGRectGetMinY(remote.panningRect));
+      }
     }
   }
 }
@@ -959,6 +968,15 @@ static SiriRemoteInfo siriRemoteInfo;
   remote.panningRect = CGRectMake(0.0, 0.0, 0.35, 0.35);
   remote.panningRect.origin.x = remote.startPoint.x - CGRectGetWidth(remote.panningRect) / 2.0;
   remote.panningRect.origin.y = remote.startPoint.y - CGRectGetHeight(remote.panningRect) / 2.0;
+  if (remote.debug)
+  {
+    NSLog(@"microGamepad: x(%f), y(%f), L(%f), R(%f), T(%f), B(%f)",
+      remote.movedPoint.x, remote.movedPoint.y,
+      CGRectGetMinX(remote.panningRect),
+      CGRectGetMaxX(remote.panningRect),
+      CGRectGetMaxY(remote.panningRect),
+      CGRectGetMinY(remote.panningRect));
+  }
 
   remote.startSeconds = CFAbsoluteTimeGetCurrent();
   remote.movedSeconds = remote.startSeconds;
@@ -1154,7 +1172,10 @@ static SiriRemoteInfo siriRemoteInfo;
             {
               // swipes are complete by 0.5 seconds, so this must be a pan
               if (siriRemoteInfo.dt >= 0.50f)
+              {
+                [weakSelf processPanEvent:siriRemoteInfo];
                 siriRemoteInfo.state = SiriRemotePan;
+              }
             }
             else
             {
