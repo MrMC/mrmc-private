@@ -83,6 +83,15 @@ public:
     alpha = 1.0f;
     identity = (scaleX == 1 && scaleY == 1);
   };
+  void setDistort(float m_new[3][4])
+  {
+//    m = m_new;
+    m[0][0] = m_new[0][0]; m[0][1] = m_new[0][1]; m[0][2] = m_new[0][2]; m[0][3] = m_new[0][3];
+    m[1][0] = m_new[1][0]; m[1][1] = m_new[1][1]; m[1][2] = m_new[1][2]; m[1][3] = m_new[1][3];
+    m[2][0] = m_new[2][0]; m[2][1] = m_new[2][1]; m[2][2] = m_new[2][2]; m[2][3] = m_new[2][3];
+    alpha = 1.0f;
+    identity = false;
+  };
   void SetXRotation(float angle, float y, float z, float ar = 1.0f)
   { // angle about the X axis, centered at y,z where our coordinate system has aspect ratio ar.
     // Trans(0,y,z)*Scale(1,1/ar,1)*RotateX(angle)*Scale(ar,1,1)*Trans(0,-y,-z);

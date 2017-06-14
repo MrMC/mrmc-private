@@ -59,6 +59,9 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <GameController/GameController.h>
 
+#include "utils/XBMCTinyXML.h"
+#include "utils/StringUtils.h"
+
 // these MUST match those in system/keymaps/customcontroller.SiriRemote.xml
 typedef enum SiriRemoteTypes
 {
@@ -784,6 +787,52 @@ static SiriRemoteInfo siriRemoteInfo;
     // check if moving left/right or up/down ?
     if (remote.dx >= remote.dy)
     {
+      CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
+      CGUIControl *focusedControl = pWindow->GetFocusedControl();
+      
+//      if (focusedControl->GetControlType() == CGUIControl::GUICONTROL_LISTGROUP ||
+//          focusedControl->GetControlType() == CGUIControl::GUICONTROL_GROUPLIST ||
+//          focusedControl->GetControlType() == CGUIControl::GUICONTROL_LISTLABEL ||
+//          focusedControl->GetControlType() == CGUIControl::GUICONTAINER_LIST ||
+//          focusedControl->GetControlType() == CGUIControl::GUICONTAINER_WRAPLIST ||
+//          focusedControl->GetControlType() == CGUIControl::GUICONTAINER_FIXEDLIST ||
+//          focusedControl->GetControlType() == CGUIControl::GUICONTAINER_EPGGRID )
+//        
+//        
+//      
+//        focusedControl = focusedControl->GetFocusedControl();
+//      
+//      CGUIControl modeListItem = focusedControl->GetListItem(0);
+      
+      CRect rect = focusedControl->GetSelectionRenderRect();
+      
+      std::vector<CAnimation> animations;
+      CAnimation anim;
+      TiXmlElement node("animation");
+      node.SetAttribute("reversible","true");
+      node.SetAttribute("effect","distort");
+      std::string temp = StringUtils::Format("%f,%f",focusedControl->GetXPosition()+focusedControl->GetHeight(),focusedControl->GetYPosition() );
+      node.SetAttribute("center",temp);
+      node.SetAttribute("end","100,110");
+      node.SetAttribute("time","150");
+      node.SetAttribute("condition","true");
+      node.SetAttribute("direction","0");
+      node.SetAttribute("ammount","10");
+      TiXmlText text("conditional");
+      node.InsertEndChild(text);
+
+      
+      
+      anim.Create(&node, rect, 0);
+      animations.push_back(anim);
+      
+//      virtual float GetXPosition() const;
+//      virtual float GetYPosition() const;
+//      virtual float GetWidth() const;
+//      virtual float GetHeight() const;
+      
+      focusedControl->SetAnimations(animations);
+      
       if (remote.movedPoint.x <= CGRectGetMinX(remote.panningRect))
       {
         if (remote.debug)
@@ -792,6 +841,7 @@ static SiriRemoteInfo siriRemoteInfo;
           remote.dt, remote.dx, remote.dy);
         }
         moved = true;
+
         [self sendButtonPressed:SiriRemote_LeftSwipe];
       }
       else if (remote.movedPoint.x >= CGRectGetMaxX(remote.panningRect))
@@ -804,6 +854,7 @@ static SiriRemoteInfo siriRemoteInfo;
         moved = true;
         [self sendButtonPressed:SiriRemote_RightSwipe];
       }
+      focusedControl->ResetAnimations();
     }
     else
     {

@@ -248,6 +248,68 @@ void CRotateEffect::ApplyEffect(float offset, const CPoint &center)
     m_matrix.SetZRotation(((m_endAngle - m_startAngle)*offset + m_startAngle) * degree_to_radian, m_center.x, m_center.y, g_graphicsContext.GetScalingPixelRatio());
 }
 
+CDistortEffect::CDistortEffect(const TiXmlElement *node, const CRect &rect) : CAnimEffect(node, EFFECT_TYPE_DISTORT), m_center(CPoint(0,0))
+{
+  m_rect = rect;
+  int direction = 0;
+  node->QueryIntAttribute("direction", &direction);
+  m_startX = m_startY = 100;
+  m_endX = m_endY = 100;
+  m_autoCenter = false;
+  
+  float startPosX = rect.x1;
+  float startPosY = rect.y1;
+  float endPosX = rect.x1;
+  float endPosY = rect.y1;
+  
+  // calculate the center position...
+  if (m_startX)
+  {
+    float scale = m_endX / m_startX;
+    if (scale != 1)
+      m_center.x = (endPosX - scale*startPosX) / (1 - scale);
+  }
+  if (m_startY)
+  {
+    float scale = m_endY / m_startY;
+    if (scale != 1)
+      m_center.y = (endPosY - scale*startPosY) / (1 - scale);
+  }
+  
+  switch(direction)
+  {
+    case 0:
+      m_direction = DISTORT_UP;
+      break;
+    case 1:
+      m_direction = DISTORT_DOWN;
+      break;
+    case 2:
+      m_direction = DISTORT_LEFT;
+      break;
+    case 3:
+      m_direction = DISTORT_RIGHT;
+      break;
+    default:
+      m_direction = DISTORT_NONE;
+      break;
+  }
+  
+  node->QueryFloatAttribute("ammount", &m_distortAmmount);
+}
+
+void CDistortEffect::ApplyEffect(float offset, const CPoint &center)
+{
+  if (m_autoCenter)
+    m_center = center;
+
+  float m[3][4];
+  m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = 0.0f;
+  m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f; m[1][3] = 0.0f;
+  m[2][0] = 0.0f; m[2][1] = -0.2f; m[2][2] = 1.0f; m[2][3] = 0.0f;
+  m_matrix.setDistort(m);
+}
+
 CZoomEffect::CZoomEffect(const TiXmlElement *node, const CRect &rect) : CAnimEffect(node, EFFECT_TYPE_ZOOM), m_center(CPoint(0,0))
 {
   // effect defaults
@@ -414,6 +476,8 @@ CAnimation &CAnimation::operator =(const CAnimation &src)
              src.m_effects[i]->GetType() == CAnimEffect::EFFECT_TYPE_ROTATE_Y ||
              src.m_effects[i]->GetType() == CAnimEffect::EFFECT_TYPE_ROTATE_Z)
       newEffect = new CRotateEffect(*(CRotateEffect *)src.m_effects[i]);
+    else if (src.m_effects[i]->GetType() == CAnimEffect::EFFECT_TYPE_DISTORT)
+      newEffect = new CDistortEffect(*(CDistortEffect *)src.m_effects[i]);
     if (newEffect)
       m_effects.push_back(newEffect);
   }
@@ -695,6 +759,8 @@ void CAnimation::AddEffect(const std::string &type, const TiXmlElement *node, co
     effect = new CRotateEffect(node, CAnimEffect::EFFECT_TYPE_ROTATE_X);
   else if (StringUtils::EqualsNoCase(type, "zoom"))
     effect = new CZoomEffect(node, rect);
+  else if (StringUtils::EqualsNoCase(type, "distort"))
+    effect = new CDistortEffect(node, rect);
 
   if (effect)
     m_effects.push_back(effect);

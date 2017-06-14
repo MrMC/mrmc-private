@@ -52,7 +52,7 @@ enum ANIMATION_TYPE
 class CAnimEffect
 {
 public:
-  enum EFFECT_TYPE { EFFECT_TYPE_NONE = 0, EFFECT_TYPE_FADE, EFFECT_TYPE_SLIDE, EFFECT_TYPE_ROTATE_X, EFFECT_TYPE_ROTATE_Y, EFFECT_TYPE_ROTATE_Z, EFFECT_TYPE_ZOOM };
+  enum EFFECT_TYPE { EFFECT_TYPE_NONE = 0, EFFECT_TYPE_FADE, EFFECT_TYPE_SLIDE, EFFECT_TYPE_ROTATE_X, EFFECT_TYPE_ROTATE_Y, EFFECT_TYPE_ROTATE_Z, EFFECT_TYPE_ZOOM, EFFECT_TYPE_DISTORT };
 
   CAnimEffect(const TiXmlElement *node, EFFECT_TYPE effect);
   CAnimEffect(unsigned int delay, unsigned int length, EFFECT_TYPE effect);
@@ -122,6 +122,34 @@ private:
   float m_startAngle;
   float m_endAngle;
 
+  bool m_autoCenter;
+  CPoint m_center;
+};
+
+class CDistortEffect : public CAnimEffect
+{
+  enum DIRECTION_TYPE
+  {
+    DISTORT_NONE = -1,
+    DISTORT_UP = 0,
+    DISTORT_DOWN,
+    DISTORT_LEFT,
+    DISTORT_RIGHT,
+  };
+public:
+  CDistortEffect(const TiXmlElement *node, const CRect &rect);
+  virtual ~CDistortEffect() {};
+private:
+  virtual void ApplyEffect(float offset, const CPoint &center);
+  
+  DIRECTION_TYPE m_direction;
+  float m_distortAmmount;
+  CRect m_rect;
+  float m_startX;
+  float m_startY;
+  float m_endX;
+  float m_endY;
+  
   bool m_autoCenter;
   CPoint m_center;
 };
