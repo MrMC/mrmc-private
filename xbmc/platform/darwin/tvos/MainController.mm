@@ -329,6 +329,30 @@ static int keyPressTimerFiredCount = 0;
 }
 
 //--------------------------------------------------------------
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+  if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+    return YES;
+  }
+  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
+    return YES;
+  }
+  if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+    return YES;
+  }
+  return NO;
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && ([otherGestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] || [otherGestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]))
+  {
+    return YES;
+  }
+  return NO;
+}
+
+//--------------------------------------------------------------
 // called before pressesBegan:withEvent: is called on the gesture recognizer
 // for a new press. return NO to prevent the gesture recognizer from seeing this press
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
@@ -366,6 +390,85 @@ static int keyPressTimerFiredCount = 0;
   }
 
   return handled;
+}
+
+//--------------------------------------------------------------
+- (void)createSwipeGestureRecognizers
+{
+  UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc]
+                                         initWithTarget:self action:@selector(handleSwipe:)];
+
+  swipeLeft.delaysTouchesBegan = NO;
+  swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
+  swipeLeft.delegate = self;
+  [m_glView addGestureRecognizer:swipeLeft];
+
+  //single finger swipe right
+  UISwipeGestureRecognizer *swipeRight = [[UISwipeGestureRecognizer alloc]
+                                          initWithTarget:self action:@selector(handleSwipe:)];
+
+  swipeRight.delaysTouchesBegan = NO;
+  swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
+  swipeRight.delegate = self;
+  [m_glView addGestureRecognizer:swipeRight];
+
+  //single finger swipe up
+  UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc]
+                                       initWithTarget:self action:@selector(handleSwipe:)];
+
+  swipeUp.delaysTouchesBegan = NO;
+  swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
+  swipeUp.delegate = self;
+  [m_glView addGestureRecognizer:swipeUp];
+
+  //single finger swipe down
+  UISwipeGestureRecognizer *swipeDown = [[UISwipeGestureRecognizer alloc]
+                                         initWithTarget:self action:@selector(handleSwipe:)];
+
+  swipeDown.delaysTouchesBegan = NO;
+  swipeDown.direction = UISwipeGestureRecognizerDirectionDown;
+  swipeDown.delegate = self;
+  [m_glView addGestureRecognizer:swipeDown];
+}
+
+//--------------------------------------------------------------
+- (void)createPanGestureRecognizers
+{
+  //PRINT_SIGNATURE();
+  // for pan gestures with one finger
+  auto pan = [[UIPanGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handlePan:)];
+  pan.delegate = self;
+  [m_glView addGestureRecognizer:pan];
+}
+//--------------------------------------------------------------
+- (void)createTapGestureRecognizers
+{
+  //PRINT_SIGNATURE();
+  // tap side of siri remote pad
+  auto upRecognizer = [[UITapGestureRecognizer alloc]
+                       initWithTarget: self action: @selector(tapUpArrowPressed:)];
+  upRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
+  upRecognizer.delegate = self;
+  [m_glView addGestureRecognizer: upRecognizer];
+
+  auto downRecognizer = [[UITapGestureRecognizer alloc]
+                         initWithTarget: self action: @selector(tapDownArrowPressed:)];
+  downRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
+  downRecognizer.delegate = self;
+  [m_glView addGestureRecognizer: downRecognizer];
+
+  auto leftRecognizer = [[UITapGestureRecognizer alloc]
+                         initWithTarget: self action: @selector(tapLeftArrowPressed:)];
+  leftRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+  leftRecognizer.delegate = self;
+  [m_glView addGestureRecognizer: leftRecognizer];
+
+  auto rightRecognizer = [[UITapGestureRecognizer alloc]
+                          initWithTarget: self action: @selector(tapRightArrowPressed:)];
+  rightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  rightRecognizer.delegate = self;
+  [m_glView addGestureRecognizer: rightRecognizer];
 }
 
 //--------------------------------------------------------------
@@ -621,6 +724,110 @@ static int keyPressTimerFiredCount = 0;
     default:
       break;
   }
+}
+
+//--------------------------------------------------------------
+- (IBAction)tapUpArrowPressed:(UIGestureRecognizer *)sender
+{
+  //if (!m_remoteIdleState)
+  NSLog(@"microGamepad: tapUpArrowPressed");
+  [self startRemoteTimer];
+}
+//--------------------------------------------------------------
+- (IBAction)tapDownArrowPressed:(UIGestureRecognizer *)sender
+{
+  //if (!m_remoteIdleState)
+  NSLog(@"microGamepad: tapDownArrowPressed");
+  [self startRemoteTimer];
+}
+//--------------------------------------------------------------
+- (IBAction)tapLeftArrowPressed:(UIGestureRecognizer *)sender
+{
+  //if (!m_remoteIdleState)
+  NSLog(@"microGamepad: tapLeftArrowPressed");
+  [self startRemoteTimer];
+}
+//--------------------------------------------------------------
+- (IBAction)tapRightArrowPressed:(UIGestureRecognizer *)sender
+{
+  //if (!m_remoteIdleState)
+  NSLog(@"microGamepad: tapRightArrowPressed");
+  [self startRemoteTimer];
+}
+
+//--------------------------------------------------------------
+- (IBAction)handleSwipe:(UISwipeGestureRecognizer *)sender
+{
+  if (!m_remoteIdleState)
+  {
+    if (m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          NSLog(@"microGamepad: handleSwipe:UIGestureRecognizerStateBegan");
+          break;
+        case UIGestureRecognizerStateChanged:
+          NSLog(@"microGamepad: handleSwipe:UIGestureRecognizerStateChanged");
+          break;
+        case UIGestureRecognizerStateEnded:
+          NSLog(@"microGamepad: handleSwipe:UIGestureRecognizerStateEnded");
+          break;
+        case UIGestureRecognizerStateCancelled:
+          NSLog(@"microGamepad: handleSwipe:UIGestureRecognizerStateCancelled");
+          break;
+        default:
+          break;
+      }
+      switch ([sender direction])
+      {
+        case UISwipeGestureRecognizerDirectionRight:
+          NSLog(@"microGamepad: handleSwipe:UISwipeGestureRecognizerDirectionRight");
+          break;
+        case UISwipeGestureRecognizerDirectionLeft:
+          NSLog(@"microGamepad: handleSwipe:UISwipeGestureRecognizerDirectionLeft");
+          break;
+        case UISwipeGestureRecognizerDirectionUp:
+          NSLog(@"microGamepad: handleSwipe:UISwipeGestureRecognizerDirectionUp");
+          break;
+        case UISwipeGestureRecognizerDirectionDown:
+          NSLog(@"microGamepad: handleSwipe:UISwipeGestureRecognizerDirectionDown");
+          break;
+      }
+    }
+  }
+  // start remote idle timer
+  [self startRemoteTimer];
+}
+
+//--------------------------------------------------------------
+- (IBAction)handlePan:(UIPanGestureRecognizer *)sender
+{
+  if (!m_remoteIdleState)
+  {
+    if (m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          NSLog(@"microGamepad: handlePan:UIGestureRecognizerStateBegan");
+          break;
+        case UIGestureRecognizerStateChanged:
+          NSLog(@"microGamepad: handlePan:UIGestureRecognizerStateChanged");
+          break;
+        case UIGestureRecognizerStateEnded:
+          NSLog(@"microGamepad: handlePan:UIGestureRecognizerStateEnded");
+          break;
+        case UIGestureRecognizerStateCancelled:
+          NSLog(@"microGamepad: handlePan:UIGestureRecognizerStateCancelled");
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  // start remote idle timer
+  [self startRemoteTimer];
 }
 
 //--------------------------------------------------------------
@@ -1315,6 +1522,10 @@ static SiriRemoteInfo siriRemoteInfo;
 - (void)viewDidLoad
 {
   [super viewDidLoad];
+
+  [self createSwipeGestureRecognizers];
+  [self createPanGestureRecognizers];
+  [self createTapGestureRecognizers];
 
   // for IR remotes
   [self createPressGesturecognizers];
