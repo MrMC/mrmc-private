@@ -801,13 +801,13 @@ static SiriRemoteInfo siriRemoteInfo;
         rect.x1, rect.y1,
         rect.x2, rect.y2);
       float scalerX = dx * (0.1 * rect.Width());
-      float scalerY = dy * (0.1 * rect.Height());
+      float scalerY = (-dy) * (0.1 * rect.Height());
       NSLog(@"microGamepad: focus scalerX(%f), scalerY(%f)", scalerX, scalerY);
       
       std::vector<CAnimation> animations;
       CAnimation anim;
       TiXmlElement node("animation");
-      node.SetAttribute("reversible", "false");
+      node.SetAttribute("reversible", "true");
       node.SetAttribute("effect", "slide");
       node.SetAttribute("start", "0, 0");
       if (orientation == HORIZONTAL)
@@ -821,14 +821,17 @@ static SiriRemoteInfo siriRemoteInfo;
         node.SetAttribute("end", temp);
       }
       //node.SetAttribute("time", "10");
-      node.SetAttribute("condition", "true");
+      std::string condition = StringUtils::Format("Control.HasFocus(%d)", remote.focusedControl->GetID());
+      node.SetAttribute("condition", condition);
+      //node.SetAttribute("condition", "true");
       TiXmlText text("conditional");
       node.InsertEndChild(text);
 
       anim.Create(&node, rect, 0);
       animations.push_back(anim);
       g_graphicsContext.Lock();
-      remote.focusedControl->SetAnimations(animations);
+      //remote.focusedControl->ResetAnimations();
+      remote.focusedControl->SetDynamicAnimations(animations);
       g_graphicsContext.Unlock();
     }
   }
@@ -861,6 +864,12 @@ static SiriRemoteInfo siriRemoteInfo;
           remote.dt, remote.dx, remote.dy);
         }
         moved = true;
+        if (remote.focusedControl)
+        {
+          g_graphicsContext.Lock();
+          remote.focusedControl->ResetAnimations();
+          g_graphicsContext.Unlock();
+        }
         [self sendButtonPressed:SiriRemote_LeftSwipe];
       }
       else if (remote.movedPoint.x >= CGRectGetMaxX(remote.panningRect))
@@ -871,6 +880,12 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
+        if (remote.focusedControl)
+        {
+          g_graphicsContext.Lock();
+          remote.focusedControl->ResetAnimations();
+          g_graphicsContext.Unlock();
+        }
         [self sendButtonPressed:SiriRemote_RightSwipe];
       }
     }
@@ -884,6 +899,12 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
+        if (remote.focusedControl)
+        {
+          g_graphicsContext.Lock();
+          remote.focusedControl->ResetAnimations();
+          g_graphicsContext.Unlock();
+        }
         [self sendButtonPressed:SiriRemote_UpSwipe];
       }
       else if (remote.movedPoint.y <= CGRectGetMinY(remote.panningRect))
@@ -894,17 +915,17 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
+        if (remote.focusedControl)
+        {
+          g_graphicsContext.Lock();
+          remote.focusedControl->ResetAnimations();
+          g_graphicsContext.Unlock();
+        }
         [self sendButtonPressed:SiriRemote_DownSwipe];
       }
     }
     if (moved)
     {
-      if (remote.focusedControl)
-      {
-        g_graphicsContext.Lock();
-        remote.focusedControl->ResetAnimations();
-        g_graphicsContext.Unlock();
-      }
       // only update if we actually moved focus
       CGFloat dx = remote.movedPoint.x - CGRectGetMidX(remote.panningRect);
       CGFloat dy = remote.movedPoint.y - CGRectGetMidY(remote.panningRect);
@@ -1296,16 +1317,6 @@ static SiriRemoteInfo siriRemoteInfo;
             // pan is pinned to same panningRect or some other check.
             if (pressed)
               [weakSelf processPanEvent:siriRemoteInfo];
-            else
-            {
-              if (siriRemoteInfo.focusedControl)
-              {
-                g_graphicsContext.Lock();
-                siriRemoteInfo.focusedControl->ResetAnimations();
-                g_graphicsContext.Unlock();
-                siriRemoteInfo.focusedControl = nullptr;
-              }
-            }
             break;
         }
 
@@ -1317,6 +1328,14 @@ static SiriRemoteInfo siriRemoteInfo;
           [weakSelf startRemoteTimer];
           // always cancel tap repeat timer
           [weakSelf stopTapRepeatTimer];
+          if (siriRemoteInfo.focusedControl)
+          {
+            g_graphicsContext.Lock();
+            siriRemoteInfo.focusedControl->ClearDynamicAnimations();
+            siriRemoteInfo.focusedControl->ResetAnimations();
+            g_graphicsContext.Unlock();
+            siriRemoteInfo.focusedControl = nullptr;
+          }
           // always return to SiriRemoteIdle2
           siriRemoteInfo.state = SiriRemoteIdle;
           if (siriRemoteInfo.debug)

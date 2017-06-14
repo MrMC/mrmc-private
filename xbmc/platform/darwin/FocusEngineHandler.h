@@ -20,10 +20,14 @@
 
 #include "guilib/Geometry.h"
 
+class CGUIControl;
+
 class CFocusEngineHandler
 {
  public:
   static CFocusEngineHandler& GetInstance();
+
+  void          Process();
 
   const CRect   GetFocusedItemRect();
   const CPoint  GetFocusedItemCenter();
@@ -33,6 +37,7 @@ private:
   CFocusEngineHandler(CFocusEngineHandler const& );
   CFocusEngineHandler& operator=(CFocusEngineHandler const&);
 
-  CRect m_focusedItem;
+  CRect m_focusedRenderRect;
+  CGUIControl *m_focusedControl;
   static CFocusEngineHandler* m_instance;
 };

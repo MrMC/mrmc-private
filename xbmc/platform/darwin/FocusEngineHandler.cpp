@@ -53,6 +53,10 @@ CFocusEngineHandler::CFocusEngineHandler()
 {
 }
 
+void CFocusEngineHandler::Process()
+{
+}
+
 const CRect
 CFocusEngineHandler::GetFocusedItemRect()
 {
@@ -64,7 +68,7 @@ CFocusEngineHandler::GetFocusedItemRect()
   if (!focusedControl)
     return CRect();
 
-  CRect focusedItem;
+  CRect focusedRenderRect;
   switch(focusedControl->GetControlType())
   {
     case CGUIControl::GUICONTROL_UNKNOWN:
@@ -107,10 +111,10 @@ CFocusEngineHandler::GetFocusedItemRect()
     case CGUIControl::GUICONTROL_MULTISELECT:
       {
         // returned rect is in screen coordinates.
-        focusedItem = focusedControl->GetSelectionRenderRect();
-        if (focusedItem != m_focusedItem)
+        focusedRenderRect = focusedControl->GetSelectionRenderRect();
+        if (focusedRenderRect != m_focusedRenderRect)
         {
-          m_focusedItem = focusedItem;
+          m_focusedRenderRect = focusedRenderRect;
           //CLog::Log(LOGDEBUG, "GetFocusedItem: itemRect, t(%f) l(%f) w(%f) h(%f)",
           //  focusedItem.x1, focusedItem.y1, focusedItem.Width(), focusedItem.Height());
         }
@@ -118,7 +122,7 @@ CFocusEngineHandler::GetFocusedItemRect()
       break;
   }
 
-  return m_focusedItem;
+  return m_focusedRenderRect;
 }
 
 const CPoint
