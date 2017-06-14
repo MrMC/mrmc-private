@@ -19,20 +19,64 @@
  */
 
 #include "guilib/Geometry.h"
+#include "guilib/GUIControl.h"
+#include "threads/CriticalSection.h"
+
+class CAnimation;
+class CGUIWindow;
+class CGUIControl;
+
+typedef enum FocusEngineState
+{
+  Idle,
+  Clear,
+  Update,
+} FocusEngineState;
+
+typedef struct
+{
+  CGUIWindow  *window = nullptr;
+  CGUIControl *rootFocus = nullptr;
+  CGUIControl *itemFocus = nullptr;
+} FocusEngineFocus;
+
+typedef struct
+{
+  float zoomX = -1.0f;
+  float zoomY = -1.0f;
+  float slideX = 0.0f;
+  float slideY = 0.0f;
+} FocusEngineAnimate;
 
 class CFocusEngineHandler
 {
  public:
   static CFocusEngineHandler& GetInstance();
 
-  const CRect   GetFocusedItemRect();
-  const CPoint  GetFocusedItemCenter();
+  void          Process();
+  void          ClearAnimation();
+  void          UpdateAnimation(FocusEngineAnimate &focusAnimate);
+  void          EnableFocusZoom(bool enable);
+  void          EnableFocusSlide(bool enable);
+  void          UpdateFocus(FocusEngineFocus &focus);
+  void          InvalidateFocus(CGUIControl *control);
+  const CRect   GetFocusRect();
+  bool          GetShowFocusRect();
+  ORIENTATION   GetFocusOrientation();
 
 private:
   CFocusEngineHandler();
   CFocusEngineHandler(CFocusEngineHandler const& );
   CFocusEngineHandler& operator=(CFocusEngineHandler const&);
 
-  CRect m_focusedItem;
+  bool showFocusRect = false;
+  bool m_focusZoom;
+  bool m_focusSlide;
+  CCriticalSection m_lock;
+  FocusEngineState m_state;
+  FocusEngineFocus m_focus;
+  ORIENTATION m_focusedOrientation;
+  FocusEngineAnimate m_focusAnimate;
   static CFocusEngineHandler* m_instance;
+
 };
