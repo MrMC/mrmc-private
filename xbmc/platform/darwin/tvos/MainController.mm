@@ -17,7 +17,7 @@
  *  <http://www.gnu.org/licenses/>.
  *
  *
- *  Refactored. Copyright (C) 2015 Team MrMC
+ *  Refactored. Copyright (C) 2015-2017 Team MrMC
  *  https://github.com/MrMC
  *
  */
@@ -38,6 +38,7 @@
 #import "messaging/ApplicationMessenger.h"
 #import "platform/darwin/FocusEngineHandler.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
+#import "platform/darwin/FocusEngineHandler.h"
 #import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainApplication.h"
@@ -54,9 +55,6 @@
 #import <MediaPlayer/MPMediaItem.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import <MediaPlayer/MPNowPlayingInfoCenter.h>
-
-#import <AVFoundation/AVAudioPlayer.h>
-#import <AudioToolbox/AudioToolbox.h>
 #import <GameController/GameController.h>
 
 // these MUST match those in system/keymaps/customcontroller.SiriRemote.xml
@@ -270,20 +268,7 @@ static int keyPressTimerFiredCount = 0;
 
 -(ORIENTATION)getFocusedOrientation
 {
-  // we dont want fast scroll in below windows, no point in going 15 places in home screen
-  CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
-  CGUIControl *focusedControl = pWindow->GetFocusedControl();
-  if (focusedControl)
-  {
-    if (focusedControl->GetControlType() == CGUIControl::GUICONTROL_BUTTON)
-    {
-      CGUIControl *parentFocusedControl = focusedControl->GetParentControl();
-      if (parentFocusedControl)
-      return parentFocusedControl->GetOrientation();
-    }
-    return focusedControl->GetOrientation();
-  }
-  return UNDEFINED;
+  return CFocusEngineHandler::GetInstance().GetFocusOrientation();;
 }
 
 -(bool)canDoScrollUpDown
@@ -848,12 +833,14 @@ typedef struct
   bool  debug = true;
   CGPoint startPoint;
   CGPoint movedPoint;
+  CGPoint lastMovedPoint;
   CGRect  panningRect;
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
   bool ignoreAfterSelect;
   float ignoreAfterSwipeSeconds;
   bool shouldRemoteSwipe;
+  FocusEngineAnimate focusAnimate;
   SiriRemoteState state = SiriRemoteIdle;
 } SiriRemoteInfo;
 static SiriRemoteInfo siriRemoteInfo;
@@ -935,6 +922,17 @@ static SiriRemoteInfo siriRemoteInfo;
   if (!siriRemoteInfo.shouldRemoteSwipe)
     return;
 
+  if (!CGPointEqualToPoint(remote.movedPoint, remote.lastMovedPoint))
+  {
+    float dx = remote.movedPoint.x - remote.startPoint.x;
+    float dy = remote.movedPoint.y - remote.startPoint.y;
+    remote.lastMovedPoint = remote.movedPoint;
+
+    NSLog(@"microGamepad: focus dx(%f), dy(%f)", dx, dy);
+    remote.focusAnimate.slideX = dx;
+    remote.focusAnimate.slideY = dy;
+    CFocusEngineHandler::GetInstance().UpdateAnimation(remote.focusAnimate);
+  }
   // check if moved point is outside panning rect
   // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
   // use SiriRemote_xxxxSwipe here so we can block them when playing videos
@@ -1013,6 +1011,10 @@ static SiriRemoteInfo siriRemoteInfo;
           CGRectGetMaxY(remote.panningRect),
           CGRectGetMinY(remote.panningRect));
       }
+      // if focus moves to new control, we reset to current position
+      // and pretend finnger just went down.
+      remote.startPoint = remote.movedPoint;
+      remote.lastMovedPoint = remote.movedPoint;
     }
   }
 }
@@ -1172,6 +1174,7 @@ static SiriRemoteInfo siriRemoteInfo;
     NSStringFromCGPoint(remote));
   */
   remote.movedPoint = remote.startPoint;
+  remote.lastMovedPoint = remote.startPoint;
   remote.panningRect = CGRectMake(0.0, 0.0, 0.35, 0.35);
   remote.panningRect.origin.x = remote.startPoint.x - CGRectGetWidth(remote.panningRect) / 2.0;
   remote.panningRect.origin.y = remote.startPoint.y - CGRectGetHeight(remote.panningRect) / 2.0;
@@ -1184,7 +1187,6 @@ static SiriRemoteInfo siriRemoteInfo;
       CGRectGetMaxY(remote.panningRect),
       CGRectGetMinY(remote.panningRect));
   }
-
   remote.startSeconds = CFAbsoluteTimeGetCurrent();
   remote.movedSeconds = remote.startSeconds;
   remote.ignoreAfterSelect = false;
@@ -1309,6 +1311,11 @@ static SiriRemoteInfo siriRemoteInfo;
             if (siriRemoteInfo.debug)
               NSLog(@"microGamepad: idle, pressed(%d), dt(%f)", pressed, siriRemoteInfo.dt);
             [weakSelf stopTapRepeatTimer];
+            siriRemoteInfo.focusAnimate = FocusEngineAnimate();
+            siriRemoteInfo.focusAnimate.zoomX = 105.0f;
+            siriRemoteInfo.focusAnimate.zoomY = 105.0f;
+            CFocusEngineHandler::GetInstance().ClearAnimation();
+            CFocusEngineHandler::GetInstance().UpdateAnimation(siriRemoteInfo.focusAnimate);
             if (pressed)
             {
               [weakSelf updateRemoteStartInfo:siriRemoteInfo withGamePad:gamepad];
@@ -1436,6 +1443,7 @@ static SiriRemoteInfo siriRemoteInfo;
           [weakSelf startRemoteTimer];
           // always cancel tap repeat timer
           [weakSelf stopTapRepeatTimer];
+          CFocusEngineHandler::GetInstance().ClearAnimation();
           // always return to SiriRemoteIdle2
           siriRemoteInfo.state = SiriRemoteIdle;
           if (siriRemoteInfo.debug)

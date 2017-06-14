@@ -17,13 +17,12 @@
  *  <http://www.gnu.org/licenses/>.
  *
  *
- *  Refactored. Copyright (C) 2015 Team MrMC
+ *  Refactored. Copyright (C) 2015-2017 Team MrMC
  *  https://github.com/MrMC
  *
  */
 
 #import <UIKit/UIKit.h>
-#import "windowing/XBMC_events.h"
 
 typedef enum
 {
