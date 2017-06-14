@@ -48,6 +48,7 @@
 #import "windowing/WindowingFactory.h"
 #import "settings/Settings.h"
 #import "services/lighteffects/LightEffectServices.h"
+#import "utils/MathUtils.h"
 #import "utils/SeekHandler.h"
 #import "utils/log.h"
 
@@ -682,6 +683,8 @@ typedef struct
   bool  debug = true;
   CGPoint startPoint;
   CGPoint movedPoint;
+  CGPoint lastMovedPoint;
+  CGUIControl *focusedControl;
   CGRect  panningRect;
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
@@ -767,6 +770,69 @@ static SiriRemoteInfo siriRemoteInfo;
 {
   if (!siriRemoteInfo.shouldRemoteSwipe)
     return;
+
+  ORIENTATION orientation = UNDEFINED;
+  remote.focusedControl = nullptr;
+  CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
+  remote.focusedControl = pWindow->GetFocusedControl();
+  if (remote.focusedControl)
+  {
+    orientation = remote.focusedControl->GetOrientation();
+    if (remote.focusedControl->GetControlType() == CGUIControl::GUICONTROL_BUTTON)
+    {
+      CGUIControl *parentFocusedControl = remote.focusedControl->GetParentControl();
+      if (parentFocusedControl)
+        orientation = parentFocusedControl->GetOrientation();
+    }
+  }
+
+  if (!CGPointEqualToPoint(remote.movedPoint, remote.lastMovedPoint))
+  {
+    float dx = remote.movedPoint.x - remote.startPoint.x;
+    float dy = remote.movedPoint.y - remote.startPoint.y;
+    remote.lastMovedPoint = remote.movedPoint;
+
+    NSLog(@"microGamepad: focus dx(%f), dy(%f)", dx, dy);
+
+    if (orientation != UNDEFINED)
+    {
+      CRect rect = remote.focusedControl->GetSelectionRenderRect();
+      NSLog(@"microGamepad: focus T(%f), L(%f), R(%f), B(%f)",
+        rect.x1, rect.y1,
+        rect.x2, rect.y2);
+      float scalerX = dx * (0.1 * rect.Width());
+      float scalerY = dy * (0.1 * rect.Height());
+      NSLog(@"microGamepad: focus scalerX(%f), scalerY(%f)", scalerX, scalerY);
+      
+      std::vector<CAnimation> animations;
+      CAnimation anim;
+      TiXmlElement node("animation");
+      node.SetAttribute("reversible", "false");
+      node.SetAttribute("effect", "slide");
+      node.SetAttribute("start", "0, 0");
+      if (orientation == HORIZONTAL)
+      {
+        std::string temp = StringUtils::Format("%d, 0", MathUtils::round_int(scalerX));
+        node.SetAttribute("end", temp);
+      }
+      else if (orientation == VERTICAL)
+      {
+        std::string temp = StringUtils::Format("0, %d", MathUtils::round_int(scalerY));
+        node.SetAttribute("end", temp);
+      }
+      //node.SetAttribute("time", "10");
+      node.SetAttribute("condition", "true");
+      TiXmlText text("conditional");
+      node.InsertEndChild(text);
+
+      anim.Create(&node, rect, 0);
+      animations.push_back(anim);
+      g_graphicsContext.Lock();
+      remote.focusedControl->SetAnimations(animations);
+      g_graphicsContext.Unlock();
+    }
+  }
+
   // check if moved point is outside panning rect
   // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
   // use SiriRemote_xxxxSwipe here so we can block them when playing videos
@@ -787,52 +853,6 @@ static SiriRemoteInfo siriRemoteInfo;
     // check if moving left/right or up/down ?
     if (remote.dx >= remote.dy)
     {
-      CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
-      CGUIControl *focusedControl = pWindow->GetFocusedControl();
-      
-//      if (focusedControl->GetControlType() == CGUIControl::GUICONTROL_LISTGROUP ||
-//          focusedControl->GetControlType() == CGUIControl::GUICONTROL_GROUPLIST ||
-//          focusedControl->GetControlType() == CGUIControl::GUICONTROL_LISTLABEL ||
-//          focusedControl->GetControlType() == CGUIControl::GUICONTAINER_LIST ||
-//          focusedControl->GetControlType() == CGUIControl::GUICONTAINER_WRAPLIST ||
-//          focusedControl->GetControlType() == CGUIControl::GUICONTAINER_FIXEDLIST ||
-//          focusedControl->GetControlType() == CGUIControl::GUICONTAINER_EPGGRID )
-//        
-//        
-//      
-//        focusedControl = focusedControl->GetFocusedControl();
-//      
-//      CGUIControl modeListItem = focusedControl->GetListItem(0);
-      
-      CRect rect = focusedControl->GetSelectionRenderRect();
-      
-      std::vector<CAnimation> animations;
-      CAnimation anim;
-      TiXmlElement node("animation");
-      node.SetAttribute("reversible","true");
-      node.SetAttribute("effect","distort");
-      std::string temp = StringUtils::Format("%f,%f",focusedControl->GetXPosition()+focusedControl->GetHeight(),focusedControl->GetYPosition() );
-      node.SetAttribute("center",temp);
-      node.SetAttribute("end","100,110");
-      node.SetAttribute("time","150");
-      node.SetAttribute("condition","true");
-      node.SetAttribute("direction","0");
-      node.SetAttribute("ammount","10");
-      TiXmlText text("conditional");
-      node.InsertEndChild(text);
-
-      
-      
-      anim.Create(&node, rect, 0);
-      animations.push_back(anim);
-      
-//      virtual float GetXPosition() const;
-//      virtual float GetYPosition() const;
-//      virtual float GetWidth() const;
-//      virtual float GetHeight() const;
-      
-      focusedControl->SetAnimations(animations);
-      
       if (remote.movedPoint.x <= CGRectGetMinX(remote.panningRect))
       {
         if (remote.debug)
@@ -841,7 +861,6 @@ static SiriRemoteInfo siriRemoteInfo;
           remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-
         [self sendButtonPressed:SiriRemote_LeftSwipe];
       }
       else if (remote.movedPoint.x >= CGRectGetMaxX(remote.panningRect))
@@ -854,7 +873,6 @@ static SiriRemoteInfo siriRemoteInfo;
         moved = true;
         [self sendButtonPressed:SiriRemote_RightSwipe];
       }
-      focusedControl->ResetAnimations();
     }
     else
     {
@@ -881,6 +899,12 @@ static SiriRemoteInfo siriRemoteInfo;
     }
     if (moved)
     {
+      if (remote.focusedControl)
+      {
+        g_graphicsContext.Lock();
+        remote.focusedControl->ResetAnimations();
+        g_graphicsContext.Unlock();
+      }
       // only update if we actually moved focus
       CGFloat dx = remote.movedPoint.x - CGRectGetMidX(remote.panningRect);
       CGFloat dy = remote.movedPoint.y - CGRectGetMidY(remote.panningRect);
@@ -1044,6 +1068,8 @@ static SiriRemoteInfo siriRemoteInfo;
     NSStringFromCGPoint(siriRemoteInfo.startPoint));
   */
   remote.movedPoint = siriRemoteInfo.startPoint;
+  remote.lastMovedPoint = siriRemoteInfo.startPoint;
+  remote.focusedControl = nullptr;
   remote.panningRect = CGRectMake(remote.startPoint.x, remote.startPoint.y, 0.75, 0.75);
   remote.startSeconds = CFAbsoluteTimeGetCurrent();
   remote.movedSeconds = siriRemoteInfo.startSeconds;
@@ -1065,9 +1091,9 @@ static SiriRemoteInfo siriRemoteInfo;
   remote.movedPoint.x += 1.0;
   remote.movedPoint.y += 1.0;
   remote.movedSeconds = CFAbsoluteTimeGetCurrent();
-  remote.dt = siriRemoteInfo.movedSeconds - siriRemoteInfo.startSeconds;
-  remote.dx = fabs(siriRemoteInfo.movedPoint.x - siriRemoteInfo.startPoint.x);
-  remote.dy = fabs(siriRemoteInfo.movedPoint.y - siriRemoteInfo.startPoint.y);
+  remote.dt = remote.movedSeconds - remote.startSeconds;
+  remote.dx = fabs(remote.movedPoint.x - remote.startPoint.x);
+  remote.dy = fabs(remote.movedPoint.y - remote.startPoint.y);
 }
 
 -(void)cgControllerDidDisconnect:(NSNotification *)notification
@@ -1270,6 +1296,16 @@ static SiriRemoteInfo siriRemoteInfo;
             // pan is pinned to same panningRect or some other check.
             if (pressed)
               [weakSelf processPanEvent:siriRemoteInfo];
+            else
+            {
+              if (siriRemoteInfo.focusedControl)
+              {
+                g_graphicsContext.Lock();
+                siriRemoteInfo.focusedControl->ResetAnimations();
+                g_graphicsContext.Unlock();
+                siriRemoteInfo.focusedControl = nullptr;
+              }
+            }
             break;
         }
 
