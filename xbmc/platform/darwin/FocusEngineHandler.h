@@ -25,6 +25,13 @@
 class CAnimation;
 class CGUIControl;
 
+typedef enum FocusEngineState
+{
+  Idle,
+  Clear,
+  Update,
+} FocusEngineState;
+
 class CFocusEngineHandler
 {
  public:
@@ -46,8 +53,10 @@ private:
 
   CRect m_focusedRenderRect;
   CCriticalSection m_lock;
+  int m_focusedID;
   CGUIControl *m_focusedControl;
   ORIENTATION m_focusedOrientation;
+  FocusEngineState m_state;
   std::vector<CAnimation> m_animations;
   static CFocusEngineHandler* m_instance;
 

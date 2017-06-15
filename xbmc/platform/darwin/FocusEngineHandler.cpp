@@ -55,8 +55,10 @@ CFocusEngineHandler::GetInstance()
 }
 
 CFocusEngineHandler::CFocusEngineHandler()
-: m_focusedControl(nullptr)
+: m_focusedID(0)
+, m_focusedControl(nullptr)
 , m_focusedOrientation(UNDEFINED)
+, m_state(FocusEngineState::Idle)
 {
 }
 
@@ -95,11 +97,22 @@ void CFocusEngineHandler::Process()
 
   if (m_focusedControl)
   {
-    if (m_animations.size() && !m_focusedControl->IsAnimating(ANIM_TYPE_CONDITIONAL))
+    switch(m_state)
     {
-      m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
-      m_focusedControl->SetDynamicAnimations(m_animations);
-      m_animations.clear();
+      case FocusEngineState::Idle:
+        break;
+      case FocusEngineState::Clear:
+        m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+        m_focusedControl->ClearDynamicAnimations();
+        m_animations.clear();
+        m_state = FocusEngineState::Idle;
+        break;
+      case FocusEngineState::Update:
+        m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+        m_focusedControl->SetDynamicAnimations(m_animations);
+        m_animations.clear();
+        m_state = FocusEngineState::Idle;
+        break;
     }
   }
 }
@@ -107,28 +120,17 @@ void CFocusEngineHandler::Process()
 void CFocusEngineHandler::ClearAnimations()
 {
   CSingleLock lock(m_lock);
-  if (m_focusedControl)
-  {
-    m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
-    m_focusedControl->ClearDynamicAnimations();
-  }
-  m_animations.clear();
+  m_state = FocusEngineState::Clear;
 }
 
 void CFocusEngineHandler::UpdateFocusedAnimation(float dx, float dy)
 {
   CSingleLock lock(m_lock);
 
-  ORIENTATION orientation = GetFocusedOrientation();
-  //if (orientation == UNDEFINED)
-  //  return;
-
   CRect rect = CFocusEngineHandler::GetInstance().GetFocusedItemRect();
   if (rect.IsEmpty())
     return;
 
-  //float screenDX =   dx  * (0.1 * rect.Width());
-  //float screenDY = (-dy) * (0.1 * rect.Height());
   float screenDX =   dx  * 10.0f;
   float screenDY = (-dy) * 10.0f;
 
@@ -138,22 +140,8 @@ void CFocusEngineHandler::UpdateFocusedAnimation(float dx, float dy)
   node.SetAttribute("start", "0, 0");
   std::string temp = StringUtils::Format("%d, %d", MathUtils::round_int(screenDX), MathUtils::round_int(screenDY));
   node.SetAttribute("end", temp);
-  /*
-  if (orientation == HORIZONTAL)
-  {
-    std::string temp = StringUtils::Format("%d, %d", MathUtils::round_int(screenDX), MathUtils::round_int(screenDY));
-    node.SetAttribute("end", temp);
-  }
-  else if (orientation == VERTICAL)
-  {
-    std::string temp = StringUtils::Format("%d, %d", MathUtils::round_int(screenDX), MathUtils::round_int(screenDY));
-    node.SetAttribute("end", temp);
-  }
-  */
   //node.SetAttribute("time", "10");
-  std::string condition = StringUtils::Format("Control.HasFocus(%d)", m_focusedControl->GetID());
-  node.SetAttribute("condition", condition);
-  //node.SetAttribute("condition", "true");
+  node.SetAttribute("condition", "true");
   TiXmlText text("conditional");
   node.InsertEndChild(text);
 
@@ -163,9 +151,10 @@ void CFocusEngineHandler::UpdateFocusedAnimation(float dx, float dy)
   animations.push_back(anim);
 
   m_animations = animations;
+  m_state = FocusEngineState::Update;
 }
 
-CGUIControl  *CFocusEngineHandler::GetFocusedControl()
+CGUIControl *CFocusEngineHandler::GetFocusedControl()
 {
   CSingleLock lock(m_lock);
   return m_focusedControl;
