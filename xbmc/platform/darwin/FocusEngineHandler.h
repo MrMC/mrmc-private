@@ -23,6 +23,7 @@
 #include "threads/CriticalSection.h"
 
 class CAnimation;
+class CGUIWindow;
 class CGUIControl;
 
 typedef enum FocusEngineState
@@ -32,6 +33,13 @@ typedef enum FocusEngineState
   Update,
 } FocusEngineState;
 
+typedef struct
+{
+  CGUIWindow  *window = nullptr;
+  CGUIControl *rootFocus = nullptr;
+  CGUIControl *itemFocus = nullptr;
+} FocusEngineFocus;
+
 class CFocusEngineHandler
 {
  public:
@@ -40,7 +48,8 @@ class CFocusEngineHandler
   void          Process();
   void          ClearAnimations();
   void          UpdateFocusedAnimation(float dx, float dy);
-  CGUIControl  *GetFocusedControl();
+  void          GetFocus(FocusEngineFocus &focus);
+  void          InvalidateFocus(CGUIControl *control);
   const CRect   GetFocusedItemRect();
   ORIENTATION   GetFocusedOrientation();
 
@@ -51,10 +60,9 @@ private:
 
   CRect m_focusedRenderRect;
   CCriticalSection m_lock;
-  int m_focusedID;
-  CGUIControl *m_focusedControl;
-  ORIENTATION m_focusedOrientation;
   FocusEngineState m_state;
+  FocusEngineFocus m_focus;
+  ORIENTATION m_focusedOrientation;
   std::vector<CAnimation> m_animations;
   static CFocusEngineHandler* m_instance;
 

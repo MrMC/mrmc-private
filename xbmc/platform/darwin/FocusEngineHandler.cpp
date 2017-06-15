@@ -55,10 +55,8 @@ CFocusEngineHandler::GetInstance()
 }
 
 CFocusEngineHandler::CFocusEngineHandler()
-: m_focusedID(0)
-, m_focusedControl(nullptr)
+: m_state(FocusEngineState::Idle)
 , m_focusedOrientation(UNDEFINED)
-, m_state(FocusEngineState::Idle)
 {
 }
 
@@ -66,32 +64,33 @@ void CFocusEngineHandler::Process()
 {
   CSingleLock lock(m_lock);
 
-  CGUIControl *focusedControl = GetFocusedControl();
-  if (m_focusedControl != focusedControl)
+  FocusEngineFocus focus;
+  GetFocus(focus);
+  if (m_focus.itemFocus != focus.itemFocus)
   {
-    if (m_focusedControl)
+    if (m_focus.itemFocus)
     {
-      //m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
-      //m_focusedControl->ClearDynamicAnimations();
+      m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+      m_focus.itemFocus->ClearDynamicAnimations();
     }
-    m_focusedControl = focusedControl;
+    m_focus = focus;
   }
 
-  if (m_focusedControl)
+  if (m_focus.itemFocus)
   {
     switch(m_state)
     {
       case FocusEngineState::Idle:
         break;
       case FocusEngineState::Clear:
-        m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
-        m_focusedControl->ClearDynamicAnimations();
+        m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+        m_focus.itemFocus->ClearDynamicAnimations();
         m_animations.clear();
         m_state = FocusEngineState::Idle;
         break;
       case FocusEngineState::Update:
-        m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
-        m_focusedControl->SetDynamicAnimations(m_animations);
+        m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+        m_focus.itemFocus->SetDynamicAnimations(m_animations);
         m_animations.clear();
         m_state = FocusEngineState::Idle;
         break;
@@ -135,27 +134,26 @@ void CFocusEngineHandler::UpdateFocusedAnimation(float dx, float dy)
   m_state = FocusEngineState::Update;
 }
 
-CGUIControl *CFocusEngineHandler::GetFocusedControl()
+void CFocusEngineHandler::GetFocus(FocusEngineFocus &focus)
 {
-  CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
-  if (!pWindow)
-    return nullptr;
+  focus.window = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
+  if (!focus.window)
+    return;
 
-  CGUIControl *rootFocusedControl = pWindow->GetFocusedControl();
-  if (!rootFocusedControl)
-    return nullptr;
+  focus.rootFocus = focus.window->GetFocusedControl();
+  if (!focus.rootFocus)
+    return;
 
-  if (rootFocusedControl->GetControlType() == CGUIControl::GUICONTROL_UNKNOWN)
-    return nullptr;
+  if (focus.rootFocus->GetControlType() == CGUIControl::GUICONTROL_UNKNOWN)
+    return;
 
-  if (!rootFocusedControl->HasFocus())
-    return nullptr;
+  if (!focus.rootFocus->HasFocus())
+    return;
   
-  if (rootFocusedControl->GetID() <= 0)
-    return nullptr;
+  if (focus.rootFocus->GetID() <= 0)
+    return;
 
-  CGUIControl *focusedControl = nullptr;
-  switch(rootFocusedControl->GetControlType())
+  switch(focus.rootFocus->GetControlType())
   {
     case CGUIControl::GUICONTROL_UNKNOWN:
       CLog::Log(LOGDEBUG, "GetFocusedItem: GUICONTROL_UNKNOWN");
@@ -195,26 +193,34 @@ CGUIControl *CFocusEngineHandler::GetFocusedControl()
     case CGUIControl::GUICONTAINER_EPGGRID:
     case CGUIControl::GUICONTAINER_PANEL:
       {
-        focusedControl = rootFocusedControl->GetSelectionControl();
+        focus.itemFocus = focus.rootFocus->GetSelectionControl();
       }
       break;
     case CGUIControl::GUICONTAINER_FIXEDLIST:
       {
-        focusedControl = rootFocusedControl->GetSelectionControl();
+        focus.itemFocus = focus.rootFocus->GetSelectionControl();
       }
       break;
   }
+}
 
-  return focusedControl;
+void CFocusEngineHandler::InvalidateFocus(CGUIControl *control)
+{
+  CSingleLock lock(m_lock);
+  if (m_focus.rootFocus == control || m_focus.itemFocus == control)
+  {
+    m_focus = FocusEngineFocus();
+  }
 }
 
 const CRect
 CFocusEngineHandler::GetFocusedItemRect()
 {
-  CGUIControl *focusedControl = GetFocusedControl();
-  if (focusedControl)
+  FocusEngineFocus focus;
+  GetFocus(focus);
+  if (focus.itemFocus)
   {
-    m_focusedRenderRect = focusedControl->GetSelectionRenderRect();
+    m_focusedRenderRect = focus.itemFocus->GetSelectionRenderRect();
     return m_focusedRenderRect;
   }
 
@@ -223,15 +229,16 @@ CFocusEngineHandler::GetFocusedItemRect()
 
 ORIENTATION CFocusEngineHandler::GetFocusedOrientation()
 {
-  CGUIControl *focusedControl = GetFocusedControl();
-  if (focusedControl)
+  FocusEngineFocus focus;
+  GetFocus(focus);
+  if (focus.itemFocus)
   {
-    switch(focusedControl->GetControlType())
+    switch(focus.itemFocus->GetControlType())
     {
       case CGUIControl::GUICONTROL_BUTTON:
       case CGUIControl::GUICONTROL_IMAGE:
         {
-          CGUIControl *parentFocusedControl = focusedControl->GetParentControl();
+          CGUIControl *parentFocusedControl = focus.itemFocus->GetParentControl();
           if (parentFocusedControl)
             return parentFocusedControl->GetOrientation();
         }
@@ -239,7 +246,7 @@ ORIENTATION CFocusEngineHandler::GetFocusedOrientation()
       default:
         break;
     }
-    return focusedControl->GetOrientation();
+    return focus.itemFocus->GetOrientation();
   }
   return UNDEFINED;
 }
