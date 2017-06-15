@@ -1111,6 +1111,7 @@ static SiriRemoteInfo siriRemoteInfo;
             if (siriRemoteInfo.debug)
               NSLog(@"microGamepad: idle, pressed(%d), dt(%f)", pressed, siriRemoteInfo.dt);
             [weakSelf stopTapRepeatTimer];
+            CFocusEngineHandler::GetInstance().ClearAnimations();
             if (pressed)
             {
               [weakSelf updateRemoteStartInfo:siriRemoteInfo withGamePad:gamepad];
@@ -1235,6 +1236,7 @@ static SiriRemoteInfo siriRemoteInfo;
           siriRemoteInfo.state = SiriRemoteIdle;
           if (siriRemoteInfo.debug)
             NSLog(@"microGamepad: idle");
+          CFocusEngineHandler::GetInstance().ClearAnimations();
         }
       };
 #endif

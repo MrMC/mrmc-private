@@ -107,6 +107,11 @@ void CFocusEngineHandler::Process()
 void CFocusEngineHandler::ClearAnimations()
 {
   CSingleLock lock(m_lock);
+  if (m_focusedControl)
+  {
+    m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+    m_focusedControl->ClearDynamicAnimations();
+  }
   m_animations.clear();
 }
 
