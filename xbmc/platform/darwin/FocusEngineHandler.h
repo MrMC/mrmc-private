@@ -19,7 +19,10 @@
  */
 
 #include "guilib/Geometry.h"
+#include "guilib/GUIControl.h"
+#include "threads/CriticalSection.h"
 
+class CAnimation;
 class CGUIControl;
 
 class CFocusEngineHandler
@@ -28,6 +31,10 @@ class CFocusEngineHandler
   static CFocusEngineHandler& GetInstance();
 
   void          Process();
+  void          ClearAnimations();
+  void          UpdateFocusedAnimation(float dx, float dy);
+  CGUIControl  *GetFocusedControl();
+  ORIENTATION   GetFocusedOrientation () const;
 
   const CRect   GetFocusedItemRect();
   const CPoint  GetFocusedItemCenter();
@@ -38,6 +45,10 @@ private:
   CFocusEngineHandler& operator=(CFocusEngineHandler const&);
 
   CRect m_focusedRenderRect;
+  CCriticalSection m_lock;
   CGUIControl *m_focusedControl;
+  ORIENTATION m_focusedOrientation;
+  std::vector<CAnimation> m_animations;
   static CFocusEngineHandler* m_instance;
+
 };

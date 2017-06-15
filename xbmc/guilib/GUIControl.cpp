@@ -1037,6 +1037,13 @@ const CRect CGUIControl::GetSelectionRenderRect()
   return m_renderRegion;
 }
 
+CGUIControl *CGUIControl::GetSelectionControl()
+{
+  if (m_bAllocated)
+    return this;
+  return nullptr;
+}
+
 void CGUIControl::SetCamera(const CPoint &camera)
 {
   m_camera = camera;

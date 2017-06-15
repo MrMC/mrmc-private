@@ -419,10 +419,34 @@ void CGUIControlGroup::UnfocusFromPoint(const CPoint &point)
 const CRect CGUIControlGroup::GetSelectionRenderRect()
 {
   CRect selectionRenderRect = GetRenderRect();
+  /*
   CGUIControl *control = GetFocusedControl();
   if (control)
     selectionRenderRect = control->GetSelectionRenderRect();
+  */
   return selectionRenderRect;
+}
+
+CGUIControl *CGUIControlGroup::GetSelectionControl()
+{
+  /*
+  for (iControls it = m_children.begin(); it != m_children.end(); ++it)
+  {
+    const CGUIControl* control = *it;
+    // Avoid calling HasFocus() on control group as it will (possibly) recursively
+    // traverse entire group tree just to check if there is focused control.
+    // We are recursively traversing it here so no point in doing it twice.
+    if (control->IsGroup())
+    {
+      CGUIControl* focusedControl = ((CGUIControlGroup *)control)->GetFocusedControl();
+      if (focusedControl)
+        return (CGUIControl *)focusedControl;
+    }
+    else if (control->HasFocus())
+      return (CGUIControl *)control;
+  }
+  */
+  return this;
 }
 
 bool CGUIControlGroup::HasID(int id) const

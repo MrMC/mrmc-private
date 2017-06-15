@@ -38,6 +38,7 @@
 #import "messaging/ApplicationMessenger.h"
 #import "platform/darwin/FocusEngineHandler.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
+#import "platform/darwin/FocusEngineHandler.h"
 #import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainApplication.h"
@@ -48,7 +49,6 @@
 #import "windowing/WindowingFactory.h"
 #import "settings/Settings.h"
 #import "services/lighteffects/LightEffectServices.h"
-#import "utils/MathUtils.h"
 #import "utils/SeekHandler.h"
 #import "utils/log.h"
 
@@ -59,9 +59,6 @@
 #import <AVFoundation/AVAudioPlayer.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <GameController/GameController.h>
-
-#include "utils/XBMCTinyXML.h"
-#include "utils/StringUtils.h"
 
 // these MUST match those in system/keymaps/customcontroller.SiriRemote.xml
 typedef enum SiriRemoteTypes
@@ -259,20 +256,7 @@ static int keyPressTimerFiredCount = 0;
 
 -(ORIENTATION)getFocusedOrientation
 {
-  // we dont want fast scroll in below windows, no point in going 15 places in home screen
-  CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
-  CGUIControl *focusedControl = pWindow->GetFocusedControl();
-  if (focusedControl)
-  {
-    if (focusedControl->GetControlType() == CGUIControl::GUICONTROL_BUTTON)
-    {
-      CGUIControl *parentFocusedControl = focusedControl->GetParentControl();
-      if (parentFocusedControl)
-      return parentFocusedControl->GetOrientation();
-    }
-    return focusedControl->GetOrientation();
-  }
-  return UNDEFINED;
+  return CFocusEngineHandler::GetInstance().GetFocusedOrientation();;
 }
 
 //--------------------------------------------------------------
@@ -684,7 +668,6 @@ typedef struct
   CGPoint startPoint;
   CGPoint movedPoint;
   CGPoint lastMovedPoint;
-  CGUIControl *focusedControl;
   CGRect  panningRect;
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
@@ -771,21 +754,6 @@ static SiriRemoteInfo siriRemoteInfo;
   if (!siriRemoteInfo.shouldRemoteSwipe)
     return;
 
-  ORIENTATION orientation = UNDEFINED;
-  remote.focusedControl = nullptr;
-  CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
-  remote.focusedControl = pWindow->GetFocusedControl();
-  if (remote.focusedControl)
-  {
-    orientation = remote.focusedControl->GetOrientation();
-    if (remote.focusedControl->GetControlType() == CGUIControl::GUICONTROL_BUTTON)
-    {
-      CGUIControl *parentFocusedControl = remote.focusedControl->GetParentControl();
-      if (parentFocusedControl)
-        orientation = parentFocusedControl->GetOrientation();
-    }
-  }
-
   if (!CGPointEqualToPoint(remote.movedPoint, remote.lastMovedPoint))
   {
     float dx = remote.movedPoint.x - remote.startPoint.x;
@@ -793,47 +761,7 @@ static SiriRemoteInfo siriRemoteInfo;
     remote.lastMovedPoint = remote.movedPoint;
 
     NSLog(@"microGamepad: focus dx(%f), dy(%f)", dx, dy);
-
-    if (orientation != UNDEFINED)
-    {
-      CRect rect = remote.focusedControl->GetSelectionRenderRect();
-      NSLog(@"microGamepad: focus T(%f), L(%f), R(%f), B(%f)",
-        rect.x1, rect.y1,
-        rect.x2, rect.y2);
-      float scalerX = dx * (0.1 * rect.Width());
-      float scalerY = (-dy) * (0.1 * rect.Height());
-      NSLog(@"microGamepad: focus scalerX(%f), scalerY(%f)", scalerX, scalerY);
-      
-      std::vector<CAnimation> animations;
-      CAnimation anim;
-      TiXmlElement node("animation");
-      node.SetAttribute("reversible", "true");
-      node.SetAttribute("effect", "slide");
-      node.SetAttribute("start", "0, 0");
-      if (orientation == HORIZONTAL)
-      {
-        std::string temp = StringUtils::Format("%d, 0", MathUtils::round_int(scalerX));
-        node.SetAttribute("end", temp);
-      }
-      else if (orientation == VERTICAL)
-      {
-        std::string temp = StringUtils::Format("0, %d", MathUtils::round_int(scalerY));
-        node.SetAttribute("end", temp);
-      }
-      //node.SetAttribute("time", "10");
-      std::string condition = StringUtils::Format("Control.HasFocus(%d)", remote.focusedControl->GetID());
-      node.SetAttribute("condition", condition);
-      //node.SetAttribute("condition", "true");
-      TiXmlText text("conditional");
-      node.InsertEndChild(text);
-
-      anim.Create(&node, rect, 0);
-      animations.push_back(anim);
-      g_graphicsContext.Lock();
-      //remote.focusedControl->ResetAnimations();
-      remote.focusedControl->SetDynamicAnimations(animations);
-      g_graphicsContext.Unlock();
-    }
+    CFocusEngineHandler::GetInstance().UpdateFocusedAnimation(dx, dy);
   }
 
   // check if moved point is outside panning rect
@@ -864,12 +792,6 @@ static SiriRemoteInfo siriRemoteInfo;
           remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-        if (remote.focusedControl)
-        {
-          g_graphicsContext.Lock();
-          remote.focusedControl->ResetAnimations();
-          g_graphicsContext.Unlock();
-        }
         [self sendButtonPressed:SiriRemote_LeftSwipe];
       }
       else if (remote.movedPoint.x >= CGRectGetMaxX(remote.panningRect))
@@ -880,12 +802,6 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-        if (remote.focusedControl)
-        {
-          g_graphicsContext.Lock();
-          remote.focusedControl->ResetAnimations();
-          g_graphicsContext.Unlock();
-        }
         [self sendButtonPressed:SiriRemote_RightSwipe];
       }
     }
@@ -899,12 +815,6 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-        if (remote.focusedControl)
-        {
-          g_graphicsContext.Lock();
-          remote.focusedControl->ResetAnimations();
-          g_graphicsContext.Unlock();
-        }
         [self sendButtonPressed:SiriRemote_UpSwipe];
       }
       else if (remote.movedPoint.y <= CGRectGetMinY(remote.panningRect))
@@ -915,12 +825,6 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-        if (remote.focusedControl)
-        {
-          g_graphicsContext.Lock();
-          remote.focusedControl->ResetAnimations();
-          g_graphicsContext.Unlock();
-        }
         [self sendButtonPressed:SiriRemote_DownSwipe];
       }
     }
@@ -1090,7 +994,6 @@ static SiriRemoteInfo siriRemoteInfo;
   */
   remote.movedPoint = siriRemoteInfo.startPoint;
   remote.lastMovedPoint = siriRemoteInfo.startPoint;
-  remote.focusedControl = nullptr;
   remote.panningRect = CGRectMake(remote.startPoint.x, remote.startPoint.y, 0.75, 0.75);
   remote.startSeconds = CFAbsoluteTimeGetCurrent();
   remote.movedSeconds = siriRemoteInfo.startSeconds;
@@ -1328,14 +1231,6 @@ static SiriRemoteInfo siriRemoteInfo;
           [weakSelf startRemoteTimer];
           // always cancel tap repeat timer
           [weakSelf stopTapRepeatTimer];
-          if (siriRemoteInfo.focusedControl)
-          {
-            g_graphicsContext.Lock();
-            siriRemoteInfo.focusedControl->ClearDynamicAnimations();
-            siriRemoteInfo.focusedControl->ResetAnimations();
-            g_graphicsContext.Unlock();
-            siriRemoteInfo.focusedControl = nullptr;
-          }
           // always return to SiriRemoteIdle2
           siriRemoteInfo.state = SiriRemoteIdle;
           if (siriRemoteInfo.debug)

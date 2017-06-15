@@ -1091,14 +1091,17 @@ bool CGUIWindowManager::Render()
     for (CDirtyRegionList::const_iterator i = dirtyRegions.begin(); i != dirtyRegions.end(); ++i)
       CGUITexture::DrawQuad(*i, 0x4c00ff00);
   }
-/*
+
 #if defined(TARGET_DARWIN)
-  g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
-  // osx debugging for CFocusEngineHandler
-  CRect focusedItem = CFocusEngineHandler::GetInstance().GetFocusedItemRect();
-  CGUITexture::DrawQuad(focusedItem, 0x4c00ff00);
+  if (g_application.IsAppFocused())
+  {
+    g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
+    // osx debugging for CFocusEngineHandler
+    CRect focusedItem = CFocusEngineHandler::GetInstance().GetFocusedItemRect();
+    CGUITexture::DrawQuad(focusedItem, 0x4c00ff00);
+  }
 #endif
-*/
+
   return hasRendered;
 }
 
