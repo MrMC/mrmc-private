@@ -66,33 +66,15 @@ void CFocusEngineHandler::Process()
 {
   CSingleLock lock(m_lock);
 
-  // find and update the real focused control
-  CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
-  if (!pWindow)
-    return;
-
-  CGUIControl *focusedControl = pWindow->GetFocusedControl();
-  if (!focusedControl)
-    return;
-
-  if (focusedControl->GetControlType() == CGUIControl::GUICONTROL_UNKNOWN)
-    return;
-
-  if (!focusedControl->HasFocus())
-    return;
-  
-  if (focusedControl->GetID() <= 0)
-    return;
-
-  if (!m_focusedControl)
+  CGUIControl *focusedControl = GetFocusedControl();
+  if (m_focusedControl != focusedControl)
   {
-    m_focusedControl = focusedControl->GetSelectionControl();
-  }
-  else if (m_focusedControl->GetID() != focusedControl->GetSelectionControl()->GetID())
-  {
-    m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
-    m_focusedControl->ClearDynamicAnimations();
-    m_focusedControl = focusedControl->GetSelectionControl();
+    if (m_focusedControl)
+    {
+      //m_focusedControl->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+      //m_focusedControl->ClearDynamicAnimations();
+    }
+    m_focusedControl = focusedControl;
   }
 
   if (m_focusedControl)
@@ -126,8 +108,7 @@ void CFocusEngineHandler::ClearAnimations()
 void CFocusEngineHandler::UpdateFocusedAnimation(float dx, float dy)
 {
   CSingleLock lock(m_lock);
-
-  CRect rect = CFocusEngineHandler::GetInstance().GetFocusedItemRect();
+  CRect rect = GetFocusedItemRect();
   if (rect.IsEmpty())
     return;
 
@@ -156,46 +137,25 @@ void CFocusEngineHandler::UpdateFocusedAnimation(float dx, float dy)
 
 CGUIControl *CFocusEngineHandler::GetFocusedControl()
 {
-  CSingleLock lock(m_lock);
-  return m_focusedControl;
-}
-
-ORIENTATION CFocusEngineHandler::GetFocusedOrientation () const
-{
-  CSingleLock lock(m_lock);
-  if (m_focusedControl)
-  {
-    switch(m_focusedControl->GetControlType())
-    {
-      case CGUIControl::GUICONTROL_BUTTON:
-      case CGUIControl::GUICONTROL_IMAGE:
-        {
-          CGUIControl *parentFocusedControl = m_focusedControl->GetParentControl();
-          if (parentFocusedControl)
-            return parentFocusedControl->GetOrientation();
-        }
-        break;
-      default:
-        break;
-    }
-    return m_focusedControl->GetOrientation();
-  }
-  return UNDEFINED;
-}
-
-const CRect
-CFocusEngineHandler::GetFocusedItemRect()
-{
   CGUIWindow* pWindow = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
   if (!pWindow)
-    return CRect();
+    return nullptr;
 
-  CGUIControl *focusedControl = pWindow->GetFocusedControl();
-  if (!focusedControl)
-    return CRect();
+  CGUIControl *rootFocusedControl = pWindow->GetFocusedControl();
+  if (!rootFocusedControl)
+    return nullptr;
 
-  CRect focusedRenderRect;
-  switch(focusedControl->GetControlType())
+  if (rootFocusedControl->GetControlType() == CGUIControl::GUICONTROL_UNKNOWN)
+    return nullptr;
+
+  if (!rootFocusedControl->HasFocus())
+    return nullptr;
+  
+  if (rootFocusedControl->GetID() <= 0)
+    return nullptr;
+
+  CGUIControl *focusedControl = nullptr;
+  switch(rootFocusedControl->GetControlType())
   {
     case CGUIControl::GUICONTROL_UNKNOWN:
       CLog::Log(LOGDEBUG, "GetFocusedItem: GUICONTROL_UNKNOWN");
@@ -235,37 +195,51 @@ CFocusEngineHandler::GetFocusedItemRect()
     case CGUIControl::GUICONTAINER_EPGGRID:
     case CGUIControl::GUICONTAINER_PANEL:
       {
-        // returned rect is in screen coordinates.
-        focusedRenderRect = focusedControl->GetSelectionRenderRect();
-        if (focusedRenderRect != m_focusedRenderRect)
-        {
-          m_focusedRenderRect = focusedRenderRect;
-          //CLog::Log(LOGDEBUG, "GetFocusedItem: itemRect, t(%f) l(%f) w(%f) h(%f)",
-          //  focusedItem.x1, focusedItem.y1, focusedItem.Width(), focusedItem.Height());
-        }
+        focusedControl = rootFocusedControl->GetSelectionControl();
       }
       break;
     case CGUIControl::GUICONTAINER_FIXEDLIST:
       {
-        CGUIFixedListContainer *fixedListContainer = (CGUIFixedListContainer*)focusedControl;
-        // returned rect is in screen coordinates.
-        focusedRenderRect = fixedListContainer->GetSelectionRenderRect();
-        if (focusedRenderRect != m_focusedRenderRect)
-        {
-          m_focusedRenderRect = focusedRenderRect;
-          //CLog::Log(LOGDEBUG, "GetFocusedItem: itemRect, t(%f) l(%f) w(%f) h(%f)",
-          //  focusedItem.x1, focusedItem.y1, focusedItem.Width(), focusedItem.Height());
-        }
-        
+        focusedControl = rootFocusedControl->GetSelectionControl();
       }
       break;
   }
 
-  return m_focusedRenderRect;
+  return focusedControl;
 }
 
-const CPoint
-CFocusEngineHandler::GetFocusedItemCenter()
+const CRect
+CFocusEngineHandler::GetFocusedItemRect()
 {
-  return GetFocusedItemRect().Center();
+  CGUIControl *focusedControl = GetFocusedControl();
+  if (focusedControl)
+  {
+    m_focusedRenderRect = focusedControl->GetSelectionRenderRect();
+    return m_focusedRenderRect;
+  }
+
+  return CRect();
+}
+
+ORIENTATION CFocusEngineHandler::GetFocusedOrientation()
+{
+  CGUIControl *focusedControl = GetFocusedControl();
+  if (focusedControl)
+  {
+    switch(focusedControl->GetControlType())
+    {
+      case CGUIControl::GUICONTROL_BUTTON:
+      case CGUIControl::GUICONTROL_IMAGE:
+        {
+          CGUIControl *parentFocusedControl = focusedControl->GetParentControl();
+          if (parentFocusedControl)
+            return parentFocusedControl->GetOrientation();
+        }
+        break;
+      default:
+        break;
+    }
+    return focusedControl->GetOrientation();
+  }
+  return UNDEFINED;
 }

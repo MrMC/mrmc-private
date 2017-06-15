@@ -41,10 +41,8 @@ class CFocusEngineHandler
   void          ClearAnimations();
   void          UpdateFocusedAnimation(float dx, float dy);
   CGUIControl  *GetFocusedControl();
-  ORIENTATION   GetFocusedOrientation () const;
-
   const CRect   GetFocusedItemRect();
-  const CPoint  GetFocusedItemCenter();
+  ORIENTATION   GetFocusedOrientation();
 
 private:
   CFocusEngineHandler();
