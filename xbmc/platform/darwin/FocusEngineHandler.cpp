@@ -246,7 +246,7 @@ ORIENTATION CFocusEngineHandler::GetFocusedOrientation()
       default:
         break;
     }
-    return focus.itemFocus->GetOrientation();
+    return focus.rootFocus->GetOrientation();
   }
   return UNDEFINED;
 }
