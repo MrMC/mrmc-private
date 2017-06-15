@@ -54,12 +54,12 @@ class CFocusEngineHandler
   static CFocusEngineHandler& GetInstance();
 
   void          Process();
-  void          ClearAnimations();
+  void          ClearAnimation();
   void          UpdateAnimation(FocusEngineAnimate &focusAnimate);
-  void          GetFocus(FocusEngineFocus &focus);
+  void          UpdateFocus(FocusEngineFocus &focus);
   void          InvalidateFocus(CGUIControl *control);
-  const CRect   GetFocusedItemRect();
-  ORIENTATION   GetFocusedOrientation();
+  const CRect   GetFocusRect();
+  ORIENTATION   GetFocusOrientation();
 
 private:
   CFocusEngineHandler();

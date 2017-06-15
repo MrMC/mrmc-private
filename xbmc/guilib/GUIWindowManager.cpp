@@ -1097,8 +1097,9 @@ bool CGUIWindowManager::Render()
   {
     g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
     // osx debugging for CFocusEngineHandler
-    CRect focusedItem = CFocusEngineHandler::GetInstance().GetFocusedItemRect();
-    CGUITexture::DrawQuad(focusedItem, 0x4c00ff00);
+    CRect focusedItem = CFocusEngineHandler::GetInstance().GetFocusRect();
+    if (!focusedItem.IsEmpty())
+      CGUITexture::DrawQuad(focusedItem, 0x4c00ff00);
   }
 #endif
 

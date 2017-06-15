@@ -256,7 +256,7 @@ static int keyPressTimerFiredCount = 0;
 
 -(ORIENTATION)getFocusedOrientation
 {
-  return CFocusEngineHandler::GetInstance().GetFocusedOrientation();;
+  return CFocusEngineHandler::GetInstance().GetFocusOrientation();;
 }
 
 //--------------------------------------------------------------
@@ -1117,7 +1117,7 @@ static SiriRemoteInfo siriRemoteInfo;
             siriRemoteInfo.focusAnimate = FocusEngineAnimate();
             siriRemoteInfo.focusAnimate.zoomX = 110.0f;
             siriRemoteInfo.focusAnimate.zoomY = 110.0f;
-            CFocusEngineHandler::GetInstance().ClearAnimations();
+            CFocusEngineHandler::GetInstance().ClearAnimation();
             CFocusEngineHandler::GetInstance().UpdateAnimation(siriRemoteInfo.focusAnimate);
             if (pressed)
             {
@@ -1239,12 +1239,11 @@ static SiriRemoteInfo siriRemoteInfo;
           [weakSelf startRemoteTimer];
           // always cancel tap repeat timer
           [weakSelf stopTapRepeatTimer];
-          CFocusEngineHandler::GetInstance().ClearAnimations();
+          CFocusEngineHandler::GetInstance().ClearAnimation();
           // always return to SiriRemoteIdle2
           siriRemoteInfo.state = SiriRemoteIdle;
           if (siriRemoteInfo.debug)
             NSLog(@"microGamepad: idle");
-          CFocusEngineHandler::GetInstance().ClearAnimations();
         }
       };
 #endif

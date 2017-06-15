@@ -65,7 +65,7 @@ void CFocusEngineHandler::Process()
   CSingleLock lock(m_lock);
 
   FocusEngineFocus focus;
-  GetFocus(focus);
+  UpdateFocus(focus);
   if (m_focus.itemFocus != focus.itemFocus)
   {
     if (m_focus.itemFocus)
@@ -142,7 +142,7 @@ void CFocusEngineHandler::Process()
   }
 }
 
-void CFocusEngineHandler::ClearAnimations()
+void CFocusEngineHandler::ClearAnimation()
 {
   CSingleLock lock(m_lock);
   m_state = FocusEngineState::Clear;
@@ -154,7 +154,7 @@ void CFocusEngineHandler::UpdateAnimation(FocusEngineAnimate &focusAnimate)
   m_state = FocusEngineState::Update;
 }
 
-void CFocusEngineHandler::GetFocus(FocusEngineFocus &focus)
+void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
 {
   focus.window = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
   if (!focus.window)
@@ -234,10 +234,10 @@ void CFocusEngineHandler::InvalidateFocus(CGUIControl *control)
 }
 
 const CRect
-CFocusEngineHandler::GetFocusedItemRect()
+CFocusEngineHandler::GetFocusRect()
 {
   FocusEngineFocus focus;
-  GetFocus(focus);
+  UpdateFocus(focus);
   if (focus.itemFocus)
   {
     m_focusedRenderRect = focus.itemFocus->GetSelectionRenderRect();
@@ -247,10 +247,10 @@ CFocusEngineHandler::GetFocusedItemRect()
   return CRect();
 }
 
-ORIENTATION CFocusEngineHandler::GetFocusedOrientation()
+ORIENTATION CFocusEngineHandler::GetFocusOrientation()
 {
   FocusEngineFocus focus;
-  GetFocus(focus);
+  UpdateFocus(focus);
   if (focus.itemFocus)
   {
     switch(focus.itemFocus->GetControlType())
