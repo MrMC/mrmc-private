@@ -28,9 +28,6 @@
 #include "input/MouseStat.h"
 #include "input/InputManager.h"
 #include "input/Key.h"
-#if defined(TARGET_DARWIN)
-#include "platform/darwin/FocusEngineHandler.h"
-#endif
 
 CGUIControl::CGUIControl() :
   m_hitColor(0xffffffff),
@@ -92,9 +89,7 @@ CGUIControl::CGUIControl(int parentID, int controlID, float posX, float posY, fl
 
 CGUIControl::~CGUIControl(void)
 {
-#if defined(TARGET_DARWIN)
-  CFocusEngineHandler::GetInstance().InvalidateFocus(this);
-#endif
+  g_windowManager.InvalidateFocus(this);
 }
 
 void CGUIControl::AllocResources()

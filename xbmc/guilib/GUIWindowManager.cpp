@@ -1517,6 +1517,15 @@ void CGUIWindowManager::GetActiveModelessWindows(std::vector<int> &ids)
   }
 }
 
+void CGUIWindowManager::InvalidateFocus(CGUIControl *control)
+{
+#if defined(TARGET_DARWIN)
+  // called when a control is destroyed, there is no
+  // other way to track down a control in a window that vanishes.
+  CFocusEngineHandler::GetInstance().InvalidateFocus(control);
+#endif
+}
+
 CGUIWindow *CGUIWindowManager::GetTopMostDialog() const
 {
   CSingleLock lock(g_graphicsContext);
