@@ -85,14 +85,58 @@ void CFocusEngineHandler::Process()
       case FocusEngineState::Clear:
         m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
         m_focus.itemFocus->ClearDynamicAnimations();
-        m_animations.clear();
+        m_focusAnimate = FocusEngineAnimate();
         m_state = FocusEngineState::Idle;
         break;
       case FocusEngineState::Update:
-        m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
-        m_focus.itemFocus->SetDynamicAnimations(m_animations);
-        m_animations.clear();
-        m_state = FocusEngineState::Idle;
+        {
+          CRect rect = focus.itemFocus->GetSelectionRenderRect();
+          if (!rect.IsEmpty())
+          {
+            FocusEngineAnimate focusAnimate = m_focusAnimate;
+            std::vector<CAnimation> animations;
+            if (fabs(focusAnimate.slideX) > 0.0f || fabs(focusAnimate.slideY) > 0.0f)
+            {
+              float screenDX =   focusAnimate.slideX  * 10.0f;
+              float screenDY = (-focusAnimate.slideY) * 10.0f;
+              TiXmlElement node("animation");
+              node.SetAttribute("reversible", "false");
+              node.SetAttribute("effect", "slide");
+              node.SetAttribute("start", "0, 0");
+              std::string temp = StringUtils::Format("%d, %d", MathUtils::round_int(screenDX), MathUtils::round_int(screenDY));
+              node.SetAttribute("end", temp);
+              //node.SetAttribute("time", "10");
+              node.SetAttribute("condition", "true");
+              TiXmlText text("conditional");
+              node.InsertEndChild(text);
+
+              CAnimation anim;
+              anim.Create(&node, rect, 0);
+              animations.push_back(anim);
+            }
+
+            if (focusAnimate.zoomX > 0 && focusAnimate.zoomY > 0)
+            {
+              TiXmlElement node("animation");
+              node.SetAttribute("reversible", "false");
+              node.SetAttribute("effect", "zoom");
+              node.SetAttribute("start", "100, 100");
+              std::string temp = StringUtils::Format("%f, %f", focusAnimate.zoomX, focusAnimate.zoomY);
+              node.SetAttribute("end", temp);
+              node.SetAttribute("center", "auto");
+              node.SetAttribute("condition", "true");
+              TiXmlText text("conditional");
+              node.InsertEndChild(text);
+
+              CAnimation anim;
+              anim.Create(&node, rect, 0);
+              animations.push_back(anim);
+            }
+            m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+            m_focus.itemFocus->SetDynamicAnimations(animations);
+          }
+          m_state = FocusEngineState::Idle;
+        }
         break;
     }
   }
@@ -104,33 +148,9 @@ void CFocusEngineHandler::ClearAnimations()
   m_state = FocusEngineState::Clear;
 }
 
-void CFocusEngineHandler::UpdateFocusedAnimation(float dx, float dy)
+void CFocusEngineHandler::UpdateAnimation(FocusEngineAnimate &focusAnimate)
 {
-  CSingleLock lock(m_lock);
-  CRect rect = GetFocusedItemRect();
-  if (rect.IsEmpty())
-    return;
-
-  float screenDX =   dx  * 10.0f;
-  float screenDY = (-dy) * 10.0f;
-
-  TiXmlElement node("animation");
-  node.SetAttribute("reversible", "false");
-  node.SetAttribute("effect", "slide");
-  node.SetAttribute("start", "0, 0");
-  std::string temp = StringUtils::Format("%d, %d", MathUtils::round_int(screenDX), MathUtils::round_int(screenDY));
-  node.SetAttribute("end", temp);
-  //node.SetAttribute("time", "10");
-  node.SetAttribute("condition", "true");
-  TiXmlText text("conditional");
-  node.InsertEndChild(text);
-
-  CAnimation anim;
-  anim.Create(&node, rect, 0);
-  std::vector<CAnimation> animations;
-  animations.push_back(anim);
-
-  m_animations = animations;
+  m_focusAnimate = focusAnimate;
   m_state = FocusEngineState::Update;
 }
 

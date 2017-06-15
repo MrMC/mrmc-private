@@ -40,6 +40,14 @@ typedef struct
   CGUIControl *itemFocus = nullptr;
 } FocusEngineFocus;
 
+typedef struct
+{
+  float zoomX = -1.0f;
+  float zoomY = -1.0f;
+  float slideX = 0.0f;
+  float slideY = 0.0f;
+} FocusEngineAnimate;
+
 class CFocusEngineHandler
 {
  public:
@@ -47,7 +55,7 @@ class CFocusEngineHandler
 
   void          Process();
   void          ClearAnimations();
-  void          UpdateFocusedAnimation(float dx, float dy);
+  void          UpdateAnimation(FocusEngineAnimate &focusAnimate);
   void          GetFocus(FocusEngineFocus &focus);
   void          InvalidateFocus(CGUIControl *control);
   const CRect   GetFocusedItemRect();
@@ -63,7 +71,7 @@ private:
   FocusEngineState m_state;
   FocusEngineFocus m_focus;
   ORIENTATION m_focusedOrientation;
-  std::vector<CAnimation> m_animations;
+  FocusEngineAnimate m_focusAnimate;
   static CFocusEngineHandler* m_instance;
 
 };

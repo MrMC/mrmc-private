@@ -673,6 +673,7 @@ typedef struct
   CFAbsoluteTime movedSeconds;
   float ignoreAfterSwipeSeconds;
   bool shouldRemoteSwipe;
+  FocusEngineAnimate focusAnimate;
   SiriRemoteState state = SiriRemoteIdle;
 } SiriRemoteInfo;
 static SiriRemoteInfo siriRemoteInfo;
@@ -761,7 +762,9 @@ static SiriRemoteInfo siriRemoteInfo;
     remote.lastMovedPoint = remote.movedPoint;
 
     NSLog(@"microGamepad: focus dx(%f), dy(%f)", dx, dy);
-    CFocusEngineHandler::GetInstance().UpdateFocusedAnimation(dx, dy);
+    remote.focusAnimate.slideX = dx;
+    remote.focusAnimate.slideY = dy;
+    CFocusEngineHandler::GetInstance().UpdateAnimation(remote.focusAnimate);
   }
 
   // check if moved point is outside panning rect
@@ -1111,7 +1114,11 @@ static SiriRemoteInfo siriRemoteInfo;
             if (siriRemoteInfo.debug)
               NSLog(@"microGamepad: idle, pressed(%d), dt(%f)", pressed, siriRemoteInfo.dt);
             [weakSelf stopTapRepeatTimer];
+            siriRemoteInfo.focusAnimate = FocusEngineAnimate();
+            siriRemoteInfo.focusAnimate.zoomX = 110.0f;
+            siriRemoteInfo.focusAnimate.zoomY = 110.0f;
             CFocusEngineHandler::GetInstance().ClearAnimations();
+            CFocusEngineHandler::GetInstance().UpdateAnimation(siriRemoteInfo.focusAnimate);
             if (pressed)
             {
               [weakSelf updateRemoteStartInfo:siriRemoteInfo withGamePad:gamepad];
@@ -1232,6 +1239,7 @@ static SiriRemoteInfo siriRemoteInfo;
           [weakSelf startRemoteTimer];
           // always cancel tap repeat timer
           [weakSelf stopTapRepeatTimer];
+          CFocusEngineHandler::GetInstance().ClearAnimations();
           // always return to SiriRemoteIdle2
           siriRemoteInfo.state = SiriRemoteIdle;
           if (siriRemoteInfo.debug)
