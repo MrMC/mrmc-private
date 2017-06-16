@@ -56,6 +56,8 @@ class CFocusEngineHandler
   void          Process();
   void          ClearAnimation();
   void          UpdateAnimation(FocusEngineAnimate &focusAnimate);
+  void          setShouldZoom(bool shouldZoom);
+  void          setShouldSlide(bool shouldSlide);
   void          UpdateFocus(FocusEngineFocus &focus);
   void          InvalidateFocus(CGUIControl *control);
   const CRect   GetFocusRect();
@@ -68,6 +70,8 @@ private:
   CFocusEngineHandler& operator=(CFocusEngineHandler const&);
 
   bool showFocusRect = false;
+  bool m_shouldZoom;
+  bool m_shouldSlide;
   CCriticalSection m_lock;
   FocusEngineState m_state;
   FocusEngineFocus m_focus;

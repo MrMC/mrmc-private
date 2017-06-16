@@ -26,6 +26,7 @@
 #import "platform/darwin/tvos/MainController.h"
 
 #include "threads/Atomics.h"
+#include "platform/darwin/FocusEngineHandler.h"
 
 static std::atomic<long> sg_singleton_lock_variable {0};
 CTVOSInputSettings* CTVOSInputSettings::m_instance = nullptr;
@@ -52,6 +53,10 @@ void CTVOSInputSettings::Initialize()
   [g_xbmcController setRemoteIdleTimeout:timeout];
   bool enableSwipe = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPE);
   [g_xbmcController setShouldRemoteSwipe:enableSwipe];
+  bool enableSwipeZoom = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPEZOOM);
+  CFocusEngineHandler::GetInstance().setShouldZoom(enableSwipe && enableSwipeZoom);
+  bool enableSwipeSlide = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPESLIDE);
+  CFocusEngineHandler::GetInstance().setShouldSlide(enableSwipe && enableSwipeSlide);
 }
 
 void CTVOSInputSettings::OnSettingChanged(const CSetting *setting)
@@ -70,9 +75,15 @@ void CTVOSInputSettings::OnSettingChanged(const CSetting *setting)
     int timeout = CSettings::GetInstance().GetInt(CSettings::SETTING_INPUT_APPLESIRITIMEOUT);
     [g_xbmcController setRemoteIdleTimeout:timeout];
   }
-  else if (settingId == CSettings::SETTING_INPUT_APPLESIRISWIPE)
+  else if (settingId == CSettings::SETTING_INPUT_APPLESIRISWIPE ||
+           settingId == CSettings::SETTING_INPUT_APPLESIRISWIPEZOOM ||
+           settingId == CSettings::SETTING_INPUT_APPLESIRISWIPESLIDE)
   {
     bool enableSwipe = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPE);
     [g_xbmcController setShouldRemoteSwipe:enableSwipe];
+    bool enableSwipeZoom = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPEZOOM);
+    CFocusEngineHandler::GetInstance().setShouldZoom(enableSwipe && enableSwipeZoom);
+    bool enableSwipeSlide = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPESLIDE);
+    CFocusEngineHandler::GetInstance().setShouldSlide(enableSwipe && enableSwipeSlide);
   }
 }

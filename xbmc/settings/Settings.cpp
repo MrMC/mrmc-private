@@ -400,6 +400,8 @@ const std::string CSettings::SETTING_INPUT_APPLEREMOTEMODE = "input.appleremotem
 const std::string CSettings::SETTING_INPUT_APPLEREMOTEALWAYSON = "input.appleremotealwayson";
 const std::string CSettings::SETTING_INPUT_APPLEREMOTESEQUENCETIME = "input.appleremotesequencetime";
 const std::string CSettings::SETTING_INPUT_APPLESIRISWIPE = "input.applesiriswipe";
+const std::string CSettings::SETTING_INPUT_APPLESIRISWIPEZOOM = "input.applesiriswipezoom";
+const std::string CSettings::SETTING_INPUT_APPLESIRISWIPESLIDE = "input.applesiriswipeslide";
 const std::string CSettings::SETTING_INPUT_APPLESIRIBACK = "input.applesiriback";
 const std::string CSettings::SETTING_INPUT_APPLESIRITIMEOUT = "input.applesiritimeout";
 const std::string CSettings::SETTING_INPUT_APPLESIRITIMEOUTENABLED = "input.applesiritimeoutenabled";
@@ -1325,6 +1327,8 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_INPUT_APPLESIRITIMEOUT);
   settingSet.insert(CSettings::SETTING_INPUT_APPLESIRITIMEOUTENABLED);
   settingSet.insert(CSettings::SETTING_INPUT_APPLESIRISWIPE);
+  settingSet.insert(CSettings::SETTING_INPUT_APPLESIRISWIPEZOOM);
+  settingSet.insert(CSettings::SETTING_INPUT_APPLESIRISWIPESLIDE);
   m_settingsManager->RegisterCallback(&CTVOSInputSettings::GetInstance(), settingSet);
 #endif
   

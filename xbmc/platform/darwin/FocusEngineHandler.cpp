@@ -57,6 +57,8 @@ CFocusEngineHandler::GetInstance()
 CFocusEngineHandler::CFocusEngineHandler()
 : m_state(FocusEngineState::Idle)
 , m_focusedOrientation(UNDEFINED)
+, m_shouldZoom(true)
+, m_shouldSlide(true)
 {
 }
 
@@ -95,7 +97,7 @@ void CFocusEngineHandler::Process()
           {
             FocusEngineAnimate focusAnimate = m_focusAnimate;
             std::vector<CAnimation> animations;
-            if (fabs(focusAnimate.slideX) > 0.0f || fabs(focusAnimate.slideY) > 0.0f)
+            if (m_shouldSlide && (fabs(focusAnimate.slideX) > 0.0f || fabs(focusAnimate.slideY) > 0.0f))
             {
               float screenDX =   focusAnimate.slideX  * 10.0f;
               float screenDY = (-focusAnimate.slideY) * 10.0f;
@@ -115,7 +117,7 @@ void CFocusEngineHandler::Process()
               animations.push_back(anim);
             }
 
-            if (focusAnimate.zoomX > 0 && focusAnimate.zoomY > 0)
+            if (m_shouldZoom && (focusAnimate.zoomX > 0 && focusAnimate.zoomY > 0))
             {
               TiXmlElement node("animation");
               node.SetAttribute("reversible", "false");
@@ -152,6 +154,16 @@ void CFocusEngineHandler::UpdateAnimation(FocusEngineAnimate &focusAnimate)
 {
   m_focusAnimate = focusAnimate;
   m_state = FocusEngineState::Update;
+}
+
+void CFocusEngineHandler::setShouldZoom(bool shouldZoom)
+{
+  m_shouldZoom = shouldZoom;
+}
+
+void CFocusEngineHandler::setShouldSlide(bool shouldSlide)
+{
+  m_shouldSlide = shouldSlide;
 }
 
 void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
