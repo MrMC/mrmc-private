@@ -404,7 +404,7 @@ static int keyPressTimerFiredCount = 0;
 #pragma mark - gesture handlers
 - (void)menuPressed:(UITapGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -440,8 +440,7 @@ static int keyPressTimerFiredCount = 0;
 //--------------------------------------------------------------
 - (void)selectPressed:(UITapGestureRecognizer *)sender
 {
-  PRINT_SIGNATURE();
-  
+  //PRINT_SIGNATURE();
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -469,7 +468,7 @@ static int keyPressTimerFiredCount = 0;
 
 - (void)playPausePressed:(UITapGestureRecognizer *) sender
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
@@ -1405,7 +1404,8 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)didReceiveMemoryWarning
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
+  CLog::Log(LOGWARNING, "didReceiveMemoryWarning");
   // Releases the view if it doesn't have a superview.
   [super didReceiveMemoryWarning];
   // Release any cached data, images, etc. that aren't in use.
@@ -1413,7 +1413,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)enableBackGroundTask
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_bgTask != UIBackgroundTaskInvalid)
   {
     [[UIApplication sharedApplication] endBackgroundTask: m_bgTask];
@@ -1428,7 +1428,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)disableBackGroundTask
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_bgTask != UIBackgroundTaskInvalid)
   {
     LOG(@"%s: endBackgroundTask", __PRETTY_FUNCTION__);
@@ -1501,7 +1501,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)enterForeground
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 }
 //--------------------------------------------------------------
 - (void)enterActiveDelayed:(id)arg
@@ -1512,7 +1512,7 @@ static SiriRemoteInfo siriRemoteInfo;
   if ([UIApplication sharedApplication].applicationState != UIApplicationStateActive)
     return;
 
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 
   // MCRuntimeLib_Initialized is only true if
   // we were running and got moved to background
@@ -1567,7 +1567,7 @@ static SiriRemoteInfo siriRemoteInfo;
 }
 - (void)becomeActive
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   // stop background task (if running)
   [self disableBackGroundTask];
 
@@ -1577,7 +1577,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)becomeInactive
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 
   m_controllerState = MC_INACTIVE;
   if (g_application.m_pPlayer->IsPlayingVideo())
@@ -1596,7 +1596,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)enterBackgroundDetached:(id)arg
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   switch(m_controllerState)
   {
     default:
@@ -1643,7 +1643,7 @@ static SiriRemoteInfo siriRemoteInfo;
 
 - (void)enterBackground
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (m_controllerState != MC_INACTIVE)
     [self enableBackGroundTask];
   [NSThread detachNewThreadSelector:@selector(enterBackgroundDetached:) toTarget:self withObject:nil];
@@ -1652,7 +1652,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)audioRouteChanged
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (MCRuntimeLib_Initialized())
     CAEFactory::DeviceChange();
 }
@@ -1753,7 +1753,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)remoteControlReceivedWithEvent:(UIEvent*)receivedEvent
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (receivedEvent.type == UIEventTypeRemoteControl)
   {
     switch (receivedEvent.subtype)
@@ -1889,7 +1889,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)onSpeedChanged:(NSDictionary *)item
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (NSClassFromString(@"MPNowPlayingInfoCenter"))
   {
     NSMutableDictionary *info = [self.m_nowPlayingInfo mutableCopy];
@@ -1925,13 +1925,13 @@ static SiriRemoteInfo siriRemoteInfo;
 
 - (void)onSeekPlaying
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   [NSThread detachNewThreadSelector:@selector(onSeekDelayed:) toTarget:self withObject:nil];
 }
 //--------------------------------------------------------------
 - (void)onPausePlaying:(NSDictionary *)item
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if (NSClassFromString(@"MPNowPlayingInfoCenter"))
   {
     NSMutableDictionary *info = [self.m_nowPlayingInfo mutableCopy];
@@ -1947,7 +1947,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //--------------------------------------------------------------
 - (void)onStopPlaying:(NSDictionary *)item
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   [self setIOSNowPlayingInfo:nil];
 }
 
