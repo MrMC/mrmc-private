@@ -22,23 +22,13 @@
 
 #include "FocusEngineHandler.h"
 
-#include "guilib/GUIBaseContainer.h"
 #include "guilib/GUIControl.h"
-#include "guilib/GUIListItem.h"
-#include "guilib/GUIScrollBarControl.h"
-#include "guilib/GUIControlGroupList.h"
-#include "guilib/GUIFixedListContainer.h"
-#include "guilib/GUIMultiSelectText.h"
-#include "guilib/GUIListLabel.h"
 #include "guilib/GUIWindowManager.h"
-#include "guiinfo/GUIInfoLabels.h"
-
 #include "threads/Atomics.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/XBMCTinyXML.h"
-#include "utils/MathUtils.h"
 
 
 static std::atomic<long> sg_focusenginehandler_lock {0};
@@ -99,13 +89,13 @@ void CFocusEngineHandler::Process()
             std::vector<CAnimation> animations;
             if (m_focusSlide && (fabs(focusAnimate.slideX) > 0.0f || fabs(focusAnimate.slideY) > 0.0f))
             {
-              float screenDX =   focusAnimate.slideX  * 10.0f;
-              float screenDY = (-focusAnimate.slideY) * 10.0f;
+              float screenDX =   focusAnimate.slideX  * focusAnimate.maxScreenSlideX;
+              float screenDY = (-focusAnimate.slideY) * focusAnimate.maxScreenSlideY;
               TiXmlElement node("animation");
               node.SetAttribute("reversible", "false");
               node.SetAttribute("effect", "slide");
               node.SetAttribute("start", "0, 0");
-              std::string temp = StringUtils::Format("%d, %d", MathUtils::round_int(screenDX), MathUtils::round_int(screenDY));
+              std::string temp = StringUtils::Format("%f, %f", screenDX, screenDY);
               node.SetAttribute("end", temp);
               //node.SetAttribute("time", "10");
               node.SetAttribute("condition", "true");
@@ -117,7 +107,7 @@ void CFocusEngineHandler::Process()
               animations.push_back(anim);
             }
 
-            if (m_focusZoom && (focusAnimate.zoomX > 0 && focusAnimate.zoomY > 0))
+            if (m_focusZoom && (focusAnimate.zoomX > 0.0f && focusAnimate.zoomY > 0.0f))
             {
               TiXmlElement node("animation");
               node.SetAttribute("reversible", "false");

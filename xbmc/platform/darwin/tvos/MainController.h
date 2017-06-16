@@ -23,7 +23,6 @@
  */
 
 #import <UIKit/UIKit.h>
-#import "windowing/XBMC_events.h"
 
 typedef enum
 {

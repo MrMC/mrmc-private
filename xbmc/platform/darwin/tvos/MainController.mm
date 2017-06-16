@@ -55,9 +55,6 @@
 #import <MediaPlayer/MPMediaItem.h>
 #import <MediaPlayer/MediaPlayer.h>
 #import <MediaPlayer/MPNowPlayingInfoCenter.h>
-
-#import <AVFoundation/AVAudioPlayer.h>
-#import <AudioToolbox/AudioToolbox.h>
 #import <GameController/GameController.h>
 
 // these MUST match those in system/keymaps/customcontroller.SiriRemote.xml

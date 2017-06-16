@@ -18,13 +18,11 @@
  *
  */
 
-#include "guilib/Geometry.h"
 #include "guilib/GUIControl.h"
 #include "threads/CriticalSection.h"
 
 class CAnimation;
 class CGUIWindow;
-class CGUIControl;
 
 typedef enum FocusEngineState
 {
@@ -42,10 +40,13 @@ typedef struct
 
 typedef struct
 {
-  float zoomX = -1.0f;
-  float zoomY = -1.0f;
+  float zoomX = 0.0f;
+  float zoomY = 0.0f;
   float slideX = 0.0f;
   float slideY = 0.0f;
+  // amx amount (screen pixels) that control slides
+  float maxScreenSlideX = 15.0f;
+  float maxScreenSlideY = 15.0f;
 } FocusEngineAnimate;
 
 class CFocusEngineHandler
