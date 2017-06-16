@@ -62,7 +62,7 @@ void CFocusEngineHandler::Process()
   {
     if (m_focus.itemFocus)
     {
-      m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+      m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
       m_focus.itemFocus->ClearDynamicAnimations();
     }
     m_focus = focus;
@@ -75,7 +75,7 @@ void CFocusEngineHandler::Process()
       case FocusEngineState::Idle:
         break;
       case FocusEngineState::Clear:
-        m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+        m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
         m_focus.itemFocus->ClearDynamicAnimations();
         m_focusAnimate = FocusEngineAnimate();
         m_state = FocusEngineState::Idle;
@@ -100,7 +100,7 @@ void CFocusEngineHandler::Process()
               node.SetAttribute("end", temp);
               //node.SetAttribute("time", "10");
               node.SetAttribute("condition", "true");
-              TiXmlText text("conditional");
+              TiXmlText text("dynamic");
               node.InsertEndChild(text);
 
               CAnimation anim;
@@ -118,14 +118,14 @@ void CFocusEngineHandler::Process()
               node.SetAttribute("end", temp);
               node.SetAttribute("center", "auto");
               node.SetAttribute("condition", "true");
-              TiXmlText text("conditional");
+              TiXmlText text("dynamic");
               node.InsertEndChild(text);
 
               CAnimation anim;
               anim.Create(&node, rect, 0);
               animations.push_back(anim);
             }
-            m_focus.itemFocus->ResetAnimation(ANIM_TYPE_CONDITIONAL);
+            m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
             m_focus.itemFocus->SetDynamicAnimations(animations);
           }
           m_state = FocusEngineState::Idle;

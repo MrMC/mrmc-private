@@ -109,7 +109,7 @@ void CGUIControl::FreeResources(bool immediately)
     for (unsigned int i = 0; i < m_animations.size(); i++)
     {
       CAnimation &anim = m_animations[i];
-      if (anim.GetType() != ANIM_TYPE_CONDITIONAL)
+      if (anim.GetType() != ANIM_TYPE_CONDITIONAL || anim.GetType() != ANIM_TYPE_DYNAMIC)
         anim.ResetAnimation();
     }
     m_dynamicAnimations.clear();
@@ -618,14 +618,14 @@ void CGUIControl::UpdateVisibility(const CGUIListItem *item)
   for (unsigned int i = 0; i < m_animations.size(); i++)
   {
     CAnimation &anim = m_animations[i];
-    if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL || anim.GetType() == ANIM_TYPE_DYNAMIC)
       anim.UpdateCondition(item);
   }
   // check for conditional dynamic animations
   for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
   {
     CAnimation &anim = m_dynamicAnimations[i];
-    if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL || anim.GetType() == ANIM_TYPE_DYNAMIC)
       anim.UpdateCondition(item);
   }
 
@@ -665,14 +665,14 @@ void CGUIControl::SetInitialVisibility()
   for (unsigned int i = 0; i < m_animations.size(); i++)
   {
     CAnimation &anim = m_animations[i];
-    if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL || anim.GetType() == ANIM_TYPE_DYNAMIC)
       anim.SetInitialCondition();
   }
   // and handle dynamic animation conditions as well
   for (unsigned int i = 0; i < m_dynamicAnimations.size(); i++)
   {
     CAnimation &anim = m_dynamicAnimations[i];
-    if (anim.GetType() == ANIM_TYPE_CONDITIONAL)
+    if (anim.GetType() == ANIM_TYPE_CONDITIONAL || anim.GetType() == ANIM_TYPE_DYNAMIC)
       anim.SetInitialCondition();
   }
 
