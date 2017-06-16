@@ -1,0 +1,26 @@
+--- a/configure.ac	2017-06-16 13:35:36.000000000 -0400
++++ b/configure.ac	2017-06-16 13:35:59.000000000 -0400
+@@ -1,6 +1,6 @@
+ AC_INIT([libcloudstorage], [1.1])
+ AM_INIT_AUTOMAKE([foreign subdir-objects])
+-AC_CONFIG_MACRO_DIRS([m4])
++AC_CONFIG_MACRO_DIR([m4])
+ AC_USE_SYSTEM_EXTENSIONS
+ AC_LANG(C++)
+ 
+@@ -12,7 +12,6 @@ AX_CXX_COMPILE_STDCXX_11
+ 
+ PKG_CHECK_MODULES([libjsoncpp], [jsoncpp])
+ PKG_CHECK_MODULES([libmicrohttpd], [libmicrohttpd])
+-PKG_CHECK_MODULES([libtinyxml2], [tinyxml2])
+ 
+ AC_ARG_WITH([mega], AS_HELP_STRING([--with-mega]))
+ AM_CONDITIONAL([WITH_MEGA], [test "x$with_mega" != "xno"])
+@@ -80,6 +79,7 @@ AC_ARG_WITH([qmlplayer], AS_HELP_STRING(
+ AM_CONDITIONAL([WITH_QMLPLAYER], [test "x$with_qmlplayer" = "xyes"])
+ 
+ AS_IF([test "x$with_examples" = "xyes"], [
++  PKG_CHECK_MODULES([libtinyxml2], [tinyxml2])
+   PKG_CHECK_MODULES([qt], [Qt5Core Qt5Gui Qt5Quick], [
+     QT_PATH="$(eval $PKG_CONFIG --variable=exec_prefix Qt5Core)"
+     QT_HOST_PATH="$(eval $PKG_CONFIG --variable=host_bins Qt5Core)"

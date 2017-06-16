@@ -1,0 +1,26 @@
+--- a/src/Utility/CloudStorage.cpp	2017-06-16 14:15:37.000000000 -0400
++++ b/src/Utility/CloudStorage.cpp	2017-06-16 14:16:17.000000000 -0400
+@@ -24,12 +24,10 @@
+ #include "CloudStorage.h"
+ 
+ #include "CloudProvider/AmazonDrive.h"
+-#include "CloudProvider/AmazonS3.h"
+ #include "CloudProvider/Box.h"
+ #include "CloudProvider/Dropbox.h"
+ #include "CloudProvider/GoogleDrive.h"
+ #include "CloudProvider/OneDrive.h"
+-#include "CloudProvider/OwnCloud.h"
+ #include "CloudProvider/YandexDisk.h"
+ #include "CloudProvider/YouTube.h"
+ 
+@@ -45,8 +43,7 @@ CloudStorage::CloudStorage()
+     : providers_({std::make_shared<GoogleDrive>(), std::make_shared<OneDrive>(),
+                   std::make_shared<Dropbox>(), std::make_shared<AmazonDrive>(),
+                   std::make_shared<Box>(), std::make_shared<YouTube>(),
+-                  std::make_shared<YandexDisk>(), std::make_shared<OwnCloud>(),
+-                  std::make_shared<AmazonS3>()}) {
++                  std::make_shared<YandexDisk>()}) {
+ #ifdef WITH_MEGA
+   providers_.emplace_back(std::make_shared<MegaNz>());
+ #endif
+

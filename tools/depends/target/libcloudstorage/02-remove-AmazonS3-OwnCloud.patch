@@ -1,0 +1,26 @@
+--- a/src/Makefile.am	2017-06-16 14:12:59.000000000 -0400
++++ b/src/Makefile.am	2017-06-16 14:13:37.000000000 -0400
+@@ -21,11 +21,9 @@ libcloudstorage_la_SOURCES = \
+ 	CloudProvider/OneDrive.cpp \
+ 	CloudProvider/Dropbox.cpp \
+ 	CloudProvider/AmazonDrive.cpp \
+-	CloudProvider/AmazonS3.cpp \
+ 	CloudProvider/Box.cpp \
+ 	CloudProvider/YouTube.cpp \
+ 	CloudProvider/YandexDisk.cpp \
+-	CloudProvider/OwnCloud.cpp \
+ 	Request/Request.cpp \
+ 	Request/HttpCallback.cpp \
+ 	Request/AuthorizeRequest.cpp \
+@@ -51,10 +49,8 @@ noinst_HEADERS = \
+ 	CloudProvider/Dropbox.h \
+ 	CloudProvider/Box.h \
+ 	CloudProvider/AmazonDrive.h \
+-	CloudProvider/AmazonS3.h \
+ 	CloudProvider/YouTube.h \
+ 	CloudProvider/YandexDisk.h \
+-	CloudProvider/OwnCloud.h \
+ 	Request/HttpCallback.h \
+ 	Request/AuthorizeRequest.h \
+ 	Request/Request.h \
+
