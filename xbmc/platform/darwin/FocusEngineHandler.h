@@ -62,22 +62,21 @@ class CFocusEngineHandler
   void          UpdateFocus(FocusEngineFocus &focus);
   void          InvalidateFocus(CGUIControl *control);
   const CRect   GetFocusRect();
-  bool          GetShowFocusRect();
+  bool          ShowFocusRect();
   ORIENTATION   GetFocusOrientation();
 
 private:
   CFocusEngineHandler();
-  CFocusEngineHandler(CFocusEngineHandler const& );
+  CFocusEngineHandler(CFocusEngineHandler const&);
   CFocusEngineHandler& operator=(CFocusEngineHandler const&);
 
-  bool showFocusRect = false;
   bool m_focusZoom;
   bool m_focusSlide;
+  bool m_showFocusRect;
   CCriticalSection m_lock;
   FocusEngineState m_state;
   FocusEngineFocus m_focus;
   ORIENTATION m_focusedOrientation;
   FocusEngineAnimate m_focusAnimate;
   static CFocusEngineHandler* m_instance;
-
 };

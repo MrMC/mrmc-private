@@ -1095,7 +1095,7 @@ bool CGUIWindowManager::Render()
 #if defined(TARGET_DARWIN)
   if (g_application.IsAppFocused())
   {
-    if (CFocusEngineHandler::GetInstance().GetShowFocusRect())
+    if (CFocusEngineHandler::GetInstance().ShowFocusRect())
     {
       g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
       // osx debugging for CFocusEngineHandler

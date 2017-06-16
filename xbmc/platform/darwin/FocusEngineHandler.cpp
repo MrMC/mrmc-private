@@ -40,13 +40,13 @@ CFocusEngineHandler::GetInstance()
   CAtomicSpinLock lock(sg_focusenginehandler_lock);
   if (!m_instance)
     m_instance = new CFocusEngineHandler();
-
   return *m_instance;
 }
 
 CFocusEngineHandler::CFocusEngineHandler()
 : m_focusZoom(true)
 , m_focusSlide(true)
+, m_showFocusRect(false)
 , m_state(FocusEngineState::Idle)
 , m_focusedOrientation(UNDEFINED)
 {
@@ -87,6 +87,7 @@ void CFocusEngineHandler::Process()
           {
             FocusEngineAnimate focusAnimate = m_focusAnimate;
             std::vector<CAnimation> animations;
+            // handle control slide
             if (m_focusSlide && (fabs(focusAnimate.slideX) > 0.0f || fabs(focusAnimate.slideY) > 0.0f))
             {
               float screenDX =   focusAnimate.slideX  * focusAnimate.maxScreenSlideX;
@@ -106,7 +107,7 @@ void CFocusEngineHandler::Process()
               anim.Create(&node, rect, 0);
               animations.push_back(anim);
             }
-
+            // handle control zoom
             if (m_focusZoom && (focusAnimate.zoomX > 0.0f && focusAnimate.zoomY > 0.0f))
             {
               TiXmlElement node("animation");
@@ -158,9 +159,14 @@ void CFocusEngineHandler::EnableFocusSlide(bool enable)
 
 void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
 {
-  focus.window = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
+  // if focus.window is valid, use it and
+  // skip finding focused window
   if (!focus.window)
-    return;
+  {
+    focus.window = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
+    if (!focus.window)
+      return;
+  }
 
   focus.rootFocus = focus.window->GetFocusedControl();
   if (!focus.rootFocus)
@@ -174,6 +180,9 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
 
   switch(focus.rootFocus->GetControlType())
   {
+    // include all known types of controls
+    // we do not really need to do this but compiler
+    // will generate a warning if a new one is added.
     case CGUIControl::GUICONTROL_UNKNOWN:
       CLog::Log(LOGDEBUG, "GetFocusedItem: GUICONTROL_UNKNOWN");
       break;
@@ -236,6 +245,8 @@ const CRect
 CFocusEngineHandler::GetFocusRect()
 {
   FocusEngineFocus focus;
+  // skip finding focused window, use current
+  focus.window = m_focus.window;
   UpdateFocus(focus);
   if (focus.itemFocus)
   {
@@ -246,9 +257,9 @@ CFocusEngineHandler::GetFocusRect()
   return CRect();
 }
 
-bool CFocusEngineHandler::GetShowFocusRect()
+bool CFocusEngineHandler::ShowFocusRect()
 {
-  return showFocusRect;
+  return m_showFocusRect;
 }
 
 ORIENTATION CFocusEngineHandler::GetFocusOrientation()
