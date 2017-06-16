@@ -55,10 +55,10 @@ CFocusEngineHandler::GetInstance()
 }
 
 CFocusEngineHandler::CFocusEngineHandler()
-: m_state(FocusEngineState::Idle)
-, m_focusedOrientation(UNDEFINED)
-, m_shouldZoom(true)
+: m_shouldZoom(true)
 , m_shouldSlide(true)
+, m_state(FocusEngineState::Idle)
+, m_focusedOrientation(UNDEFINED)
 {
 }
 
