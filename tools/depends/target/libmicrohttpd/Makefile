@@ -41,6 +41,7 @@ $(LIBDYLIB): $(PLATFORM)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
 	$(MAKE) -j1 -C $(PLATFORM)/src/microhttpd install
+	cp $(PLATFORM)/libmicrohttpd.pc $(PREFIX)/lib/pkgconfig/libmicrohttpd.pc
 	# internal _MD5xxx collides with others
 	$(RPL) -e "_MD5Final" "_MDyFinal" $(PREFIX)/lib/libmicrohttpd.a
 	$(RPL) -e "_MD5Init" "_MDyInit" $(PREFIX)/lib/libmicrohttpd.a
