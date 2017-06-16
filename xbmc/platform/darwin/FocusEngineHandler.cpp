@@ -169,9 +169,6 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
 
   if (!focus.rootFocus->HasFocus())
     return;
-  
-  if (focus.rootFocus->GetID() <= 0)
-    return;
 
   switch(focus.rootFocus->GetControlType())
   {
@@ -240,11 +237,16 @@ CFocusEngineHandler::GetFocusRect()
   UpdateFocus(focus);
   if (focus.itemFocus)
   {
-    m_focusedRenderRect = focus.itemFocus->GetSelectionRenderRect();
-    return m_focusedRenderRect;
+    CRect focusedRenderRect = focus.itemFocus->GetSelectionRenderRect();
+    return focusedRenderRect;
   }
 
   return CRect();
+}
+
+bool CFocusEngineHandler::GetShowFocusRect()
+{
+  return showFocusRect;
 }
 
 ORIENTATION CFocusEngineHandler::GetFocusOrientation()
@@ -255,6 +257,9 @@ ORIENTATION CFocusEngineHandler::GetFocusOrientation()
   {
     switch(focus.itemFocus->GetControlType())
     {
+      case CGUIControl::GUICONTROL_LISTGROUP:
+        return focus.rootFocus->GetOrientation();
+        break;
       case CGUIControl::GUICONTROL_BUTTON:
       case CGUIControl::GUICONTROL_IMAGE:
         {
@@ -266,7 +271,7 @@ ORIENTATION CFocusEngineHandler::GetFocusOrientation()
       default:
         break;
     }
-    return focus.rootFocus->GetOrientation();
+    return focus.itemFocus->GetOrientation();
   }
   return UNDEFINED;
 }

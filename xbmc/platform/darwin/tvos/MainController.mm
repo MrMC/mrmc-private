@@ -997,7 +997,7 @@ static SiriRemoteInfo siriRemoteInfo;
   */
   remote.movedPoint = siriRemoteInfo.startPoint;
   remote.lastMovedPoint = siriRemoteInfo.startPoint;
-  remote.panningRect = CGRectMake(remote.startPoint.x, remote.startPoint.y, 0.75, 0.75);
+  remote.panningRect = CGRectMake(remote.startPoint.x, remote.startPoint.y, 0.45, 0.45);
   remote.startSeconds = CFAbsoluteTimeGetCurrent();
   remote.movedSeconds = siriRemoteInfo.startSeconds;
   remote.ignoreAfterSwipeSeconds = 0.0f;
@@ -1115,8 +1115,8 @@ static SiriRemoteInfo siriRemoteInfo;
               NSLog(@"microGamepad: idle, pressed(%d), dt(%f)", pressed, siriRemoteInfo.dt);
             [weakSelf stopTapRepeatTimer];
             siriRemoteInfo.focusAnimate = FocusEngineAnimate();
-            siriRemoteInfo.focusAnimate.zoomX = 110.0f;
-            siriRemoteInfo.focusAnimate.zoomY = 110.0f;
+            siriRemoteInfo.focusAnimate.zoomX = 105.0f;
+            siriRemoteInfo.focusAnimate.zoomY = 105.0f;
             CFocusEngineHandler::GetInstance().ClearAnimation();
             CFocusEngineHandler::GetInstance().UpdateAnimation(siriRemoteInfo.focusAnimate);
             if (pressed)

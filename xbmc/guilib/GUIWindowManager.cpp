@@ -1095,11 +1095,14 @@ bool CGUIWindowManager::Render()
 #if defined(TARGET_DARWIN)
   if (g_application.IsAppFocused())
   {
-    g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
-    // osx debugging for CFocusEngineHandler
-    CRect focusedItem = CFocusEngineHandler::GetInstance().GetFocusRect();
-    if (!focusedItem.IsEmpty())
-      CGUITexture::DrawQuad(focusedItem, 0x4c00ff00);
+    if (CFocusEngineHandler::GetInstance().GetShowFocusRect())
+    {
+      g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
+      // osx debugging for CFocusEngineHandler
+      CRect focusedItem = CFocusEngineHandler::GetInstance().GetFocusRect();
+      if (!focusedItem.IsEmpty())
+        CGUITexture::DrawQuad(focusedItem, 0x4c00ff00);
+    }
   }
 #endif
 
