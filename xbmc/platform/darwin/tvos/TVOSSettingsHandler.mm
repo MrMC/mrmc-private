@@ -53,10 +53,10 @@ void CTVOSInputSettings::Initialize()
   [g_xbmcController setRemoteIdleTimeout:timeout];
   bool enableSwipe = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPE);
   [g_xbmcController setShouldRemoteSwipe:enableSwipe];
-  bool enableSwipeZoom = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPEZOOM);
-  CFocusEngineHandler::GetInstance().setShouldZoom(enableSwipe && enableSwipeZoom);
-  bool enableSwipeSlide = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPESLIDE);
-  CFocusEngineHandler::GetInstance().setShouldSlide(enableSwipe && enableSwipeSlide);
+  bool enableFocusZoom = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRIFOCUSZOOM);
+  CFocusEngineHandler::GetInstance().EnableFocusZoom(enableSwipe && enableFocusZoom);
+  bool enableFocusSlide = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRIFOCUSLIDE);
+  CFocusEngineHandler::GetInstance().EnableFocusSlide(enableSwipe && enableFocusSlide);
 }
 
 void CTVOSInputSettings::OnSettingChanged(const CSetting *setting)
@@ -76,14 +76,14 @@ void CTVOSInputSettings::OnSettingChanged(const CSetting *setting)
     [g_xbmcController setRemoteIdleTimeout:timeout];
   }
   else if (settingId == CSettings::SETTING_INPUT_APPLESIRISWIPE ||
-           settingId == CSettings::SETTING_INPUT_APPLESIRISWIPEZOOM ||
-           settingId == CSettings::SETTING_INPUT_APPLESIRISWIPESLIDE)
+           settingId == CSettings::SETTING_INPUT_APPLESIRIFOCUSZOOM ||
+           settingId == CSettings::SETTING_INPUT_APPLESIRIFOCUSLIDE)
   {
     bool enableSwipe = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPE);
     [g_xbmcController setShouldRemoteSwipe:enableSwipe];
-    bool enableSwipeZoom = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPEZOOM);
-    CFocusEngineHandler::GetInstance().setShouldZoom(enableSwipe && enableSwipeZoom);
-    bool enableSwipeSlide = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRISWIPESLIDE);
-    CFocusEngineHandler::GetInstance().setShouldSlide(enableSwipe && enableSwipeSlide);
+    bool enableFocusZoom = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRIFOCUSZOOM);
+    CFocusEngineHandler::GetInstance().EnableFocusZoom(enableSwipe && enableFocusZoom);
+    bool enableFocusSlide = CSettings::GetInstance().GetBool(CSettings::SETTING_INPUT_APPLESIRIFOCUSLIDE);
+    CFocusEngineHandler::GetInstance().EnableFocusSlide(enableSwipe && enableFocusSlide);
   }
 }

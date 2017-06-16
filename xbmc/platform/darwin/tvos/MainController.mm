@@ -837,6 +837,10 @@ static SiriRemoteInfo siriRemoteInfo;
       CGFloat dx = remote.movedPoint.x - CGRectGetMidX(remote.panningRect);
       CGFloat dy = remote.movedPoint.y - CGRectGetMidY(remote.panningRect);
       remote.panningRect = CGRectOffset(remote.panningRect, dx, dy);
+      // if focus moves to new control, we reset to current position
+      // and pretend finnger just went down.
+      remote.startPoint = remote.movedPoint;
+      remote.lastMovedPoint = remote.movedPoint;
     }
   }
 }

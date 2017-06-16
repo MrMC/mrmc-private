@@ -104,7 +104,7 @@
           <default>true</default>
           <control type="toggle" />
         </setting>
-        <setting id="input.applesiriswipezoom" type="boolean" parent="input.applesiriswipe" label="890" help="891">
+        <setting id="input.applesirifocuszoom" type="boolean" parent="input.applesiriswipe" label="890" help="891">
           <level>1</level>
           <default>true</default>
           <control type="toggle" />
@@ -112,7 +112,7 @@
             <dependency type="visible" setting="input.applesiriswipe">true</dependency>
           </dependencies>
         </setting>
-        <setting id="input.applesiriswipeslide" type="boolean" parent="input.applesiriswipe" label="892" help="893">
+        <setting id="input.applesirifocusslide" type="boolean" parent="input.applesiriswipe" label="892" help="893">
           <level>1</level>
           <default>true</default>
           <control type="toggle" />
