@@ -106,7 +106,7 @@ MainController *g_xbmcController;
 @synthesize m_nowPlayingInfo;
 @synthesize m_remoteIdleState;
 @synthesize m_remoteIdleTimeout;
-@synthesize m_shouldRemoteIdle;
+@synthesize m_enableRemoteIdle;
 
 #pragma mark - internal key press methods
 - (void)sendButtonPressed:(int)buttonId
@@ -133,7 +133,7 @@ MainController *g_xbmcController;
   //PRINT_SIGNATURE();
   if (self.remoteIdleTimer != nil)
     [self stopRemoteTimer];
-  if (m_shouldRemoteIdle)
+  if (m_enableRemoteIdle)
   {
     NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:m_remoteIdleTimeout];
     NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
@@ -291,17 +291,17 @@ static int keyPressTimerFiredCount = 0;
   [self startRemoteTimer];
 }
 
-- (void)setShouldRemoteIdle:(BOOL)idle
+- (void)enableRemoteIdle:(BOOL)enable
 {
   //PRINT_SIGNATURE();
-  m_shouldRemoteIdle = idle;
+  m_enableRemoteIdle = enable;
   [self startRemoteTimer];
 }
 
-- (void)setShouldRemoteSwipe:(BOOL)swipe
+- (void)enableRemotePanSwipe:(BOOL)enable
 {
   //PRINT_SIGNATURE();
-  siriRemoteInfo.shouldRemoteSwipe = swipe;
+  siriRemoteInfo.enablePanSwipe = enable;
 }
 
 //--------------------------------------------------------------
@@ -835,11 +835,12 @@ typedef struct
   CGPoint movedPoint;
   CGPoint lastMovedPoint;
   CGRect  panningRect;
+  CGRect  panningRectStart = {0.0f, 0.0f, 0.50f, 0.50f};
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
   bool ignoreAfterSelect;
   float ignoreAfterSwipeSeconds;
-  bool shouldRemoteSwipe;
+  bool enablePanSwipe;
   FocusEngineAnimate focusAnimate;
   SiriRemoteState state = SiriRemoteIdle;
 } SiriRemoteInfo;
@@ -919,16 +920,17 @@ static SiriRemoteInfo siriRemoteInfo;
 
 -(void)processPanEvent:(SiriRemoteInfo&)remote
 {
-  if (!siriRemoteInfo.shouldRemoteSwipe)
+  if (!siriRemoteInfo.enablePanSwipe)
     return;
 
+  float dx = remote.movedPoint.x - remote.startPoint.x;
+  float dy = remote.movedPoint.y - remote.startPoint.y;
+  // check if focus visual effect needs updating
   if (!CGPointEqualToPoint(remote.movedPoint, remote.lastMovedPoint))
   {
-    float dx = remote.movedPoint.x - remote.startPoint.x;
-    float dy = remote.movedPoint.y - remote.startPoint.y;
     remote.lastMovedPoint = remote.movedPoint;
-
-    NSLog(@"microGamepad: focus dx(%f), dy(%f)", dx, dy);
+    if (remote.debug)
+      NSLog(@"microGamepad: focus dx(%f), dy(%f)", dx, dy);
     remote.focusAnimate.slideX = dx;
     remote.focusAnimate.slideY = dy;
     CFocusEngineHandler::GetInstance().UpdateAnimation(remote.focusAnimate);
@@ -950,6 +952,10 @@ static SiriRemoteInfo siriRemoteInfo;
     }
 
     bool moved = false;
+    // if user pans fast, might have panned more than item
+    // check if dx or dy is some multiple of 1/2 the panning rect item bounds.
+    int cycleX = std::min(1, (int)(fabs(dx) / (CGRectGetWidth(remote.panningRect) / 2.0f)));
+    int cycleY = std::min(1, (int)(fabs(dy) / (CGRectGetHeight(remote.panningRect) / 2.0f)));
     // check if moving left/right or up/down ?
     if (remote.dx >= remote.dy)
     {
@@ -961,7 +967,8 @@ static SiriRemoteInfo siriRemoteInfo;
           remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-        [self sendButtonPressed:SiriRemote_LeftSwipe];
+        for (int i = 0; i < cycleX; ++i)
+          [self sendButtonPressed:SiriRemote_LeftSwipe];
       }
       else if (remote.movedPoint.x >= CGRectGetMaxX(remote.panningRect))
       {
@@ -971,7 +978,8 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-        [self sendButtonPressed:SiriRemote_RightSwipe];
+        for (int i = 0; i < cycleX; ++i)
+          [self sendButtonPressed:SiriRemote_RightSwipe];
       }
     }
     else
@@ -984,7 +992,8 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-        [self sendButtonPressed:SiriRemote_UpSwipe];
+        for (int i = 0; i < cycleY; ++i)
+          [self sendButtonPressed:SiriRemote_UpSwipe];
       }
       else if (remote.movedPoint.y <= CGRectGetMinY(remote.panningRect))
       {
@@ -994,7 +1003,8 @@ static SiriRemoteInfo siriRemoteInfo;
             remote.dt, remote.dx, remote.dy);
         }
         moved = true;
-        [self sendButtonPressed:SiriRemote_DownSwipe];
+        for (int i = 0; i < cycleY; ++i)
+          [self sendButtonPressed:SiriRemote_DownSwipe];
       }
     }
     if (moved)
@@ -1019,9 +1029,9 @@ static SiriRemoteInfo siriRemoteInfo;
   }
 }
 
--(void)processSwipeEvent:(SiriRemoteInfo&)remote withRepeat:(int)repeat
+-(void)processSwipeEvent:(SiriRemoteInfo&)remote withCycles:(int)cycles
 {
-  if (!siriRemoteInfo.shouldRemoteSwipe)
+  if (!siriRemoteInfo.enablePanSwipe)
     return;
 
   // absolute coordinate system is 0 to +2 with left/bottom = (0,0)
@@ -1035,7 +1045,7 @@ static SiriRemoteInfo siriRemoteInfo;
   {
     if ([self getFocusedOrientation] != HORIZONTAL)
     {
-      repeat = 1;
+      cycles = 1;
       delaySeconds = 0.0f;
     }
 
@@ -1047,7 +1057,7 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: swipe left  dt(%f), dx(%f), dy(%f), vx(%f)",
           remote.dt, remote.dx, remote.dy, vx);
       }
-      for (int i = 0; i < repeat; ++i)
+      for (int i = 0; i < cycles; ++i)
       {
         [self sendButtonPressed:SiriRemote_LeftSwipe];
         usleep((int)(delaySeconds * 1000) * 1000);
@@ -1060,7 +1070,7 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: swipe right dt(%f), dx(%f), dy(%f), vx(%f)",
           remote.dt, remote.dx, remote.dy, vx);
       }
-      for (int i = 0; i < repeat; ++i)
+      for (int i = 0; i < cycles; ++i)
       {
         [self sendButtonPressed:SiriRemote_RightSwipe];
         usleep((int)(delaySeconds * 1000) * 1000);
@@ -1071,7 +1081,7 @@ static SiriRemoteInfo siriRemoteInfo;
   {
     if ([self getFocusedOrientation] != VERTICAL)
     {
-      repeat = 1;
+      cycles = 1;
       delaySeconds = 0.0f;
     }
 
@@ -1083,7 +1093,7 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: swipe up    dt(%f), dx(%f), dy(%f), vy(%f)",
           remote.dt, remote.dx, remote.dy, vy);
       }
-      for (int i = 0; i < repeat; ++i)
+      for (int i = 0; i < cycles; ++i)
       {
         [self sendButtonPressed:SiriRemote_UpSwipe];
         usleep((int)(delaySeconds * 1000) * 1000);
@@ -1096,7 +1106,7 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: swipe down  dt(%f), dx(%f), dy(%f), vy(%f)",
           remote.dt, remote.dx, remote.dy, vy);
       }
-      for (int i = 0; i < repeat; ++i)
+      for (int i = 0; i < cycles; ++i)
       {
         [self sendButtonPressed:SiriRemote_DownSwipe];
         usleep((int)(delaySeconds * 1000) * 1000);
@@ -1175,7 +1185,7 @@ static SiriRemoteInfo siriRemoteInfo;
   */
   remote.movedPoint = remote.startPoint;
   remote.lastMovedPoint = remote.startPoint;
-  remote.panningRect = CGRectMake(0.0, 0.0, 0.35, 0.35);
+  remote.panningRect = remote.panningRectStart;
   remote.panningRect.origin.x = remote.startPoint.x - CGRectGetWidth(remote.panningRect) / 2.0;
   remote.panningRect.origin.y = remote.startPoint.y - CGRectGetHeight(remote.panningRect) / 2.0;
   if (remote.debug)
@@ -1412,7 +1422,7 @@ static SiriRemoteInfo siriRemoteInfo;
                 if (siriRemoteInfo.debug)
                   NSLog(@"microGamepad: dt(%f), vcycles(%d), cycles(%d)", siriRemoteInfo.dt, vcycles, cycles);
 
-                [weakSelf processSwipeEvent:siriRemoteInfo withRepeat:cycles];
+                [weakSelf processSwipeEvent:siriRemoteInfo withCycles:cycles];
                 siriRemoteInfo.ignoreAfterSwipeSeconds = 0.25;
               }
               else
