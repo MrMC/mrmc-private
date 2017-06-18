@@ -947,8 +947,12 @@ static SiriRemoteInfo siriRemoteInfo;
     if (siriRemoteInfo.debug)
         NSLog(@"microGamepad: processPanPinnedEvent");
 
-    float dx = remote.movedPoint.x - remote.startPoint.x;
-    float dy = remote.movedPoint.y - remote.startPoint.y;
+    if (![self isTapRepeatTimerActive])
+      [self startTapRepeatTimer:remote withdelay:REPEATED_KEYPRESS_DELAY_S];
+  }
+  else
+  {
+    [self stopTapRepeatTimer];
   }
 }
 
@@ -975,6 +979,7 @@ static SiriRemoteInfo siriRemoteInfo;
   // check if inside panning rect. if not, we moved outside and need to move focus.
   if (!CGRectContainsPoint(remote.panningRect, remote.movedPoint))
   {
+    [self stopTapRepeatTimer];
     if (remote.debug)
     {
       NSLog(@"microGamepad: x(%f), y(%f), L(%f), R(%f), T(%f), B(%f)",
