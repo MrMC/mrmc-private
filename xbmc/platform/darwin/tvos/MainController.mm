@@ -836,7 +836,7 @@ typedef struct
   CGPoint lastMovedPoint;
   float   tapbounts = 0.14f;
   CGRect  panningRect;
-  CGRect  panningPinnedRect = {0.1f, 0.1f, 1.8f, 1.8f};
+  CGRect  panningPinnedRect = {0.2f, 0.2f, 1.6f, 1.6f};
   CGRect  panningRectStart = {0.0f, 0.0f, 0.55f, 0.55f};
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
