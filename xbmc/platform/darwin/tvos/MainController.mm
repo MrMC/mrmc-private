@@ -250,11 +250,11 @@ static int keyPressTimerFiredCount = 0;
     switch([keyId intValue])
     {
       case SiriRemote_UpTap:
-      case SiriRemote_RightTap:
+      case SiriRemote_LeftTap:
         [self sendButtonPressed:SiriRemote_UpScroll];
         break;
       case SiriRemote_DownTap:
-      case SiriRemote_LeftTap:
+      case SiriRemote_RightTap:
         [self sendButtonPressed:SiriRemote_DownScroll];
         break;
       default:
