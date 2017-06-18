@@ -171,7 +171,7 @@ MainController *g_xbmcController;
 // start repeating after 0.25s
 #define REPEATED_KEYPRESS_DELAY_S 0.25
 // pause 0.05s (50ms) between keypresses
-#define REPEATED_KEYPRESS_PAUSE_S 0.05
+#define REPEATED_KEYPRESS_PAUSE_S 0.20
 //--------------------------------------------------------------
 
 //- (void)startKeyPressTimer:(XBMCKey)keyId
@@ -243,7 +243,27 @@ static int keyPressTimerFiredCount = 0;
     return;
 
   NSNumber *keyId = [theTimer userInfo];
-  [self sendButtonPressed:[keyId intValue]];
+  if ([self canDoScrollUpDown] && keyPressTimerFiredCount > 10)
+  {
+    switch([keyId intValue])
+    {
+      case SiriRemote_UpTap:
+      case SiriRemote_RightTap:
+        [self sendButtonPressed:SiriRemote_UpScroll];
+        break;
+      case SiriRemote_DownTap:
+      case SiriRemote_LeftTap:
+        [self sendButtonPressed:SiriRemote_DownScroll];
+        break;
+      default:
+        [self sendButtonPressed:[keyId intValue]];
+        break;
+    }
+  }
+  else
+  {
+    [self sendButtonPressed:[keyId intValue]];
+  }
   keyPressTimerFiredCount++;
 }
 
@@ -625,8 +645,7 @@ static int keyPressTimerFiredCount = 0;
       [self sendButtonPressed:SiriRemote_UpTap];
       if ([self shouldFastScroll] && [self getFocusedOrientation] == VERTICAL)
       {
-        int keyId = [self canDoScrollUpDown] ? SiriRemote_UpScroll:SiriRemote_UpTap;
-        [self startKeyPressTimer:keyId doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+        [self startKeyPressTimer:SiriRemote_UpTap doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
       }
       break;
     case UIGestureRecognizerStateEnded:
@@ -649,8 +668,7 @@ static int keyPressTimerFiredCount = 0;
       [self sendButtonPressed:SiriRemote_DownTap];
       if ([self shouldFastScroll] && [self getFocusedOrientation] == VERTICAL)
       {
-        int keyId = [self canDoScrollUpDown] ? SiriRemote_DownScroll:SiriRemote_DownTap;
-        [self startKeyPressTimer:keyId doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+        [self startKeyPressTimer:SiriRemote_DownTap doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
       }
       break;
     case UIGestureRecognizerStateEnded:
@@ -672,8 +690,7 @@ static int keyPressTimerFiredCount = 0;
      [self sendButtonPressed:SiriRemote_LeftTap];
       if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
       {
-        int keyId = [self canDoScrollUpDown] ? SiriRemote_UpScroll:SiriRemote_LeftTap;
-        [self startKeyPressTimer:keyId doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+        [self startKeyPressTimer:SiriRemote_LeftTap doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
       }
       break;
     case UIGestureRecognizerStateEnded:
@@ -695,8 +712,7 @@ static int keyPressTimerFiredCount = 0;
       [self sendButtonPressed:SiriRemote_RightTap];
       if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
       {
-        int keyId = [self canDoScrollUpDown] ? SiriRemote_DownScroll:SiriRemote_RightTap;
-        [self startKeyPressTimer:keyId doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+        [self startKeyPressTimer:SiriRemote_RightTap doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
       }
       break;
     case UIGestureRecognizerStateEnded:
@@ -875,14 +891,14 @@ static SiriRemoteInfo siriRemoteInfo;
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat left");
         if ([self getFocusedOrientation] == HORIZONTAL)
-          [self startKeyPressTimer:SiriRemote_UpScroll doBeforeDelay:false withDelay:delayTime];
+          [self startKeyPressTimer:SiriRemote_UpTap doBeforeDelay:false withDelay:delayTime];
       }
       else
       {
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat right");
         if ([self getFocusedOrientation] == HORIZONTAL)
-          [self startKeyPressTimer:SiriRemote_DownScroll doBeforeDelay:false withDelay:delayTime];
+          [self startKeyPressTimer:SiriRemote_DownTap doBeforeDelay:false withDelay:delayTime];
       }
     }
     else
@@ -892,14 +908,14 @@ static SiriRemoteInfo siriRemoteInfo;
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat up");
         if ([self getFocusedOrientation] == VERTICAL)
-          [self startKeyPressTimer:SiriRemote_UpScroll doBeforeDelay:false withDelay:delayTime];
+          [self startKeyPressTimer:SiriRemote_UpTap doBeforeDelay:false withDelay:delayTime];
       }
       else
       {
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat down");
         if ([self getFocusedOrientation] == VERTICAL)
-          [self startKeyPressTimer:SiriRemote_DownScroll doBeforeDelay:false withDelay:delayTime];
+          [self startKeyPressTimer:SiriRemote_DownTap doBeforeDelay:false withDelay:delayTime];
       }
     }
   }
