@@ -892,14 +892,22 @@ static SiriRemoteInfo siriRemoteInfo;
       {
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat left");
-        if ([self getFocusedOrientation] == HORIZONTAL)
+        if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
+        {
+          [self startKeyPressTimer:SiriRemote_LeftTap doBeforeDelay:false withDelay:delayTime];
+        }
+        else
           [self startKeyPressTimer:SiriRemote_UpTap doBeforeDelay:false withDelay:delayTime];
       }
       else
       {
         if (remote.debug)
           NSLog(@"microGamepad: tap repeat right");
-        if ([self getFocusedOrientation] == HORIZONTAL)
+        if ([self shouldFastScroll] && [self getFocusedOrientation] == HORIZONTAL)
+        {
+          [self startKeyPressTimer:SiriRemote_RightTap doBeforeDelay:false withDelay:delayTime];
+        }
+        else
           [self startKeyPressTimer:SiriRemote_DownTap doBeforeDelay:false withDelay:delayTime];
       }
     }
