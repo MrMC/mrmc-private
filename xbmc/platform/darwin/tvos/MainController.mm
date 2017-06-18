@@ -836,10 +836,10 @@ typedef struct
   CGPoint lastMovedPoint;
   float   tapbounts = 0.14f;
   CGRect  panningRect;
+  CGRect  panningPinnedRect = {0.1f, 0.1f, 1.8f, 1.8f};
   CGRect  panningRectStart = {0.0f, 0.0f, 0.55f, 0.55f};
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
-  bool ignoreAfterSelect;
   float ignoreAfterSwipeSeconds;
   bool enablePanSwipe;
   FocusEngineAnimate focusAnimate;
@@ -924,8 +924,16 @@ static SiriRemoteInfo siriRemoteInfo;
   if (!siriRemoteInfo.enablePanSwipe)
     return;
 
-  float dx = remote.movedPoint.x - remote.startPoint.x;
-  float dy = remote.movedPoint.y - remote.startPoint.y;
+  // if outside the panning pinned rect,
+  // we are at edges of trackpad.
+  if (!CGRectContainsPoint(remote.panningPinnedRect, remote.movedPoint))
+  {
+    if (siriRemoteInfo.debug)
+        NSLog(@"microGamepad: processPanPinnedEvent");
+
+    float dx = remote.movedPoint.x - remote.startPoint.x;
+    float dy = remote.movedPoint.y - remote.startPoint.y;
+  }
 }
 
 -(void)processPanEvent:(SiriRemoteInfo&)remote
@@ -1051,6 +1059,10 @@ static SiriRemoteInfo siriRemoteInfo;
       remote.startPoint = remote.movedPoint;
       remote.lastMovedPoint = remote.movedPoint;
     }
+  }
+  else
+  {
+    [self processPanPinnedEvent:remote];
   }
 }
 
@@ -1224,7 +1236,6 @@ static SiriRemoteInfo siriRemoteInfo;
   }
   remote.startSeconds = CFAbsoluteTimeGetCurrent();
   remote.movedSeconds = remote.startSeconds;
-  remote.ignoreAfterSelect = false;
   remote.ignoreAfterSwipeSeconds = 0.0f;
   remote.dt = 0.0f;
   remote.dx = 0.0f;
@@ -1311,14 +1322,6 @@ static SiriRemoteInfo siriRemoteInfo;
             else
               return;
           }
-          // after a select (click on trackpad) we will
-          // get a pressed event as finger is still on trackpad.
-          // ingore under finger is lifted.
-          if (siriRemoteInfo.ignoreAfterSelect)
-          {
-            siriRemoteInfo.ignoreAfterSelect = false;
-            return;
-          }
           // if siri remote idle timeout is active,
           // ignore the 1st touch and pretend to wake up
           if (weakSelf.m_remoteIdleState)
@@ -1331,7 +1334,13 @@ static SiriRemoteInfo siriRemoteInfo;
         // we only care that some dpad is pressed or not. touch directions are
         // determined by the dpad values. The reason for this is when a finger
         // is down, we get two signaling down and we have to track all four.
-        BOOL pressed = gamepad.dpad.up.pressed ||
+        // we also track buttonA.pressed so we can ignore it.
+        // when user does a select, finger down (up/down/right/left pressed),
+        // click down (buttonA.pressed), click up and finger is still
+        // down (up/down/right/left pressed), then finger goes up. Need to also eat the
+        // finger still down.
+        BOOL pressed = gamepad.buttonA.pressed ||
+                       gamepad.dpad.up.pressed ||
                        gamepad.dpad.down.pressed ||
                        gamepad.dpad.left.pressed ||
                        gamepad.dpad.right.pressed;
@@ -1360,8 +1369,7 @@ static SiriRemoteInfo siriRemoteInfo;
             }
             break;
           case SiriRemoteSelect:
-            // Selects are handled by gesture handler, ignore them
-            siriRemoteInfo.ignoreAfterSelect = true;
+            // Selects are handled by gesture handler, eat these
             break;
           case SiriRemoteTapTimer:
             if (siriRemoteInfo.debug)
