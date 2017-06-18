@@ -288,7 +288,7 @@ static int keyPressTimerFiredCount = 0;
 
 -(ORIENTATION)getFocusedOrientation
 {
-  return CFocusEngineHandler::GetInstance().GetFocusOrientation();;
+  return CFocusEngineHandler::GetInstance().GetFocusOrientation();
 }
 
 -(bool)canDoScrollUpDown
@@ -852,7 +852,7 @@ typedef struct
   CGPoint lastMovedPoint;
   float   tapbounts = 0.18f;
   CGRect  panningRect;
-  CGRect  panningPinnedRect = {0.2f, 0.2f, 1.6f, 1.6f};
+  CGRect  panningPinnedRect = {0.25f, 0.25f, 1.50f, 1.50f};
   CGRect  panningRectStart = {0.0f, 0.0f, 0.55f, 0.55f};
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
