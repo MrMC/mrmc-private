@@ -114,8 +114,25 @@ void CFocusEngineHandler::Process()
               node.SetAttribute("reversible", "false");
               node.SetAttribute("effect", "zoom");
               node.SetAttribute("start", "100, 100");
-              std::string temp = StringUtils::Format("%f, %f", focusAnimate.zoomX, focusAnimate.zoomY);
-              node.SetAttribute("end", temp);
+              float aspectRatio = rect.Width()/ rect.Height();
+              //CLog::Log(LOGDEBUG, "FocusEngineState::Update: aspectRatio(%f)", aspectRatio);
+              if (aspectRatio > 2.5f)
+              {
+                CRect newRect(rect);
+                newRect.x1 -= 2;
+                newRect.y1 -= 2;
+                newRect.x2 += 8;
+                newRect.y2 += 8;
+                // format is end="x,y,width,height"
+                std::string temp = StringUtils::Format("%f, %f, %f, %f",
+                  newRect.x1, newRect.y1, newRect.Width(), newRect.Height());
+                node.SetAttribute("end", temp);
+              }
+              else
+              {
+                std::string temp = StringUtils::Format("%f, %f", focusAnimate.zoomX, focusAnimate.zoomY);
+                node.SetAttribute("end", temp);
+              }
               node.SetAttribute("center", "auto");
               node.SetAttribute("condition", "true");
               TiXmlText text("dynamic");
