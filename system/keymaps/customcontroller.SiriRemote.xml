@@ -53,6 +53,8 @@
       <!-- menu at home  -->   <button id="20">PreviousMenu</button>
       <!-- swipe left/up -->   <button id="21">ScrollUp</button>
       <!-- swipe right/down --><button id="22">ScrollDown</button>
+      <!-- page up -->         <button id="23">PageUp</button>
+      <!-- page down -->       <button id="24">PageDown</button>
     </customcontroller>
   </global>
   <Home>

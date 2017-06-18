@@ -82,6 +82,8 @@ typedef enum SiriRemoteTypes
   SiriRemote_MenuClickAtHome = 20,
   SiriRemote_UpScroll = 21,
   SiriRemote_DownScroll = 22,
+  SiriRemote_PageUp = 23,
+  SiriRemote_PageDown = 24
 } SiriRemoteTypes;
 
 using namespace KODI::MESSAGING;
@@ -1115,9 +1117,12 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: swipe left  dt(%f), dx(%f), dy(%f), vx(%f)",
           remote.dt, remote.dx, remote.dy, vx);
       }
+      int keyId = SiriRemote_LeftSwipe;
+      if (!CGRectContainsPoint(remote.panningPinnedRect, remote.movedPoint))
+        keyId = SiriRemote_PageUp;
       for (int i = 0; i < cycles; ++i)
       {
-        [self sendButtonPressed:SiriRemote_LeftSwipe];
+        [self sendButtonPressed:keyId];
         usleep((int)(delaySeconds * 1000) * 1000);
       }
     }
@@ -1128,9 +1133,12 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: swipe right dt(%f), dx(%f), dy(%f), vx(%f)",
           remote.dt, remote.dx, remote.dy, vx);
       }
+      int keyId = SiriRemote_RightSwipe;
+      if (!CGRectContainsPoint(remote.panningPinnedRect, remote.movedPoint))
+        keyId = SiriRemote_PageDown;
       for (int i = 0; i < cycles; ++i)
       {
-        [self sendButtonPressed:SiriRemote_RightSwipe];
+        [self sendButtonPressed:keyId];
         usleep((int)(delaySeconds * 1000) * 1000);
       }
     }
@@ -1151,9 +1159,12 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: swipe up    dt(%f), dx(%f), dy(%f), vy(%f)",
           remote.dt, remote.dx, remote.dy, vy);
       }
+      int keyId = SiriRemote_UpSwipe;
+      if (!CGRectContainsPoint(remote.panningPinnedRect, remote.movedPoint))
+        keyId = SiriRemote_PageUp;
       for (int i = 0; i < cycles; ++i)
       {
-        [self sendButtonPressed:SiriRemote_UpSwipe];
+        [self sendButtonPressed:keyId];
         usleep((int)(delaySeconds * 1000) * 1000);
       }
     }
@@ -1164,9 +1175,12 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: swipe down  dt(%f), dx(%f), dy(%f), vy(%f)",
           remote.dt, remote.dx, remote.dy, vy);
       }
+      int keyId = SiriRemote_DownSwipe;
+      if (!CGRectContainsPoint(remote.panningPinnedRect, remote.movedPoint))
+        keyId = SiriRemote_PageDown;
       for (int i = 0; i < cycles; ++i)
       {
-        [self sendButtonPressed:SiriRemote_DownSwipe];
+        [self sendButtonPressed:keyId];
         usleep((int)(delaySeconds * 1000) * 1000);
       }
     }
