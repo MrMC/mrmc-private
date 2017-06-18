@@ -958,7 +958,7 @@ static SiriRemoteInfo siriRemoteInfo;
         NSLog(@"microGamepad: processPanPinnedEvent");
 
     if (![self isTapRepeatTimerActive])
-      [self startTapRepeatTimer:remote withdelay:REPEATED_KEYPRESS_DELAY_S];
+      [self startTapRepeatTimer:remote withdelay:0];
   }
   else
   {
