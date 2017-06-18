@@ -282,6 +282,8 @@ bool CFocusEngineHandler::ShowFocusRect()
 ORIENTATION CFocusEngineHandler::GetFocusOrientation()
 {
   FocusEngineFocus focus;
+  // skip finding focused window, use current
+  focus.window = m_focus.window;
   UpdateFocus(focus);
   if (focus.itemFocus)
   {
