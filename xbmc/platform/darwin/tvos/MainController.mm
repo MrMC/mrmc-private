@@ -171,7 +171,7 @@ MainController *g_xbmcController;
 // start repeating after 0.25s
 #define REPEATED_KEYPRESS_DELAY_S 0.25
 // pause 0.05s (50ms) between keypresses
-#define REPEATED_KEYPRESS_PAUSE_S 0.20
+#define REPEATED_KEYPRESS_PAUSE_S 0.15
 //--------------------------------------------------------------
 
 //- (void)startKeyPressTimer:(XBMCKey)keyId
@@ -243,7 +243,7 @@ static int keyPressTimerFiredCount = 0;
     return;
 
   NSNumber *keyId = [theTimer userInfo];
-  if ([self canDoScrollUpDown] && keyPressTimerFiredCount > 10)
+  if ([self canDoScrollUpDown] && keyPressTimerFiredCount > 14)
   {
     switch([keyId intValue])
     {
@@ -850,14 +850,14 @@ typedef struct
   CGPoint startPoint;
   CGPoint movedPoint;
   CGPoint lastMovedPoint;
-  float   tapbounts = 0.14f;
+  float   tapbounts = 0.18f;
   CGRect  panningRect;
   CGRect  panningPinnedRect = {0.2f, 0.2f, 1.6f, 1.6f};
   CGRect  panningRectStart = {0.0f, 0.0f, 0.55f, 0.55f};
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
-  float ignoreAfterSwipeSeconds;
   bool enablePanSwipe;
+  float ignoreAfterSwipeSeconds;
   FocusEngineAnimate focusAnimate;
   SiriRemoteState state = SiriRemoteIdle;
 } SiriRemoteInfo;
