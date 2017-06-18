@@ -834,8 +834,9 @@ typedef struct
   CGPoint startPoint;
   CGPoint movedPoint;
   CGPoint lastMovedPoint;
+  float   tapbounts = 0.14f;
   CGRect  panningRect;
-  CGRect  panningRectStart = {0.0f, 0.0f, 0.50f, 0.50f};
+  CGRect  panningRectStart = {0.0f, 0.0f, 0.55f, 0.55f};
   CFAbsoluteTime startSeconds;
   CFAbsoluteTime movedSeconds;
   bool ignoreAfterSelect;
@@ -918,6 +919,15 @@ static SiriRemoteInfo siriRemoteInfo;
   }
 }
 
+-(void)processPanPinnedEvent:(SiriRemoteInfo&)remote
+{
+  if (!siriRemoteInfo.enablePanSwipe)
+    return;
+
+  float dx = remote.movedPoint.x - remote.startPoint.x;
+  float dy = remote.movedPoint.y - remote.startPoint.y;
+}
+
 -(void)processPanEvent:(SiriRemoteInfo&)remote
 {
   if (!siriRemoteInfo.enablePanSwipe)
@@ -952,10 +962,13 @@ static SiriRemoteInfo siriRemoteInfo;
     }
 
     bool moved = false;
+    float delaySeconds = 0.15f;
     // if user pans fast, might have panned more than item
     // check if dx or dy is some multiple of 1/2 the panning rect item bounds.
-    int cycleX = std::min(1, (int)(fabs(dx) / (CGRectGetWidth(remote.panningRect) / 2.0f)));
-    int cycleY = std::min(1, (int)(fabs(dy) / (CGRectGetHeight(remote.panningRect) / 2.0f)));
+    int cycleX = fabs(dx) / (CGRectGetWidth(remote.panningRect) / 2.0f);
+    if (cycleX < 1) cycleX = 1;
+    int cycleY = fabs(dy) / (CGRectGetHeight(remote.panningRect) / 2.0f);
+    if (cycleY < 1) cycleY = 1;
     // check if moving left/right or up/down ?
     if (remote.dx >= remote.dy)
     {
@@ -968,7 +981,10 @@ static SiriRemoteInfo siriRemoteInfo;
         }
         moved = true;
         for (int i = 0; i < cycleX; ++i)
+        {
           [self sendButtonPressed:SiriRemote_LeftSwipe];
+          usleep((int)(delaySeconds * 1000) * 1000);
+        }
       }
       else if (remote.movedPoint.x >= CGRectGetMaxX(remote.panningRect))
       {
@@ -979,7 +995,10 @@ static SiriRemoteInfo siriRemoteInfo;
         }
         moved = true;
         for (int i = 0; i < cycleX; ++i)
+        {
           [self sendButtonPressed:SiriRemote_RightSwipe];
+          usleep((int)(delaySeconds * 1000) * 1000);
+        }
       }
     }
     else
@@ -993,7 +1012,10 @@ static SiriRemoteInfo siriRemoteInfo;
         }
         moved = true;
         for (int i = 0; i < cycleY; ++i)
+        {
           [self sendButtonPressed:SiriRemote_UpSwipe];
+          usleep((int)(delaySeconds * 1000) * 1000);
+        }
       }
       else if (remote.movedPoint.y <= CGRectGetMinY(remote.panningRect))
       {
@@ -1004,7 +1026,10 @@ static SiriRemoteInfo siriRemoteInfo;
         }
         moved = true;
         for (int i = 0; i < cycleY; ++i)
+        {
           [self sendButtonPressed:SiriRemote_DownSwipe];
+          usleep((int)(delaySeconds * 1000) * 1000);
+        }
       }
     }
     if (moved)
@@ -1122,7 +1147,7 @@ static SiriRemoteInfo siriRemoteInfo;
   CGPoint centerStart = CGPointMake(
     remote.startPoint.x - 1.0,
     remote.startPoint.y - 1.0);
-  if (fabs(centerStart.x) < 0.2f && fabs(centerStart.y) < 0.2f)
+  if (fabs(centerStart.x) < remote.tapbounts && fabs(centerStart.y) < remote.tapbounts)
   {
     // tap in center, ignore it.
     if (remote.debug)
@@ -1348,7 +1373,7 @@ static SiriRemoteInfo siriRemoteInfo;
             if (pressed)
             {
               // check if we are moving and outside tap bounds
-              if (siriRemoteInfo.dx > 0.2f || siriRemoteInfo.dy > 0.2f)
+              if (siriRemoteInfo.dx > siriRemoteInfo.tapbounts || siriRemoteInfo.dy > siriRemoteInfo.tapbounts)
               {
                 // cancel tap hold/repeat timer
                 [weakSelf stopTapRepeatTimer];
@@ -1359,29 +1384,23 @@ static SiriRemoteInfo siriRemoteInfo;
             }
             else
             {
-              // finger lifted, check guardSeconds. The touch pad is very sensitive
-              // and will register glancing hits which we want to ignore.
-              float guardSeconds = CFAbsoluteTimeGetCurrent() - siriRemoteInfo.startSeconds;
-              if (guardSeconds > 0.05f)
+              if (siriRemoteInfo.dx < siriRemoteInfo.tapbounts && siriRemoteInfo.dy < siriRemoteInfo.tapbounts)
               {
-                // guardSeconds is ok, check for tap bounds
-                if (siriRemoteInfo.dx < 0.2f && siriRemoteInfo.dy < 0.2f)
+                // if we did not move at all, dt will not get updated and will be
+                // zero on touch release, so use guardSeconds to calc tap duration.
+                // if tap duration is longer than limit, ignore it
+                float tapSeconds = CFAbsoluteTimeGetCurrent() - siriRemoteInfo.startSeconds;
+                if (tapSeconds < 1.0f)
+                  [weakSelf processTapEvent:siriRemoteInfo];
+                else if (![weakSelf isTapRepeatTimerActive])
                 {
-                  // if we did not move at all, dt will not get updated and will be
-                  // zero on touch release, so use guardSeconds to calc tap duration.
-                  // if tap duration is longer than limit, ignore it
-                  if (guardSeconds < 1.0f)
-                    [weakSelf processTapEvent:siriRemoteInfo];
-                  else if (![weakSelf isTapRepeatTimerActive])
-                  {
-                    // if pressAutoRepeatTimer is not alive, it got invalidated
-                    // during call to startTapRepeatTimer in touch pressed
-                    // from a match to [self getFocusedOrientation], i.e
-                    // tried to autorepeat in a non valid direction. Normally
-                    // we just ignore taps if tap duration is longer than limit,
-                    // but in this case, permit a tap.
-                    [weakSelf processTapEvent:siriRemoteInfo];
-                  }
+                  // if pressAutoRepeatTimer is not alive, it got invalidated
+                  // during call to startTapRepeatTimer in touch pressed
+                  // from a match to [self getFocusedOrientation], i.e
+                  // tried to autorepeat in a non valid direction. Normally
+                  // we just ignore taps if tap duration is longer than limit,
+                  // but in this case, permit a tap.
+                  [weakSelf processTapEvent:siriRemoteInfo];
                 }
               }
             }
@@ -1406,7 +1425,8 @@ static SiriRemoteInfo siriRemoteInfo;
               // check if this looks like a swipe, which have a min distance then
               // the finger is down. Also swipes that take longer than 1 second are ignored.
               // should not need the time check, if touch is down longer than 0.5 seconds, it is a pan.
-              if (siriRemoteInfo.dt <= 1.0f && (siriRemoteInfo.dx >= 0.2f || siriRemoteInfo.dy >= 0.2f))
+              if (siriRemoteInfo.dt <= 1.0f &&
+                 (siriRemoteInfo.dx >= siriRemoteInfo.tapbounts || siriRemoteInfo.dy >= siriRemoteInfo.tapbounts))
               {
                 // swipe
                 // vx, xy range is typically 0 to 12+
