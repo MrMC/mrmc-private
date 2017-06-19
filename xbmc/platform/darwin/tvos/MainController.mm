@@ -175,6 +175,7 @@ MainController *g_xbmcController;
 // pause 0.05s (50ms) between keypresses
 #define REPEATED_KEYPRESS_PAUSE_S 0.15
 //--------------------------------------------------------------
+static CFAbsoluteTime keyPressTimerStartSeconds;
 
 //- (void)startKeyPressTimer:(XBMCKey)keyId
 - (void)startKeyPressTimer:(int)keyId
@@ -211,6 +212,7 @@ static int keyPressTimerFiredCount = 0;
   NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
 
   keyPressTimerFiredCount = 0;
+  keyPressTimerStartSeconds = CFAbsoluteTimeGetCurrent() + delay;
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
   NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
@@ -240,12 +242,13 @@ static int keyPressTimerFiredCount = 0;
 - (void)keyPressTimerCallback:(NSTimer*)theTimer
 {
   //PRINT_SIGNATURE();
-  // if queue is empty - skip this timer event before letting it process
+  // if queue is not empty - skip this timer event before letting it process
   if (CWinEvents::GetQueueSize())
     return;
 
   NSNumber *keyId = [theTimer userInfo];
-  if ([self canDoScrollUpDown] && keyPressTimerFiredCount > 14)
+  CFAbsoluteTime secondsFromStart = CFAbsoluteTimeGetCurrent() - keyPressTimerStartSeconds;
+  if ([self canDoScrollUpDown] && secondsFromStart > 2.5f)
   {
     switch([keyId intValue])
     {
