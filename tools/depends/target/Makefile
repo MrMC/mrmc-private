@@ -60,6 +60,8 @@ DEPENDS += libcdio
 #DEPENDS += libdvdread
 DEPENDS += libtasn1
 DEPENDS += libdsm
+DEPENDS += libjsoncpp
+DEPENDS += libcloudstorage
 
 EXCLUDED_DEPENDS =
 ifeq ($(OS),ios)
@@ -150,6 +152,7 @@ libcpluff: expat
 libdvdread: libdvdcss
 libdvdnav: libdvdread
 libulxmlrpcpp: libgcrypt openssl $(ZLIB)
+libcloudstorage: libjsoncpp libmicrohttpd
 
 .installed-$(PLATFORM): $(DEPENDS)
 	touch $@

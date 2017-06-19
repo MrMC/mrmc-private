@@ -9,8 +9,8 @@ ARCHIVE=$(LIBNAME)-$(VERSION).tar.gz
 
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
-          ./configure --prefix=$(PREFIX) --disable-static \
-          --with-mega=no
+          ./configure --prefix=$(PREFIX) --disable-shared --enable-static \
+          --with-mega=no --with-examples=no
 
 LIBDYLIB=$(PLATFORM)/.libs/libcloudstorage.a
 
@@ -28,7 +28,7 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	cd $(PLATFORM); patch -p1 < ../01-confgure.patch
 	cd $(PLATFORM); patch -p1 < ../02-remove-AmazonS3-OwnCloud.patch
 	cd $(PLATFORM); patch -p1 < ../03-remove-AmazonS3-OwnCloud.patch
-	#sed -ie "s|AC_CONFIG_MACRO_DIRS|AC_CONFIG_MACRO_DIR|" "$(PLATFORM)/configure.ac"
+	sed -ie "s|src test|src|" "$(PLATFORM)/Makefile.am"
 	cd $(PLATFORM); $(AUTORECONF) -vif
 	cd $(PLATFORM); $(CONFIGURE)
 
@@ -36,7 +36,7 @@ $(LIBDYLIB): $(PLATFORM)
 	$(MAKE) -j 1 -C $(PLATFORM)
 
 .installed-$(PLATFORM): $(LIBDYLIB)
-	#$(MAKE) -C $(PLATFORM) install
+	$(MAKE) -C $(PLATFORM) install
 	touch $@
 
 clean:
