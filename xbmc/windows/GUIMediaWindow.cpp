@@ -22,6 +22,7 @@
 #include "Application.h"
 #include "messaging/ApplicationMessenger.h"
 #include "ContextMenuManager.h"
+#include "CompileInfo.h"
 #include "FileItemListModification.h"
 #include "GUIPassword.h"
 #include "GUIUserMessages.h"
@@ -759,6 +760,31 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
   SetProperty("filter", "");
   m_canFilterAdvanced = false;
   m_filter.Reset();
+  
+#if defined(APP_PACKAGE_LITE)
+  int preTrimSize = items.Size();
+  if (preTrimSize > 10)
+  {
+    // if we are lite, trim to 10 items + ".."
+    items.Sort(SortByTitle, SortOrderAscending);
+    items.Trim(11);
+    
+    if (preTrimSize > items.Size())
+    {
+      std::string line2 = StringUtils::Format(g_localizeStrings.Get(895).c_str(),preTrimSize);
+      std::string line3;
+#if defined(TARGET_DARWIN)
+      line3 = StringUtils::Format(g_localizeStrings.Get(896).c_str(), "Apple");
+#elif defined(TARGET_ANDROID)
+      bool isAmazon; // we need amazon check here
+      line3 = StringUtils::Format(g_localizeStrings.Get(896).c_str(), isAmazon ? "Amazon":"Google Play");
+#endif
+      CGUIDialogOK::ShowAndGetInput(CCompileInfo::GetAppName(), 894, line2, line3);
+      
+    }
+  }
+#endif
+  
   return true;
 }
 

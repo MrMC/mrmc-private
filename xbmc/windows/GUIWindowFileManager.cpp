@@ -906,7 +906,18 @@ void CGUIWindowFileManager::GetDirectoryHistoryString(const CFileItem* pItem, st
 bool CGUIWindowFileManager::GetDirectory(int iList, const std::string &strDirectory, CFileItemList &items)
 {
   const CURL pathToUrl(strDirectory);
-  return m_rootDir.GetDirectory(pathToUrl, items, false);
+  bool result = m_rootDir.GetDirectory(pathToUrl, items, false);
+  
+#if defined(APP_PACKAGE_LITE)
+  int preTrimSize = items.Size();
+  if (preTrimSize > 10)
+  {
+    // if we are lite, trim to 10 items + ".."
+    items.Sort(SortByTitle, SortOrderAscending);
+    items.Trim(11);
+  }
+#endif
+  return result;
 }
 
 bool CGUIWindowFileManager::CanRename(int iList)
