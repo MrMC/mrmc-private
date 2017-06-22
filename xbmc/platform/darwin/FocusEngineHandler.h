@@ -33,6 +33,7 @@ typedef enum FocusEngineState
 
 typedef struct
 {
+  int windowID = 0;
   CGUIWindow  *window = nullptr;
   CGUIControl *rootFocus = nullptr;
   CGUIControl *itemFocus = nullptr;
@@ -61,6 +62,7 @@ class CFocusEngineHandler
   void          EnableFocusSlide(bool enable);
   void          UpdateFocus(FocusEngineFocus &focus);
   void          InvalidateFocus(CGUIControl *control);
+  const int     GetFocusWindowID();
   const CRect   GetFocusRect();
   bool          ShowFocusRect();
   ORIENTATION   GetFocusOrientation();

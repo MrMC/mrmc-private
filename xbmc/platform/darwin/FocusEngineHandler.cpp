@@ -180,7 +180,8 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
   // skip finding focused window
   if (!focus.window)
   {
-    focus.window = g_windowManager.GetWindow(g_windowManager.GetFocusedWindow());
+    focus.windowID = g_windowManager.GetFocusedWindow();
+    focus.window = g_windowManager.GetWindow(focus.windowID);
     if (!focus.window)
       return;
   }
@@ -256,6 +257,12 @@ void CFocusEngineHandler::InvalidateFocus(CGUIControl *control)
   {
     m_focus = FocusEngineFocus();
   }
+}
+
+const int
+CFocusEngineHandler::GetFocusWindowID()
+{
+  return m_focus.windowID;
 }
 
 const CRect

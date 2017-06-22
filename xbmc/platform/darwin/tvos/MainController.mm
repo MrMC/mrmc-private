@@ -116,7 +116,8 @@ MainController *g_xbmcController;
   int actionID;
   std::string actionName;
   // Translate using custom controller translator.
-  if (CButtonTranslator::GetInstance().TranslateCustomControllerString(g_windowManager.GetActiveWindowID(),
+  if (CButtonTranslator::GetInstance().TranslateCustomControllerString(
+    CFocusEngineHandler::GetInstance().GetFocusWindowID(),
     "SiriRemote", buttonId, actionID, actionName))
   {
     CInputManager::GetInstance().QueueAction(CAction(actionID, 1.0f, 0.0f, actionName), true);
@@ -278,7 +279,7 @@ static int keyPressTimerFiredCount = 0;
 -(bool)shouldFastScroll
 {
   // we dont want fast scroll in below windows, no point in going 15 places in home screen
-  int window = g_windowManager.GetFocusedWindow();
+  int window = CFocusEngineHandler::GetInstance().GetFocusWindowID();
 
   if (window == WINDOW_HOME ||
       window == WINDOW_FULLSCREEN_LIVETV ||
