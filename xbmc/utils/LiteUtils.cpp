@@ -37,7 +37,7 @@ int CLiteUtils::nextReminderTrigger = 0;
 bool CLiteUtils::NeedReminding()
 {
   if (nextReminderTrigger <= 0)
-    nextReminderTrigger = CUtil::GetRandomNumber() % 5 + 8;
+    nextReminderTrigger = CUtil::GetRandomNumber(3,8);
   else
     nextReminderTrigger--;
   return nextReminderTrigger <= 0;
@@ -51,6 +51,8 @@ int CLiteUtils::GetItemSizeLimit()
 
 void CLiteUtils::ShowIsLiteDialog(int preTruncateSize)
 {
+  if (!NeedReminding())
+    return;
   std::string line2 = StringUtils::Format(g_localizeStrings.Get(895).c_str(), preTruncateSize);
   std::string line3;
 #if defined(TARGET_DARWIN)

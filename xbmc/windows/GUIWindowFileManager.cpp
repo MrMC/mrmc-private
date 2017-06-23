@@ -62,6 +62,10 @@
 #include "Autorun.h"
 #include "URL.h"
 
+#if defined(APP_PACKAGE_LITE)
+#include "utils/LiteUtils.h"
+#endif
+
 using namespace XFILE;
 using namespace PLAYLIST;
 using namespace KODI::MESSAGING;
@@ -910,11 +914,11 @@ bool CGUIWindowFileManager::GetDirectory(int iList, const std::string &strDirect
   
 #if defined(APP_PACKAGE_LITE)
   int preTrimSize = items.Size();
-  if (preTrimSize > 10)
+  int trimSize = CLiteUtils::GetItemSizeLimit();
+  if (preTrimSize > trimSize)
   {
-    // if we are lite, trim to 10 items + ".."
     items.Sort(SortByTitle, SortOrderAscending);
-    items.Trim(11);
+    items.Trim(trimSize);
   }
 #endif
   return result;

@@ -72,6 +72,10 @@
 #include "video/VideoLibraryQueue.h"
 #include "video/VideoInfoTag.h"
 
+#if defined(APP_PACKAGE_LITE)
+#include "utils/LiteUtils.h"
+#endif
+
 #define CONTROL_BTNVIEWASICONS       2
 #define CONTROL_BTNSORTBY            3
 #define CONTROL_BTNSORTASC           4
@@ -763,24 +767,15 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
   
 #if defined(APP_PACKAGE_LITE)
   int preTrimSize = items.Size();
-  if (preTrimSize > 10)
+  int trimSize = CLiteUtils::GetItemSizeLimit();
+  if (preTrimSize > trimSize)
   {
-    // if we are lite, trim to 10 items + ".."
     items.Sort(SortByTitle, SortOrderAscending);
-    items.Trim(11);
+    items.Trim(trimSize);
     
     if (preTrimSize > items.Size())
     {
-      std::string line2 = StringUtils::Format(g_localizeStrings.Get(895).c_str(),preTrimSize);
-      std::string line3;
-#if defined(TARGET_DARWIN)
-      line3 = StringUtils::Format(g_localizeStrings.Get(896).c_str(), "Apple");
-#elif defined(TARGET_ANDROID)
-      bool isAmazon; // we need amazon check here
-      line3 = StringUtils::Format(g_localizeStrings.Get(896).c_str(), isAmazon ? "Amazon":"Google Play");
-#endif
-      CGUIDialogOK::ShowAndGetInput(CCompileInfo::GetAppName(), 894, line2, line3);
-      
+      CLiteUtils::ShowIsLiteDialog(preTrimSize);
     }
   }
 #endif
