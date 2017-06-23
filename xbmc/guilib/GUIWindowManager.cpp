@@ -140,7 +140,7 @@
 #include "peripherals/dialogs/GUIDialogPeripheralSettings.h"
 #include "addons/AddonCallbacksGUI.h"
 
-#if defined(TARGET_DARWIN)
+#if defined(TARGET_DARWIN_TVOS)
 #include "platform/darwin/FocusEngineHandler.h"
 #endif
 
@@ -1092,7 +1092,7 @@ bool CGUIWindowManager::Render()
       CGUITexture::DrawQuad(*i, 0x4c00ff00);
   }
 
-#if defined(TARGET_DARWIN)
+#if defined(TARGET_DARWIN_TVOS)
   if (g_application.IsAppFocused())
   {
     if (CFocusEngineHandler::GetInstance().ShowFocusRect())
@@ -1522,7 +1522,7 @@ void CGUIWindowManager::GetActiveModelessWindows(std::vector<int> &ids)
 
 void CGUIWindowManager::InvalidateFocus(CGUIControl *control)
 {
-#if defined(TARGET_DARWIN)
+#if defined(TARGET_DARWIN_TVOS)
   // called when a control is destroyed, there is no
   // other way to track down a control in a window that vanishes.
   CFocusEngineHandler::GetInstance().InvalidateFocus(control);

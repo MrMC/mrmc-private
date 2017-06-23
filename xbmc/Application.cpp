@@ -176,13 +176,13 @@
 #if defined(TARGET_DARWIN)
   #if defined(TARGET_DARWIN_TVOS)
     #include "platform/darwin/tvos/TVOSSettingsHandler.h"
+    #include "platform/darwin/FocusEngineHandler.h"
   #elif defined(TARGET_DARWIN_OSX)
     #include "platform/darwin/osx/CocoaInterface.h"
     #include "platform/darwin/osx/XBMCHelper.h"
   #endif
   #include "platform/darwin/DarwinUtils.h"
   #include "platform/darwin/DarwinNSUserDefaults.h"
-  #include "platform/darwin/FocusEngineHandler.h"
 #endif
 
 #ifdef HAS_DVD_DRIVE
@@ -4428,7 +4428,7 @@ void CApplication::Process()
   // update sound
   m_pPlayer->DoAudioWork();
 
-#if defined(TARGET_DARWIN)
+#if defined(TARGET_DARWIN_TVOS)
   if (!m_bInitializing && m_AppFocused)
     CFocusEngineHandler::GetInstance().Process();
 #endif
