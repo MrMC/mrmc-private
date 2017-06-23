@@ -13,20 +13,9 @@ function package_skin
   if [ -f "$SKIN_PATH/addon.xml" ]; then
     SYNCSKIN_CMD=${SYNC_CMD}
     if [ -f "$SKIN_PATH/media/Textures.xbt" ]; then
-      SYNCSKIN_CMD="${SYNC_CMD} --exclude *.png --exclude *.jpg --exclude *.gif --exclude media/Makefile*"
+      SYNCSKIN_CMD="${SYNC_CMD} --include *${SKIN_NAME}/media/Textures.xbt --exclude *${SKIN_NAME}/media/*"
     fi
     ${SYNCSKIN_CMD} "$SKIN_PATH" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons"
-    # these might have image files so just sync them
-    # look for both background and backgrounds, skins do not seem to follow a dir naming convention
-    if [ -d "$SKIN_PATH/background" ]; then
-      ${SYNC_CMD} "$SKIN_PATH/background" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons/$SKIN_NAME"
-    fi
-    if [ -d "$SKIN_PATH/backgrounds" ]; then
-      ${SYNC_CMD} "$SKIN_PATH/backgrounds" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons/$SKIN_NAME"
-    fi
-    if [ -f "$SKIN_PATH/icon.png" ]; then
-      ${SYNC_CMD} "$SKIN_PATH/icon.png" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons/$SKIN_NAME"
-    fi
   fi
 }
 
@@ -57,7 +46,7 @@ if [ "$ACTION" == build ] || [ "$ACTION" == install ]; then
   LANGSYNC="rsync -aq ${PLATFORM} ${BUILDSRC} ${BUILDSYS} --exclude resource.uisounds*"
 
   # rsync command for including everything but the skins
-  DEFAULTSKIN_EXCLUDES="--exclude addons/skin.mrmc --exclude addons/skin.re-touched --exclude addons/skin.amber --exclude addons/skin.pm3.hd --exclude addons/skin.sio2"
+  DEFAULTSKIN_EXCLUDES="--exclude addons/skin.mrmc --exclude addons/skin.re-touched --exclude addons/skin.amber --exclude addons/skin.pm3.hd --exclude addons/skin.sio2 --exclude addons/skin.opacity"
   ADDONSYNC="rsync -aq ${PLATFORM} ${BUILDSRC} ${BUILDDBG} ${DEFAULTSKIN_EXCLUDES} --exclude addons/lib --exclude addons/share  --exclude *changelog.* --exclude *library.*/*.h --exclude *library.*/*.cpp --exclude *xml.in"
 
   # binary name is MrMC but we build MrMC so to get a clean binary each time
@@ -83,6 +72,7 @@ if [ "$ACTION" == build ] || [ "$ACTION" == install ]; then
 
   # always sync skin.mrmc
   package_skin "${SYNC}" "$SRCROOT/addons/skin.mrmc"
+  package_skin "${SYNC}" "$SRCROOT/addons/skin.opacity"
 
   # sync touch skin if it exists
   if [ -f "$SRCROOT/addons/skin.re-touched/addon.xml" ] && [ "$PLATFORM_NAME" == "iphoneos" ]; then
