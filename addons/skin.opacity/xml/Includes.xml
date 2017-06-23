@@ -23,7 +23,7 @@
 	<constant name="dialogbuttons_itemgap">-20</constant>
 	<constant name="list_top_offset">102</constant>
 	<constant name="list_bottom_offset">102</constant>
-	<constant name="list_item_height">108</constant>
+	<constant name="list_item_height">96</constant>
 	<include name="HiddenObject">
 		<left>-3000</left>
 		<top>-3000</top>
@@ -280,13 +280,40 @@
 			<itemgap>15</itemgap>
 			<orientation>horizontal</orientation>
 			<align>right</align>
+			<control type="group">
+				<visible>!IsEmpty(ListItem.Mpaa)</visible>
+				<width>122</width>
+				<control type="image">
+					<height>36</height>
+					<width>122</width>
+					<posx>0</posx>
+					<posy>0</posy>
+					<align>right</align>
+					<aligny>bottom</aligny>
+					<colordiffuse>grey</colordiffuse>
+					<texture>badges/MpaaBox.png</texture>
+				</control>
+				<control type="label">
+					<height>36</height>
+					<width>124</width>
+					<posx>0</posx>
+					<posy>8</posy>
+					<font>font_flag</font>
+					<align>center</align>
+					<aligny>bottom</aligny>
+					<textoffsetx>10</textoffsetx>
+					<textoffsety>-3</textoffsety>
+					<textcolor>grey</textcolor>
+					<label>$INFO[ListItem.Mpaa]</label>
+				</control>
+			</control>
 			<control type="button">
 				<visible>!IsEmpty(ListItem.Rating)</visible>
 				<height>36</height>
 				<width>102</width>
 				<posx>0</posx>
 				<posy>0</posy>
-				<font>Flags</font>
+				<font>font13</font>
 				<align>right</align>
 				<aligny>bottom</aligny>
 				<textoffsetx>10</textoffsetx>
@@ -303,7 +330,7 @@
 				<width>102</width>
 				<posx>0</posx>
 				<posy>0</posy>
-				<font>Flags</font>
+				<font>font13</font>
 				<align>center</align>
 				<aligny>bottom</aligny>
 				<textoffsetx>0</textoffsetx>
@@ -336,7 +363,7 @@
 				<width>102</width>
 				<posx>0</posx>
 				<posy>0</posy>
-				<font>Flags</font>
+				<font>font13</font>
 				<align>center</align>
 				<aligny>bottom</aligny>
 				<textoffsetx>0</textoffsetx>
@@ -971,18 +998,25 @@
 					<onclick>SetFocus(50)</onclick>
 					<onclick>Info</onclick>
 				</control>
+				<control type="label">
+					<left>30</left>
+					<top>635</top>
+					<width>525</width>
+					<height>44</height>
+					<label>$INFO[ListItem.Genre,[COLOR grey]$LOCALIZE[515]: [/COLOR],[CR]]</label>
+				</control>
 				<control type="textbox" id="15500">
 					<left>30</left>
-					<top>640</top>
+					<top>700</top>
 					<width>525</width>
-					<bottom>117</bottom>
+					<bottom>125</bottom>
 					<autoscroll time="3000" delay="7000" repeat="5000">!System.HasModalDialog</autoscroll>
 					<label>$VAR[ListBoxInfoVar]</label>
 					<visible>!Container.Content() | !IsEmpty(ListItem.Plot)</visible>
 				</control>
 				<control type="group">
 					<left>20</left>
-					<top>640</top>
+					<top>690</top>
 					<visible>ListItem.IsCollection</visible>
 					<include content="InfoList">
 						<param name="bottom" value="100" />
@@ -996,7 +1030,7 @@
 					<visible>IsEmpty(Control.GetLabel(15500)) + !ListItem.IsCollection</visible>
 					<control type="textbox">
 						<left>30</left>
-						<top>460</top>
+						<top>700</top>
 						<width>530</width>
 						<height>413</height>
 						<align>center</align>
