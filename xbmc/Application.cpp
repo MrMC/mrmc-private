@@ -1180,7 +1180,7 @@ bool CApplication::Initialize()
   }
 
   std::string skin = CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
-  if ((CSettings::GetInstance().GetBool(CSettings::SETTING_LOOKANDFEEL_NEWSKINCHECKED)) &&
+  if ((!CSettings::GetInstance().GetBool(CSettings::SETTING_LOOKANDFEEL_NEWSKINCHECKED)) &&
       CSkinSettings::GetInstance().MigrateToNewSkin(skin))
   {
     skin = CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
