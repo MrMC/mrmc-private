@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0E3036EC1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
 		0E3036ED1760F68A00D93596 /* FavouritesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0E3036EA1760F68A00D93596 /* FavouritesDirectory.cpp */; };
+		181E4B701EFCF664004C5551 /* FocusEngineHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8E821EE578AB00C8F93B /* FocusEngineHandler.cpp */; };
 		182600F71EC0E87F0004447E /* MediaDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 182600F51EC0E87F0004447E /* MediaDirectory.cpp */; };
 		182600F81EC0E87F0004447E /* MediaDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 182600F51EC0E87F0004447E /* MediaDirectory.cpp */; };
 		182600F91EC0E87F0004447E /* MediaDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 182600F51EC0E87F0004447E /* MediaDirectory.cpp */; };
@@ -12127,6 +12128,7 @@
 				E49913E2174E5F8D00741B6D /* PlayListM3U.cpp in Sources */,
 				F5022F2D1E2D41D5001BBF75 /* hdhomerun_discover.c in Sources */,
 				E49913E3174E5F8D00741B6D /* PlayListPLS.cpp in Sources */,
+				181E4B701EFCF664004C5551 /* FocusEngineHandler.cpp in Sources */,
 				E49913E4174E5F8D00741B6D /* PlayListURL.cpp in Sources */,
 				F5B725081C7E150C006432AE /* scantree.cpp in Sources */,
 				E49913E5174E5F8D00741B6D /* PlayListWPL.cpp in Sources */,
@@ -13895,8 +13897,9 @@
 			baseConfigurationReference = E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon${BUNDLE_ID_SUFFIX}";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				BUNDLE_ID_SUFFIX = .lite;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -14091,8 +14094,9 @@
 			baseConfigurationReference = E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon${BUNDLE_ID_SUFFIX}";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				BUNDLE_ID_SUFFIX = .lite;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -14366,8 +14370,9 @@
 			baseConfigurationReference = E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon${BUNDLE_ID_SUFFIX}";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				BUNDLE_ID_SUFFIX = "";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
@@ -14399,8 +14404,9 @@
 			baseConfigurationReference = E49910D0174E2DFF00741B6D /* App-iOS.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "AppIcon${BUNDLE_ID_SUFFIX}";
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				BUNDLE_ID_SUFFIX = "";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
