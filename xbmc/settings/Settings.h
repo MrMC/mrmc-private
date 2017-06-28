@@ -452,6 +452,11 @@ public:
   static const std::string SETTING_SERVICES_EMBYACESSTOKEN;
   static const std::string SETTING_SERVICES_EMBYSAVEDSOURCES;
   static const std::string SETTING_SERVICES_EMBYLIMITHOMETO;
+  // trakt
+  static const std::string SETTING_SERVICES_TRAKTSIGNINPIN;
+  static const std::string SETTING_SERVICES_TRAKTACESSTOKEN;
+  static const std::string SETTING_SERVICES_TRAKTACESSREFRESHTOKEN;
+  static const std::string SETTING_SERVICES_TRAKTACESSTOKENVALIDITY;
 
   /*!
    \brief Creates a new settings wrapper around a new settings manager.

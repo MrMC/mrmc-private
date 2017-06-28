@@ -181,6 +181,17 @@ bool EmbyHomeUserEnable(const std::string &condition, const std::string &value, 
   return enable;
 }
 
+bool TraktSignInPinEnable (const std::string &condition, const std::string &value, const CSetting *setting, void *data)
+{
+  bool enable = true;
+  
+  if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN) == g_localizeStrings.Get(1240))
+  {
+    enable = true;
+  }
+  return enable;
+}
+
 bool IsUsingTTFSubtitles(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
 {
   return CUtil::IsUsingTTFSubtitles();
@@ -381,6 +392,7 @@ void CSettingConditions::Initialize()
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("embysignin",                    EmbySignInEnable));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("embysigninpin",                 EmbySignInPinEnable));
   m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("embyhomeuser",                  EmbyHomeUserEnable));
+  m_complexConditions.insert(std::pair<std::string, SettingConditionCheck>("traktsigninpin",                TraktSignInPinEnable));
 }
 
 bool CSettingConditions::Check(const std::string &condition, const std::string &value /* = "" */, const CSetting *setting /* = NULL */)
