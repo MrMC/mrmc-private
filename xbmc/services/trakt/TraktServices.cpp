@@ -324,7 +324,7 @@ bool CTraktServices::GetSignInPinCode()
     waitPinReplyDialog->SetLine(1, prompt);
     
     waitPinReplyDialog->Open();
-    waitPinReplyDialog->ShowProgressBar(false);
+    waitPinReplyDialog->ShowProgressBar(true);
     
     CStopWatch dieTimer;
     dieTimer.StartZero();
