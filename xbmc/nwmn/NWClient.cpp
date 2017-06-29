@@ -311,7 +311,10 @@ void CNWClient::Process()
       m_NextUpdateTime += m_NextUpdateInterval;
       CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
 
-      m_HasNetwork = HasInternet();
+      if (m_StartupState == ClientTryUseExistingPlayer)
+        m_HasNetwork = false;
+      else
+        m_HasNetwork = HasInternet();
       m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
 
       GetPlayerInfo();
