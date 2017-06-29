@@ -315,7 +315,8 @@ void CNWClient::Process()
       m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
 
       GetPlayerInfo();
-      GetActions();
+      if (m_StartupState != ClientTryUseExistingPlayer)
+        GetActions();
       if (GetProgamInfo())
       {
         m_StartupState = ClientUseUpdateInterval;
