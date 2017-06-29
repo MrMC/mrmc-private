@@ -330,6 +330,12 @@ void CNWClient::Process()
       if (m_ClientCallBackFn)
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, 0);
 
+      if (!m_HasNetwork)
+      {
+        m_HasNetwork = HasInternet();
+        m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
+      }
+
       if (m_Player->IsPlaying())
         SendPlayerStatus(kTVAPI_Status_Playing);
       else
@@ -342,13 +348,11 @@ void CNWClient::Process()
 
 void CNWClient::ShowStartUpDialog(bool fetchAndUpdate)
 {
-  m_dlgProgress->SetHeading("Download and Verify media files");
-  m_dlgProgress->SetLine(1, StringUtils::Format("Client Startup: Fetching Player and Program Info"));
+  m_dlgProgress->SetHeading("Player Startup");
   if (!fetchAndUpdate && HasLocalPlayer(m_strHome) && HasLocalPlaylist(m_strHome))
-  {
-    m_dlgProgress->SetHeading("Verifying media files");
-    //m_dlgProgress->SetLine(1, StringUtils::Format("Client Startup: Please wait"));
-  }
+    m_dlgProgress->SetLine(1, StringUtils::Format("Verifying player and media files"));
+  else
+    m_dlgProgress->SetLine(1, StringUtils::Format("Download/Verify player and media files"));
   m_dlgProgress->Open();
   m_dlgProgress->ShowProgressBar(true);
 }
