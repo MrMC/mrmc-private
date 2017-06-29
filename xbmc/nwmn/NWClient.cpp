@@ -85,9 +85,9 @@ CNWClient *CNWClient::m_this = NULL;
 
 CNWClient::CNWClient()
  : CThread("CNWClient")
- , m_Startup(true)
  , m_HasNetwork(true)
- , m_FullUpdate(true)
+ , m_Startup(true)
+ , m_StartupState(ClientFetchUpdatePlayer)
  , m_NextUpdateTime(CDateTime::GetCurrentDateTime())
  , m_NextUpdateInterval(0, 0, 5, 0)
  , m_Player(NULL)
@@ -212,9 +212,9 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
   }
 }
 
-void CNWClient::Startup(bool bypass_authorization)
+void CNWClient::Startup(bool bypass_authorization, bool fetchAndUpdate)
 {
-  ShowStartUpDialog();
+  ShowStartUpDialog(fetchAndUpdate);
 
   StopThread();
   StopPlaying();
@@ -231,7 +231,12 @@ void CNWClient::Startup(bool bypass_authorization)
   SendPlayerStatus(kTVAPI_Status_Restarting);
 
   m_Startup = true;
-  m_FullUpdate = true;
+  m_StartupState = ClientFetchUpdatePlayer;
+  if (!fetchAndUpdate)
+  {
+    if (HasLocalPlayer(m_strHome) && HasLocalPlaylist(m_strHome))
+      m_StartupState = ClientTryUseExistingPlayer;
+  }
 
   Create();
   if (!m_MediaManager->IsRunning())
@@ -240,12 +245,6 @@ void CNWClient::Startup(bool bypass_authorization)
     m_PurgeManager->Create();
   if (!m_Player->IsRunning())
     m_Player->Create();
-}
-
-void CNWClient::FullUpdate()
-{
-  SendPlayerStatus(kTVAPI_Status_Restarting);
-  m_FullUpdate = true;
 }
 
 void CNWClient::PlayPause()
@@ -302,7 +301,7 @@ void CNWClient::Process()
       ManageStartupDialog();
 
     CDateTime time = CDateTime::GetCurrentDateTime();
-    if (m_FullUpdate || time >= m_NextUpdateTime)
+    if (m_StartupState != ClientUseUpdateInterval || time >= m_NextUpdateTime)
     {
       CLog::Log(LOGDEBUG, "**NW** - time = %s", time.GetAsDBDateTime().c_str());
       CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
@@ -319,7 +318,7 @@ void CNWClient::Process()
       GetActions();
       if (GetProgamInfo())
       {
-        m_FullUpdate = false;
+        m_StartupState = ClientUseUpdateInterval;
         if (m_PlayerInfo.allow_async_player != "no")
           m_Player->Play();
       }
@@ -337,10 +336,15 @@ void CNWClient::Process()
   CLog::Log(LOGDEBUG, "**NW** - CNWClient::Process Stopped");
 }
 
-void CNWClient::ShowStartUpDialog()
+void CNWClient::ShowStartUpDialog(bool fetchAndUpdate)
 {
   m_dlgProgress->SetHeading("Download and Verify media files");
   m_dlgProgress->SetLine(1, StringUtils::Format("Client Startup: Fetching Player and Program Info"));
+  if (!fetchAndUpdate && HasLocalPlayer(m_strHome) && HasLocalPlaylist(m_strHome))
+  {
+    m_dlgProgress->SetHeading("Verifying media files");
+    //m_dlgProgress->SetLine(1, StringUtils::Format("Client Startup: Please wait"));
+  }
   m_dlgProgress->Open();
   m_dlgProgress->ShowProgressBar(true);
 }
@@ -357,7 +361,7 @@ bool CNWClient::ManageStartupDialog()
     if (m_dlgProgress->IsCanceled())
     {
       m_Startup = false;
-      m_FullUpdate = false;
+      m_StartupState = ClientUseUpdateInterval;
       CloseStartUpDialog();
 
       StopPlaying();
@@ -388,7 +392,7 @@ bool CNWClient::ManageStartupDialog()
     if (m_dlgProgress->IsCanceled())
     {
       m_Startup = false;
-      m_FullUpdate = false;
+      m_StartupState = ClientUseUpdateInterval;
       CloseStartUpDialog();
 
       StopPlaying();
@@ -414,7 +418,7 @@ bool CNWClient::ManageStartupDialog()
 
 void CNWClient::GetPlayerInfo()
 {
-  if (m_HasNetwork)
+  if (m_HasNetwork && m_StartupState != ClientTryUseExistingPlayer)
   {
     TVAPI_Machine machine;
     machine.apiKey = m_PlayerInfo.apiKey;
@@ -464,14 +468,14 @@ bool CNWClient::GetProgamInfo()
 {
   bool rtn = false;
 
-  if (m_HasNetwork)
+  if (m_HasNetwork && m_StartupState != ClientTryUseExistingPlayer)
   {
     TVAPI_Playlist playlist;
     playlist.apiKey = m_PlayerInfo.apiKey;
     playlist.apiSecret = m_PlayerInfo.apiSecret;
     TVAPI_GetPlaylist(playlist, m_PlayerInfo.playlist_id);
 
-    if (m_FullUpdate || m_ProgramInfo.updated_date != playlist.updated_date)
+    if (m_StartupState != ClientUseUpdateInterval || m_ProgramInfo.updated_date != playlist.updated_date)
     {
       TVAPI_PlaylistItems playlistItems;
       playlistItems.apiKey = m_PlayerInfo.apiKey;
@@ -524,7 +528,7 @@ bool CNWClient::GetProgamInfo()
       std::string updated_date = m_ProgramInfo.updated_date;
       if (LoadLocalPlaylist(m_strHome, m_ProgramInfo))
       {
-        if (m_FullUpdate || m_ProgramInfo.updated_date != updated_date)
+        if (m_StartupState != ClientUseUpdateInterval || m_ProgramInfo.updated_date != updated_date)
         {
           // send msg to GUIWindowMN to change to horz/vert
           // see m_ProgramInfo.layout
@@ -573,6 +577,7 @@ void CNWClient::GetActions()
     return;
 
   TVAPI_Actions actions;
+  bool filePlayedSent = false;
   actions.apiKey = m_PlayerInfo.apiKey;
   actions.apiSecret = m_PlayerInfo.apiSecret;
   if (TVAPI_GetActionQueue(actions))
@@ -601,6 +606,7 @@ void CNWClient::GetActions()
       {
         SendFilesPlayed();
         ClearAction(actions, action.id);
+        filePlayedSent = true;
       }
       else if (action.action == kTVAPI_ActionPlay)
       {
@@ -623,6 +629,13 @@ void CNWClient::GetActions()
       }
     }
     actions.actions.clear();
+  }
+
+  // 'files played' action must be uploaded regardless of if there was
+  // an action for it or not.
+  if (!filePlayedSent)
+  {
+    SendFilesPlayed();
   }
 }
 

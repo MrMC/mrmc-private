@@ -38,6 +38,13 @@ enum AssetDownloadState
   wasDownloaded,
 };
 
+enum ClientStartupState
+{
+  ClientUseUpdateInterval,
+  ClientFetchUpdatePlayer,
+  ClientTryUseExistingPlayer,
+};
+
 // ---------------------------------------------
 // ---------------------------------------------
 typedef void (*ClientCallBackFn)(const void *ctx, int msg);
@@ -60,8 +67,7 @@ public:
   
   virtual void  Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
 
-  void          Startup(bool bypass_authorization);
-  void          FullUpdate();
+  void          Startup(bool bypass_authorization, bool fetchAndUpdate);
   void          PlayPause();
   void          PausePlaying();
   void          StopPlaying();
@@ -80,7 +86,7 @@ public:
 protected:
   virtual void  Process();
 
-  void          ShowStartUpDialog();
+  void          ShowStartUpDialog(bool fetchAndUpdate);
   void          CloseStartUpDialog();
   bool          ManageStartupDialog();
 
@@ -102,9 +108,9 @@ protected:
   static void   AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownloadState downloadState);
 
   std::string   m_strHome;
-  std::atomic<bool> m_Startup;
   bool          m_HasNetwork;
-  bool          m_FullUpdate;
+  std::atomic<bool> m_Startup;
+  ClientStartupState m_StartupState;
   int           m_totalAssets;
   bool          m_assetsValidated;
   CDateTime     m_NextUpdateTime;

@@ -130,7 +130,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), PLAYLIST);
       OnMessage(msg);
       if (m_client->IsAuthorized())
-        Refresh();
+        Refresh(false);
       return true;
     }
     else if (iControl == MEDIAUPDATE && m_client)
@@ -138,7 +138,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), MEDIAUPDATE);
       OnMessage(msg);
       if (m_client->IsAuthorized())
-        Refresh();
+        Refresh(true);
       return true;
     }
     else if (iControl == NETWORKTEST)
@@ -257,14 +257,14 @@ void CGUIWindowMN::OnWindowUnload()
   SAFE_DELETE(m_client);
 }
 
-void CGUIWindowMN::Refresh()
+void CGUIWindowMN::Refresh(bool fetchAndUpdate)
 {
   CLog::Log(LOGDEBUG, "**NW** - CGUIWindowMN::Refresh()");
   if (!m_RefreshRunning)
   {
     m_RefreshRunning = true;
     if (m_client)
-      m_client->Startup(false);
+      m_client->Startup(false, fetchAndUpdate);
   }
 }
 
@@ -275,12 +275,12 @@ void CGUIWindowMN::StartClient(bool force)
     m_client = new CNWClient();
     m_client->RegisterClientCallBack(this, ClientCallBack);
     m_client->RegisterPlayerCallBack(this, PlayerCallBack);
-    m_client->Startup(false);
+    m_client->Startup(false, false);
   }
   else
   {
     if (force)
-      m_client->Startup(true);
+      m_client->Startup(true, true);
   }
 
 }
