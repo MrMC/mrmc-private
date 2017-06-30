@@ -28,6 +28,7 @@
 #include "input/Key.h"
 #include "utils/StringUtils.h"
 #include "utils/log.h"
+#include "utils/Variant.h"
 #include "FileItem.h"
 #include "video/VideoInfoTag.h"
 #include "Application.h"
@@ -88,7 +89,7 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
           thumb = asset.thumb_url;
         pItem->SetLabel2(asset.name);
         pItem->SetPath(CSpecialProtocol::TranslatePath(path));
-
+        pItem->SetProperty("Membernet", true);
         pItem->GetVideoInfoTag()->m_strTitle = asset.name;
         pItem->GetVideoInfoTag()->m_streamDetails.Reset();
         CMediaSettings::GetInstance().SetVideoStartWindowed(false);
