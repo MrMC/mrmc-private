@@ -116,6 +116,7 @@ protected:
   bool          m_HasNetwork;
   std::atomic<bool> m_Startup;
   ClientStartupState m_StartupState;
+  bool          m_bypassDownloadWait;
   int           m_totalAssets;
   bool          m_assetsValidated;
   CDateTime     m_NextUpdateTime;
