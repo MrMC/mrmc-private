@@ -119,6 +119,7 @@ CNWClient::CNWClient()
  , m_HasNetwork(true)
  , m_Startup(true)
  , m_StartupState(ClientFetchUpdatePlayer)
+ , m_bypassDownloadWait(false)
  , m_NextUpdateTime(CDateTime::GetCurrentDateTime())
  , m_NextUpdateInterval(0, 0, 5, 0)
  , m_Player(NULL)
@@ -263,10 +264,14 @@ void CNWClient::Startup(bool bypass_authorization, bool fetchAndUpdate)
 
   m_Startup = true;
   m_StartupState = ClientFetchUpdatePlayer;
+  m_bypassDownloadWait = false;
   if (!fetchAndUpdate)
   {
     if (HasLocalPlayer(m_strHome) && HasLocalPlaylist(m_strHome))
+    {
+      m_bypassDownloadWait = true;
       m_StartupState = ClientTryUseExistingPlayer;
+    }
   }
 
   Create();
@@ -350,7 +355,7 @@ void CNWClient::Process()
       if (GetProgamInfo())
       {
         m_StartupState = ClientUseUpdateInterval;
-        if (m_PlayerInfo.allow_async_player != "no")
+        if (m_bypassDownloadWait || m_PlayerInfo.allow_async_player != "no")
           m_Player->Play();
       }
 
@@ -387,7 +392,7 @@ void CNWClient::CloseStartUpDialog()
 
 bool CNWClient::ManageStartupDialog()
 {
-  if (m_PlayerInfo.allow_async_player == "no")
+  if (!m_bypassDownloadWait && m_PlayerInfo.allow_async_player == "no")
   {
     if (m_dlgProgress->IsCanceled())
     {
@@ -1034,32 +1039,34 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
 
     for (auto id : playlist.files)
     {
+      // find the file item that matches this id
       auto it = std::find_if(playlistItems.items.begin(), playlistItems.items.end(),
         [id](const TVAPI_PlaylistItem &item) { return item.id == id.id; });
       if (it != playlistItems.items.end())
       {
+        const TVAPI_PlaylistItem &item = *it;
         NWAsset asset;
-        asset.id = std_stoi((*it).id);
-        asset.name = (*it).name;
+        asset.id = std_stoi(item.id);
+        asset.name = item.name;
         asset.group_id = group.id;
         asset.valid = false;
 
-        std::string video_format = CheckForVideoFormatAndFallBack(playList.video_format, (*it).files);
-        for (auto file : (*it).files)
+        std::string video_format = CheckForVideoFormatAndFallBack(playList.video_format, item.files);
+        for (auto file : item.files)
         {
           if (file.type == video_format)
           {
             // trap out bad urls
             if (file.path.find("proxy.membernettv.com") != std::string::npos)
               continue;
-            asset.id = std_stoi((*it).id);
+            asset.id = std_stoi(item.id);
             asset.type = file.type;
             asset.video_url = file.path;
             asset.video_md5 = file.etag;
             asset.video_size = std_stoi(file.size);
             // format is "2013-02-27 01:00:00"
-            asset.available_to.SetFromDBDateTime((*it).availability_to);
-            asset.available_from.SetFromDBDateTime((*it).availability_from);
+            asset.available_to.SetFromDBDateTime(item.availability_to);
+            asset.available_from.SetFromDBDateTime(item.availability_from);
             asset.video_basename = URIUtils::GetFileName(asset.video_url);
             std::string video_extension = URIUtils::GetExtension(asset.video_url);
             std::string localpath = kNWClient_DownloadVideoPath + std_to_string(asset.id) + video_extension;
@@ -1071,12 +1078,12 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
         if (!asset.video_url.empty())
         {
           // trap out bad urls
-          if ((*it).thumb.path.find("proxy.membernettv.com") == std::string::npos)
+          if (item.thumb.path.find("proxy.membernettv.com") == std::string::npos)
           {
             // bring over thumb references
-            asset.thumb_url = (*it).thumb.path;
-            asset.thumb_md5 = (*it).thumb.etag;
-            asset.thumb_size = std_stoi((*it).thumb.size);
+            asset.thumb_url = item.thumb.path;
+            asset.thumb_md5 = item.thumb.etag;
+            asset.thumb_size = std_stoi(item.thumb.size);
             asset.thumb_basename = URIUtils::GetFileName(asset.thumb_url);
             std::string thumb_extension = URIUtils::GetExtension(asset.thumb_url);
             std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std_to_string(asset.id) + thumb_extension;
@@ -1104,7 +1111,7 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownlo
   if (downloadState == AssetDownloadState::wasDownloaded)
     client->LogFilesDownLoaded(std_to_string(asset.id));
 
-  if (client->m_Player->IsPlaying() || client->m_PlayerInfo.allow_async_player == "no")
+  if (client->m_Player->IsPlaying() || (!client->m_bypassDownloadWait &&client->m_PlayerInfo.allow_async_player == "no"))
   {
     if (client->m_Startup && client->m_dlgProgress->IsDialogRunning())
     {
