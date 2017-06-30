@@ -380,7 +380,9 @@ void CNWClient::ShowStartUpDialog(bool fetchAndUpdate)
 
 void CNWClient::CloseStartUpDialog()
 {
-   m_dlgProgress->Close();
+  m_dlgProgress->Close();
+  while (m_dlgProgress->IsDialogRunning())
+    Sleep(10);
 }
 
 bool CNWClient::ManageStartupDialog()
@@ -940,11 +942,89 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
   playList.groups.clear();
   playList.play_order.clear();
 
-  for (auto catagory : playlist.categories)
+  if (!playlist.categories.empty())
+  {
+    for (auto catagory : playlist.categories)
+    {
+      NWGroup group;
+      group.id = std_stoi(catagory.id);
+      group.name = catagory.name;
+      group.next_asset_index = 0;
+      // always remember original group play order
+      // this determines group play order. ie.
+      // pick 1st group, play asset, pick next group, play asset, do all groups
+      // cycle back, pick 1st group, play next asset...
+      playList.play_order.push_back(group.id);
+
+      // check if we already have handled this group
+      auto it = std::find_if(playList.groups.begin(), playList.groups.end(),
+        [group](const NWGroup &existingGroup) { return existingGroup.id == group.id; });
+      if (it == playList.groups.end())
+      {
+        // not present, pull out assets assigned to this group
+        for (auto item : playlistItems.items)
+        {
+          if (item.tv_category_id == catagory.id)
+          {
+            NWAsset asset;
+            asset.id = std_stoi(item.id);
+            asset.name = item.name;
+            asset.group_id = std_stoi(item.tv_category_id);
+            asset.valid = false;
+
+            std::string video_format = CheckForVideoFormatAndFallBack(playList.video_format, item.files);
+            for (auto file : item.files)
+            {
+              if (file.type == video_format)
+              {
+                // trap out bad urls
+                if (file.path.find("proxy.membernettv.com") != std::string::npos)
+                  continue;
+                asset.id = std_stoi(item.id);
+                asset.type = file.type;
+                asset.video_url = file.path;
+                asset.video_md5 = file.etag;
+                asset.video_size = std_stoi(file.size);
+                // format is "2013-02-27 01:00:00"
+                asset.available_to.SetFromDBDateTime(item.availability_to);
+                asset.available_from.SetFromDBDateTime(item.availability_from);
+                asset.video_basename = URIUtils::GetFileName(asset.video_url);
+                std::string video_extension = URIUtils::GetExtension(asset.video_url);
+                std::string localpath = kNWClient_DownloadVideoPath + std_to_string(asset.id) + video_extension;
+                asset.video_localpath = URIUtils::AddFileToFolder(home, localpath);
+                break;
+              }
+            }
+            // if we got an complete asset, save it.
+            if (!asset.video_url.empty())
+            {
+              // trap out bad urls
+              if (item.thumb.path.find("proxy.membernettv.com") == std::string::npos)
+              {
+                // bring over thumb references
+                asset.thumb_url = item.thumb.path;
+                asset.thumb_md5 = item.thumb.etag;
+                asset.thumb_size = std_stoi(item.thumb.size);
+                asset.thumb_basename = URIUtils::GetFileName(asset.thumb_url);
+                std::string thumb_extension = URIUtils::GetExtension(asset.thumb_url);
+                std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std_to_string(asset.id) + thumb_extension;
+                asset.thumb_localpath = URIUtils::AddFileToFolder(home, localpath);
+              }
+              group.assets.push_back(asset);
+            }
+          }
+        }
+        // add the new group regardless of it there are assets present
+        // player will skip over this group if there are no assets.
+        playList.groups.push_back(group);
+      }
+    }
+  }
+  else if (!playlist.files.empty())
   {
     NWGroup group;
-    group.id = std_stoi(catagory.id);
-    group.name = catagory.name;
+    group.id = playList.id;
+    group.name = playList.name;
     group.next_asset_index = 0;
     // always remember original group play order
     // this determines group play order. ie.
@@ -952,68 +1032,63 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
     // cycle back, pick 1st group, play next asset...
     playList.play_order.push_back(group.id);
 
-    // check if we already have handled this group
-    auto it = std::find_if(playList.groups.begin(), playList.groups.end(),
-      [group](const NWGroup &existingGroup) { return existingGroup.id == group.id; });
-    if (it == playList.groups.end())
+    for (auto id : playlist.files)
     {
-      // not present, pull out assets assigned to this group
-      for (auto item : playlistItems.items)
+      auto it = std::find_if(playlistItems.items.begin(), playlistItems.items.end(),
+        [id](const TVAPI_PlaylistItem &item) { return item.id == id.id; });
+      if (it != playlistItems.items.end())
       {
-        if (item.tv_category_id == catagory.id)
-        {
-          NWAsset asset;
-          asset.id = std_stoi(item.id);
-          asset.name = item.name;
-          asset.group_id = std_stoi(item.tv_category_id);
-          asset.valid = false;
+        NWAsset asset;
+        asset.id = std_stoi((*it).id);
+        asset.name = (*it).name;
+        asset.group_id = group.id;
+        asset.valid = false;
 
-          std::string video_format = CheckForVideoFormatAndFallBack(playList.video_format, item.files);
-          for (auto file : item.files)
-          {
-            if (file.type == video_format)
-            {
-              // trap out bad urls
-              if (file.path.find("proxy.membernettv.com") != std::string::npos)
-                continue;
-              asset.id = std_stoi(item.id);
-              asset.type = file.type;
-              asset.video_url = file.path;
-              asset.video_md5 = file.etag;
-              asset.video_size = std_stoi(file.size);
-              // format is "2013-02-27 01:00:00"
-              asset.available_to.SetFromDBDateTime(item.availability_to);
-              asset.available_from.SetFromDBDateTime(item.availability_from);
-              asset.video_basename = URIUtils::GetFileName(asset.video_url);
-              std::string video_extension = URIUtils::GetExtension(asset.video_url);
-              std::string localpath = kNWClient_DownloadVideoPath + std_to_string(asset.id) + video_extension;
-              asset.video_localpath = URIUtils::AddFileToFolder(home, localpath);
-              break;
-            }
-          }
-          // if we got an complete asset, save it.
-          if (!asset.video_url.empty())
+        std::string video_format = CheckForVideoFormatAndFallBack(playList.video_format, (*it).files);
+        for (auto file : (*it).files)
+        {
+          if (file.type == video_format)
           {
             // trap out bad urls
-            if (item.thumb.path.find("proxy.membernettv.com") == std::string::npos)
-            {
-              // bring over thumb references
-              asset.thumb_url = item.thumb.path;
-              asset.thumb_md5 = item.thumb.etag;
-              asset.thumb_size = std_stoi(item.thumb.size);
-              asset.thumb_basename = URIUtils::GetFileName(asset.thumb_url);
-              std::string thumb_extension = URIUtils::GetExtension(asset.thumb_url);
-              std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std_to_string(asset.id) + thumb_extension;
-              asset.thumb_localpath = URIUtils::AddFileToFolder(home, localpath);
-            }
-            group.assets.push_back(asset);
+            if (file.path.find("proxy.membernettv.com") != std::string::npos)
+              continue;
+            asset.id = std_stoi((*it).id);
+            asset.type = file.type;
+            asset.video_url = file.path;
+            asset.video_md5 = file.etag;
+            asset.video_size = std_stoi(file.size);
+            // format is "2013-02-27 01:00:00"
+            asset.available_to.SetFromDBDateTime((*it).availability_to);
+            asset.available_from.SetFromDBDateTime((*it).availability_from);
+            asset.video_basename = URIUtils::GetFileName(asset.video_url);
+            std::string video_extension = URIUtils::GetExtension(asset.video_url);
+            std::string localpath = kNWClient_DownloadVideoPath + std_to_string(asset.id) + video_extension;
+            asset.video_localpath = URIUtils::AddFileToFolder(home, localpath);
+            break;
           }
         }
+        // if we got an complete asset, save it.
+        if (!asset.video_url.empty())
+        {
+          // trap out bad urls
+          if ((*it).thumb.path.find("proxy.membernettv.com") == std::string::npos)
+          {
+            // bring over thumb references
+            asset.thumb_url = (*it).thumb.path;
+            asset.thumb_md5 = (*it).thumb.etag;
+            asset.thumb_size = std_stoi((*it).thumb.size);
+            asset.thumb_basename = URIUtils::GetFileName(asset.thumb_url);
+            std::string thumb_extension = URIUtils::GetExtension(asset.thumb_url);
+            std::string localpath = kNWClient_DownloadVideoThumbNailsPath + std_to_string(asset.id) + thumb_extension;
+            asset.thumb_localpath = URIUtils::AddFileToFolder(home, localpath);
+          }
+          group.assets.push_back(asset);
+        }
       }
-      // add the new group regardless of it there are assets present
-      // player will skip over this group if there are no assets.
-      playList.groups.push_back(group);
     }
+    // add the new group regardless of it there are assets present
+    // player will skip over this group if there are no assets.
+    playList.groups.push_back(group);
   }
 
   return false;
