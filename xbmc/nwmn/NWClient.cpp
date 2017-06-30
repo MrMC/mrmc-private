@@ -80,6 +80,37 @@ static int std_stoi(std::string value)
   return atoi(value.c_str());
 }
 
+class CNWClientJob: public CJob
+{
+public:
+  CNWClientJob(CNWClient *nwmnClient, std::string strFunction)
+  : m_function(strFunction)
+  , m_client(nwmnClient)
+  {
+  }
+  virtual ~CNWClientJob()
+  {
+  }
+  virtual bool DoWork()
+  {
+    if (m_function == "GetActions")
+    {
+      CLog::Log(LOGNOTICE, "CNWClientJob: GetActions");
+      m_client->GetActions();
+      return true;
+    }
+    return false;
+  }
+  virtual bool operator==(const CJob *job) const
+  {
+    return true;
+  }
+private:
+
+  std::string    m_function;
+  CNWClient     *m_client;
+};
+
 CCriticalSection CNWClient::m_clientLock;
 CNWClient *CNWClient::m_this = NULL;
 
@@ -311,15 +342,11 @@ void CNWClient::Process()
       m_NextUpdateTime += m_NextUpdateInterval;
       CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
 
-      if (m_StartupState == ClientTryUseExistingPlayer)
-        m_HasNetwork = false;
-      else
-        m_HasNetwork = HasInternet();
-      m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
+      UpdateNetworkStatus();
+      if (m_HasNetwork)
+        AddJob(new CNWClientJob(this, "GetActions"));
 
       GetPlayerInfo();
-      if (m_StartupState != ClientTryUseExistingPlayer)
-        GetActions();
       if (GetProgamInfo())
       {
         m_StartupState = ClientUseUpdateInterval;
@@ -329,12 +356,6 @@ void CNWClient::Process()
 
       if (m_ClientCallBackFn)
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, 0);
-
-      if (!m_HasNetwork)
-      {
-        m_HasNetwork = HasInternet();
-        m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
-      }
 
       if (m_Player->IsPlaying())
         SendPlayerStatus(kTVAPI_Status_Playing);
@@ -794,6 +815,12 @@ void CNWClient::LogFilesDownLoaded(std::string assetID)
   file.Seek(0, SEEK_END);
   file.Write(strData.c_str(), strData.size());
   file.Close();
+}
+
+void CNWClient::UpdateNetworkStatus()
+{
+  m_HasNetwork = HasInternet();
+  m_MediaManager->UpdateNetworkStatus(m_HasNetwork);
 }
 
 bool CNWClient::SendPlayerStatus(const std::string status)

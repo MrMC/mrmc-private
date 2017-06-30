@@ -30,6 +30,7 @@
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 #include "dialogs/GUIDialogProgress.h"
+#include "utils/JobManager.h"
 
 enum AssetDownloadState
 {
@@ -57,8 +58,10 @@ class CNWPurgeManager;
 
 class CNWClient
 : public CThread
+, public CJobQueue
 , public ANNOUNCEMENT::IAnnouncer
 {
+  friend class CNWClientJob;
 public:
   CNWClient();
   virtual ~CNWClient();
@@ -92,13 +95,15 @@ protected:
 
   void          GetPlayerInfo();
   bool          GetProgamInfo();
+
   void          GetActions();
   void          ClearAction(TVAPI_Actions &actions, std::string id);
-
   void          SendFilesPlayed();
   void          LogFilesPlayed(std::string assetID);
   void          SendFilesDownloaded();
   void          LogFilesDownLoaded(std::string assetID);
+
+  void          UpdateNetworkStatus();
   bool          SendPlayerStatus(const std::string status);
 
   void          InitializeInternalsFromPlayer();
