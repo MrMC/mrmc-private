@@ -46,7 +46,7 @@
   			<posy>60</posy>
   			<width>550</width>
   			<height>30</height>
-  			<align>left</align>
+  			<align>center</align>
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
@@ -58,7 +58,7 @@
   			<posy>85</posy>
   			<width>550</width>
   			<height>30</height>
-  			<align>left</align>
+  			<align>center</align>
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
@@ -70,7 +70,7 @@
   			<posy>110</posy>
   			<width>550</width>
   			<height>30</height>
-  			<align>left</align>
+  			<align>center</align>
   			<aligny>center</aligny>
   			<label>-</label>
   			<haspath>true</haspath>
