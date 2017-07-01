@@ -66,7 +66,9 @@ void CNWPlayer::Reset()
 void CNWPlayer::Play()
 {
   CSingleLock lock(m_player_lock);
+  #if ENABLE_NWPLAYER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::Play() playback enabled");
+  #endif
   CApplicationMessenger::GetInstance().SendMsg(TMSG_PLAYLISTPLAYER_CLEAR, PLAYLIST_VIDEO);
   m_playing = true;
 }
@@ -141,7 +143,9 @@ void CNWPlayer::MarkValidated(NWAsset &asset)
         if (m_playlist.groups[g].assets[a].id == asset.id)
         {
           m_playlist.groups[g].assets[a].valid = true;
+          #if ENABLE_NWPLAYER_DEBUGLOGS
           CLog::Log(LOGDEBUG, "**NW** - NW Asset - %s validated", m_playlist.groups[g].assets[a].video_localpath.c_str());
+          #endif
           break;
         }
       }
@@ -164,7 +168,9 @@ void CNWPlayer::RegisterPlayerCallBack(const void *ctx, PlayerCallBackFn fn)
 void CNWPlayer::Process()
 {
   SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
+  #if ENABLE_NWPLAYER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::Process Started");
+  #endif
 
   while (!m_bStop)
   {
@@ -216,7 +222,9 @@ void CNWPlayer::Process()
             // now play the asset if valid (downloaded and md5 checked)
             if (asset.valid)
             {
+              #if ENABLE_NWPLAYER_DEBUGLOGS
               CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::queue group(%d), asset(%d)", group->id, asset.id);
+              #endif
 
               CFileItemPtr item(new CFileItem());
               item->SetLabel2(asset.name);
@@ -255,7 +263,7 @@ void CNWPlayer::Process()
               {
                 if (playbackFailed.GetElapsedSeconds() > playbackFailedTimeoutSeconds)
                 {
-                  CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::playback failed to start after %d seconds", playbackFailedTimeoutSeconds);
+                  CLog::Log(LOGERROR, "**NW** - CNWPlayer::playback failed to start after %d seconds", playbackFailedTimeoutSeconds);
                   break;
                 }
                 else
@@ -268,7 +276,9 @@ void CNWPlayer::Process()
     }
   }
 
+  #if ENABLE_NWPLAYER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::Process Stopped");
+  #endif
 }
 
 bool CNWPlayer::Exists(NWGroup &testgroup)

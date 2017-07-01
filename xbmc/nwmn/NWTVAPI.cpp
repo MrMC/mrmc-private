@@ -93,8 +93,10 @@ bool TVAPI_DoActivate(TVAPI_Activate &activate)
     {
       activate.apiKey = reply["key"].asString();
       activate.apiSecret = reply["secret"].asString();
+      #if ENABLE_TVAPI_DEBUGLOGS
       CLog::Log(LOGDEBUG, "testNationwide5_0 apiKey = %s", activate.apiKey.c_str());
       CLog::Log(LOGDEBUG, "testNationwide5_0 apiSecret = %s", activate.apiSecret.c_str());
+      #endif
       return true;
     }
   }
@@ -118,7 +120,9 @@ bool TVAPI_GetStatus(TVAPI_Status &status)
 
   if (curlfile.Get(curl.Get(), strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     CLog::Log(LOGDEBUG, "TVAPI_GetStatus %s", strResponse.c_str());
+    #endif
 
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -151,8 +155,9 @@ bool TVAPI_GetMachine(TVAPI_Machine &machine)
 
   if (curlfile.Get(curl.Get(), strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     CLog::Log(LOGDEBUG, "TVAPI_GetMachine %s", strResponse.c_str());
-
+    #endif
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
 
@@ -254,8 +259,10 @@ bool TVAPI_UpdateMachineInfo(TVAPI_MachineUpdate &machineUpdate)
   std::string strResponse;
   if (curlfile.Put(curl.Get(), jsonBody, strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_UpdateMachineInfo %s", strResponse.c_str());
+    #endif
     return true;
   }
   return false;
@@ -281,7 +288,9 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
 
   if (curlfile.Get(curl.Get(), strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists %s", strResponse.c_str());
+    #endif
 
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -292,8 +301,10 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
     playlists.playlists.clear();
     while(true)
     {
+      #if ENABLE_TVAPI_DEBUGLOGS
       int curPage = reply["page"].asInteger();
       int perPage = reply["perPage"].asInteger();
+      #endif
 
       CVariant results(CVariant::VariantTypeArray);
       results = reply["results"];
@@ -312,10 +323,14 @@ bool TVAPI_GetPlaylists(TVAPI_Playlists &playlists)
         playListInfo.nmg_managed = result["nmg_managed"].asString();
         playlists.playlists.push_back(playListInfo);
 
+        #if ENABLE_TVAPI_DEBUGLOGS
         CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists %d, %s", sub_total, playListInfo.name.c_str());
+        #endif
       }
 
+      #if ENABLE_TVAPI_DEBUGLOGS
       CLog::Log(LOGDEBUG, "TVAPI_GetPlaylists page = %d, perPage = %d, sub_total = %d, total = %d", curPage, perPage, sub_total, total);
+      #endif
 
       if (sub_total < total)
       {
@@ -355,7 +370,9 @@ bool TVAPI_GetPlaylist(TVAPI_Playlist &playlist, std::string playlist_id)
 
   if (curlfile.Get(curl.Get(), strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     CLog::Log(LOGDEBUG, "TVAPI_GetPlaylist %s", strResponse.c_str());
+    #endif
 
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -414,7 +431,9 @@ bool TVAPI_GetPlaylistItems(TVAPI_PlaylistItems &playlistItems, std::string play
 
   if (curlfile.Get(curl.Get(), strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     CLog::Log(LOGDEBUG, "TVAPI_GetPlaylistItems %s", strResponse.c_str());
+    #endif
 
     CVariant reply;
     reply = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -545,8 +564,10 @@ bool TVAPI_ReportHealth(TVAPI_HealthReport &health)
   std::string strResponse;
   if (curlfile.Post(curl.Get(), params, strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_ReportHealth %s", strResponse.c_str());
+    #endif
     return true;
   }
   return false;
@@ -577,8 +598,10 @@ bool TVAPI_ReportFilesPlayed(TVAPI_Files &files, std::string serial_number)
   std::string strResponse;
   if (curlfile.Post(curl.Get(), jsonBody, strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_ReportFilesPlayed %s", strResponse.c_str());
+    #endif
     return true;
   }
   
@@ -609,8 +632,10 @@ bool TVAPI_ReportFilesDeleted(TVAPI_Files &files)
   std::string strResponse;
   if (curlfile.Delete(curl.Get(), jsonBody, strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_ReportFilesDeleted %s", strResponse.c_str());
+    #endif
     return true;
   }
  
@@ -641,7 +666,9 @@ bool TVAPI_ReportFilesDownloaded(TVAPI_Files &files)
   std::string strResponse;
   if (curlfile.Post(curl.Get(), jsonBody, strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     CLog::Log(LOGDEBUG, "TVAPI_ReportFilesDownloaded %s", strResponse.c_str());
+    #endif
     return true;
   }
   
@@ -665,8 +692,10 @@ bool TVAPI_GetActionQueue(TVAPI_Actions &actions)
   std::string strResponse;
   if (curlfile.Get(curl.Get(), strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_GetActionQueue %s", strResponse.c_str());
+    #endif
 
     CVariant results(CVariant::VariantTypeArray);
     results = CJSONVariantParser::Parse((const unsigned char*)strResponse.c_str(), strResponse.size());
@@ -683,7 +712,9 @@ bool TVAPI_GetActionQueue(TVAPI_Actions &actions)
       actions.actions.push_back(action);
       rtn = true;
 
+      #if ENABLE_TVAPI_DEBUGLOGS
       CLog::Log(LOGDEBUG, "TVAPI_GetActionQueue %s, %s", action.action.c_str(), action.name.c_str());
+      #endif
     }
   }
 
@@ -711,8 +742,10 @@ bool TVAPI_UpdateActionStatus(TVAPI_ActionStatus &actionStatus)
   std::string strResponse;
   if (curlfile.Put(curl.Get(), jsonBody, strResponse))
   {
+    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_UpdateActionStatus %s", strResponse.c_str());
+    #endif
     return true;
   }
   return false;

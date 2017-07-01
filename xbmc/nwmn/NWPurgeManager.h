@@ -25,6 +25,8 @@
 #include "threads/Thread.h"
 #include "threads/CriticalSection.h"
 
+#define ENABLE_NWMPURGEMANAGER_DEBUGLOGS 1
+
 class CNWPurgeManager : public CThread
 {
 public:

@@ -27,6 +27,8 @@
 #include "threads/CriticalSection.h"
 #include "filesystem/CurlFile.h"
 
+#define ENABLE_NWMEDIAMANAGER_DEBUGLOGS 0
+
 typedef void (*AssetUpdateCallBackFn)(const void *ctx, NWAsset &asset, AssetDownloadState downloadState);
 
 class CNWMediaManager : public CThread

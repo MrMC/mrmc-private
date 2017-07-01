@@ -26,6 +26,8 @@
 
 // https://www.nationwidemember.com/tv-api-doc/
 
+#define ENABLE_TVAPI_DEBUGLOGS 0
+
 const std::string kTVAPI_URLBASE = "https://www.nationwidemember.com/tv-api/1/";
 const std::string kTVAPI_URLBASE_TESTSITE = "http://test.nationwidemember.com/tv-api/1/";
 

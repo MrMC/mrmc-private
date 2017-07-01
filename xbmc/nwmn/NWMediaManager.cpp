@@ -113,6 +113,8 @@ size_t CNWMediaManager::GetLocalAssetCount()
 
 void CNWMediaManager::QueueAssetsForDownload(std::vector<NWAsset> &assets)
 {
+  CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::QueueAssetsForDownload "
+    "count = %d", (int)assets.size());
   if (!assets.empty())
   {
     for (size_t asset = 0; asset < assets.size(); asset++)
@@ -135,8 +137,10 @@ void CNWMediaManager::QueueAssetForDownload(NWAsset &asset)
 
   // queue for download
   CSingleLock lock(m_download_lock);
+  #if ENABLE_NWMEDIAMANAGER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::QueueAssetForDownload "
     "%s", asset.video_localpath.c_str());
+  #endif
   m_download.push_back(asset);
 }
 
@@ -174,7 +178,9 @@ void CNWMediaManager::RegisterAssetUpdateCallBack(const void *ctx, AssetUpdateCa
 void CNWMediaManager::Process()
 {
   SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
+  #if ENABLE_NWMEDIAMANAGER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process Started");
+  #endif
 
   //m_http.SetBufferSize(32768 * 10);
   m_http.SetTimeout(5);
@@ -242,7 +248,7 @@ void CNWMediaManager::Process()
         }
         else
         {
-          CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process "
+          CLog::Log(LOGERROR, "**NW** - CNWMediaManager::Process "
                     "md5 mismatch for %s", asset.video_localpath.c_str());
           // must be bad file, delete and requeue for download
           if (XFILE::CFile::Delete(asset.video_localpath))
@@ -258,7 +264,7 @@ void CNWMediaManager::Process()
       }
       else
       {
-        CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process download/save failed, just requeue");
+        CLog::Log(LOGERROR, "**NW** - CNWMediaManager::Process download/save failed or canceled, just requeue");
         // download/save failed, just requeue
         download_lock.Enter();
         m_download.push_back(asset);
@@ -268,7 +274,9 @@ void CNWMediaManager::Process()
     }
   }
 
+  #if ENABLE_NWMEDIAMANAGER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::Process Stopped");
+  #endif
 }
 
 bool CNWMediaManager::AssetExists(NWAsset &asset)

@@ -95,7 +95,9 @@ public:
   {
     if (m_function == "GetActions")
     {
+      #if ENABLE_NWCLIENT_DEBUGLOGS
       CLog::Log(LOGNOTICE, "CNWClientJob: GetActions");
+      #endif
       m_client->GetActions();
       return true;
     }
@@ -235,11 +237,26 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
   {
     if (strcmp(message, "OnPlay") == 0)
     {
+      #if ENABLE_NWCLIENT_DEBUGLOGS
       CLog::Log(LOGDEBUG, "**MN** - CNWClient::Announce() - Playback started");
+      #endif
       std::string strPath = g_application.CurrentFileItem().GetPath();
       std::string assetID = URIUtils::GetFileName(strPath);
       URIUtils::RemoveExtension(assetID);
       LogFilesPlayed(assetID);
+    }
+    else if (strcmp(message, "OnStop") == 0)
+    {
+      #if ENABLE_NWCLIENT_DEBUGLOGS
+      CLog::Log(LOGDEBUG, "**MN** - CNWClient::Announce() - Playback stopped");
+      #endif
+      if (data.isMember("end") && data["end"] == false)
+      {
+        // playback stopped, someone hit back in gui.
+        StopThread();
+        StopPlaying();
+        m_totalAssets = 0;
+      }
     }
   }
 }
@@ -251,8 +268,6 @@ void CNWClient::Startup(bool bypass_authorization, bool fetchAndUpdate)
   StopThread();
   StopPlaying();
   m_totalAssets = 0;
-  m_MediaManager->ClearDownloads();
-  m_MediaManager->ClearAssets();
 
   if (!bypass_authorization)
   {
@@ -297,6 +312,11 @@ void CNWClient::StopPlaying()
 {
   if (m_Player->IsPlaying())
     m_Player->StopPlaying();
+  if (m_MediaManager)
+  {
+    m_MediaManager->ClearDownloads();
+    m_MediaManager->ClearAssets();
+  }
 }
 
 void CNWClient::PlayNext()
@@ -322,8 +342,9 @@ void CNWClient::RegisterPlayerCallBack(const void *ctx, PlayerCallBackFn fn)
 void CNWClient::Process()
 {
   SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
+  #if ENABLE_NWCLIENT_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWClient::Process Started");
-
+  #endif
   SendPlayerStatus(kTVAPI_Status_On);
 
   while (!m_bStop)
@@ -339,11 +360,12 @@ void CNWClient::Process()
     CDateTime time = CDateTime::GetCurrentDateTime();
     if (m_StartupState != ClientUseUpdateInterval || time >= m_NextUpdateTime)
     {
+      #if ENABLE_NWCLIENT_DEBUGLOGS
       CLog::Log(LOGDEBUG, "**NW** - time = %s", time.GetAsDBDateTime().c_str());
       CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
       CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateInterval = %d days, %d hours, %d mins",
         m_NextUpdateInterval.GetDays(), m_NextUpdateInterval.GetHours(), m_NextUpdateInterval.GetMinutes());
-
+      #endif
       m_NextUpdateTime += m_NextUpdateInterval;
       CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
 
@@ -369,7 +391,9 @@ void CNWClient::Process()
     }
   }
 
+  #if ENABLE_NWCLIENT_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWClient::Process Stopped");
+  #endif
 }
 
 void CNWClient::ShowStartUpDialog(bool fetchAndUpdate)
@@ -401,8 +425,6 @@ bool CNWClient::ManageStartupDialog()
       CloseStartUpDialog();
 
       StopPlaying();
-      m_MediaManager->ClearDownloads();
-      m_MediaManager->ClearAssets();
 
       if (m_ClientCallBackFn)
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, 1);
@@ -432,8 +454,6 @@ bool CNWClient::ManageStartupDialog()
       CloseStartUpDialog();
 
       StopPlaying();
-      m_MediaManager->ClearDownloads();
-      m_MediaManager->ClearAssets();
 
       if (m_ClientCallBackFn)
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, 1);
@@ -886,9 +906,11 @@ void CNWClient::InitializeInternalsFromPlayer()
     if (time >= m_NextUpdateTime)
       m_NextUpdateTime += m_NextUpdateInterval;
 
+    #if ENABLE_NWCLIENT_DEBUGLOGS
     CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
     CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateInterval = %d days, %d hours, %d mins",
       m_NextUpdateInterval.GetDays(), m_NextUpdateInterval.GetHours(), m_NextUpdateInterval.GetMinutes());
+    #endif
 
   }
 

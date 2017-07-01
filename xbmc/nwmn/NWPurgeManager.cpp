@@ -85,7 +85,9 @@ void CNWPurgeManager::AddPurgePath(const std::string &media, const std::string &
 void CNWPurgeManager::Process()
 {
   SetPriority(THREAD_PRIORITY_BELOW_NORMAL);
+  #if ENABLE_NWMPURGEMANAGER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWPurgeManager::Process Started");
+  #endif
 
   while (!m_bStop)
   {
@@ -122,7 +124,9 @@ void CNWPurgeManager::Process()
     }
   }
 
+  #if ENABLE_NWMPURGEMANAGER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWPurgeManager::Process Stopped");
+  #endif
 }
 
 void CNWPurgeManager::UpdateMargins()
@@ -287,8 +291,10 @@ bool CNWPurgeManager::PurgeLastAccessed()
     }
   }
 
+  #if ENABLE_NWMPURGEMANAGER_DEBUGLOGS
   if (!rtn)
     CLog::Log(LOGDEBUG, "**NW** - CNWPurgeManager::PurgeLastAccessed nothing to purge");
+  #endif
 
   return rtn;
 }

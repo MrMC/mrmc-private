@@ -27,6 +27,8 @@
 
 #include "NWClient.h"
 
+#define ENABLE_NWPLAYER_DEBUGLOGS 1
+
 typedef void (*PlayerCallBackFn)(const void *ctx, int msg, struct NWAsset &asset);
 
 class CNWPlayer

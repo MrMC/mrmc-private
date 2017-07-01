@@ -32,6 +32,8 @@
 #include "dialogs/GUIDialogProgress.h"
 #include "utils/JobManager.h"
 
+#define ENABLE_NWCLIENT_DEBUGLOGS 1
+
 enum AssetDownloadState
 {
   IsPresent,
