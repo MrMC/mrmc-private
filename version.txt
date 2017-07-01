@@ -3,7 +3,7 @@ APP_PACKAGE org.nationwidegroup.membernettv
 COMPANY_NAME Nationwide Marketing Group, LLC
 WEBSITE http://www.nationwidegroup.org/
 VERSION_MAJOR 2
-VERSION_MINOR 8
+VERSION_MINOR 9
 VERSION_PATCH 0
 VERSION_TAG 0
 VERSION_CODE 160201
