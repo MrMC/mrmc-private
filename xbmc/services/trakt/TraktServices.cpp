@@ -572,7 +572,7 @@ void CTraktServices::SetItemUnWatched(CFileItem &item)
 void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, double percentage)
 {
   // if we are music, do not report
-  if (item.IsAudio())
+  if (item.IsAudio() || item.IsPVR())
     return;
 
   if (!status.empty())
