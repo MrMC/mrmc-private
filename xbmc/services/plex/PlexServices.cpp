@@ -496,8 +496,7 @@ void CPlexServices::Process()
   // the via GDM
   CheckForGDMServers();
 
-  CStopWatch debugRSS, plextvTimer, checkUpdatesTimer;
-  debugRSS.StartZero();
+  CStopWatch plextvTimer, checkUpdatesTimer;
   gdmTimer.StartZero();
   plextvTimer.StartZero();
   checkUpdatesTimer.StartZero();

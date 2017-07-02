@@ -490,9 +490,6 @@ void CEmbyServices::Process()
     m_processSleep.Reset();
   }
 
-
-
-
   int serviceTimeoutSeconds = 5;
   if (signInByManual)
   {
