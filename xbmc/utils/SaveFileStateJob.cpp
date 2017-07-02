@@ -42,12 +42,9 @@ bool CSaveFileStateJob::DoWork()
 {
   if (!m_item.GetPath().empty() && CTraktServices::GetInstance().IsEnabled())
   {
-    if (m_bookmark.timeInSeconds >= 0)
-    {
-      m_item.GetVideoInfoTag()->m_resumePoint.timeInSeconds = m_bookmark.timeInSeconds;
-      m_item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds = m_bookmark.totalTimeInSeconds;
-    }
-
+    if (m_item.HasVideoInfoTag())
+      m_item.GetVideoInfoTag()->m_resumePoint = m_bookmark;
+    
     double total_s = m_item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
     double total_s_90percent = total_s * 0.9;
     double total_s_minus_5mins = total_s - (60 * 5);
