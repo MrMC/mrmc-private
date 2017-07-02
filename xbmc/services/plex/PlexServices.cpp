@@ -37,6 +37,7 @@
 #include "network/Network.h"
 #include "network/Socket.h"
 #include "network/DNSNameCache.h"
+#include "network/WakeOnAccess.h"
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "profiles/dialogs/GUIDialogLockSettings.h"
@@ -988,6 +989,8 @@ bool CPlexServices::AddClient(CPlexClientPtr foundClient)
     if (client->GetUuid() == foundClient->GetUuid())
       return false;
   }
+
+  CWakeOnAccess::GetInstance().WakeUpHost(foundClient->GetHost(), "Plex Server");
 
   // only add new clients that are present
   if (foundClient->GetPresence() && foundClient->ParseSections(PlexSectionParsing::newSection))
