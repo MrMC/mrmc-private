@@ -452,6 +452,8 @@ void CPlexServices::Process()
   // reset any canceled state
   m_plextv.Reset();
 
+  CStopWatch gdmTimer;
+  gdmTimer.StartZero();
   while (!m_bStop)
   {
     if (g_sysinfo.HasInternet())
@@ -468,6 +470,12 @@ void CPlexServices::Process()
       {
         CLog::Log(LOGDEBUG, "CPlexServices::Process has gateway2");
         break;
+      }
+      if (gdmTimer.GetElapsedSeconds() > 5)
+      {
+        if (m_playState == MediaServicesPlayerState::stopped)
+          CheckForGDMServers();
+        gdmTimer.Reset();
       }
     }
 
@@ -488,7 +496,8 @@ void CPlexServices::Process()
   // the via GDM
   CheckForGDMServers();
 
-  CStopWatch gdmTimer, plextvTimer, checkUpdatesTimer;
+  CStopWatch debugRSS, plextvTimer, checkUpdatesTimer;
+  debugRSS.StartZero();
   gdmTimer.StartZero();
   plextvTimer.StartZero();
   checkUpdatesTimer.StartZero();
