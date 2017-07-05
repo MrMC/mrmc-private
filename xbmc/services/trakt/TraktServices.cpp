@@ -927,11 +927,7 @@ void CTraktServices::PushWatchedStatus()
               CFileItemList episodes;
               CVideoDatabase::Filter filter1(videodb.PrepareSQL("idShow=%i", sItem.GetVideoInfoTag()->m_iDbId));
               CVideoDatabase::Filter filter2;
-//              CVideoDbUrl videoUrl;
-//              videoUrl.FromString("videodb://tvshows/titles/");
-//              videoUrl.AddOption("season", seItem.GetVideoInfoTag()->m_iSeason);
               videodb.GetEpisodesByWhere(StringUtils::Format("videodb://tvshows/titles/%i/%i",sItem.GetVideoInfoTag()->m_iDbId,seItem.GetVideoInfoTag()->m_iSeason), filter2, episodes);
-//              videodb.GetEpisodesNav("videodb://tvshows/titles/", episodes, -1, -1, -1, -1, sItem.GetVideoInfoTag()->m_iDbId, seItem.GetVideoInfoTag()->m_iSeason);
               if (episodes.Size() > 0)
               {
                 int watched = 0;
