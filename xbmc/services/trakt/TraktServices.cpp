@@ -832,7 +832,162 @@ void CTraktServices::PullWatchedStatus()
 void CTraktServices::PushWatchedStatus()
 {
   CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() - Started");
-  Sleep(10000);
+  
+  CVariant data;
+  CVideoDatabase videodb;
+  
+  if (!videodb.Open())
+    return;
+  
+  if (!videodb.HasContent())
+    return;
+  
+  CFileItemList movieItems;
+  videodb.GetMoviesNav("videodb://movies/titles/", movieItems);
+
+  if (movieItems.Size() > 0)
+  {
+    for (int i=0; i < movieItems.Size(); i++)
+    {
+      CFileItem pItem = *new CFileItem(*movieItems[i]);
+      if (pItem.HasVideoInfoTag() &&
+          pItem.GetVideoInfoTag()->m_type == MediaTypeMovie &&
+          pItem.GetVideoInfoTag()->m_playCount > 0)
+      {
+        CDateTime date = pItem.GetVideoInfoTag()->m_lastPlayed;
+        std::string timenow = date.GetAsW3CDateTime(true);
+        CVariant movie;
+        movie["title"]      = pItem.GetVideoInfoTag()->m_strTitle;
+        movie["year"]       = pItem.GetVideoInfoTag()->GetYear();
+        movie["watched_at"] = timenow;
+        movie["ids"]        = ParseIds(pItem.GetVideoInfoTag()->GetUniqueIDs(), pItem.GetVideoInfoTag()->m_type);
+        data["movies"].push_back(movie);
+        CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() - Movie [%s]", pItem.GetVideoInfoTag()->m_strTitle.c_str());
+      }
+    }
+  }
+  
+  CFileItemList showItems;
+  CVideoDatabase::Filter filter;
+  videodb.GetTvShowsByWhere("videodb://tvshows/titles/", filter, showItems);
+
+  if (showItems.Size() > 0)
+  {
+    for (int i=0; i < showItems.Size(); i++)
+    {
+      CFileItem sItem = *new CFileItem(*showItems[i]);
+      
+      CFileItem showItem;
+      std::string basePath = StringUtils::Format("videodb://tvshows/titles/%i/%i",sItem.GetVideoInfoTag()->m_iDbId, sItem.GetVideoInfoTag()->m_iSeason);
+      videodb.GetTvShowInfo(basePath, *showItem.GetVideoInfoTag(), sItem.GetVideoInfoTag()->m_iIdShow);
+      
+      if (sItem.HasVideoInfoTag() &&
+          sItem.GetVideoInfoTag()->m_type == MediaTypeTvShow &&
+          sItem.GetVideoInfoTag()->m_playCount > 0)
+      {
+        CVariant show;
+        CDateTime date = sItem.GetVideoInfoTag()->m_lastPlayed;
+        std::string timenow = date.GetAsW3CDateTime(true);
+        show["title"]      = sItem.GetVideoInfoTag()->m_strShowTitle;
+        show["year"]       = sItem.GetVideoInfoTag()->GetYear();
+        show["watched_at"] = timenow;
+        show["ids"]        = ParseIds(showItem.GetVideoInfoTag()->GetUniqueIDs(), sItem.GetVideoInfoTag()->m_type);
+        data["shows"].push_back(show);
+        CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() - Show [%s]", sItem.GetVideoInfoTag()->m_strShowTitle.c_str());
+      }
+      else
+      {
+        std::string strPath = StringUtils::Format("videodb://tvshows/titles/%i/", sItem.GetVideoInfoTag()->m_iDbId);
+        CFileItemList seasonItems;
+        videodb.GetSeasonsNav(strPath, seasonItems, -1, -1, -1, -1, sItem.GetVideoInfoTag()->m_iIdShow, false);
+        if (seasonItems.Size() > 0)
+        {
+          for (int i=0; i < seasonItems.Size(); i++)
+          {
+            CFileItem seItem = *new CFileItem(*seasonItems[i]);
+            if (seItem.HasVideoInfoTag() &&
+                seItem.GetVideoInfoTag()->m_type == MediaTypeSeason &&
+                seItem.GetVideoInfoTag()->m_playCount > 0)
+            {
+              CVariant show;
+              CDateTime date = seItem.GetVideoInfoTag()->m_lastPlayed;
+              std::string timenow = date.GetAsW3CDateTime(true);
+              show["title"]      = sItem.GetVideoInfoTag()->m_strShowTitle;
+              show["year"]       = sItem.GetVideoInfoTag()->GetYear();
+              show["watched_at"] = timenow;
+              show["ids"]        = ParseIds(showItem.GetVideoInfoTag()->GetUniqueIDs(), sItem.GetVideoInfoTag()->m_type);
+              CVariant season;
+              season["number"] = seItem.GetVideoInfoTag()->m_iSeason;
+              show["seasons"].push_back(season);
+              data["shows"].push_back(show);
+              CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() - Show [%s] Season [%i]", sItem.GetVideoInfoTag()->m_strShowTitle.c_str(), seItem.GetVideoInfoTag()->m_iSeason);
+            }
+            else
+            {
+              CFileItemList episodes;
+              CVideoDatabase::Filter filter1(videodb.PrepareSQL("idShow=%i", sItem.GetVideoInfoTag()->m_iDbId));
+              CVideoDatabase::Filter filter2;
+//              CVideoDbUrl videoUrl;
+//              videoUrl.FromString("videodb://tvshows/titles/");
+//              videoUrl.AddOption("season", seItem.GetVideoInfoTag()->m_iSeason);
+              videodb.GetEpisodesByWhere(StringUtils::Format("videodb://tvshows/titles/%i/%i",sItem.GetVideoInfoTag()->m_iDbId,seItem.GetVideoInfoTag()->m_iSeason), filter2, episodes);
+//              videodb.GetEpisodesNav("videodb://tvshows/titles/", episodes, -1, -1, -1, -1, sItem.GetVideoInfoTag()->m_iDbId, seItem.GetVideoInfoTag()->m_iSeason);
+              if (episodes.Size() > 0)
+              {
+                int watched = 0;
+                for (int i=0; i < episodes.Size(); i++)
+                {
+                  CFileItem eItem = *new CFileItem(*episodes[i]);
+                  if(eItem.GetVideoInfoTag()->m_playCount > 0)
+                    watched++;
+                }
+                if (watched > 0)
+                {
+                  std::string showName = seItem.GetVideoInfoTag()->m_strShowTitle;
+                  removeCharsFromString(showName);
+                  StringUtils::Replace(showName, " ", "-");
+                  StringUtils::Replace(showName, ":", "");
+                  StringUtils::Replace(showName, "(", "");
+                  StringUtils::Replace(showName, ")", "");
+                  std::string showNameT;
+                  std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",showName.c_str(),seItem.GetVideoInfoTag()->m_iSeason);
+                  CVariant ep = GetTraktCVariant(episodesUrl);
+                  CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() get trakt episodes [%s]",episodesUrl.c_str());
+                  if (ep.isArray())
+                  {
+                    for (int i=0; i < episodes.Size(); i++)
+                    {
+                      CFileItem eItem = *new CFileItem(*episodes[i]);
+                      if (eItem.HasVideoInfoTag() &&
+                          eItem.GetVideoInfoTag()->m_type == MediaTypeEpisode &&
+                          eItem.GetVideoInfoTag()->m_playCount > 0)
+                      {
+                        for (CVariant::iterator_array it = ep.begin_array(); it != ep.end_array(); it++)
+                        {
+                          CVariant &episodeItem = *it;
+                          if (episodeItem["number"].asInteger() == eItem.GetVideoInfoTag()->m_iEpisode)
+                          {
+                            CDateTime date = eItem.GetVideoInfoTag()->m_lastPlayed;
+                            std::string timenow = date.GetAsW3CDateTime(true);
+                            CVariant episode;
+                            episode["watched_at"] = timenow;
+                            episode["ids"]        = episodeItem["ids"];
+                            data["episodes"].push_back(episode);
+                            CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() - Show [%s] Season [%i] episode[%i]", sItem.GetVideoInfoTag()->m_strShowTitle.c_str(), seItem.GetVideoInfoTag()->m_iSeason,eItem.GetVideoInfoTag()->m_iEpisode);
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  ServerChat("https://api.trakt.tv/sync/history", data);
   CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() - Done");
   CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPUSHWATCHED, "Idle");
   GetInstance().SetButtonsEnabled(true);
