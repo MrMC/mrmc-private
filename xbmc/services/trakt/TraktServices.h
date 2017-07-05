@@ -78,7 +78,7 @@ private:
   static CVariant   ParseIds(const std::map<std::string, std::string> &Ids, const std::string &type);
   static CVariant   GetTraktCVariant(const std::string &url);
   static void       ServerChat(const std::string &url, const CVariant &data);
-  static void       SetItemWatchedJob(CFileItem &item, bool watched);
+  static void       SetItemWatchedJob(CFileItem &item, bool watched, bool setLastWatched = false);
   void              RefreshAccessToken();
   void              CheckAccessToken();
 

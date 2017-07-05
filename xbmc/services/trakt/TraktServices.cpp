@@ -105,8 +105,17 @@ public:
   }
   virtual bool operator==(const CJob *job) const
   {
-    return true;
+    if (strcmp(job->GetType(),GetType()) == 0)
+    {
+      const CTraktServiceJob* rjob = dynamic_cast<const CTraktServiceJob*>(job);
+      if (rjob)
+      {
+        return m_function == rjob->m_function;
+      }
+    }
+    return false;
   }
+  
 private:
   CFileItem   m_item;
   std::string m_function;
@@ -450,10 +459,14 @@ void CTraktServices::SetPlayState(CFileItem &item, const MediaServicesPlayerStat
   }
 }
 
-void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched)
+void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched, bool setLastWatched)
 {
   CVariant data;
   CDateTime now = CDateTime::GetUTCDateTime();
+  CDateTime lastPlayed = item.GetVideoInfoTag()->m_lastPlayed;
+  
+  if (setLastWatched && lastPlayed.IsValid())
+    now = lastPlayed;
 
   if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
   {
