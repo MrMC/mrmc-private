@@ -744,10 +744,12 @@ void CTraktServices::PullWatchedStatus()
         for (int i=0; i < items.Size(); i++)
         {
           CFileItem pItem = *new CFileItem(*items[i]);
-          std::string itemIMDB = pItem.GetVideoInfoTag()->GetUniqueID("imdb");
-          std::string itemTMDB = pItem.GetVideoInfoTag()->GetUniqueID("tmdb");
-          if (itemIMDB == movieItem["movie"]["ids"]["imdb"].asString() ||
-              itemTMDB == movieItem["movie"]["ids"]["tmdb"].asString())
+          std::string itemDefault = pItem.GetVideoInfoTag()->GetUniqueID();
+          if (!itemDefault.empty() &&
+              ((itemDefault == movieItem["movie"]["ids"]["tvdb"].asString() ||
+                itemDefault == movieItem["movie"]["ids"]["tmdb"].asString() ||
+                itemDefault == movieItem["movie"]["ids"]["imdb"].asString()) &&
+               pItem.GetVideoInfoTag()->GetYear() == movieItem["movie"]["year"].asInteger()))
           {
             CDateTime date;
             date.SetFromW3CDate(movieItem["last_watched_at"].asString());
