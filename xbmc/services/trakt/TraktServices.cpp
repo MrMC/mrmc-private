@@ -66,6 +66,12 @@ public:
   , m_percentage(percentage)
   {
   }
+  CTraktServiceJob(std::string strFunction)
+  : m_item(*new CFileItem)
+  , m_function(strFunction)
+  , m_percentage(0)
+  {
+  }
   virtual ~CTraktServiceJob()
   {
   }
@@ -98,6 +104,12 @@ public:
       case "TraktSetUnWatched"_mkhash:
         CTraktServices::SetItemWatchedJob(m_item, false);
         break;
+      case "TraktPushWatched"_mkhash:
+        CTraktServices::PushWatchedStatus();
+        break;
+      case "TraktPullWatched"_mkhash:
+        CTraktServices::PullWatchedStatus();
+        break;
       default:
         return false;
     }
@@ -128,6 +140,8 @@ CTraktServices::CTraktServices()
 {
   CAnnouncementManager::GetInstance().AddAnnouncer(this);
   GetUserSettings();
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPULLWATCHED, "Idle");
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPUSHWATCHED, "Idle");
 }
 
 CTraktServices::~CTraktServices()
@@ -148,6 +162,16 @@ bool CTraktServices::IsEnabled()
 
 void CTraktServices::OnSettingAction(const CSetting *setting)
 {
+  
+  /*
+   static const std::string SETTING_SERVICES_TRAKTSIGNINPIN;
+   static const std::string SETTING_SERVICES_TRAKTPULLWATCHED;
+   static const std::string SETTING_SERVICES_TRAKTPUSHWATCHED;
+   static const std::string SETTING_SERVICES_TRAKTACESSTOKEN;
+   static const std::string SETTING_SERVICES_TRAKTACESSREFRESHTOKEN;
+   static const std::string SETTING_SERVICES_TRAKTACESSTOKENVALIDITY;
+   */
+  
   if (setting == nullptr)
     return;
 
@@ -173,6 +197,7 @@ void CTraktServices::OnSettingAction(const CSetting *setting)
         std::string strMessage = "Could not get authToken via pin request sign-in";
         CLog::Log(LOGERROR, "CTraktServices: %s", strMessage.c_str());
       }
+      SetButtonsEnabled(true);
     }
     else
     {
@@ -183,8 +208,21 @@ void CTraktServices::OnSettingAction(const CSetting *setting)
       m_refreshAuthToken.clear();
       CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN, strSignIn);
       CLog::Log(LOGDEBUG, "CTraktServices:OnSettingAction sign-out ok");
+      SetButtonsEnabled(false);
     }
     SetUserSettings();
+  }
+  else if (settingId == CSettings::SETTING_SERVICES_TRAKTPULLWATCHED)
+  {
+    SetButtonsEnabled(false);
+    CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPULLWATCHED, "Running");
+    AddJob(new CTraktServiceJob("TraktPullWatched"));
+  }
+  else if (settingId == CSettings::SETTING_SERVICES_TRAKTPUSHWATCHED)
+  {
+    SetButtonsEnabled(false);
+    CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPUSHWATCHED, "Running");
+    AddJob(new CTraktServiceJob("TraktPushWatched"));
   }
 }
 
@@ -261,6 +299,14 @@ void CTraktServices::OnSettingChanged(const CSetting *setting)
 
   if (setting == NULL)
     return;
+}
+
+void CTraktServices::SetButtonsEnabled(bool visible)
+{
+  auto settingPush = static_cast<CSettingString*>(CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_TRAKTPUSHWATCHED));
+  settingPush->SetEnabled(visible);
+  auto settingPull = static_cast<CSettingString*>(CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_TRAKTPULLWATCHED));
+  settingPull->SetEnabled(visible);
 }
 
 void CTraktServices::SetUserSettings()
@@ -670,6 +716,131 @@ CVariant CTraktServices::ParseIds(const std::map<std::string, std::string> &Ids,
   return variantIDs;
 }
 
+void CTraktServices::PullWatchedStatus()
+{
+  CLog::Log(LOGDEBUG, "CTraktServices::PullWatchedStatus() - Started");
+  CVideoDatabase videodb;
+  
+  if (!videodb.Open())
+    return;
+  
+  if (!videodb.HasContent())
+    return;
+  
+  CFileItemList items;
+  if (!videodb.GetMoviesNav("videodb://movies/titles/", items))
+  {
+    videodb.Close();
+    return;
+  }
+  CVariant data = GetTraktCVariant("https://api.trakt.tv/sync/watched/movies");
+  if (data.isArray())
+  {
+    for (CVariant::iterator_array it = data.begin_array(); it != data.end_array(); it++)
+    {
+      CVariant &movieItem = *it;
+      if (items.Size() > 0)
+      {
+        for (int i=0; i < items.Size(); i++)
+        {
+          CFileItem pItem = *new CFileItem(*items[i]);
+          std::string itemIMDB = pItem.GetVideoInfoTag()->GetUniqueID("imdb");
+          std::string itemTMDB = pItem.GetVideoInfoTag()->GetUniqueID("tmdb");
+          if (itemIMDB == movieItem["movie"]["ids"]["imdb"].asString() ||
+              itemTMDB == movieItem["movie"]["ids"]["tmdb"].asString())
+          {
+            CDateTime date;
+            date.SetFromW3CDate(movieItem["last_watched_at"].asString());
+            videodb.ClearBookMarksOfFile(pItem.GetVideoInfoTag()->GetPath(), CBookmark::RESUME);
+            videodb.SetPlayCount(pItem, pItem.GetVideoInfoTag()->m_playCount + 1 , date);
+          }
+        }
+      }
+    }
+  }
+  // CommitTransaction in case GetTvShowsByWhere below fails
+  videodb.CommitTransaction();
+  
+  // get tvshows
+  CVideoDatabase::Filter filter;
+  items.Clear();
+  if (!videodb.GetTvShowsByWhere("videodb://tvshows/titles/", filter, items))
+  {
+    videodb.Close();
+    return;
+  }
+  CVariant dataShows = GetTraktCVariant("https://api.trakt.tv/sync/watched/shows");
+  if (dataShows.isArray())
+  {
+    for (CVariant::iterator_array it = dataShows.begin_array(); it != dataShows.end_array(); it++)
+    {
+      CVariant &movieItem = *it;
+      if (items.Size() > 0)
+      {
+        for (int i=0; i < items.Size(); i++)
+        {
+          CFileItem pItem = *new CFileItem(*items[i]);
+          std::string itemDefault = pItem.GetVideoInfoTag()->GetUniqueID();
+          
+          if (!itemDefault.empty() &&
+              ((itemDefault == movieItem["show"]["ids"]["tvdb"].asString() ||
+               itemDefault == movieItem["show"]["ids"]["tmdb"].asString() ||
+               itemDefault == movieItem["show"]["ids"]["imdb"].asString()) &&
+               pItem.GetVideoInfoTag()->GetYear() == movieItem["show"]["year"].asInteger()))
+          {
+            CFileItemList episodes;
+            CVideoDatabase::Filter filter1(videodb.PrepareSQL("idShow=%i", pItem.GetVideoInfoTag()->m_iDbId));
+            videodb.GetEpisodesByWhere("videodb://tvshows/titles/", filter1, episodes);
+            for (int i = 0; i < episodes.Size(); i++)
+            {
+              CFileItem pItemEpisode = *new CFileItem(*episodes[i]);
+              CVariant dataSeasons = movieItem["seasons"];
+              for (CVariant::iterator_array is = dataSeasons.begin_array(); is != dataSeasons.end_array(); is++)
+              {
+                CVariant &seasonItem = *is;
+                if(seasonItem["number"].asInteger() == pItemEpisode.GetVideoInfoTag()->m_iSeason)
+                {
+                  CVariant dataEpisodes = seasonItem["episodes"];
+                  for (CVariant::iterator_array ie = dataEpisodes.begin_array(); ie != dataEpisodes.end_array(); ie++)
+                  {
+                    CVariant &episodeItem = *ie;
+                    if(episodeItem["number"].asInteger() == pItemEpisode.GetVideoInfoTag()->m_iEpisode)
+                    {
+                      CLog::Log(LOGDEBUG, "CTraktServices::PullWatchedStatus() - Matched [%s] season %i episode %i",
+                                movieItem["show"]["title"].asString().c_str(),
+                                pItemEpisode.GetVideoInfoTag()->m_iSeason,
+                                pItemEpisode.GetVideoInfoTag()->m_iEpisode);
+                      CDateTime date;
+                      date.SetFromW3CDate(episodeItem["last_watched_at"].asString());
+                      videodb.ClearBookMarksOfFile(pItem.GetVideoInfoTag()->GetPath(), CBookmark::RESUME);
+                      videodb.SetPlayCount(pItemEpisode, pItem.GetVideoInfoTag()->m_playCount + 1 , date);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  // close database
+  videodb.CommitTransaction();
+  videodb.Close();
+  CLog::Log(LOGDEBUG, "CTraktServices::PullWatchedStatus() - Done");
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPULLWATCHED, "Idle");
+  GetInstance().SetButtonsEnabled(true);
+}
+
+void CTraktServices::PushWatchedStatus()
+{
+  CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() - Started");
+  Sleep(10000);
+  CLog::Log(LOGDEBUG, "CTraktServices::PushWatchedStatus() - Done");
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPUSHWATCHED, "Idle");
+  GetInstance().SetButtonsEnabled(true);
+}
+
 CVariant CTraktServices::GetTraktCVariant(const std::string &url)
 {
   // check if token expired
@@ -681,6 +852,7 @@ CVariant CTraktServices::GetTraktCVariant(const std::string &url)
   trakt.SetRequestHeader("Accept-Encoding", "gzip");
   trakt.SetRequestHeader("trakt-api-version", "2");
   trakt.SetRequestHeader("trakt-api-key", NS_TRAKT_CLIENTID);
+  trakt.SetRequestHeader("Authorization", "Bearer " + CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTACESSTOKEN));
   
   CURL curl(url);
   // this is key to get back gzip encoded content

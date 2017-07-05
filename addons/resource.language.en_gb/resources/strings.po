@@ -18715,7 +18715,27 @@ msgctxt "#36632"
 msgid "Timeout in seconds for MySQL connections"
 msgstr ""
 
-#empty strings from id 36633 to 36899
+#: system/settings/settings.xml
+msgctxt "#36633"
+msgid "Pull watched status from Trakt.tv server"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#36634"
+msgid "Function to retreive watched status for items on Trakt.tv server, MySql and sqlite(internal MrMC database) only."
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#36635"
+msgid "Push watched status to Trakt.tv server"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#36636"
+msgid "Function to send watched status to Trakt.tv server, MySql and sqlite(internal MrMC database) only."
+msgstr ""
+
+#empty strings from id 36637 to 36899
 
 #: xbmc/media/MediaType.cpp
 msgctxt "#36900"

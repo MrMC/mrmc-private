@@ -454,6 +454,8 @@ public:
   static const std::string SETTING_SERVICES_EMBYLIMITHOMETO;
   // trakt
   static const std::string SETTING_SERVICES_TRAKTSIGNINPIN;
+  static const std::string SETTING_SERVICES_TRAKTPULLWATCHED;
+  static const std::string SETTING_SERVICES_TRAKTPUSHWATCHED;
   static const std::string SETTING_SERVICES_TRAKTACESSTOKEN;
   static const std::string SETTING_SERVICES_TRAKTACESSREFRESHTOKEN;
   static const std::string SETTING_SERVICES_TRAKTACESSTOKENVALIDITY;

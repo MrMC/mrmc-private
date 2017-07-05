@@ -70,6 +70,8 @@ private:
 
 
   void              SetUserSettings();
+  void              SetButtonsEnabled(bool visible);
+  void              SetButtonText(std::string text, std::string button);
   void              GetUserSettings();
   bool              MyTraktSignedIn();
 
@@ -78,6 +80,8 @@ private:
   const MediaServicesPlayerState GetPlayState(CFileItem &item);
   void              SetPlayState(CFileItem &item, const MediaServicesPlayerState &state);
   static CVariant   ParseIds(const std::map<std::string, std::string> &Ids, const std::string &type);
+  static void       PullWatchedStatus();  
+  static void       PushWatchedStatus();
   static CVariant   GetTraktCVariant(const std::string &url);
   static void       ServerChat(const std::string &url, const CVariant &data);
   static void       SetItemWatchedJob(CFileItem &item, bool watched, bool setLastWatched = false);

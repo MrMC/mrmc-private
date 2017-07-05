@@ -2497,10 +2497,18 @@
           <level>0</level>
           <default>Sign-in</default>
           <dependencies>
-            <dependency type="enable">
-              <condition on="property" name="traktsigninpin" setting="trakt.signinpin" />
-            </dependency>
+            <dependency type="visible" on="property" name="traktsigninpin" operator="is">0</dependency>
           </dependencies>
+          <control type="button" format="action"/>
+        </setting>
+        <setting id="trakt.pullwatched" type="string" label="36633" help="36634">
+          <level>0</level>
+          <default>Idle</default>
+          <control type="button" format="action"/>
+        </setting>
+        <setting id="trakt.pushwatched" type="string" label="36635" help="36636">
+          <level>0</level>
+          <default>Idle</default>
           <control type="button" format="action"/>
         </setting>
         <setting id="trakt.accesstoken" type="string" label="" help="">
@@ -2513,6 +2521,15 @@
           <visible>false</visible>
         </setting>
         <setting id="trakt.accessrefreshtoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="trakt.accesstokenvalidity" type="string" label="" help="">
           <level>0</level>
           <default></default>
           <constraints>

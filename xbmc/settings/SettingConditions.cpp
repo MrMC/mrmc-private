@@ -183,13 +183,17 @@ bool EmbyHomeUserEnable(const std::string &condition, const std::string &value, 
 
 bool TraktSignInPinEnable (const std::string &condition, const std::string &value, const CSetting *setting, void *data)
 {
-  bool enable = true;
+  bool enable = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN) == g_localizeStrings.Get(1241);
+
+  auto settingPush = static_cast<CSettingString*>(CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_TRAKTPUSHWATCHED));
+  settingPush->SetEnabled(enable && settingPush->IsEnabled() != enable);
+  auto settingPull = static_cast<CSettingString*>(CSettings::GetInstance().GetSetting(CSettings::SETTING_SERVICES_TRAKTPULLWATCHED));
+  settingPull->SetEnabled(enable && settingPull->IsEnabled() != enable);
   
-  if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN) == g_localizeStrings.Get(1240))
-  {
-    enable = true;
-  }
-  return enable;
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPULLWATCHED, "Idle");
+  CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_TRAKTPUSHWATCHED, "Idle");
+  
+  return true;
 }
 
 bool IsUsingTTFSubtitles(const std::string &condition, const std::string &value, const CSetting *setting, void *data)
