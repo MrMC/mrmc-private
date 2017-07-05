@@ -19,6 +19,8 @@
  *
  */
 
+#include <atomic>
+
 #include "filesystem/CurlFile.h"
 #include "services/ServicesManager.h"
 #include "settings/lib/ISettingCallback.h"
