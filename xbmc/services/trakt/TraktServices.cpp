@@ -725,14 +725,14 @@ void CTraktServices::PullWatchedStatus()
     return;
   
   if (!videodb.HasContent())
-    return;
-  
-  CFileItemList items;
-  if (!videodb.GetMoviesNav("videodb://movies/titles/", items))
   {
     videodb.Close();
     return;
   }
+  
+  CFileItemList items;
+  videodb.GetMoviesNav("videodb://movies/titles/", items);
+
   CVariant data = GetTraktCVariant("https://api.trakt.tv/sync/watched/movies");
   if (data.isArray())
   {
@@ -764,11 +764,8 @@ void CTraktServices::PullWatchedStatus()
   // get tvshows
   CVideoDatabase::Filter filter;
   items.Clear();
-  if (!videodb.GetTvShowsByWhere("videodb://tvshows/titles/", filter, items))
-  {
-    videodb.Close();
-    return;
-  }
+  videodb.GetTvShowsByWhere("videodb://tvshows/titles/", filter, items);
+
   CVariant dataShows = GetTraktCVariant("https://api.trakt.tv/sync/watched/shows");
   if (dataShows.isArray())
   {
