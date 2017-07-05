@@ -2529,13 +2529,10 @@
           <control type="edit" format="string" />
           <visible>false</visible>
         </setting>
-        <setting id="trakt.accesstokenvalidity" type="string" label="" help="">
+        <setting id="trakt.accesstokenvalidity" type="integer" label="" help="">
           <level>0</level>
-          <default></default>
-          <constraints>
-            <allowempty>true</allowempty>
-          </constraints>
-          <control type="edit" format="string" />
+          <default>0</default>
+          <control type="edit" format="integer" />
           <visible>false</visible>
         </setting>
       </group>
