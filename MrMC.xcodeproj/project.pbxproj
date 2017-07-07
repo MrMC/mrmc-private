@@ -1725,6 +1725,9 @@
 		F50F8E9D1F02BD4E00C8F93B /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F50F8E9C1F02BD4E00C8F93B /* VideoToolbox.framework */; };
 		F50F8E9E1F02D4DB00C8F93B /* DVDVideoCodecVideoToolBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E499158F174E6ABD00741B6D /* DVDVideoCodecVideoToolBox.cpp */; };
 		F50F8E9F1F02D66900C8F93B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E49910E6174E54B300741B6D /* CoreMedia.framework */; };
+		F50F8EA21F0E922000C8F93B /* CloudDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EA01F0E922000C8F93B /* CloudDirectory.cpp */; };
+		F50F8EA31F0E922000C8F93B /* CloudDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EA01F0E922000C8F93B /* CloudDirectory.cpp */; };
+		F50F8EA41F0E922000C8F93B /* CloudDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EA01F0E922000C8F93B /* CloudDirectory.cpp */; };
 		F50FDC5A119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */; };
 		F51063421BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
 		F51063431BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
@@ -5275,6 +5278,8 @@
 		F50F8E981F02BD2D00C8F93B /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS10.2.sdk/System/Library/Frameworks/VideoToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		F50F8E9A1F02BD3C00C8F93B /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.3.sdk/System/Library/Frameworks/VideoToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		F50F8E9C1F02BD4E00C8F93B /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		F50F8EA01F0E922000C8F93B /* CloudDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudDirectory.cpp; sourceTree = "<group>"; };
+		F50F8EA11F0E922000C8F93B /* CloudDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudDirectory.h; sourceTree = "<group>"; };
 		F50FDC58119B4B2C00C8B8CD /* GUIDialogTextViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogTextViewer.h; sourceTree = "<group>"; };
 		F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogTextViewer.cpp; sourceTree = "<group>"; };
 		F51063401BDAA11D00BBCED6 /* DarwinNSUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DarwinNSUserDefaults.h; sourceTree = "<group>"; };
@@ -8573,6 +8578,8 @@
 				F5B723A41C7C9B77006432AE /* CDDAFile.h */,
 				7C99B6A2133D342100FC2B16 /* CircularCache.cpp */,
 				7C99B6A3133D342100FC2B16 /* CircularCache.h */,
+				F50F8EA01F0E922000C8F93B /* CloudDirectory.cpp */,
+				F50F8EA11F0E922000C8F93B /* CloudDirectory.h */,
 				DF93D66B1444A8B0007C6459 /* CurlFile.cpp */,
 				DF93D66C1444A8B0007C6459 /* CurlFile.h */,
 				DFD5812116C8284F0008EEA0 /* DAVCommon.cpp */,
@@ -10557,6 +10564,7 @@
 				E38E20340D25F9FD00618676 /* DirectoryNode.cpp in Sources */,
 				F5B724C51C7E150C006432AE /* getbits.cpp in Sources */,
 				E38E20350D25F9FD00618676 /* DirectoryNodeAlbum.cpp in Sources */,
+				F50F8EA21F0E922000C8F93B /* CloudDirectory.cpp in Sources */,
 				F5B7238F1C7C9AF6006432AE /* RarManager.cpp in Sources */,
 				F51D16FD1E29950600A03C93 /* dvd_iso9660.c in Sources */,
 				E38E20360D25F9FD00618676 /* DirectoryNodeAlbumCompilations.cpp in Sources */,
@@ -11610,6 +11618,7 @@
 				E49911C8174E5D2500741B6D /* DVDOverlayCodecFFmpeg.cpp in Sources */,
 				E49911C9174E5D2500741B6D /* DVDOverlayCodecSSA.cpp in Sources */,
 				F5B723181C7C894F006432AE /* PVRBuiltins.cpp in Sources */,
+				F50F8EA31F0E922000C8F93B /* CloudDirectory.cpp in Sources */,
 				E49911CA174E5D2500741B6D /* DVDOverlayCodecText.cpp in Sources */,
 				E49911CB174E5D2500741B6D /* DVDOverlayCodecTX3G.cpp in Sources */,
 				E49911CE174E5D2500741B6D /* DVDVideoCodecFFmpeg.cpp in Sources */,
@@ -12737,6 +12746,7 @@
 				F5D13F1E1BAF0B6D0075A95C /* DVDAudio.cpp in Sources */,
 				F5B725061C7E150C006432AE /* savepos.cpp in Sources */,
 				F5471B2F1E8562C100570A53 /* EmbyUtils.cpp in Sources */,
+				F50F8EA41F0E922000C8F93B /* CloudDirectory.cpp in Sources */,
 				F5022F251E2D41D5001BBF75 /* hdhomerun_debug.c in Sources */,
 				F51D170E1E29950600A03C93 /* md5.c in Sources */,
 				F5D13F1F1BAF0B6D0075A95C /* DVDClock.cpp in Sources */,
