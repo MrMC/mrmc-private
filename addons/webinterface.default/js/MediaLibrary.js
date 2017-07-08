@@ -391,8 +391,21 @@ MediaLibrary.prototype = {
       {
         document.getElementById('dropbox').disabled = true;
         document.getElementById('auth_text').disabled = false;
+                xbmc.rpc.request({
+          'context': this,
+          'method': 'Cloud.GetCloudPrelogin',
+          'params': {
+              'service':'google'
+          },
+          'success': function (data) {
+            var appkey = data.result.appkey
 
-        button.innerHTML = "Confirm";
+            var logUrl = "https://accounts.google.com/o/oauth2/device/code&client_id=" + appkey + "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive"
+            var strWindowFeatures = "location=yes,height=570,width=520,scrollbars=yes,status=yes";
+            var win = window.open(logUrl, "_blank", strWindowFeatures);
+            button.innerHTML = "Confirm";
+          }
+        });
       }
       else if (button.innerHTML == "Confirm")
       {

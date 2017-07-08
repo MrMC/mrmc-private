@@ -512,6 +512,9 @@ const std::string CSettings::SETTING_SERVICES_TRAKTACESSTOKENVALIDITY = "trakt.a
 
 // cloud services
 const std::string CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN = "cloud.dropboxtoken";
+const std::string CSettings::SETTING_SERVICES_CLOUDGOOGLETOKEN = "cloud.googletoken";
+const std::string CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTOKEN = "cloud.googlerefreshtoken";
+const std::string CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTIME = "cloud.googlerefreshtime";
 
 CSettings::CSettings()
   : m_initialized(false)

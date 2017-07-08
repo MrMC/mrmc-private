@@ -2188,6 +2188,30 @@
           </constraints>
           <control type="edit" format="string" />
         </setting>
+         <setting id="cloud.googletoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="cloud.googlerefreshtoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+        <setting id="cloud.googlerefreshtime" type="integer" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="integer" />
+        </setting>
       </group>
     </category>
     <category id="plex" label="1236" help="1237">

@@ -25,6 +25,7 @@ class CCloudUtils
 {
 public:
   static void        ParseAuth2();
+  static std::string GetGoogleAppKey();
   static std::string GetDropboxAppKey();
   static std::string GetDropboxCSRF();
   static bool        AuthorizeCloud(std::string service, std::string authCode);
@@ -35,4 +36,7 @@ private:
   static std::string m_dropboxAppID;
   static std::string m_dropboxAppSecret;
   static std::string m_dropboxAccessToken;
+  static std::string m_googleAppID;
+  static std::string m_googleAppSecret;
+  static std::string m_googleAccessToken;
 };

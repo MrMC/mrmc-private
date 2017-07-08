@@ -31,8 +31,15 @@ JSONRPC_STATUS CCloudOperations::GetDropboxPrelogin(const std::string &method, I
 {
   std::string service = parameterObject["service"].asString();
   
-  result["appkey"] = CCloudUtils::GetDropboxAppKey();
-  result["csrf"] = CCloudUtils::GetDropboxCSRF();
+  if (service == "dropbox")
+  {
+    result["appkey"] = CCloudUtils::GetDropboxAppKey();
+    result["csrf"] = CCloudUtils::GetDropboxCSRF();
+  }
+  else if (service == "google")
+  {
+    result["appkey"] = CCloudUtils::GetGoogleAppKey();
+  }
 
   return OK;
 }

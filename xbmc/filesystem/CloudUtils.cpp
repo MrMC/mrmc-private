@@ -69,6 +69,9 @@ void genclientinfo(void)
 std::string CCloudUtils::m_dropboxAccessToken;
 std::string CCloudUtils::m_dropboxAppID;
 std::string CCloudUtils::m_dropboxAppSecret;
+std::string CCloudUtils::m_googleAppID;
+std::string CCloudUtils::m_googleAppSecret;
+std::string CCloudUtils::m_googleAccessToken;
 
 void CCloudUtils::ParseAuth2()
 {
@@ -83,7 +86,13 @@ void CCloudUtils::ParseAuth2()
       m_dropboxAppID = client["client_id"].asString();
       m_dropboxAppSecret = client["client_secret"].asString();
     }
+    else if (client["client"].asString() == "gdrive")
+    {
+      m_googleAppID = client["client_id"].asString();
+      m_googleAppSecret = client["client_secret"].asString();
+    }
   }
+  m_googleAccessToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_CLOUDGOOGLETOKEN);
   m_dropboxAccessToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN);
 }
 
@@ -91,6 +100,12 @@ std::string CCloudUtils::GetDropboxAppKey()
 {
   ParseAuth2();
   return m_dropboxAppID;
+}
+
+std::string CCloudUtils::GetGoogleAppKey()
+{
+  ParseAuth2();
+  return m_googleAppID;
 }
 
 std::string CCloudUtils::GetDropboxCSRF()
@@ -134,6 +149,36 @@ bool CCloudUtils::AuthorizeCloud(std::string service, std::string authCode)
         }
       }
     }
+  }
+  else if (service == "google")
+  {
+    /*
+     https://accounts.google.com/o/oauth2/v2/auth?code=4%2F2HVI8-dh7L-NXiOYDV5_BfU8rxrH8n0Q2WSd1Invf8A&redirect_uri=https%3A%2F%2Fdevelopers.google.com%2Foauthplayground&client_id=407408718192.apps.googleusercontent.com&client_secret=************&scope=&grant_type=authorization_code
+     */
+    std::string url = "https://api.dropbox.com/1/oauth2/token?grant_type=authorization_code&code=" + authCode;
+    
+    CURL curl(url);
+    curl.SetUserName(m_dropboxAppID);
+    curl.SetPassword(m_dropboxAppSecret);
+    
+    XFILE::CCurlFile db;
+    std::string response, data;
+    if (db.Post(curl.Get(),data,response))
+    {
+      CVariant resultObject;
+      if (CJSONVariantParser::Parse(response, resultObject))
+      {
+        if (resultObject.isObject() || resultObject.isArray())
+        {
+          m_dropboxAccessToken = resultObject["access_token"].asString();
+          CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN, m_dropboxAccessToken);
+          CSettings::GetInstance().Save();
+          return true;
+        }
+      }
+    }
+//    CSettings::GetInstance().SetString(SETTING_SERVICES_CLOUDGOOGLEREFRESHTOKEN);
+//    CSettings::GetInstance().SetInt(CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTIME);
   }
   return false;
 }
