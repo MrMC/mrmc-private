@@ -21,7 +21,7 @@
 
 #include <string>
 
-const std::string kOAuth2ClientInfo = "[{\"client\":\"dropbox\",\"client_id\":\"173082143886-b1qhrbohloeugcm6u5kr08ujlr2o5lsn.apps.googleusercontent.com\",\"client_secret\":\"5FPzj6s-iVKSHXD9Lmt6jUbt\"},{\"client\":\"gdrive\",\"client_id\":\"44h26vxxs0q78z9\",\"client_secret\":\"jgjs8a8q5lta9bd\"}]";
+const std::string kOAuth2ClientInfo = "[{\"client\":\"gdrive\",\"client_id\":\"173082143886-b1qhrbohloeugcm6u5kr08ujlr2o5lsn.apps.googleusercontent.com\",\"client_secret\":\"5FPzj6s-iVKSHXD9Lmt6jUbt\"},{\"client\":\"dropbox\",\"client_id\":\"44h26vxxs0q78z9\",\"client_secret\":\"jgjs8a8q5lta9bd\"}]";
 
 
 class CCloudUtils
@@ -30,13 +30,16 @@ public:
   CCloudUtils();
   virtual ~CCloudUtils();
   
+  static void        ParseAuth2();
   static std::string GetDropboxAppKey();
   static std::string GetDropboxCSRF();
-  static bool        AuthDropbox(std::string authCode);
+  static bool        AuthorizeCloud(std::string service, std::string authCode);
+  static std::string GetAccessToken(std::string service);
 private:
   static std::string GenerateRandom16Byte();
   
   static std::string m_dropboxCSFR;
   static std::string m_dropboxAppID;
   static std::string m_dropboxAppSecret;
+  static std::string m_dropboxAccessToken;
 };

@@ -2260,13 +2260,14 @@
       "additionalProperties": { "type": "string" }
     }
   },
-  "Cloud.DropBoxAuthorize": {
+  "Cloud.CloudAuthorize": {
     "type": "method",
     "description": "GetCloud credentials",
     "transport": "Response",
     "permission": "ReadData",
     "params": [
-      { "name": "service", "type": "string", "required": true, "description": "Authorise Drobox" }
+      { "name": "service", "type": "string", "required": true, "description": "Authorize Service" },
+      { "name": "auth_token", "type": "string", "required": true, "description": "Authorize Token" }
     ],
     "returns": "boolean"
   },

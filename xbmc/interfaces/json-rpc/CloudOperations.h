@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2005-2017 Team MrMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -29,6 +29,6 @@ namespace JSONRPC
   {
   public:
     static JSONRPC_STATUS GetDropboxPrelogin(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result);
-    static JSONRPC_STATUS DropBoxAuthorize(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result);
+    static JSONRPC_STATUS CloudAuthorize(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result);
   };
 }

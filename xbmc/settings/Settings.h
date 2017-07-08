@@ -459,6 +459,9 @@ public:
   static const std::string SETTING_SERVICES_TRAKTACESSTOKEN;
   static const std::string SETTING_SERVICES_TRAKTACESSREFRESHTOKEN;
   static const std::string SETTING_SERVICES_TRAKTACESSTOKENVALIDITY;
+  // cloud services
+  static const std::string SETTING_SERVICES_CLOUDDROPBOXTOKEN;
+  
 
   /*!
    \brief Creates a new settings wrapper around a new settings manager.

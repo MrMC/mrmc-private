@@ -2177,6 +2177,19 @@
         </setting>
       </group>
     </category>
+    <category id="cloud" label="" help="">
+      <visible>false</visible>
+      <group id="1">
+        <setting id="cloud.dropboxtoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+        </setting>
+      </group>
+    </category>
     <category id="plex" label="1236" help="1237">
       <group id="1">
         <setting id="plex.signin" type="string" label="1238" help="1239">

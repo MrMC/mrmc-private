@@ -510,6 +510,9 @@ const std::string CSettings::SETTING_SERVICES_TRAKTACESSTOKEN = "trakt.accesstok
 const std::string CSettings::SETTING_SERVICES_TRAKTACESSREFRESHTOKEN = "trakt.accessrefreshtoken";
 const std::string CSettings::SETTING_SERVICES_TRAKTACESSTOKENVALIDITY = "trakt.accesstokenvalidity";
 
+// cloud services
+const std::string CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN = "cloud.dropboxtoken";
+
 CSettings::CSettings()
   : m_initialized(false)
 {

@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2005-2013 Team XBMC
+ *      Copyright (C) 2005-2017 Team MrMC
  *      http://xbmc.org
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -37,44 +37,14 @@ JSONRPC_STATUS CCloudOperations::GetDropboxPrelogin(const std::string &method, I
   return OK;
 }
 
-JSONRPC_STATUS CCloudOperations::DropBoxAuthorize(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+JSONRPC_STATUS CCloudOperations::CloudAuthorize(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
   std::vector<std::string> info;
 
-  bool CanControlPower = (client->GetPermissionFlags() & ControlPower) > 0;
-
-  for (unsigned int i = 0; i < parameterObject["booleans"].size(); i++)
-  {
-    std::string field = parameterObject["booleans"][i].asString();
-    StringUtils::ToLower(field);
-
-    // Need to override power management of whats in infomanager since jsonrpc
-    // have a security layer aswell.
-    if (field == "system.canshutdown")
-      result[parameterObject["booleans"][i].asString()] = (g_powerManager.CanPowerdown() && CanControlPower);
-    else if (field == "system.canpowerdown")
-      result[parameterObject["booleans"][i].asString()] = (g_powerManager.CanPowerdown() && CanControlPower);
-    else if (field == "system.cansuspend")
-      result[parameterObject["booleans"][i].asString()] = (g_powerManager.CanSuspend() && CanControlPower);
-    else if (field == "system.canhibernate")
-      result[parameterObject["booleans"][i].asString()] = (g_powerManager.CanHibernate() && CanControlPower);
-    else if (field == "system.canreboot")
-      result[parameterObject["booleans"][i].asString()] = (g_powerManager.CanReboot() && CanControlPower);
-    else
-      info.push_back(parameterObject["booleans"][i].asString());
-  }
-
-  if (info.size() > 0)
-  {
-    std::vector<bool> infoLabels;
-    CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_INFOBOOL, -1, -1, static_cast<void*>(&infoLabels), "", info);
-    for (unsigned int i = 0; i < info.size(); i++)
-    {
-      if (i >= infoLabels.size())
-        break;
-      result[info[i].c_str()] = CVariant(infoLabels[i]);
-    }
-  }
+  std::string service = parameterObject["service"].asString();
+  std::string authToken = parameterObject["auth_token"].asString();
+  
+  result = CCloudUtils::AuthorizeCloud(service, authToken);
 
   return OK;
 }

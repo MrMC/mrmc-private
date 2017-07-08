@@ -238,7 +238,7 @@ JsonRpcMethodMap CJSONServiceDescription::m_methodMaps[] = {
   
   // Cloud operations
   { "Cloud.GetCloudPrelogin",                       CCloudOperations::GetDropboxPrelogin },
-  { "Cloud.DropBoxAuthorize",                       CCloudOperations::DropBoxAuthorize }
+  { "Cloud.CloudAuthorize",                         CCloudOperations::CloudAuthorize }
 };
 
 JSONSchemaTypeDefinition::JSONSchemaTypeDefinition()

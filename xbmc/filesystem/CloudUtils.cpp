@@ -20,19 +20,24 @@
 
 #include "CloudUtils.h"
 
+#include "URL.h"
 #include "utils/JSONVariantParser.h"
 #include "utils/Base64.h"
+#include "utils/StringUtils.h"
 #include "utils/Variant.h"
+#include "filesystem/CurlFile.h"
+#include "filesystem/ZipFile.h"
+#include "settings/Settings.h"
 
 #include <stdlib.h>
 
 std::string CCloudUtils::m_dropboxCSFR;
+std::string CCloudUtils::m_dropboxAccessToken;
+std::string CCloudUtils::m_dropboxAppID;
+std::string CCloudUtils::m_dropboxAppSecret;
 
 CCloudUtils::CCloudUtils()
 {
-  std::string clientInfoString = kOAuth2ClientInfo;
-  CVariant clientInfo(CVariant::VariantTypeArray);
-  CJSONVariantParser::Parse(clientInfoString, clientInfo);
 
 }
 
@@ -40,36 +45,76 @@ CCloudUtils::~CCloudUtils()
 {
 }
 
-std::string CCloudUtils::GetDropboxAppKey()
+void CCloudUtils::ParseAuth2()
 {
   std::string clientInfoString = kOAuth2ClientInfo;
   CVariant clientInfo(CVariant::VariantTypeArray);
   CJSONVariantParser::Parse(clientInfoString, clientInfo);
-
   for (auto variantItemIt = clientInfo.begin_array(); variantItemIt != clientInfo.end_array(); ++variantItemIt)
   {
     const auto &client = *variantItemIt;
     if (client["client"].asString() == "dropbox")
     {
-      return client["client_id"].asString();
+      m_dropboxAppID = client["client_id"].asString();
+      m_dropboxAppSecret = client["client_secret"].asString();
     }
   }
+  std::string base64AccessToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN);
+  std::string accessToken = Base64::Decode(base64AccessToken);
+  m_dropboxAccessToken = StringUtils::TrimLeft(accessToken, m_dropboxAppSecret.c_str());
+  std::string a;
+}
 
-  //std::string AppKey = "p81ixbo7322dndd";
-  //return AppKey;
-  return "";
+std::string CCloudUtils::GetDropboxAppKey()
+{
+  ParseAuth2();
+  return m_dropboxAppID;
 }
 
 std::string CCloudUtils::GetDropboxCSRF()
 {
-  m_dropboxCSFR = GenerateRandom16Byte();
-  return m_dropboxCSFR;
+  return GenerateRandom16Byte();
 }
 
-bool CCloudUtils::AuthDropbox(std::string authCode)
+std::string CCloudUtils::GetAccessToken(std::string service)
 {
+  ParseAuth2();
+  if (service == "dropbox")
+    return m_dropboxAccessToken;
   
-  return true;
+  return "";
+}
+
+bool CCloudUtils::AuthorizeCloud(std::string service, std::string authCode)
+{
+  ParseAuth2();
+  if (service == "dropbox")
+  {
+    std::string url = "https://api.dropbox.com/1/oauth2/token?grant_type=authorization_code&code=" + authCode;
+
+    CURL curl(url);
+    curl.SetUserName(m_dropboxAppID);
+    curl.SetPassword(m_dropboxAppSecret);
+    
+    XFILE::CCurlFile db;
+    std::string response, data;
+    if (db.Post(curl.Get(),data,response))
+    {
+      CVariant resultObject;
+      if (CJSONVariantParser::Parse(response, resultObject))
+      {
+        if (resultObject.isObject() || resultObject.isArray())
+        {
+          m_dropboxAccessToken = resultObject["access_token"].asString();
+          std::string base64AccessToken = Base64::Encode(m_dropboxAppSecret + m_dropboxAccessToken);
+          CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN, base64AccessToken);
+          CSettings::GetInstance().Save();
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
 
 std::string CCloudUtils::GenerateRandom16Byte()

@@ -197,12 +197,13 @@ bool CCloudDirectory::GetDirectory(const CURL& url, CFileItemList &items)
     std::string data;
     CJSONVariantWriter::Write(body, data, true);
 
+    std::string dropboxAccessToken = CCloudUtils::GetAccessToken("dropbox");
     std::string response;
     // execute the POST request
     XFILE::CCurlFile curlfile;
     curlfile.SetRequestHeader("Cache-Control", "no-cache");
     curlfile.SetRequestHeader("Content-Type", "application/json");
-    curlfile.SetRequestHeader("Authorization", "Bearer " + DROPBOXAPI_ACCESSTOKEN);
+    curlfile.SetRequestHeader("Authorization", "Bearer " + dropboxAccessToken);
     curlfile.SetRequestHeader("Accept-Encoding", "gzip");
 
     rtn = false;
