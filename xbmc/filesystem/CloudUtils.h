@@ -24,9 +24,6 @@
 class CCloudUtils
 {
 public:
-  CCloudUtils();
-  virtual ~CCloudUtils();
-  
   static void        ParseAuth2();
   static std::string GetDropboxAppKey();
   static std::string GetDropboxCSRF();

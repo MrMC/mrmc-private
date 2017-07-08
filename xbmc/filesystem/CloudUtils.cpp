@@ -71,15 +71,6 @@ std::string CCloudUtils::m_dropboxAccessToken;
 std::string CCloudUtils::m_dropboxAppID;
 std::string CCloudUtils::m_dropboxAppSecret;
 
-CCloudUtils::CCloudUtils()
-{
-
-}
-
-CCloudUtils::~CCloudUtils()
-{
-}
-
 void CCloudUtils::ParseAuth2()
 {
   std::string clientInfoString = kOAuth2ClientInfo;
