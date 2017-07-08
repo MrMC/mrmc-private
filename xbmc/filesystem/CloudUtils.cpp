@@ -23,7 +23,6 @@
 #include "URL.h"
 #include "utils/JSONVariantParser.h"
 #include "utils/Base64.h"
-#include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/ZipFile.h"
@@ -59,10 +58,7 @@ void CCloudUtils::ParseAuth2()
       m_dropboxAppSecret = client["client_secret"].asString();
     }
   }
-  std::string base64AccessToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN);
-  std::string accessToken = Base64::Decode(base64AccessToken);
-  m_dropboxAccessToken = StringUtils::TrimLeft(accessToken, m_dropboxAppSecret.c_str());
-  std::string a;
+  m_dropboxAccessToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN);
 }
 
 std::string CCloudUtils::GetDropboxAppKey()
@@ -106,8 +102,7 @@ bool CCloudUtils::AuthorizeCloud(std::string service, std::string authCode)
         if (resultObject.isObject() || resultObject.isArray())
         {
           m_dropboxAccessToken = resultObject["access_token"].asString();
-          std::string base64AccessToken = Base64::Encode(m_dropboxAppSecret + m_dropboxAccessToken);
-          CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN, base64AccessToken);
+          CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN, m_dropboxAccessToken);
           CSettings::GetInstance().Save();
           return true;
         }
