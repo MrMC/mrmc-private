@@ -42,8 +42,22 @@ CCloudUtils::~CCloudUtils()
 
 std::string CCloudUtils::GetDropboxAppKey()
 {
-  std::string AppKey = "p81ixbo7322dndd";
-  return AppKey;
+  std::string clientInfoString = kOAuth2ClientInfo;
+  CVariant clientInfo(CVariant::VariantTypeArray);
+  CJSONVariantParser::Parse(clientInfoString, clientInfo);
+
+  for (auto variantItemIt = clientInfo.begin_array(); variantItemIt != clientInfo.end_array(); ++variantItemIt)
+  {
+    const auto &client = *variantItemIt;
+    if (client["client"].asString() == "dropbox")
+    {
+      return client["client_id"].asString();
+    }
+  }
+
+  //std::string AppKey = "p81ixbo7322dndd";
+  //return AppKey;
+  return "";
 }
 
 std::string CCloudUtils::GetDropboxCSRF()

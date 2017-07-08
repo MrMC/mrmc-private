@@ -41,7 +41,7 @@
 #include "video/VideoDatabase.h"
 #include "music/MusicDatabase.h"
 
-//#include "OAuth2ClientInfo.h"
+#include "CloudUtils.h"
 
 using namespace XFILE;
 
@@ -53,6 +53,15 @@ const std::string DROPBOXAPI_ACCESSTOKEN = "_p059TcPL0UAAAAAAAACyi0FcXSmUG_xuTqD
 const std::string DROPBOXAPI_ENDPOINT = "https://api.dropboxapi.com";
 const std::string DROPBOXAPI_CLIENTID = "44h26vxxs0q78z9";
 const std::string DROPBOXAPI_CLIENTSECRET = "jgjs8a8q5lta9bd";
+
+void testclientinfo(void)
+{
+  std::string clientInfoString = kOAuth2ClientInfo;
+  CVariant clientInfo(CVariant::VariantTypeArray);
+  CJSONVariantParser::Parse(clientInfoString, clientInfo);
+
+  CLog::Log(LOGDEBUG, "CCloudDirectory::testclientinfo %s", clientInfoString.c_str());
+}
 
 void genclientinfo(void)
 {
@@ -69,7 +78,7 @@ void genclientinfo(void)
   oath2ClientInfo.append(oath2Client);
   std::string oath2ClientInfoString;
   CJSONVariantWriter::Write(oath2ClientInfo, oath2ClientInfoString, true);
-  CLog::Log(LOGDEBUG, "CCloudDirectory::oath2ClientInfo %s", oath2ClientInfoString.c_str());
+  CLog::Log(LOGDEBUG, "CCloudDirectory::genclientinfo %s", oath2ClientInfoString.c_str());
 }
 
 CCloudDirectory::CCloudDirectory()
