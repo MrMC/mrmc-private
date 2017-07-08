@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2016 Team MrMC
+ *      Copyright (C) 2017 Team MrMC
  *      https://github.com/MrMC
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -41,10 +41,36 @@
 #include "video/VideoDatabase.h"
 #include "music/MusicDatabase.h"
 
+#include "OAuth2ClientInfo.h"
+
 using namespace XFILE;
+
+const std::string GOOGLEAPI_ENDPOINT = "https://www.googleapis.com";
+const std::string GOOGLEAPI_CLIENTID = "173082143886-b1qhrbohloeugcm6u5kr08ujlr2o5lsn.apps.googleusercontent.com";
+const std::string GOOGLEAPI_CLIENTSECRET = "5FPzj6s-iVKSHXD9Lmt6jUbt";
 
 const std::string DROPBOXAPI_ACCESSTOKEN = "_p059TcPL0UAAAAAAAACyi0FcXSmUG_xuTqD6TWXmYGvdqO3W831-C_nWX5QlGOU";
 const std::string DROPBOXAPI_ENDPOINT = "https://api.dropboxapi.com";
+const std::string DROPBOXAPI_CLIENTID = "44h26vxxs0q78z9";
+const std::string DROPBOXAPI_CLIENTSECRET = "jgjs8a8q5lta9bd";
+
+void genclientinfo(void)
+{
+  CVariant oath2ClientInfo(CVariant::VariantTypeArray);
+  CVariant oath2Client;
+  oath2Client["client"] = "dropbox";
+  oath2Client["client_id"] = GOOGLEAPI_CLIENTID;
+  oath2Client["client_secret"] = GOOGLEAPI_CLIENTSECRET;
+  oath2ClientInfo.append(oath2Client);
+
+  oath2Client["client"] = "gdrive";
+  oath2Client["client_id"] = DROPBOXAPI_CLIENTID;
+  oath2Client["client_secret"] = DROPBOXAPI_CLIENTSECRET;
+  oath2ClientInfo.append(oath2Client);
+  std::string oath2ClientInfoString;
+  CJSONVariantWriter::Write(oath2ClientInfo, oath2ClientInfoString, true);
+  CLog::Log(LOGDEBUG, "CCloudDirectory::oath2ClientInfo %s", oath2ClientInfoString.c_str());
+}
 
 CCloudDirectory::CCloudDirectory()
 {
