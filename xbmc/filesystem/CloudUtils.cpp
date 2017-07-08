@@ -23,13 +23,48 @@
 
 #include "URL.h"
 #include "utils/JSONVariantParser.h"
+#include "utils/JSONVariantWriter.h"
 #include "utils/Base64.h"
 #include "utils/Variant.h"
+#include "utils/log.h"
 #include "filesystem/CurlFile.h"
 #include "filesystem/ZipFile.h"
 #include "settings/Settings.h"
 
 #include <stdlib.h>
+
+void testclientinfo(void)
+{
+  std::string clientInfoString = kOAuth2ClientInfo;
+  CVariant clientInfo(CVariant::VariantTypeArray);
+  CJSONVariantParser::Parse(clientInfoString, clientInfo);
+
+  CLog::Log(LOGDEBUG, "testclientinfo %s", clientInfoString.c_str());
+}
+
+void genclientinfo(void)
+{
+  const std::string GOOGLEAPI_CLIENTID = "173082143886-b1qhrbohloeugcm6u5kr08ujlr2o5lsn.apps.googleusercontent.com";
+  const std::string GOOGLEAPI_CLIENTSECRET = "5FPzj6s-iVKSHXD9Lmt6jUbt";
+
+  const std::string DROPBOXAPI_CLIENTID = "44h26vxxs0q78z9";
+  const std::string DROPBOXAPI_CLIENTSECRET = "jgjs8a8q5lta9bd";
+
+  CVariant oath2ClientInfo(CVariant::VariantTypeArray);
+  CVariant oath2Client;
+  oath2Client["client"] = "gdrive";
+  oath2Client["client_id"] = GOOGLEAPI_CLIENTID;
+  oath2Client["client_secret"] = GOOGLEAPI_CLIENTSECRET;
+  oath2ClientInfo.append(oath2Client);
+
+  oath2Client["client"] = "dropbox";
+  oath2Client["client_id"] = DROPBOXAPI_CLIENTID;
+  oath2Client["client_secret"] = DROPBOXAPI_CLIENTSECRET;
+  oath2ClientInfo.append(oath2Client);
+  std::string oath2ClientInfoString;
+  CJSONVariantWriter::Write(oath2ClientInfo, oath2ClientInfoString, true);
+  CLog::Log(LOGDEBUG, "genclientinfo %s", oath2ClientInfoString.c_str());
+}
 
 std::string CCloudUtils::m_dropboxCSFR;
 std::string CCloudUtils::m_dropboxAccessToken;
