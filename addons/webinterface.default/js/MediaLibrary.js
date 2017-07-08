@@ -400,7 +400,7 @@ MediaLibrary.prototype = {
           'success': function (data) {
             var appkey = data.result.appkey
 
-            var logUrl = "https://accounts.google.com/o/oauth2/device/code&client_id=" + appkey + "&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive"
+            var logUrl = "https://accounts.google.com/o/oauth2/v2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&include_granted_scopes=true&state=state_parameter_passthrough_value&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=" + appkey;
             var strWindowFeatures = "location=yes,height=570,width=520,scrollbars=yes,status=yes";
             var win = window.open(logUrl, "_blank", strWindowFeatures);
             button.innerHTML = "Confirm";
