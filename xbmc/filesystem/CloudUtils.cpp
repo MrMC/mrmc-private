@@ -66,7 +66,6 @@ void genclientinfo(void)
   CLog::Log(LOGDEBUG, "genclientinfo %s", oath2ClientInfoString.c_str());
 }
 
-std::string CCloudUtils::m_dropboxCSFR;
 std::string CCloudUtils::m_dropboxAccessToken;
 std::string CCloudUtils::m_dropboxAppID;
 std::string CCloudUtils::m_dropboxAppSecret;

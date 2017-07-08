@@ -32,7 +32,6 @@ public:
 private:
   static std::string GenerateRandom16Byte();
   
-  static std::string m_dropboxCSFR;
   static std::string m_dropboxAppID;
   static std::string m_dropboxAppSecret;
   static std::string m_dropboxAccessToken;
