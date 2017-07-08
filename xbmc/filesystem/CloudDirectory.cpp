@@ -67,12 +67,12 @@ void genclientinfo(void)
 {
   CVariant oath2ClientInfo(CVariant::VariantTypeArray);
   CVariant oath2Client;
-  oath2Client["client"] = "dropbox";
+  oath2Client["client"] = "gdrive";
   oath2Client["client_id"] = GOOGLEAPI_CLIENTID;
   oath2Client["client_secret"] = GOOGLEAPI_CLIENTSECRET;
   oath2ClientInfo.append(oath2Client);
 
-  oath2Client["client"] = "gdrive";
+  oath2Client["client"] = "dropbox";
   oath2Client["client_id"] = DROPBOXAPI_CLIENTID;
   oath2Client["client_secret"] = DROPBOXAPI_CLIENTSECRET;
   oath2ClientInfo.append(oath2Client);
