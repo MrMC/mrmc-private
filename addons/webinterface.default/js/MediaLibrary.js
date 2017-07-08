@@ -35,6 +35,7 @@ MediaLibrary.prototype = {
     $('#profiles').click(jQuery.proxy(this.profilesOpen, this));
     $('#log').click(jQuery.proxy(this.logOpen, this, "log"));
     $('#logold').click(jQuery.proxy(this.logOpen, this, "logOld"));
+    $('#authcloud').click(jQuery.proxy(this.authCloud, this));
     $('#overlay').click(jQuery.proxy(this.hideOverlay, this));
     $(window).resize(jQuery.proxy(this.updatePlayButtonLocation, this));
     $(document).on('keydown', jQuery.proxy(this.handleKeyPress, this));
@@ -49,6 +50,7 @@ MediaLibrary.prototype = {
     $('#profiles').removeClass('selected');
     $('#log').removeClass('selected');
     $('#logold').removeClass('selected');
+    $('#authcloud').removeClass('selected');
     $('iframe').remove();
     $('button').remove();
     this.hideOverlay();
@@ -128,6 +130,7 @@ MediaLibrary.prototype = {
   },
   logOpen: function (event) {
     this.resetPage();
+    $('#footerPopover').hide();
     var logUrl;
     var btnLabel;
     if(event == "log")
@@ -164,6 +167,30 @@ MediaLibrary.prototype = {
     iframe.name=event;
     iframe.id=event;
     $('#content').append(iframe);
+  },
+  authCloud: function () {
+    this.resetPage();
+    $('#footerPopover').hide();
+    var logUrl;
+    var btnLabel;
+    $('#authcloud').addClass('selected');
+
+    $('.contentContainer').hide();
+
+    var input = document.createElement("input");
+    input.type = "text";
+    input.name = "auth_text";
+    input.id = "auth_text";
+    $('#content').append(input);
+
+    var buttonDB = document.createElement('button');
+    buttonDB.innerHTML = "Authorize DropBox";
+    buttonDB.name = "dropbox";
+    buttonDB.style.marginTop = "5px";
+    $('#content').append(buttonDB);
+
+    buttonDB.addEventListener ("click", jQuery.proxy(this.pressAuthKey,this, buttonDB));
+
   },
   shouldHandleEvent: function (event) {
     var inRemoteControl = $('#remoteControl').hasClass('selected');
@@ -285,6 +312,53 @@ MediaLibrary.prototype = {
           window.alert(logDetail + " was NOT copied to clipboard, select all content and copy manually");
         }
         document.body.removeChild(textArea);
+    }
+    $('#spinner').hide();
+  },
+  pressAuthKey: function (button) {
+    var btnFunction = button.innerHTML;
+    if (button.name == "dropbox")
+    {
+      if (button.innerHTML == "Authorize DropBox")
+      {
+
+        $('#spinner').show();
+        xbmc.rpc.request({
+          'context': this,
+          'method': 'Cloud.GetCloudPrelogin',
+          'params': {
+              'service':'dropbox'
+          },
+          'success': function (data) {
+            var appkey = data.result.appkey
+            var csrf = data.result.csrf
+
+            var logUrl = 'https://www.dropbox.com/1/oauth2/authorize?client_id=' + appkey + '&response_type=code&state=' + csrf;
+            var strWindowFeatures = "location=yes,height=570,width=520,scrollbars=yes,status=yes";
+            var win = window.open(logUrl, "_blank", strWindowFeatures);
+            button.innerHTML = "Confirm";
+            button.name = "dropbox";
+          }
+        });
+      }
+      else if (btnFunction == "Confirm")
+      {
+        var authToken = document.getElementById("auth_text").value;
+        xbmc.rpc.request({
+          'context': this,
+          'method': 'Cloud.CloudAuthorize',
+          'params': {
+              'service':'dropbox',
+              'auth_token':authToken
+          },
+          'success': function (data) {
+            var result = data.result
+            // for now, we assume all is good :)
+          }
+        });
+        document.getElementById("auth_text").value = "";
+        button.innerHTML = "Authorize DropBox";
+      }
     }
     $('#spinner').hide();
   },

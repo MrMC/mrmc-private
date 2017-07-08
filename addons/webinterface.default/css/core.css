@@ -772,6 +772,29 @@ div.imgWrapper div.inner {
 	font-weight: 700;
 	}
 
+.details
+{
+    text-align: center;
+}
+
+#user-id-div
+{
+width:200px;
+margin:auto;    
+}
+
+input[type="text"] {
+  padding:9px 76px;
+  border-radius:10px;
+  border:1px solid #d83526;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 200px;
+  display:inline-block;
+  text-align: center;
+  transition: box-shadow 0.3s, border 0.3s;
+}
+
 iframe {
   margin-top: 5px;
   margin-left: 10px;
