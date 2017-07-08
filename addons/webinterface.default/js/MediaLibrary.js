@@ -53,6 +53,8 @@ MediaLibrary.prototype = {
     $('#authcloud').removeClass('selected');
     $('iframe').remove();
     $('button').remove();
+    $('label').remove();
+    $('input').remove();
     this.hideOverlay();
   },
   replaceAll: function (haystack, needle, thread) {
@@ -177,20 +179,35 @@ MediaLibrary.prototype = {
 
     $('.contentContainer').hide();
 
+    var div = document.createElement('div');
+
     var input = document.createElement("input");
     input.type = "text";
+    input.value = "Paste your authourization token here";
     input.name = "auth_text";
     input.id = "auth_text";
-    $('#content').append(input);
+    input.disabled = true;
+    div.appendChild(input);
 
     var buttonDB = document.createElement('button');
     buttonDB.innerHTML = "Authorize DropBox";
     buttonDB.name = "dropbox";
+    buttonDB.id = "dropbox";
     buttonDB.style.marginTop = "5px";
-    $('#content').append(buttonDB);
-
     buttonDB.addEventListener ("click", jQuery.proxy(this.pressAuthKey,this, buttonDB));
+    div.appendChild(buttonDB);
 
+    var buttonG = document.createElement('button');
+    buttonG.innerHTML = "Authorize Google Drive";
+    buttonG.name = "google";
+    buttonG.id = "google";
+    buttonG.style.marginTop = "5px";
+    buttonG.addEventListener ("click", jQuery.proxy(this.pressAuthKey,this, buttonG));
+    div.appendChild(buttonG);
+
+    div.style.textAlign = "center";
+
+    $('#content').append(div);
   },
   shouldHandleEvent: function (event) {
     var inRemoteControl = $('#remoteControl').hasClass('selected');
@@ -316,12 +333,14 @@ MediaLibrary.prototype = {
     $('#spinner').hide();
   },
   pressAuthKey: function (button) {
-    var btnFunction = button.innerHTML;
+    var authToken = document.getElementById("auth_text").value;
+    document.getElementById('auth_text').value = "";
     if (button.name == "dropbox")
     {
       if (button.innerHTML == "Authorize DropBox")
       {
-
+        document.getElementById('google').disabled = true;
+        document.getElementById('auth_text').disabled = false;
         $('#spinner').show();
         xbmc.rpc.request({
           'context': this,
@@ -337,13 +356,11 @@ MediaLibrary.prototype = {
             var strWindowFeatures = "location=yes,height=570,width=520,scrollbars=yes,status=yes";
             var win = window.open(logUrl, "_blank", strWindowFeatures);
             button.innerHTML = "Confirm";
-            button.name = "dropbox";
           }
         });
       }
-      else if (btnFunction == "Confirm")
+      else if (button.innerHTML == "Confirm")
       {
-        var authToken = document.getElementById("auth_text").value;
         xbmc.rpc.request({
           'context': this,
           'method': 'Cloud.CloudAuthorize',
@@ -353,12 +370,37 @@ MediaLibrary.prototype = {
           },
           'success': function (data) {
             var result = data.result
-            // for now, we assume all is good :)
+            if (result)
+            {
+              document.getElementById('auth_text').value = "DropBox account successfuly linked";
+            }
+            else
+            {
+              document.getElementById('auth_text').value = "Failed to link DropBox account";
+            }            
           }
         });
-        document.getElementById("auth_text").value = "";
+        document.getElementById('auth_text').disabled = true;
+        document.getElementById('google').disabled = false;
         button.innerHTML = "Authorize DropBox";
       }
+    }
+    else if (button.name == "google")
+    {
+      if (button.innerHTML == "Authorize Google Drive")
+      {
+        document.getElementById('dropbox').disabled = true;
+        document.getElementById('auth_text').disabled = false;
+
+        button.innerHTML = "Confirm";
+      }
+      else if (button.innerHTML == "Confirm")
+      {
+        document.getElementById('auth_text').disabled = true;
+        document.getElementById('dropbox').disabled = false;
+        button.innerHTML = "Authorize Google Drive";
+      } 
+
     }
     $('#spinner').hide();
   },
