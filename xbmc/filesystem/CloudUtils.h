@@ -23,3 +23,20 @@
 
 const std::string kOAuth2ClientInfo = "[{\"client\":\"dropbox\",\"client_id\":\"173082143886-b1qhrbohloeugcm6u5kr08ujlr2o5lsn.apps.googleusercontent.com\",\"client_secret\":\"5FPzj6s-iVKSHXD9Lmt6jUbt\"},{\"client\":\"gdrive\",\"client_id\":\"44h26vxxs0q78z9\",\"client_secret\":\"jgjs8a8q5lta9bd\"}]";
 
+
+class CCloudUtils
+{
+public:
+  CCloudUtils();
+  virtual ~CCloudUtils();
+  
+  static std::string GetDropboxAppKey();
+  static std::string GetDropboxCSRF();
+  static bool        AuthDropbox(std::string authCode);
+private:
+  static std::string GenerateRandom16Byte();
+  
+  static std::string m_dropboxCSFR;
+  static std::string m_dropboxAppID;
+  static std::string m_dropboxAppSecret;
+};

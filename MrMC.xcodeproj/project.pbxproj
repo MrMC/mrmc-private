@@ -155,6 +155,9 @@
 		18D18CE91D0DC14400BBAB05 /* PlexUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */; };
 		18D18CEA1D0DC14400BBAB05 /* PlexUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */; };
 		18ECC96213CF178D00A9ED6C /* StreamUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18ECC96013CF178D00A9ED6C /* StreamUtils.cpp */; };
+		18ECCFD51F11178C00451061 /* CloudOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18ECCFD31F11178C00451061 /* CloudOperations.cpp */; };
+		18ECCFD61F11178C00451061 /* CloudOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18ECCFD31F11178C00451061 /* CloudOperations.cpp */; };
+		18ECCFD71F11178C00451061 /* CloudOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18ECCFD31F11178C00451061 /* CloudOperations.cpp */; };
 		18FD1CA91BC8E62600027005 /* PodnapisiSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */; };
 		18FD1CAA1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */; };
 		18FD1CAB1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */; };
@@ -3617,6 +3620,8 @@
 		18D18CE71D0DC14400BBAB05 /* PlexUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlexUtils.h; sourceTree = "<group>"; };
 		18ECC96013CF178D00A9ED6C /* StreamUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamUtils.cpp; sourceTree = "<group>"; };
 		18ECC96113CF178D00A9ED6C /* StreamUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamUtils.h; sourceTree = "<group>"; };
+		18ECCFD31F11178C00451061 /* CloudOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudOperations.cpp; sourceTree = "<group>"; };
+		18ECCFD41F11178C00451061 /* CloudOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudOperations.h; sourceTree = "<group>"; };
 		18FD1CA31BC7DC2900027005 /* SubtitleSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SubtitleSearch.h; sourceTree = "<group>"; };
 		18FD1CA71BC8E62600027005 /* PodnapisiSearch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PodnapisiSearch.cpp; sourceTree = "<group>"; };
 		18FD1CA81BC8E62600027005 /* PodnapisiSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PodnapisiSearch.h; sourceTree = "<group>"; };
@@ -9638,6 +9643,8 @@
 				18968DC714155D7C005BA742 /* ApplicationOperations.h */,
 				F5AE408013415D9E0004BD79 /* AudioLibrary.cpp */,
 				F5AE408113415D9E0004BD79 /* AudioLibrary.h */,
+				18ECCFD31F11178C00451061 /* CloudOperations.cpp */,
+				18ECCFD41F11178C00451061 /* CloudOperations.h */,
 				F5DB700017322DBB00D4DF21 /* FavouritesOperations.cpp */,
 				F5DB700117322DBB00D4DF21 /* FavouritesOperations.h */,
 				F5AE408613415D9E0004BD79 /* FileItemHandler.cpp */,
@@ -10947,6 +10954,7 @@
 				18B7C7B71294222E009E7A26 /* GUIControl.cpp in Sources */,
 				397877D81AAAF87700F98A45 /* Temperature.cpp in Sources */,
 				18B7C7B81294222E009E7A26 /* GUIControlFactory.cpp in Sources */,
+				18ECCFD51F11178C00451061 /* CloudOperations.cpp in Sources */,
 				18B7C7B91294222E009E7A26 /* GUIControlGroup.cpp in Sources */,
 				F5B7239B1C7C9B50006432AE /* ISO9660Directory.cpp in Sources */,
 				18B7C7BA1294222E009E7A26 /* GUIControlGroupList.cpp in Sources */,
@@ -12151,6 +12159,7 @@
 				E49913CA174E5F8100741B6D /* Peripheral.cpp in Sources */,
 				E49913CB174E5F8100741B6D /* PeripheralBluetooth.cpp in Sources */,
 				E49913CC174E5F8100741B6D /* PeripheralCecAdapter.cpp in Sources */,
+				18ECCFD61F11178C00451061 /* CloudOperations.cpp in Sources */,
 				E49913CD174E5F8100741B6D /* PeripheralDisk.cpp in Sources */,
 				E49913CE174E5F8100741B6D /* PeripheralHID.cpp in Sources */,
 				E49913CF174E5F8100741B6D /* PeripheralImon.cpp in Sources */,
@@ -12668,6 +12677,7 @@
 				F5D13ED31BAF0B6D0075A95C /* AddonManager.cpp in Sources */,
 				F5D13ED41BAF0B6D0075A95C /* AddonStatusHandler.cpp in Sources */,
 				F5D13ED51BAF0B6D0075A95C /* AddonVersion.cpp in Sources */,
+				18ECCFD71F11178C00451061 /* CloudOperations.cpp in Sources */,
 				F5D13ED61BAF0B6D0075A95C /* GUIDialogAddonInfo.cpp in Sources */,
 				F5B722F31C7C894F006432AE /* AndroidBuiltins.cpp in Sources */,
 				F5D13ED71BAF0B6D0075A95C /* GUIDialogAddonSettings.cpp in Sources */,

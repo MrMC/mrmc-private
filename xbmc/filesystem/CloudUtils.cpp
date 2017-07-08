@@ -19,3 +19,52 @@
  */
 
 #include "CloudUtils.h"
+
+#include "utils/JSONVariantParser.h"
+#include "utils/Base64.h"
+#include "utils/Variant.h"
+
+#include <stdlib.h>
+
+std::string CCloudUtils::m_dropboxCSFR;
+
+CCloudUtils::CCloudUtils()
+{
+  std::string clientInfoString = kOAuth2ClientInfo;
+  CVariant clientInfo(CVariant::VariantTypeArray);
+  CJSONVariantParser::Parse(clientInfoString, clientInfo);
+
+}
+
+CCloudUtils::~CCloudUtils()
+{
+}
+
+std::string CCloudUtils::GetDropboxAppKey()
+{
+  std::string AppKey = "p81ixbo7322dndd";
+  return AppKey;
+}
+
+std::string CCloudUtils::GetDropboxCSRF()
+{
+  m_dropboxCSFR = GenerateRandom16Byte();
+  return m_dropboxCSFR;
+}
+
+bool CCloudUtils::AuthDropbox(std::string authCode)
+{
+  
+  return true;
+}
+
+std::string CCloudUtils::GenerateRandom16Byte()
+{
+  unsigned char buf[16];
+  int i;
+  srand(time(NULL));
+  for (i = 0; i < 16; i++) {
+    buf[i] = rand() % 256;
+  }
+  return Base64::Encode((const char*)buf, sizeof(buf));
+}

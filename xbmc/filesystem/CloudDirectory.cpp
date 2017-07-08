@@ -41,7 +41,7 @@
 #include "video/VideoDatabase.h"
 #include "music/MusicDatabase.h"
 
-#include "OAuth2ClientInfo.h"
+//#include "OAuth2ClientInfo.h"
 
 using namespace XFILE;
 
