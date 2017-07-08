@@ -9,7 +9,7 @@ ifneq ("$(wildcard $(FILEPATH)/OAuth2ClientInfo.json)","")
 endif
 
 .PHONY: GitRevision $(FILEPATH)/.GitRevision
-all: $(FILEPATH)/filesystem/CloudUtils.h $(FILEPATH)/CompileInfo.cpp GitRevision
+all: $(FILEPATH)/OAuth2ClientInfo.h $(FILEPATH)/CompileInfo.cpp GitRevision
 GitRevision: $(FILEPATH)/.GitRevision
 
 $(FILEPATH)/.GitRevision:
@@ -33,8 +33,8 @@ $(FILEPATH)/.GitRevision:
           echo $$GITREV > $@ ;\
         fi
 
-$(FILEPATH)/filesystem/CloudUtils.h: $(FILEPATH)/filesystem/CloudUtils.h.in $(OAUTHCLIENTSPATH)
-	sed -e 's/\@APP_OAUTHCLIENTS\@/$(OAUTHCLIENTS)/' $(FILEPATH)/filesystem/CloudUtils.h.in > $(FILEPATH)/filesystem/CloudUtils.h
+$(FILEPATH)/OAuth2ClientInfo.h: $(FILEPATH)/OAuth2ClientInfo.h.in $(OAUTHCLIENTSPATH)
+	sed -e 's/\@APP_OAUTHCLIENTS\@/$(OAUTHCLIENTS)/' $(FILEPATH)/OAuth2ClientInfo.h.in > $(FILEPATH)/OAuth2ClientInfo.h
 
 $(FILEPATH)/CompileInfo.cpp: $(FILEPATH)/CompileInfoTemplate.cpp $(FILEPATH)/.GitRevision
 	@GITREV=$$(cat $(FILEPATH)/.GitRevision) ;\

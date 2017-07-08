@@ -21,9 +21,6 @@
 
 #include <string>
 
-const std::string kOAuth2ClientInfo = "[{\"client\":\"gdrive\",\"client_id\":\"173082143886-b1qhrbohloeugcm6u5kr08ujlr2o5lsn.apps.googleusercontent.com\",\"client_secret\":\"5FPzj6s-iVKSHXD9Lmt6jUbt\"},{\"client\":\"dropbox\",\"client_id\":\"44h26vxxs0q78z9\",\"client_secret\":\"jgjs8a8q5lta9bd\"}]";
-
-
 class CCloudUtils
 {
 public:

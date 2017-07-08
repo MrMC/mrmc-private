@@ -22,21 +22,3 @@
 #include <string>
 
 const std::string kOAuth2ClientInfo = "@APP_OAUTHCLIENTS@";
-
-
-class CCloudUtils
-{
-public:
-  CCloudUtils();
-  virtual ~CCloudUtils();
-  
-  static std::string GetDropboxAppKey();
-  static std::string GetDropboxCSRF();
-  static bool        AuthDropbox(std::string authCode);
-private:
-  static std::string GenerateRandom16Byte();
-  
-  static std::string m_dropboxCSFR;
-  static std::string m_dropboxAppID;
-  static std::string m_dropboxAppSecret;
-};

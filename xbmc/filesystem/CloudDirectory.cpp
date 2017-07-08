@@ -19,6 +19,8 @@
  */
 
 #include "CloudDirectory.h"
+#include "CloudUtils.h"
+#include "OAuth2ClientInfo.h"
 
 #include "Application.h"
 #include "DirectoryCache.h"
@@ -40,8 +42,6 @@
 
 #include "video/VideoDatabase.h"
 #include "music/MusicDatabase.h"
-
-#include "CloudUtils.h"
 
 using namespace XFILE;
 

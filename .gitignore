@@ -466,6 +466,7 @@ lib/cpluff/stamp-h1
 /xbmc/DllPaths_generated.h
 /xbmc/DllPaths_generated_android.h
 /xbmc/OAuth2ClientInfo.json
+/xbmc/OAuth2ClientInfo.h
 /xbmc/Makefile
 /xbmc/stamp-h1
 
@@ -503,7 +504,6 @@ lib/cpluff/stamp-h1
 /xbmc/cores/VideoRenderers/Makefile
 
 # /xbmc/filesystem/
-/xbmc/filesystem/CloudUtils.h
 /xbmc/filesystem/Makefile
 
 # /xbmc/freebsd/

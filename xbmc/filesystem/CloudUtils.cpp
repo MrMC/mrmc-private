@@ -19,6 +19,7 @@
  */
 
 #include "CloudUtils.h"
+#include "OAuth2ClientInfo.h"
 
 #include "URL.h"
 #include "utils/JSONVariantParser.h"
