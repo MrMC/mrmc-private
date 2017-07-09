@@ -128,15 +128,13 @@ bool CCloudUtils::AuthorizeCloud(std::string service, std::string authCode)
   ParseAuth2();
   if (service == "dropbox")
   {
-    std::string url = "https://api.dropbox.com/1/oauth2/token?grant_type=authorization_code&code=" + authCode;
-
-    CURL curl(url);
+    CURL curl("https://api.dropbox.com/1/oauth2/token?grant_type=authorization_code&code=" + authCode);
     curl.SetUserName(m_dropboxAppID);
     curl.SetPassword(m_dropboxAppSecret);
     
-    XFILE::CCurlFile db;
-    std::string response, data;
-    if (db.Post(curl.Get(),data,response))
+    std::string response;
+    XFILE::CCurlFile curlfile;
+    if (curlfile.Post(curl.Get(), "", response))
     {
       CVariant resultObject;
       if (CJSONVariantParser::Parse(response, resultObject))
@@ -153,18 +151,17 @@ bool CCloudUtils::AuthorizeCloud(std::string service, std::string authCode)
   }
   else if (service == "google")
   {
-    std::string url = "https://www.googleapis.com/oauth2/v4/token";
-    CURL curl(url) ;
+    CURL curl("https://www.googleapis.com/oauth2/v4/token");
     curl.SetProtocolOption("seekable", "0");
-    curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
-    XFILE::CCurlFile curlfile;
-    curlfile.SetRequestHeader("User-Agent", "curl/7.51.0");
-
    
-    std::string data = "redirect_uri=" + CURL::Encode("urn:ietf:wg:oauth:2.0:oob") + "&code=" + CURL::Encode(authCode) + "&client_secret=" + CURL::Encode(m_googleAppSecret) + "&client_id=" + CURL::Encode(m_googleAppID) + "&scope=&grant_type=authorization_code";
-    std::string response;
-    std::string test = curl.Get();
-    bool ret = curlfile.Post(test, data, response);
+    std::string data, response;
+    data += "redirect_uri=" + CURL::Encode("urn:ietf:wg:oauth:2.0:oob");
+    data += "&code=" + CURL::Encode(authCode);
+    data += "&client_secret=" + CURL::Encode(m_googleAppSecret);
+    data += "&client_id=" + CURL::Encode(m_googleAppID);
+    data += "&scope=&grant_type=authorization_code";
+    XFILE::CCurlFile curlfile;
+    bool ret = curlfile.Post(curl.Get(), data, response);
     if (ret)
     {
       CVariant resultObject;
