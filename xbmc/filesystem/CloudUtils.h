@@ -32,6 +32,8 @@ public:
   static std::string GetAccessToken(std::string service);
 private:
   static std::string GenerateRandom16Byte();
+  static void        CheckGoogleTokenValidity();
+  static bool        RefreshGoogleToken();
   
   static std::string m_dropboxAppID;
   static std::string m_dropboxAppSecret;

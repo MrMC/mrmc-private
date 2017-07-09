@@ -119,6 +119,11 @@ std::string CCloudUtils::GetAccessToken(std::string service)
   ParseAuth2();
   if (service == "dropbox")
     return m_dropboxAccessToken;
+  else if (service == "google")
+  {
+    CheckGoogleTokenValidity();
+    return m_googleAccessToken;
+  }
   
   return "";
 }
@@ -173,13 +178,18 @@ bool CCloudUtils::AuthorizeCloud(std::string service, std::string authCode)
           m_googleRefreshToken = resultObject["refresh_token"].asString();
           CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDGOOGLETOKEN, m_googleAccessToken);
           CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTOKEN, m_googleRefreshToken);
+          
+          time_t tNow = 0;
+          CDateTime now = CDateTime::GetUTCDateTime();
+          time_t tExpiry = (time_t)resultObject["expires_in"].asInteger();
+          now.GetAsTime(tNow);
+          CSettings::GetInstance().SetInt(CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTIME, tExpiry + tNow - 60);
+          
           CSettings::GetInstance().Save();
           return true;
         }
       }
     }
-//    CSettings::GetInstance().SetString(SETTING_SERVICES_CLOUDGOOGLEREFRESHTOKEN);
-//    CSettings::GetInstance().SetInt(CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTIME);
   }
   return false;
 }
@@ -193,5 +203,59 @@ std::string CCloudUtils::GenerateRandom16Byte()
     buf[i] = rand() % 256;
   }
   return Base64::Encode((const char*)buf, sizeof(buf));
+}
+
+void CCloudUtils::CheckGoogleTokenValidity()
+{
+  CDateTime now = CDateTime::GetUTCDateTime();
+  time_t tNow = 0;
+  time_t tExpiry = (time_t)CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTIME);
+  now.GetAsTime(tNow);
+  if (tNow > tExpiry)
+  {
+    if (RefreshGoogleToken())
+      CLog::Log(LOGDEBUG, "CCloudUtils::RefreshGoogleToken() refreshed");
+    else
+      CLog::Log(LOGDEBUG, "CCloudUtils::RefreshGoogleToken() failed to refresh, Authorize again");
+  }
+}
+
+bool CCloudUtils::RefreshGoogleToken()
+{
+  CURL curl("https://www.googleapis.com/oauth2/v4/token");
+  curl.SetProtocolOption("seekable", "0");
+  
+  std::string refreshToken = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTOKEN);
+  
+  std::string data, response;
+  data += "&refresh_token=" + CURL::Encode(refreshToken);
+  data += "&client_secret=" + CURL::Encode(m_googleAppSecret);
+  data += "&client_id=" + CURL::Encode(m_googleAppID);
+  data += "&scope=&grant_type=refresh_token";
+  XFILE::CCurlFile curlfile;
+  bool ret = curlfile.Post(curl.Get(), data, response);
+  if (ret)
+  {
+    CVariant resultObject;
+    if (CJSONVariantParser::Parse(response, resultObject))
+    {
+      if (resultObject.isObject() || resultObject.isArray())
+      {
+        m_googleAccessToken = resultObject["access_token"].asString();
+        CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDGOOGLETOKEN, m_googleAccessToken);
+        
+        time_t tNow = 0;
+        CDateTime now = CDateTime::GetUTCDateTime();
+        time_t tExpiry = (time_t)resultObject["expires_in"].asInteger();
+        now.GetAsTime(tNow);
+        CSettings::GetInstance().SetInt(CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTIME, tExpiry + tNow - 60);
+        
+        CSettings::GetInstance().Save();
+        return true;
+      }
+    }
+  }
+  
+  return false;
 }
 

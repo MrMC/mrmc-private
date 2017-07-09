@@ -2206,11 +2206,9 @@
         </setting>
         <setting id="cloud.googlerefreshtime" type="integer" label="" help="">
           <level>0</level>
-          <default></default>
-          <constraints>
-            <allowempty>true</allowempty>
-          </constraints>
+          <default>0</default>
           <control type="edit" format="integer" />
+          <visible>false</visible>
         </setting>
       </group>
     </category>
