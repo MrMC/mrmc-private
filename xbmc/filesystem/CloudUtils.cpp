@@ -35,7 +35,7 @@
 
 void testclientinfo(void)
 {
-  std::string clientInfoString = kOAuth2ClientInfo;
+  std::string clientInfoString = OAuth2ClientInfo::Decrypt();
   CVariant clientInfo(CVariant::VariantTypeArray);
   CJSONVariantParser::Parse(clientInfoString, clientInfo);
 
@@ -75,7 +75,7 @@ std::string CCloudUtils::m_googleAccessToken;
 
 void CCloudUtils::ParseAuth2()
 {
-  std::string clientInfoString = kOAuth2ClientInfo;
+  std::string clientInfoString = OAuth2ClientInfo::Decrypt();
   CVariant clientInfo(CVariant::VariantTypeArray);
   CJSONVariantParser::Parse(clientInfoString, clientInfo);
   for (auto variantItemIt = clientInfo.begin_array(); variantItemIt != clientInfo.end_array(); ++variantItemIt)

@@ -20,5 +20,15 @@
  */
 
 #include <string>
+#include "utils/StringObfuscation.h"
 
-const std::string kOAuth2ClientInfo = "@APP_OAUTHCLIENTS@";
+class OAuth2ClientInfo
+{
+  public:
+  static std::string Decrypt()
+  {
+    using namespace StringObfuscation;
+    std::string clientInfo = ObfuscateString("@APP_OAUTHCLIENTS@");
+    return clientInfo;
+  }
+};
