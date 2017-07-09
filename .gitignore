@@ -463,6 +463,7 @@ lib/cpluff/stamp-h1
 /xbmc/config.h.in~
 /xbmc/CompileInfo.cpp
 /xbmc/CompileInfoTemplate.cpp
+/xbmc/ClientPrivateInfo.cpp
 /xbmc/DllPaths_generated.h
 /xbmc/DllPaths_generated_android.h
 /xbmc/OAuth2ClientInfo.json

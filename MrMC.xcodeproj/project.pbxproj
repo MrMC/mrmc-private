@@ -1734,6 +1734,9 @@
 		F50F8EA71F110FFE00C8F93B /* CloudUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EA51F110FFE00C8F93B /* CloudUtils.cpp */; };
 		F50F8EA81F110FFE00C8F93B /* CloudUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EA51F110FFE00C8F93B /* CloudUtils.cpp */; };
 		F50F8EA91F110FFE00C8F93B /* CloudUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EA51F110FFE00C8F93B /* CloudUtils.cpp */; };
+		F50F8EAB1F12C28100C8F93B /* ClientPrivateInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EAA1F12C28100C8F93B /* ClientPrivateInfo.cpp */; };
+		F50F8EAC1F12C28100C8F93B /* ClientPrivateInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EAA1F12C28100C8F93B /* ClientPrivateInfo.cpp */; };
+		F50F8EAD1F12C28100C8F93B /* ClientPrivateInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50F8EAA1F12C28100C8F93B /* ClientPrivateInfo.cpp */; };
 		F50FDC5A119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */; };
 		F51063421BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
 		F51063431BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm in Sources */ = {isa = PBXBuildFile; fileRef = F51063411BDAA11D00BBCED6 /* DarwinNSUserDefaults.mm */; };
@@ -5290,6 +5293,8 @@
 		F50F8EA11F0E922000C8F93B /* CloudDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudDirectory.h; sourceTree = "<group>"; };
 		F50F8EA51F110FFE00C8F93B /* CloudUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CloudUtils.cpp; sourceTree = "<group>"; };
 		F50F8EA61F110FFE00C8F93B /* CloudUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CloudUtils.h; sourceTree = "<group>"; };
+		F50F8EAA1F12C28100C8F93B /* ClientPrivateInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ClientPrivateInfo.cpp; sourceTree = "<group>"; };
+		F50F8EAE1F12C29000C8F93B /* ClientPrivateInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ClientPrivateInfo.h; sourceTree = "<group>"; };
 		F50FDC58119B4B2C00C8B8CD /* GUIDialogTextViewer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogTextViewer.h; sourceTree = "<group>"; };
 		F50FDC59119B4B2C00C8B8CD /* GUIDialogTextViewer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogTextViewer.cpp; sourceTree = "<group>"; };
 		F51063401BDAA11D00BBCED6 /* DarwinNSUserDefaults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DarwinNSUserDefaults.h; sourceTree = "<group>"; };
@@ -8211,6 +8216,8 @@
 				E38E16930D25F9FA00618676 /* FileItem.h */,
 				DFEF0BA9180ADE6400AEAED1 /* FileItemListModification.cpp */,
 				DFEF0BAA180ADE6400AEAED1 /* FileItemListModification.h */,
+				F50F8EAA1F12C28100C8F93B /* ClientPrivateInfo.cpp */,
+				F50F8EAE1F12C29000C8F93B /* ClientPrivateInfo.h */,
 				DFBB4317178B5E6F006CC20A /* CompileInfo.cpp */,
 				DFBB4318178B5E6F006CC20A /* CompileInfo.h */,
 				E38E1E3E0D25F9FD00618676 /* GUIInfoManager.cpp */,
@@ -11290,6 +11297,7 @@
 				1D638128161E211E003603ED /* PeripheralImon.cpp in Sources */,
 				AE89ACA61621DAB800E17DBC /* DVDDemuxBXA.cpp in Sources */,
 				36A95DA51624894400727135 /* GUIDialogMediaFilter.cpp in Sources */,
+				F50F8EAB1F12C28100C8F93B /* ClientPrivateInfo.cpp in Sources */,
 				7CC30DB116291A5C003E7579 /* MusicThumbLoader.cpp in Sources */,
 				7CC30DC016291C2C003E7579 /* VideoThumbLoader.cpp in Sources */,
 				DF00492D162DAEA200A971AD /* PVROperations.cpp in Sources */,
@@ -12284,6 +12292,7 @@
 				E499143B174E604700741B6D /* SystemClock.cpp in Sources */,
 				F51D170A1E29950600A03C93 /* ifo_read.c in Sources */,
 				F5B724E31C7E150C006432AE /* pathfn.cpp in Sources */,
+				F50F8EAC1F12C28100C8F93B /* ClientPrivateInfo.cpp in Sources */,
 				E499143C174E604700741B6D /* Thread.cpp in Sources */,
 				E499143D174E604700741B6D /* Timer.cpp in Sources */,
 				E499143E174E605900741B6D /* AlarmClock.cpp in Sources */,
@@ -12954,6 +12963,7 @@
 				F5D13FB41BAF0B6D0075A95C /* ShoutcastFile.cpp in Sources */,
 				F5B722BE1C7BC10B006432AE /* kiss_fft.c in Sources */,
 				F5D13FB51BAF0B6D0075A95C /* Webinterface.cpp in Sources */,
+				F50F8EAD1F12C28100C8F93B /* ClientPrivateInfo.cpp in Sources */,
 				F5B725381C7E150C006432AE /* volume.cpp in Sources */,
 				F5D13FB61BAF0B6D0075A95C /* SmartPlaylistDirectory.cpp in Sources */,
 				F5D13FB71BAF0B6D0075A95C /* SMBDirectory.cpp in Sources */,
