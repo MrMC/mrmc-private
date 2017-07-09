@@ -39,4 +39,5 @@ private:
   static std::string m_googleAppID;
   static std::string m_googleAppSecret;
   static std::string m_googleAccessToken;
+  static std::string m_googleRefreshToken;
 };

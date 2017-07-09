@@ -73,7 +73,7 @@ std::string CCloudUtils::m_dropboxAppSecret;
 std::string CCloudUtils::m_googleAppID;
 std::string CCloudUtils::m_googleAppSecret;
 std::string CCloudUtils::m_googleAccessToken;
-
+std::string CCloudUtils::m_googleRefreshToken;
 void CCloudUtils::ParseAuth2()
 {
   std::string clientInfoString = OAuth2ClientInfo::Decrypt();
@@ -154,45 +154,17 @@ bool CCloudUtils::AuthorizeCloud(std::string service, std::string authCode)
   else if (service == "google")
   {
     std::string url = "https://www.googleapis.com/oauth2/v4/token";
-    
-    std::string options = "?redirect_uri=" + CURL::Encode("urn:ietf:wg:oauth:2.0:oob") + "&code=" + CURL::Encode(authCode) + "&client_secret=" + CURL::Encode(m_googleAppSecret) + "&client_id=" + CURL::Encode(m_googleAppID) + "&scope=&grant_type=authorization_code";
-    
     CURL curl(url) ;
+    curl.SetProtocolOption("seekable", "0");
+    curl.SetProtocolOption("Content-Type", "application/x-www-form-urlencoded");
     XFILE::CCurlFile curlfile;
-
-    curlfile.SetRequestHeader("Cache-Control", "no-cache");
-    curlfile.SetRequestHeader("Content-Type", "application/json");
-//    curlfile.SetRequestHeader("Host", "www.googleapis.com");
-//    curlfile.SetRequestHeader("Content-length", 0);
-//    curlfile.SetRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"); User-Agent: curl/7.51.0 Content-Type: application/x-www-form-urlencoded
-//
-    curlfile.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     curlfile.SetRequestHeader("User-Agent", "curl/7.51.0");
 
-    
-//    curl.SetOption("redirect_uri", "urn:ietf:wg:oauth:2.0:oob");
-//    curl.SetOption("code", authCode);
-//    curl.SetOption("client_secret", m_googleAppSecret);
-//    curl.SetOption("client_id", m_googleAppID);
-//    curl.SetOption("scope", "");
-//    curl.SetOption("grant_type", "authorization_code");
-    curl.SetOptions(options);
    
-    CVariant body;
-    body["redirect_uri"] = CURL::Encode("urn:ietf:wg:oauth:2.0:oob");
-    body["code"] = CURL::Encode(authCode);
-    body["client_secret"] = CURL::Encode(m_googleAppSecret);
-    body["client_id"] = CURL::Encode(m_googleAppID);
-    body["scope"] = "";
-    body["grant_type"] = "authorization_code";
-
-    std::string data;
-    CJSONVariantWriter::Write(body, data, true);
-    
-//    std::string data;
+    std::string data = "redirect_uri=" + CURL::Encode("urn:ietf:wg:oauth:2.0:oob") + "&code=" + CURL::Encode(authCode) + "&client_secret=" + CURL::Encode(m_googleAppSecret) + "&client_id=" + CURL::Encode(m_googleAppID) + "&scope=&grant_type=authorization_code";
     std::string response;
     std::string test = curl.Get();
-    bool ret = curlfile.Post(test,data,response);
+    bool ret = curlfile.Post(test, data, response);
     if (ret)
     {
       CVariant resultObject;
@@ -201,7 +173,9 @@ bool CCloudUtils::AuthorizeCloud(std::string service, std::string authCode)
         if (resultObject.isObject() || resultObject.isArray())
         {
           m_googleAccessToken = resultObject["access_token"].asString();
-          CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDDROPBOXTOKEN, m_dropboxAccessToken);
+          m_googleRefreshToken = resultObject["refresh_token"].asString();
+          CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDGOOGLETOKEN, m_googleAccessToken);
+          CSettings::GetInstance().SetString(CSettings::SETTING_SERVICES_CLOUDGOOGLEREFRESHTOKEN, m_googleRefreshToken);
           CSettings::GetInstance().Save();
           return true;
         }
