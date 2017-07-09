@@ -400,7 +400,7 @@ MediaLibrary.prototype = {
           'success': function (data) {
             var appkey = data.result.appkey
 
-            var logUrl = "https://accounts.google.com/o/oauth2/v2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&include_granted_scopes=true&state=state_parameter_passthrough_value&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&client_id=" + appkey;
+            var logUrl = "https://accounts.google.com/o/oauth2/v2/auth?scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&redirect_uri=urn:ietf:wg:oauth:2.0:oob&response_type=code&access_type=offline&client_id=" + appkey;
             var strWindowFeatures = "location=yes,height=570,width=520,scrollbars=yes,status=yes";
             var win = window.open(logUrl, "_blank", strWindowFeatures);
             button.innerHTML = "Confirm";
@@ -409,6 +409,25 @@ MediaLibrary.prototype = {
       }
       else if (button.innerHTML == "Confirm")
       {
+        xbmc.rpc.request({
+          'context': this,
+          'method': 'Cloud.CloudAuthorize',
+          'params': {
+              'service':'google',
+              'auth_token':authToken
+          },
+          'success': function (data) {
+            var result = data.result
+            if (result)
+            {
+              document.getElementById('auth_text').value = "Google Drive account successfuly linked";
+            }
+            else
+            {
+              document.getElementById('auth_text').value = "Failed to link Google Drive account";
+            }            
+          }
+        });
         document.getElementById('auth_text').disabled = true;
         document.getElementById('dropbox').disabled = false;
         button.innerHTML = "Authorize Google Drive";
