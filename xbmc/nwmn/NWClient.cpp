@@ -96,7 +96,7 @@ public:
     if (m_function == "GetActions")
     {
       #if ENABLE_NWCLIENT_DEBUGLOGS
-      CLog::Log(LOGNOTICE, "CNWClientJob: GetActions");
+      CLog::Log(LOGNOTICE, "**NW** - CNWClientJob: GetActions");
       #endif
       m_client->GetActions();
       return true;
@@ -345,6 +345,7 @@ void CNWClient::Process()
   #if ENABLE_NWCLIENT_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWClient::Process Started");
   #endif
+
   SendPlayerStatus(kTVAPI_Status_On);
 
   while (!m_bStop)
@@ -666,12 +667,14 @@ void CNWClient::GetActions()
       }
       else if (action.action == kTVAPI_ActionPlay)
       {
-        m_Player->Play();
+        // do nothing, this action is badly defined
+        CLog::Log(LOGNOTICE, "**NW** - GotAction kTVAPI_ActionPlay");
         ClearAction(actions, action.id);
       }
       else if (action.action == kTVAPI_ActionStop)
       {
-        m_Player->StopPlaying();
+        // do nothing, this action is badly defined
+        CLog::Log(LOGNOTICE, "**NW** - GotAction kTVAPI_ActionStop");
         ClearAction(actions, action.id);
       }
       else if (action.action == kTVAPI_ActionRestart)
