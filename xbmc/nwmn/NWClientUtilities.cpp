@@ -32,6 +32,7 @@
 //#include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
+#include "utils/TimeUtils.h"
 
 template <typename T>
 static std::string std_to_string(T value)
@@ -375,7 +376,7 @@ std::string GetSystemUpTime()
 {
   // uptime=0 days 5 hours 22 minutes
   int iMinutes = 0; int iHours = 0; int iDays = 0;
-  iMinutes = g_sysinfo.GetTotalUptime();
+  iMinutes = (int)(CTimeUtils::GetFrameTime() / 60000);
   if (iMinutes >= 60) // Hour's
   {
     iHours = iMinutes / 60;
