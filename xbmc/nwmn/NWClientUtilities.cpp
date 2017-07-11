@@ -279,7 +279,7 @@ bool SaveLocalPlaylist(std::string home, const NWPlaylist &playList)
 
     return xmlDoc.SaveFile(home + kNWClient_PlaylistFileName);
   }
-  
+
   return false;
 }
 
@@ -295,14 +295,19 @@ std::string GetDiskUsed(std::string path)
     StringUtils::RemoveDuplicatedSpacesAndTabs(diskUsage[d]);
 
     std::vector<std::string> items = StringUtils::Split(diskUsage[d], " ");
-    std::string mountPoint = items[items.size() - 1];
-    if (mountPoint == "/")
+    #if defined(TARGET_ANDROID)
       used = items[2];
-    if (mountPoint.find(path) != std::string::npos)
-      used = items[2];
+      StringUtils::Replace(used, "G", "GB");
+      break;
+    #else
+      std::string mountPoint = items[items.size() - 1];
+      if (mountPoint == "/")
+        used = items[2];
+      if (mountPoint.find(path) != std::string::npos)
+        used = items[2];
+      StringUtils::Replace(used, "Gi", "GB");
+    #endif
   }
-
-  StringUtils::Replace(used, "Gi", "GB");
 
   return used;
 }
@@ -319,14 +324,20 @@ std::string GetDiskFree(std::string path)
     StringUtils::RemoveDuplicatedSpacesAndTabs(diskUsage[d]);
 
     std::vector<std::string> items = StringUtils::Split(diskUsage[d], " ");
-    std::string mountPoint = items[items.size() - 1];
-    if (mountPoint == "/")
+    #if defined(TARGET_ANDROID)
       free = items[3];
-    if (mountPoint.find(path) != std::string::npos)
-      free = items[3];
+      StringUtils::Replace(free, "G", "GB");
+      break;
+    #else
+      std::string mountPoint = items[items.size() - 1];
+      if (mountPoint == "/" || mountPoint.find(path) != std::string::npos)
+      {
+        free = items[3];
+        StringUtils::Replace(free, "Gi", "GB");
+        break;
+      }
+    #endif
   }
-
-  StringUtils::Replace(free, "Gi", "GB");
 
   return free;
 }
@@ -343,13 +354,19 @@ std::string GetDiskTotal(std::string path)
     StringUtils::RemoveDuplicatedSpacesAndTabs(diskUsage[d]);
 
     std::vector<std::string> items = StringUtils::Split(diskUsage[d], " ");
-    std::string mountPoint = items[items.size() - 1];
-    if (mountPoint == "/")
+    #if defined(TARGET_ANDROID)
       total = items[1];
-    if (mountPoint.find(path) != std::string::npos)
-      total = items[1];
+      StringUtils::Replace(total, "G", "GB");
+      break;
+    #else
+      std::string mountPoint = items[items.size() - 1];
+      if (mountPoint == "/")
+        total = items[1];
+      if (mountPoint.find(path) != std::string::npos)
+        total = items[1];
+      StringUtils::Replace(total, "Gi", "GB");
+    #endif
   }
-  StringUtils::Replace(total, "Gi", "GB");
 
   return total;
 }
