@@ -564,10 +564,8 @@ bool TVAPI_ReportHealth(TVAPI_HealthReport &health)
   std::string strResponse;
   if (curlfile.Post(curl.Get(), params, strResponse))
   {
-    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_ReportHealth %s", strResponse.c_str());
-    #endif
     return true;
   }
   return false;
@@ -598,10 +596,8 @@ bool TVAPI_ReportFilesPlayed(TVAPI_Files &files, std::string serial_number)
   std::string strResponse;
   if (curlfile.Post(curl.Get(), jsonBody, strResponse))
   {
-    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_ReportFilesPlayed %s", strResponse.c_str());
-    #endif
     return true;
   }
   
@@ -632,10 +628,8 @@ bool TVAPI_ReportFilesDeleted(TVAPI_Files &files)
   std::string strResponse;
   if (curlfile.Delete(curl.Get(), jsonBody, strResponse))
   {
-    #if ENABLE_TVAPI_DEBUGLOGS
     if (!strResponse.empty())
       CLog::Log(LOGDEBUG, "TVAPI_ReportFilesDeleted %s", strResponse.c_str());
-    #endif
     return true;
   }
  
@@ -666,9 +660,8 @@ bool TVAPI_ReportFilesDownloaded(TVAPI_Files &files)
   std::string strResponse;
   if (curlfile.Post(curl.Get(), jsonBody, strResponse))
   {
-    #if ENABLE_TVAPI_DEBUGLOGS
-    CLog::Log(LOGDEBUG, "TVAPI_ReportFilesDownloaded %s", strResponse.c_str());
-    #endif
+    if (!strResponse.empty())
+      CLog::Log(LOGDEBUG, "TVAPI_ReportFilesDownloaded %s", strResponse.c_str());
     return true;
   }
   
