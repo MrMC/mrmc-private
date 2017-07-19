@@ -37,7 +37,10 @@ int CLiteUtils::nextReminderTrigger = 0;
 bool CLiteUtils::NeedReminding()
 {
   if (nextReminderTrigger <= 0)
+  {
     nextReminderTrigger = CUtil::GetRandomNumber(3,8);
+    return true;
+  }
   else
     nextReminderTrigger--;
   return nextReminderTrigger <= 0;
