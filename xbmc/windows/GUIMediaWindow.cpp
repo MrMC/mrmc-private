@@ -767,6 +767,10 @@ bool CGUIMediaWindow::GetDirectory(const std::string &strDirectory, CFileItemLis
   m_filter.Reset();
   
 #if defined(APP_PACKAGE_LITE)
+  // if we are listing addons we should not limit them
+  // any other "safe" urls could be added here
+  if (StringUtils::StartsWithNoCase(strDirectory, "addons://"))
+      return true;
   int preTrimSize = items.Size();
   int trimSize = CLiteUtils::GetItemSizeLimit();
   if (preTrimSize > trimSize)
