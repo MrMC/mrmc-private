@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F5D13EC51BAF0B6D0075A95C"
-               BuildableName = "MrMC.app"
+               BuildableName = "MrMCLite.app"
                BlueprintName = "MrMC-TVOS"
                ReferencedContainer = "container:MrMC.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F5D13EC51BAF0B6D0075A95C"
-            BuildableName = "MrMC.app"
+            BuildableName = "MrMCLite.app"
             BlueprintName = "MrMC-TVOS"
             ReferencedContainer = "container:MrMC.xcodeproj">
          </BuildableReference>
@@ -56,7 +56,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F5D13EC51BAF0B6D0075A95C"
-            BuildableName = "MrMC.app"
+            BuildableName = "MrMCLite.app"
             BlueprintName = "MrMC-TVOS"
             ReferencedContainer = "container:MrMC.xcodeproj">
          </BuildableReference>
@@ -75,7 +75,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F5D13EC51BAF0B6D0075A95C"
-            BuildableName = "MrMC.app"
+            BuildableName = "MrMCLite.app"
             BlueprintName = "MrMC-TVOS"
             ReferencedContainer = "container:MrMC.xcodeproj">
          </BuildableReference>
