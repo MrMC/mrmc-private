@@ -3923,7 +3923,7 @@ msgstr ""
 
 #: CGUIWindowVideoNav
 msgctxt "#897"
-msgid "Your list has been trimmed down from %i items to 10,"
+msgid "Your list has been trimmed down from %i items to %i,"
 msgstr ""
 
 #: CGUIWindowVideoNav

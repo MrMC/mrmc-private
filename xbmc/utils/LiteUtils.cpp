@@ -56,7 +56,7 @@ void CLiteUtils::ShowIsLiteDialog(int preTruncateSize)
 {
   if (!NeedReminding())
     return;
-  std::string line2 = StringUtils::Format(g_localizeStrings.Get(897).c_str(), preTruncateSize);
+  std::string line2 = StringUtils::Format(g_localizeStrings.Get(897).c_str(), preTruncateSize, GetItemSizeLimit());
   std::string line3;
 #if defined(TARGET_DARWIN)
   line3 = StringUtils::Format(g_localizeStrings.Get(898).c_str(), "Apple");
