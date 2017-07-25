@@ -5,7 +5,7 @@
       <group id="1">
         <setting id="services.devicename" type="string" label="1271" help="36321">
           <level>0</level>
-          <default>MrMC Lite</default>
+          <default>MrMCLite</default>
           <control type="edit" format="string" />
         </setting>
       </group>
