@@ -16,13 +16,12 @@ OBJS+= librtmp.so
 PLATFORM_OBJS =
 EXCLUDED_ADDONS += $(PKG_EXCLUDED_ADDONS)
 
-XBMCROOT = $(shell cd $(CURDIR)/../../..; pwd)
 ifeq ($(lite),yes)
   MEDIAROOT = media.lite
 else
   MEDIAROOT = media
 endif
-
+XBMCROOT = $(shell cd $(CURDIR)/../../..; pwd)
 COPYDIRS = system addons $(MEDIAROOT)
 GCC_VERSION=$(shell $(CC) -dumpversion)
 ZIP=zip
@@ -89,6 +88,9 @@ symbols: libs
 shared:
 	mkdir -p assets
 	cp -rfp $(PREFIX)/share/@APP_NAME_LC@/* ./assets
+	# depends build of binary pvr hardcodes path to mrmc
+	cp -rfp $(PREFIX)/share/mrmc/addons/pvr.* ./assets/addons
+	# depends build of repo-resources hardcodes path to mrmc
 	cp -rfp $(PREFIX)/mrmc/repo-resources/* ./assets/addons
 	find `pwd`/assets/ -depth -name ".git" -exec rm -rf {} \;
 	find `pwd`/assets/ -name "*.so" -exec rm {} \;
@@ -129,9 +131,11 @@ libs: $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so
 	mkdir -p xbmc/lib/$(ABI) xbmc/libs/$(ABI) xbmc/obj/local/$(ABI)
 	cp -fp $(SRCLIBS) xbmc/obj/local/$(ABI)/
 	cp -fp $(PREFIX)/lib/@APP_NAME_LC@/lib@APP_NAME_LC@.so xbmc/obj/local/$(ABI)/
+	# depends build of binary pvr hardcodes path to mrmc
+	find $(PREFIX)/lib/mrmc/addons/pvr* -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
 	find $(PREFIX)/lib/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
-	find $(PREFIX)/share/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
 	find $(PREFIX)/lib/@APP_NAME_LC@/system -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \; | true
+	find $(PREFIX)/share/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} xbmc/obj/local/$(ABI)/ \;
 	cd xbmc/obj/local/$(ABI)/; find . -name "*.so" -not -name "lib*.so" | sed "s/\.\///" | xargs -I@ mv @ lib@
 	cp -fp xbmc/obj/local/$(ABI)/*.so xbmc/lib/$(ABI)/
 	$(STRIP) --strip-unneeded xbmc/lib/$(ABI)/*.so
