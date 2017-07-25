@@ -83,7 +83,11 @@ const CGFloat timeFadeSecs                    = 2.0;
     [_touchView addSubview:descriptionLabel];
 
     //load the splash image
-    std::string strUserSplash = CSpecialProtocol::TranslatePath("special://xbmc/media/Splash.png");
+    std::string splashName = "Splash.png";
+#if defined(APP_PACKAGE_LITE)
+    splashName = "Splash.lite.png";
+#endif
+    std::string strUserSplash = CSpecialProtocol::TranslatePath("special://xbmc/media/" + splashName);
     xbmcLogo = [UIImage imageWithContentsOfFile:[NSString stringWithUTF8String:strUserSplash.c_str()]];
     
     //make a view with the image
