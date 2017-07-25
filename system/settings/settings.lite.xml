@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <settings>
   <section id="services" label="14036" help="36319">
+    <category id="general" label="16000" help="36320">
+      <group id="1">
+        <setting id="services.devicename" type="string" label="1271" help="36321">
+          <level>0</level>
+          <default>MrMC Lite</default>
+          <control type="edit" format="string" />
+        </setting>
+      </group>
+    </category>
     <category id="webserver" label="33101" help="36327">
       <requirement>HAS_WEB_SERVER</requirement>
       <group id="1">
