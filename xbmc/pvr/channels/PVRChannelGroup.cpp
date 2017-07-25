@@ -42,6 +42,10 @@
 #include "PVRChannelGroup.h"
 #include "PVRChannelGroupsContainer.h"
 
+#if defined(APP_PACKAGE_LITE)
+#include "utils/LiteUtils.h"
+#endif
+
 using namespace PVR;
 using namespace EPG;
 
@@ -177,6 +181,7 @@ bool CPVRChannelGroup::Load(void)
         __FUNCTION__, static_cast<int>(Size() - iChannelCount), m_strGroupName.c_str());
   }
 
+  LimitIfLite();
   SortAndRenumber();
 
   m_bLoaded = true;
@@ -347,6 +352,20 @@ void CPVRChannelGroup::SearchAndSetChannelIcons(bool bUpdateDb /* = false */)
 
   if (dlgProgressHandle)
     dlgProgressHandle->MarkFinished();
+}
+
+void CPVRChannelGroup::LimitIfLite(void)
+{
+#if defined(APP_PACKAGE_LITE)
+  int preTrimSize = m_sortedMembers.size();
+  // we add one more channel to our limit size, that way it
+  // will trigger the warning when listing them in channel view
+  int trimSize = CLiteUtils::GetItemSizeLimit() + 1;
+  if (preTrimSize > trimSize)
+  {
+    m_sortedMembers.resize(trimSize);
+  }
+#endif
 }
 
 /********** sort methods **********/
