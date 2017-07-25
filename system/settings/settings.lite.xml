@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+  <section id="services" label="14036" help="36319">
+    <category id="webserver" label="33101" help="36327">
+      <requirement>HAS_WEB_SERVER</requirement>
+      <group id="1">
+        <setting id="services.webserverport" type="integer" parent="services.webserver" label="730" help="36329">
+          <level>0</level>
+          <default>8880</default>
+          <constraints>
+            <minimum>1</minimum>
+            <step>1</step>
+            <maximum>65535</maximum>
+          </constraints>
+          <updates>
+            <update type="change" />
+          </updates>
+          <control type="edit" format="integer" />
+        </setting>
+      </group>
+    </category>
+  </section>
+</settings>
