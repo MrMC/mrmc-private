@@ -95,6 +95,15 @@ JSONRPC_STATUS CSystemOperations::Reboot(const std::string &method, ITransportLa
     return FailedToExecute;
 }
 
+JSONRPC_STATUS CSystemOperations::IsLite(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
+{
+  result = false;
+#if defined(APP_PACKAGE_LITE)
+  result = true;
+#endif
+  return OK;
+}
+
 JSONRPC_STATUS CSystemOperations::GetPropertyValue(int permissions, const std::string &property, CVariant &result)
 {
   if (property == "canshutdown")
