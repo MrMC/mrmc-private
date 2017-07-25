@@ -952,10 +952,10 @@ bool CSettings::InitializeDefinitions()
   if (CFile::Exists(SETTINGS_XML_FOLDER "darwin_ios.xml") && !Initialize(SETTINGS_XML_FOLDER "darwin_ios.xml"))
     CLog::Log(LOGFATAL, "Unable to load ios-specific settings definitions");
 #endif
+#endif
 #if defined(APP_PACKAGE_LITE)
   if (CFile::Exists(SETTINGS_XML_FOLDER "settings.lite.xml") && !Initialize(SETTINGS_XML_FOLDER "settings.lite.xml"))
     CLog::Log(LOGFATAL, "Unable to load Lite specific settings definitions");
-#endif
 #endif
 
   // load any custom visibility and default values before loading the special
