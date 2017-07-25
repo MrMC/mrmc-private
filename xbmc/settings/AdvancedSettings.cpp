@@ -412,6 +412,9 @@ void CAdvancedSettings::Initialize()
 
   m_jsonOutputCompact = true;
   m_jsonTcpPort = 9090;
+#if defined(APP_PACKAGE_LITE)
+  m_jsonTcpPort = 9990;
+#endif
 
   m_enableMultimediaKeys = false;
 
