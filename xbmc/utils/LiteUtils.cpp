@@ -92,7 +92,10 @@ void CLiteUtils::ShowIsLiteDialog(int preTruncateSize)
 #if defined(TARGET_DARWIN)
       CDarwinUtils::OpenAppWithOpenURL(path);
 #elif defined(TARGET_ANDROID)
-      // some android call to open store
+      if (CAndroidFeatures::IsAmazonDevice())
+        CAndroidFeatures::OpenAmazonStore();
+      else
+        CAndroidFeatures::OpenGooglePlayStore();
 #endif
     }
   }
