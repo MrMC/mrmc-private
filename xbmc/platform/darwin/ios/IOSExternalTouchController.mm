@@ -22,6 +22,7 @@
 #include "WindowingFactory.h"
 #include "filesystem/SpecialProtocol.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/LiteUtils.h"
 
 #import "IOSExternalTouchController.h"
 #import "XBMCController.h"
@@ -84,9 +85,8 @@ const CGFloat timeFadeSecs                    = 2.0;
 
     //load the splash image
     std::string splashName = "Splash.png";
-#if defined(APP_PACKAGE_LITE)
-    splashName = "Splash.lite.png";
-#endif
+    if (CLiteUtils::IsLite())
+      splashName = "Splash.lite.png";
     std::string strUserSplash = CSpecialProtocol::TranslatePath("special://xbmc/media/" + splashName);
     xbmcLogo = [UIImage imageWithContentsOfFile:[NSString stringWithUTF8String:strUserSplash.c_str()]];
     

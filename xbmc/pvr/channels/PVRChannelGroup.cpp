@@ -32,6 +32,7 @@
 #include "settings/lib/Setting.h"
 #include "settings/Settings.h"
 #include "threads/SingleLock.h"
+#include "utils/LiteUtils.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 
@@ -41,10 +42,6 @@
 
 #include "PVRChannelGroup.h"
 #include "PVRChannelGroupsContainer.h"
-
-#if defined(APP_PACKAGE_LITE)
-#include "utils/LiteUtils.h"
-#endif
 
 using namespace PVR;
 using namespace EPG;
@@ -356,16 +353,17 @@ void CPVRChannelGroup::SearchAndSetChannelIcons(bool bUpdateDb /* = false */)
 
 void CPVRChannelGroup::LimitIfLite(void)
 {
-#if defined(APP_PACKAGE_LITE)
-  int preTrimSize = m_sortedMembers.size();
-  // we add one more channel to our limit size, that way it
-  // will trigger the warning when listing them in channel view
-  int trimSize = CLiteUtils::GetItemSizeLimit() + 1;
-  if (preTrimSize > trimSize)
+  if (CLiteUtils::IsLite())
   {
-    m_sortedMembers.resize(trimSize);
+    int preTrimSize = m_sortedMembers.size();
+    // we add one more channel to our limit size, that way it
+    // will trigger the warning when listing them in channel view
+    int trimSize = CLiteUtils::GetItemSizeLimit() + 1;
+    if (preTrimSize > trimSize)
+    {
+      m_sortedMembers.resize(trimSize);
+    }
   }
-#endif
 }
 
 /********** sort methods **********/

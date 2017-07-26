@@ -21,6 +21,7 @@
 #include "SystemOperations.h"
 #include "messaging/ApplicationMessenger.h"
 #include "interfaces/builtins/Builtins.h"
+#include "utils/LiteUtils.h"
 #include "utils/Variant.h"
 #include "powermanagement/PowerManager.h"
 
@@ -97,10 +98,7 @@ JSONRPC_STATUS CSystemOperations::Reboot(const std::string &method, ITransportLa
 
 JSONRPC_STATUS CSystemOperations::IsLite(const std::string &method, ITransportLayer *transport, IClient *client, const CVariant &parameterObject, CVariant &result)
 {
-  result = false;
-#if defined(APP_PACKAGE_LITE)
-  result = true;
-#endif
+  result = CLiteUtils::IsLite();
   return OK;
 }
 

@@ -97,3 +97,12 @@ void CLiteUtils::ShowIsLiteDialog(int preTruncateSize)
     }
   }
 }
+
+bool CLiteUtils::IsLite()
+{
+  bool res = false;
+#if defined(APP_PACKAGE_LITE)
+  res = true;
+#endif
+  return res;
+}
