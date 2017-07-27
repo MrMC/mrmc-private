@@ -159,21 +159,25 @@ bool CAndroidFeatures::IsShieldTVDevice()
 void CAndroidFeatures::OpenAmazonStore()
 {
   // string below is linking to our full app on Amazon Store
+/*
   final String appPackageName = "B01ENT3I1Q";
   try {
       startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("amzn://apps/android?asin=" + appPackageName)));
   } catch (android.content.ActivityNotFoundException anfe) {
       startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.amazon.com/gp/mas/dl/android?asin=" + appPackageName)));
   }
+*/
 }
 
 void CAndroidFeatures::OpenGooglePlayStore()
 {
   // string below is linking to our full app on Google Play store
+/*
   final String appPackageName = "tv.mrmc.mrmc";
   try {
       startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
   } catch (android.content.ActivityNotFoundException anfe) {
       startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
   }
+*/
 }
