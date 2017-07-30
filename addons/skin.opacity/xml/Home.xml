@@ -277,7 +277,7 @@
 						<font>font25_title</font>
 						<aligny>top</aligny>
 						<textcolor>grey</textcolor>
-						<label>$INFO[Container(8000).ListItem.Property(ItemType)]</label>
+						<label>[UPPERCASE]$INFO[Container(8000).ListItem.Property(ItemType)][/UPPERCASE]</label>
 					</control>
 					<control type="list" id="8000">
 						<top>130</top>
@@ -373,7 +373,7 @@
 						<font>font25_title</font>
 						<aligny>top</aligny>
 						<textcolor>grey</textcolor>
-						<label>$INFO[Container(8010).ListItem.Property(ItemType)]</label>
+						<label>[UPPERCASE]$INFO[Container(8010).ListItem.Property(ItemType)][/UPPERCASE]</label>
 					</control>
 					<control type="list" id="8010">
 						<top>570</top>
@@ -475,7 +475,7 @@
 						<font>font25_title</font>
 						<aligny>top</aligny>
 						<textcolor>grey</textcolor>
-						<label>$INFO[Container(8001).ListItem.Property(ItemType)]</label>
+						<label>[UPPERCASE]$INFO[Container(8001).ListItem.Property(ItemType)][/UPPERCASE]</label>
 					</control>
 					<control type="list" id="8001">
 						<top>130</top>
@@ -571,7 +571,7 @@
 						<font>font25_title</font>
 						<aligny>top</aligny>
 						<textcolor>grey</textcolor>
-						<label>$INFO[Container(8011).ListItem.Property(ItemType)]</label>
+						<label>[UPPERCASE]$INFO[Container(8011).ListItem.Property(ItemType)][/UPPERCASE]</label>
 					</control>
 					<control type="list" id="8011">
 						<top>570</top>
@@ -673,7 +673,7 @@
 						<font>font25_title</font>
 						<aligny>top</aligny>
 						<textcolor>grey</textcolor>
-						<label>$INFO[Container(8002).ListItem.Property(ItemType)]</label>
+						<label>[UPPERCASE]$INFO[Container(8002).ListItem.Property(ItemType)][/UPPERCASE]</label>
 					</control>
 					<control type="list" id="8002">
 						<top>130</top>
