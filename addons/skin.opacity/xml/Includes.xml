@@ -454,7 +454,6 @@
 		<definition>
 			<control type="image">
 				<texture flipx="$PARAM[flipx]">lists/panel.png</texture>
-				<bordertexture border="21">overlays/shadow.png</bordertexture>
  				<height>82</height>
 				<top>0</top>
 			</control>
@@ -616,7 +615,6 @@
 		<definition>
 			<control type="image">
 				<texture flipx="$PARAM[flipx]">lists/panel.png</texture>
-				<bordertexture border="21">overlays/shadow.png</bordertexture>
  				<height>82</height>
 				<bottom>0</bottom>
 			</control>
@@ -710,8 +708,7 @@
 		<param name="flipx">false</param>
 		<definition>
 			<control type="image">
-				<texture flipx="$PARAM[flipx]">lists/panel.png</texture>
-				<bordertexture border="21">overlays/shadow.png</bordertexture>
+				<texture flipx="$PARAM[flipx]">lists/panel_80.png</texture>
 				<bordersize>20</bordersize>
 				<width>$PARAM[width]</width>
 				<left>$PARAM[left]</left>
