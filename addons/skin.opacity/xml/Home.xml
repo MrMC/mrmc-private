@@ -705,7 +705,7 @@
 					</control>
 					<control type="list" id="8002">
 						<top>130</top>
-						<width>1270</width>
+						<width>1210</width>
 						<height>600</height>
 						<scrolltime tween="cubic" easing="out">500</scrolltime>
 						<orientation>horizontal</orientation>
