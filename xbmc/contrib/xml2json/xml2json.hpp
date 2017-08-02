@@ -58,6 +58,10 @@ static bool xml2json_has_digits_only(const char * input, bool *hasDecimal)
             else
                 return false; // we found two dots - not a number
         }
+        else if (ispunct(*runPtr))
+        {
+            return false;
+        }
         else if (isalpha(*runPtr))
         {
             return false;

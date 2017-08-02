@@ -2548,19 +2548,6 @@ CVariant CPlexUtils::GetPlexCVariant(std::string url, std::string filter)
         return CVariant(CVariant::VariantTypeNull);
     }
 
-    StringUtils::Replace(response, "&#39;", "");
-    /*
-    const char *tstr = response.c_str();
-    unsigned int i = 0;
-    while (i < response.length()) {
-      if (strncmp(tstr + i, "&#39;", 5) == 0) {
-        volatile int temp = 1;
-        temp++;
-      }
-      i++;
-    }
-    */
-
 #if defined(PLEX_DEBUG_VERBOSE)
     CLog::Log(LOGDEBUG, "CPlexUtils::GetPlexCVariant %s", curl.Get().c_str());
     CLog::Log(LOGDEBUG, "CPlexUtils::GetPlexCVariant %s", response.c_str());
