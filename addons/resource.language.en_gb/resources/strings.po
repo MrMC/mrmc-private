@@ -16139,7 +16139,12 @@ msgctxt "#35504"
 msgid "Product ID"
 msgstr ""
 
-#empty strings from id 35505 to 35999
+#: addons/skin.opacity
+msgctxt "#35505"
+msgid "Enable dark theme"
+msgstr ""
+
+#empty strings from id 35506 to 35999
 
 #: xbmc/peripherals/devices/PeripheralCecAdapter.cpp
 msgctxt "#36000"
