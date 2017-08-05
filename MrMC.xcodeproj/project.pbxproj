@@ -152,6 +152,9 @@
 		18BBE8E01E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18BBE8DD1E7EEBDE00B36525 /* ServicesDirectory.cpp */; };
 		18BBE8E11E7EEBDE00B36525 /* ServicesDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18BBE8DD1E7EEBDE00B36525 /* ServicesDirectory.cpp */; };
 		18C1D22D13033F6A00CFFE59 /* GLUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C1D22B13033F6A00CFFE59 /* GLUtils.cpp */; };
+		18C773801F3599CD009C8BEE /* CGUIWindowMrMusic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C7737E1F3599CD009C8BEE /* CGUIWindowMrMusic.cpp */; };
+		18C773811F3599CD009C8BEE /* CGUIWindowMrMusic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C7737E1F3599CD009C8BEE /* CGUIWindowMrMusic.cpp */; };
+		18C773821F3599CD009C8BEE /* CGUIWindowMrMusic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18C7737E1F3599CD009C8BEE /* CGUIWindowMrMusic.cpp */; };
 		18D18CE81D0DC14400BBAB05 /* PlexUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */; };
 		18D18CE91D0DC14400BBAB05 /* PlexUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */; };
 		18D18CEA1D0DC14400BBAB05 /* PlexUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */; };
@@ -3611,6 +3614,8 @@
 		18BBE8DE1E7EEBDE00B36525 /* ServicesDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServicesDirectory.h; sourceTree = "<group>"; };
 		18C1D22B13033F6A00CFFE59 /* GLUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GLUtils.cpp; sourceTree = "<group>"; };
 		18C1D22C13033F6A00CFFE59 /* GLUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLUtils.h; sourceTree = "<group>"; };
+		18C7737E1F3599CD009C8BEE /* CGUIWindowMrMusic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CGUIWindowMrMusic.cpp; path = mrmusic/CGUIWindowMrMusic.cpp; sourceTree = "<group>"; };
+		18C7737F1F3599CD009C8BEE /* CGUIWindowMrMusic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CGUIWindowMrMusic.h; path = mrmusic/CGUIWindowMrMusic.h; sourceTree = "<group>"; };
 		18D18CE61D0DC14400BBAB05 /* PlexUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PlexUtils.cpp; sourceTree = "<group>"; };
 		18D18CE71D0DC14400BBAB05 /* PlexUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlexUtils.h; sourceTree = "<group>"; };
 		18ECC96013CF178D00A9ED6C /* StreamUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamUtils.cpp; sourceTree = "<group>"; };
@@ -6508,6 +6513,15 @@
 			path = playlists;
 			sourceTree = "<group>";
 		};
+		18C773741F35995E009C8BEE /* mrmusic */ = {
+			isa = PBXGroup;
+			children = (
+				18C7737E1F3599CD009C8BEE /* CGUIWindowMrMusic.cpp */,
+				18C7737F1F3599CD009C8BEE /* CGUIWindowMrMusic.h */,
+			);
+			name = mrmusic;
+			sourceTree = "<group>";
+		};
 		19C28FBDFE9D53C911CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -8152,6 +8166,7 @@
 				E38E1D690D25F9FD00618676 /* linux */,
 				7C430161175C41FE009B82E5 /* listproviders */,
 				7CF0504F191195DA00222135 /* media */,
+				18C773741F35995E009C8BEE /* mrmusic */,
 				DF4A3BAC1B4B0FC100F9CDC0 /* messaging */,
 				18B7C853129423A7009E7A26 /* music */,
 				431376F212D6449100680C15 /* network */,
@@ -11149,6 +11164,7 @@
 				DFCA6ACB152245CD000BFAAE /* IHTTPRequestHandler.cpp in Sources */,
 				DF93D69A1444A8B1007C6459 /* DirectoryCache.cpp in Sources */,
 				DF93D69B1444A8B1007C6459 /* FileCache.cpp in Sources */,
+				18C773801F3599CD009C8BEE /* CGUIWindowMrMusic.cpp in Sources */,
 				3994427A1A8DD920006C39E9 /* VideoLibraryScanningJob.cpp in Sources */,
 				DF93D69D1444A8B1007C6459 /* CurlFile.cpp in Sources */,
 				F5FBE7DC1E2AB65F001B85EE /* strutl.c in Sources */,
@@ -12393,6 +12409,7 @@
 				E499152E174E642900741B6D /* AppParamParser.cpp in Sources */,
 				E4991530174E642900741B6D /* AutoSwitch.cpp in Sources */,
 				E4991531174E642900741B6D /* BackgroundInfoLoader.cpp in Sources */,
+				18C773811F3599CD009C8BEE /* CGUIWindowMrMusic.cpp in Sources */,
 				E4991532174E642900741B6D /* CueDocument.cpp in Sources */,
 				E4991533174E642900741B6D /* DatabaseManager.cpp in Sources */,
 				E4991534174E642900741B6D /* DbUrl.cpp in Sources */,
@@ -13358,6 +13375,7 @@
 				F5D141131BAF0B6D0075A95C /* FileOperationJob.cpp in Sources */,
 				F5D141141BAF0B6D0075A95C /* FileUtils.cpp in Sources */,
 				F5D141151BAF0B6D0075A95C /* GLUtils.cpp in Sources */,
+				18C773821F3599CD009C8BEE /* CGUIWindowMrMusic.cpp in Sources */,
 				F5D141161BAF0B6D0075A95C /* GroupUtils.cpp in Sources */,
 				F5D141171BAF0B6D0075A95C /* HTMLUtil.cpp in Sources */,
 				F5D141181BAF0B6D0075A95C /* HttpHeader.cpp in Sources */,

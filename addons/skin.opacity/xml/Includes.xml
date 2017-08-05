@@ -527,14 +527,6 @@
 						<texture>dialogs/volume/mute.png</texture>
 						<visible>Player.Muted</visible>
 					</control>
-					<control type="label">
-						<font>font45</font>
-						<shadowcolor>text_shadow</shadowcolor>
-						<height>200</height>
-						<width>auto</width>
-						<animation effect="fade" start="100" end="0" time="300" condition="Window.Next(screencalibration)">WindowClose</animation>
-						<label>$INFO[System.Time]</label>
-					</control>
 				</control>
 				<control type="label" id="23000">
 					<centertop>50%</centertop>
@@ -624,6 +616,16 @@
 				<bottom>82</bottom>
 				<height>4</height>
 				<texture colordiffuse="primary_color" border="3">dialogs/separator-grey.png</texture>
+			</control>
+			<control type="label">
+				<font>font45</font>
+				<bottom>-20</bottom>
+				<right>-60</right>
+				<shadowcolor>text_shadow</shadowcolor>
+				<height>100</height>
+				<width>300</width>
+				<animation effect="fade" start="100" end="0" time="300" condition="Window.Next(screencalibration)">WindowClose</animation>
+				<label>$INFO[System.Time]</label>
 			</control>
 			<control type="group">
 				<animation effect="slide" end="0,90" time="300" tween="sine" easing="inout" condition="System.HasModalDialog">conditional</animation>

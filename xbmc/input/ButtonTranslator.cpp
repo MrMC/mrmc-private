@@ -399,6 +399,7 @@ static const ActionMapping windows[] =
     { "pvrclientbrowser"         , WINDOW_PVRCLIENT_BROWSER },
     { "informationproviderbrowser", WINDOW_INFOPROVIDER_BROWSER },
     { "mediasources"             , WINDOW_MEDIA_SOURCES },
+    { "mrmusic"                  , WINDOW_MR_MUSIC },
 };
 
 static const ActionMapping mousekeys[] =

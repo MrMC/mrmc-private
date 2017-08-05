@@ -142,6 +142,8 @@
 
 #define WINDOW_MEDIA_SOURCES              10700
 
+#define WINDOW_MR_MUSIC                   10800
+
 //#define WINDOW_VIRTUAL_KEYBOARD           11000
 // WINDOW_ID's from 11100 to 11199 reserved for Skins
 

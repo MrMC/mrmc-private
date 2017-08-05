@@ -70,6 +70,7 @@
 #include "windows/GUIWindowMediaSources.h"
 #include "video/windows/GUIWindowFullScreen.h"
 #include "video/dialogs/GUIDialogVideoOSD.h"
+#include "mrmusic/CGUIWindowMrMusic.h"
 
 
 // Dialog includes
@@ -288,6 +289,9 @@ void CGUIWindowManager::CreateWindows()
   Add(new CGUIWindowSplash);
 
   Add(new CGUIWindowEventLog);
+  
+  // MrMusic
+  Add(new CGUIWindowMrMusic);
 }
 
 bool CGUIWindowManager::DestroyWindows()
@@ -340,6 +344,9 @@ bool CGUIWindowManager::DestroyWindows()
     Delete(WINDOW_DIALOG_MEDIA_FILTER);
     Delete(WINDOW_DIALOG_SUBTITLES);
     Delete(WINDOW_MEDIA_SOURCES);
+    
+    // MrMusic
+    Delete(WINDOW_MR_MUSIC);
 
     /* Delete PVR related windows and dialogs */
     Delete(WINDOW_TV_CHANNELS);
