@@ -36,7 +36,18 @@
 #include "utils/StringUtils.h"
 #include "utils/log.h"
 
+
+#include "filesystem/Directory.h"
+#include "music/windows/GUIWindowMusicBase.h"
+#include "playlists/PlayList.h"
+#include "playlists/PlayListFactory.h"
+#include "FileItem.h"
+#include "filesystem/MusicDatabaseDirectory.h"
+
+using namespace PLAYLIST;
+
 #define MAINLIST          9000
+#define MENUBUTTON        9001
 
 #define CONTROLS          90101
 #define PLAYQUEUE         90102
@@ -48,6 +59,7 @@
 #define OPTIONS           90108
 #define HELP              90109
 #define EXIT              90110
+
 
 
 
@@ -90,9 +102,17 @@ bool CGUIWindowMrMusic::OnMessage(CGUIMessage& message)
     bool selectAction = (message.GetParam1() == ACTION_SELECT_ITEM ||
                          message.GetParam1() == ACTION_MOUSE_LEFT_CLICK);
     
-    if (selectAction && iList == MAINLIST)
-    {
+    selectAction = true;
     
+    if (selectAction && iList == MENUBUTTON)
+    {
+      SET_CONTROL_VISIBLE(MAINLIST);
+      SET_CONTROL_FOCUS(CONTROLS, 0);
+    }
+    else if (selectAction && iList == MAINLIST)
+    {
+      SET_CONTROL_HIDDEN(MAINLIST);
+      SET_CONTROL_FOCUS(MENUBUTTON, 0);
       CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), iList);
       OnMessage(msg);
       
@@ -110,6 +130,8 @@ bool CGUIWindowMrMusic::OnMessage(CGUIMessage& message)
         CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), PLAYQUEUE);
         OnMessage(msg);
 
+        CPlayList playList = g_playlistPlayer.GetPlaylist(PLAYLIST_MUSIC);
+          
         return true;
       }
       else if (iControl == SOURCEFOLDER)
@@ -124,6 +146,18 @@ bool CGUIWindowMrMusic::OnMessage(CGUIMessage& message)
         CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), PLAYLIST);
         OnMessage(msg);
 
+//        CFileItemList items;
+////        int flags = DIR_FLAG_NO_FILE_DIRS | DIR_FLAG_NO_FILE_INFO;
+//        XFILE::CDirectory::GetDirectory("sources://music/", items);
+//        CGUIMessage message(GUI_MSG_LABEL_BIND, GetID(), 50, 0, 0, &items);
+        std::vector<std::string> params;
+        params.push_back("sources://music/");
+        params.push_back("return");
+        // going to ".." will put us
+        // at 'sources://' and we want to go back here.
+//        params.push_back("parent_redirect=" + strParentPath);
+        g_windowManager.ActivateWindow(WINDOW_MUSIC_NAV, params);
+        OnMessage(message);
         return true;
       }
       else if (iControl == USB)

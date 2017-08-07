@@ -39,18 +39,31 @@
 					<depth>DepthContentPanel</depth>
 					<include>OpenClose_Left</include>
 					<left>0</left>
-					<include content="ContentPanel">
+<!-- 					<include content="ContentPanel">
 						<param name="left" value="-520" />
 						<param name="width" value="1065" />
-					</include>
+					</include> -->
+					<control type="group">
+						<visible>!Control.IsVisible(9000)</visible>
+						<control type="button" id="9001">
+							<left>0</left>
+							<top>80</top>
+							<width>200</width>
+							<bottom>80</bottom>
+							<texturefocus>lists/panel-mediamenu_mrmusic.png</texturefocus>
+							<texturenofocus>lists/panel-mediamenu_mrmusic.png</texturenofocus>
+							<onclick>noop</onclick>
+						</control>
+					</control>
 					<control type="fixedlist" id="9000">
+						<!-- <onfocus>SetFocus(90101)</onfocus> -->
 						<top>85</top>
 						<left>0</left>
 						<bottom>140</bottom>
 						<width>540</width>
 						<movement>10</movement>
 						<focusposition>0</focusposition>
-						<onfocus>ClearProperty(listposition,home)</onfocus>
+						<!-- <onfocus>ClearProperty(listposition,home)</onfocus> -->
 						<ondown>9000</ondown>
 						<onup>9000</onup>
 						<onleft>9100</onleft>
@@ -187,6 +200,7 @@
 					</control>
 				</control>
 			</control>
+			<include>View_50_WideList</include>
 			<include>BottomBar</include>
 			<include content="TopBar">
 				<param name="breadcrumbs_label" value="" />

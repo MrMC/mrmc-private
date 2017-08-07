@@ -19164,6 +19164,11 @@ msgctxt "#37053"
 msgid "Only selected Plex servers will be displayed in Home Shelf, recently added and in progress"
 msgstr ""
 
+#: MrMusic
+msgctxt "#37054"
+msgid "<"
+msgstr ""
+
 #empty strings from id 37053 to 38009
 
 #: system/settings/rbp.xml
