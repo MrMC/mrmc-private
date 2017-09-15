@@ -6,7 +6,6 @@ LIBNAME=libpng
 VERSION=1.6.29
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
-BASE_URL=https://downloads.sourceforge.net/project/libpng/libpng16/older-releases/1.6.29
 
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
