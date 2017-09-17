@@ -3,7 +3,7 @@ DEPS= ../../Makefile.include Makefile
 
 # lib name, version
 LIBNAME=libgpg-error
-VERSION=1.20
+VERSION=1.27
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.bz2
 
@@ -28,9 +28,11 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 
 $(LIBDYLIB): $(PLATFORM)
 ifeq ($(OS),osx)
-	$(MAKE) -C $(PLATFORM)/src gen-posix-lock-obj
-	$(PLATFORM)/src/gen-posix-lock-obj > $(PLATFORM)/src/syscfg/tmp.h
-	mv $(PLATFORM)/src/syscfg/tmp.h $(PLATFORM)/src/syscfg/$$(awk 'NR==1 {print $$2}' $(PLATFORM)/src/syscfg/tmp.h)
+  ifneq ($(USE_SIMULATOR),yes)
+	  $(MAKE) -C $(PLATFORM)/src gen-posix-lock-obj
+	  $(PLATFORM)/src/gen-posix-lock-obj > $(PLATFORM)/src/syscfg/tmp.h
+	  mv $(PLATFORM)/src/syscfg/tmp.h $(PLATFORM)/src/syscfg/$$(awk 'NR==1 {print $$2}' $(PLATFORM)/src/syscfg/tmp.h)
+  endif
 endif
 ifeq ($(CPU),arm64)
 	cp $(PLATFORM)/src/syscfg/lock-obj-pub.aarch64-apple-darwin.h $(PLATFORM)/src/syscfg/lock-obj-pub.arm-apple-darwin.h

@@ -71,7 +71,10 @@ ifeq ($(OS),ios)
 endif
 
 ifeq ($(OS),osx)
-  DEPENDS += libGLEW
+  DEPENDS += samba
+  ifneq ($(USE_SIMULATOR),yes)
+    DEPENDS += libGLEW
+  endif
   EXCLUDED_DEPENDS += libcec
   EXCLUDED_DEPENDS += libusb
 endif
