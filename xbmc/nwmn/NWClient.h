@@ -101,9 +101,9 @@ protected:
   void          GetActions();
   void          ClearAction(TVAPI_Actions &actions, std::string id);
   void          SendFilesPlayed();
-  void          LogFilesPlayed(std::string assetID);
+  void          LogFilesPlayed(std::string assetID,std::string assetFormat);
   void          SendFilesDownloaded();
-  void          LogFilesDownLoaded(std::string assetID);
+  void          LogFilesDownLoaded(std::string assetID,std::string assetFormat);
 
   void          UpdateNetworkStatus();
   bool          SendPlayerStatus(const std::string status);

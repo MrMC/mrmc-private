@@ -90,6 +90,7 @@ bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
         pItem->SetLabel2(asset.name);
         pItem->SetPath(CSpecialProtocol::TranslatePath(path));
         pItem->SetProperty("Membernet", true);
+        pItem->SetProperty("video_format", asset.type);
         pItem->GetVideoInfoTag()->m_strTitle = asset.name;
         pItem->GetVideoInfoTag()->m_streamDetails.Reset();
         CMediaSettings::GetInstance().SetVideoStartWindowed(false);

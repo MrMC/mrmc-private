@@ -240,10 +240,12 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
       #if ENABLE_NWCLIENT_DEBUGLOGS
       CLog::Log(LOGDEBUG, "**MN** - CNWClient::Announce() - Playback started");
       #endif
-      std::string strPath = g_application.CurrentFileItem().GetPath();
+      CFileItem currentFile(g_application.CurrentFileItem());
+      std::string strPath = currentFile.GetPath();
       std::string assetID = URIUtils::GetFileName(strPath);
       URIUtils::RemoveExtension(assetID);
-      LogFilesPlayed(assetID);
+      std::string format = currentFile.GetProperty("video_format").asString();
+      LogFilesPlayed(assetID,format);
     }
     else if (strcmp(message, "OnStop") == 0)
     {
@@ -758,17 +760,18 @@ void CNWClient::SendFilesPlayed()
   }
 }
 
-void CNWClient::LogFilesPlayed(std::string assetID)
+void CNWClient::LogFilesPlayed(std::string assetID,std::string assetFormat)
 {
-  //  date,assetID
-  //  2015-02-05 12:01:40-0500,58350
-  //  2015-02-05 12:05:40-0500,57116
+  //  date,assetID,type
+  //  2015-02-05 12:01:40-0500,58350,4K
+  //  2015-02-05 12:05:40-0500,57116,720
 
   CSingleLock lock(m_reportLock);
   CDateTime time = CDateTime::GetCurrentDateTime();
-  std::string strData = StringUtils::Format("%s,%s\n",
+  std::string strData = StringUtils::Format("%s,%s,%s\n",
     time.GetAsDBDateTime().c_str(),
-    assetID.c_str()
+    assetID.c_str(),
+    assetFormat.c_str()
   );
 
   std::string filename = m_strHome + "log/" + m_PlayerInfo.id + "_playback.log";
@@ -820,20 +823,21 @@ void CNWClient::SendFilesDownloaded()
   }
 }
 
-void CNWClient::LogFilesDownLoaded(std::string assetID)
+void CNWClient::LogFilesDownLoaded(std::string assetID,std::string assetFormat)
 {
   if (!m_HasNetwork)
     return;
 
-  //  date,assetID
-  //  2015-02-05 12:01:40-0500,58350
-  //  2015-02-05 12:05:40-0500,57116
+  //  date,assetID,type
+  //  2015-02-05 12:01:40-0500,58350,4K
+  //  2015-02-05 12:05:40-0500,57116,720
 
   CSingleLock lock(m_reportLock);
   CDateTime time = CDateTime::GetCurrentDateTime();
-  std::string strData = StringUtils::Format("%s,%s\n",
+  std::string strData = StringUtils::Format("%s,%s,%s\n",
     time.GetAsDBDateTime().c_str(),
-    assetID.c_str()
+    assetID.c_str(),
+    assetFormat.c_str()
   );
 
   XFILE::CFile file;
@@ -1127,11 +1131,11 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownlo
 {
   CNWClient *client = (CNWClient*)ctx;
   if (downloadState != AssetDownloadState::willDownload)
-    client->LogFilesDownLoaded(std_to_string(asset.id));
+    client->LogFilesDownLoaded(std_to_string(asset.id),asset.type);
 
   client->m_Player->MarkValidated(asset);
   if (downloadState == AssetDownloadState::wasDownloaded)
-    client->LogFilesDownLoaded(std_to_string(asset.id));
+    client->LogFilesDownLoaded(std_to_string(asset.id),asset.type);
 
   if (client->m_Player->IsPlaying() || (!client->m_bypassDownloadWait &&client->m_PlayerInfo.allow_async_player == "no"))
   {

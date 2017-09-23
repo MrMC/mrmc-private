@@ -193,6 +193,7 @@ bool LoadLocalPlaylist(std::string home, NWPlaylist &playList)
       XMLUtils::GetInt(   assetElement, "video_size", asset.video_size);
       XMLUtils::GetString(assetElement, "video_basename", asset.video_basename);
       XMLUtils::GetString(assetElement, "video_localpath", asset.video_localpath);
+      XMLUtils::GetString(assetElement, "video_format", asset.type);
 
       XMLUtils::GetString(assetElement, "thumb_url", asset.thumb_url);
       XMLUtils::GetString(assetElement, "thumb_md5", asset.thumb_md5);
@@ -263,6 +264,7 @@ bool SaveLocalPlaylist(std::string home, const NWPlaylist &playList)
             XMLUtils::SetInt(   assetNode, "video_size", asset.video_size);
             XMLUtils::SetString(assetNode, "video_basename", asset.video_basename);
             XMLUtils::SetString(assetNode, "video_localpath", asset.video_localpath);
+            XMLUtils::SetString(assetNode, "video_format", asset.type);
 
             XMLUtils::SetString(assetNode, "thumb_url", asset.thumb_url);
             XMLUtils::SetString(assetNode, "thumb_md5", asset.thumb_md5);
