@@ -1174,14 +1174,14 @@ bool CNWClient::DoAuthorize()
   if (CGUIKeyboardFactory::ShowAndGetInput(code, CVariant{header}, false))
   {
     size_t test_url_pos = code.find("test://");
-    if (test_url_pos != std::string::npos)
+    if (test_url_pos == std::string::npos)
       test_url_pos = code.find("TEST://");
 
     if (test_url_pos != std::string::npos)
     {
       // if we find code starts with test site url, switch to test site
       TVAPI_SetURLBASE(kTVAPI_URLBASE_TESTSITE);
-      code.erase(test_url_pos + 1);
+      code.erase(test_url_pos, strlen("TEST://"));
     }
     else
     {
