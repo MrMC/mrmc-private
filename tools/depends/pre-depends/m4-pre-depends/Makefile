@@ -1,4 +1,5 @@
 include ../../Makefile.include.in
+DEPS=Makefile osx_snprintf.patch
 PREFIX=$(CURDIR)/../../pre-build-deps
 PLATFORM=native
 TARBALLS_LOCATION=$(PREFIX)
@@ -9,6 +10,7 @@ LIBNAME=m4
 VERSION=1.4.18
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
+BASE_URL=http://mirrors.kodi.tv/build-deps/sources
 
 # configuration settings
 CONFIGURE=./configure --prefix=$(PREFIX)
@@ -26,6 +28,7 @@ $(TARBALLS_LOCATION)/$(ARCHIVE):
 $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	-rm -rf $(PLATFORM)/*; mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
+	cd $(PLATFORM); patch -p1 -i ../osx_snprintf.patch
 	cd $(PLATFORM); $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)
