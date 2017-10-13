@@ -590,6 +590,7 @@ bool TVAPI_ReportFilesPlayed(TVAPI_Files &files, std::string serial_number)
     CVariant file;
     file["id"] = files.files[i].id;
     file["date"] = files.files[i].date;
+    file["format"] = files.files[i].format;
     vfiles.push_back(file);
   }
   std::string jsonBody = CJSONVariantWriter::Write(vfiles, false);

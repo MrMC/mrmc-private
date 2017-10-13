@@ -264,6 +264,7 @@ typedef struct TVAPI_Playlist {
 typedef struct TVAPI_File {
   std::string id;
   std::string date;
+  std::string format;
 } TVAPI_File;
 
 typedef struct TVAPI_Files {
