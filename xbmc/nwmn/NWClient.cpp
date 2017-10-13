@@ -1142,10 +1142,10 @@ bool CNWClient::CreatePlaylist(std::string home, NWPlaylist &playList,
 void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownloadState downloadState)
 {
   CNWClient *client = (CNWClient*)ctx;
-  if (downloadState != AssetDownloadState::willDownload)
-    client->LogFilesDownLoaded(std_to_string(asset.id),asset.type);
 
-  client->m_Player->MarkValidated(asset);
+  if (downloadState == AssetDownloadState::IsPresent)
+    client->m_Player->MarkValidated(asset);
+
   if (downloadState == AssetDownloadState::wasDownloaded)
     client->LogFilesDownLoaded(std_to_string(asset.id),asset.type);
 
