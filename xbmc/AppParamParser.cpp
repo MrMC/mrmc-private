@@ -134,7 +134,7 @@ void CAppParamParser::ParseArg(const std::string &arg)
     m_testmode = true;
   else if (arg.substr(0, 11) == "--settings=")
     g_advancedSettings.AddSettingsFile(arg.substr(11));
-  else if (arg.length() != 0 && arg[0] != '-')
+  else if (arg != "YES" && arg.length() != 0 && arg[0] != '-')
   {
     if (m_testmode)
       g_application.SetEnableTestMode(true);
@@ -150,7 +150,6 @@ void CAppParamParser::PlayPlaylist()
   {
     g_playlistPlayer.Add(0, m_playlist);
     g_playlistPlayer.SetCurrentPlaylist(0);
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_PLAY, -1);
   }
-
-  CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_PLAY, -1);
 }
