@@ -746,17 +746,20 @@ void CNWClient::SendFilesPlayed()
     for (auto line: lines)
     {
       std::vector<std::string> items = StringUtils::Split(line, ',');
-      if (items.size() == 3)
+      TVAPI_File playedFile;
+      switch(items.size())
       {
-        TVAPI_File playedFile;
-        playedFile.date = items[0];
-        playedFile.id = items[1];
-        playedFile.format = items[2];
-        playedFiles.files.push_back(playedFile);
-      }
-      else
-      {
-        CLog::Log(LOGDEBUG, "**NW** - SendFilesPlayed, split failed = %s", line.c_str());
+          case 3:
+            playedFile.format = items[2];
+            // no break so drop through to next
+          case 2:
+            playedFile.date = items[0];
+            playedFile.id = items[1];
+            playedFiles.files.push_back(playedFile);
+            break;
+          default:
+            CLog::Log(LOGDEBUG, "**NW** - SendFilesPlayed, split failed = %s", line.c_str());
+            break;
       }
     }
 
