@@ -817,16 +817,20 @@ void CNWClient::SendFilesDownloaded()
     for (auto line: lines)
     {
       std::vector<std::string> items = StringUtils::Split(line, ',');
-      if (items.size() == 2)
+      TVAPI_File downloadedFile;
+      switch(items.size())
       {
-        TVAPI_File downloadedFile;
-        downloadedFile.date = items[0];
-        downloadedFile.id = items[1];
-        downloadedFiles.files.push_back(downloadedFile);
-      }
-      else
-      {
-        CLog::Log(LOGDEBUG, "**NW** - SendFilesDownloaded, split failed = %s", line.c_str());
+        case 3:
+          downloadedFile.format = items[2];
+          // no break so drop through to next
+        case 2:
+          downloadedFile.date = items[0];
+          downloadedFile.id = items[1];
+          downloadedFiles.files.push_back(downloadedFile);
+          break;
+        default:
+          CLog::Log(LOGDEBUG, "**NW** - SendFilesDownloaded, split failed = %s", line.c_str());
+          break;
       }
     }
 
