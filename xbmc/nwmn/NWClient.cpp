@@ -742,6 +742,7 @@ void CNWClient::SendFilesPlayed()
     playedFiles.apiSecret = m_PlayerInfo.apiSecret;
 
     std::string charbuffer(buffer.get());
+    buffer.clear();
     std::vector<std::string> lines = StringUtils::Split(charbuffer, '\n');
     for (auto line: lines)
     {
@@ -813,6 +814,7 @@ void CNWClient::SendFilesDownloaded()
     downloadedFiles.apiSecret = m_PlayerInfo.apiSecret;
 
     std::string charbuffer(buffer.get());
+    buffer.clear();
     std::vector<std::string> lines = StringUtils::Split(charbuffer, '\n');
     for (auto line: lines)
     {
