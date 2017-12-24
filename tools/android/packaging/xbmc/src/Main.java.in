@@ -275,6 +275,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, mSettingsContentObserver );
     mJsonRPC = new XBMCJsonRPC();
 
+    // keep alive
+    startService(new Intent(this, KeepAliveService.class));
+
     // Delayed Intent
     if (getIntent().getData() != null)
     {
@@ -390,6 +393,9 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   @Override
   public void onDestroy()
   {
+    // kill keepalive
+    stopService(new Intent(this, KeepAliveService.class));
+
     getApplicationContext().getContentResolver().unregisterContentObserver(mSettingsContentObserver);
     handler.removeCallbacks(leanbackUpdateRunnable);
     handler.removeCallbacks(watchnextUpdateRunnable);
