@@ -2367,6 +2367,7 @@ OUTPUT_FILES="$OUTPUT_FILES tools/android/packaging/xbmc/CMakeLists.txt"
 
 OUTPUT_FILES="$OUTPUT_FILES tools/android/packaging/xbmc/src/Splash.java"
 OUTPUT_FILES="$OUTPUT_FILES tools/android/packaging/xbmc/src/Main.java"
+OUTPUT_FILES="$OUTPUT_FILES tools/android/packaging/xbmc/src/KeepAliveService.java"
 OUTPUT_FILES="$OUTPUT_FILES tools/android/packaging/xbmc/src/XBMCBroadcastReceiver.java"
 OUTPUT_FILES="$OUTPUT_FILES tools/android/packaging/xbmc/src/XBMCSettingsContentObserver.java"
 OUTPUT_FILES="$OUTPUT_FILES tools/android/packaging/xbmc/src/XBMCVideoView.java"
