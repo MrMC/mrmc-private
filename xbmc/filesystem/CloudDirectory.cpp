@@ -204,19 +204,22 @@ bool CCloudDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         std::string path_display = objectItem["path_display"].asString();
 
         CFileItemPtr item(new CFileItem(name, false));
-        std::string path(url.Get());
-        path = URIUtils::AddFileToFolder(path, name);
-        item->SetPath(path);
+
+        std::string path;
         item->SetLabel(name);
         item->SetLabelPreformated(true);
         if (tag == "folder")
         {
+          path = url.Get();
+          path = URIUtils::AddFileToFolder(path, name);
           item->m_bIsFolder = true;
         }
         else if (tag == "file")
         {
+          path = GetPlayableLink(path_lower);
           item->m_bIsFolder = false;
         }
+        item->SetPath(path);
         item->m_bIsShareOrDrive = false;
         //just set the default folder icon
         item->FillInDefaultIcon();
@@ -249,4 +252,49 @@ bool CCloudDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 DIR_CACHE_TYPE CCloudDirectory::GetCacheType(const CURL& url) const
 {
   return DIR_CACHE_NEVER;
+}
+
+std::string CCloudDirectory::GetPlayableLink(const std::string& path) const
+{
+//  std::string dropboxAccessToken = CCloudUtils::GetAccessToken("dropbox");
+//  std::string data;
+//  std::string playablePath;
+//  CVariant body;
+//  body["path"] = path;
+//  CJSONVariantWriter::Write(body, data, true);
+//  std::string data1 = "https://content.dropboxapi.com/2/files/download?authorization=" +
+//                  CURL::Encode("Bearer " + dropboxAccessToken) +
+//                  "&arg=" + CURL::Encode(data);
+//  playablePath = "https://content.dropboxapi.com/2/files/download?arg=%7B%22path%22%3A%20%22" + path + "%22%7D&authorization=Bearer%20" + dropboxAccessToken;
+  
+  CURL curl(DROPBOXAPI_ENDPOINT);
+  curl.SetFileName("2/sharing/create_shared_link");
+  // this is key to get back gzip encoded content
+  curl.SetProtocolOption("seekable", "0");
+
+  CVariant body;
+  body["path"] = path;
+  body["short_url"] = false;
+
+  std::string data;
+  std::string playablePath;
+  CJSONVariantWriter::Write(body, data, true);
+
+  std::string dropboxAccessToken = CCloudUtils::GetAccessToken("dropbox");
+  std::string response;
+  // execute the POST request
+  XFILE::CCurlFile curlfile;
+  curlfile.SetRequestHeader("Cache-Control", "no-cache");
+  curlfile.SetRequestHeader("Content-Type", "application/json");
+  curlfile.SetRequestHeader("Authorization", "Bearer " + dropboxAccessToken);
+
+  if (curlfile.Post(curl.Get(), data, response))
+  {
+    CVariant reply;
+    if (CJSONVariantParser::Parse(response, reply))
+    {
+      playablePath = reply["url"].asString() + "&raw=1";
+    }
+  }
+  return playablePath;
 }
