@@ -23,6 +23,7 @@
  */
 
 #import <UIKit/UIKit.h>
+#import "guilib/Geometry.h"
 
 typedef enum
 {
@@ -107,6 +108,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void) audioRouteChanged;
 - (EAGLContext*) getEAGLContextObj;
 
+- (void) updateFocusView;
 - (void) changeFocus:(FocusLayerView *)view;
 
 - (void) setFramebuffer;

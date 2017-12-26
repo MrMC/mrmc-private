@@ -20,9 +20,16 @@
  */
 
 #import <UIKit/UIKit.h>
+#import <vector>
 
 @interface FocusLayerView : UIView
+{
+@private
+  std::vector<CGRect> m_items;
+}
 
 @property (nonatomic, assign) id videolayer;
+
+- (void) updateItems:(std::vector<CGRect> &)items;
 
 @end

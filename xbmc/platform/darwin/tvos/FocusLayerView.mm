@@ -113,18 +113,32 @@
 	return self;
 }
 
+- (void) updateItems:(std::vector<CGRect> &)items
+{
+  m_items = items;
+}
+
 - (void)drawRect:(CGRect)rect
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   CGContextRef context = UIGraphicsGetCurrentContext();
   // make the window transparent
   CGContextSetBlendMode(context, kCGBlendModeClear);
   CGContextFillRect(context, rect);
   CGContextSetBlendMode(context, kCGBlendModeCopy);
-  CGContextSetStrokeColorWithColor(context, [[UIColor orangeColor] CGColor]);
-  if (self.focused)
-    CGContextSetLineWidth(context, 10);
+  CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
+
+  CGContextSetLineWidth(context, 2);
+  if (m_items.size() > 0)
+  {
+    for (auto it = m_items.begin(); it != m_items.end(); ++it)
+      CGContextStrokeRect(context, *it);
+  }
+  //else
+/*
+  CGContextSetLineWidth(context, 10);
   CGContextStrokeRect(context, rect);
+*/
 }
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
@@ -169,7 +183,8 @@
 {
   //PRINT_SIGNATURE();
   // need this or we do not get GestureRecognizers under tvos.
-  return YES;
+  //return YES;
+  return NO;
 }
 
 

@@ -1112,10 +1112,15 @@ bool CGUIWindowManager::Render()
     if (CFocusEngineHandler::GetInstance().ShowVisibleRects())
     {
       g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
-      std::vector<CGUIControl *> visible;
-      CFocusEngineHandler::GetInstance().GetVisible(visible);
-      for (auto i = visible.begin(); i != visible.end(); ++i)
-        CGUITexture::DrawQuad((*i)->GetRenderRect(), 0x4c00ff00);
+      std::vector<FocusEngineItem> *items = CFocusEngineHandler::GetInstance().GetVisible();
+      if (items)
+      {
+        for (auto i = items->begin(); i != items->end(); ++i)
+        {
+          (*i).renderRect = (*i).control->GetRenderRect();
+          //CGUITexture::DrawQuad((*i).renderRect, 0x4c00ff00);
+        }
+      }
     }
   }
 #endif

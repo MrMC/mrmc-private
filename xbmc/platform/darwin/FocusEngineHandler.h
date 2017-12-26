@@ -35,11 +35,16 @@ typedef enum FocusEngineState
 
 typedef struct
 {
+  CGUIControl *control;
+  CRect renderRect;
+} FocusEngineItem;
+typedef struct
+{
   int windowID = 0;
   CGUIWindow  *window = nullptr;
   CGUIControl *rootFocus = nullptr;
   CGUIControl *itemFocus = nullptr;
-  std::vector<CGUIControl *> itemsVisible;
+  std::vector<FocusEngineItem> items;
 } FocusEngineFocus;
 
 typedef struct
@@ -69,7 +74,7 @@ class CFocusEngineHandler
   bool          ShowFocusRect();
   bool          ShowVisibleRects();
   ORIENTATION   GetFocusOrientation();
-  void          GetVisible(std::vector<CGUIControl *> &visible);
+  std::vector<FocusEngineItem> *GetVisible();
 
 private:
   void          UpdateFocus(FocusEngineFocus &focus);

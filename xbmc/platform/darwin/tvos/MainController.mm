@@ -1717,10 +1717,10 @@ static SiriRemoteInfo siriRemoteInfo;
   m_screenScale = [m_glView getScreenScale:[UIScreen mainScreen]];
   [self.view addSubview: m_glView];
 
-#ifdef false
-  CGRect  viewRect = CGRectMake(100, 50, 100, 100);
+  CGRect  viewRect = CGRectMake(0, 0, m_glView.bounds.size.width, m_glView.bounds.size.height);
   _View1 = [[FocusLayerView alloc] initWithFrame:viewRect];
   [self.view insertSubview:_View1 aboveSubview:m_glView];
+#ifdef false
 
   viewRect = CGRectOffset(viewRect, 200, 0);
   _View2 = [[FocusLayerView alloc] initWithFrame:viewRect];
@@ -2119,12 +2119,33 @@ static SiriRemoteInfo siriRemoteInfo;
 {
   return [m_glView getContext];
 }
-#ifdef false
+
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
-  return @[_View1];
+  return @[m_glView];
 }
-#endif
+
+- (void) updateFocusView
+{
+  std::vector<FocusEngineItem> *items = CFocusEngineHandler::GetInstance().GetVisible();
+  if (items && items->size() > 0)
+  {
+    std::vector<CGRect> cgRects;
+    for (auto it = items->begin(); it != items->end(); ++it)
+    {
+      if (!(*it).renderRect.IsEmpty())
+      {
+        CGRect rect = CGRectMake(
+          (*it).renderRect.x1/m_screenScale, (*it).renderRect.y1/m_screenScale,
+          (*it).renderRect.Width()/m_screenScale, (*it).renderRect.Height()/m_screenScale);
+        rect = CGRectInset(rect, 4, 4);
+        cgRects.push_back(rect);
+      }
+    }
+    [_View1 updateItems:cgRects];
+    [_View1 setNeedsDisplay];
+  }
+}
 
 -(void) changeFocus:(FocusLayerView *)view
 {
@@ -2190,6 +2211,9 @@ static SiriRemoteInfo siriRemoteInfo;
       CLog::Log(LOGDEBUG, "%s: displayRate = %f", __PRETTY_FUNCTION__, self.displayRate);
     }
   }
+
+  if (m_animating)
+    [self performSelectorOnMainThread:@selector(updateFocusView) withObject:nil  waitUntilDone:NO];
 }
 
 //--------------------------------------------------------------
