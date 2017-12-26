@@ -42,6 +42,7 @@
 #import "platform/darwin/FocusEngineHandler.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/MainEAGLView.h"
+#import "platform/darwin/tvos/FocusLayerView.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainApplication.h"
 #import "platform/darwin/tvos/TVOSTopShelf.h"
@@ -129,6 +130,11 @@ MainController *g_xbmcController;
 @property (strong) GCController* gcController;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) float displayRate;
+@property (nonatomic) FocusLayerView *View1;
+@property (nonatomic) FocusLayerView *View2;
+@property (nonatomic) FocusLayerView *View3;
+@property (nonatomic) FocusLayerView *View4;
+@property (nonatomic) UIView *preferredView;
 
 @end
 
@@ -240,7 +246,7 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 static int keyPressTimerFiredCount = 0;
 - (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay withInterval:(NSTimeInterval)interval
 {
-  //PRINT_SIGNATURE();
+  PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
     [self stopKeyPressTimer];
 
@@ -1710,6 +1716,24 @@ static SiriRemoteInfo siriRemoteInfo;
   // Check if screen is Retina
   m_screenScale = [m_glView getScreenScale:[UIScreen mainScreen]];
   [self.view addSubview: m_glView];
+
+#ifdef false
+  CGRect  viewRect = CGRectMake(100, 50, 100, 100);
+  _View1 = [[FocusLayerView alloc] initWithFrame:viewRect];
+  [self.view insertSubview:_View1 aboveSubview:m_glView];
+
+  viewRect = CGRectOffset(viewRect, 200, 0);
+  _View2 = [[FocusLayerView alloc] initWithFrame:viewRect];
+  [self.view insertSubview:_View2 aboveSubview:m_glView];
+
+  viewRect = CGRectOffset(viewRect, 200, 0);
+  _View3 = [[FocusLayerView alloc] initWithFrame:viewRect];
+  [self.view insertSubview:_View3 aboveSubview:m_glView];
+
+  viewRect = CGRectOffset(viewRect, 200, 0);
+  _View4 = [[FocusLayerView alloc] initWithFrame:viewRect];
+  [self.view insertSubview:_View4 aboveSubview:m_glView];
+#endif
 }
 //--------------------------------------------------------------
 - (void)viewDidLoad
@@ -1981,7 +2005,7 @@ static SiriRemoteInfo siriRemoteInfo;
         CAEFactory::DeviceChange();
         break;
       case MC_INACTIVE_WASPAUSED:
-        CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_UNPAUSE);
+        CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_UNPAUSE);
         break;
       case MC_BACKGROUND_RESTORE:
         if (!g_application.LastProgressTrackingItem().GetPath().empty())
@@ -2094,6 +2118,17 @@ static SiriRemoteInfo siriRemoteInfo;
 - (EAGLContext*) getEAGLContextObj
 {
   return [m_glView getContext];
+}
+#ifdef false
+- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
+{
+  return @[_View1];
+}
+#endif
+
+-(void) changeFocus:(FocusLayerView *)view
+{
+  PRINT_SIGNATURE();
 }
 
 #pragma mark - display switching routines

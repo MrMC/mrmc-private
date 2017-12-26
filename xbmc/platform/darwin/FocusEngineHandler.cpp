@@ -47,6 +47,7 @@ CFocusEngineHandler::CFocusEngineHandler()
 : m_focusZoom(true)
 , m_focusSlide(true)
 , m_showFocusRect(false)
+, m_showVisibleRects(true)
 , m_state(FocusEngineState::Idle)
 , m_focusedOrientation(UNDEFINED)
 {
@@ -66,8 +67,10 @@ void CFocusEngineHandler::Process()
       m_focus.itemFocus->ClearDynamicAnimations();
     }
     CSingleLock lock(m_focusLock);
+    // itemsVisible will start cleared
     m_focus = focus;
   }
+  UpdateVisible(m_focus);
 
   if (m_focus.itemFocus)
   {
@@ -184,6 +187,7 @@ void CFocusEngineHandler::InvalidateFocus(CGUIControl *control)
   CSingleLock lock(m_focusLock);
   if (m_focus.rootFocus == control || m_focus.itemFocus == control)
     m_focus = FocusEngineFocus();
+
 }
 
 const int
@@ -218,6 +222,12 @@ bool CFocusEngineHandler::ShowFocusRect()
 {
   return m_showFocusRect;
 }
+
+bool CFocusEngineHandler::ShowVisibleRects()
+{
+  return m_showVisibleRects;
+}
+
 
 ORIENTATION CFocusEngineHandler::GetFocusOrientation()
 {
@@ -333,4 +343,76 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
       }
       break;
   }
+}
+
+void CFocusEngineHandler::GetVisible(std::vector<CGUIControl *> &visible)
+{
+  // skip finding focused window, use current
+  CSingleLock lock(m_focusLock);
+  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+    visible = m_focus.itemsVisible;
+}
+
+void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
+{
+  std::vector<CGUIControl *> containers;
+  focus.window->GetContainers(containers);
+
+  // add in missing containers
+  for (auto it = containers.begin(); it != containers.end(); ++it)
+  {
+    CGUIControl *control = *it;
+    if (control->CanFocus() && control->IsVisibleFromSkin())
+    {
+      if (control->GetControlType() == CGUIControl::GUICONTAINER_LIST)
+      {
+        CGUIControl *parent = control->GetParentControl();
+        if (parent && (!parent->CanFocus() || !parent->IsVisibleFromSkin()))
+          continue;
+      }
+
+      auto foundControl = std::find(focus.itemsVisible.begin(), focus.itemsVisible.end(), control);
+      // missing from our list, add it in
+      if (foundControl == focus.itemsVisible.end())
+      {
+        AddVisible(focus, control);
+        CRect renderRect = control->GetRenderRect();
+      }
+    }
+  }
+  // now remove containers that have vanished or lost focusable visibility
+  for (auto it = focus.itemsVisible.begin(); it != focus.itemsVisible.end();)
+  {
+    auto foundControl = std::find(containers.begin(), containers.end(), *it);
+    if (foundControl == containers.end())
+    {
+      it = focus.itemsVisible.erase(it);
+      CLog::Log(LOGDEBUG, "%s: sub %p %lu", __FUNCTION__, *it, focus.itemsVisible.size());
+    }
+    else
+    {
+      if (!(*it)->CanFocus() || !(*it)->IsVisibleFromSkin())
+      {
+        it = focus.itemsVisible.erase(it);
+        CLog::Log(LOGDEBUG, "%s: sub %p %lu", __FUNCTION__, *it, focus.itemsVisible.size());
+      }
+      else
+      {
+        ++it;
+      }
+    }
+  }
+}
+
+void CFocusEngineHandler::AddVisible(FocusEngineFocus &focus, CGUIControl *visible)
+{
+  CRect renderRect = visible->GetRenderRect();
+  CLog::Log(LOGDEBUG, "%s: add renderRect - %f,%f %f x %f", __FUNCTION__,
+    renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
+  focus.itemsVisible.push_back(visible);
+  CLog::Log(LOGDEBUG, "%s: add %p %lu", __FUNCTION__, visible, focus.itemsVisible.size());
+}
+
+void CFocusEngineHandler::RemoveVisible(CGUIControl *visible)
+{
 }

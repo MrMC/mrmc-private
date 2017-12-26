@@ -45,6 +45,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 };
 
 @class MainEAGLView;
+@class FocusLayerView;
 
 @interface MainController : UIViewController <UIGestureRecognizerDelegate>
 {
@@ -105,6 +106,8 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 
 - (void) audioRouteChanged;
 - (EAGLContext*) getEAGLContextObj;
+
+- (void) changeFocus:(FocusLayerView *)view;
 
 - (void) setFramebuffer;
 - (bool) presentFramebuffer;
