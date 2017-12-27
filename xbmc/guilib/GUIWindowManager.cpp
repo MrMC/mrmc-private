@@ -1099,7 +1099,7 @@ bool CGUIWindowManager::Render()
   }
 
 #if defined(TARGET_DARWIN_TVOS)
-  if (g_application.IsAppFocused())
+  if (g_application.IsAppInitialized() && g_application.IsAppFocused())
   {
     for (auto it = m_focusableTracker.begin(); it != m_focusableTracker.end(); ++it)
     {
@@ -1108,7 +1108,6 @@ bool CGUIWindowManager::Render()
       //  *it, renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
       CFocusEngineHandler::GetInstance().AppendVisible(*it);
     }
-    m_focusableTracker.clear();
     CFocusEngineHandler::GetInstance().UpdateRenderRects();
 
     if (CFocusEngineHandler::GetInstance().ShowFocusRect())
@@ -1128,6 +1127,7 @@ bool CGUIWindowManager::Render()
         CGUITexture::DrawQuad((*it).renderRect, 0x4c00ff00);
     }
   }
+  m_focusableTracker.clear();
 #endif
 
   return hasRendered;
