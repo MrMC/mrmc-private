@@ -425,9 +425,11 @@ void CFocusEngineHandler::UpdateRenderRects()
           break;
         case CGUIControl::GUICONTROL_LISTLABEL:
           {
-            (*it).renderRect = (*it).control->GetRenderRect();
-            //CGUIListLabel *listLabel = (CGUIListLabel*)(*it).control;
-            //(*it).renderRect = listLabel->GetMaxRenderRect();
+            CGUIControl *parent = (*it).control->GetParentControl();
+            if (parent)
+              (*it).renderRect = parent->GetRenderRect();
+            else
+              (*it).renderRect = (*it).control->GetRenderRect();
           }
           break;
       }
@@ -489,6 +491,7 @@ void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
       case CGUIControl::GUICONTROL_GROUP:
        {
           addControl = control->CanFocus() && control->IsVisibleFromSkin();
+          continue;
           if (addControl)
           {
             CGUIControlGroup *groupControl = (CGUIControlGroup*)control;
@@ -509,6 +512,7 @@ void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
       case CGUIControl::GUICONTROL_LISTGROUP:
         {
           addControl = control->CanFocus() && control->IsVisibleFromSkin();
+          continue;
         }
         break;
       case CGUIControl::GUICONTAINER_FIXEDLIST:
@@ -520,6 +524,7 @@ void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
           //if (parent)
           //  control = parent;
           addControl = control->CanFocus() && control->IsVisibleFromSkin();
+          continue;
         }
         break;
      case CGUIControl::GUICONTAINER_LIST:
@@ -528,6 +533,7 @@ void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
           if (parent)
             control = parent;
           addControl = control->CanFocus() && control->IsVisibleFromSkin();
+          continue;
         }
         break;
     }

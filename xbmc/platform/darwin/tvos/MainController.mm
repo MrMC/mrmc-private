@@ -2169,7 +2169,7 @@ static SiriRemoteInfo siriRemoteInfo;
     if (CGRectEqualToRect(rect, boundsRect))
       continue;
 
-    rect = CGRectInset(rect, 4, 4);
+    //rect = CGRectInset(rect, 4, 4);
     cgRects.push_back(rect);
   }
   [_View1 updateItems:cgRects];
