@@ -1014,8 +1014,23 @@ void CGUIWindowManager::MarkDirty(const CRect& rect)
   m_tracker.MarkDirtyRegion(rect);
 }
 
-void CGUIWindowManager::RenderPass() const
+void CGUIWindowManager::RenderPass()
 {
+  // we render the dialogs based on their render order.
+  CGUIWindow *topDialog = nullptr;
+  std::vector<CGUIWindow *> renderList = m_activeDialogs;
+  stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
+  // find if there is a dialog running and save the top dialog.
+  for (iDialog it = renderList.begin(); it != renderList.end(); ++it)
+  {
+    if ((*it)->IsDialogRunning())
+      topDialog = (*it);
+  }
+  if (topDialog)
+    m_enableFocusableTracker = false;
+  else
+    m_enableFocusableTracker = true;
+
   CGUIWindow* pWindow = GetWindow(GetActiveWindow());
   if (pWindow)
   {
@@ -1023,14 +1038,14 @@ void CGUIWindowManager::RenderPass() const
     pWindow->DoRender();
   }
 
-  // we render the dialogs based on their render order.
-  std::vector<CGUIWindow *> renderList = m_activeDialogs;
-  stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
-  
   for (iDialog it = renderList.begin(); it != renderList.end(); ++it)
   {
     if ((*it)->IsDialogRunning())
+    {
+      if (*it == topDialog)
+        m_enableFocusableTracker = true;
       (*it)->DoRender();
+    }
   }
 }
 
@@ -1563,7 +1578,8 @@ void CGUIWindowManager::ClearFocusableItemTracker()
 
 void CGUIWindowManager::AppendFocusableTracker(CGUIControl *control)
 {
-  m_focusableTracker.push_back(control);
+  if (m_enableFocusableTracker)
+    m_focusableTracker.push_back(control);
 }
 
 CGUIWindow *CGUIWindowManager::GetTopMostDialog() const

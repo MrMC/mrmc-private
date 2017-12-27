@@ -188,7 +188,7 @@ public:
   void DumpTextureUse();
 #endif
 private:
-  void RenderPass() const;
+  void RenderPass();
 
   void LoadNotOnDemandWindows();
   void UnloadNotOnDemandWindows();
@@ -230,6 +230,7 @@ private:
   bool m_initialized;
 
   CDirtyRegionTracker m_tracker;
+  bool m_enableFocusableTracker = true;
   std::vector<CGUIControl *> m_focusableTracker;
 
 private:
