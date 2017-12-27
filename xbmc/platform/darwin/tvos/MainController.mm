@@ -135,6 +135,8 @@ MainController *g_xbmcController;
 @property (nonatomic) FocusLayerView *View3;
 @property (nonatomic) FocusLayerView *View4;
 @property (nonatomic) UIView *preferredView;
+@property std::vector<FocusEngineItem> viewItems;
+
 
 @end
 
@@ -2127,24 +2129,45 @@ static SiriRemoteInfo siriRemoteInfo;
 
 - (void) updateFocusView
 {
-  std::vector<FocusEngineItem> *items = CFocusEngineHandler::GetInstance().GetVisible();
-  if (items && items->size() > 0)
+  // FocusEngineItems are always sorted by control address
+  std::vector<FocusEngineItem> items;
+  CFocusEngineHandler::GetInstance().GetVisible(items);
+  if (items.size() == 0)
+    self.viewItems.clear();
+  else if (self.viewItems.size() != items.size())
+    self.viewItems = items;
+  else
   {
-    std::vector<CGRect> cgRects;
-    for (auto it = items->begin(); it != items->end(); ++it)
+    bool areEqual = true;
+    // sizes are the same, so we have to compare control render rects
+    for (size_t indx = 0; indx < self.viewItems.size(); ++indx)
     {
-      if (!(*it).renderRect.IsEmpty())
+      if (self.viewItems[indx].renderRect != items[indx].renderRect)
       {
-        CGRect rect = CGRectMake(
-          (*it).renderRect.x1/m_screenScale, (*it).renderRect.y1/m_screenScale,
-          (*it).renderRect.Width()/m_screenScale, (*it).renderRect.Height()/m_screenScale);
-        rect = CGRectInset(rect, 4, 4);
-        cgRects.push_back(rect);
+        areEqual = false;
+        break;
       }
     }
-    [_View1 updateItems:cgRects];
-    [_View1 setNeedsDisplay];
+    if (areEqual)
+      return;
+    self.viewItems = items;
   }
+
+  std::vector<CGRect> cgRects;
+  for (size_t indx = 0; indx < self.viewItems.size(); ++indx)
+  {
+    // should never be an empty rect :)
+    if (self.viewItems[indx].renderRect.IsEmpty())
+      continue;
+
+    CGRect rect = CGRectMake(
+      self.viewItems[indx].renderRect.x1/m_screenScale, self.viewItems[indx].renderRect.y1/m_screenScale,
+      self.viewItems[indx].renderRect.Width()/m_screenScale, self.viewItems[indx].renderRect.Height()/m_screenScale);
+    rect = CGRectInset(rect, 4, 4);
+    cgRects.push_back(rect);
+  }
+  [_View1 updateItems:cgRects];
+  [_View1 setNeedsDisplay];
 }
 
 -(void) changeFocus:(FocusLayerView *)view

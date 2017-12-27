@@ -21,6 +21,7 @@
 #include "GUIListLabel.h"
 #include <limits>
 #include "addons/Skin.h"
+#include "utils/log.h"
 
 CGUIListLabel::CGUIListLabel(int parentID, int controlID, float posX, float posY, float width, float height, const CLabelInfo& labelInfo, const CGUIInfoLabel &info, CGUIControl::GUISCROLLVALUE scroll)
     : CGUIControl(parentID, controlID, posX, posY, width, height)
@@ -94,6 +95,14 @@ void CGUIListLabel::Process(unsigned int currentTime, CDirtyRegionList &dirtyreg
 void CGUIListLabel::Render()
 {
   m_label.Render();
+  if (m_parentControl && !m_parentControl->IsDisabled() && m_parentControl->IsVisibleFromSkin())
+  {
+    if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)
+    {
+      CLog::Log(LOGDEBUG, "CGUIListLabel::Render: %p - %f,%f %f x %f", this,
+        m_renderRegion.x1, m_renderRegion.y1, m_renderRegion.Width(), m_renderRegion.Height());
+    }
+  }
   CGUIControl::Render();
 }
 

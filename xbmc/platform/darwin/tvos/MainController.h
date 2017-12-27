@@ -76,6 +76,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   BOOL                        m_enableRemoteIdle;
   BOOL                        m_allowTap;
   BOOL                        m_nativeKeyboardActive;
+
 }
 // why are these properties ?
 @property (nonatomic, strong) NSTimer *m_holdTimer;

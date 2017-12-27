@@ -1143,6 +1143,7 @@ void CGUIWindowManager::AfterRender()
     if ((*it)->IsDialogRunning())
       (*it)->AfterRender();
   }
+  CLog::Log(LOGDEBUG, "CGUIWindowManager::AfterRender");
 }
 
 void CGUIWindowManager::FrameMove()

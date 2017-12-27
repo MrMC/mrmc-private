@@ -26,7 +26,6 @@
 #include "guilib/GUIListGroup.h"
 #include "guilib/GUIBaseContainer.h"
 #include "guilib/GUIWindowManager.h"
-#include "windows/GUIMediaWindow.h"
 #include "threads/Atomics.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
@@ -357,6 +356,14 @@ std::vector<FocusEngineItem> * CFocusEngineHandler::GetVisible()
   return nullptr;
 }
 
+void CFocusEngineHandler::GetVisible(std::vector<FocusEngineItem> &items)
+{
+  // skip finding focused window, use current
+  CSingleLock lock(m_focusLock);
+  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+    items = m_focus.items;
+}
+
 void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
 {
   size_t visibilityCount = focus.items.size();
@@ -413,18 +420,6 @@ void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
           addControl = control->CanFocus() && control->IsVisibleFromSkin();
           if (addControl)
           {
-            if (focus.window->IsMediaWindow())
-            {
-              int data1 = ((CGUIMediaWindow*)(focus.window))->GetViewContainerID();
-              const CGUIControl *control1 = focus.window->GetControl(data1);
-              if (control1 && control1->IsContainer())
-              {
-                std::vector<CGUIControl *> mediaControls;
-                //((IGUIContainer *)control1)->GetContainers(mediaControls);
-              }
-
-            }
-
             CGUIControlGroup *groupControl = (CGUIControlGroup*)control;
             std::vector<CGUIControl *> groupControls;
             groupControl->GetContainers(groupControls);
@@ -441,22 +436,8 @@ void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
         break;
       case CGUIControl::GUICONTROL_GROUPLIST:
       case CGUIControl::GUICONTROL_LISTGROUP:
-       {
+        {
           addControl = control->CanFocus() && control->IsVisibleFromSkin();
-          if (addControl)
-          {
-            CGUIControlGroup *groupControl = (CGUIControlGroup*)control;
-            std::vector<CGUIControl *> groupControls;
-            groupControl->GetContainers(groupControls);
-            for (auto groupIt = groupControls.begin(); groupIt != groupControls.end(); ++groupIt)
-            {
-              if ((*groupIt)->CanFocus() && (*groupIt)->IsVisibleFromSkin())
-              {
-                AddVisible(focus, *groupIt);
-                addControl = false;
-              }
-            }
-          }
         }
         break;
       case CGUIControl::GUICONTAINER_FIXEDLIST:
@@ -468,25 +449,6 @@ void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
           //if (parent)
           //  control = parent;
           addControl = control->CanFocus() && control->IsVisibleFromSkin();
-          if (addControl)
-          {
-            CGUIBaseContainer *baseContainer = (CGUIBaseContainer*)control;
-            CGUIListItemLayout *layout = baseContainer->GetFocusedLayout();
-            if (layout)
-            {
-              CGUIListGroup *group =  layout->GetGroup();
-              std::vector<CGUIControl *> groupControls;
-              group->GetContainers(groupControls);
-              for (auto groupIt = groupControls.begin(); groupIt != groupControls.end(); ++groupIt)
-              {
-                if ((*groupIt)->CanFocus() && (*groupIt)->IsVisibleFromSkin())
-                {
-                  AddVisible(focus, *groupIt);
-                  addControl = false;
-                }
-              }
-            }
-          }
         }
         break;
      case CGUIControl::GUICONTAINER_LIST:
@@ -520,6 +482,13 @@ void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
       }
     }
   }
+
+  // always sort the control list by control pointer address
+  std::sort(focus.items.begin(), focus.items.end(),
+    [] (FocusEngineItem const& a, FocusEngineItem const& b)
+  {
+      return a.control < b.control;
+  });
 
   bool visibleChanged = false;
   visibleChanged = visibilityCount != focus.items.size();

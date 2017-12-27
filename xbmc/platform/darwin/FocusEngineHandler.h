@@ -75,6 +75,7 @@ class CFocusEngineHandler
   bool          ShowVisibleRects();
   ORIENTATION   GetFocusOrientation();
   std::vector<FocusEngineItem> *GetVisible();
+  void          GetVisible(std::vector<FocusEngineItem> &items);
 
 private:
   void          UpdateFocus(FocusEngineFocus &focus);
