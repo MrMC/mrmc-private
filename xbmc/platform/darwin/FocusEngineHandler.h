@@ -77,6 +77,7 @@ class CFocusEngineHandler
   std::vector<FocusEngineItem> *GetVisible();
   void          GetVisible(std::vector<FocusEngineItem> &items);
   void          AppendVisible(CGUIControl *control);
+  void          UpdateRenderRects();
 
 private:
   void          UpdateFocus(FocusEngineFocus &focus);

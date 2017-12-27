@@ -49,7 +49,7 @@ CFocusEngineHandler::CFocusEngineHandler()
 : m_focusZoom(true)
 , m_focusSlide(true)
 , m_showFocusRect(false)
-, m_showVisibleRects(true)
+, m_showVisibleRects(false)
 , m_state(FocusEngineState::Idle)
 , m_focusedOrientation(UNDEFINED)
 {
@@ -190,6 +190,12 @@ void CFocusEngineHandler::InvalidateFocus(CGUIControl *control)
   if (m_focus.rootFocus == control || m_focus.itemFocus == control)
     m_focus = FocusEngineFocus();
 
+  auto foundControl = std::find_if(m_focus.items.begin(), m_focus.items.end(),
+      [&](FocusEngineItem item)
+      { return item.control == control;
+  });
+  if (foundControl != m_focus.items.end())
+    m_focus.items.erase(foundControl);
 }
 
 const int
@@ -229,7 +235,6 @@ bool CFocusEngineHandler::ShowVisibleRects()
 {
   return m_showVisibleRects;
 }
-
 
 ORIENTATION CFocusEngineHandler::GetFocusOrientation()
 {
@@ -396,6 +401,17 @@ void CFocusEngineHandler::AppendVisible(CGUIControl *control)
       // if existing, just update renderRect
       (*foundControl).renderRect = control->GetRenderRect();
     }
+  }
+}
+
+void CFocusEngineHandler::UpdateRenderRects()
+{
+  // skip finding focused window, use current
+  CSingleLock lock(m_focusLock);
+  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+  {
+    for (auto it = m_focus.items.begin(); it != m_focus.items.end(); ++it)
+      (*it).renderRect = (*it).control->GetRenderRect();
   }
 }
 
