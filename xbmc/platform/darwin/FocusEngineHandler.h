@@ -74,7 +74,6 @@ class CFocusEngineHandler
   bool          ShowFocusRect();
   bool          ShowVisibleRects();
   ORIENTATION   GetFocusOrientation();
-  std::vector<FocusEngineItem> *GetVisible();
   void          GetVisible(std::vector<FocusEngineItem> &items);
   void          AppendVisible(CGUIControl *control);
   void          UpdateRenderRects();

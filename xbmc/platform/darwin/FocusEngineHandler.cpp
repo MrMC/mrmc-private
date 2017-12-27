@@ -353,21 +353,17 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
   }
 }
 
-std::vector<FocusEngineItem> * CFocusEngineHandler::GetVisible()
-{
-  // skip finding focused window, use current
-  CSingleLock lock(m_focusLock);
-  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
-    return &m_focus.items;
-  return nullptr;
-}
-
 void CFocusEngineHandler::GetVisible(std::vector<FocusEngineItem> &items)
 {
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
-    items = m_focus.items;
+  {
+    if (m_focus.rootFocus)
+      items = m_focus.items;
+    else
+      items.clear();
+  }
 }
 
 void CFocusEngineHandler::AppendVisible(CGUIControl *control)
@@ -425,11 +421,34 @@ void CFocusEngineHandler::UpdateRenderRects()
           break;
         case CGUIControl::GUICONTROL_LISTLABEL:
           {
+            (*it).renderRect = (*it).control->GetRenderRect();
             CGUIControl *parent = (*it).control->GetParentControl();
             if (parent)
+            {
               (*it).renderRect = parent->GetRenderRect();
-            else
-              (*it).renderRect = (*it).control->GetRenderRect();
+              CGUIControlGroup *groupControl = dynamic_cast<CGUIControlGroup*>(parent);
+              if (groupControl)
+              {
+                CRect region = (*it).renderRect;
+                CRect zeroRect = CRect(0, 0, 0, 0);
+                std::vector<CGUIControl *> children;
+                groupControl->GetChildren(children);
+                for (auto childit = children.begin(); childit != children.end(); ++childit)
+                {
+                  // never trust renderRects that are not processed
+                  // this means they have not been mapped to display
+                  if (!(*childit)->HasProcessed())
+                    continue;
+                  CRect childRenderRect = (*childit)->GetRenderRect();
+                  if (childRenderRect != zeroRect)
+                    region.ArithmeticUnion( childRenderRect );
+                }
+                // not sure why this happens, it's the ".." in a file list
+                if (region.x1 < (*it).renderRect.x1)
+                  region.x1 = (*it).renderRect.x1;
+                (*it).renderRect = region;
+              }
+            }
           }
           break;
       }

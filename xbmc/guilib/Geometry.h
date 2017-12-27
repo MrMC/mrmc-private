@@ -182,6 +182,22 @@ public:
     return *this;
   };
 
+  const this_type &ArithmeticUnion(const this_type &rect)
+  {
+    if (IsEmpty())
+      *this = rect;
+    else
+    {
+      x1 = std::min(x1,rect.x1);
+      y1 = std::min(y1,rect.y1);
+
+      x2 = std::max(x2,rect.x2);
+      y2 = std::max(y2,rect.y2);
+    }
+
+    return *this;
+  };
+
   inline bool IsEmpty() const XBMC_FORCE_INLINE
   {
     return (x2 - x1) * (y2 - y1) == 0;

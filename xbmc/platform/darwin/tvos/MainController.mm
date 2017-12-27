@@ -135,9 +135,6 @@ MainController *g_xbmcController;
 @property (nonatomic) FocusLayerView *View3;
 @property (nonatomic) FocusLayerView *View4;
 @property (nonatomic) UIView *preferredView;
-@property std::vector<FocusEngineItem> viewItems;
-
-
 @end
 
 #pragma mark - MainController implementation
@@ -151,6 +148,8 @@ MainController *g_xbmcController;
 @synthesize m_remoteIdleTimeout;
 @synthesize m_enableRemoteIdle;
 @synthesize m_allowTap;
+
+std::vector<FocusEngineItem> m_viewItems;
 
 #pragma mark - internal key press methods
 - (void)sendButtonPressed:(int)buttonId
@@ -2134,16 +2133,16 @@ static SiriRemoteInfo siriRemoteInfo;
   std::vector<FocusEngineItem> items;
   CFocusEngineHandler::GetInstance().GetVisible(items);
   if (items.size() == 0)
-    self.viewItems.clear();
-  else if (self.viewItems.size() != items.size())
-    self.viewItems = items;
+    m_viewItems.clear();
+  else if (m_viewItems.size() != items.size())
+    m_viewItems = items;
   else
   {
     bool areEqual = true;
     // sizes are the same, so we have to compare control render rects
-    for (size_t indx = 0; indx < self.viewItems.size(); ++indx)
+    for (size_t indx = 0; indx < m_viewItems.size(); ++indx)
     {
-      if (self.viewItems[indx].renderRect != items[indx].renderRect)
+      if (m_viewItems[indx].renderRect != items[indx].renderRect)
       {
         areEqual = false;
         break;
@@ -2151,19 +2150,19 @@ static SiriRemoteInfo siriRemoteInfo;
     }
     if (areEqual)
       return;
-    self.viewItems = items;
+    m_viewItems = items;
   }
 
   std::vector<CGRect> cgRects;
-  for (size_t indx = 0; indx < self.viewItems.size(); ++indx)
+  for (size_t indx = 0; indx < m_viewItems.size(); ++indx)
   {
     // should never be an empty rect :)
-    if (self.viewItems[indx].renderRect.IsEmpty())
+    if (m_viewItems[indx].renderRect.IsEmpty())
       continue;
 
     CGRect rect = CGRectMake(
-      self.viewItems[indx].renderRect.x1/m_screenScale, self.viewItems[indx].renderRect.y1/m_screenScale,
-      self.viewItems[indx].renderRect.Width()/m_screenScale, self.viewItems[indx].renderRect.Height()/m_screenScale);
+      m_viewItems[indx].renderRect.x1/m_screenScale, m_viewItems[indx].renderRect.y1/m_screenScale,
+      m_viewItems[indx].renderRect.Width()/m_screenScale, m_viewItems[indx].renderRect.Height()/m_screenScale);
 
     // ignore rects that are the same size as gles bounds.
     if (CGRectEqualToRect(rect, boundsRect))

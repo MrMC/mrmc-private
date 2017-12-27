@@ -96,6 +96,7 @@ public:
    */
   bool IsValidControl(const CGUIControl *control) const;
 
+  void GetChildren(std::vector<CGUIControl *> &controls) { controls = m_children;};
 
 #ifdef DEBUG_CGUI_TEXTUREUSE
   virtual void DumpTextureUse();
