@@ -364,6 +364,41 @@ void CFocusEngineHandler::GetVisible(std::vector<FocusEngineItem> &items)
     items = m_focus.items;
 }
 
+void CFocusEngineHandler::AppendVisible(CGUIControl *control)
+{
+  // skip finding focused window, use current
+  CSingleLock lock(m_focusLock);
+  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+  {
+    FocusEngineItem item;
+    item.control = control;
+    item.renderRect = control->GetRenderRect();
+
+    auto foundControl = std::find_if(m_focus.items.begin(), m_focus.items.end(),
+        [&](FocusEngineItem item)
+        { return item.control == control;
+    });
+    if (foundControl == m_focus.items.end())
+    {
+      // missing from our list, add it in
+      m_focus.items.push_back(item);
+      // always sort the control list by control pointer address
+      // we could play games with trying to inset at the right place
+      // but these arrays are short and it just does not matter much.
+      std::sort(m_focus.items.begin(), m_focus.items.end(),
+        [] (FocusEngineItem const& a, FocusEngineItem const& b)
+      {
+          return a.control < b.control;
+      });
+    }
+    else
+    {
+      // if existing, just update renderRect
+      (*foundControl).renderRect = control->GetRenderRect();
+    }
+  }
+}
+
 void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
 {
   size_t visibilityCount = focus.items.size();

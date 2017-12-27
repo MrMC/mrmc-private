@@ -76,6 +76,7 @@ class CFocusEngineHandler
   ORIENTATION   GetFocusOrientation();
   std::vector<FocusEngineItem> *GetVisible();
   void          GetVisible(std::vector<FocusEngineItem> &items);
+  void          AppendVisible(CGUIControl *control);
 
 private:
   void          UpdateFocus(FocusEngineFocus &focus);

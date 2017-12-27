@@ -1101,6 +1101,15 @@ bool CGUIWindowManager::Render()
 #if defined(TARGET_DARWIN_TVOS)
   if (g_application.IsAppFocused())
   {
+    for (auto it = m_focusableTracker.begin(); it != m_focusableTracker.end(); ++it)
+    {
+      CRect renderRect = (*it)->GetRenderRect();
+      CLog::Log(LOGDEBUG, "focusableTracker: %p, %f,%f %f x %f",
+        *it, renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
+      CFocusEngineHandler::GetInstance().AppendVisible(*it);
+    }
+    m_focusableTracker.clear();
+
     if (CFocusEngineHandler::GetInstance().ShowFocusRect())
     {
       g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
@@ -1547,6 +1556,18 @@ void CGUIWindowManager::InvalidateFocus(CGUIControl *control)
   // other way to track down a control in a window that vanishes.
   CFocusEngineHandler::GetInstance().InvalidateFocus(control);
 #endif
+}
+
+void CGUIWindowManager::ClearFocusableItemTracker()
+{
+  m_focusableTracker.clear();
+#if defined(TARGET_DARWIN_TVOS)
+#endif
+}
+
+void CGUIWindowManager::AppendFocusableTracker(CGUIControl *control)
+{
+  m_focusableTracker.push_back(control);
 }
 
 CGUIWindow *CGUIWindowManager::GetTopMostDialog() const

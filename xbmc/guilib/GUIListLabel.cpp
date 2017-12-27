@@ -20,6 +20,7 @@
 
 #include "GUIListLabel.h"
 #include <limits>
+#include "GUIWindowManager.h"
 #include "addons/Skin.h"
 #include "utils/log.h"
 
@@ -95,13 +96,11 @@ void CGUIListLabel::Process(unsigned int currentTime, CDirtyRegionList &dirtyreg
 void CGUIListLabel::Render()
 {
   m_label.Render();
+  // lables can never focus so we have to check their parent
   if (m_parentControl && !m_parentControl->IsDisabled() && m_parentControl->IsVisibleFromSkin())
   {
     if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)
-    {
-      CLog::Log(LOGDEBUG, "CGUIListLabel::Render: %p - %f,%f %f x %f", this,
-        m_renderRegion.x1, m_renderRegion.y1, m_renderRegion.Width(), m_renderRegion.Height());
-    }
+      g_windowManager.AppendFocusableTracker(this);
   }
   CGUIControl::Render();
 }
