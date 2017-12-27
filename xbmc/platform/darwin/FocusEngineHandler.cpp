@@ -24,6 +24,7 @@
 
 #include "guilib/GUIControl.h"
 #include "guilib/GUIListGroup.h"
+#include "guilib/GUIListLabel.h"
 #include "guilib/GUIBaseContainer.h"
 #include "guilib/GUIWindowManager.h"
 #include "threads/Atomics.h"
@@ -411,7 +412,26 @@ void CFocusEngineHandler::UpdateRenderRects()
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
   {
     for (auto it = m_focus.items.begin(); it != m_focus.items.end(); ++it)
-      (*it).renderRect = (*it).control->GetRenderRect();
+    {
+      switch((*it).control->GetControlType())
+      {
+        default:
+          (*it).renderRect = (*it).control->GetRenderRect();
+          break;
+        case CGUIControl::GUICONTROL_IMAGE:
+          break;
+        case CGUIControl::GUICONTROL_BORDEREDIMAGE:
+          (*it).renderRect = (*it).control->GetRenderRect();
+          break;
+        case CGUIControl::GUICONTROL_LISTLABEL:
+          {
+            (*it).renderRect = (*it).control->GetRenderRect();
+            //CGUIListLabel *listLabel = (CGUIListLabel*)(*it).control;
+            //(*it).renderRect = listLabel->GetMaxRenderRect();
+          }
+          break;
+      }
+    }
   }
 }
 

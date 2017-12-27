@@ -19,6 +19,7 @@
  */
 
 #include "GUIImage.h"
+#include "GUIWindowManager.h"
 #include "utils/log.h"
 
 #include <cassert>
@@ -178,6 +179,17 @@ void CGUIImage::Render()
     (*itr)->m_texture->Render();
 
   m_texture.Render();
+
+  // maybe move to CGUIBorderedImage ?
+  // images can never focus themselves so we have to check their parent
+  if (m_parentControl && !m_parentControl->CanFocus() && m_parentControl->IsVisibleFromSkin())
+  {
+    if (GetControlType() == CGUIControl::GUICONTROL_BORDEREDIMAGE)
+    {
+      if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)
+        g_windowManager.AppendFocusableTracker(this);
+    }
+  }
 
   CGUIControl::Render();
 }

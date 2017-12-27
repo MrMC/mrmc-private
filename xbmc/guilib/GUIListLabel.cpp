@@ -96,7 +96,7 @@ void CGUIListLabel::Process(unsigned int currentTime, CDirtyRegionList &dirtyreg
 void CGUIListLabel::Render()
 {
   m_label.Render();
-  // lables can never focus so we have to check their parent
+  // lables can never focus themselves so we have to check their parent
   if (m_parentControl && !m_parentControl->IsDisabled() && m_parentControl->IsVisibleFromSkin())
   {
     if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)

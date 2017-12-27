@@ -2129,6 +2129,7 @@ static SiriRemoteInfo siriRemoteInfo;
 
 - (void) updateFocusView
 {
+  CGRect boundsRect = CGRectMake(0, 0, m_glView.bounds.size.width, m_glView.bounds.size.height);
   // FocusEngineItems are always sorted by control address
   std::vector<FocusEngineItem> items;
   CFocusEngineHandler::GetInstance().GetVisible(items);
@@ -2163,6 +2164,11 @@ static SiriRemoteInfo siriRemoteInfo;
     CGRect rect = CGRectMake(
       self.viewItems[indx].renderRect.x1/m_screenScale, self.viewItems[indx].renderRect.y1/m_screenScale,
       self.viewItems[indx].renderRect.Width()/m_screenScale, self.viewItems[indx].renderRect.Height()/m_screenScale);
+
+    // ignore rects that are the same size as gles bounds.
+    if (CGRectEqualToRect(rect, boundsRect))
+      continue;
+
     rect = CGRectInset(rect, 4, 4);
     cgRects.push_back(rect);
   }

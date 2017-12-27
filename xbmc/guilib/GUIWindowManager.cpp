@@ -1103,9 +1103,9 @@ bool CGUIWindowManager::Render()
   {
     for (auto it = m_focusableTracker.begin(); it != m_focusableTracker.end(); ++it)
     {
-      CRect renderRect = (*it)->GetRenderRect();
-      CLog::Log(LOGDEBUG, "focusableTracker: %p, %f,%f %f x %f",
-        *it, renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
+      //CRect renderRect = (*it)->GetRenderRect();
+      //CLog::Log(LOGDEBUG, "focusableTracker: %p, %f,%f %f x %f",
+      //  *it, renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
       CFocusEngineHandler::GetInstance().AppendVisible(*it);
     }
     m_focusableTracker.clear();
@@ -1148,7 +1148,7 @@ void CGUIWindowManager::AfterRender()
     if ((*it)->IsDialogRunning())
       (*it)->AfterRender();
   }
-  CLog::Log(LOGDEBUG, "CGUIWindowManager::AfterRender");
+  //CLog::Log(LOGDEBUG, "CGUIWindowManager::AfterRender");
 }
 
 void CGUIWindowManager::FrameMove()
