@@ -488,6 +488,12 @@ void CGUIControl::MarkDirtyRegion()
   m_controlIsDirty = true;
 }
 
+void CGUIControl::AppendFocusableTracker()
+{
+  if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)
+    g_windowManager.AppendFocusableTracker(this);
+}
+
 CRect CGUIControl::CalcRenderRegion() const
 {
   CPoint tl(GetXPosition(), GetYPosition());

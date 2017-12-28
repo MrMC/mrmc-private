@@ -33,6 +33,7 @@
 
 #include "DirtyRegionTracker.h"
 #include "guilib/WindowIDs.h"
+#include "guilib/FocusabilityTracker.h"
 #include "GUIWindow.h"
 #include "IMsgTargetCallback.h"
 #include "IWindowManagerCallback.h"
@@ -181,7 +182,7 @@ public:
   bool IsPythonWindow(int id) const { return (id >= WINDOW_PYTHON_START && id <= WINDOW_PYTHON_END); };
   void GetActiveModelessWindows(std::vector<int> &ids);
   void InvalidateFocus(CGUIControl *control);
-  void ClearFocusableItemTracker();
+
   void AppendFocusableTracker(CGUIControl *control);
 
 #ifdef DEBUG_CGUI_TEXTUREUSE
@@ -230,8 +231,7 @@ private:
   bool m_initialized;
 
   CDirtyRegionTracker m_tracker;
-  bool m_enableFocusableTracker = true;
-  std::vector<CGUIControl *> m_focusableTracker;
+  CFocusabilityTracker m_focusableTracker;
 
 private:
   class CGUIWindowManagerIdCache

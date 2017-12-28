@@ -182,6 +182,7 @@ public:
   virtual ORIENTATION GetOrientation () const;
 
   void MarkDirtyRegion();
+  void AppendFocusableTracker();
 
   /*! \brief return the render region in screen coordinates of this control
    */

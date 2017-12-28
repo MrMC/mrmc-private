@@ -21,6 +21,7 @@
  */
 
 #include "guilib/GUIControl.h"
+#include "guilib/FocusabilityTracker.h"
 #include "threads/CriticalSection.h"
 
 class CAnimation;
@@ -35,16 +36,11 @@ typedef enum FocusEngineState
 
 typedef struct
 {
-  CGUIControl *control;
-  CRect renderRect;
-} FocusEngineItem;
-typedef struct
-{
   int windowID = 0;
   CGUIWindow  *window = nullptr;
   CGUIControl *rootFocus = nullptr;
   CGUIControl *itemFocus = nullptr;
-  std::vector<FocusEngineItem> items;
+  std::vector<FocusabilityItem> items;
 } FocusEngineFocus;
 
 typedef struct
@@ -74,15 +70,13 @@ class CFocusEngineHandler
   bool          ShowFocusRect();
   bool          ShowVisibleRects();
   ORIENTATION   GetFocusOrientation();
-  void          GetVisible(std::vector<FocusEngineItem> &items);
-  void          AppendVisible(CGUIControl *control);
-  void          UpdateRenderRects();
+  void          GetFocusabilityItems(std::vector<FocusabilityItem> &items);
+  void          AppendFocusability(const CFocusabilityTracker &focusabilityTracker);
+  void          AppendFocusabilityItem(FocusabilityItem &item);
+  void          UpdateFocusabilityItemRenderRects();
 
 private:
   void          UpdateFocus(FocusEngineFocus &focus);
-  void          UpdateVisible(FocusEngineFocus &focus);
-  void          AddVisible(FocusEngineFocus &focus, CGUIControl *visible);
-  void          RemoveVisible(CGUIControl *visible);
 
   CFocusEngineHandler();
   CFocusEngineHandler(CFocusEngineHandler const&);

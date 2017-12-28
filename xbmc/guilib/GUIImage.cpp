@@ -19,7 +19,6 @@
  */
 
 #include "GUIImage.h"
-#include "GUIWindowManager.h"
 #include "utils/log.h"
 
 #include <cassert>
@@ -185,12 +184,8 @@ void CGUIImage::Render()
   if (m_parentControl && !m_parentControl->CanFocus() && m_parentControl->IsVisibleFromSkin())
   {
     if (GetControlType() == CGUIControl::GUICONTROL_BORDEREDIMAGE)
-    {
-      if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)
-        g_windowManager.AppendFocusableTracker(this);
-    }
+      CGUIControl::AppendFocusableTracker();
   }
-
   CGUIControl::Render();
 }
 

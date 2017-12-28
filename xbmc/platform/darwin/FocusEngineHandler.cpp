@@ -73,7 +73,7 @@ void CFocusEngineHandler::Process()
     // itemsVisible will start cleared
     m_focus = focus;
   }
-  UpdateVisible(m_focus);
+  //UpdateVisible(m_focus);
 
   if (m_focus.itemFocus)
   {
@@ -192,7 +192,7 @@ void CFocusEngineHandler::InvalidateFocus(CGUIControl *control)
     m_focus = FocusEngineFocus();
 
   auto foundControl = std::find_if(m_focus.items.begin(), m_focus.items.end(),
-      [&](FocusEngineItem item)
+      [&](FocusabilityItem item)
       { return item.control == control;
   });
   if (foundControl != m_focus.items.end())
@@ -353,7 +353,7 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
   }
 }
 
-void CFocusEngineHandler::GetVisible(std::vector<FocusEngineItem> &items)
+void CFocusEngineHandler::GetFocusabilityItems(std::vector<FocusabilityItem> &items)
 {
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
@@ -366,19 +366,29 @@ void CFocusEngineHandler::GetVisible(std::vector<FocusEngineItem> &items)
   }
 }
 
-void CFocusEngineHandler::AppendVisible(CGUIControl *control)
+void CFocusEngineHandler::AppendFocusability(const CFocusabilityTracker &focusabilityTracker)
+{
+  auto items = focusabilityTracker.GetItems();
+  for (auto it = items.begin(); it != items.end(); ++it)
+  {
+    //CRect renderRect = (*it)->GetRenderRect();
+    //CLog::Log(LOGDEBUG, "focusableTracker: %p, %f,%f %f x %f",
+    //  *it, renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
+    if (!(*it).control->HasProcessed() || !(*it).control->IsVisible())
+      continue;
+    AppendFocusabilityItem(*it);
+  }
+}
+
+void CFocusEngineHandler::AppendFocusabilityItem(FocusabilityItem &item)
 {
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
   {
-    FocusEngineItem item;
-    item.control = control;
-    item.renderRect = control->GetRenderRect();
-
     auto foundControl = std::find_if(m_focus.items.begin(), m_focus.items.end(),
-        [&](FocusEngineItem item)
-        { return item.control == control;
+        [&](FocusabilityItem a)
+        { return a.control == item.control;
     });
     if (foundControl == m_focus.items.end())
     {
@@ -388,7 +398,7 @@ void CFocusEngineHandler::AppendVisible(CGUIControl *control)
       // we could play games with trying to inset at the right place
       // but these arrays are short and it just does not matter much.
       std::sort(m_focus.items.begin(), m_focus.items.end(),
-        [] (FocusEngineItem const& a, FocusEngineItem const& b)
+        [] (FocusabilityItem const& a, FocusabilityItem const& b)
       {
           return a.control < b.control;
       });
@@ -396,12 +406,12 @@ void CFocusEngineHandler::AppendVisible(CGUIControl *control)
     else
     {
       // if existing, just update renderRect
-      (*foundControl).renderRect = control->GetRenderRect();
+      (*foundControl).renderRect = item.control->GetRenderRect();
     }
   }
 }
 
-void CFocusEngineHandler::UpdateRenderRects()
+void CFocusEngineHandler::UpdateFocusabilityItemRenderRects()
 {
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
@@ -409,15 +419,26 @@ void CFocusEngineHandler::UpdateRenderRects()
   {
     for (auto it = m_focus.items.begin(); it != m_focus.items.end(); ++it)
     {
+      // grr, some animation effects will leave button boxes showing,
+      // the control eventually gets marked unprocessed or hidden so
+      // deal with that quirk here.
+      if (!(*it).control->HasProcessed() || !(*it).control->IsVisible())
+      {
+        (*it).renderRect = CRect();
+        continue;
+      }
       switch((*it).control->GetControlType())
       {
         default:
           (*it).renderRect = (*it).control->GetRenderRect();
           break;
-        case CGUIControl::GUICONTROL_IMAGE:
-          break;
-        case CGUIControl::GUICONTROL_BORDEREDIMAGE:
-          (*it).renderRect = (*it).control->GetRenderRect();
+        case CGUIControl::GUICONTROL_BUTTON:
+          {
+            // bottons with ControlID of zero are only
+            // touch navigable, ignore them.
+            if ((*it).control->GetID() == 0)
+              (*it).renderRect = CRect();
+          }
           break;
         case CGUIControl::GUICONTROL_LISTLABEL:
           {
@@ -437,7 +458,7 @@ void CFocusEngineHandler::UpdateRenderRects()
                 {
                   // never trust renderRects that are not processed
                   // this means they have not been mapped to display
-                  if (!(*childit)->HasProcessed())
+                  if (!(*childit)->HasProcessed() || !(*childit)->IsVisible())
                     continue;
                   CRect childRenderRect = (*childit)->GetRenderRect();
                   if (childRenderRect != zeroRect)
@@ -454,171 +475,4 @@ void CFocusEngineHandler::UpdateRenderRects()
       }
     }
   }
-}
-
-void CFocusEngineHandler::UpdateVisible(FocusEngineFocus &focus)
-{
-  size_t visibilityCount = focus.items.size();
-
-  std::vector<CGUIControl *> controls;
-  focus.window->GetControlsFromLookUpMap(controls);
-
-  // add in missing containers
-  for (auto it = controls.begin(); it != controls.end(); ++it)
-  {
-    bool  addControl = false;
-    CGUIControl *control = *it;
-    switch(control->GetControlType())
-    {
-      // include all known types of controls
-      // we do not really need to do this but compiler
-      // will generate a warning if a new one is added.
-      case CGUIControl::GUICONTROL_UNKNOWN:
-        CLog::Log(LOGDEBUG, "GetFocusedItem: GUICONTROL_UNKNOWN");
-        break;
-      case CGUIControl::GUICONTROL_BUTTON:
-      case CGUIControl::GUICONTROL_CHECKMARK:
-      case CGUIControl::GUICONTROL_FADELABEL:
-      case CGUIControl::GUICONTROL_IMAGE:
-      case CGUIControl::GUICONTROL_BORDEREDIMAGE:
-      case CGUIControl::GUICONTROL_LARGE_IMAGE:
-      case CGUIControl::GUICONTROL_LABEL:
-      case CGUIControl::GUICONTROL_PROGRESS:
-      case CGUIControl::GUICONTROL_RADIO:
-      case CGUIControl::GUICONTROL_RSS:
-      case CGUIControl::GUICONTROL_SELECTBUTTON:
-      case CGUIControl::GUICONTROL_SPIN:
-      case CGUIControl::GUICONTROL_SPINEX:
-      case CGUIControl::GUICONTROL_TEXTBOX:
-      case CGUIControl::GUICONTROL_TOGGLEBUTTON:
-      case CGUIControl::GUICONTROL_VIDEO:
-      case CGUIControl::GUICONTROL_SLIDER:
-      case CGUIControl::GUICONTROL_SETTINGS_SLIDER:
-      case CGUIControl::GUICONTROL_MOVER:
-      case CGUIControl::GUICONTROL_RESIZE:
-      case CGUIControl::GUICONTROL_EDIT:
-      case CGUIControl::GUICONTROL_VISUALISATION:
-      case CGUIControl::GUICONTROL_RENDERADDON:
-      case CGUIControl::GUICONTROL_MULTI_IMAGE:
-      case CGUIControl::GUICONTROL_LISTLABEL:
-      case CGUIControl::GUICONTROL_SCROLLBAR:
-      case CGUIControl::GUICONTROL_MULTISELECT:
-        {
-          addControl = control->CanFocus() && control->IsVisibleFromSkin();
-        }
-        break;
-      case CGUIControl::GUICONTROL_GROUP:
-       {
-          addControl = control->CanFocus() && control->IsVisibleFromSkin();
-          continue;
-          if (addControl)
-          {
-            CGUIControlGroup *groupControl = (CGUIControlGroup*)control;
-            std::vector<CGUIControl *> groupControls;
-            groupControl->GetContainers(groupControls);
-            for (auto groupIt = groupControls.begin(); groupIt != groupControls.end(); ++groupIt)
-            {
-              if ((*groupIt)->CanFocus() && (*groupIt)->IsVisibleFromSkin())
-              {
-                AddVisible(focus, *groupIt);
-                addControl = false;
-              }
-            }
-          }
-        }
-        break;
-      case CGUIControl::GUICONTROL_GROUPLIST:
-      case CGUIControl::GUICONTROL_LISTGROUP:
-        {
-          addControl = control->CanFocus() && control->IsVisibleFromSkin();
-          continue;
-        }
-        break;
-      case CGUIControl::GUICONTAINER_FIXEDLIST:
-      case CGUIControl::GUICONTAINER_WRAPLIST:
-      case CGUIControl::GUICONTAINER_EPGGRID:
-      case CGUIControl::GUICONTAINER_PANEL:
-        {
-          //CGUIControl *parent = control->GetParentControl();
-          //if (parent)
-          //  control = parent;
-          addControl = control->CanFocus() && control->IsVisibleFromSkin();
-          continue;
-        }
-        break;
-     case CGUIControl::GUICONTAINER_LIST:
-        {
-          CGUIControl *parent = control->GetParentControl();
-          if (parent)
-            control = parent;
-          addControl = control->CanFocus() && control->IsVisibleFromSkin();
-          continue;
-        }
-        break;
-    }
-    if (addControl)
-    {
-      auto foundControl = std::find_if(focus.items.begin(), focus.items.end(),
-          [&](FocusEngineItem item)
-          { return item.control == control;
-      });
-      // missing from our list, add it in
-      if (foundControl == focus.items.end())
-      {
-        CRect renderRect = control->GetRenderRect();
-        //CLog::Log(LOGDEBUG, "%s: add renderRect - %f,%f %f x %f", __FUNCTION__,
-        //  renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
-        if (!renderRect.IsEmpty())
-        {
-          FocusEngineItem item;
-          item.control = control;
-          focus.items.push_back(item);
-        }
-        //CLog::Log(LOGDEBUG, "%s: add %p %lu", __FUNCTION__, control, focus.itemsVisible.size());
-      }
-    }
-  }
-
-  // always sort the control list by control pointer address
-  std::sort(focus.items.begin(), focus.items.end(),
-    [] (FocusEngineItem const& a, FocusEngineItem const& b)
-  {
-      return a.control < b.control;
-  });
-
-  bool visibleChanged = false;
-  visibleChanged = visibilityCount != focus.items.size();
-  if (visibleChanged)
-  {
-    for (auto it = focus.items.begin(); it != focus.items.end(); ++it)
-    {
-      CRect renderRect = (*it).control->GetRenderRect();
-      CLog::Log(LOGDEBUG, "%s: add renderRect - %f,%f %f x %f", __FUNCTION__,
-        renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
-      CLog::Log(LOGDEBUG, "%s: add %p %lu", __FUNCTION__, (*it).control, focus.items.size());
-    }
-  }
-}
-
-void CFocusEngineHandler::AddVisible(FocusEngineFocus &focus, CGUIControl *control)
-{
-    auto foundControl = std::find_if(focus.items.begin(), focus.items.end(),
-        [&](FocusEngineItem item)
-        { return item.control == control;
-    });
-  // missing from our list, add it in
-  if (foundControl == focus.items.end())
-  {
-    CRect renderRect = control->GetRenderRect();
-    CLog::Log(LOGDEBUG, "%s: add renderRect - %f,%f %f x %f", __FUNCTION__,
-      renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
-    FocusEngineItem item;
-    item.control = control;
-    focus.items.push_back(item);
-    CLog::Log(LOGDEBUG, "%s: add %p %lu", __FUNCTION__, control, focus.items.size());
-  }
-}
-
-void CFocusEngineHandler::RemoveVisible(CGUIControl *visible)
-{
 }

@@ -81,6 +81,8 @@ void CGUICheckMarkControl::Render()
     m_imgCheckMarkNoFocus.SetPosition(checkMarkPosX, m_posY);
     m_imgCheckMarkNoFocus.Render();
   }
+  if (CanFocus() && IsVisibleFromSkin())
+    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 

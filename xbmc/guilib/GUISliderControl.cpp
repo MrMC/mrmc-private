@@ -133,6 +133,8 @@ void CGUISliderControl::Render()
     CGUITexture &nibUpper = (m_bHasFocus && !IsDisabled() && m_currentSelector == RangeSelectorUpper) ? m_guiSelectorUpperFocus : m_guiSelectorUpper;
     nibUpper.Render();
   }
+  if (CanFocus() && IsVisibleFromSkin())
+    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 

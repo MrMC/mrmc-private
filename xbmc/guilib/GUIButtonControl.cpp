@@ -92,6 +92,8 @@ void CGUIButtonControl::Render()
   m_imgNoFocus.Render();
 
   RenderText();
+  if (CanFocus() && IsVisibleFromSkin())
+    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 

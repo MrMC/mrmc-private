@@ -20,9 +20,7 @@
 
 #include "GUIListLabel.h"
 #include <limits>
-#include "GUIWindowManager.h"
 #include "addons/Skin.h"
-#include "utils/log.h"
 
 CGUIListLabel::CGUIListLabel(int parentID, int controlID, float posX, float posY, float width, float height, const CLabelInfo& labelInfo, const CGUIInfoLabel &info, CGUIControl::GUISCROLLVALUE scroll)
     : CGUIControl(parentID, controlID, posX, posY, width, height)
@@ -98,10 +96,7 @@ void CGUIListLabel::Render()
   m_label.Render();
   // lables can never focus themselves so we have to check their parent
   if (m_parentControl && !m_parentControl->IsDisabled() && m_parentControl->IsVisibleFromSkin())
-  {
-    if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)
-      g_windowManager.AppendFocusableTracker(this);
-  }
+    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 

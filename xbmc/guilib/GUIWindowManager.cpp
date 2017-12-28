@@ -1026,10 +1026,8 @@ void CGUIWindowManager::RenderPass()
     if ((*it)->IsDialogRunning())
       topDialog = (*it);
   }
-  if (topDialog)
-    m_enableFocusableTracker = false;
-  else
-    m_enableFocusableTracker = true;
+  // disable if we have dialogs showing
+  m_focusableTracker.SetEnabled(topDialog ? false:true);
 
   CGUIWindow* pWindow = GetWindow(GetActiveWindow());
   if (pWindow)
@@ -1043,7 +1041,7 @@ void CGUIWindowManager::RenderPass()
     if ((*it)->IsDialogRunning())
     {
       if (*it == topDialog)
-        m_enableFocusableTracker = true;
+        m_focusableTracker.SetEnabled(true);
       (*it)->DoRender();
     }
   }
@@ -1116,14 +1114,8 @@ bool CGUIWindowManager::Render()
 #if defined(TARGET_DARWIN_TVOS)
   if (g_application.IsAppInitialized() && g_application.IsAppFocused())
   {
-    for (auto it = m_focusableTracker.begin(); it != m_focusableTracker.end(); ++it)
-    {
-      //CRect renderRect = (*it)->GetRenderRect();
-      //CLog::Log(LOGDEBUG, "focusableTracker: %p, %f,%f %f x %f",
-      //  *it, renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
-      CFocusEngineHandler::GetInstance().AppendVisible(*it);
-    }
-    CFocusEngineHandler::GetInstance().UpdateRenderRects();
+    CFocusEngineHandler::GetInstance().AppendFocusability(m_focusableTracker);
+    CFocusEngineHandler::GetInstance().UpdateFocusabilityItemRenderRects();
 
     if (CFocusEngineHandler::GetInstance().ShowFocusRect())
     {
@@ -1136,13 +1128,12 @@ bool CGUIWindowManager::Render()
     if (CFocusEngineHandler::GetInstance().ShowVisibleRects())
     {
       g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
-      std::vector<FocusEngineItem> items;
-      CFocusEngineHandler::GetInstance().GetVisible(items);
+      std::vector<FocusabilityItem> items;
+      CFocusEngineHandler::GetInstance().GetFocusabilityItems(items);
       for (auto it = items.begin(); it != items.end(); ++it)
         CGUITexture::DrawQuad((*it).renderRect, 0x4c00ff00);
     }
   }
-  m_focusableTracker.clear();
 #endif
 
   return hasRendered;
@@ -1163,6 +1154,7 @@ void CGUIWindowManager::AfterRender()
     if ((*it)->IsDialogRunning())
       (*it)->AfterRender();
   }
+  m_focusableTracker.Clear();
   //CLog::Log(LOGDEBUG, "CGUIWindowManager::AfterRender");
 }
 
@@ -1569,17 +1561,9 @@ void CGUIWindowManager::InvalidateFocus(CGUIControl *control)
 #endif
 }
 
-void CGUIWindowManager::ClearFocusableItemTracker()
-{
-  m_focusableTracker.clear();
-#if defined(TARGET_DARWIN_TVOS)
-#endif
-}
-
 void CGUIWindowManager::AppendFocusableTracker(CGUIControl *control)
 {
-  if (m_enableFocusableTracker)
-    m_focusableTracker.push_back(control);
+  m_focusableTracker.Append(control);
 }
 
 CGUIWindow *CGUIWindowManager::GetTopMostDialog() const

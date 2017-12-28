@@ -259,6 +259,8 @@ void CGUITextBox::Render()
   }
   if (m_autoScrollRepeatAnim)
     g_graphicsContext.RemoveTransform();
+  if (CanFocus() && IsVisibleFromSkin())
+    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 

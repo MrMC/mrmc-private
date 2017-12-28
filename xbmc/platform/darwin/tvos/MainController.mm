@@ -149,7 +149,7 @@ MainController *g_xbmcController;
 @synthesize m_enableRemoteIdle;
 @synthesize m_allowTap;
 
-std::vector<FocusEngineItem> m_viewItems;
+std::vector<FocusabilityItem> m_viewItems;
 
 #pragma mark - internal key press methods
 - (void)sendButtonPressed:(int)buttonId
@@ -2130,8 +2130,8 @@ static SiriRemoteInfo siriRemoteInfo;
 {
   CGRect boundsRect = CGRectMake(0, 0, m_glView.bounds.size.width, m_glView.bounds.size.height);
   // FocusEngineItems are always sorted by control address
-  std::vector<FocusEngineItem> items;
-  CFocusEngineHandler::GetInstance().GetVisible(items);
+  std::vector<FocusabilityItem> items;
+  CFocusEngineHandler::GetInstance().GetFocusabilityItems(items);
   if (items.size() == 0)
     m_viewItems.clear();
   else if (m_viewItems.size() != items.size())
