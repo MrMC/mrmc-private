@@ -185,7 +185,7 @@ public:
 
   bool FocusableTrackerIsEnabled();
   void FocusableTrackerSetEnabled(bool enablel);
-  void AppendFocusableTracker(CGUIControl *control);
+  void AppendFocusableTracker(CGUIControl *control, CGUIControl *view = nullptr);
 
 #ifdef DEBUG_CGUI_TEXTUREUSE
   void DumpTextureUse();

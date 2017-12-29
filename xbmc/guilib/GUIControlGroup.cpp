@@ -115,6 +115,8 @@ void CGUIControlGroup::Process(unsigned int currentTime, CDirtyRegionList &dirty
   g_graphicsContext.RestoreOrigin();
   CGUIControl::Process(currentTime, dirtyregions);
   m_renderRegion = rect;
+
+  //CGUIControl::AppendFocusableTracker(this);
 }
 
 void CGUIControlGroup::Render()

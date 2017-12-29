@@ -2162,7 +2162,7 @@ static SiriRemoteInfo siriRemoteInfo;
   std::sort(viewItems.begin(), viewItems.end(),
     [] (FocusabilityItem const& a, FocusabilityItem const& b)
   {
-      return a.order < b.order;
+      return a.controlOrder < b.controlOrder;
   });
   for (auto viewIt = viewItems.begin(); viewIt != viewItems.end(); ++viewIt)
   {

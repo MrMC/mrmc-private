@@ -182,7 +182,7 @@ public:
   virtual ORIENTATION GetOrientation () const;
 
   void MarkDirtyRegion();
-  void AppendFocusableTracker();
+  void AppendFocusableTracker(CGUIControl *view = nullptr);
 
   /*! \brief return the render region in screen coordinates of this control
    */

@@ -982,7 +982,6 @@ void CGUIWindowManager::Process(unsigned int currentTime)
 
   CDirtyRegionList dirtyregions;
 
-  // we render the dialogs based on their render order.
   CGUIWindow *topDialog = nullptr;
   std::vector<CGUIWindow *> renderList = m_activeDialogs;
   stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
@@ -1579,9 +1578,9 @@ void CGUIWindowManager::FocusableTrackerSetEnabled(bool enablel)
   m_focusableTracker.SetEnabled(enablel);
 }
 
-void CGUIWindowManager::AppendFocusableTracker(CGUIControl *control)
+void CGUIWindowManager::AppendFocusableTracker(CGUIControl *control, CGUIControl *view)
 {
-  m_focusableTracker.Append(control);
+  m_focusableTracker.Append(control, view);
 }
 
 CGUIWindow *CGUIWindowManager::GetTopMostDialog() const

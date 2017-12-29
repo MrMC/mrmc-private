@@ -44,13 +44,13 @@ void CFocusabilityTracker::SetEnabled(bool enable)
   m_enable = enable;
 }
 
-void CFocusabilityTracker::Append(CGUIControl *control)
+void CFocusabilityTracker::Append(CGUIControl *control, CGUIControl *view)
 {
   if (m_enable)
   {
     FocusabilityItem item;
-    item.order = ++m_order;
     item.control = control;
+    item.controlOrder = ++m_order;
     items.push_back(item);
   }
 }

@@ -27,9 +27,16 @@
 
 typedef struct
 {
-  int order = 0;                    // draw order
-  CRect renderRect;                 // renderRect in display coordinates
+  int controlOrder = 0;             // process order
+  CRect renderRect;                 // in display coordinates
   CGUIControl *control = nullptr;   // control item reference
+  // views are what enclose focusable controls,
+  // they can be containers or groups (which include window/dialog).
+  // for example, a button is enclosed by a group (for a group of controls)
+  // or a window/dialog when the button not enclosed with others controls.
+  int viewOrder = 0;                // process order
+  CRect viewRenderRect;             // in display coordinates
+  CGUIControl::GUICONTROLTYPES parentView = CGUIControl::GUICONTROL_UNKNOWN;
 } FocusabilityItem;
 
 class CFocusabilityTracker
@@ -42,7 +49,7 @@ public:
 
   bool IsEnabled();
   void SetEnabled(bool enable);
-  void Append(CGUIControl *control);
+  void Append(CGUIControl *control, CGUIControl *view = nullptr);
   const std::vector<FocusabilityItem>& GetItems() const;
 
 private:
