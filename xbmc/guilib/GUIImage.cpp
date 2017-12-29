@@ -168,6 +168,13 @@ void CGUIImage::Process(unsigned int currentTime, CDirtyRegionList &dirtyregions
     MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
+  // maybe move to CGUIBorderedImage ?
+  // images can never focus themselves so we have to check their parent
+  //if (m_parentControl && !m_parentControl->CanFocus() && m_parentControl->IsVisibleFromSkin())
+  //{
+  //  if (GetControlType() == CGUIControl::GUICONTROL_BORDEREDIMAGE)
+  //    CGUIControl::AppendFocusableTracker();
+  //}
 }
 
 void CGUIImage::Render()
@@ -179,13 +186,6 @@ void CGUIImage::Render()
 
   m_texture.Render();
 
-  // maybe move to CGUIBorderedImage ?
-  // images can never focus themselves so we have to check their parent
-  if (m_parentControl && !m_parentControl->CanFocus() && m_parentControl->IsVisibleFromSkin())
-  {
-    if (GetControlType() == CGUIControl::GUICONTROL_BORDEREDIMAGE)
-      CGUIControl::AppendFocusableTracker();
-  }
   CGUIControl::Render();
 }
 

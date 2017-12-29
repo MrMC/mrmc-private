@@ -89,14 +89,14 @@ void CGUIListLabel::Process(unsigned int currentTime, CDirtyRegionList &dirtyreg
     MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
+  // lables can never focus themselves so we have to check their parent
+  //if (m_parentControl && !m_parentControl->IsDisabled() && m_parentControl->IsVisibleFromSkin())
+  //  CGUIControl::AppendFocusableTracker();
 }
 
 void CGUIListLabel::Render()
 {
   m_label.Render();
-  // lables can never focus themselves so we have to check their parent
-  if (m_parentControl && !m_parentControl->IsDisabled() && m_parentControl->IsVisibleFromSkin())
-    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 

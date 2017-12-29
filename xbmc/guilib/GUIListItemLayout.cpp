@@ -86,6 +86,7 @@ void CGUIListItemLayout::Process(CGUIListItem *item, int parentID, unsigned int 
   m_group.SetState(item->IsSelected() || m_isPlaying, m_focused);
   m_group.UpdateVisibility(item);
   m_group.DoProcess(currentTime, dirtyregions);
+  m_group.AppendFocusableTracker();
 }
 
 void CGUIListItemLayout::Render(CGUIListItem *item, int parentID)

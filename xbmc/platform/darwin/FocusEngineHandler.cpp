@@ -413,7 +413,7 @@ void CFocusEngineHandler::AppendFocusabilityItem(FocusabilityItem &item)
 
 void CFocusEngineHandler::UpdateFocusabilityItemRenderRects()
 {
-  // skip finding focused window, use current
+  // use current focused window
   CSingleLock lock(m_focusLock);
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
   {
@@ -443,6 +443,7 @@ void CFocusEngineHandler::UpdateFocusabilityItemRenderRects()
         case CGUIControl::GUICONTROL_LISTLABEL:
           {
             (*it).renderRect = (*it).control->GetRenderRect();
+            /*
             CGUIControl *parent = (*it).control->GetParentControl();
             if (parent)
             {
@@ -470,6 +471,7 @@ void CFocusEngineHandler::UpdateFocusabilityItemRenderRects()
                 (*it).renderRect = region;
               }
             }
+            */
           }
           break;
       }

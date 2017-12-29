@@ -2128,7 +2128,8 @@ static SiriRemoteInfo siriRemoteInfo;
 
 - (void) updateFocusView
 {
-  CGRect boundsRect = CGRectMake(0, 0, m_glView.bounds.size.width, m_glView.bounds.size.height);
+  // incoming rects are full upscaled display size.
+  CRect boundsRect = CRect(0, 0, m_glView.bounds.size.width*m_screenScale, m_glView.bounds.size.height*m_screenScale);
   // FocusEngineItems are always sorted by control address
   std::vector<FocusabilityItem> items;
   CFocusEngineHandler::GetInstance().GetFocusabilityItems(items);
@@ -2154,19 +2155,81 @@ static SiriRemoteInfo siriRemoteInfo;
   }
 
   std::vector<CGRect> cgRects;
-  for (size_t indx = 0; indx < m_viewItems.size(); ++indx)
+  // copy view list and sort by draw order, 1st to last
+  // a lower view that is obscured by higher view
+  // cannot be 'hit' and will be removed.
+  std::vector<FocusabilityItem> viewItems = m_viewItems;
+  std::sort(viewItems.begin(), viewItems.end(),
+    [] (FocusabilityItem const& a, FocusabilityItem const& b)
   {
+      return a.order < b.order;
+  });
+  for (auto viewIt = viewItems.begin(); viewIt != viewItems.end(); ++viewIt)
+  {
+    auto &viewItem = *viewIt;
+
     // should never be an empty rect :)
-    if (m_viewItems[indx].renderRect.IsEmpty())
+    if (viewItem.renderRect.IsEmpty())
       continue;
 
+    // ignore rects that are the same size as display bounds
+    if ( !(viewItem.renderRect != boundsRect))
+      continue;
+
+/*
+    // ignore rects that extend outside display bounds
+    // these are slid outs and are handled in a different
+    // way under tvOS focus engine.
+    CRect testRect = viewItem.renderRect;
+    testRect.Union(boundsRect);
+    if (testRect != boundsRect)
+      continue;
+*/
+
+/*
+    // ignore a view that is obscured by the higher views
+    auto obscuredIt = viewIt;
+    ++obscuredIt;
+    bool IsObscured = false;
+    std::vector<CRect> partialOverlaps;
+    for (;obscuredIt != viewItems.end(); ++obscuredIt)
+    {
+      auto &testViewItem = *obscuredIt;
+      // should never be an empty rect :)
+      if (testViewItem.renderRect.IsEmpty())
+        continue;
+      // ignore rects that are the same size as display bounds
+      if ( !(testViewItem.renderRect != boundsRect))
+        continue;
+
+      CRect testRect = testViewItem.renderRect;
+      testRect.Union(viewItem.renderRect);
+      if ( !(testRect != viewItem.renderRect))
+      {
+        // viewItem.renderRect is inside testViewItem.renderRect
+        IsObscured = true;
+        break;
+      }
+
+      // collect intersections that overlap into obscuringRect.
+      CRect intersection = testViewItem.renderRect;
+      intersection.Intersect(viewItem.renderRect);
+      if (!intersection.IsEmpty())
+        partialOverlaps.push_back(intersection);
+    }
+    if (!IsObscured && partialOverlaps.size() > 0)
+    {
+      std::vector<CRect> rects = viewItem.renderRect.SubtractRects(partialOverlaps);
+      if (rects.size() == 0)
+        IsObscured = true;
+    }
+    if (IsObscured)
+      continue;
+*/
+    // m_glView.bounds does not have screen scaling
     CGRect rect = CGRectMake(
-      m_viewItems[indx].renderRect.x1/m_screenScale, m_viewItems[indx].renderRect.y1/m_screenScale,
-      m_viewItems[indx].renderRect.Width()/m_screenScale, m_viewItems[indx].renderRect.Height()/m_screenScale);
-
-    // ignore rects that are the same size as gles bounds.
-    if (CGRectEqualToRect(rect, boundsRect))
-      continue;
+      viewItem.renderRect.x1/m_screenScale, viewItem.renderRect.y1/m_screenScale,
+      viewItem.renderRect.Width()/m_screenScale, viewItem.renderRect.Height()/m_screenScale);
 
     //rect = CGRectInset(rect, 4, 4);
     cgRects.push_back(rect);

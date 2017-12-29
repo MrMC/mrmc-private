@@ -183,6 +183,8 @@ public:
   void GetActiveModelessWindows(std::vector<int> &ids);
   void InvalidateFocus(CGUIControl *control);
 
+  bool FocusableTrackerIsEnabled();
+  void FocusableTrackerSetEnabled(bool enablel);
   void AppendFocusableTracker(CGUIControl *control);
 
 #ifdef DEBUG_CGUI_TEXTUREUSE

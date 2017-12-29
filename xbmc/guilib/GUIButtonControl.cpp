@@ -84,6 +84,14 @@ void CGUIButtonControl::Process(unsigned int currentTime, CDirtyRegionList &dirt
   m_imgNoFocus.Process(currentTime);
 
   CGUIControl::Process(currentTime, dirtyregions);
+
+  if (CanFocus() && IsVisibleFromSkin())
+  {
+    // bottons with ControlID of zero are only
+    // touch navigable, ignore them.
+    if (GetID() != 0)
+      CGUIControl::AppendFocusableTracker();
+  }
 }
 
 void CGUIButtonControl::Render()
@@ -92,8 +100,6 @@ void CGUIButtonControl::Render()
   m_imgNoFocus.Render();
 
   RenderText();
-  if (CanFocus() && IsVisibleFromSkin())
-    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 

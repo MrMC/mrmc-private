@@ -49,6 +49,8 @@ void CGUICheckMarkControl::Process(unsigned int currentTime, CDirtyRegionList &d
     MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
+  if (CanFocus() && IsVisibleFromSkin())
+    CGUIControl::AppendFocusableTracker();
 }
 
 void CGUICheckMarkControl::Render()
@@ -81,8 +83,6 @@ void CGUICheckMarkControl::Render()
     m_imgCheckMarkNoFocus.SetPosition(checkMarkPosX, m_posY);
     m_imgCheckMarkNoFocus.Render();
   }
-  if (CanFocus() && IsVisibleFromSkin())
-    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 

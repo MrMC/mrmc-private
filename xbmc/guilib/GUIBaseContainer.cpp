@@ -32,6 +32,7 @@
 #include "listproviders/IListProvider.h"
 #include "settings/Settings.h"
 #include "guiinfo/GUIInfoLabels.h"
+#include "GUIWindowManager.h"
 
 #define HOLD_TIME_START 100
 #define HOLD_TIME_END   3000
@@ -190,8 +191,15 @@ void CGUIBaseContainer::ProcessItem(float posX, float posY, CGUIListItemPtr& ite
       CGUIListItemLayout *layout = new CGUIListItemLayout(*m_layout);
       item->SetLayout(layout);
     }
+
+    bool focusableTrackerIsEnabled = g_windowManager.FocusableTrackerIsEnabled();
+    g_windowManager.FocusableTrackerSetEnabled(false);
+
     if (item->GetFocusedLayout())
       item->GetFocusedLayout()->Process(item.get(), m_parentID, currentTime, dirtyregions);
+
+    g_windowManager.FocusableTrackerSetEnabled(focusableTrackerIsEnabled);
+
     if (item->GetLayout())
       item->GetLayout()->Process(item.get(), m_parentID, currentTime, dirtyregions);
   }

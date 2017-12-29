@@ -194,6 +194,8 @@ void CGUITextBox::Process(unsigned int currentTime, CDirtyRegionList &dirtyregio
   }
 
   CGUIControl::Process(currentTime, dirtyregions);
+  //if (CanFocus() && IsVisibleFromSkin())
+  //  CGUIControl::AppendFocusableTracker();
 
   if (m_autoScrollRepeatAnim)
     g_graphicsContext.RemoveTransform();
@@ -259,8 +261,6 @@ void CGUITextBox::Render()
   }
   if (m_autoScrollRepeatAnim)
     g_graphicsContext.RemoveTransform();
-  if (CanFocus() && IsVisibleFromSkin())
-    CGUIControl::AppendFocusableTracker();
   CGUIControl::Render();
 }
 
