@@ -97,13 +97,8 @@ void CGUISliderControl::Process(unsigned int currentTime, CDirtyRegionList &dirt
     MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
-  if (CanFocus() && IsVisibleFromSkin())
-  {
-    // slider with ControlID of zero are only
-    // touch navigable, ignore them.
-    if (GetID() != 0)
-      CGUIControl::AppendFocusableTracker();
-  }
+  if (HasFocusVisibility())
+    CGUIControl::AppendFocusableTracker();
 }
 
 bool CGUISliderControl::ProcessSelector(CGUITexture &nib, unsigned int currentTime, float fScaleY, RangeSelector selector)
@@ -488,6 +483,13 @@ bool CGUISliderControl::HitTest(const CPoint &point) const
   if (m_guiSelectorLower.HitTest(point)) return true;
   if (m_rangeSelection && m_guiSelectorUpper.HitTest(point)) return true;
   return false;
+}
+
+bool CGUISliderControl::HasFocusVisibility()
+{
+  // slider with ControlID of zero are only
+  // touch navigable, ignore them.
+  return (GetID() != 0) && CanFocus() && IsVisibleFromSkin();
 }
 
 void CGUISliderControl::SetFromPosition(const CPoint &point, bool guessSelector /* = false */)

@@ -116,7 +116,17 @@ void CGUIControlGroup::Process(unsigned int currentTime, CDirtyRegionList &dirty
   CGUIControl::Process(currentTime, dirtyregions);
   m_renderRegion = rect;
 
-  //CGUIControl::AppendFocusableTracker(this);
+  for (iControls it = m_children.begin(); it != m_children.end(); ++it)
+  {
+    // if any control has focusvisibility,
+    // then this view also has focusvisibility
+    CGUIControl *control = *it;
+    if (control->HasFocusVisibility())
+    {
+      CGUIControl::AppendFocusableTracker(this);
+      break;
+    }
+  }
 }
 
 void CGUIControlGroup::Render()

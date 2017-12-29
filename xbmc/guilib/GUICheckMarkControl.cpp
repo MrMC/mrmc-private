@@ -49,7 +49,7 @@ void CGUICheckMarkControl::Process(unsigned int currentTime, CDirtyRegionList &d
     MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
-  if (CanFocus() && IsVisibleFromSkin())
+  if (HasFocusVisibility())
     CGUIControl::AppendFocusableTracker();
 }
 

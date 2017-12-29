@@ -488,6 +488,11 @@ void CGUIControl::MarkDirtyRegion()
   m_controlIsDirty = true;
 }
 
+bool CGUIControl::HasFocusVisibility()
+{
+  return CanFocus() && IsVisibleFromSkin();
+}
+
 void CGUIControl::AppendFocusableTracker(CGUIControl *view)
 {
   if (m_renderRegion.Width() > 0 && m_renderRegion.Height() > 0)
