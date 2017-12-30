@@ -313,9 +313,9 @@ bool CGUIControlGroup::CanFocus() const
 
 bool CGUIControlGroup::HasFocusVisibility()
 {
-  if (!CGUIControl::CanFocus()) return false;
+  if (!CGUIControl::HasFocusVisibility()) return false;
   // see if we have any children that can be focused
-  for (ciControls it = m_children.begin(); it != m_children.end(); ++it)
+  for (auto it = m_children.begin(); it != m_children.end(); ++it)
   {
     if ((*it)->HasFocusVisibility())
       return true;

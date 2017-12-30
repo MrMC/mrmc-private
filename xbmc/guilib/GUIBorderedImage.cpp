@@ -69,9 +69,12 @@ CRect CGUIBorderedImage::CalcRenderRegion() const
 
 bool CGUIBorderedImage::HasFocusVisibility()
 {
+  return CGUIControl::HasFocusVisibility();
+  /*
   // bordered iamges with ControlID of zero are only
   // touch navigable, ignore them.
   return (GetID() != 0) && CanFocus() && IsVisibleFromSkin();
+  */
 }
 
 

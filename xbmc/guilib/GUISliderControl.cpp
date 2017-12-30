@@ -97,6 +97,8 @@ void CGUISliderControl::Process(unsigned int currentTime, CDirtyRegionList &dirt
     MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
+
+  // todo: missing background area...
   if (HasFocusVisibility())
     CGUIControl::AppendFocusableTracker();
 }

@@ -30,7 +30,8 @@ CFocusabilityTracker::~CFocusabilityTracker()
 
 void CFocusabilityTracker::Clear()
 {
-  m_order = 0;
+  m_viewOrder = 0;
+  m_controlOrder = 0;
   items.clear();
 }
 
@@ -50,7 +51,14 @@ void CFocusabilityTracker::Append(CGUIControl *control, CGUIControl *view)
   {
     FocusabilityItem item;
     item.control = control;
-    item.controlOrder = ++m_order;
+    item.controlOrder = ++m_controlOrder;
+    item.viewOrder = m_viewOrder;
+    item.parentView = CGUIControl::GUICONTROL_UNKNOWN;
+    if (view)
+    {
+      item.parentView = view->GetControlType();
+      m_viewOrder++;
+    }
     items.push_back(item);
   }
 }

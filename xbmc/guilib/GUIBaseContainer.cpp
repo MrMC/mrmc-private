@@ -1371,3 +1371,14 @@ void CGUIBaseContainer::OnUnFocus()
 
   CGUIControl::OnUnFocus();
 }
+
+bool CGUIBaseContainer::HasFocusVisibility()
+{
+  if (CGUIControl::HasFocusVisibility())
+  {
+     // We allow focus if we have items available or if we have a list provider
+     // that's in the process of updating.
+    return !m_items.empty() || (m_listProvider && m_listProvider->IsUpdating());
+  }
+  return false;
+}

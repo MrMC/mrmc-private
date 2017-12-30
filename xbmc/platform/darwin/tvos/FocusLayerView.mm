@@ -125,15 +125,16 @@
   // make the window transparent
   CGContextSetBlendMode(context, kCGBlendModeClear);
   CGContextFillRect(context, rect);
+
   CGContextSetBlendMode(context, kCGBlendModeCopy);
   CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
-
   CGContextSetLineWidth(context, 2);
   if (m_items.size() > 0)
   {
     for (auto it = m_items.begin(); it != m_items.end(); ++it)
       CGContextStrokeRect(context, *it);
   }
+
   //else
 /*
   CGContextSetLineWidth(context, 10);

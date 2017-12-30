@@ -1020,7 +1020,7 @@ void CGUIWindowManager::Process(unsigned int currentTime)
   if (g_application.IsAppInitialized() && g_application.IsAppFocused())
   {
     CFocusEngineHandler::GetInstance().AppendFocusability(m_focusableTracker);
-    //CFocusEngineHandler::GetInstance().UpdateFocusabilityItemRenderRects();
+    CFocusEngineHandler::GetInstance().UpdateFocusabilityItemRenderRects();
     CFocusEngineHandler::GetInstance().Process();
   }
 #endif

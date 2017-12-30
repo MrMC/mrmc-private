@@ -53,7 +53,8 @@ public:
   const std::vector<FocusabilityItem>& GetItems() const;
 
 private:
-  int m_order = 0;
   bool m_enable = true;
+  int m_viewOrder = 0;
+  int m_controlOrder = 0;
   std::vector<FocusabilityItem> items;
 };

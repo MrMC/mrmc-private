@@ -2133,7 +2133,7 @@ static SiriRemoteInfo siriRemoteInfo;
   // FocusEngineItems are always sorted by control address
   std::vector<FocusabilityItem> items;
   CFocusEngineHandler::GetInstance().GetFocusabilityItems(items);
-  if (items.size() == 0)
+  if (items.empty())
     m_viewItems.clear();
   else if (m_viewItems.size() != items.size())
     m_viewItems = items;
@@ -2171,21 +2171,13 @@ static SiriRemoteInfo siriRemoteInfo;
     // should never be an empty rect :)
     if (viewItem.renderRect.IsEmpty())
       continue;
-
     // ignore rects that are the same size as display bounds
-    if ( !(viewItem.renderRect != boundsRect))
+    if (viewItem.renderRect == boundsRect)
       continue;
-
-/*
-    // ignore rects that extend outside display bounds
-    // these are slid outs and are handled in a different
-    // way under tvOS focus engine.
-    CRect testRect = viewItem.renderRect;
-    testRect.Union(boundsRect);
-    if (testRect != boundsRect)
+    CRect testRect = boundsRect;
+    testRect.Intersect(viewItem.renderRect);
+    if (testRect == boundsRect)
       continue;
-*/
-
 /*
     // ignore a view that is obscured by the higher views
     auto obscuredIt = viewIt;
@@ -2195,18 +2187,20 @@ static SiriRemoteInfo siriRemoteInfo;
     for (;obscuredIt != viewItems.end(); ++obscuredIt)
     {
       auto &testViewItem = *obscuredIt;
+
       // should never be an empty rect :)
       if (testViewItem.renderRect.IsEmpty())
         continue;
       // ignore rects that are the same size as display bounds
-      if ( !(testViewItem.renderRect != boundsRect))
+      if (testViewItem.renderRect == boundsRect)
+        continue;
+      CRect testRect = boundsRect;
+      testRect.Intersect(testViewItem.renderRect);
+      if (testRect == boundsRect)
         continue;
 
-      CRect testRect = testViewItem.renderRect;
-      testRect.Union(viewItem.renderRect);
-      if ( !(testRect != viewItem.renderRect))
+      if (testViewItem.renderRect.RectInRect(viewItem.renderRect))
       {
-        // viewItem.renderRect is inside testViewItem.renderRect
         IsObscured = true;
         break;
       }
@@ -2216,6 +2210,9 @@ static SiriRemoteInfo siriRemoteInfo;
       intersection.Intersect(viewItem.renderRect);
       if (!intersection.IsEmpty())
         partialOverlaps.push_back(intersection);
+
+      //if (testViewItem.viewOrder != viewItem.viewOrder)
+      //  break;
     }
     if (!IsObscured && partialOverlaps.size() > 0)
     {

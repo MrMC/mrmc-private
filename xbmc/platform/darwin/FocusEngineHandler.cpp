@@ -427,54 +427,7 @@ void CFocusEngineHandler::UpdateFocusabilityItemRenderRects()
         (*it).renderRect = CRect();
         continue;
       }
-      switch((*it).control->GetControlType())
-      {
-        default:
-          (*it).renderRect = (*it).control->GetRenderRect();
-          break;
-        case CGUIControl::GUICONTROL_BUTTON:
-          {
-            // bottons with ControlID of zero are only
-            // touch navigable, ignore them.
-            if ((*it).control->GetID() == 0)
-              (*it).renderRect = CRect();
-          }
-          break;
-        case CGUIControl::GUICONTROL_LISTLABEL:
-          {
-            (*it).renderRect = (*it).control->GetRenderRect();
-            /*
-            CGUIControl *parent = (*it).control->GetParentControl();
-            if (parent)
-            {
-              (*it).renderRect = parent->GetRenderRect();
-              CGUIControlGroup *groupControl = dynamic_cast<CGUIControlGroup*>(parent);
-              if (groupControl)
-              {
-                CRect region = (*it).renderRect;
-                CRect zeroRect = CRect(0, 0, 0, 0);
-                std::vector<CGUIControl *> children;
-                groupControl->GetChildren(children);
-                for (auto childit = children.begin(); childit != children.end(); ++childit)
-                {
-                  // never trust renderRects that are not processed
-                  // this means they have not been mapped to display
-                  if (!(*childit)->HasProcessed() || !(*childit)->IsVisible())
-                    continue;
-                  CRect childRenderRect = (*childit)->GetRenderRect();
-                  if (childRenderRect != zeroRect)
-                    region.ArithmeticUnion( childRenderRect );
-                }
-                // not sure why this happens, it's the ".." in a file list
-                if (region.x1 < (*it).renderRect.x1)
-                  region.x1 = (*it).renderRect.x1;
-                (*it).renderRect = region;
-              }
-            }
-            */
-          }
-          break;
-      }
+      (*it).renderRect = (*it).control->GetRenderRect();
     }
   }
 }
