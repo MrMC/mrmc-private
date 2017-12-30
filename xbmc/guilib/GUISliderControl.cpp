@@ -97,10 +97,6 @@ void CGUISliderControl::Process(unsigned int currentTime, CDirtyRegionList &dirt
     MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
-
-  // todo: missing background area...
-  if (HasFocusVisibility())
-    CGUIControl::AppendFocusableTracker();
 }
 
 bool CGUISliderControl::ProcessSelector(CGUITexture &nib, unsigned int currentTime, float fScaleY, RangeSelector selector)
@@ -138,6 +134,10 @@ void CGUISliderControl::Render()
     nibUpper.Render();
   }
   CGUIControl::Render();
+
+  // todo: missing background area...
+  if (HasFocusVisibility())
+    CGUIControl::AppendFocusableTracker();
 }
 
 bool CGUISliderControl::OnMessage(CGUIMessage& message)

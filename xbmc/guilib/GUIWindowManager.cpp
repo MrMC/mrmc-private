@@ -982,18 +982,6 @@ void CGUIWindowManager::Process(unsigned int currentTime)
 
   CDirtyRegionList dirtyregions;
 
-  CGUIWindow *topDialog = nullptr;
-  std::vector<CGUIWindow *> renderList = m_activeDialogs;
-  stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
-  // find if there is a dialog running and save the top dialog.
-  for (iDialog it = renderList.begin(); it != renderList.end(); ++it)
-  {
-    if ((*it)->IsDialogRunning())
-      topDialog = (*it);
-  }
-  // disable if we have dialogs showing
-  m_focusableTracker.SetEnabled(topDialog ? false:true);
-
   CGUIWindow* pWindow = GetWindow(GetActiveWindow());
   if (pWindow)
     pWindow->DoProcess(currentTime, dirtyregions);
@@ -1003,13 +991,7 @@ void CGUIWindowManager::Process(unsigned int currentTime)
   {
     CGUIWindow *pWindow = (*it).second;
     if (pWindow && pWindow->IsDialog())
-    {
-      if ((*it).second == topDialog)
-        m_focusableTracker.SetEnabled(true);
       pWindow->DoProcess(currentTime, dirtyregions);
-      if ((*it).second == topDialog)
-        m_focusableTracker.SetEnabled(false);
-    }
   }
 
   for (CDirtyRegionList::iterator itr = dirtyregions.begin(); itr != dirtyregions.end(); ++itr)
@@ -1018,14 +1000,8 @@ void CGUIWindowManager::Process(unsigned int currentTime)
 #if defined(TARGET_DARWIN_TVOS)
   // update focus engine after all windows/dialogs have processed
   if (g_application.IsAppInitialized() && g_application.IsAppFocused())
-  {
-    CFocusEngineHandler::GetInstance().AppendFocusability(m_focusableTracker);
-    CFocusEngineHandler::GetInstance().UpdateFocusabilityItemRenderRects();
     CFocusEngineHandler::GetInstance().Process();
-  }
 #endif
-  m_focusableTracker.Clear();
-  m_focusableTracker.SetEnabled(false);
 }
 
 void CGUIWindowManager::MarkDirty()
@@ -1040,6 +1016,18 @@ void CGUIWindowManager::MarkDirty(const CRect& rect)
 
 void CGUIWindowManager::RenderPass()
 {
+  CGUIWindow *topDialog = nullptr;
+  std::vector<CGUIWindow *> renderList = m_activeDialogs;
+  stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
+  // find if there is a dialog running and save the top dialog.
+  for (iDialog it = renderList.begin(); it != renderList.end(); ++it)
+  {
+    if ((*it)->IsDialogRunning())
+      topDialog = (*it);
+  }
+  // disable if we have dialogs showing
+  m_focusableTracker.SetEnabled(topDialog ? false:true);
+
   CGUIWindow* pWindow = GetWindow(GetActiveWindow());
   if (pWindow)
   {
@@ -1047,13 +1035,24 @@ void CGUIWindowManager::RenderPass()
     pWindow->DoRender();
   }
 
-  std::vector<CGUIWindow *> renderList = m_activeDialogs;
   stable_sort(renderList.begin(), renderList.end(), RenderOrderSortFunction);
   for (iDialog it = renderList.begin(); it != renderList.end(); ++it)
   {
     if ((*it)->IsDialogRunning())
+    {
+      if (*it == topDialog)
+        m_focusableTracker.SetEnabled(true);
       (*it)->DoRender();
+    }
   }
+#if defined(TARGET_DARWIN_TVOS)
+  // update focus engine after all windows/dialogs have processed
+  if (g_application.IsAppInitialized() && g_application.IsAppFocused())
+  {
+    CFocusEngineHandler::GetInstance().AppendFocusability(m_focusableTracker);
+    CFocusEngineHandler::GetInstance().UpdateFocusabilityItemRenderRects();
+  }
+#endif
 }
 
 void CGUIWindowManager::RenderEx() const
@@ -1161,6 +1160,8 @@ void CGUIWindowManager::AfterRender()
       (*it)->AfterRender();
   }
   //CLog::Log(LOGDEBUG, "CGUIWindowManager::AfterRender");
+  m_focusableTracker.Clear();
+  m_focusableTracker.SetEnabled(false);
 }
 
 void CGUIWindowManager::FrameMove()

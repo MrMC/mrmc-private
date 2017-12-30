@@ -84,9 +84,6 @@ void CGUIButtonControl::Process(unsigned int currentTime, CDirtyRegionList &dirt
   m_imgNoFocus.Process(currentTime);
 
   CGUIControl::Process(currentTime, dirtyregions);
-
-  if (HasFocusVisibility())
-    CGUIControl::AppendFocusableTracker();
 }
 
 void CGUIButtonControl::Render()
@@ -96,6 +93,8 @@ void CGUIButtonControl::Render()
 
   RenderText();
   CGUIControl::Render();
+  if (HasFocusVisibility())
+    CGUIControl::AppendFocusableTracker();
 }
 
 void CGUIButtonControl::RenderText()

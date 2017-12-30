@@ -192,14 +192,8 @@ void CGUIBaseContainer::ProcessItem(float posX, float posY, CGUIListItemPtr& ite
       item->SetLayout(layout);
     }
 
-    bool focusableTrackerIsEnabled = g_windowManager.FocusableTrackerIsEnabled();
-    g_windowManager.FocusableTrackerSetEnabled(false);
-
     if (item->GetFocusedLayout())
       item->GetFocusedLayout()->Process(item.get(), m_parentID, currentTime, dirtyregions);
-
-    g_windowManager.FocusableTrackerSetEnabled(focusableTrackerIsEnabled);
-
     if (item->GetLayout())
       item->GetLayout()->Process(item.get(), m_parentID, currentTime, dirtyregions);
   }
@@ -295,6 +289,7 @@ void CGUIBaseContainer::RenderItem(float posX, float posY, CGUIListItem *item, b
     else if (item->GetLayout())
       item->GetLayout()->Render(item, m_parentID);
   }
+
   g_graphicsContext.RestoreOrigin();
 }
 
@@ -1353,6 +1348,19 @@ bool CGUIBaseContainer::CanFocus() const
   return false;
 }
 
+bool CGUIBaseContainer::HasFocusVisibility()
+{
+  if (!IsVisible() && !CGUIControl::CanFocus())
+    return false;
+  if (CGUIControl::HasFocusVisibility())
+  {
+     // We allow focus if we have items available or if we have a list provider
+     // that's in the process of updating.
+    return !m_items.empty() || (m_listProvider && m_listProvider->IsUpdating());
+  }
+  return false;
+}
+
 void CGUIBaseContainer::OnFocus()
 {
   if (m_listProvider && m_listProvider->AlwaysFocusDefaultItem())
@@ -1370,15 +1378,4 @@ void CGUIBaseContainer::OnUnFocus()
     m_unfocusActions.ExecuteActions(GetID(), GetParentID());
 
   CGUIControl::OnUnFocus();
-}
-
-bool CGUIBaseContainer::HasFocusVisibility()
-{
-  if (CGUIControl::HasFocusVisibility())
-  {
-     // We allow focus if we have items available or if we have a list provider
-     // that's in the process of updating.
-    return !m_items.empty() || (m_listProvider && m_listProvider->IsUpdating());
-  }
-  return false;
 }

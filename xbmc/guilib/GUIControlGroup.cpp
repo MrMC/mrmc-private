@@ -115,9 +115,6 @@ void CGUIControlGroup::Process(unsigned int currentTime, CDirtyRegionList &dirty
   g_graphicsContext.RestoreOrigin();
   CGUIControl::Process(currentTime, dirtyregions);
   m_renderRegion = rect;
-
-  if (HasFocusVisibility())
-    CGUIControl::AppendFocusableTracker(this);
 }
 
 void CGUIControlGroup::Render()
@@ -136,6 +133,8 @@ void CGUIControlGroup::Render()
   if (focusedControl)
     focusedControl->DoRender();
   CGUIControl::Render();
+  if (HasFocusVisibility())
+    CGUIControl::AppendFocusableTracker(this);
   g_graphicsContext.RestoreOrigin();
 }
 

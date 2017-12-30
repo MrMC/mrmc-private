@@ -2174,10 +2174,12 @@ static SiriRemoteInfo siriRemoteInfo;
     // ignore rects that are the same size as display bounds
     if (viewItem.renderRect == boundsRect)
       continue;
+    /*
     CRect testRect = boundsRect;
     testRect.Intersect(viewItem.renderRect);
     if (testRect == boundsRect)
       continue;
+    */
 /*
     // ignore a view that is obscured by the higher views
     auto obscuredIt = viewIt;
@@ -2228,7 +2230,7 @@ static SiriRemoteInfo siriRemoteInfo;
       viewItem.renderRect.x1/m_screenScale, viewItem.renderRect.y1/m_screenScale,
       viewItem.renderRect.Width()/m_screenScale, viewItem.renderRect.Height()/m_screenScale);
 
-    //rect = CGRectInset(rect, 4, 4);
+    rect = CGRectInset(rect, 4, 4);
     cgRects.push_back(rect);
   }
   [_View1 updateItems:cgRects];

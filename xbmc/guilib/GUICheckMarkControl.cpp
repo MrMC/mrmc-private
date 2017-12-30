@@ -49,8 +49,6 @@ void CGUICheckMarkControl::Process(unsigned int currentTime, CDirtyRegionList &d
     MarkDirtyRegion();
 
   CGUIControl::Process(currentTime, dirtyregions);
-  if (HasFocusVisibility())
-    CGUIControl::AppendFocusableTracker();
 }
 
 void CGUICheckMarkControl::Render()
@@ -84,6 +82,8 @@ void CGUICheckMarkControl::Render()
     m_imgCheckMarkNoFocus.Render();
   }
   CGUIControl::Render();
+  if (HasFocusVisibility())
+    CGUIControl::AppendFocusableTracker();
 }
 
 CGUILabel::COLOR CGUICheckMarkControl::GetTextColor() const

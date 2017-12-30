@@ -131,8 +131,27 @@
   CGContextSetLineWidth(context, 2);
   if (m_items.size() > 0)
   {
-    for (auto it = m_items.begin(); it != m_items.end(); ++it)
-      CGContextStrokeRect(context, *it);
+    /*
+    float rgbScaler = 0.5f / m_items.size();
+    for (size_t indx = 0; indx < m_items.size(); ++indx)
+    {
+      float rgb = 1.0f - (rgbScaler * indx);
+      UIColor *uiRGBA = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:rgb];
+      CGContextSetFillColorWithColor(context, [uiRGBA CGColor]);
+      CGContextFillRect(context, m_items[indx]);
+    }
+    for (size_t indx = 0; indx < m_items.size(); ++indx)
+    {
+      float rgb = 1.0f - (rgbScaler * indx);
+      UIColor *uiRGBA = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:rgb];
+      //CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
+      CGContextSetStrokeColorWithColor(context, [uiRGBA CGColor]);
+      CGContextSetLineWidth(context, 4);
+      CGContextStrokeRect(context, m_items[indx]);
+    }
+    */
+    for (size_t indx = 0; indx < m_items.size(); ++indx)
+      CGContextStrokeRect(context, m_items[indx]);
   }
 
   //else
