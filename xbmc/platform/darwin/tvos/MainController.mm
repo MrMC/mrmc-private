@@ -149,7 +149,7 @@ MainController *g_xbmcController;
 @synthesize m_enableRemoteIdle;
 @synthesize m_allowTap;
 
-std::vector<FocusabilityItem> m_viewItems;
+std::vector<GUIFocusabilityItem> m_viewItems;
 
 #pragma mark - internal key press methods
 - (void)sendButtonPressed:(int)buttonId
@@ -2131,8 +2131,8 @@ static SiriRemoteInfo siriRemoteInfo;
   // incoming rects are full upscaled display size.
   CRect boundsRect = CRect(0, 0, m_glView.bounds.size.width*m_screenScale, m_glView.bounds.size.height*m_screenScale);
   // FocusEngineItems are always sorted by control address
-  std::vector<FocusabilityItem> items;
-  CFocusEngineHandler::GetInstance().GetFocusabilityItems(items);
+  std::vector<GUIFocusabilityItem> items;
+  CFocusEngineHandler::GetInstance().GetGUIFocusabilityItems(items);
   if (items.empty())
     m_viewItems.clear();
   else if (m_viewItems.size() != items.size())
@@ -2158,11 +2158,11 @@ static SiriRemoteInfo siriRemoteInfo;
   // copy view list and sort by draw order, 1st to last
   // a lower view that is obscured by higher view
   // cannot be 'hit' and will be removed.
-  std::vector<FocusabilityItem> viewItems = m_viewItems;
+  std::vector<GUIFocusabilityItem> viewItems = m_viewItems;
   std::sort(viewItems.begin(), viewItems.end(),
-    [] (FocusabilityItem const& a, FocusabilityItem const& b)
+    [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
   {
-      return a.controlOrder < b.controlOrder;
+      return a.renderOrder < b.renderOrder;
   });
   for (auto viewIt = viewItems.begin(); viewIt != viewItems.end(); ++viewIt)
   {
@@ -2251,7 +2251,7 @@ static SiriRemoteInfo siriRemoteInfo;
 
     std::string type = CFocusEngineHandler::GetInstance().TranslateControlType(viewItem.control, viewItem.parentView);
     CLog::Log(LOGDEBUG, "updateFocusView: %d-%d, %p, %p, %s, %f,%f %f, %f",
-      viewItem.viewOrder, viewItem.controlOrder , viewItem.control, viewItem.parentView, type.c_str(),
+      viewItem.renderOrder, viewItem.viewOrder , viewItem.control, viewItem.parentView, type.c_str(),
       viewItem.renderRect.x1, viewItem.renderRect.y1, viewItem.renderRect.x2, viewItem.renderRect.y2);
 
     // m_glView.bounds does not have screen scaling

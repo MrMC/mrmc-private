@@ -1125,8 +1125,8 @@ bool CGUIWindowManager::Render()
     if (CFocusEngineHandler::GetInstance().ShowVisibleRects())
     {
       g_graphicsContext.SetRenderingResolution(g_graphicsContext.GetResInfo(), false);
-      std::vector<FocusabilityItem> items;
-      CFocusEngineHandler::GetInstance().GetFocusabilityItems(items);
+      std::vector<GUIFocusabilityItem> items;
+      CFocusEngineHandler::GetInstance().GetGUIFocusabilityItems(items);
       for (auto it = items.begin(); it != items.end(); ++it)
         CGUITexture::DrawQuad((*it).renderRect, 0x4c00ff00);
     }
@@ -1155,7 +1155,7 @@ void CGUIWindowManager::AfterRender()
 #if defined(TARGET_DARWIN_TVOS)
   // update focus engine after all windows/dialogs have processed
   if (g_application.IsAppInitialized() && g_application.IsAppFocused())
-    CFocusEngineHandler::GetInstance().UpdateFocusability(m_focusableTracker);
+    CFocusEngineHandler::GetInstance().SetGUIFocusabilityItems(m_focusableTracker);
 #endif
   m_focusableTracker.SetEnabled(false);
   m_focusableTracker.Clear();

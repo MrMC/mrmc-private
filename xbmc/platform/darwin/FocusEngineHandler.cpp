@@ -195,7 +195,7 @@ void CFocusEngineHandler::InvalidateFocus(CGUIControl *control)
     m_focus = FocusEngineFocus();
 
   auto foundControl = std::find_if(m_focus.items.begin(), m_focus.items.end(),
-      [&](FocusabilityItem item)
+      [&](GUIFocusabilityItem item)
       { return item.control == control;
   });
   if (foundControl != m_focus.items.end())
@@ -356,92 +356,126 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
   }
 }
 
-void CFocusEngineHandler::GetFocusabilityItems(std::vector<FocusabilityItem> &items)
+void CFocusEngineHandler::GetGUIFocusabilityItems(std::vector<GUIFocusabilityItem> &items)
 {
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
   {
     if (m_focus.rootFocus)
-      items = m_focus.items;
-    else
-      items.clear();
-  }
-}
-
-void CFocusEngineHandler::UpdateFocusability(const CFocusabilityTracker &focusabilityTracker)
-{
-  CSingleLock lock(m_focusLock);
-  auto items = focusabilityTracker.GetItems();
-  if (items.empty())
-    return;
-
-  std::vector<FocusabilityItem> verifiedItems;
-  for (auto it = items.begin(); it != items.end(); ++it)
-  {
-    //CRect renderRect = (*it)->GetRenderRect();
-    //CLog::Log(LOGDEBUG, "focusableTracker: %p, %f,%f %f x %f",
-    //  *it, renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
-    if (!(*it).control->HasProcessed() || !(*it).control->IsVisible())
-      continue;
-
-    verifiedItems.push_back(*it);
-  }
-
-  if (verifiedItems.size() != m_focus.items.size())
-    m_focus.items = verifiedItems;
-  UpdateFocusabilityItemRenderRects();
-}
-
-void CFocusEngineHandler::AppendFocusabilityItem(FocusabilityItem &item)
-{
-  // skip finding focused window, use current
-  CSingleLock lock(m_focusLock);
-  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
-  {
-    auto foundControl = std::find_if(m_focus.items.begin(), m_focus.items.end(),
-        [&](FocusabilityItem a)
-        { return a.control == item.control;
-    });
-    if (foundControl == m_focus.items.end())
     {
-      // missing from our list, add it in
-      m_focus.items.push_back(item);
-      // always sort the control list by control pointer address
-      // we could play games with trying to inset at the right place
-      // but these arrays are short and it just does not matter much.
-      std::sort(m_focus.items.begin(), m_focus.items.end(),
-        [] (FocusabilityItem const& a, FocusabilityItem const& b)
+      items = m_focus.items;
+      std::sort(items.begin(), items.end(),
+        [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
       {
           return a.control < b.control;
       });
     }
     else
-    {
-      // if existing, just update renderRect
-      (*foundControl).renderRect = item.control->GetRenderRect();
-    }
+      items.clear();
   }
 }
 
-void CFocusEngineHandler::UpdateFocusabilityItemRenderRects()
+void CFocusEngineHandler::SetGUIFocusabilityItems(const CFocusabilityTracker &focusabilityTracker)
+{
+  CSingleLock lock(m_focusLock);
+  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+  {
+    if (!m_focus.rootFocus)
+      return;
+
+    auto items = focusabilityTracker.GetItems();
+    // there should always something that has focus. if incoming focusabilityTracker is empty,
+    // it is a transition effect or nothing reported a dirty region and rendering was skipped.
+    if (items.empty())
+      return;
+
+    std::vector<GUIFocusabilityItem> verifiedItems;
+    for (auto it = items.begin(); it != items.end(); ++it)
+    {
+      if ((*it).control->HasProcessed() && (*it).control->IsVisible())
+        verifiedItems.push_back(*it);
+    }
+
+    if (verifiedItems.size() != m_focus.items.size())
+    {
+      m_focus.items = verifiedItems;
+      std::sort(m_focus.items.begin(), m_focus.items.end(),
+        [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
+      {
+          return a.renderOrder < b.renderOrder;
+      });
+    }
+    UpdateFocusability();
+  }
+}
+
+void CFocusEngineHandler::UpdateFocusability()
 {
   // use current focused window
   CSingleLock lock(m_focusLock);
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
   {
+    CRect boundsRect = CRect(0, 0, (float)g_graphicsContext.GetWidth(), (float)g_graphicsContext.GetHeight());
+    // update all renderRects 1st, we depend on them being correct in next step.
     for (auto it = m_focus.items.begin(); it != m_focus.items.end(); ++it)
     {
-      // grr, some animation effects will leave button boxes showing,
-      // the control eventually gets marked unprocessed or hidden so
-      // deal with that quirk here.
-      if (!(*it).control->HasProcessed() || !(*it).control->IsVisible())
-      {
-        (*it).renderRect = CRect();
-        continue;
-      }
-      (*it).renderRect = (*it).control->GetRenderRect();
+      auto &item = *it;
+      item.renderRect = item.control->GetRenderRect();
+      if (item.parentView)
+        item.viewRenderRect = item.parentView->GetRenderRect();
     }
+    // qualify items and rather them into views. The enclosing
+    // view will be last in draw order.
+    std::vector<FocusEngineFocusItem> items;
+    std::vector<FocusEngineFocusView> views;
+    for (auto it = m_focus.items.begin(); it != m_focus.items.end(); ++it)
+    {
+      auto &focusabilityItem = *it;
+      // should never be an empty render rect :)
+      if (focusabilityItem.renderRect.IsEmpty())
+        continue;
+
+      // clip all render rects to screen bounds
+      if (focusabilityItem.renderRect.x1 < boundsRect.x1)
+        focusabilityItem.renderRect.x1 = boundsRect.x1;
+      if (focusabilityItem.renderRect.y1 < boundsRect.y1)
+        focusabilityItem.renderRect.y1 = boundsRect.y1;
+      if (focusabilityItem.renderRect.x2 > boundsRect.x2)
+        focusabilityItem.renderRect.x2 = boundsRect.x2;
+      if (focusabilityItem.renderRect.y2 > boundsRect.y2)
+        focusabilityItem.renderRect.y2 = boundsRect.y2;
+
+      //  remove zero width or zero height rects
+      if (focusabilityItem.renderRect.x1 == focusabilityItem.renderRect.x2)
+        continue;
+      if (focusabilityItem.renderRect.y1 == focusabilityItem.renderRect.y2)
+        continue;
+
+      // remove rects that might have a negative width/height
+      if (focusabilityItem.renderRect.x2 < boundsRect.x1)
+        continue;
+      if (focusabilityItem.renderRect.y2 < boundsRect.y1)
+        continue;
+
+      if ((*it).control == (*it).parentView)
+      {
+        FocusEngineFocusView view;
+        view.rect = (*it).renderRect;
+        view.type = TranslateControlType((*it).control, (*it).parentView);
+        view.items = items;
+        views.push_back(view);
+        items.clear();
+      }
+      else
+      {
+        FocusEngineFocusItem item;
+        item.rect = (*it).renderRect;
+        item.type = TranslateControlType((*it).control, (*it).parentView);
+        items.push_back(item);
+      }
+    }
+    m_focus.views = views;
   }
 }
 

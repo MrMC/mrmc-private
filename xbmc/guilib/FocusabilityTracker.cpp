@@ -31,7 +31,7 @@ CFocusabilityTracker::~CFocusabilityTracker()
 void CFocusabilityTracker::Clear()
 {
   m_viewOrder = 0;
-  m_controlOrder = 0;
+  m_renderOrder = 0;
   items.clear();
 }
 
@@ -49,9 +49,9 @@ void CFocusabilityTracker::Append(CGUIControl *control, CGUIControl *view)
 {
   if (m_enable)
   {
-    FocusabilityItem item;
+    GUIFocusabilityItem item;
     item.control = control;
-    item.controlOrder = ++m_controlOrder;
+    item.renderOrder = ++m_renderOrder;
     item.viewOrder = m_viewOrder;
     item.parentView = view;
     if (item.parentView)
@@ -60,7 +60,7 @@ void CFocusabilityTracker::Append(CGUIControl *control, CGUIControl *view)
   }
 }
 
-const std::vector<FocusabilityItem>& CFocusabilityTracker::GetItems() const
+const std::vector<GUIFocusabilityItem>& CFocusabilityTracker::GetItems() const
 {
   return items;
 }
