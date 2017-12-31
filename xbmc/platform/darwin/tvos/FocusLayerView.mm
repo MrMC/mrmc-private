@@ -113,45 +113,35 @@
 	return self;
 }
 
-- (void) updateItems:(std::vector<CGRect> &)items
+- (void) updateItems:(std::vector<FocusLayerControl> &)views
 {
-  m_items = items;
+  m_views = views;
 }
 
 - (void)drawRect:(CGRect)rect
 {
   //PRINT_SIGNATURE();
   CGContextRef context = UIGraphicsGetCurrentContext();
-  // make the window transparent
+  // make the view transparent
   CGContextSetBlendMode(context, kCGBlendModeClear);
   CGContextFillRect(context, rect);
 
-  CGContextSetBlendMode(context, kCGBlendModeCopy);
-  CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
-  CGContextSetLineWidth(context, 2);
-  if (m_items.size() > 0)
+  if (!m_views.empty())
   {
-    /*
-    float rgbScaler = 0.5f / m_items.size();
-    for (size_t indx = 0; indx < m_items.size(); ++indx)
+    CGContextSetLineWidth(context, 2.0);
+    CGContextSetBlendMode(context, kCGBlendModeCopy);
+    CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
+    for (size_t andx = 0; andx < m_views.size(); ++andx)
     {
-      float rgb = 1.0f - (rgbScaler * indx);
-      UIColor *uiRGBA = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:rgb];
-      CGContextSetFillColorWithColor(context, [uiRGBA CGColor]);
-      CGContextFillRect(context, m_items[indx]);
+      CGContextSetStrokeColorWithColor(context, [[UIColor greenColor] CGColor]);
+      for (size_t bndx = 0; bndx < m_views[andx].items.size(); ++bndx)
+      {
+        CGRect rect = CGRectInset(m_views[andx].items[bndx].rect, 3.0, 3.0);
+        CGContextStrokeRect(context, rect);
+      }
+      CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
+      CGContextStrokeRect(context, m_views[andx].rect);
     }
-    for (size_t indx = 0; indx < m_items.size(); ++indx)
-    {
-      float rgb = 1.0f - (rgbScaler * indx);
-      UIColor *uiRGBA = [UIColor colorWithRed:1.0 green:1.0 blue:1.0 alpha:rgb];
-      //CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
-      CGContextSetStrokeColorWithColor(context, [uiRGBA CGColor]);
-      CGContextSetLineWidth(context, 4);
-      CGContextStrokeRect(context, m_items[indx]);
-    }
-    */
-    for (size_t indx = 0; indx < m_items.size(); ++indx)
-      CGContextStrokeRect(context, m_items[indx]);
   }
 
   //else

@@ -149,7 +149,7 @@ MainController *g_xbmcController;
 @synthesize m_enableRemoteIdle;
 @synthesize m_allowTap;
 
-std::vector<GUIFocusabilityItem> m_viewItems;
+std::vector<FocusEngineFocusView> m_viewItems;
 
 #pragma mark - internal key press methods
 - (void)sendButtonPressed:(int)buttonId
@@ -2128,22 +2128,17 @@ static SiriRemoteInfo siriRemoteInfo;
 
 - (void) updateFocusView
 {
-  // incoming rects are full upscaled display size.
-  CRect boundsRect = CRect(0, 0, m_glView.bounds.size.width*m_screenScale, m_glView.bounds.size.height*m_screenScale);
-  // FocusEngineItems are always sorted by control address
-  std::vector<GUIFocusabilityItem> items;
-  CFocusEngineHandler::GetInstance().GetGUIFocusabilityItems(items);
-  if (items.empty())
+  std::vector<FocusEngineFocusView> views;
+  CFocusEngineHandler::GetInstance().GetViews(views);
+  if (views.empty())
     m_viewItems.clear();
-  else if (m_viewItems.size() != items.size())
-    m_viewItems = items;
-  else
+  else if (m_viewItems.size() == views.size())
   {
     bool areEqual = true;
-    // sizes are the same, so we have to compare control render rects
     for (size_t indx = 0; indx < m_viewItems.size(); ++indx)
     {
-      if (m_viewItems[indx].renderRect != items[indx].renderRect)
+      // sizes are the same, so we have to compare views
+      if (!m_viewItems[indx].IsEqual(views[indx]))
       {
         areEqual = false;
         break;
@@ -2151,58 +2146,16 @@ static SiriRemoteInfo siriRemoteInfo;
     }
     if (areEqual)
       return;
-    m_viewItems = items;
+    m_viewItems = views;
   }
+  else
+    m_viewItems = views;
 
-  std::vector<CGRect> cgRects;
-  // copy view list and sort by draw order, 1st to last
-  // a lower view that is obscured by higher view
-  // cannot be 'hit' and will be removed.
-  std::vector<GUIFocusabilityItem> viewItems = m_viewItems;
-  std::sort(viewItems.begin(), viewItems.end(),
-    [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
-  {
-      return a.renderOrder < b.renderOrder;
-  });
-  for (auto viewIt = viewItems.begin(); viewIt != viewItems.end(); ++viewIt)
+  CLog::Log(LOGDEBUG, "updateFocusView: begin");
+  std::vector<FocusLayerControl> focusViews;
+  for (auto viewIt = m_viewItems.begin(); viewIt != m_viewItems.end(); ++viewIt)
   {
     auto &viewItem = *viewIt;
-
-    // should never be an empty rect :)
-    if (viewItem.renderRect.IsEmpty())
-      continue;
-
-    if (viewItem.renderRect.x1 < boundsRect.x1)
-      viewItem.renderRect.x1 = boundsRect.x1;
-    if (viewItem.renderRect.y1 < boundsRect.y1)
-      viewItem.renderRect.y1 = boundsRect.y1;
-    if (viewItem.renderRect.x2 > boundsRect.x2)
-      viewItem.renderRect.x2 = boundsRect.x2;
-    if (viewItem.renderRect.y2 > boundsRect.y2)
-      viewItem.renderRect.y2 = boundsRect.y2;
-
-    // zero width rects
-    if (viewItem.renderRect.x1 == viewItem.renderRect.x2)
-      continue;
-    if (viewItem.renderRect.y1 == viewItem.renderRect.y2)
-      continue;
-
-    // zero width rects
-    if (viewItem.renderRect.x2 < boundsRect.x1)
-      continue;
-    if (viewItem.renderRect.y2 < boundsRect.y1)
-      continue;
-
-    /*
-    // ignore rects that are the same size as display bounds
-    if (viewItem.renderRect == boundsRect)
-      continue;
-
-    if (boundsRect.RectInRect(viewItem.renderRect))
-      continue;
-    */
-
-
 /*
     // ignore a view that is obscured by the higher views
     auto obscuredIt = viewIt;
@@ -2249,20 +2202,39 @@ static SiriRemoteInfo siriRemoteInfo;
       continue;
 */
 
-    std::string type = CFocusEngineHandler::GetInstance().TranslateControlType(viewItem.control, viewItem.parentView);
-    CLog::Log(LOGDEBUG, "updateFocusView: %d-%d, %p, %p, %s, %f,%f %f, %f",
-      viewItem.renderOrder, viewItem.viewOrder , viewItem.control, viewItem.parentView, type.c_str(),
-      viewItem.renderRect.x1, viewItem.renderRect.y1, viewItem.renderRect.x2, viewItem.renderRect.y2);
-
     // m_glView.bounds does not have screen scaling
     CGRect rect = CGRectMake(
-      viewItem.renderRect.x1/m_screenScale, viewItem.renderRect.y1/m_screenScale,
-      viewItem.renderRect.Width()/m_screenScale, viewItem.renderRect.Height()/m_screenScale);
+      viewItem.rect.x1/m_screenScale, viewItem.rect.y1/m_screenScale,
+      viewItem.rect.Width()/m_screenScale, viewItem.rect.Height()/m_screenScale);
 
-    rect = CGRectInset(rect, 4, 4);
-    cgRects.push_back(rect);
+    FocusLayerControl focusView;
+    focusView.rect = rect;
+    focusView.type = viewItem.type;
+    for (auto itemsIt = viewItem.items.begin(); itemsIt != viewItem.items.end(); ++itemsIt)
+    {
+      auto &item = *itemsIt;
+
+      CLog::Log(LOGDEBUG, "updateFocusView: %s, %f,%f %f, %f",
+        item.type.c_str(),
+        item.rect.x1, item.rect.y1, item.rect.x2, item.rect.y2);
+
+      // m_glView.bounds does not have screen scaling
+      CGRect rect = CGRectMake(
+        item.rect.x1/m_screenScale, item.rect.y1/m_screenScale,
+        item.rect.Width()/m_screenScale, item.rect.Height()/m_screenScale);
+
+      FocusLayerItem control;
+      control.rect = rect;
+      control.type = item.type;
+      focusView.items.push_back(control);
+    }
+    CLog::Log(LOGDEBUG, "updateFocusView: %s, %f,%f %f, %f",
+      viewItem.type.c_str(),
+      viewItem.rect.x1, viewItem.rect.y1, viewItem.rect.x2, viewItem.rect.y2);
+
+    focusViews.push_back(focusView);
   }
-  [_View1 updateItems:cgRects];
+  [_View1 updateItems:focusViews];
   [_View1 setNeedsDisplay];
 }
 

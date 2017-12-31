@@ -356,6 +356,19 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
   }
 }
 
+void CFocusEngineHandler::GetViews(std::vector<FocusEngineFocusView> &views)
+{
+  // skip finding focused window, use current
+  CSingleLock lock(m_focusLock);
+  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+  {
+    if (m_focus.rootFocus)
+      views = m_focus.views;
+    else
+      views.clear();
+  }
+}
+
 void CFocusEngineHandler::GetGUIFocusabilityItems(std::vector<GUIFocusabilityItem> &items)
 {
   // skip finding focused window, use current
@@ -363,14 +376,7 @@ void CFocusEngineHandler::GetGUIFocusabilityItems(std::vector<GUIFocusabilityIte
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
   {
     if (m_focus.rootFocus)
-    {
       items = m_focus.items;
-      std::sort(items.begin(), items.end(),
-        [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
-      {
-          return a.control < b.control;
-      });
-    }
     else
       items.clear();
   }
@@ -490,5 +496,11 @@ std::string CFocusEngineHandler::TranslateControlType(CGUIControl *control, CGUI
     if (window)
       return "window";
   }
+  // TranslateControlType return 'group for
+  // both CGUIListGroup and CGUIControlGroup
+  CGUIListGroup *listgroup = dynamic_cast<CGUIListGroup*>(control);
+  if (listgroup)
+    return "listgroup";
+
   return CGUIControlFactory::TranslateControlType(control->GetControlType());
 }

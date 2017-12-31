@@ -92,8 +92,7 @@ void CGUIListItemLayout::Process(CGUIListItem *item, int parentID, unsigned int 
 void CGUIListItemLayout::Render(CGUIListItem *item, int parentID)
 {
   m_group.DoRender();
-  if (CheckCondition() && g_windowManager.FocusableTrackerIsEnabled())
-    m_group.AppendFocusableTracker();
+  m_group.AppendFocusableTracker();
 }
 
 void CGUIListItemLayout::SetFocusedItem(unsigned int focus)
