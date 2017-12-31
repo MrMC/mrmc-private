@@ -71,12 +71,13 @@ class CFocusEngineHandler
   bool          ShowVisibleRects();
   ORIENTATION   GetFocusOrientation();
   void          GetFocusabilityItems(std::vector<FocusabilityItem> &items);
-  void          AppendFocusability(const CFocusabilityTracker &focusabilityTracker);
-  void          AppendFocusabilityItem(FocusabilityItem &item);
-  void          UpdateFocusabilityItemRenderRects();
+  void          UpdateFocusability(const CFocusabilityTracker &focusabilityTracker);
+  std::string   TranslateControlType(CGUIControl *control, CGUIControl *parent);
 
 private:
   void          UpdateFocus(FocusEngineFocus &focus);
+  void          AppendFocusabilityItem(FocusabilityItem &item);
+  void          UpdateFocusabilityItemRenderRects();
 
   CFocusEngineHandler();
   CFocusEngineHandler(CFocusEngineHandler const&);

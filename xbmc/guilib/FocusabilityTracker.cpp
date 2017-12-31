@@ -53,12 +53,9 @@ void CFocusabilityTracker::Append(CGUIControl *control, CGUIControl *view)
     item.control = control;
     item.controlOrder = ++m_controlOrder;
     item.viewOrder = m_viewOrder;
-    item.parentView = CGUIControl::GUICONTROL_UNKNOWN;
-    if (view)
-    {
-      item.parentView = view->GetControlType();
+    item.parentView = view;
+    if (item.parentView)
       m_viewOrder++;
-    }
     items.push_back(item);
   }
 }

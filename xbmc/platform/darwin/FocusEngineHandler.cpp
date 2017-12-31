@@ -23,10 +23,13 @@
 #include "FocusEngineHandler.h"
 
 #include "guilib/GUIControl.h"
+#include "guilib/GUIWindow.h"
+#include "guilib/GUIDialog.h"
 #include "guilib/GUIListGroup.h"
 #include "guilib/GUIListLabel.h"
 #include "guilib/GUIBaseContainer.h"
 #include "guilib/GUIWindowManager.h"
+#include "guilib/GUIControlFactory.h"
 #include "threads/Atomics.h"
 #include "threads/SingleLock.h"
 #include "utils/log.h"
@@ -366,9 +369,14 @@ void CFocusEngineHandler::GetFocusabilityItems(std::vector<FocusabilityItem> &it
   }
 }
 
-void CFocusEngineHandler::AppendFocusability(const CFocusabilityTracker &focusabilityTracker)
+void CFocusEngineHandler::UpdateFocusability(const CFocusabilityTracker &focusabilityTracker)
 {
+  CSingleLock lock(m_focusLock);
   auto items = focusabilityTracker.GetItems();
+  if (items.empty())
+    return;
+
+  std::vector<FocusabilityItem> verifiedItems;
   for (auto it = items.begin(); it != items.end(); ++it)
   {
     //CRect renderRect = (*it)->GetRenderRect();
@@ -376,8 +384,13 @@ void CFocusEngineHandler::AppendFocusability(const CFocusabilityTracker &focusab
     //  *it, renderRect.x1, renderRect.y1, renderRect.Width(), renderRect.Height());
     if (!(*it).control->HasProcessed() || !(*it).control->IsVisible())
       continue;
-    AppendFocusabilityItem(*it);
+
+    verifiedItems.push_back(*it);
   }
+
+  if (verifiedItems.size() != m_focus.items.size())
+    m_focus.items = verifiedItems;
+  UpdateFocusabilityItemRenderRects();
 }
 
 void CFocusEngineHandler::AppendFocusabilityItem(FocusabilityItem &item)
@@ -430,4 +443,18 @@ void CFocusEngineHandler::UpdateFocusabilityItemRenderRects()
       (*it).renderRect = (*it).control->GetRenderRect();
     }
   }
+}
+
+std::string CFocusEngineHandler::TranslateControlType(CGUIControl *control, CGUIControl *parent)
+{
+  if (parent)
+  {
+    CGUIDialog *dialog = dynamic_cast<CGUIDialog*>(parent);
+    if (dialog)
+      return "dialog";
+    CGUIWindow *window = dynamic_cast<CGUIWindow*>(parent);
+    if (window)
+      return "window";
+  }
+  return CGUIControlFactory::TranslateControlType(control->GetControlType());
 }

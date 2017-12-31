@@ -2171,15 +2171,38 @@ static SiriRemoteInfo siriRemoteInfo;
     // should never be an empty rect :)
     if (viewItem.renderRect.IsEmpty())
       continue;
+
+    if (viewItem.renderRect.x1 < boundsRect.x1)
+      viewItem.renderRect.x1 = boundsRect.x1;
+    if (viewItem.renderRect.y1 < boundsRect.y1)
+      viewItem.renderRect.y1 = boundsRect.y1;
+    if (viewItem.renderRect.x2 > boundsRect.x2)
+      viewItem.renderRect.x2 = boundsRect.x2;
+    if (viewItem.renderRect.y2 > boundsRect.y2)
+      viewItem.renderRect.y2 = boundsRect.y2;
+
+    // zero width rects
+    if (viewItem.renderRect.x1 == viewItem.renderRect.x2)
+      continue;
+    if (viewItem.renderRect.y1 == viewItem.renderRect.y2)
+      continue;
+
+    // zero width rects
+    if (viewItem.renderRect.x2 < boundsRect.x1)
+      continue;
+    if (viewItem.renderRect.y2 < boundsRect.y1)
+      continue;
+
+    /*
     // ignore rects that are the same size as display bounds
     if (viewItem.renderRect == boundsRect)
       continue;
-    /*
-    CRect testRect = boundsRect;
-    testRect.Intersect(viewItem.renderRect);
-    if (testRect == boundsRect)
+
+    if (boundsRect.RectInRect(viewItem.renderRect))
       continue;
     */
+
+
 /*
     // ignore a view that is obscured by the higher views
     auto obscuredIt = viewIt;
@@ -2225,6 +2248,12 @@ static SiriRemoteInfo siriRemoteInfo;
     if (IsObscured)
       continue;
 */
+
+    std::string type = CFocusEngineHandler::GetInstance().TranslateControlType(viewItem.control, viewItem.parentView);
+    CLog::Log(LOGDEBUG, "updateFocusView: %d-%d, %p, %p, %s, %f,%f %f, %f",
+      viewItem.viewOrder, viewItem.controlOrder , viewItem.control, viewItem.parentView, type.c_str(),
+      viewItem.renderRect.x1, viewItem.renderRect.y1, viewItem.renderRect.x2, viewItem.renderRect.y2);
+
     // m_glView.bounds does not have screen scaling
     CGRect rect = CGRectMake(
       viewItem.renderRect.x1/m_screenScale, viewItem.renderRect.y1/m_screenScale,

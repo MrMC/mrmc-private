@@ -1045,14 +1045,6 @@ void CGUIWindowManager::RenderPass()
       (*it)->DoRender();
     }
   }
-#if defined(TARGET_DARWIN_TVOS)
-  // update focus engine after all windows/dialogs have processed
-  if (g_application.IsAppInitialized() && g_application.IsAppFocused())
-  {
-    CFocusEngineHandler::GetInstance().AppendFocusability(m_focusableTracker);
-    CFocusEngineHandler::GetInstance().UpdateFocusabilityItemRenderRects();
-  }
-#endif
 }
 
 void CGUIWindowManager::RenderEx() const
@@ -1159,9 +1151,14 @@ void CGUIWindowManager::AfterRender()
     if ((*it)->IsDialogRunning())
       (*it)->AfterRender();
   }
-  //CLog::Log(LOGDEBUG, "CGUIWindowManager::AfterRender");
-  m_focusableTracker.Clear();
+  CLog::Log(LOGDEBUG, "CGUIWindowManager::AfterRender");
+#if defined(TARGET_DARWIN_TVOS)
+  // update focus engine after all windows/dialogs have processed
+  if (g_application.IsAppInitialized() && g_application.IsAppFocused())
+    CFocusEngineHandler::GetInstance().UpdateFocusability(m_focusableTracker);
+#endif
   m_focusableTracker.SetEnabled(false);
+  m_focusableTracker.Clear();
 }
 
 void CGUIWindowManager::FrameMove()

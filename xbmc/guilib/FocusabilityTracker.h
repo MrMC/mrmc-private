@@ -36,7 +36,7 @@ typedef struct
   // or a window/dialog when the button not enclosed with others controls.
   int viewOrder = 0;                // process order
   CRect viewRenderRect;             // in display coordinates
-  CGUIControl::GUICONTROLTYPES parentView = CGUIControl::GUICONTROL_UNKNOWN;
+  CGUIControl *parentView = nullptr;
 } FocusabilityItem;
 
 class CFocusabilityTracker
