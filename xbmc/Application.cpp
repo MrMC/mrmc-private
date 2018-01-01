@@ -1917,6 +1917,7 @@ void CApplication::Render()
   // render gui layer
   if (!m_skipGuiRender)
   {
+    g_windowManager.BeginRender();
     dirtyRegions = g_windowManager.GetDirty();
     if (g_graphicsContext.GetStereoMode())
     {

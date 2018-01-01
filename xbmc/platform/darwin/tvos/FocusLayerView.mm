@@ -123,8 +123,8 @@
   //PRINT_SIGNATURE();
   CGContextRef context = UIGraphicsGetCurrentContext();
   // make the view transparent
-  CGContextSetBlendMode(context, kCGBlendModeClear);
-  CGContextFillRect(context, rect);
+  //CGContextSetBlendMode(context, kCGBlendModeClear);
+  //CGContextFillRect(context, rect);
 
   if (!m_views.empty())
   {

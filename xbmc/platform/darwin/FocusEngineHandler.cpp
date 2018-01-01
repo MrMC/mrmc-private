@@ -481,6 +481,68 @@ void CFocusEngineHandler::UpdateFocusability()
         items.push_back(item);
       }
     }
+#ifdef false
+    // the window
+    for (auto it = views.begin(); it != views.end(); )
+    {
+      auto &view = *it;
+      if (view.items.empty())
+        it = views.erase(it);
+      else
+        ++it;
+    }
+#endif
+#ifdef false
+    // run through our views in reverse order (so that last is checked first)
+    //for (auto it = views.begin(); it != views.rend(); )
+    for (auto it = views.rbegin(); it != views.rend(); )
+    {
+      auto &view = *it;
+      // ignore a view that is obscured by the higher views
+      auto obscuredIt = it;
+      ++obscuredIt;
+      bool IsObscured = false;
+      std::vector<CRect> partialOverlaps;
+      //for (;obscuredIt != views.end(); ++obscuredIt)
+      for (;obscuredIt != views.rend(); ++obscuredIt)
+      {
+        auto &testViewItem = *obscuredIt;
+
+        // should never be an empty rect :)
+        if (testViewItem.rect.IsEmpty())
+          continue;
+        // ignore rects that are the same size as display bounds
+        if (testViewItem.rect == boundsRect)
+          continue;
+        CRect testRect = boundsRect;
+        testRect.Intersect(testViewItem.rect);
+        if (testRect == boundsRect)
+          continue;
+
+        if (testViewItem.rect.RectInRect(view.rect))
+        {
+          IsObscured = true;
+          break;
+        }
+
+        // collect intersections that overlap into obscuringRect.
+        CRect intersection = testViewItem.rect;
+        intersection.Intersect(view.rect);
+        if (!intersection.IsEmpty())
+          partialOverlaps.push_back(intersection);
+      }
+      if (!IsObscured && partialOverlaps.size() > 0)
+      {
+        std::vector<CRect> rects = view.rect.SubtractRects(partialOverlaps);
+        if (rects.size() == 0)
+          IsObscured = true;
+      }
+      if (IsObscured)
+        it = views.erase(it);
+      else
+        ++it;
+    }
+#endif
     m_focus.views = views;
   }
 }
@@ -496,7 +558,7 @@ std::string CFocusEngineHandler::TranslateControlType(CGUIControl *control, CGUI
     if (window)
       return "window";
   }
-  // TranslateControlType return 'group for
+  // TranslateControlType returns 'group' for
   // both CGUIListGroup and CGUIControlGroup
   CGUIListGroup *listgroup = dynamic_cast<CGUIListGroup*>(control);
   if (listgroup)

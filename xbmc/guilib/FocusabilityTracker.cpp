@@ -19,6 +19,7 @@
  */
 
 #include "FocusabilityTracker.h"
+#include "utils/log.h"
 
 CFocusabilityTracker::CFocusabilityTracker()
 {
@@ -32,7 +33,7 @@ void CFocusabilityTracker::Clear()
 {
   m_viewOrder = 0;
   m_renderOrder = 0;
-  items.clear();
+  m_items.clear();
 }
 
 bool CFocusabilityTracker::IsEnabled()
@@ -56,11 +57,49 @@ void CFocusabilityTracker::Append(CGUIControl *control, CGUIControl *view)
     item.parentView = view;
     if (item.parentView)
       m_viewOrder++;
-    items.push_back(item);
+    m_items.push_back(item);
+  }
+}
+
+void CFocusabilityTracker::BeginRender()
+{
+  //CLog::Log(LOGDEBUG, "CFocusabilityTracker::BeginRender");
+  m_controlOrder = 0;
+  for (const auto &control : m_controls)
+    control->SetRenderTrackingOrder(-1);
+}
+
+void CFocusabilityTracker::AfterRender()
+{
+  //CLog::Log(LOGDEBUG, "CFocusabilityTracker::AfterRender");
+  std::vector<CGUIControl *> renderedControls;
+  for (const auto &control : m_controls)
+  {
+    if (control->GetRenderTrackingOrder() > -1)
+      renderedControls.push_back(control);
+  }
+  CLog::Log(LOGDEBUG, "CFocusabilityTracker::AfterRender rendered %lu controls", renderedControls.size());
+}
+
+void CFocusabilityTracker::UpdateRender(CGUIControl *control, bool remove)
+{
+  if (remove)
+  {
+    auto foundControl = std::find(m_controls.begin(), m_controls.end(), control);
+    if (foundControl != m_controls.end())
+      m_controls.erase(foundControl);
+  }
+  else
+  {
+    auto foundControl = std::find(m_controls.begin(), m_controls.end(), control);
+    if (foundControl == m_controls.end())
+      m_controls.push_back(control);
+    else
+      control->SetRenderTrackingOrder(++m_controlOrder);
   }
 }
 
 const std::vector<GUIFocusabilityItem>& CFocusabilityTracker::GetItems() const
 {
-  return items;
+  return m_items;
 }

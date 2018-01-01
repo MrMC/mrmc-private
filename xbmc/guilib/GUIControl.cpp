@@ -210,6 +210,15 @@ void CGUIControl::DoRender()
   }
 }
 
+void CGUIControl::Render()
+{
+  g_windowManager.UpdateRenderTracker(this);
+}
+
+void CGUIControl::RenderEx()
+{
+}
+
 bool CGUIControl::OnAction(const CAction &action)
 {
   if (HasFocus())

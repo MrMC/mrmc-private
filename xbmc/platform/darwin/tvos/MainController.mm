@@ -2151,57 +2151,15 @@ static SiriRemoteInfo siriRemoteInfo;
   else
     m_viewItems = views;
 
-  CLog::Log(LOGDEBUG, "updateFocusView: begin");
+  if (!m_viewItems.empty())
+    CLog::Log(LOGDEBUG, "updateFocusView: begin");
+  int viewCount = 0;
   std::vector<FocusLayerControl> focusViews;
-  for (auto viewIt = m_viewItems.begin(); viewIt != m_viewItems.end(); ++viewIt)
+  // build through our views in reverse order (so that last (window) is first)
+  //for (auto viewIt = m_viewItems.begin(); viewIt != m_viewItems.end(); ++viewIt)
+  for (auto viewIt = m_viewItems.rbegin(); viewIt != m_viewItems.rend(); ++viewIt)
   {
     auto &viewItem = *viewIt;
-/*
-    // ignore a view that is obscured by the higher views
-    auto obscuredIt = viewIt;
-    ++obscuredIt;
-    bool IsObscured = false;
-    std::vector<CRect> partialOverlaps;
-    for (;obscuredIt != viewItems.end(); ++obscuredIt)
-    {
-      auto &testViewItem = *obscuredIt;
-
-      // should never be an empty rect :)
-      if (testViewItem.renderRect.IsEmpty())
-        continue;
-      // ignore rects that are the same size as display bounds
-      if (testViewItem.renderRect == boundsRect)
-        continue;
-      CRect testRect = boundsRect;
-      testRect.Intersect(testViewItem.renderRect);
-      if (testRect == boundsRect)
-        continue;
-
-      if (testViewItem.renderRect.RectInRect(viewItem.renderRect))
-      {
-        IsObscured = true;
-        break;
-      }
-
-      // collect intersections that overlap into obscuringRect.
-      CRect intersection = testViewItem.renderRect;
-      intersection.Intersect(viewItem.renderRect);
-      if (!intersection.IsEmpty())
-        partialOverlaps.push_back(intersection);
-
-      //if (testViewItem.viewOrder != viewItem.viewOrder)
-      //  break;
-    }
-    if (!IsObscured && partialOverlaps.size() > 0)
-    {
-      std::vector<CRect> rects = viewItem.renderRect.SubtractRects(partialOverlaps);
-      if (rects.size() == 0)
-        IsObscured = true;
-    }
-    if (IsObscured)
-      continue;
-*/
-
     // m_glView.bounds does not have screen scaling
     CGRect rect = CGRectMake(
       viewItem.rect.x1/m_screenScale, viewItem.rect.y1/m_screenScale,
@@ -2210,12 +2168,16 @@ static SiriRemoteInfo siriRemoteInfo;
     FocusLayerControl focusView;
     focusView.rect = rect;
     focusView.type = viewItem.type;
+    CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f,%f %f, %f",
+      viewCount, viewItem.type.c_str(),
+      viewItem.rect.x1, viewItem.rect.y1, viewItem.rect.x2, viewItem.rect.y2);
+
     for (auto itemsIt = viewItem.items.begin(); itemsIt != viewItem.items.end(); ++itemsIt)
     {
       auto &item = *itemsIt;
 
-      CLog::Log(LOGDEBUG, "updateFocusView: %s, %f,%f %f, %f",
-        item.type.c_str(),
+      CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f,%f %f, %f",
+        viewCount, item.type.c_str(),
         item.rect.x1, item.rect.y1, item.rect.x2, item.rect.y2);
 
       // m_glView.bounds does not have screen scaling
@@ -2228,11 +2190,9 @@ static SiriRemoteInfo siriRemoteInfo;
       control.type = item.type;
       focusView.items.push_back(control);
     }
-    CLog::Log(LOGDEBUG, "updateFocusView: %s, %f,%f %f, %f",
-      viewItem.type.c_str(),
-      viewItem.rect.x1, viewItem.rect.y1, viewItem.rect.x2, viewItem.rect.y2);
 
     focusViews.push_back(focusView);
+    viewCount++;
   }
   [_View1 updateItems:focusViews];
   [_View1 setNeedsDisplay];

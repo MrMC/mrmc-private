@@ -50,11 +50,16 @@ public:
   bool IsEnabled();
   void SetEnabled(bool enable);
   void Append(CGUIControl *control, CGUIControl *view = nullptr);
+  void BeginRender();
+  void AfterRender();
+  void UpdateRender(CGUIControl *control, bool remove = false);
   const std::vector<GUIFocusabilityItem>& GetItems() const;
 
 private:
   bool m_enable = true;
   int m_viewOrder = 0;
   int m_renderOrder = 0;
-  std::vector<GUIFocusabilityItem> items;
+  std::vector<GUIFocusabilityItem> m_items;
+  int m_controlOrder = 0;
+  std::vector<CGUIControl *> m_controls;
 };

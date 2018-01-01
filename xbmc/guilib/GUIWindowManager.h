@@ -113,6 +113,8 @@ public:
 
   void RenderEx() const;
 
+  void BeginRender();
+
   /*! \brief Do any post render activities.
    */
   void AfterRender();
@@ -186,6 +188,7 @@ public:
   bool FocusableTrackerIsEnabled();
   void FocusableTrackerSetEnabled(bool enablel);
   void AppendFocusableTracker(CGUIControl *control, CGUIControl *view = nullptr);
+  void UpdateRenderTracker(CGUIControl *control, bool remove = false);
 
 #ifdef DEBUG_CGUI_TEXTUREUSE
   void DumpTextureUse();

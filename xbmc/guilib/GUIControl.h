@@ -85,10 +85,13 @@ public:
   virtual void DoProcess(unsigned int currentTime, CDirtyRegionList &dirtyregions);
   virtual void Process(unsigned int currentTime, CDirtyRegionList &dirtyregions);
   virtual void DoRender();
-  virtual void Render() {};
+  virtual void Render();
   // Called after the actual rendering is completed to trigger additional
   // non GUI rendering operations
-  virtual void RenderEx() {};
+  virtual void RenderEx();
+
+  virtual void SetRenderTrackingOrder(int order) { m_renderOrder = order; };
+  virtual int  GetRenderTrackingOrder() { return m_renderOrder; };
 
   /*! \brief Returns whether or not we have processed */
   bool HasProcessed() const { return m_hasProcessed; };
@@ -377,6 +380,7 @@ protected:
 
   bool  m_controlIsDirty;
   CRect m_renderRegion;         // In screen coordinates
+  int   m_renderOrder = -1;
 };
 
 #endif
