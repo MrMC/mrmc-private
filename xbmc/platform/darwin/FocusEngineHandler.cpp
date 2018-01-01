@@ -459,9 +459,16 @@ void CFocusEngineHandler::UpdateFocusability()
         continue;
 
       // remove rects that might have a negative width/height
+      // with respect to bounds rect
       if (focusabilityItem.renderRect.x2 < boundsRect.x1)
         continue;
       if (focusabilityItem.renderRect.y2 < boundsRect.y1)
+        continue;
+
+      // remove rects that might have a negative width/height
+      if (focusabilityItem.renderRect.x2 < focusabilityItem.renderRect.x1)
+        continue;
+      if (focusabilityItem.renderRect.y2 < focusabilityItem.renderRect.y1)
         continue;
 
       if ((*it).control == (*it).parentView)
@@ -469,6 +476,20 @@ void CFocusEngineHandler::UpdateFocusability()
         FocusEngineFocusView view;
         view.rect = (*it).renderRect;
         view.type = TranslateControlType((*it).control, (*it).parentView);
+#ifdef false
+        for (auto &item : items)
+        {
+          // clip all item rects to enclosing view rect
+          if (item.rect.x1 < view.rect.x1)
+            item.rect.x1 = view.rect.x1;
+          if (item.rect.y1 < view.rect.y1)
+            item.rect.y1 = view.rect.y1;
+          if (item.rect.x2 > view.rect.x2)
+            item.rect.x2 = view.rect.x2;
+          if (item.rect.y2 > view.rect.y2)
+            item.rect.y2 = view.rect.y2;
+        }
+#endif
         view.items = items;
         views.push_back(view);
         items.clear();

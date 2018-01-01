@@ -2168,7 +2168,7 @@ static SiriRemoteInfo siriRemoteInfo;
     FocusLayerControl focusView;
     focusView.rect = rect;
     focusView.type = viewItem.type;
-    CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f,%f %f, %f",
+    CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f, %f, %f, %f",
       viewCount, viewItem.type.c_str(),
       viewItem.rect.x1, viewItem.rect.y1, viewItem.rect.x2, viewItem.rect.y2);
 
@@ -2176,7 +2176,7 @@ static SiriRemoteInfo siriRemoteInfo;
     {
       auto &item = *itemsIt;
 
-      CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f,%f %f, %f",
+      CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f, %f, %f, %f",
         viewCount, item.type.c_str(),
         item.rect.x1, item.rect.y1, item.rect.x2, item.rect.y2);
 
