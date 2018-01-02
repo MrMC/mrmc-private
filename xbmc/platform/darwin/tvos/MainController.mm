@@ -535,39 +535,6 @@ static int keyPressTimerFiredCount = 0;
 //--------------------------------------------------------------
 - (void)createPressGesturecognizers
 {
-  //PRINT_SIGNATURE();
-  // we need UILongPressGestureRecognizer here because it will give
-  // UIGestureRecognizerStateBegan AND UIGestureRecognizerStateEnded
-  // even if we hold down for a long time. UITapGestureRecognizer
-  // will eat the ending on long holds and we never see it.
-  auto upRecognizer = [[UILongPressGestureRecognizer alloc]
-    initWithTarget: self action: @selector(IRRemoteUpArrowPressed:)];
-  upRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
-  upRecognizer.minimumPressDuration = 0.01;
-  upRecognizer.delegate = self;
-  [self.view addGestureRecognizer: upRecognizer];
-
-  auto downRecognizer = [[UILongPressGestureRecognizer alloc]
-    initWithTarget: self action: @selector(IRRemoteDownArrowPressed:)];
-  downRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
-  downRecognizer.minimumPressDuration = 0.01;
-  downRecognizer.delegate = self;
-  [self.view addGestureRecognizer: downRecognizer];
-
-  auto leftRecognizer = [[UILongPressGestureRecognizer alloc]
-    initWithTarget: self action: @selector(IRRemoteLeftArrowPressed:)];
-  leftRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
-  leftRecognizer.minimumPressDuration = 0.01;
-  leftRecognizer.delegate = self;
-  [self.view addGestureRecognizer: leftRecognizer];
-
-  auto rightRecognizer = [[UILongPressGestureRecognizer alloc]
-    initWithTarget: self action: @selector(IRRemoteRightArrowPressed:)];
-  rightRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
-  rightRecognizer.minimumPressDuration = 0.01;
-  rightRecognizer.delegate = self;
-  [self.view addGestureRecognizer: rightRecognizer];
-  
   // we always have these under tvos, both ir and siri remotes respond to these
   auto menuRecognizer = [[UITapGestureRecognizer alloc]
                          initWithTarget: self action: @selector(menuPressed:)];
@@ -587,6 +554,38 @@ static int keyPressTimerFiredCount = 0;
   selectRecognizer.minimumPressDuration = 0.001;
   selectRecognizer.delegate = self;
   [self.view addGestureRecognizer: selectRecognizer];
+}
+//--------------------------------------------------------------
+- (void)createIRPressGesturecognizers
+{
+  //PRINT_SIGNATURE();
+  // we need UILongPressGestureRecognizer here because it will give
+  // UIGestureRecognizerStateBegan AND UIGestureRecognizerStateEnded
+  // even if we hold down for a long time. UITapGestureRecognizer
+  // will eat the ending on long holds and we never see it.
+  auto upRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget: self action: @selector(IRRemoteUpArrowPressed:)];
+  upRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
+  upRecognizer.minimumPressDuration = 0.01;
+  upRecognizer.delegate = self;
+  [self.view addGestureRecognizer: upRecognizer];
+
+  auto downRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget: self action: @selector(IRRemoteDownArrowPressed:)];
+  downRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
+  downRecognizer.minimumPressDuration = 0.01;
+  downRecognizer.delegate = self;
+  [self.view addGestureRecognizer: downRecognizer];
+
+  auto leftRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget: self action: @selector(IRRemoteLeftArrowPressed:)];
+  leftRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+  leftRecognizer.minimumPressDuration = 0.01;
+  leftRecognizer.delegate = self;
+  [self.view addGestureRecognizer: leftRecognizer];
+
+  auto rightRecognizer = [[UILongPressGestureRecognizer alloc] initWithTarget: self action: @selector(IRRemoteRightArrowPressed:)];
+  rightRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  rightRecognizer.minimumPressDuration = 0.01;
+  rightRecognizer.delegate = self;
+  [self.view addGestureRecognizer: rightRecognizer];
 }
 
 //--------------------------------------------------------------
@@ -1771,6 +1770,7 @@ static SiriRemoteInfo siriRemoteInfo;
 //  [self createTapGestureRecognizers];
 //
 //  // for IR remotes
+//  [self createIRPressGesturecognizers];
   [self createPressGesturecognizers];
   [self createCustomControlCenter];
   
