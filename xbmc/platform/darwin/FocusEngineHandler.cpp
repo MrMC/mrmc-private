@@ -374,7 +374,7 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
   }
 }
 
-void CFocusEngineHandler::GetViews(std::vector<FocusEngineFocusView> &views)
+void CFocusEngineHandler::GetCoreViews(std::vector<FocusEngineCoreViews> &views)
 {
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
@@ -385,6 +385,51 @@ void CFocusEngineHandler::GetViews(std::vector<FocusEngineFocusView> &views)
     else
       views.clear();
   }
+}
+
+bool CFocusEngineHandler::CoreViewsIsEqual(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
+{
+  if (views1.size() != views2.size())
+    return false;
+
+  for (size_t indx = 0; indx < views1.size(); ++indx)
+  {
+    // sizes are the same, so we have to compare views
+    if (!views1[indx].IsEqual(views2[indx]))
+      return false;
+  }
+
+  return true;
+}
+
+bool CFocusEngineHandler::CoreViewsIsEqualSize(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
+{
+  if (views1.size() != views2.size())
+    return false;
+
+  for (size_t indx = 0; indx < views1.size(); ++indx)
+  {
+    // sizes are the same, so we have to compare views
+    if (!views1[indx].IsEqualSize(views2[indx]))
+      return false;
+  }
+
+  return true;
+}
+
+bool CFocusEngineHandler::CoreViewsIsEqualControls(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
+{
+  if (views1.size() != views2.size())
+    return false;
+
+  for (size_t indx = 0; indx < views1.size(); ++indx)
+  {
+    // sizes are the same, so we have to compare views
+    if (!views1[indx].IsEqualControls(views2[indx]))
+      return false;
+  }
+
+  return true;
 }
 
 void CFocusEngineHandler::GetGUIFocusabilityItems(std::vector<GUIFocusabilityItem> &items)
@@ -451,8 +496,8 @@ void CFocusEngineHandler::UpdateFocusability()
     }
     // qualify items and rather them into views. The enclosing
     // view will be last in draw order.
-    std::vector<FocusEngineFocusItem> items;
-    std::vector<FocusEngineFocusView> views;
+    std::vector<FocusEngineCoreItem> items;
+    std::vector<FocusEngineCoreViews> views;
     for (auto it = m_focus.items.begin(); it != m_focus.items.end(); ++it)
     {
       auto &focusabilityItem = *it;
@@ -492,7 +537,7 @@ void CFocusEngineHandler::UpdateFocusability()
 
       if ((*it).control == (*it).parentView)
       {
-        FocusEngineFocusView view;
+        FocusEngineCoreViews view;
         view.rect = (*it).renderRect;
         view.type = TranslateControlType((*it).control, (*it).parentView);
 #if false
@@ -516,7 +561,7 @@ void CFocusEngineHandler::UpdateFocusability()
       }
       else
       {
-        FocusEngineFocusItem item;
+        FocusEngineCoreItem item;
         item.rect = (*it).renderRect;
         item.type = TranslateControlType((*it).control, (*it).parentView);
         item.control = (*it).control;

@@ -135,7 +135,7 @@ MainController *g_xbmcController;
 @property (nonatomic) FocusLayerView *focusViewRight;
 @property (nonatomic) FocusLayerView *focusViewTop;
 @property (nonatomic) FocusLayerView *focusViewBottom;
-@property (nonatomic) FocusLayerView *preferredView;
+@property (nonatomic, assign) FocusLayer focusLayer;
 @end
 
 #pragma mark - MainController implementation
@@ -153,8 +153,7 @@ MainController *g_xbmcController;
 // careful, this is like a global for all MainController classes
 // we only have one so it does not matter and keeps from exposing
 // FocusEngineHandler.h all over the place.
-std::vector<FocusEngineFocusView> m_viewItems;
-std::vector<FocusLayerControl> m_focusViews;
+std::vector<FocusEngineCoreViews> m_viewItems;
 
 #pragma mark - internal key press methods
 - (void)sendButtonPressed:(int)buttonId
@@ -2152,26 +2151,31 @@ static SiriRemoteInfo siriRemoteInfo;
 - (void) UpdatePreferredView
 {
   CGUIControl *preferredControl = CFocusEngineHandler::GetInstance().GetFocusControl();
+  CGUIControl *foundcontrol = nullptr;
   FocusLayerView *foundview = nullptr;
-  for (size_t andx = 0; andx < m_focusViews.size() && foundview == nullptr; ++andx)
+  for (size_t andx = 0; andx < _focusLayer.views.size() && foundview == nullptr; ++andx)
   {
-    if (preferredControl == m_focusViews[andx].control)
+    if (preferredControl == _focusLayer.views[andx].core)
     {
-      foundview = m_focusViews[andx].view;
+      foundview = _focusLayer.views[andx].view;
+      foundcontrol = (CGUIControl*)_focusLayer.views[andx].core;
       break;
     }
-    for (size_t bndx = 0; bndx < m_focusViews[andx].items.size(); ++bndx)
+    for (size_t bndx = 0; bndx < _focusLayer.views[andx].items.size(); ++bndx)
     {
-      if (preferredControl == m_focusViews[andx].items[bndx].control)
+      if (preferredControl == _focusLayer.views[andx].items[bndx].core)
       {
-        foundview = m_focusViews[andx].items[bndx].view;
+        foundview = _focusLayer.views[andx].items[bndx].view;
+        foundcontrol = (CGUIControl*)_focusLayer.views[andx].core;
         break;
       }
     }
   }
+  // set the view that is in focus
   if (foundview == nullptr)
     foundview = self.focusView;
-  self.preferredView = foundview;
+  _focusLayer.view = foundview;
+  _focusLayer.core = foundcontrol;
 }
 
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
@@ -2182,17 +2186,10 @@ static SiriRemoteInfo siriRemoteInfo;
 
   //return @[m_glView];
   [self UpdatePreferredView];
-  if (self.preferredView)
-    return @[(UIView*)self.preferredView];
+  if (_focusLayer.view)
+    return @[(UIView*)_focusLayer.view];
   else
     return [super preferredFocusEnvironments];
-  /*
-  UIView *topMost = [[self.view subviews] lastObject];
-  if (topMost)
-    return @[topMost];
-  else
-    return @[self.focusView];
-  */
 }
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
@@ -2272,36 +2269,8 @@ static SiriRemoteInfo siriRemoteInfo;
   }
 }
 
-- (void) updateFocusView
+- (void) buildFocusViews
 {
-  std::vector<FocusEngineFocusView> views;
-  CFocusEngineHandler::GetInstance().GetViews(views);
-  if (views.empty())
-  {
-    m_viewItems.clear();
-    m_focusViews.clear();
-    self.preferredView = nullptr;
-    [self clearSubViews];
-  }
-  else if (m_viewItems.size() == views.size())
-  {
-    bool areEqual = true;
-    for (size_t indx = 0; indx < m_viewItems.size(); ++indx)
-    {
-      // sizes are the same, so we have to compare views
-      if (!m_viewItems[indx].IsEqual(views[indx]))
-      {
-        areEqual = false;
-        break;
-      }
-    }
-    if (areEqual)
-      return;
-    m_viewItems = views;
-  }
-  else
-    m_viewItems = views;
-
   [self clearSubViews];
 
   if (!m_viewItems.empty())
@@ -2325,8 +2294,8 @@ static SiriRemoteInfo siriRemoteInfo;
     FocusLayerControl focusView;
     focusView.rect = rect;
     focusView.type = viewItem.type;
+    focusView.core = viewItem.control;
     focusView.view = focusLayerView;
-    focusView.control = viewItem.control;
     CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f, %f, %f, %f",
       viewCount, viewItem.type.c_str(),
       viewItem.rect.x1, viewItem.rect.y1, viewItem.rect.x2, viewItem.rect.y2);
@@ -2350,16 +2319,50 @@ static SiriRemoteInfo siriRemoteInfo;
       FocusLayerItem control;
       control.rect = rect;
       control.type = item.type;
+      control.core = item.control;
       control.view = focusLayerItem;
-      control.control = item.control;
       focusView.items.push_back(control);
     }
 
     focusViews.push_back(focusView);
     viewCount++;
   }
-  m_focusViews = focusViews;
+  _focusLayer.views = focusViews;
+}
+
+- (void) updateFocusView
+{
+  std::vector<FocusEngineCoreViews> views;
+  CFocusEngineHandler::GetInstance().GetCoreViews(views);
+  if (views.empty())
+  {
+    m_viewItems.clear();
+    _focusLayer.Reset();
+  }
+  else
+  {
+    // this is deep 'is equals' comparison
+    // has to match in order and content.
+    if (CFocusEngineHandler::CoreViewsIsEqual(m_viewItems, views))
+      return;
+    // something is different. check size (deep check)
+    if (!CFocusEngineHandler::CoreViewsIsEqualSize(m_viewItems, views))
+      m_viewItems = views;
+    else if (!CFocusEngineHandler::CoreViewsIsEqualControls(m_viewItems, views))
+    {
+      // same size but core controls are different, punt
+      m_viewItems = views;
+    }
+    else
+    {
+      // just view rects have changed, update view positions
+      m_viewItems = views;
+    }
+  }
+
+  [self buildFocusViews];
   [self UpdatePreferredView];
+
   [self.focusView setNeedsDisplay];
   [self setNeedsFocusUpdate];
   [self updateFocusIfNeeded];

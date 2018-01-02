@@ -34,39 +34,80 @@ typedef enum FocusEngineState
   Update,
 } FocusEngineState;
 
-typedef struct FocusEngineFocusItem
+typedef struct FocusEngineCoreItem
 {
-  bool IsEqual(FocusEngineFocusItem &item)
+  bool IsEqual(FocusEngineCoreItem &item)
+  {
+    if (!IsEqualRect(item))
+      return false;
+    if (!IsEqualControl(item))
+      return false;
+    return true;
+  }
+  bool IsEqualRect(FocusEngineCoreItem &item)
   {
     if (rect != item.rect)
+      return false;
+    return true;
+  }
+  bool IsEqualControl(FocusEngineCoreItem &item)
+  {
+    if (control != item.control)
       return false;
     return true;
   }
   CRect rect;
   std::string type;
   CGUIControl *control = nullptr;
-} FocusEngineFocusItem;
+} FocusEngineCoreItem;
 
-typedef struct FocusEngineFocusView
+typedef struct FocusEngineCoreViews
 {
-  bool IsEqual(FocusEngineFocusView &view)
+  bool IsEqual(FocusEngineCoreViews &view)
+  {
+    if (!IsEqualSize(view))
+      return false;
+    if (!IsEqualRect(view))
+      return false;
+    if (!IsEqualControls(view))
+      return false;
+    return true;
+  }
+  bool IsEqualSize(FocusEngineCoreViews &view)
   {
     if (items.size() != view.items.size())
+      return false;
+    return true;
+  }
+  bool IsEqualRect(FocusEngineCoreViews &view)
+  {
+    if (rect != view.rect)
       return false;
     for (size_t indx = 0; indx < items.size(); ++indx)
     {
       if (items[indx].rect != view.items[indx].rect)
         return false;
     }
-    if (rect != view.rect)
+    return true;
+  }
+  bool IsEqualControls(FocusEngineCoreViews &view)
+  {
+    if (control != view.control)
       return false;
+    if (items.size() != view.items.size())
+      return false;
+    for (size_t indx = 0; indx < items.size(); ++indx)
+    {
+      if (items[indx].control != view.items[indx].control)
+        return false;
+    }
     return true;
   }
   CRect rect;
   std::string type;
   CGUIControl *control = nullptr;
-  std::vector<FocusEngineFocusItem> items;
-} FocusEngineFocusView;
+  std::vector<FocusEngineCoreItem> items;
+} FocusEngineCoreViews;
 
 typedef struct FocusEngineFocus
 {
@@ -75,7 +116,7 @@ typedef struct FocusEngineFocus
   CGUIControl *rootFocus = nullptr;
   CGUIControl *itemFocus = nullptr;
   std::vector<GUIFocusabilityItem> items;
-  std::vector<FocusEngineFocusView> views;
+  std::vector<FocusEngineCoreViews> views;
 } FocusEngineFocus;
 
 typedef struct
@@ -106,7 +147,10 @@ class CFocusEngineHandler
   bool          ShowFocusRect();
   bool          ShowVisibleRects();
   ORIENTATION   GetFocusOrientation();
-  void          GetViews(std::vector<FocusEngineFocusView> &views);
+  void          GetCoreViews(std::vector<FocusEngineCoreViews> &views);
+  static bool   CoreViewsIsEqual(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
+  static bool   CoreViewsIsEqualSize(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
+  static bool   CoreViewsIsEqualControls(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
   void          GetGUIFocusabilityItems(std::vector<GUIFocusabilityItem> &items);
   void          SetGUIFocusabilityItems(const CFocusabilityTracker &focusabilityTracker);
   std::string   TranslateControlType(CGUIControl *control, CGUIControl *parent);
