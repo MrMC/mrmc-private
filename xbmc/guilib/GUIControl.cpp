@@ -497,6 +497,12 @@ void CGUIControl::MarkDirtyRegion()
   m_controlIsDirty = true;
 }
 
+bool CGUIControl::GetWrapOverride()
+{
+  return g_windowManager.GetWrapOverride();
+
+}
+
 bool CGUIControl::HasFocusVisibility()
 {
   bool focusvisible = false;

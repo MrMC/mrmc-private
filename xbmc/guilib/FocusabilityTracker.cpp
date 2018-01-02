@@ -78,7 +78,7 @@ void CFocusabilityTracker::AfterRender()
     if (control->GetRenderTrackingOrder() > -1)
       renderedControls.push_back(control);
   }
-  CLog::Log(LOGDEBUG, "CFocusabilityTracker::AfterRender rendered %lu controls", renderedControls.size());
+  //CLog::Log(LOGDEBUG, "CFocusabilityTracker::AfterRender rendered %lu controls", renderedControls.size());
 }
 
 void CFocusabilityTracker::UpdateRender(CGUIControl *control, bool remove)

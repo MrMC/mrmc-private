@@ -1563,6 +1563,16 @@ void CGUIWindowManager::GetActiveModelessWindows(std::vector<int> &ids)
   }
 }
 
+bool CGUIWindowManager::GetWrapOverride()
+{
+  return m_wrapOverride;
+}
+
+void CGUIWindowManager::SetWrapOverride(bool wrapOverride)
+{
+  m_wrapOverride = wrapOverride;
+}
+
 void CGUIWindowManager::InvalidateFocus(CGUIControl *control)
 {
 #if defined(TARGET_DARWIN_TVOS)
@@ -1572,8 +1582,6 @@ void CGUIWindowManager::InvalidateFocus(CGUIControl *control)
   m_focusableTracker.UpdateRender(control, true);
 #endif
 }
-  bool IsEnabled();
-  void SetEnabled(bool enable);
 
 bool CGUIWindowManager::FocusableTrackerIsEnabled()
 {

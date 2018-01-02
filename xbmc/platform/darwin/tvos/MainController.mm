@@ -1786,6 +1786,8 @@ static SiriRemoteInfo siriRemoteInfo;
       [avDisplayManager addObserver:self forKeyPath:@"displayModeSwitchInProgress" options:NSKeyValueObservingOptionNew context:nullptr];
     }
   }
+
+  g_windowManager.SetWrapOverride(true);
 }
 //--------------------------------------------------------------
 - (void)viewWillAppear:(BOOL)animated
@@ -2146,6 +2148,29 @@ static SiriRemoteInfo siriRemoteInfo;
   return [m_glView getContext];
 }
 
+- (void) UpdatePreferredView
+{
+  CGUIControl *preferredControl = CFocusEngineHandler::GetInstance().GetFocusControl();
+  FocusLayerView *foundview = nullptr;
+  for (size_t andx = 0; andx < m_focusViews.size() && foundview == nullptr; ++andx)
+  {
+    if (preferredControl == m_focusViews[andx].control)
+    {
+      foundview = m_focusViews[andx].view;
+      break;
+    }
+    for (size_t bndx = 0; bndx < m_focusViews[andx].items.size(); ++bndx)
+    {
+      if (preferredControl == m_focusViews[andx].items[bndx].control)
+      {
+        foundview = m_focusViews[andx].items[bndx].view;
+        break;
+      }
+    }
+  }
+  self.preferredView = foundview;
+}
+
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
   //PRINT_SIGNATURE();
@@ -2153,6 +2178,7 @@ static SiriRemoteInfo siriRemoteInfo;
   // priority that the focus engine will use when picking the focused item
 
   //return @[m_glView];
+  [self UpdatePreferredView];
   if (self.preferredView)
     return @[(UIView*)self.preferredView];
   else
@@ -2176,6 +2202,9 @@ static SiriRemoteInfo siriRemoteInfo;
 {
   // po [(UIView *)0x0000000129f02100 _whyIsThisViewNotFocusable]
   // Asks whether the system should allow a focus update to occur.
+
+  [self UpdatePreferredView];
+
   BOOL result = [super shouldUpdateFocusInContext:context];
   switch (context.focusHeading)
   {
@@ -2327,25 +2356,7 @@ static SiriRemoteInfo siriRemoteInfo;
     viewCount++;
   }
   m_focusViews = focusViews;
-  CGUIControl *preferredControl = CFocusEngineHandler::GetInstance().GetFocusControl();
-  FocusLayerView *foundview = nullptr;
-  for (size_t andx = 0; andx < m_focusViews.size() && foundview == nullptr; ++andx)
-  {
-    if (preferredControl == m_focusViews[andx].control)
-    {
-      foundview = m_focusViews[andx].view;
-      break;
-    }
-    for (size_t bndx = 0; bndx < m_focusViews[andx].items.size(); ++bndx)
-    {
-      if (preferredControl == m_focusViews[andx].items[bndx].control)
-      {
-        foundview = m_focusViews[andx].items[bndx].view;
-        break;
-      }
-    }
-  }
-  self.preferredView = foundview;
+  [self UpdatePreferredView];
   [self.focusView setNeedsDisplay];
   [self setNeedsFocusUpdate];
   [self updateFocusIfNeeded];

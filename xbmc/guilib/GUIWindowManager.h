@@ -183,8 +183,10 @@ public:
    */
   bool IsPythonWindow(int id) const { return (id >= WINDOW_PYTHON_START && id <= WINDOW_PYTHON_END); };
   void GetActiveModelessWindows(std::vector<int> &ids);
-  void InvalidateFocus(CGUIControl *control);
 
+  bool GetWrapOverride();
+  void SetWrapOverride(bool focusWrap);
+  void InvalidateFocus(CGUIControl *control);
   bool FocusableTrackerIsEnabled();
   void FocusableTrackerSetEnabled(bool enablel);
   void AppendFocusableTracker(CGUIControl *control, CGUIControl *view = nullptr);
@@ -236,6 +238,7 @@ private:
   bool m_initialized;
 
   CDirtyRegionTracker m_tracker;
+  bool m_wrapOverride = false;
   CFocusabilityTracker m_focusableTracker;
 
 private:
