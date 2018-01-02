@@ -510,6 +510,8 @@ void CGUIBaseContainer::OnLeft()
 {
   CGUIAction action = GetAction(ACTION_MOVE_LEFT);
   bool wrapAround = action.GetNavigation() == GetID() || !action.HasActionsMeetingCondition();
+  if (GetGlobalWrapDisable())
+    wrapAround = false;
   if (m_orientation == HORIZONTAL && MoveUp(wrapAround))
     return;
   else if (m_orientation == VERTICAL)
@@ -525,6 +527,8 @@ void CGUIBaseContainer::OnRight()
 {
   CGUIAction action = GetAction(ACTION_MOVE_RIGHT);
   bool wrapAround = action.GetNavigation() == GetID() || !action.HasActionsMeetingCondition();
+  if (GetGlobalWrapDisable())
+    wrapAround = false;
   if (m_orientation == HORIZONTAL && MoveDown(wrapAround))
     return;
   else if (m_orientation == VERTICAL)
