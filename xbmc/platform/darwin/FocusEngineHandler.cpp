@@ -230,6 +230,24 @@ CFocusEngineHandler::GetFocusRect()
   return CRect();
 }
 
+CGUIControl*
+CFocusEngineHandler::GetFocusControl()
+{
+  FocusEngineFocus focus;
+  // skip finding focused window, use current
+  CSingleLock lock(m_focusLock);
+  focus.window = m_focus.window;
+  focus.windowID = m_focus.windowID;
+  lock.Leave();
+  if (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
+  {
+    UpdateFocus(focus);
+    if (focus.itemFocus)
+      return focus.itemFocus;
+  }
+  return nullptr;
+}
+
 bool CFocusEngineHandler::ShowFocusRect()
 {
   return m_showFocusRect;
@@ -441,7 +459,7 @@ void CFocusEngineHandler::UpdateFocusability()
       // should never be an empty render rect :)
       if (focusabilityItem.renderRect.IsEmpty())
         continue;
-
+#if true
       // clip all render rects to screen bounds
       if (focusabilityItem.renderRect.x1 < boundsRect.x1)
         focusabilityItem.renderRect.x1 = boundsRect.x1;
@@ -470,13 +488,14 @@ void CFocusEngineHandler::UpdateFocusability()
         continue;
       if (focusabilityItem.renderRect.y2 < focusabilityItem.renderRect.y1)
         continue;
+#endif
 
       if ((*it).control == (*it).parentView)
       {
         FocusEngineFocusView view;
         view.rect = (*it).renderRect;
         view.type = TranslateControlType((*it).control, (*it).parentView);
-#ifdef false
+#if false
         for (auto &item : items)
         {
           // clip all item rects to enclosing view rect
@@ -491,6 +510,7 @@ void CFocusEngineHandler::UpdateFocusability()
         }
 #endif
         view.items = items;
+        view.control = (*it).control;
         views.push_back(view);
         items.clear();
       }
@@ -499,10 +519,11 @@ void CFocusEngineHandler::UpdateFocusability()
         FocusEngineFocusItem item;
         item.rect = (*it).renderRect;
         item.type = TranslateControlType((*it).control, (*it).parentView);
+        item.control = (*it).control;
         items.push_back(item);
       }
     }
-#ifdef false
+#if false
     // the window
     for (auto it = views.begin(); it != views.end(); )
     {
@@ -513,7 +534,7 @@ void CFocusEngineHandler::UpdateFocusability()
         ++it;
     }
 #endif
-#ifdef false
+#if false
     // run through our views in reverse order (so that last is checked first)
     //for (auto it = views.begin(); it != views.rend(); )
     for (auto it = views.rbegin(); it != views.rend(); )

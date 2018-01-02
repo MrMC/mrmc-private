@@ -99,18 +99,27 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 	self = [super initWithFrame:frame];
 	if (self)
 	{
     self.opaque = NO;
     self.userInteractionEnabled = YES;
+    self.bounds = frame;
+    self->frameColor = [UIColor whiteColor];
     self.layer.backgroundColor = [[UIColor clearColor] CGColor];
     [self setNeedsLayout];
     [self layoutIfNeeded];
   }
-
 	return self;
+}
+
+- (void) withType:(int)viewType
+{
+  self->viewType = viewType;
+  self->frameColor = [UIColor whiteColor];
+  if (viewType)
+    self->frameColor = [UIColor greenColor];
 }
 
 - (void) updateItems:(std::vector<FocusLayerControl> &)views
@@ -126,9 +135,16 @@
   //CGContextSetBlendMode(context, kCGBlendModeClear);
   //CGContextFillRect(context, rect);
 
+  CGContextSetBlendMode(context, kCGBlendModeCopy);
+  CGContextSetLineWidth(context, 4.0);
+  if (self.focused)
+    CGContextSetStrokeColorWithColor(context, [[UIColor orangeColor] CGColor]);
+  else
+    CGContextSetStrokeColorWithColor(context, [self->frameColor CGColor]);
+  CGContextStrokeRect(context, rect);
+
   if (!m_views.empty())
   {
-    CGContextSetLineWidth(context, 2.0);
     CGContextSetBlendMode(context, kCGBlendModeCopy);
     CGContextSetStrokeColorWithColor(context, [[UIColor whiteColor] CGColor]);
     for (size_t andx = 0; andx < m_views.size(); ++andx)
@@ -151,9 +167,10 @@
 */
 }
 
-- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
+    withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 #ifdef false
   // Create a static instance of the motion effect group
   // (could do this anywhere, really, maybe init would be better - we only need one of them.)
@@ -194,13 +211,15 @@
   //PRINT_SIGNATURE();
   // need this or we do not get GestureRecognizers under tvos.
   //return YES;
-  return NO;
+  if (self->viewType == 0)
+    return NO;
+  return YES;
 }
 
 
 - (void)dealloc
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 }
 
 - (void)layoutSubviews
@@ -208,13 +227,13 @@
 /*
   Subclasses can override this method as needed to perform more precise layout of their subviews. You should override this method only if the autoresizing and constraint-based behaviors of the subviews do not offer the behavior you want. You can use your implementation to set the frame rectangles of your subviews directly.
 */
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   [self setNeedsDisplay];
 }
 
 - (void)viewDidLayoutSubviews
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
 }
 
 @end

@@ -44,6 +44,7 @@ typedef struct FocusEngineFocusItem
   }
   CRect rect;
   std::string type;
+  CGUIControl *control = nullptr;
 } FocusEngineFocusItem;
 
 typedef struct FocusEngineFocusView
@@ -63,6 +64,7 @@ typedef struct FocusEngineFocusView
   }
   CRect rect;
   std::string type;
+  CGUIControl *control = nullptr;
   std::vector<FocusEngineFocusItem> items;
 } FocusEngineFocusView;
 
@@ -100,6 +102,7 @@ class CFocusEngineHandler
   void          InvalidateFocus(CGUIControl *control);
   const int     GetFocusWindowID();
   const CRect   GetFocusRect();
+  CGUIControl*  GetFocusControl();
   bool          ShowFocusRect();
   bool          ShowVisibleRects();
   ORIENTATION   GetFocusOrientation();

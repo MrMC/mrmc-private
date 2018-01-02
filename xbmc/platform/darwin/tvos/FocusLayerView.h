@@ -22,27 +22,36 @@
 #import <UIKit/UIKit.h>
 #import <vector>
 
+@class FocusLayerView;
+
 typedef struct
 {
   CGRect rect;
   std::string type;
+  void *control;
+  FocusLayerView *view;
 } FocusLayerItem;
 
 typedef struct
 {
   CGRect rect;
   std::string type;
+  void *control;
+  FocusLayerView *view;
   std::vector<FocusLayerItem> items;
 } FocusLayerControl;
 
 @interface FocusLayerView : UIView
 {
 @private
+  int viewType;
+  UIColor *frameColor;
   std::vector<FocusLayerControl> m_views;
 }
 
 @property (nonatomic, assign) id videolayer;
 
+- (void) withType:(int)type;
 - (void) updateItems:(std::vector<FocusLayerControl> &)views;
 
 @end

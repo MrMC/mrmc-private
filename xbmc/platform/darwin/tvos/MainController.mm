@@ -130,11 +130,12 @@ MainController *g_xbmcController;
 @property (strong) GCController* gcController;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) float displayRate;
-@property (nonatomic) FocusLayerView *View1;
-@property (nonatomic) FocusLayerView *View2;
-@property (nonatomic) FocusLayerView *View3;
-@property (nonatomic) FocusLayerView *View4;
-@property (nonatomic) UIView *preferredView;
+@property (nonatomic) FocusLayerView *focusView;
+@property (nonatomic) FocusLayerView *focusViewLeft;
+@property (nonatomic) FocusLayerView *focusViewRight;
+@property (nonatomic) FocusLayerView *focusViewTop;
+@property (nonatomic) FocusLayerView *focusViewBottom;
+@property (nonatomic) FocusLayerView *preferredView;
 @end
 
 #pragma mark - MainController implementation
@@ -149,7 +150,11 @@ MainController *g_xbmcController;
 @synthesize m_enableRemoteIdle;
 @synthesize m_allowTap;
 
+// careful, this is like a global for all MainController classes
+// we only have one so it does not matter and keeps from exposing
+// FocusEngineHandler.h all over the place.
 std::vector<FocusEngineFocusView> m_viewItems;
+std::vector<FocusLayerControl> m_focusViews;
 
 #pragma mark - internal key press methods
 - (void)sendButtonPressed:(int)buttonId
@@ -1718,23 +1723,43 @@ static SiriRemoteInfo siriRemoteInfo;
   m_screenScale = [m_glView getScreenScale:[UIScreen mainScreen]];
   [self.view addSubview: m_glView];
 
-  CGRect  viewRect = CGRectMake(0, 0, m_glView.bounds.size.width, m_glView.bounds.size.height);
-  _View1 = [[FocusLayerView alloc] initWithFrame:viewRect];
-  [self.view insertSubview:_View1 aboveSubview:m_glView];
-#ifdef false
+  CGRect focusRect = CGRectMake(0, 0, m_glView.bounds.size.width, m_glView.bounds.size.height);
+  // virtual views, these outside focusView (display bounds)
+  // and used to detect up/down/right/left focus movements for pop/slide out views
+  // we trap/cancel the focus move in shouldUpdateFocusInContext which also posts
+  // an action message to core, if the focused core control can do the move, it will and
+  // we will get a focus update from core which we then use to adjust focus in preferredFocusEnvironments.
+  // That's the theory anyway :)
+  CGRect focusRectLeft = focusRect;
+  focusRectLeft.origin.x -= 200;
+  focusRectLeft.size.width = 200;
+  self.focusViewLeft = [[FocusLayerView alloc] initWithFrame:focusRectLeft];
+  [self.focusViewLeft withType:1];
 
-  viewRect = CGRectOffset(viewRect, 200, 0);
-  _View2 = [[FocusLayerView alloc] initWithFrame:viewRect];
-  [self.view insertSubview:_View2 aboveSubview:m_glView];
+  CGRect focusRectRight = focusRect;
+  focusRectRight.origin.x += focusRect.size.width;
+  focusRectRight.size.width = 200;
+  self.focusViewRight = [[FocusLayerView alloc] initWithFrame:focusRectRight];
+  [self.focusViewRight withType:1];
 
-  viewRect = CGRectOffset(viewRect, 200, 0);
-  _View3 = [[FocusLayerView alloc] initWithFrame:viewRect];
-  [self.view insertSubview:_View3 aboveSubview:m_glView];
+  CGRect focusRectTop = focusRect;
+  focusRectTop.origin.y -= 200;
+  focusRectTop.size.height = 200;
+  self.focusViewTop = [[FocusLayerView alloc] initWithFrame:focusRectTop];
+  [self.focusViewTop withType:1];
 
-  viewRect = CGRectOffset(viewRect, 200, 0);
-  _View4 = [[FocusLayerView alloc] initWithFrame:viewRect];
-  [self.view insertSubview:_View4 aboveSubview:m_glView];
-#endif
+  CGRect focusRectBottom = focusRect;
+  focusRectBottom.origin.y += focusRect.size.height;
+  focusRectBottom.size.height = 200;
+  self.focusViewBottom = [[FocusLayerView alloc] initWithFrame:focusRectBottom];
+  [self.focusViewBottom withType:1];
+
+  self.focusView = [[FocusLayerView alloc] initWithFrame:focusRect];
+  [self.view insertSubview:self.focusView aboveSubview:m_glView];
+  [self.focusView addSubview:self.focusViewLeft];
+  [self.focusView addSubview:self.focusViewRight];
+  [self.focusView addSubview:self.focusViewTop];
+  [self.focusView addSubview:self.focusViewBottom];
 }
 //--------------------------------------------------------------
 - (void)viewDidLoad
@@ -2123,7 +2148,96 @@ static SiriRemoteInfo siriRemoteInfo;
 
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
-  return @[m_glView];
+  //PRINT_SIGNATURE();
+  // The order of the items in the preferredFocusEnvironments array is the
+  // priority that the focus engine will use when picking the focused item
+
+  //return @[m_glView];
+  if (self.preferredView)
+    return @[(UIView*)self.preferredView];
+  else
+    return [super preferredFocusEnvironments];
+  /*
+  UIView *topMost = [[self.view subviews] lastObject];
+  if (topMost)
+    return @[topMost];
+  else
+    return @[self.focusView];
+  */
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
+    withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  PRINT_SIGNATURE();
+}
+
+- (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
+{
+  // po [(UIView *)0x0000000129f02100 _whyIsThisViewNotFocusable]
+  // Asks whether the system should allow a focus update to occur.
+  BOOL result = [super shouldUpdateFocusInContext:context];
+  switch (context.focusHeading)
+  {
+    case UIFocusHeadingNone:
+      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingNone");
+      break;
+    case UIFocusHeadingUp:
+      CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_UP)));
+      if (context.nextFocusedItem == self.focusViewTop)
+        return NO;
+      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingUp");
+      break;
+    case UIFocusHeadingDown:
+      CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_DOWN)));
+      if (context.nextFocusedItem == self.focusViewBottom)
+        return NO;
+      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingDown");
+      break;
+    case UIFocusHeadingLeft:
+      CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_LEFT)));
+      if (context.nextFocusedItem == self.focusViewLeft)
+        return NO;
+      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingLeft");
+      break;
+    case UIFocusHeadingRight:
+      CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_RIGHT)));
+      if (context.nextFocusedItem == self.focusViewRight)
+        return NO;
+      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingRight");
+      break;
+    case UIFocusHeadingNext:
+      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingNext");
+      break;
+    case UIFocusHeadingPrevious:
+      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingPrevious");
+      break;
+  }
+  return result;
+}
+
+- (void)clearSubViews
+{
+  NSArray *subviews = self.focusView.subviews;
+  if (subviews)
+  {
+    for (UIView *view in subviews)
+    {
+      if (view == self.focusViewLeft)
+        continue;
+      if (view == self.focusViewRight)
+        continue;
+      if (view == self.focusViewTop)
+        continue;
+      if (view == self.focusViewBottom)
+        continue;
+      [view removeFromSuperview];
+    }
+  }
 }
 
 - (void) updateFocusView
@@ -2131,7 +2245,12 @@ static SiriRemoteInfo siriRemoteInfo;
   std::vector<FocusEngineFocusView> views;
   CFocusEngineHandler::GetInstance().GetViews(views);
   if (views.empty())
+  {
     m_viewItems.clear();
+    m_focusViews.clear();
+    self.preferredView = nullptr;
+    [self clearSubViews];
+  }
   else if (m_viewItems.size() == views.size())
   {
     bool areEqual = true;
@@ -2151,6 +2270,8 @@ static SiriRemoteInfo siriRemoteInfo;
   else
     m_viewItems = views;
 
+  [self clearSubViews];
+
   if (!m_viewItems.empty())
     CLog::Log(LOGDEBUG, "updateFocusView: begin");
   int viewCount = 0;
@@ -2165,9 +2286,15 @@ static SiriRemoteInfo siriRemoteInfo;
       viewItem.rect.x1/m_screenScale, viewItem.rect.y1/m_screenScale,
       viewItem.rect.Width()/m_screenScale, viewItem.rect.Height()/m_screenScale);
 
+    FocusLayerView *focusLayerView = [[FocusLayerView alloc] initWithFrame:rect];
+    [focusLayerView withType:0];
+    [self.focusView addSubview:focusLayerView];
+
     FocusLayerControl focusView;
     focusView.rect = rect;
     focusView.type = viewItem.type;
+    focusView.view = focusLayerView;
+    focusView.control = viewItem.control;
     CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f, %f, %f, %f",
       viewCount, viewItem.type.c_str(),
       viewItem.rect.x1, viewItem.rect.y1, viewItem.rect.x2, viewItem.rect.y2);
@@ -2175,7 +2302,6 @@ static SiriRemoteInfo siriRemoteInfo;
     for (auto itemsIt = viewItem.items.begin(); itemsIt != viewItem.items.end(); ++itemsIt)
     {
       auto &item = *itemsIt;
-
       CLog::Log(LOGDEBUG, "updateFocusView: %d, %s, %f, %f, %f, %f",
         viewCount, item.type.c_str(),
         item.rect.x1, item.rect.y1, item.rect.x2, item.rect.y2);
@@ -2185,17 +2311,44 @@ static SiriRemoteInfo siriRemoteInfo;
         item.rect.x1/m_screenScale, item.rect.y1/m_screenScale,
         item.rect.Width()/m_screenScale, item.rect.Height()/m_screenScale);
 
+      FocusLayerView *focusLayerItem = [[FocusLayerView alloc] initWithFrame:rect];
+      [focusLayerItem withType:1];
+      [focusLayerView addSubview:focusLayerItem];
+
       FocusLayerItem control;
       control.rect = rect;
       control.type = item.type;
+      control.view = focusLayerItem;
+      control.control = item.control;
       focusView.items.push_back(control);
     }
 
     focusViews.push_back(focusView);
     viewCount++;
   }
-  [_View1 updateItems:focusViews];
-  [_View1 setNeedsDisplay];
+  m_focusViews = focusViews;
+  CGUIControl *preferredControl = CFocusEngineHandler::GetInstance().GetFocusControl();
+  FocusLayerView *foundview = nullptr;
+  for (size_t andx = 0; andx < m_focusViews.size() && foundview == nullptr; ++andx)
+  {
+    if (preferredControl == m_focusViews[andx].control)
+    {
+      foundview = m_focusViews[andx].view;
+      break;
+    }
+    for (size_t bndx = 0; bndx < m_focusViews[andx].items.size(); ++bndx)
+    {
+      if (preferredControl == m_focusViews[andx].items[bndx].control)
+      {
+        foundview = m_focusViews[andx].items[bndx].view;
+        break;
+      }
+    }
+  }
+  self.preferredView = foundview;
+  [self.focusView setNeedsDisplay];
+  [self setNeedsFocusUpdate];
+  [self updateFocusIfNeeded];
 }
 
 -(void) changeFocus:(FocusLayerView *)view
