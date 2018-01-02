@@ -1771,8 +1771,8 @@ static SiriRemoteInfo siriRemoteInfo;
 //  [self createTapGestureRecognizers];
 //
 //  // for IR remotes
-//  [self createPressGesturecognizers];
-//  [self createCustomControlCenter];
+  [self createPressGesturecognizers];
+  [self createCustomControlCenter];
   
 //  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cgControllerDidConnect:) name:GCControllerDidConnectNotification object:nil];
 //  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cgControllerDidDisconnect:) name:GCControllerDidDisconnectNotification object:nil];
