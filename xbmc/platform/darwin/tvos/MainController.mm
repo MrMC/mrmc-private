@@ -1766,16 +1766,16 @@ static SiriRemoteInfo siriRemoteInfo;
 {
   [super viewDidLoad];
 
-  [self createSwipeGestureRecognizers];
-  [self createPanGestureRecognizers];
-  [self createTapGestureRecognizers];
-
-  // for IR remotes
-  [self createPressGesturecognizers];
-  [self createCustomControlCenter];
+//  [self createSwipeGestureRecognizers];
+//  [self createPanGestureRecognizers];
+//  [self createTapGestureRecognizers];
+//
+//  // for IR remotes
+//  [self createPressGesturecognizers];
+//  [self createCustomControlCenter];
   
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cgControllerDidConnect:) name:GCControllerDidConnectNotification object:nil];
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cgControllerDidDisconnect:) name:GCControllerDidDisconnectNotification object:nil];
+//  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cgControllerDidConnect:) name:GCControllerDidConnectNotification object:nil];
+//  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(cgControllerDidDisconnect:) name:GCControllerDidDisconnectNotification object:nil];
   [GCController startWirelessControllerDiscoveryWithCompletionHandler:nil];
 
   if (__builtin_available(tvOS 11.2, *))
