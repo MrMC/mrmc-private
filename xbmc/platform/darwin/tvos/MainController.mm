@@ -573,13 +573,13 @@ static int keyPressTimerFiredCount = 0;
                          initWithTarget: self action: @selector(menuPressed:)];
   menuRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeMenu]];
   menuRecognizer.delegate  = self;
-  [m_glView addGestureRecognizer: menuRecognizer];
+  [self.view addGestureRecognizer: menuRecognizer];
   
   auto playPauseRecognizer = [[UITapGestureRecognizer alloc]
                               initWithTarget: self action: @selector(playPausePressed:)];
   playPauseRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypePlayPause]];
   playPauseRecognizer.delegate  = self;
-  [m_glView addGestureRecognizer: playPauseRecognizer];
+  [self.view addGestureRecognizer: playPauseRecognizer];
   
   auto selectRecognizer = [[UILongPressGestureRecognizer alloc]
                           initWithTarget: self action: @selector(selectPressed:)];
