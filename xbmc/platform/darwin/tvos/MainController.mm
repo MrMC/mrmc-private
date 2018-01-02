@@ -540,20 +540,20 @@ static int keyPressTimerFiredCount = 0;
                          initWithTarget: self action: @selector(menuPressed:)];
   menuRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeMenu]];
   menuRecognizer.delegate  = self;
-  [self.view addGestureRecognizer: menuRecognizer];
+  [self.focusView addGestureRecognizer: menuRecognizer];
   
   auto playPauseRecognizer = [[UITapGestureRecognizer alloc]
                               initWithTarget: self action: @selector(playPausePressed:)];
   playPauseRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypePlayPause]];
   playPauseRecognizer.delegate  = self;
-  [self.view addGestureRecognizer: playPauseRecognizer];
+  [self.focusView addGestureRecognizer: playPauseRecognizer];
   
   auto selectRecognizer = [[UILongPressGestureRecognizer alloc]
                           initWithTarget: self action: @selector(selectPressed:)];
   selectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
   selectRecognizer.minimumPressDuration = 0.001;
   selectRecognizer.delegate = self;
-  [self.view addGestureRecognizer: selectRecognizer];
+  [self.focusView addGestureRecognizer: selectRecognizer];
 }
 //--------------------------------------------------------------
 - (void)createIRPressGesturecognizers
@@ -1754,6 +1754,7 @@ static SiriRemoteInfo siriRemoteInfo;
   [self.focusViewBottom withType:1];
 
   self.focusView = [[FocusLayerView alloc] initWithFrame:focusRect];
+//  [self.focusView withType:1];
   [self.view insertSubview:self.focusView aboveSubview:m_glView];
   [self.focusView addSubview:self.focusViewLeft];
   [self.focusView addSubview:self.focusViewRight];
@@ -2168,6 +2169,8 @@ static SiriRemoteInfo siriRemoteInfo;
       }
     }
   }
+  if (foundview == nullptr)
+    foundview = self.focusView;
   self.preferredView = foundview;
 }
 
