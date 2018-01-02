@@ -184,7 +184,7 @@ public:
   bool IsPythonWindow(int id) const { return (id >= WINDOW_PYTHON_START && id <= WINDOW_PYTHON_END); };
   void GetActiveModelessWindows(std::vector<int> &ids);
 
-  bool GetWrapOverride();
+  bool GetGlobalWrapDisable();
   void SetWrapOverride(bool focusWrap);
   void InvalidateFocus(CGUIControl *control);
   bool FocusableTrackerIsEnabled();

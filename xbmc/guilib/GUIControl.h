@@ -186,7 +186,7 @@ public:
 
   void MarkDirtyRegion();
 
-  virtual bool GetWrapOverride();
+  virtual bool GetGlobalWrapDisable();
   virtual bool HasFocusVisibility();
   void AppendFocusableTracker(CGUIControl *view = nullptr);
 

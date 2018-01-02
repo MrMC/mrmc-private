@@ -1563,7 +1563,7 @@ void CGUIWindowManager::GetActiveModelessWindows(std::vector<int> &ids)
   }
 }
 
-bool CGUIWindowManager::GetWrapOverride()
+bool CGUIWindowManager::GetGlobalWrapDisable()
 {
   return m_wrapOverride;
 }

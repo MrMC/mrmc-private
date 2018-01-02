@@ -497,9 +497,9 @@ void CGUIControl::MarkDirtyRegion()
   m_controlIsDirty = true;
 }
 
-bool CGUIControl::GetWrapOverride()
+bool CGUIControl::GetGlobalWrapDisable()
 {
-  return g_windowManager.GetWrapOverride();
+  return g_windowManager.GetGlobalWrapDisable();
 
 }
 
