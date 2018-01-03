@@ -118,7 +118,8 @@ typedef struct FocusLayer
 
 @property (nonatomic, assign) id videolayer;
 
-- (void) withType:(int)type;
+- (void) setViewType:(int)viewType;
+- (void) moveView:(CGRect)frame;
 - (void) updateItems:(std::vector<FocusLayerControl> &)views;
 
 @end

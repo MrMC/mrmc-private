@@ -114,12 +114,19 @@
 	return self;
 }
 
-- (void) withType:(int)viewType
+- (void) setViewType:(int)viewType
 {
   self->viewType = viewType;
   self->frameColor = [UIColor whiteColor];
   if (viewType)
     self->frameColor = [UIColor greenColor];
+}
+
+- (void) moveView:(CGRect)frame
+{
+  self.frame = frame;
+  self.bounds = frame;
+  [self setNeedsDisplay];
 }
 
 - (void) updateItems:(std::vector<FocusLayerControl> &)views
@@ -159,14 +166,9 @@
       CGContextStrokeRect(context, m_views[andx].rect);
     }
   }
-
-  //else
-/*
-  CGContextSetLineWidth(context, 10);
-  CGContextStrokeRect(context, rect);
-*/
 }
 
+/*
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
     withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
@@ -193,9 +195,7 @@
 #else
   if (self.focused)
   {
-    // Apply focused appearence,
-    // e.g scale both of them using transform or apply background color
-    [g_xbmcController performSelectorOnMainThread:@selector(changeFocus:) withObject:self  waitUntilDone:NO];
+   // [g_xbmcController changeFocus:nil withHeading:context.focusHeading];
   }
   else
   {
@@ -204,6 +204,7 @@
   [self setNeedsDisplay];
 #endif
 }
+*/
 
 //--------------------------------------------------------------
 - (BOOL)canBecomeFocused

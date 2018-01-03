@@ -85,7 +85,19 @@ typedef struct FocusEngineCoreViews
       return false;
     for (size_t indx = 0; indx < items.size(); ++indx)
     {
-      if (items[indx].rect != view.items[indx].rect)
+      // core always has the focused control last in any list
+      // which will change the order when focus changes.
+      // so we have to search for the matching control.
+      auto foundItem = std::find_if(view.items.begin(), view.items.end(),
+          [&](FocusEngineCoreItem item)
+          { return items[indx].control == item.control;
+      });
+      // grr, did not find matching control in view compare
+      // so punt, while size is same, controls are different.
+      if (foundItem == view.items.end())
+        return false;
+
+      if (items[indx].rect != (*foundItem).rect)
         return false;
     }
     return true;
@@ -96,9 +108,19 @@ typedef struct FocusEngineCoreViews
       return false;
     if (items.size() != view.items.size())
       return false;
+
     for (size_t indx = 0; indx < items.size(); ++indx)
     {
-      if (items[indx].control != view.items[indx].control)
+      // core always has the focused control last in any list
+      // which will change the order when focus changes.
+      // so we have to search for the matching control.
+      auto foundItem = std::find_if(view.items.begin(), view.items.end(),
+          [&](FocusEngineCoreItem item)
+          { return items[indx].control == item.control;
+      });
+      // grr, did not find matching control in view compare
+      // so punt, while size is same, controls are different.
+      if (foundItem == view.items.end())
         return false;
     }
     return true;
