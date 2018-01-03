@@ -25,6 +25,8 @@
 #import <UIKit/UIKit.h>
 #import "guilib/Geometry.h"
 
+#define SHOW_FOCUS_FRAMES 1
+
 typedef enum
 {
   MC_NONE = 0,
@@ -46,7 +48,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 };
 
 @class MainEAGLView;
-@class FocusLayerView;
 
 @interface MainController : UIViewController <UIGestureRecognizerDelegate>
 {

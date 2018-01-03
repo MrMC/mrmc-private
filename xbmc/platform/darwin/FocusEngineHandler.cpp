@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2017 Team MrMC
+ *      Copyright (C) 2017-2018 Team MrMC
  *      https://github.com/MrMC
  *
  *  This Program is free software; you can redistribute it and/or modify

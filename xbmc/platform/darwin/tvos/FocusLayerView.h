@@ -1,6 +1,6 @@
 #pragma once
 /*
- *      Copyright (C) 2017 Team MrMC
+ *      Copyright (C) 2018 Team MrMC
  *      https://github.com/MrMC
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -111,15 +111,12 @@ typedef struct FocusLayer
 @interface FocusLayerView : UIView
 {
 @private
-  int viewType;
+  bool debug;
+  bool focusable;
   UIColor *frameColor;
-  std::vector<FocusLayerControl> m_views;
 }
 
-@property (nonatomic, assign) id videolayer;
-
-- (void) setViewType:(int)viewType;
-- (void) moveView:(CGRect)frame;
-- (void) updateItems:(std::vector<FocusLayerControl> &)views;
+- (void) setFocusable:(bool)focusable;
+- (void) SetSizeLocation:(CGRect)location;
 
 @end
