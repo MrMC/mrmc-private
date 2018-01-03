@@ -67,9 +67,9 @@ typedef struct FocusEngineCoreViews
   {
     if (!IsEqualSize(view))
       return false;
-    if (!IsEqualRect(view))
-      return false;
     if (!IsEqualControls(view))
+      return false;
+    if (!IsEqualRect(view))
       return false;
     return true;
   }

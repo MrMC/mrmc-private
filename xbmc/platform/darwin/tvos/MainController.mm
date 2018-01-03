@@ -130,11 +130,11 @@ MainController *g_xbmcController;
 @property (strong) GCController* gcController;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) float displayRate;
-@property (nonatomic) FocusLayerView *focusView;
-@property (nonatomic) FocusLayerView *focusViewLeft;
-@property (nonatomic) FocusLayerView *focusViewRight;
-@property (nonatomic) FocusLayerView *focusViewTop;
-@property (nonatomic) FocusLayerView *focusViewBottom;
+@property (nonatomic, nullable) FocusLayerView *focusView;
+@property (nonatomic, nullable) FocusLayerView *focusViewLeft;
+@property (nonatomic, nullable) FocusLayerView *focusViewRight;
+@property (nonatomic, nullable) FocusLayerView *focusViewTop;
+@property (nonatomic, nullable) FocusLayerView *focusViewBottom;
 @property (nonatomic, assign) FocusLayer focusLayer;
 @end
 
@@ -373,38 +373,39 @@ static int keyPressTimerFiredCount = 0;
 {
 }
 
-////--------------------------------------------------------------
-//#pragma mark - gesture methods
-////--------------------------------------------------------------
-//- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
-//{
-//  // important, this lets our view get touch events
-//  return YES;
-//}
-//
-////--------------------------------------------------------------
-//- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-//{
-//  if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-//    return YES;
-//  }
-//  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
-//    return YES;
-//  }
-//  if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
-//    return YES;
-//  }
-//  return NO;
-//}
-//
-//- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-//{
-//  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && ([otherGestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] || [otherGestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]))
-//  {
-//    return YES;
-//  }
-//  return NO;
-//}
+//--------------------------------------------------------------
+#pragma mark - gesture methods
+//--------------------------------------------------------------
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+  // important, this lets our view get touch events
+  return YES;
+}
+/*
+//--------------------------------------------------------------
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+  if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+    return YES;
+  }
+  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]]) {
+    return YES;
+  }
+  if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]] && [otherGestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]]) {
+    return YES;
+  }
+  return NO;
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]] && ([otherGestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] || [otherGestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]))
+  {
+    return YES;
+  }
+  return NO;
+}
+*/
 
 //--------------------------------------------------------------
 // called before pressesBegan:withEvent: is called on the gesture recognizer
@@ -1112,6 +1113,11 @@ static int keyPressTimerFiredCount = 0;
   [self updateFocusLayerFocusFromCore];
   if (_focusLayer.view)
     return @[(UIView*)_focusLayer.view];
+    /*
+      (UIView*)self.focusViewLeft, (UIView*)self.focusViewRight,
+      (UIView*)self.focusViewTop, (UIView*)self.focusViewBottom, (UIView*)_focusLayer.view, (UIView*)self.focusView
+      ];
+    */
   else
     return [super preferredFocusEnvironments];
 }
@@ -1123,39 +1129,41 @@ static int keyPressTimerFiredCount = 0;
   switch (context.focusHeading)
   {
     case UIFocusHeadingNone:
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingNone");
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingNone");
       break;
     case UIFocusHeadingUp:
       CApplicationMessenger::GetInstance().PostMsg(
         TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_UP)));
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingUp");
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingUp");
       break;
     case UIFocusHeadingDown:
       CApplicationMessenger::GetInstance().PostMsg(
         TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_DOWN)));
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingDown");
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingDown");
       break;
     case UIFocusHeadingLeft:
       CApplicationMessenger::GetInstance().PostMsg(
         TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_LEFT)));
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingLeft");
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingLeft");
       break;
     case UIFocusHeadingRight:
       CApplicationMessenger::GetInstance().PostMsg(
         TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_RIGHT)));
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingRight");
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingRight");
       break;
     case UIFocusHeadingNext:
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingNext");
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingNext");
       break;
     case UIFocusHeadingPrevious:
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingPrevious");
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingPrevious");
       break;
   }
 }
 
 - (UIFocusSoundIdentifier)soundIdentifierForFocusUpdateInContext:(UIFocusUpdateContext *)context
 {
+  // disable focus engine sound effect when playing video
+  // it will mess up audio if passthrough is occurring.
   if ( g_application.m_pPlayer->IsPlayingVideo() )
   {
     if (@available(tvOS 11.0, *))
@@ -1336,7 +1344,10 @@ static int keyPressTimerFiredCount = 0;
     // this is deep 'is equals' comparison
     // has to match in order and content.
     if (CFocusEngineHandler::CoreViewsIsEqual(m_viewItems, views))
+    {
+      [self updateFocusLayerFocusFromCore];
       return;
+    }
 
     // something is different. check size (deep check)
     if (!CFocusEngineHandler::CoreViewsIsEqualSize(m_viewItems, views))
