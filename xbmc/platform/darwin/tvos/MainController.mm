@@ -1212,7 +1212,7 @@ static int keyPressTimerFiredCount = 0;
   // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
   // Detect the focus request, post direction message to core and cancel tvOS focus move.
 
-  [self updateFocusLayerFocus];
+  //[self updateFocusLayerFocus];
   if (![self isNextFocusedItemInParentView:context])
   {
     if (!self.swipeIdleTimedOut)
@@ -1341,7 +1341,7 @@ static int keyPressTimerFiredCount = 0;
   // build up new focusLayer from core items.
   [self clearSubViews];
 
-  if (debug)
+  //if (debug)
   {
     if (!m_viewItems.empty())
       CLog::Log(LOGDEBUG, "buildFocusLayerFromCore: begin");
@@ -1466,22 +1466,25 @@ static int keyPressTimerFiredCount = 0;
       [self updateFocusLayerFocus];
       return;
     }
-
     // something is different. check size (deep check)
     if (!CFocusEngineHandler::CoreViewsIsEqualSize(m_viewItems, views))
     {
+      // sizes are different, punt
+      CLog::Log(LOGDEBUG, "updateFocusLayer:Sizes are different, rebuild");
       m_viewItems = views;
       [self buildFocusLayerFromCore];
     }
     else if (!CFocusEngineHandler::CoreViewsIsEqualControls(m_viewItems, views))
     {
+      CLog::Log(LOGDEBUG, "updateFocusLayer:Controls are different, rebuild");
       // same size but core controls are different, punt
       m_viewItems = views;
       [self buildFocusLayerFromCore];
     }
     else
     {
-      // core controls match so only view rects have changed, update view position/size
+      CLog::Log(LOGDEBUG, "updateFocusLayer:CheckRects failed, change view locations");
+      // same sizes, same controls, so only view rects have changed, update view position/size
       m_viewItems = views;
       [self buildFocusLayerFromCore];
       //[self updateFocusLayerFromCore];

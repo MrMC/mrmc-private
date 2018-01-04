@@ -517,6 +517,7 @@ void CFocusEngineHandler::UpdateFocusability()
       // should never be an empty render rect :)
       if (focusabilityItem.renderRect.IsEmpty())
         continue;
+
 #if true
       // clip all render rects to screen bounds
       if (focusabilityItem.renderRect.x1 < boundsRect.x1)
@@ -547,6 +548,9 @@ void CFocusEngineHandler::UpdateFocusability()
       if (focusabilityItem.renderRect.y2 < focusabilityItem.renderRect.y1)
         continue;
 #endif
+      //  remove rects that are same size as bounds
+      if (focusabilityItem.renderRect == boundsRect)
+        continue;
 
       if ((*it).control == (*it).parentView)
       {
