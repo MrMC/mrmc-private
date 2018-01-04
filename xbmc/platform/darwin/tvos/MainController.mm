@@ -127,6 +127,8 @@ MainController *g_xbmcController;
 @interface MainController ()
 @property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
 @property (strong, nonatomic) NSTimer *remoteIdleTimer;
+@property (strong, nonatomic) NSTimer *swipeIdleTimer;
+@property (nonatomic, assign) bool swipeIdleTimedOut;
 @property (strong) GCController* gcController;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) float displayRate;
@@ -699,6 +701,7 @@ static int keyPressTimerFiredCount = 0;
 {
   [super viewDidLoad];
 
+  self.swipeIdleTimedOut = false;
   [self createPressGesturecognizers];
   [self createCustomControlCenter];
   
@@ -1073,89 +1076,50 @@ static int keyPressTimerFiredCount = 0;
   return [m_glView getContext];
 }
 
-#pragma mark - focus engine routines
-- (void) updateFocusLayerFocusFromCore
-{
-  CGUIControl *preferredControl = CFocusEngineHandler::GetInstance().GetFocusControl();
-  CGUIControl *foundcontrol = nullptr;
-  FocusLayerView *foundview = nullptr;
-  for (size_t andx = 0; andx < _focusLayer.views.size() && foundview == nullptr; ++andx)
-  {
-    if (preferredControl == _focusLayer.views[andx].core)
-    {
-      foundview = _focusLayer.views[andx].view;
-      foundcontrol = (CGUIControl*)_focusLayer.views[andx].core;
-      break;
-    }
-    for (size_t bndx = 0; bndx < _focusLayer.views[andx].items.size(); ++bndx)
-    {
-      if (preferredControl == _focusLayer.views[andx].items[bndx].core)
-      {
-        foundview = _focusLayer.views[andx].items[bndx].view;
-        foundcontrol = (CGUIControl*)_focusLayer.views[andx].items[bndx].core;
-        break;
-      }
-    }
-  }
-  // set the view that is in focus
-  if (foundview == nullptr)
-    foundview = self.focusView;
-  _focusLayer.view = foundview;
-  _focusLayer.core = foundcontrol;
-}
-
-- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
+#pragma mark - swipe idle timer (for focus)
+//--------------------------------------------------------------
+#define Swipe_DELAY_S 0.50
+- (void)startSwipeTimeOut
 {
   //PRINT_SIGNATURE();
-  // The order of the items in the preferredFocusEnvironments array is the
-  // priority that the focus engine will use when picking the focused item
+  self.swipeIdleTimedOut = false;
+  if (self.swipeIdleTimer != nil)
+    [self stopSwipeTimeOut];
 
-  //return @[m_glView];
-  [self updateFocusLayerFocusFromCore];
-  if (_focusLayer.view)
-    return @[(UIView*)_focusLayer.view];
-  else
-    return [super preferredFocusEnvironments];
-}
-
-- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
-    withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
-{
-  CLog::Log(LOGDEBUG, "didUpdateFocusInContext");
-  switch (context.focusHeading)
+  if (true)
   {
-    case UIFocusHeadingNone:
-      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingNone");
-      break;
-    case UIFocusHeadingUp:
-      CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_UP)));
-      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingUp");
-      break;
-    case UIFocusHeadingDown:
-      CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_DOWN)));
-      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingDown");
-      break;
-    case UIFocusHeadingLeft:
-      CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_LEFT)));
-      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingLeft");
-      break;
-    case UIFocusHeadingRight:
-      CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_RIGHT)));
-      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingRight");
-      break;
-    case UIFocusHeadingNext:
-      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingNext");
-      break;
-    case UIFocusHeadingPrevious:
-      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingPrevious");
-      break;
+    NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:Swipe_DELAY_S];
+    NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
+                                      interval:0.0
+                                      target:self
+                                      selector:@selector(setSwipeIdleTimeOut)
+                                      userInfo:nil
+                                      repeats:NO];
+
+    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+    self.swipeIdleTimer = timer;
   }
 }
 
+- (void)stopSwipeTimeOut
+{
+  //PRINT_SIGNATURE();
+  if (self.swipeIdleTimer != nil)
+  {
+    [self.swipeIdleTimer invalidate];
+    self.swipeIdleTimer = nil;
+  }
+  self.swipeIdleTimedOut = false;
+}
+
+- (void)setSwipeIdleTimeOut
+{
+  CLog::Log(LOGDEBUG, "SwipeTimeOut:setSwipeIdleTimeOut");
+  self.swipeIdleTimedOut = true;
+}
+
+#pragma mark - focus engine routines
+//--------------------------------------------------------------
 - (UIFocusSoundIdentifier)soundIdentifierForFocusUpdateInContext:(UIFocusUpdateContext *)context
 {
   // disable focus engine sound effect when playing video
@@ -1171,6 +1135,63 @@ static int keyPressTimerFiredCount = 0;
     return UIFocusSoundIdentifierDefault;
   else
     return nil;
+}
+
+- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
+{
+  //PRINT_SIGNATURE();
+  // The order of the items in the preferredFocusEnvironments array is the
+  // priority that the focus engine will use when picking the focused item
+
+  //return @[m_glView];
+  [self updateFocusLayerFocus];
+  if (_focusLayer.view)
+    return @[(UIView*)_focusLayer.view];
+  else
+    return [super preferredFocusEnvironments];
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
+    withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  //CLog::Log(LOGDEBUG, "didUpdateFocusInContext");
+
+  switch (context.focusHeading)
+  {
+    case UIFocusHeadingNone:
+      //CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingNone");
+      break;
+    case UIFocusHeadingUp:
+      [self startSwipeTimeOut];
+      CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_UP)));
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingUp");
+      break;
+    case UIFocusHeadingDown:
+      [self startSwipeTimeOut];
+      CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_DOWN)));
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingDown");
+      break;
+    case UIFocusHeadingLeft:
+      [self startSwipeTimeOut];
+      CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_LEFT)));
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingLeft");
+      break;
+    case UIFocusHeadingRight:
+      [self startSwipeTimeOut];
+      CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_RIGHT)));
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingRight");
+      break;
+    case UIFocusHeadingNext:
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingNext");
+      break;
+    case UIFocusHeadingPrevious:
+      CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingPrevious");
+      break;
+  }
 }
 
 - (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
@@ -1191,7 +1212,15 @@ static int keyPressTimerFiredCount = 0;
   // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
   // Detect the focus request, post direction message to core and cancel tvOS focus move.
 
-  [self updateFocusLayerFocusFromCore];
+  [self updateFocusLayerFocus];
+  if (![self isNextFocusedItemInParentView:context])
+  {
+    if (!self.swipeIdleTimedOut)
+    {
+        CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:Not in same view");
+        return NO;
+    }
+  }
 
   BOOL result = [super shouldUpdateFocusInContext:context];
   switch (context.focusHeading)
@@ -1245,6 +1274,32 @@ static int keyPressTimerFiredCount = 0;
   return result;
 }
 
+- (FocusLayerView*)findParentView:(FocusLayerView *)thisView
+{
+  FocusLayerView *parentView = nullptr;
+  for (size_t andx = 0; andx < _focusLayer.views.size() && parentView == nullptr; ++andx)
+  {
+    for (size_t bndx = 0; bndx < _focusLayer.views[andx].items.size(); ++bndx)
+    {
+      if (thisView == _focusLayer.views[andx].items[bndx].view)
+      {
+        parentView = _focusLayer.views[andx].view;
+        break;
+      }
+    }
+  }
+  return parentView;
+}
+
+- (bool)isNextFocusedItemInParentView:(UIFocusUpdateContext *)context
+{
+  FocusLayerView *nextView = [self findParentView:(FocusLayerView*)context.nextFocusedItem];
+  FocusLayerView *previousView = [self findParentView:(FocusLayerView*)context.previouslyFocusedItem];
+  if (nextView == nullptr || previousView == nullptr)
+    return false;
+  return nextView == previousView;
+}
+
 - (void)clearSubViews
 {
   NSArray *subviews = self.focusView.subviews;
@@ -1280,10 +1335,15 @@ static int keyPressTimerFiredCount = 0;
 
 - (void) buildFocusLayerFromCore
 {
+  bool debug = false;
+  // build up new focusLayer from core items.
   [self clearSubViews];
 
-  if (!m_viewItems.empty())
-    CLog::Log(LOGDEBUG, "buildFocusLayerFromCore: begin");
+  if (debug)
+  {
+    if (!m_viewItems.empty())
+      CLog::Log(LOGDEBUG, "buildFocusLayerFromCore: begin");
+  }
   int viewCount = 0;
   std::vector<FocusLayerControl> focusViews;
   // build through our views in reverse order (so that last (window) is first)
@@ -1305,17 +1365,21 @@ static int keyPressTimerFiredCount = 0;
     focusView.type = viewItem.type;
     focusView.core = viewItem.control;
     focusView.view = focusLayerView;
-    CLog::Log(LOGDEBUG, "buildFocusLayerFromCore: %d, %s, %f, %f, %f, %f",
-      viewCount, viewItem.type.c_str(),
-      viewItem.rect.x1, viewItem.rect.y1, viewItem.rect.x2, viewItem.rect.y2);
-
+    if (debug)
+    {
+      CLog::Log(LOGDEBUG, "buildFocusLayerFromCore: %d, %s, %f, %f, %f, %f",
+        viewCount, viewItem.type.c_str(),
+        viewItem.rect.x1, viewItem.rect.y1, viewItem.rect.x2, viewItem.rect.y2);
+    }
     for (auto itemsIt = viewItem.items.begin(); itemsIt != viewItem.items.end(); ++itemsIt)
     {
       auto &item = *itemsIt;
-      CLog::Log(LOGDEBUG, "buildFocusLayerFromCore: %d, %s, %f, %f, %f, %f",
-        viewCount, item.type.c_str(),
-        item.rect.x1, item.rect.y1, item.rect.x2, item.rect.y2);
-
+      if (debug)
+      {
+        CLog::Log(LOGDEBUG, "buildFocusLayerFromCore: %d, %s, %f, %f, %f, %f",
+          viewCount, item.type.c_str(),
+          item.rect.x1, item.rect.y1, item.rect.x2, item.rect.y2);
+      }
       // m_glView.bounds does not have screen scaling
       CGRect rect = CGRectMake(
         item.rect.x1/m_screenScale, item.rect.y1/m_screenScale,
@@ -1337,11 +1401,41 @@ static int keyPressTimerFiredCount = 0;
     viewCount++;
   }
   _focusLayer.views = focusViews;
-  [self updateFocusLayerFocusFromCore];
+  [self updateFocusLayerFocus];
 }
 
 - (void) updateFocusLayerFromCore
 {
+}
+
+- (void) updateFocusLayerFocus
+{
+  CGUIControl *preferredControl = CFocusEngineHandler::GetInstance().GetFocusControl();
+  CGUIControl *foundcontrol = nullptr;
+  FocusLayerView *foundview = nullptr;
+  for (size_t andx = 0; andx < _focusLayer.views.size() && foundview == nullptr; ++andx)
+  {
+    if (preferredControl == _focusLayer.views[andx].core)
+    {
+      foundview = _focusLayer.views[andx].view;
+      foundcontrol = (CGUIControl*)_focusLayer.views[andx].core;
+      break;
+    }
+    for (size_t bndx = 0; bndx < _focusLayer.views[andx].items.size(); ++bndx)
+    {
+      if (preferredControl == _focusLayer.views[andx].items[bndx].core)
+      {
+        foundview = _focusLayer.views[andx].items[bndx].view;
+        foundcontrol = (CGUIControl*)_focusLayer.views[andx].items[bndx].core;
+        break;
+      }
+    }
+  }
+  // set the view that is in focus
+  if (foundview == nullptr)
+    foundview = self.focusView;
+  _focusLayer.view = foundview;
+  _focusLayer.core = foundcontrol;
 }
 
 - (void) updateFocusLayer
@@ -1359,7 +1453,7 @@ static int keyPressTimerFiredCount = 0;
     m_viewItems.clear();
     _focusLayer.Reset();
     [self clearSubViews];
-    [self updateFocusLayerFocusFromCore];
+    [self updateFocusLayerFocus];
   }
   else
   {
@@ -1367,7 +1461,7 @@ static int keyPressTimerFiredCount = 0;
     // has to match in order and content.
     if (CFocusEngineHandler::CoreViewsIsEqual(m_viewItems, views))
     {
-      [self updateFocusLayerFocusFromCore];
+      [self updateFocusLayerFocus];
       return;
     }
 
