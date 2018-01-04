@@ -685,9 +685,10 @@ static int keyPressTimerFiredCount = 0;
   [self.focusViewBottom setFocusable:true];
 
   self.focusView = [[FocusLayerView alloc] initWithFrame:focusRect];
-  [self.focusView setFocusable:true];
+  [self.focusView setFocusable:false];
   // focus layer lives above m_glView
   [self.view insertSubview:self.focusView aboveSubview:m_glView];
+
   [self.focusView addSubview:self.focusViewTop];
   [self.focusView addSubview:self.focusViewLeft];
   [self.focusView addSubview:self.focusViewRight];
@@ -1179,7 +1180,10 @@ static int keyPressTimerFiredCount = 0;
 
 - (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
 {
-  // po [(UIView *)0x0000000129f02100 _whyIsThisViewNotFocusable]
+  // po [UIFocusDebugger help]
+  // po [UIFocusDebugger status]
+  // po [UIFocusDebugger simulateFocusUpdateRequestFromEnvironment:self]
+  // po [UIFocusDebugger checkFocusabilityForItem:(UIView *)0x155e2a040]
   // Asks whether the system should allow a focus update to occur.
 
   // The operating system calls the shouldUpdateFocusInContext: method on every focus environment
@@ -1262,6 +1266,19 @@ static int keyPressTimerFiredCount = 0;
   }
 }
 
+- (void)debugSubViews
+{
+  NSArray *subviews = self.focusView.subviews;
+  if (subviews)
+  {
+    for (UIView *view in subviews)
+    {
+      LOG(@"debugSubViews: %@", view);
+    }
+  }
+}
+
+
 - (void) buildFocusLayerFromCore
 {
   [self clearSubViews];
@@ -1330,6 +1347,12 @@ static int keyPressTimerFiredCount = 0;
 
 - (void) updateFocusLayer
 {
+  volatile bool dumpit = false;
+  if (dumpit)
+  {
+    [self debugSubViews];
+  }
+
   std::vector<FocusEngineCoreViews> views;
   CFocusEngineHandler::GetInstance().GetCoreViews(views);
   if (views.empty())
