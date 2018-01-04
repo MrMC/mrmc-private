@@ -1114,11 +1114,6 @@ static int keyPressTimerFiredCount = 0;
   [self updateFocusLayerFocusFromCore];
   if (_focusLayer.view)
     return @[(UIView*)_focusLayer.view];
-    /*
-      (UIView*)self.focusViewLeft, (UIView*)self.focusViewRight,
-      (UIView*)self.focusViewTop, (UIView*)self.focusViewBottom, (UIView*)_focusLayer.view, (UIView*)self.focusView
-      ];
-    */
   else
     return [super preferredFocusEnvironments];
 }
@@ -1190,7 +1185,11 @@ static int keyPressTimerFiredCount = 0;
   // that contains the previously and next focused views. The previously focused views are notified
   //  first, then the focused views are notified, and finally the parents of those views are notified.
   // This means every view that is in the focus chain will get called, from top to bottom.
-  // So once we get hit from control view, we will also get one to parent (self.focusView)
+  // Once we get hit from control view, we will also get one to parent (self.focusView)
+  // The one exception to this recursion is if you return NO. This stops the recursion.
+  // We can use this to handle slide out panels that are represented by hidden views
+  // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
+  // Detect the focus request, post direction message to core and cancel tvOS focus move.
 
   [self updateFocusLayerFocusFromCore];
 
