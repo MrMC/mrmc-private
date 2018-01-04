@@ -1276,14 +1276,16 @@ static int keyPressTimerFiredCount = 0;
 
 - (FocusLayerView*)findParentView:(FocusLayerView *)thisView
 {
+  // _focusLayer.views are ordered bottom to top
   FocusLayerView *parentView = nullptr;
-  for (size_t andx = 0; andx < _focusLayer.views.size() && parentView == nullptr; ++andx)
+  for (auto viewIt = _focusLayer.views.rbegin(); viewIt != _focusLayer.views.rend(); ++viewIt)
   {
-    for (size_t bndx = 0; bndx < _focusLayer.views[andx].items.size(); ++bndx)
+    auto &views = *viewIt;
+    for (size_t bndx = 0; bndx < views.items.size(); ++bndx)
     {
-      if (thisView == _focusLayer.views[andx].items[bndx].view)
+      if (thisView == views.items[bndx].view)
       {
-        parentView = _focusLayer.views[andx].view;
+        parentView = views.view;
         break;
       }
     }
