@@ -110,7 +110,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void) audioRouteChanged;
 - (EAGLContext*) getEAGLContextObj;
 
-- (void) updateFocusLayer;
+- (void) updateFocusLayerMainThread;
 
 - (void) setFramebuffer;
 - (bool) presentFramebuffer;

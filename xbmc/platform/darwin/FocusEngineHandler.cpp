@@ -28,6 +28,7 @@
 #include "guilib/GUIListGroup.h"
 #include "guilib/GUIListLabel.h"
 #include "guilib/GUIBaseContainer.h"
+#include "guilib/GUIControlGroupList.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/GUIControlFactory.h"
 #include "threads/Atomics.h"
@@ -35,7 +36,7 @@
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 #include "utils/XBMCTinyXML.h"
-
+#include "platform/darwin/DarwinUtils.h"
 
 static std::atomic<long> sg_focusenginehandler_lock {0};
 CFocusEngineHandler* CFocusEngineHandler::m_instance = nullptr;
@@ -76,7 +77,7 @@ void CFocusEngineHandler::Process()
     // itemsVisible will start cleared
     m_focus = focus;
   }
-  //UpdateVisible(m_focus);
+  m_focus.isAnimating = focus.isAnimating;
 
   if (m_focus.itemFocus)
   {
@@ -209,6 +210,13 @@ CFocusEngineHandler::GetFocusWindowID()
   return m_focus.windowID;
 }
 
+const bool
+CFocusEngineHandler::GetFocusWindowIsAnimating()
+{
+  CSingleLock lock(m_focusLock);
+  return m_focus.isAnimating;
+}
+
 const CRect
 CFocusEngineHandler::GetFocusRect()
 {
@@ -217,6 +225,7 @@ CFocusEngineHandler::GetFocusRect()
   CSingleLock lock(m_focusLock);
   focus.window = m_focus.window;
   focus.windowID = m_focus.windowID;
+  focus.isAnimating = m_focus.isAnimating;
   lock.Leave();
   if (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
   {
@@ -233,19 +242,8 @@ CFocusEngineHandler::GetFocusRect()
 CGUIControl*
 CFocusEngineHandler::GetFocusControl()
 {
-  FocusEngineFocus focus;
-  // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
-  focus.window = m_focus.window;
-  focus.windowID = m_focus.windowID;
-  lock.Leave();
-  if (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
-  {
-    UpdateFocus(focus);
-    if (focus.itemFocus)
-      return focus.itemFocus;
-  }
-  return nullptr;
+  return m_focus.itemFocus;
 }
 
 bool CFocusEngineHandler::ShowFocusRect()
@@ -265,6 +263,7 @@ ORIENTATION CFocusEngineHandler::GetFocusOrientation()
   CSingleLock lock(m_focusLock);
   focus.window = m_focus.window;
   focus.windowID = m_focus.windowID;
+  focus.isAnimating = m_focus.isAnimating;
   lock.Leave();
   if (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
   {
@@ -299,6 +298,7 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
   // skip finding focused window else invalidate focus
   if (!focus.window || focus.windowID == 0 || focus.windowID == WINDOW_INVALID)
   {
+    focus.isAnimating = false;
     focus.windowID = g_windowManager.GetActiveWindowID();
     focus.window = g_windowManager.GetWindow(focus.windowID);
     if (!focus.window)
@@ -310,6 +310,7 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
     }
   }
 
+  focus.isAnimating = false;
   focus.rootFocus = focus.window->GetFocusedControl();
   if (!focus.rootFocus)
     return;
@@ -319,6 +320,8 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
 
   if (!focus.rootFocus->HasFocus())
     return;
+
+  focus.isAnimating = focus.window->IsAnimating(ANIM_TYPE_CONDITIONAL);
 
   switch(focus.rootFocus->GetControlType())
   {
@@ -353,25 +356,34 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
     case CGUIControl::GUICONTROL_RENDERADDON:
     case CGUIControl::GUICONTROL_MULTI_IMAGE:
     case CGUIControl::GUICONTROL_LISTGROUP:
-    case CGUIControl::GUICONTROL_GROUPLIST:
     case CGUIControl::GUICONTROL_LISTLABEL:
     case CGUIControl::GUICONTROL_GROUP:
     case CGUIControl::GUICONTROL_SCROLLBAR:
     case CGUIControl::GUICONTROL_MULTISELECT:
+      {
+        focus.itemFocus = focus.rootFocus->GetSelectionControl();
+      }
+      break;
+    case CGUIControl::GUICONTROL_GROUPLIST:
+      {
+        CGUIControlGroupList *controlGroupList = (CGUIControlGroupList*)focus.rootFocus;
+        focus.isAnimating |= controlGroupList->IsScrolling();
+        focus.itemFocus = focus.rootFocus->GetSelectionControl();
+      }
+      break;
     case CGUIControl::GUICONTAINER_LIST:
     case CGUIControl::GUICONTAINER_WRAPLIST:
     case CGUIControl::GUICONTAINER_EPGGRID:
     case CGUIControl::GUICONTAINER_PANEL:
-      {
-        focus.itemFocus = focus.rootFocus->GetSelectionControl();
-      }
-      break;
     case CGUIControl::GUICONTAINER_FIXEDLIST:
       {
+        CGUIBaseContainer *baseContainer = (CGUIBaseContainer*)focus.rootFocus;
+        focus.isAnimating |= baseContainer->IsScrolling();
         focus.itemFocus = focus.rootFocus->GetSelectionControl();
       }
       break;
   }
+  CDarwinUtils::UpdateFocusLayerMainThread();
 }
 
 void CFocusEngineHandler::GetCoreViews(std::vector<FocusEngineCoreViews> &views)
@@ -548,16 +560,17 @@ void CFocusEngineHandler::UpdateFocusability()
       if (focusabilityItem.renderRect.y2 < focusabilityItem.renderRect.y1)
         continue;
 #endif
-      //  remove rects that are same size as bounds
-      if (focusabilityItem.renderRect == boundsRect)
-        continue;
-
       if ((*it).control == (*it).parentView)
       {
+        // remove view that are same size as bounds
+        // and do not have any items
+        if (items.empty() && focusabilityItem.renderRect == boundsRect)
+        continue;
+
         FocusEngineCoreViews view;
         view.rect = (*it).renderRect;
         view.type = TranslateControlType((*it).control, (*it).parentView);
-#if false
+#if true
         for (auto &item : items)
         {
           // clip all item rects to enclosing view rect

@@ -134,6 +134,7 @@ typedef struct FocusEngineCoreViews
 typedef struct FocusEngineFocus
 {
   int windowID = 0;
+  bool isAnimating = false;
   CGUIWindow  *window = nullptr;
   CGUIControl *rootFocus = nullptr;
   CGUIControl *itemFocus = nullptr;
@@ -164,6 +165,7 @@ class CFocusEngineHandler
   void          EnableFocusSlide(bool enable);
   void          InvalidateFocus(CGUIControl *control);
   const int     GetFocusWindowID();
+  const bool    GetFocusWindowIsAnimating();
   const CRect   GetFocusRect();
   CGUIControl*  GetFocusControl();
   bool          ShowFocusRect();

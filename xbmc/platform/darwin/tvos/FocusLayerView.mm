@@ -37,12 +37,23 @@
     // set to false to remove debug frame drawing.
     self->debug = true;
     self->focusable = false;
+    self->viewBounds = frame;
     self->frameColor = [UIColor whiteColor];
 
-    [self setNeedsLayout];
-    [self layoutIfNeeded];
+    //[self setNeedsLayout];
+    //[self layoutIfNeeded];
   }
 	return self;
+}
+
+- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
+    withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  //PRINT_SIGNATURE();
+  // if some focus changed, we need to update ourselves
+  // to show correct debug frame color
+  if (self->debug)
+    [self setNeedsDisplay];
 }
 
 //--------------------------------------------------------------
@@ -74,6 +85,19 @@
   }
 }
 
+/*
+- (void)layoutSubviews
+{
+  PRINT_SIGNATURE();
+  [self setNeedsDisplay];
+}
+
+- (void)viewDidLayoutSubviews
+{
+  //PRINT_SIGNATURE();
+}
+*/
+
 - (void) setFocusable:(bool)focusable
 {
   // true == views frames
@@ -88,7 +112,7 @@
 {
   self.frame = location;
   self.bounds = location;
-  [self setNeedsDisplay];
+  self->viewBounds = location;
 }
 
 @end

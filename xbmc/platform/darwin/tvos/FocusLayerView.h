@@ -110,9 +110,13 @@ typedef struct FocusLayer
 
 @interface FocusLayerView : UIView
 {
+@public
+  void *core;
+
 @private
   bool debug;
   bool focusable;
+  CGRect viewBounds;
   UIColor *frameColor;
 }
 
