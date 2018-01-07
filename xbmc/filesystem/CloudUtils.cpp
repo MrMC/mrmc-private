@@ -31,6 +31,7 @@
 #include "filesystem/CurlFile.h"
 #include "filesystem/ZipFile.h"
 #include "settings/Settings.h"
+#include "video/VideoInfoTag.h"
 
 #include <stdlib.h>
 
@@ -243,7 +244,14 @@ bool CCloudUtils::RefreshGoogleToken()
 
 bool CCloudUtils::GetURL(CFileItem &item)
 {
-  std::string path = item.GetPath();
+  std::string path;
+  if (item.HasVideoInfoTag()) // Music tag?
+  {
+    if (!item.GetVideoInfoTag()->m_strFileNameAndPath.empty())
+      path = item.GetVideoInfoTag()->m_strFileNameAndPath;
+  }
+  else
+    path = item.GetPath();
   if (StringUtils::StartsWithNoCase(path, "cloud://dropbox"))
   {
     StringUtils::TrimLeft(path,"cloud://dropbox");

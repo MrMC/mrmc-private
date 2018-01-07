@@ -1104,8 +1104,8 @@ bool CFileItem::IsCloud() const
   
   if (HasVideoInfoTag()) // we need to check for MusicTag?
   {
-    if (!GetVideoInfoTag()->m_strPath.empty())
-      return CUtil::IsCloud(GetVideoInfoTag()->m_strPath);
+    if (!GetVideoInfoTag()->m_strFileNameAndPath.empty())
+      return CUtil::IsCloud(GetVideoInfoTag()->m_strFileNameAndPath);
   }
   return false;
 }
