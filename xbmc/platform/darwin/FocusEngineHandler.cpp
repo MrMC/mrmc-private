@@ -558,7 +558,7 @@ void CFocusEngineHandler::UpdateFocusability()
         FocusEngineCoreViews view;
         view.rect = (*it).renderRect;
         view.type = TranslateControlType((*it).control, (*it).parentView);
-#if true
+#if false
         for (auto &item : items)
         {
           // clip all item rects to enclosing view rect

@@ -105,6 +105,7 @@ typedef struct FocusLayer
   // core and view that are 'in focus'
   void *core;
   FocusLayerView *view;
+  std::vector<FocusLayerItem> items;
   std::vector<FocusLayerControl> views;
 } FocusLayer;
 

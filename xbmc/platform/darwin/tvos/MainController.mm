@@ -628,6 +628,9 @@ typedef enum FocusActionTypes
 } FocusActionTypes;
 int focusActionType = FocusActionNone;
 
+bool swipeNoMore = false;
+CGRect swipeStartingFocusLayerParentViewRect;
+
 //--------------------------------------------------------------
 - (IBAction)handleSwipe:(UISwipeGestureRecognizer *)sender
 {
@@ -657,6 +660,7 @@ int focusActionType = FocusActionNone;
           {
             focusActionType = FocusActionSwipe;
             FocusLayerView *parentView = [self findParentView:_focusLayer.view];
+            swipeNoMore = false;
             swipeStartingFocusLayerParentViewRect = parentView.bounds;
             location = [sender locationInView:sender.view];
             CLog::Log(LOGDEBUG, "handleSwipe:StateRecognized, %f, %f", location.x, location.y);
@@ -691,7 +695,6 @@ int focusActionType = FocusActionNone;
   [self startRemoteTimer];
 }
 
- CGRect swipeStartingFocusLayerParentViewRect;
 //--------------------------------------------------------------
 - (IBAction)handlePan:(UIPanGestureRecognizer *)sender
 {
@@ -1512,18 +1515,68 @@ int focusActionType = FocusActionNone;
     return nil;
 }
 
+CGRect debugView1;
+CGRect debugView2;
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
-  CLog::Log(LOGDEBUG, "preferredFocusEnvironments");
   // The order of the items in the preferredFocusEnvironments array is the
   // priority that the focus engine will use when picking the focused item
-
-  //return @[m_glView];
   [self updateFocusLayerFocus];
-  if (_focusLayer.view)
+  FocusLayerView *parentView = [self findParentView:_focusLayer.view];
+  if (parentView && _focusLayer.view)
+  {
+    CGRect parentViewRect = parentView.bounds;
+    if (!CGRectEqualToRect(debugView1, parentViewRect))
+    {
+      debugView1 = parentViewRect;
+      CLog::Log(LOGDEBUG, "preferredFocusEnvironments: parentViewRect %f, %f, %f, %f",
+        parentViewRect.origin.x,  parentViewRect.origin.y,
+        parentViewRect.origin.x + parentViewRect.size.width,
+        parentViewRect.origin.y + parentViewRect.size.height);
+    }
+    CGRect focusLayerViewRect = _focusLayer.view.bounds;
+    if (!CGRectEqualToRect(debugView2, focusLayerViewRect))
+    {
+      debugView2 = focusLayerViewRect;
+      CLog::Log(LOGDEBUG, "preferredFocusEnvironments: focusLayerViewRect %f, %f, %f, %f",
+        focusLayerViewRect.origin.x,  focusLayerViewRect.origin.y,
+        focusLayerViewRect.origin.x + focusLayerViewRect.size.width,
+        focusLayerViewRect.origin.y + focusLayerViewRect.size.height);
+    }
+
+    NSMutableArray *viewArray = [NSMutableArray array];
+    [viewArray addObject:(UIView*)_focusLayer.view];
+    for (size_t indx = 0; indx < _focusLayer.items.size(); ++indx)
+    {
+      if (_focusLayer.core != _focusLayer.items[indx].core)
+        [viewArray addObject:(UIView*)_focusLayer.items[indx].view];
+    }
+    [viewArray addObject:(UIView*)self.focusViewTop];
+    [viewArray addObject:(UIView*)self.focusViewLeft];
+    [viewArray addObject:(UIView*)self.focusViewRight];
+    [viewArray addObject:(UIView*)self.focusViewBottom];
+    //[viewArray addObject:(UIView*)parentView];
+    return viewArray;
+    //return @[(UIView*)_focusLayer.view, (UIView*)parentView];
+  }
+  else if (_focusLayer.view)
+  {
+    CGRect focusLayerViewRect = _focusLayer.view.bounds;
+    if (!CGRectEqualToRect(debugView2, focusLayerViewRect))
+    {
+      debugView2 = focusLayerViewRect;
+      CLog::Log(LOGDEBUG, "preferredFocusEnvironments: focusLayerViewRect %f, %f, %f, %f",
+        focusLayerViewRect.origin.x,  focusLayerViewRect.origin.y,
+        focusLayerViewRect.origin.x + focusLayerViewRect.size.width,
+        focusLayerViewRect.origin.y + focusLayerViewRect.size.height);
+    }
     return @[(UIView*)_focusLayer.view];
+  }
   else
+  {
+    CLog::Log(LOGDEBUG, "preferredFocusEnvironments");
     return [super preferredFocusEnvironments];
+  }
 }
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
@@ -1596,7 +1649,6 @@ int focusActionType = FocusActionNone;
   // We can use this to handle slide out panels that are represented by hidden views
   // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
   // So detect the focus request, post direction message to core and cancel tvOS focus update.
-
   CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: focusActionType %s", focusActionTypeNames[focusActionType]);
 
   // previouslyFocusedItem may be nil if no item was focused.
@@ -1605,11 +1657,21 @@ int focusActionType = FocusActionNone;
 
   if (focusActionType == FocusActionSwipe)
   {
+    if (swipeNoMore)
+      return NO;
+
+    CGRect previousItemRect = ((FocusLayerView*)context.previouslyFocusedItem).bounds;
+    CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: previousItemRect %f, %f, %f, %f",
+      previousItemRect.origin.x, previousItemRect.origin.y,
+      previousItemRect.origin.x + previousItemRect.size.width,
+      previousItemRect.origin.y + previousItemRect.size.height);
+
     CGRect nextFocusedItemRect = ((FocusLayerView*)context.nextFocusedItem).bounds;
     CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: nextFocusedItemRect %f, %f, %f, %f",
       nextFocusedItemRect.origin.x, nextFocusedItemRect.origin.y,
       nextFocusedItemRect.origin.x + nextFocusedItemRect.size.width,
       nextFocusedItemRect.origin.y + nextFocusedItemRect.size.height);
+
     if (!CGRectContainsRect(swipeStartingFocusLayerParentViewRect, nextFocusedItemRect))
     {
       if (context.nextFocusedItem == self.focusViewTop ||
@@ -1618,10 +1680,28 @@ int focusActionType = FocusActionNone;
           context.nextFocusedItem == self.focusViewBottom )
       {
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Hit in borderView");
+        [self setNeedsFocusUpdate];
       }
       else
       {
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Not in same parent view");
+        swipeNoMore = true;
+        switch (context.focusHeading)
+        {
+          case UIFocusHeadingUp:
+            [self sendButtonPressed:SiriRemote_UpTap];
+            break;
+          case UIFocusHeadingDown:
+            [self sendButtonPressed:SiriRemote_DownTap];
+            break;
+          case UIFocusHeadingLeft:
+            [self sendButtonPressed:SiriRemote_LeftTap];
+            break;
+          case UIFocusHeadingRight:
+            [self sendButtonPressed:SiriRemote_RightTap];
+            break;
+        }
+        [self setNeedsFocusUpdate];
         return NO;
       }
     }
@@ -1707,7 +1787,7 @@ int focusActionType = FocusActionNone;
 - (void)clearSubViews
 {
   NSArray *subviews = self.focusView.subviews;
-  if (subviews)
+  if (subviews && [subviews count])
   {
     for (UIView *view in subviews)
     {
@@ -1727,7 +1807,7 @@ int focusActionType = FocusActionNone;
 - (void)debugSubViews
 {
   NSArray *subviews = self.focusView.subviews;
-  if (subviews)
+  if (subviews && [subviews count])
   {
     for (UIView *view in subviews)
     {
@@ -1739,7 +1819,7 @@ int focusActionType = FocusActionNone;
 
 - (void) buildFocusLayerFromCore
 {
-  bool debug = true;
+  bool debug = false;
   // build up new focusLayer from core items.
   [self clearSubViews];
 
@@ -1765,7 +1845,10 @@ int focusActionType = FocusActionNone;
     FocusLayerView *focusLayerView = [[FocusLayerView alloc] initWithFrame:rect];
     [focusLayerView setFocusable:true];
     if (viewItem.type == "window")
+    {
+      [focusLayerView setFocusable:false];
       [focusLayerView setViewVisable:false];
+    }
 
     focusLayerView->core = viewItem.control;
     [self.focusView addSubview:focusLayerView];
@@ -1824,12 +1907,14 @@ int focusActionType = FocusActionNone;
   CGUIControl *preferredControl = CFocusEngineHandler::GetInstance().GetFocusControl();
   CGUIControl *foundcontrol = nullptr;
   FocusLayerView *foundview = nullptr;
+  std::vector<FocusLayerItem> foundItems;
   for (size_t andx = 0; andx < _focusLayer.views.size() && foundview == nullptr; ++andx)
   {
     if (preferredControl == _focusLayer.views[andx].core)
     {
       foundview = _focusLayer.views[andx].view;
       foundcontrol = (CGUIControl*)_focusLayer.views[andx].core;
+      foundItems = _focusLayer.views[andx].items;
       break;
     }
     for (size_t bndx = 0; bndx < _focusLayer.views[andx].items.size(); ++bndx)
@@ -1838,6 +1923,7 @@ int focusActionType = FocusActionNone;
       {
         foundview = _focusLayer.views[andx].items[bndx].view;
         foundcontrol = (CGUIControl*)_focusLayer.views[andx].items[bndx].core;
+        foundItems = _focusLayer.views[andx].items;
         break;
       }
     }
@@ -1847,6 +1933,7 @@ int focusActionType = FocusActionNone;
     foundview = self.focusView;
   _focusLayer.view = foundview;
   _focusLayer.core = foundcontrol;
+  _focusLayer.items = foundItems;
 }
 
 - (void) updateFocusLayerMainThread
