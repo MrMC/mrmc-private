@@ -1846,7 +1846,7 @@ CGRect debugView2;
     [focusLayerView setFocusable:true];
     if (viewItem.type == "window")
     {
-      [focusLayerView setFocusable:false];
+      [focusLayerView setFocusable:true];
       [focusLayerView setViewVisable:false];
     }
 
