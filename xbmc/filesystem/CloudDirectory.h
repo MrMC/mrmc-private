@@ -32,6 +32,7 @@ namespace XFILE
     virtual ~CCloudDirectory();
 
     virtual bool GetDirectory(const CURL& url, CFileItemList &items);
+    virtual bool Exists(const CURL& url) { return true; } // true for now, we can add check later
     virtual DIR_CACHE_TYPE GetCacheType(const CURL& url) const;
   };
 }
