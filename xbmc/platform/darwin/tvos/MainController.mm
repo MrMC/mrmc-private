@@ -1863,10 +1863,10 @@ int focusActionType = FocusActionNone;
     [self debugSubViews];
   }
 
-  bool isAnimating = CFocusEngineHandler::GetInstance().GetFocusWindowIsAnimating();
+  bool hideViews = CFocusEngineHandler::GetInstance().NeedToHideViews();
   std::vector<FocusEngineCoreViews> views;
   CFocusEngineHandler::GetInstance().GetCoreViews(views);
-  if (isAnimating || views.empty())
+  if (hideViews || views.empty())
   {
     m_viewItems.clear();
     _focusLayer.Reset();
@@ -1885,27 +1885,27 @@ int focusActionType = FocusActionNone;
     {
       m_viewItems = views;
       [self buildFocusLayerFromCore];
-      CLog::Log(LOGDEBUG, "updateFocusLayer:isAnimating(%d), rebuild", isAnimating);
+      CLog::Log(LOGDEBUG, "updateFocusLayer:hideViews(%s), rebuild", hideViews ? "yes":"no");
     }
 /*
     // something is different. check size (deep check)
     if (!CFocusEngineHandler::CoreViewsIsEqualSize(m_viewItems, views))
     {
       // sizes are different, punt
-      CLog::Log(LOGDEBUG, "updateFocusLayer:isAnimating(%d), Sizes are different, rebuild", isAnimating);
+      CLog::Log(LOGDEBUG, "updateFocusLayer:hideViews(%s), Sizes are different, rebuild", hideViews ? "yes":"no");
       m_viewItems = views;
       [self buildFocusLayerFromCore];
     }
     else if (!CFocusEngineHandler::CoreViewsIsEqualControls(m_viewItems, views))
     {
-      //CLog::Log(LOGDEBUG, "updateFocusLayer:isAnimating(%d), Controls are different, rebuild", isAnimating");
+      //CLog::Log(LOGDEBUG, "updateFocusLayer:hideViews(%s), Controls are different, rebuild", hideViews ? "yes":"no"");
       // same size but core controls are different, punt
       m_viewItems = views;
       [self buildFocusLayerFromCore];
     }
     else
     {
-      //CLog::Log(LOGDEBUG, "updateFocusLayer:isAnimating(%d), CheckRects failed, check view locations", isAnimating);
+      //CLog::Log(LOGDEBUG, "updateFocusLayer:hideViews(%s), CheckRects failed, check view locations", hideViews ? "yes":"no");
       // same sizes, same controls, so only view rects have changed, update view position/size
       m_viewItems = views;
       [self buildFocusLayerFromCore];

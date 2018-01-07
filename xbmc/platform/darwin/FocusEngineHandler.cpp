@@ -77,7 +77,7 @@ void CFocusEngineHandler::Process()
     // itemsVisible will start cleared
     m_focus = focus;
   }
-  m_focus.isAnimating = focus.isAnimating;
+  m_focus.hideViews = focus.hideViews;
 
   if (m_focus.itemFocus)
   {
@@ -211,10 +211,10 @@ CFocusEngineHandler::GetFocusWindowID()
 }
 
 const bool
-CFocusEngineHandler::GetFocusWindowIsAnimating()
+CFocusEngineHandler::NeedToHideViews()
 {
   CSingleLock lock(m_focusLock);
-  return m_focus.isAnimating;
+  return m_focus.hideViews;
 }
 
 const CRect
@@ -225,7 +225,7 @@ CFocusEngineHandler::GetFocusRect()
   CSingleLock lock(m_focusLock);
   focus.window = m_focus.window;
   focus.windowID = m_focus.windowID;
-  focus.isAnimating = m_focus.isAnimating;
+  focus.hideViews = m_focus.hideViews;
   lock.Leave();
   if (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
   {
@@ -269,7 +269,7 @@ ORIENTATION CFocusEngineHandler::GetFocusOrientation()
   CSingleLock lock(m_focusLock);
   focus.window = m_focus.window;
   focus.windowID = m_focus.windowID;
-  focus.isAnimating = m_focus.isAnimating;
+  focus.hideViews = m_focus.hideViews;
   lock.Leave();
   if (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
   {
@@ -304,7 +304,7 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
   // skip finding focused window else invalidate focus
   if (!focus.window || focus.windowID == 0 || focus.windowID == WINDOW_INVALID)
   {
-    focus.isAnimating = false;
+    focus.hideViews = false;
     focus.windowID = g_windowManager.GetActiveWindowID();
     focus.window = g_windowManager.GetWindow(focus.windowID);
     if (!focus.window)
@@ -363,23 +363,13 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
     case CGUIControl::GUICONTROL_GROUP:
     case CGUIControl::GUICONTROL_SCROLLBAR:
     case CGUIControl::GUICONTROL_MULTISELECT:
-      {
-        focus.itemFocus = focus.rootFocus->GetSelectionControl();
-      }
-      break;
     case CGUIControl::GUICONTROL_GROUPLIST:
-      {
-        CGUIControlGroupList *controlGroupList = (CGUIControlGroupList*)focus.rootFocus;
-        focus.itemFocus = focus.rootFocus->GetSelectionControl();
-      }
-      break;
     case CGUIControl::GUICONTAINER_LIST:
     case CGUIControl::GUICONTAINER_WRAPLIST:
     case CGUIControl::GUICONTAINER_EPGGRID:
     case CGUIControl::GUICONTAINER_PANEL:
     case CGUIControl::GUICONTAINER_FIXEDLIST:
       {
-        CGUIBaseContainer *baseContainer = (CGUIBaseContainer*)focus.rootFocus;
         focus.itemFocus = focus.rootFocus->GetSelectionControl();
       }
       break;
@@ -470,72 +460,36 @@ void CFocusEngineHandler::SetGUIFocusabilityItems(const CFocusabilityTracker &fo
   CSingleLock lock(m_focusLock);
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
   {
-    //if (m_focus.rootFocus)
+    auto items = focusabilityTracker.GetItems();
+    // there should always something that has focus. if incoming focusabilityTracker is empty,
+    // it is a transition effect or nothing reported a dirty region and rendering was skipped.
+    if (!items.empty())
     {
-      auto items = focusabilityTracker.GetItems();
-      // there should always something that has focus. if incoming focusabilityTracker is empty,
-      // it is a transition effect or nothing reported a dirty region and rendering was skipped.
-      if (!items.empty())
+      std::vector<GUIFocusabilityItem> verifiedItems;
+      for (auto it = items.begin(); it != items.end(); ++it)
       {
-        std::vector<GUIFocusabilityItem> verifiedItems;
-        for (auto it = items.begin(); it != items.end(); ++it)
-        {
-          if ((*it).control->HasProcessed() && (*it).control->IsVisible())
-            verifiedItems.push_back(*it);
-        }
-
-        if (verifiedItems.size() != m_focus.items.size())
-        {
-          m_focus.items = verifiedItems;
-          std::sort(m_focus.items.begin(), m_focus.items.end(),
-            [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
-          {
-              return a.renderOrder < b.renderOrder;
-          });
-        }
-        UpdateFocusability();
-        UpdateIsAnimating();
-        //if (m_focus.isAnimating)
-        //  CLog::Log(LOGDEBUG, "Control is animating");
+        if ((*it).control->HasProcessed() && (*it).control->IsVisible())
+          verifiedItems.push_back(*it);
       }
+
+      if (verifiedItems.size() != m_focus.items.size())
+      {
+        m_focus.items = verifiedItems;
+        std::sort(m_focus.items.begin(), m_focus.items.end(),
+          [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
+        {
+            return a.renderOrder < b.renderOrder;
+        });
+      }
+      UpdateFocusability();
+      UpdateNeedToHideViews();
+      //if (m_focus.hideViews)
+      //  CLog::Log(LOGDEBUG, "Control is animating");
     }
   }
 
+  // trigger tvOS main thread to rebuild views and focus
   CDarwinUtils::UpdateFocusLayerMainThread();
-}
-
-void CFocusEngineHandler::UpdateIsAnimating()
-{
-  m_focus.isAnimating = false;
-
-  CGUIControlGroupList *controlGroupList = dynamic_cast<CGUIControlGroupList*>(m_focus.rootFocus);
-  if (controlGroupList)
-  {
-    m_focus.isAnimating |= controlGroupList->IsScrolling();
-    if (m_focus.isAnimating)
-      return;
-  }
-  CGUIBaseContainer *baseContainer = dynamic_cast<CGUIBaseContainer*>(m_focus.rootFocus);
-  if (baseContainer)
-  {
-    m_focus.isAnimating |= baseContainer->IsScrolling();
-    if (m_focus.isAnimating)
-      return;
-  }
-
-  for (auto viewIt = m_focus.views.begin(); viewIt != m_focus.views.end(); ++viewIt)
-  {
-    if ((*viewIt).control->IsSliding())
-    {
-      m_focus.isAnimating = true;
-      break;
-    }
-    if ((*viewIt).control->IsScrolling())
-    {
-      m_focus.isAnimating = true;
-      break;
-    }
-  }
 }
 
 void CFocusEngineHandler::UpdateFocusability()
@@ -695,6 +649,46 @@ void CFocusEngineHandler::UpdateFocusability()
     }
 #endif
     m_focus.views = views;
+  }
+}
+
+void CFocusEngineHandler::UpdateNeedToHideViews()
+{
+  // we hide views when certain controls are animating
+  // such as slide out effects. Check for two cases.
+  // Sliding and Scrolling. This speeds up tvOS focus engine
+  // handling in that we do not keep rebuilding views while
+  // the animation effect is ocurring. Once views are stable
+  // again, then we rebuild and setup who has focus.
+  m_focus.hideViews = false;
+
+  CGUIControlGroupList *controlGroupList = dynamic_cast<CGUIControlGroupList*>(m_focus.rootFocus);
+  if (controlGroupList)
+  {
+    m_focus.hideViews |= controlGroupList->IsScrolling();
+    if (m_focus.hideViews)
+      return;
+  }
+  CGUIBaseContainer *baseContainer = dynamic_cast<CGUIBaseContainer*>(m_focus.rootFocus);
+  if (baseContainer)
+  {
+    m_focus.hideViews |= baseContainer->IsScrolling();
+    if (m_focus.hideViews)
+      return;
+  }
+
+  for (auto viewIt = m_focus.views.begin(); viewIt != m_focus.views.end(); ++viewIt)
+  {
+    if ((*viewIt).control->IsSliding())
+    {
+      m_focus.hideViews = true;
+      break;
+    }
+    if ((*viewIt).control->IsScrolling())
+    {
+      m_focus.hideViews = true;
+      break;
+    }
   }
 }
 
