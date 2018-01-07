@@ -34,8 +34,8 @@
     self.bounds = frame;
     self.layer.backgroundColor = [[UIColor clearColor] CGColor];
 
-    // set to false to remove debug frame drawing.
-    self->debug = true;
+    // set to false to hide frame drawing (used for debugging)
+    self->viewVisable = true;
     self->focusable = false;
     self->viewBounds = frame;
     self->frameColor = [UIColor whiteColor];
@@ -51,8 +51,8 @@
 {
   //PRINT_SIGNATURE();
   // if some focus changed, we need to update ourselves
-  // to show correct debug frame color
-  if (self->debug)
+  // to show correct frame color
+  if (self->viewVisable)
     [self setNeedsDisplay];
 }
 
@@ -68,7 +68,7 @@
 - (void)drawRect:(CGRect)rect
 {
   //PRINT_SIGNATURE();
-  if (self->debug)
+  if (self->viewVisable)
   {
     CGContextRef context = UIGraphicsGetCurrentContext();
     // make the view transparent
@@ -76,11 +76,16 @@
     //CGContextFillRect(context, rect);
 
     CGContextSetBlendMode(context, kCGBlendModeCopy);
-    CGContextSetLineWidth(context, 4.0);
     if (self.focused)
+    {
+      CGContextSetLineWidth(context, 8.0);
       CGContextSetStrokeColorWithColor(context, [[UIColor orangeColor] CGColor]);
+    }
     else
+    {
+      CGContextSetLineWidth(context, 4.0);
       CGContextSetStrokeColorWithColor(context, [self->frameColor CGColor]);
+    }
     CGContextStrokeRect(context, rect);
   }
 }
@@ -100,19 +105,16 @@
 
 - (void) setFocusable:(bool)focusable
 {
-  // true == views frames
-  // false == control frames
   self->focusable = focusable;
-  self->frameColor = [UIColor whiteColor];
   if (self->focusable)
     self->frameColor = [UIColor greenColor];
+  else
+    self->frameColor = [UIColor whiteColor];
 }
 
-- (void) SetSizeLocation:(CGRect)location
+- (void) setViewVisable:(bool)viewVisable
 {
-  self.frame = location;
-  self.bounds = location;
-  self->viewBounds = location;
+  self->viewVisable = viewVisable;
 }
 
 @end

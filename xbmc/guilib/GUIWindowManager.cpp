@@ -1157,6 +1157,10 @@ void CGUIWindowManager::AfterRender()
       (*it)->AfterRender();
   }
   m_focusableTracker.AfterRender();
+}
+
+void CGUIWindowManager::RenderingFinished()
+{
 #if defined(TARGET_DARWIN_TVOS)
   // update focus engine after all windows/dialogs have processed
   if (g_application.IsAppInitialized() && g_application.IsAppFocused())

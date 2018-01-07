@@ -997,27 +997,32 @@ int focusActionType = FocusActionNone;
   focusRectTop.size.height = 200;
   self.focusViewTop = [[FocusLayerView alloc] initWithFrame:focusRectTop];
   [self.focusViewTop setFocusable:true];
+  [self.focusViewTop setViewVisable:false];
 
   CGRect focusRectLeft = focusRect;
   focusRectLeft.origin.x -= 200;
   focusRectLeft.size.width = 200;
   self.focusViewLeft = [[FocusLayerView alloc] initWithFrame:focusRectLeft];
   [self.focusViewLeft setFocusable:true];
+  [self.focusViewLeft setViewVisable:false];
 
   CGRect focusRectRight = focusRect;
   focusRectRight.origin.x += focusRect.size.width;
   focusRectRight.size.width = 200;
   self.focusViewRight = [[FocusLayerView alloc] initWithFrame:focusRectRight];
   [self.focusViewRight setFocusable:true];
+  [self.focusViewRight setViewVisable:false];
 
   CGRect focusRectBottom = focusRect;
   focusRectBottom.origin.y += focusRect.size.height;
   focusRectBottom.size.height = 200;
   self.focusViewBottom = [[FocusLayerView alloc] initWithFrame:focusRectBottom];
   [self.focusViewBottom setFocusable:true];
+  [self.focusViewBottom setViewVisable:false];
 
   self.focusView = [[FocusLayerView alloc] initWithFrame:focusRect];
   [self.focusView setFocusable:false];
+  [self.focusView setViewVisable:false];
   // focus layer lives above m_glView
   [self.view insertSubview:self.focusView aboveSubview:m_glView];
 
@@ -1509,7 +1514,7 @@ int focusActionType = FocusActionNone;
 
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
-  //PRINT_SIGNATURE();
+  CLog::Log(LOGDEBUG, "preferredFocusEnvironments");
   // The order of the items in the preferredFocusEnvironments array is the
   // priority that the focus engine will use when picking the focused item
 
@@ -1522,7 +1527,7 @@ int focusActionType = FocusActionNone;
 }
 
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
-    withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+  withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
   //CLog::Log(LOGDEBUG, "didUpdateFocusInContext");
 
@@ -1532,23 +1537,39 @@ int focusActionType = FocusActionNone;
       //CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingNone");
       break;
     case UIFocusHeadingUp:
-      CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_UP)));
+      if (focusActionType == FocusActionSwipe)
+        [self sendButtonPressed:SiriRemote_UpSwipe];
+      else
+        [self sendButtonPressed:SiriRemote_UpTap];
+      //CApplicationMessenger::GetInstance().PostMsg(
+      //  TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_UP)));
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingUp");
       break;
     case UIFocusHeadingDown:
-      CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_DOWN)));
+      if (focusActionType == FocusActionSwipe)
+        [self sendButtonPressed:SiriRemote_DownSwipe];
+      else
+        [self sendButtonPressed:SiriRemote_DownTap];
+      //CApplicationMessenger::GetInstance().PostMsg(
+      //  TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_DOWN)));
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingDown");
       break;
     case UIFocusHeadingLeft:
-      CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_LEFT)));
+      if (focusActionType == FocusActionSwipe)
+        [self sendButtonPressed:SiriRemote_LeftSwipe];
+      else
+        [self sendButtonPressed:SiriRemote_LeftTap];
+      //CApplicationMessenger::GetInstance().PostMsg(
+      //  TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_LEFT)));
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingLeft");
       break;
     case UIFocusHeadingRight:
-      CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_RIGHT)));
+      if (focusActionType == FocusActionSwipe)
+        [self sendButtonPressed:SiriRemote_RightSwipe];
+      else
+        [self sendButtonPressed:SiriRemote_RightTap];
+      //CApplicationMessenger::GetInstance().PostMsg(
+      //  TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_RIGHT)));
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingRight");
       break;
     case UIFocusHeadingNext:
@@ -1570,45 +1591,38 @@ int focusActionType = FocusActionNone;
   // po [UIFocusDebugger checkFocusabilityForItem:(UIView *)0x155e2a040]
   // Asks whether the system should allow a focus update to occur.
 
-  // The operating system calls the shouldUpdateFocusInContext: method on every focus environment
-  // that contains the previously and next focused views. The previously focused views are notified
-  //  first, then the focused views are notified, and finally the parents of those views are notified.
-  // This means every view that is in the focus chain will get called, from top to bottom.
-  // Once we get hit from control view, we will also get one to parent (self.focusView)
-  // The one exception to this recursion is if you return NO. This stops the recursion.
+  // Once we get hit from control view, we might also get one regarding parent (self.focusView)
+  // The one exception to this possible recursion is if you return NO. This stops the recursion.
   // We can use this to handle slide out panels that are represented by hidden views
   // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
-  // Detect the focus request, post direction message to core and cancel tvOS focus move.
+  // So detect the focus request, post direction message to core and cancel tvOS focus update.
 
   CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: focusActionType %s", focusActionTypeNames[focusActionType]);
 
-  //if (context.previouslyFocusedItem && context.nextFocusedItem)
-  {
-    // previouslyFocusedItem may be nil if no item was focused.
-    CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: previous %p, next %p",
-      context.previouslyFocusedItem, context.nextFocusedItem);
+  // previouslyFocusedItem may be nil if no item was focused.
+  CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: previous %p, next %p",
+    context.previouslyFocusedItem, context.nextFocusedItem);
 
-    if (focusActionType == FocusActionSwipe)
+  if (focusActionType == FocusActionSwipe)
+  {
+    CGRect nextFocusedItemRect = ((FocusLayerView*)context.nextFocusedItem).bounds;
+    CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: nextFocusedItemRect %f, %f, %f, %f",
+      nextFocusedItemRect.origin.x, nextFocusedItemRect.origin.y,
+      nextFocusedItemRect.origin.x + nextFocusedItemRect.size.width,
+      nextFocusedItemRect.origin.y + nextFocusedItemRect.size.height);
+    if (!CGRectContainsRect(swipeStartingFocusLayerParentViewRect, nextFocusedItemRect))
     {
-      CGRect nextFocusedItemRect = ((FocusLayerView*)context.nextFocusedItem).bounds;
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: nextFocusedItemRect %f, %f, %f, %f",
-        nextFocusedItemRect.origin.x, nextFocusedItemRect.origin.y,
-        nextFocusedItemRect.origin.x + nextFocusedItemRect.size.width,
-        nextFocusedItemRect.origin.y + nextFocusedItemRect.size.height);
-      if (!CGRectContainsRect(swipeStartingFocusLayerParentViewRect, nextFocusedItemRect))
+      if (context.nextFocusedItem == self.focusViewTop ||
+          context.nextFocusedItem == self.focusViewLeft ||
+          context.nextFocusedItem == self.focusViewRight ||
+          context.nextFocusedItem == self.focusViewBottom )
       {
-        if (context.nextFocusedItem == self.focusViewTop ||
-            context.nextFocusedItem == self.focusViewLeft ||
-            context.nextFocusedItem == self.focusViewRight ||
-            context.nextFocusedItem == self.focusViewBottom )
-        {
-          CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Hit in borderView");
-        }
-        else
-        {
-          CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Not in same parent view");
-          return NO;
-        }
+        CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Hit in borderView");
+      }
+      else
+      {
+        CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Not in same parent view");
+        return NO;
       }
     }
   }
@@ -1617,14 +1631,15 @@ int focusActionType = FocusActionNone;
   switch (context.focusHeading)
   {
     case UIFocusHeadingNone:
-      // we never get this
+      // we never get here
       CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingNone");
       break;
     case UIFocusHeadingUp:
       if (context.nextFocusedItem == self.focusViewTop)
       {
-        CApplicationMessenger::GetInstance().PostMsg(
-          TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_UP)));
+        [self sendButtonPressed:SiriRemote_UpTap];
+        //CApplicationMessenger::GetInstance().PostMsg(
+        //  TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_UP)));
         return NO;
       }
       CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingUp");
@@ -1632,8 +1647,9 @@ int focusActionType = FocusActionNone;
     case UIFocusHeadingDown:
       if (context.nextFocusedItem == self.focusViewBottom)
       {
-        CApplicationMessenger::GetInstance().PostMsg(
-          TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_DOWN)));
+        [self sendButtonPressed:SiriRemote_DownTap];
+        //CApplicationMessenger::GetInstance().PostMsg(
+        //  TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_DOWN)));
         return NO;
       }
       CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingDown");
@@ -1641,8 +1657,9 @@ int focusActionType = FocusActionNone;
     case UIFocusHeadingLeft:
       if (context.nextFocusedItem == self.focusViewLeft)
       {
-        CApplicationMessenger::GetInstance().PostMsg(
-          TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_LEFT)));
+        [self sendButtonPressed:SiriRemote_LeftTap];
+        //CApplicationMessenger::GetInstance().PostMsg(
+        //  TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_LEFT)));
         return NO;
       }
       CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingLeft");
@@ -1650,8 +1667,9 @@ int focusActionType = FocusActionNone;
     case UIFocusHeadingRight:
       if (context.nextFocusedItem == self.focusViewRight)
       {
-        CApplicationMessenger::GetInstance().PostMsg(
-          TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_RIGHT)));
+        [self sendButtonPressed:SiriRemote_RightTap];
+        //CApplicationMessenger::GetInstance().PostMsg(
+        //  TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_MOVE_RIGHT)));
         return NO;
       }
       CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingRight");
@@ -1736,7 +1754,7 @@ int focusActionType = FocusActionNone;
   for (auto viewIt = m_viewItems.rbegin(); viewIt != m_viewItems.rend(); ++viewIt)
   {
     auto &viewItem = *viewIt;
-    if (viewItem.items.empty())
+    if (viewItem.items.empty() && viewItem.type != "window")
       continue;
 
     // m_glView.bounds does not have screen scaling
@@ -1746,6 +1764,9 @@ int focusActionType = FocusActionNone;
 
     FocusLayerView *focusLayerView = [[FocusLayerView alloc] initWithFrame:rect];
     [focusLayerView setFocusable:true];
+    if (viewItem.type == "window")
+      [focusLayerView setViewVisable:false];
+
     focusLayerView->core = viewItem.control;
     [self.focusView addSubview:focusLayerView];
 

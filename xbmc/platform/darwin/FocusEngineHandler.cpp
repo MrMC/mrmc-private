@@ -243,7 +243,13 @@ CGUIControl*
 CFocusEngineHandler::GetFocusControl()
 {
   CSingleLock lock(m_focusLock);
-  return m_focus.itemFocus;
+  if (m_focus.itemFocus)
+    return m_focus.itemFocus;
+  // if we do not have a focused control
+  // kick back to the window control
+  if (m_focus.window)
+    return m_focus.window;
+  return nullptr;
 }
 
 bool CFocusEngineHandler::ShowFocusRect()
@@ -309,7 +315,6 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
       return;
     }
   }
-
   focus.isAnimating = false;
   focus.rootFocus = focus.window->GetFocusedControl();
   if (!focus.rootFocus)
@@ -383,7 +388,6 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
       }
       break;
   }
-  CDarwinUtils::UpdateFocusLayerMainThread();
 }
 
 void CFocusEngineHandler::GetCoreViews(std::vector<FocusEngineCoreViews> &views)
@@ -391,12 +395,7 @@ void CFocusEngineHandler::GetCoreViews(std::vector<FocusEngineCoreViews> &views)
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
-  {
-    if (m_focus.rootFocus)
-      views = m_focus.views;
-    else
-      views.clear();
-  }
+    views = m_focus.views;
 }
 
 bool CFocusEngineHandler::CoreViewsIsEqual(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
@@ -475,33 +474,35 @@ void CFocusEngineHandler::SetGUIFocusabilityItems(const CFocusabilityTracker &fo
   CSingleLock lock(m_focusLock);
   if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
   {
-    if (!m_focus.rootFocus)
-      return;
-
-    auto items = focusabilityTracker.GetItems();
-    // there should always something that has focus. if incoming focusabilityTracker is empty,
-    // it is a transition effect or nothing reported a dirty region and rendering was skipped.
-    if (items.empty())
-      return;
-
-    std::vector<GUIFocusabilityItem> verifiedItems;
-    for (auto it = items.begin(); it != items.end(); ++it)
+    //if (m_focus.rootFocus)
     {
-      if ((*it).control->HasProcessed() && (*it).control->IsVisible())
-        verifiedItems.push_back(*it);
-    }
-
-    if (verifiedItems.size() != m_focus.items.size())
-    {
-      m_focus.items = verifiedItems;
-      std::sort(m_focus.items.begin(), m_focus.items.end(),
-        [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
+      auto items = focusabilityTracker.GetItems();
+      // there should always something that has focus. if incoming focusabilityTracker is empty,
+      // it is a transition effect or nothing reported a dirty region and rendering was skipped.
+      if (!items.empty())
       {
-          return a.renderOrder < b.renderOrder;
-      });
+        std::vector<GUIFocusabilityItem> verifiedItems;
+        for (auto it = items.begin(); it != items.end(); ++it)
+        {
+          if ((*it).control->HasProcessed() && (*it).control->IsVisible())
+            verifiedItems.push_back(*it);
+        }
+
+        if (verifiedItems.size() != m_focus.items.size())
+        {
+          m_focus.items = verifiedItems;
+          std::sort(m_focus.items.begin(), m_focus.items.end(),
+            [] (GUIFocusabilityItem const& a, GUIFocusabilityItem const& b)
+          {
+              return a.renderOrder < b.renderOrder;
+          });
+        }
+        UpdateFocusability();
+      }
     }
-    UpdateFocusability();
   }
+
+  CDarwinUtils::UpdateFocusLayerMainThread();
 }
 
 void CFocusEngineHandler::UpdateFocusability()
@@ -564,8 +565,8 @@ void CFocusEngineHandler::UpdateFocusability()
       {
         // remove view that are same size as bounds
         // and do not have any items
-        if (items.empty() && focusabilityItem.renderRect == boundsRect)
-        continue;
+        //if (items.empty() && focusabilityItem.renderRect == boundsRect)
+        //  continue;
 
         FocusEngineCoreViews view;
         view.rect = (*it).renderRect;

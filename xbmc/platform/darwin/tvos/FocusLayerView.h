@@ -114,13 +114,13 @@ typedef struct FocusLayer
   void *core;
 
 @private
-  bool debug;
   bool focusable;
+  bool viewVisable;
   CGRect viewBounds;
   UIColor *frameColor;
 }
 
 - (void) setFocusable:(bool)focusable;
-- (void) SetSizeLocation:(CGRect)location;
+- (void) setViewVisable:(bool)viewVisable;
 
 @end
