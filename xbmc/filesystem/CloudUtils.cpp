@@ -34,6 +34,12 @@
 
 #include <stdlib.h>
 
+CCloudUtils& CCloudUtils::GetInstance()
+{
+  static CCloudUtils sCloudUtils;
+  return sCloudUtils;
+}
+
 void testclientinfo(void)
 {
   std::string clientInfoString = CClientPrivateInfo::Decrypt();
@@ -235,3 +241,42 @@ bool CCloudUtils::RefreshGoogleToken()
   return false;
 }
 
+bool CCloudUtils::GetURL(CFileItem &item)
+{
+  std::string path = item.GetPath();
+  if (StringUtils::StartsWithNoCase(path, "cloud://dropbox"))
+  {
+    StringUtils::TrimLeft(path,"cloud://dropbox");
+    CURL curl("https://api.dropboxapi.com");
+    curl.SetFileName("2/files/get_temporary_link");
+    // this is key to get back gzip encoded content
+    curl.SetProtocolOption("seekable", "0");
+    
+    CVariant body;
+    body["path"] = "/" + path;
+    
+    std::string data;
+    std::string playablePath;
+    CJSONVariantWriter::Write(body, data, true);
+    
+    std::string dropboxAccessToken = CCloudUtils::GetAccessToken("dropbox");
+    std::string response;
+    // execute the POST request
+    XFILE::CCurlFile curlfile;
+    curlfile.SetRequestHeader("Cache-Control", "no-cache");
+    curlfile.SetRequestHeader("Content-Type", "application/json");
+    curlfile.SetRequestHeader("Authorization", "Bearer " + dropboxAccessToken);
+    
+    if (curlfile.Post(curl.Get(), data, response))
+    {
+      CVariant reply;
+      if (CJSONVariantParser::Parse(response, reply))
+      {
+        playablePath = reply["link"].asString();
+        item.SetPath(playablePath);
+        return true;
+      }
+    }
+  }
+  return false;
+}

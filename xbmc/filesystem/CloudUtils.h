@@ -20,16 +20,19 @@
  */
 
 #include <string>
+#include "FileItem.h"
 
 class CCloudUtils
 {
 public:
+  static CCloudUtils &GetInstance();
   static void        ParseAuth2();
   static std::string GetGoogleAppKey();
   static std::string GetDropboxAppKey();
   static std::string GetDropboxCSRF();
   static bool        AuthorizeCloud(std::string service, std::string authCode);
   static std::string GetAccessToken(std::string service);
+  bool               GetURL(CFileItem &item);
 private:
   static std::string GenerateRandom16Byte();
   static void        CheckGoogleTokenValidity();

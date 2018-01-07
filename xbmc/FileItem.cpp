@@ -1096,6 +1096,11 @@ bool CFileItem::IsPVR() const
   return CUtil::IsPVR(m_strPath);
 }
 
+bool CFileItem::IsCloud() const
+{
+  return CUtil::IsCloud(m_strPath);
+}
+
 bool CFileItem::IsLiveTV() const
 {
   return URIUtils::IsLiveTV(m_strPath);
