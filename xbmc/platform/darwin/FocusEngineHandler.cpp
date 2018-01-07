@@ -315,7 +315,7 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
       return;
     }
   }
-  focus.isAnimating = false;
+
   focus.rootFocus = focus.window->GetFocusedControl();
   if (!focus.rootFocus)
     return;
@@ -325,8 +325,6 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
 
   if (!focus.rootFocus->HasFocus())
     return;
-
-  focus.isAnimating = focus.window->IsAnimating(ANIM_TYPE_CONDITIONAL);
 
   switch(focus.rootFocus->GetControlType())
   {
@@ -372,7 +370,6 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
     case CGUIControl::GUICONTROL_GROUPLIST:
       {
         CGUIControlGroupList *controlGroupList = (CGUIControlGroupList*)focus.rootFocus;
-        focus.isAnimating |= controlGroupList->IsScrolling();
         focus.itemFocus = focus.rootFocus->GetSelectionControl();
       }
       break;
@@ -383,7 +380,6 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
     case CGUIControl::GUICONTAINER_FIXEDLIST:
       {
         CGUIBaseContainer *baseContainer = (CGUIBaseContainer*)focus.rootFocus;
-        focus.isAnimating |= baseContainer->IsScrolling();
         focus.itemFocus = focus.rootFocus->GetSelectionControl();
       }
       break;
@@ -498,11 +494,48 @@ void CFocusEngineHandler::SetGUIFocusabilityItems(const CFocusabilityTracker &fo
           });
         }
         UpdateFocusability();
+        UpdateIsAnimating();
+        //if (m_focus.isAnimating)
+        //  CLog::Log(LOGDEBUG, "Control is animating");
       }
     }
   }
 
   CDarwinUtils::UpdateFocusLayerMainThread();
+}
+
+void CFocusEngineHandler::UpdateIsAnimating()
+{
+  m_focus.isAnimating = false;
+
+  CGUIControlGroupList *controlGroupList = dynamic_cast<CGUIControlGroupList*>(m_focus.rootFocus);
+  if (controlGroupList)
+  {
+    m_focus.isAnimating |= controlGroupList->IsScrolling();
+    if (m_focus.isAnimating)
+      return;
+  }
+  CGUIBaseContainer *baseContainer = dynamic_cast<CGUIBaseContainer*>(m_focus.rootFocus);
+  if (baseContainer)
+  {
+    m_focus.isAnimating |= baseContainer->IsScrolling();
+    if (m_focus.isAnimating)
+      return;
+  }
+
+  for (auto viewIt = m_focus.views.begin(); viewIt != m_focus.views.end(); ++viewIt)
+  {
+    if ((*viewIt).control->IsSliding())
+    {
+      m_focus.isAnimating = true;
+      break;
+    }
+    if ((*viewIt).control->IsScrolling())
+    {
+      m_focus.isAnimating = true;
+      break;
+    }
+  }
 }
 
 void CFocusEngineHandler::UpdateFocusability()

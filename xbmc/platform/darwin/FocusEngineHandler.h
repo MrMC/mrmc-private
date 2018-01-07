@@ -181,6 +181,7 @@ class CFocusEngineHandler
 
 private:
   void          UpdateFocus(FocusEngineFocus &focus);
+  void          UpdateIsAnimating();
   void          UpdateFocusability();
 
   CFocusEngineHandler();
