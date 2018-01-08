@@ -87,7 +87,7 @@ bool CCloudDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       path = URIUtils::AddFileToFolder(path, serviceName);
       URIUtils::AddSlashAtEnd(path);
       pItem->SetPath(path);
-      pItem->SetLabel("Goolge Drive");
+      pItem->SetLabel("Google Drive");
       pItem->SetLabelPreformated(true);
       pItem->m_bIsFolder = true;
       pItem->m_bIsShareOrDrive = true;
