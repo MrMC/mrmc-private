@@ -80,66 +80,66 @@ bool CCloudDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       pItem->FillInDefaultIcon();
       items.Add(pItem);
     }
-    {
-      std::string serviceName = "gdrive";
-      CFileItemPtr pItem(new CFileItem(serviceName));
-      std::string path(rootpath);
-      path = URIUtils::AddFileToFolder(path, serviceName);
-      URIUtils::AddSlashAtEnd(path);
-      pItem->SetPath(path);
-      pItem->SetLabel("Google Drive");
-      pItem->SetLabelPreformated(true);
-      pItem->m_bIsFolder = true;
-      pItem->m_bIsShareOrDrive = true;
-      // set the default folder icon
-      pItem->FillInDefaultIcon();
-      items.Add(pItem);
-    }
-    {
-      std::string serviceName = "msonedrive";
-      CFileItemPtr pItem(new CFileItem(serviceName));
-      std::string path(rootpath);
-      path = URIUtils::AddFileToFolder(path, serviceName);
-      URIUtils::AddSlashAtEnd(path);
-      pItem->SetPath(path);
-      pItem->SetLabel("Microsoft OneDrive");
-      pItem->SetLabelPreformated(true);
-      pItem->m_bIsFolder = true;
-      pItem->m_bIsShareOrDrive = true;
-      // set the default folder icon
-      pItem->FillInDefaultIcon();
-      items.Add(pItem);
-    }
-    {
-      std::string serviceName = "box";
-      CFileItemPtr pItem(new CFileItem(serviceName));
-      std::string path(rootpath);
-      path = URIUtils::AddFileToFolder(path, serviceName);
-      URIUtils::AddSlashAtEnd(path);
-      pItem->SetPath(path);
-      pItem->SetLabel("Box");
-      pItem->SetLabelPreformated(true);
-      pItem->m_bIsFolder = true;
-      pItem->m_bIsShareOrDrive = true;
-      // set the default folder icon
-      pItem->FillInDefaultIcon();
-      items.Add(pItem);
-    }
-    {
-      std::string serviceName = "owncloud";
-      CFileItemPtr pItem(new CFileItem(serviceName));
-      std::string path(rootpath);
-      path = URIUtils::AddFileToFolder(path, serviceName);
-      URIUtils::AddSlashAtEnd(path);
-      pItem->SetPath(path);
-      pItem->SetLabel("OwnCloud");
-      pItem->SetLabelPreformated(true);
-      pItem->m_bIsFolder = true;
-      pItem->m_bIsShareOrDrive = true;
-      // set the default folder icon
-      pItem->FillInDefaultIcon();
-      items.Add(pItem);
-    }
+//    {
+//      std::string serviceName = "gdrive";
+//      CFileItemPtr pItem(new CFileItem(serviceName));
+//      std::string path(rootpath);
+//      path = URIUtils::AddFileToFolder(path, serviceName);
+//      URIUtils::AddSlashAtEnd(path);
+//      pItem->SetPath(path);
+//      pItem->SetLabel("Google Drive");
+//      pItem->SetLabelPreformated(true);
+//      pItem->m_bIsFolder = true;
+//      pItem->m_bIsShareOrDrive = true;
+//      // set the default folder icon
+//      pItem->FillInDefaultIcon();
+//      items.Add(pItem);
+//    }
+//    {
+//      std::string serviceName = "msonedrive";
+//      CFileItemPtr pItem(new CFileItem(serviceName));
+//      std::string path(rootpath);
+//      path = URIUtils::AddFileToFolder(path, serviceName);
+//      URIUtils::AddSlashAtEnd(path);
+//      pItem->SetPath(path);
+//      pItem->SetLabel("Microsoft OneDrive");
+//      pItem->SetLabelPreformated(true);
+//      pItem->m_bIsFolder = true;
+//      pItem->m_bIsShareOrDrive = true;
+//      // set the default folder icon
+//      pItem->FillInDefaultIcon();
+//      items.Add(pItem);
+//    }
+//    {
+//      std::string serviceName = "box";
+//      CFileItemPtr pItem(new CFileItem(serviceName));
+//      std::string path(rootpath);
+//      path = URIUtils::AddFileToFolder(path, serviceName);
+//      URIUtils::AddSlashAtEnd(path);
+//      pItem->SetPath(path);
+//      pItem->SetLabel("Box");
+//      pItem->SetLabelPreformated(true);
+//      pItem->m_bIsFolder = true;
+//      pItem->m_bIsShareOrDrive = true;
+//      // set the default folder icon
+//      pItem->FillInDefaultIcon();
+//      items.Add(pItem);
+//    }
+//    {
+//      std::string serviceName = "owncloud";
+//      CFileItemPtr pItem(new CFileItem(serviceName));
+//      std::string path(rootpath);
+//      path = URIUtils::AddFileToFolder(path, serviceName);
+//      URIUtils::AddSlashAtEnd(path);
+//      pItem->SetPath(path);
+//      pItem->SetLabel("OwnCloud");
+//      pItem->SetLabelPreformated(true);
+//      pItem->m_bIsFolder = true;
+//      pItem->m_bIsShareOrDrive = true;
+//      // set the default folder icon
+//      pItem->FillInDefaultIcon();
+//      items.Add(pItem);
+//    }
 
     return true;
   }
