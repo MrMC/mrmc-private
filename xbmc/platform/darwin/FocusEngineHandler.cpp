@@ -38,6 +38,9 @@
 #include "utils/XBMCTinyXML.h"
 #include "platform/darwin/DarwinUtils.h"
 
+#define VALID_FOCUS_WINDOW(focus) (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
+#define NOT_VALID_FOCUS_WINDOW(focus) (!focus.window || focus.windowID == 0 && focus.windowID == WINDOW_INVALID)
+
 static std::atomic<long> sg_focusenginehandler_lock {0};
 CFocusEngineHandler* CFocusEngineHandler::m_instance = nullptr;
 
@@ -227,7 +230,7 @@ CFocusEngineHandler::GetFocusRect()
   focus.windowID = m_focus.windowID;
   focus.hideViews = m_focus.hideViews;
   lock.Leave();
-  if (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
+  if (VALID_FOCUS_WINDOW(focus))
   {
     UpdateFocus(focus);
     if (focus.itemFocus)
@@ -271,7 +274,7 @@ ORIENTATION CFocusEngineHandler::GetFocusOrientation()
   focus.windowID = m_focus.windowID;
   focus.hideViews = m_focus.hideViews;
   lock.Leave();
-  if (focus.window && focus.windowID != 0 && focus.windowID != WINDOW_INVALID)
+  if (VALID_FOCUS_WINDOW(focus))
   {
     UpdateFocus(focus);
     if (focus.itemFocus)
@@ -302,11 +305,19 @@ void CFocusEngineHandler::UpdateFocus(FocusEngineFocus &focus)
 {
   // if focus.window is valid, use it and
   // skip finding focused window else invalidate focus
-  if (!focus.window || focus.windowID == 0 || focus.windowID == WINDOW_INVALID)
+  if (NOT_VALID_FOCUS_WINDOW(focus))
   {
     focus.hideViews = false;
     focus.windowID = g_windowManager.GetActiveWindowID();
-    focus.window = g_windowManager.GetWindow(focus.windowID);
+    // handle window id aliases but we need to keep orginal
+    // window id as keymaps depend on them
+    if (focus.windowID == WINDOW_FULLSCREEN_LIVETV || focus.windowID == WINDOW_VIDEO_MENU)
+      focus.window = g_windowManager.GetWindow(WINDOW_FULLSCREEN_VIDEO);
+    else if (focus.windowID == WINDOW_FULLSCREEN_RADIO)
+      focus.window = g_windowManager.GetWindow(WINDOW_VISUALISATION);
+    else
+      focus.window = g_windowManager.GetWindow(focus.windowID);
+
     if (!focus.window)
       return;
     if(focus.windowID == 0 || focus.windowID == WINDOW_INVALID)
@@ -380,11 +391,11 @@ void CFocusEngineHandler::GetCoreViews(std::vector<FocusEngineCoreViews> &views)
 {
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
-  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+  if (VALID_FOCUS_WINDOW(m_focus))
     views = m_focus.views;
 }
 
-bool CFocusEngineHandler::CoreViewsIsEqual(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
+bool CFocusEngineHandler::CoreViewsAreEqual(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
 {
   if (views1.size() != views2.size())
     return false;
@@ -399,7 +410,7 @@ bool CFocusEngineHandler::CoreViewsIsEqual(std::vector<FocusEngineCoreViews> &vi
   return true;
 }
 
-bool CFocusEngineHandler::CoreViewsIsEqualSize(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
+bool CFocusEngineHandler::CoreViewsHaveSameSize(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
 {
   if (views1.size() != views2.size())
     return false;
@@ -414,7 +425,7 @@ bool CFocusEngineHandler::CoreViewsIsEqualSize(std::vector<FocusEngineCoreViews>
   return true;
 }
 
-bool CFocusEngineHandler::CoreViewsIsEqualControls(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
+bool CFocusEngineHandler::CoreViewsHaveSameControls(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2)
 {
   if (views1.size() != views2.size())
     return false;
@@ -446,7 +457,7 @@ void CFocusEngineHandler::GetGUIFocusabilityItems(std::vector<GUIFocusabilityIte
 {
   // skip finding focused window, use current
   CSingleLock lock(m_focusLock);
-  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+  if (VALID_FOCUS_WINDOW(m_focus))
   {
     if (m_focus.rootFocus)
       items = m_focus.items;
@@ -458,7 +469,7 @@ void CFocusEngineHandler::GetGUIFocusabilityItems(std::vector<GUIFocusabilityIte
 void CFocusEngineHandler::SetGUIFocusabilityItems(const CFocusabilityTracker &focusabilityTracker)
 {
   CSingleLock lock(m_focusLock);
-  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+  if (VALID_FOCUS_WINDOW(m_focus))
   {
     auto items = focusabilityTracker.GetItems();
     // there should always something that has focus. if incoming focusabilityTracker is empty,
@@ -496,7 +507,7 @@ void CFocusEngineHandler::UpdateFocusability()
 {
   // use current focused window
   CSingleLock lock(m_focusLock);
-  if (m_focus.window && m_focus.windowID != 0 && m_focus.windowID != WINDOW_INVALID)
+  if (VALID_FOCUS_WINDOW(m_focus))
   {
     CRect boundsRect = CRect(0, 0, (float)g_graphicsContext.GetWidth(), (float)g_graphicsContext.GetHeight());
     // update all renderRects 1st, we depend on them being correct in next step.
@@ -679,11 +690,13 @@ void CFocusEngineHandler::UpdateNeedToHideViews()
 
   for (auto viewIt = m_focus.views.begin(); viewIt != m_focus.views.end(); ++viewIt)
   {
+    /*
     if ((*viewIt).control->IsSliding())
     {
       m_focus.hideViews = true;
       break;
     }
+    */
     if ((*viewIt).control->IsScrolling())
     {
       m_focus.hideViews = true;

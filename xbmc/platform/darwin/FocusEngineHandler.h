@@ -172,9 +172,9 @@ class CFocusEngineHandler
   bool          ShowVisibleRects();
   ORIENTATION   GetFocusOrientation();
   void          GetCoreViews(std::vector<FocusEngineCoreViews> &views);
-  static bool   CoreViewsIsEqual(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
-  static bool   CoreViewsIsEqualSize(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
-  static bool   CoreViewsIsEqualControls(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
+  static bool   CoreViewsAreEqual(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
+  static bool   CoreViewsHaveSameSize(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
+  static bool   CoreViewsHaveSameControls(std::vector<FocusEngineCoreViews> &views1, std::vector<FocusEngineCoreViews> &views2);
   void          GetGUIFocusabilityItems(std::vector<GUIFocusabilityItem> &items);
   void          SetGUIFocusabilityItems(const CFocusabilityTracker &focusabilityTracker);
 
