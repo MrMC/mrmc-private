@@ -665,6 +665,7 @@ void CFocusEngineHandler::UpdateFocusability()
 
 void CFocusEngineHandler::UpdateNeedToHideViews()
 {
+  bool debug = false;
   // we hide views when certain controls are animating
   // such as slide out effects. Check for two cases.
   // Sliding and Scrolling. This speeds up tvOS focus engine
@@ -673,34 +674,76 @@ void CFocusEngineHandler::UpdateNeedToHideViews()
   // again, then we rebuild and setup who has focus.
   m_focus.hideViews = false;
 
-  CGUIControlGroupList *controlGroupList = dynamic_cast<CGUIControlGroupList*>(m_focus.rootFocus);
-  if (controlGroupList)
-  {
-    m_focus.hideViews |= controlGroupList->IsScrolling();
-    if (m_focus.hideViews)
-      return;
-  }
   CGUIBaseContainer *baseContainer = dynamic_cast<CGUIBaseContainer*>(m_focus.rootFocus);
   if (baseContainer)
   {
-    m_focus.hideViews |= baseContainer->IsScrolling();
-    if (m_focus.hideViews)
+    if (baseContainer->IsSliding())
+    {
+      if (debug)
+        CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:CGUIBaseContainer");
+      m_focus.hideViews = true;
       return;
+    }
+    if (baseContainer->IsScrolling())
+    {
+      if (debug)
+        CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:CGUIBaseContainer");
+      m_focus.hideViews = true;
+      return;
+    }
+  }
+
+  CGUIControlGroupList *controlGroupList = dynamic_cast<CGUIControlGroupList*>(m_focus.rootFocus);
+  if (controlGroupList)
+  {
+    if (controlGroupList->IsSliding())
+    {
+      if (debug)
+        CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:CGUIControlGroupList");
+      m_focus.hideViews = true;
+      return;
+    }
+    if (controlGroupList->IsScrolling())
+    {
+      if (debug)
+        CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:CGUIControlGroupList");
+      m_focus.hideViews = true;
+      return;
+    }
   }
 
   for (auto viewIt = m_focus.views.begin(); viewIt != m_focus.views.end(); ++viewIt)
   {
-    /*
     if ((*viewIt).control->IsSliding())
     {
+      if (debug)
+        CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:CGUIControl");
       m_focus.hideViews = true;
-      break;
+      return;
     }
-    */
     if ((*viewIt).control->IsScrolling())
     {
+      if (debug)
+        CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:CGUIControl");
       m_focus.hideViews = true;
-      break;
+      return;
+    }
+    for (auto itemIt = (*viewIt).items.begin(); itemIt != (*viewIt).items.end(); ++itemIt)
+    {
+      if ((*itemIt).control->IsSliding())
+      {
+        if (debug)
+          CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:CGUIControl");
+        m_focus.hideViews = true;
+        return;
+      }
+      if ((*itemIt).control->IsScrolling())
+      {
+        if (debug)
+          CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:CGUIControl");
+        m_focus.hideViews = true;
+        return;
+      }
     }
   }
 }

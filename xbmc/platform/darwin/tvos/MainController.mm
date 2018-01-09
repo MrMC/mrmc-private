@@ -2065,12 +2065,6 @@ CGRect debugView2;
 //--------------------------------------------------------------
 - (void) updateFocusLayer
 {
-  volatile bool dumpit = false;
-  if (dumpit)
-  {
-    [self debugSubViews];
-  }
-
   bool hideViews = CFocusEngineHandler::GetInstance().NeedToHideViews();
   std::vector<FocusEngineCoreViews> views;
   CFocusEngineHandler::GetInstance().GetCoreViews(views);
