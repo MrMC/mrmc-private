@@ -2030,15 +2030,17 @@ CGRect debugView2;
 //--------------------------------------------------------------
 - (void) updateFocusLayer
 {
+  bool isBusy = CFocusEngineHandler::GetInstance().IsBusy();
   bool hideViews = CFocusEngineHandler::GetInstance().NeedToHideViews();
   std::vector<FocusEngineCoreViews> coreViews;
   CFocusEngineHandler::GetInstance().GetCoreViews(coreViews);
-  if (hideViews || coreViews.empty())
+  if (isBusy || hideViews || coreViews.empty())
   {
-    // we need a focusable focusView
-    // or can we unhook from the gestureRecognizer that traps
+    // if views are empty, we need a focusable focusView
+    // or we unhook from the gestureRecognizer that traps
     // UIPressTypeMenu and we will bounce out to tvOS home.
-    [self.focusView setFocusable:true];
+    if (isBusy || coreViews.empty())
+      [self.focusView setFocusable:true];
     _focusLayer.Reset();
     [self clearSubViews];
     [self updateFocusLayerInFocus];
