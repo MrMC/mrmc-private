@@ -613,6 +613,15 @@ void CFocusEngineHandler::UpdateNeedToHideViews()
   // again, then we rebuild and setup who has focus.
   m_focus.hideViews = false;
 
+  // window exceptions, we hide views if for these windows
+  if (m_focus.windowID == WINDOW_DIALOG_BUSY)
+  {
+    if (debug)
+      CLog::Log(LOGDEBUG, "UpdateNeedToHideViews:WINDOW_DIALOG_BUSY");
+    m_focus.hideViews = true;
+    return;
+  }
+
   CGUIBaseContainer *baseContainer = dynamic_cast<CGUIBaseContainer*>(m_focus.rootFocus);
   if (baseContainer)
   {
