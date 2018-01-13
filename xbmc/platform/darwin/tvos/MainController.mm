@@ -2035,11 +2035,10 @@ CGRect debugView2;
   CFocusEngineHandler::GetInstance().GetCoreViews(coreViews);
   if (hideViews || coreViews.empty())
   {
-    // if views are empty, we need a focusable focusView
-    // or we unhook from the gestureRecognizer that traps
+    // we need a focusable focusView
+    // or can we unhook from the gestureRecognizer that traps
     // UIPressTypeMenu and we will bounce out to tvOS home.
-    if (coreViews.empty())
-      [self.focusView setFocusable:true];
+    [self.focusView setFocusable:true];
     _focusLayer.Reset();
     [self clearSubViews];
     [self updateFocusLayerInFocus];
