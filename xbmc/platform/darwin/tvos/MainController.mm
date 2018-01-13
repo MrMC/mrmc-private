@@ -1739,7 +1739,6 @@ CGRect debugView2;
 
     if (!CGRectIntersectsRect(swipeStartingParentViewRect, nextFocusedItemRect))
     {
-      swipeNoMore = true;
       if (context.nextFocusedItem == self.focusViewTop ||
           context.nextFocusedItem == self.focusViewLeft ||
           context.nextFocusedItem == self.focusViewRight ||
@@ -1750,6 +1749,7 @@ CGRect debugView2;
       }
       else
       {
+        swipeNoMore = true;
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Not in same parent view");
         switch (context.focusHeading)
         {
