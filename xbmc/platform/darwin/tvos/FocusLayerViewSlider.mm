@@ -30,6 +30,28 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
+  barRect = frame;
+  // standard 16:9 video rect
+  videoRect = CGRectMake(0, 0, 400, 225);
+
+  CGRect screenRect = [UIScreen mainScreen].bounds;
+  // see if we are in upper or lower screen area
+  // we need to expand the view to include
+  // drawing room for line going from thumb position
+  // to thumbnail pict and thumbnail pict area
+  if (barRect.origin.y > screenRect.size.height/2)
+  {
+    // if in lower area, expand up
+    frame.origin.y -= videoRect.size.height + 2;
+    frame.size.height += videoRect.size.height + frame.size.height;
+  }
+  else
+  {
+    // if in upper area, expand down
+    frame.origin.y += videoRect.size.height + frame.size.height + 2;
+    frame.size.height += videoRect.size.height;
+  }
+
 	self = [super initWithFrame:frame];
 	if (self)
 	{
@@ -61,17 +83,17 @@
 
 - (double)value
 {
-  CGUISliderControl *sliderControl = (CGUISliderControl*)self->core;
-  if (sliderControl)
-    self._value = sliderControl->GetPercentage(CGUISliderControl::RangeSelectorLower);
+  //CGUISliderControl *sliderControl = (CGUISliderControl*)self->core;
+  //if (sliderControl)
+  //  self._value = sliderControl->GetPercentage(CGUISliderControl::RangeSelectorLower);
   return self._value;
 }
 
 - (void)setValue:(double)newValue
 {
-  CGUISliderControl *sliderControl = (CGUISliderControl*)self->core;
-  if (sliderControl)
-    sliderControl->SetPercentage(newValue, CGUISliderControl::RangeSelectorLower);
+  //CGUISliderControl *sliderControl = (CGUISliderControl*)self->core;
+  //if (sliderControl)
+  //  sliderControl->SetPercentage(newValue, CGUISliderControl::RangeSelectorLower);
   self._value = newValue;
   [self updateViews];
   //delegate?.slider(self, didChangeValue: value)
@@ -105,6 +127,40 @@
 - (void)drawRect:(CGRect)rect
 {
   [super drawRect:rect];
+  CGContextRef ctx = UIGraphicsGetCurrentContext();
+
+/*
+  CGContextSetLineWidth(ctx, 1.0);
+  CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
+  CGContextStrokeRect(ctx, self.bounds);
+
+  CGContextSetLineWidth(ctx, 1.0);
+  CGContextSetStrokeColorWithColor(ctx, [[UIColor orangeColor] CGColor]);
+  CGContextStrokeRect(ctx, thumbRect);
+*/
+
+  CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
+  CGContextSetLineWidth(ctx, 2.0);
+  CGPoint thumbPointerBGN = CGPointMake(CGRectGetMidX(thumbRect), CGRectGetMinY(thumbRect));
+  CGPoint thumbPointerEND = CGPointMake(thumbPointerBGN.x, CGRectGetMaxY(thumbRect));
+  CGContextMoveToPoint(ctx, thumbPointerBGN.x, thumbPointerBGN.y);
+  CGContextAddLineToPoint(ctx, thumbPointerEND.x, thumbPointerEND.y);
+  CGContextStrokePath(ctx);
+
+  videoRect = CGRectMake(0, 0, 400, 225);
+  videoRect.origin.x = CGRectGetMidX(thumbRect) - videoRect.size.width/2;
+  videoRect.origin.y = thumbRect.origin.y - videoRect.size.height;
+  videoRect.origin.y -= 2;
+  if (CGRectGetMinX(videoRect) < CGRectGetMinX(self.bounds))
+    videoRect.origin.x = self.bounds.origin.x;
+  if (CGRectGetMaxX(videoRect) > CGRectGetMaxX(self.bounds))
+    videoRect.origin.x = CGRectGetMaxX(self.bounds) - videoRect.size.width;
+  CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
+  CGContextFillRect(ctx, videoRect);
+
+  CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
+  CGContextSetLineWidth(ctx, 0.5);
+  CGContextStrokeRect(ctx, videoRect);
 }
 
 //--------------------------------------------------------------
@@ -168,7 +224,7 @@
       {
         double swipesForFullRange = 8.0;
         double leading = thumbConstant + translation.x / swipesForFullRange;
-        [self set:leading / self.bounds.size.width];
+        [self set:leading / barRect.size.width];
       }
       break;
     case UIGestureRecognizerStateEnded:
@@ -195,7 +251,12 @@
 {
   if (distance == 0.0)
     return;
-  thumb = self.bounds.size.width * (CGFloat)((self.value - min) / distance);
+  thumb = barRect.size.width * (CGFloat)((self.value - min) / distance);
+  CGPoint thumbPoint = CGPointMake(barRect.origin.x + thumb, barRect.origin.y);
+  thumbRect = CGRectMake(thumbPoint.x, thumbPoint.y, barRect.size.height, barRect.size.height);
+  if (CGRectGetMaxX(thumbRect) > CGRectGetMaxX(self.bounds))
+    thumbRect.origin.x = CGRectGetMaxX(self.bounds) - thumbRect.size.width;
+  [self setNeedsDisplay];
   // seekerLabel.text = [delegate slider:self textWithValue:value];
   //seekerLabel.text = delegate?.slider(self, textWithValue: value) ?? "\(Int(value))"
 }
@@ -204,7 +265,7 @@
 - (void)handleDeceleratingTimer:(id)obj
 {
   double leading = thumbConstant + deceleratingVelocity * 0.01;
-  [self set:(double)leading / self.bounds.size.width];
+  [self set:(double)leading / barRect.size.width];
   thumbConstant = thumb;
 
   deceleratingVelocity *= decelerationRate;

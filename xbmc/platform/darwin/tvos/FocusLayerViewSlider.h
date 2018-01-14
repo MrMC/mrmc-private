@@ -40,6 +40,9 @@
 
 @private
   double thumb;
+  CGRect thumbRect;
+  CGRect barRect;
+  CGRect videoRect;
   double thumbConstant;
   double distance;
   CGFloat deceleratingVelocity;
