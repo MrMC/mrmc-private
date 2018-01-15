@@ -22,6 +22,7 @@
 #import <UIKit/UIKit.h>
 #import "platform/darwin/tvos/FocusLayerView.h"
 
+class CProgressThumbNailer;
 @class FocusLayerViewSlider;
 
 @protocol FocusLayerViewSliderDelegate
@@ -40,9 +41,6 @@
 
 @private
   double thumb;
-  CGRect thumbRect;
-  CGRect barRect;
-  CGRect videoRect;
   double thumbConstant;
   double distance;
   CGFloat deceleratingVelocity;
@@ -50,6 +48,12 @@
   double  animationSpeed;
   CGFloat decelerationRate;
   CGFloat decelerationMaxVelocity;
+
+  CGRect thumbRect;
+  CGRect barRect;
+  CGRect videoRect;
+  CGImageRef thumbImage;
+  CProgressThumbNailer *thumbNailer;
 }
 @property (nonatomic) double _value;
 @property (nonatomic, weak) id<FocusLayerViewSliderDelegate> delegate;

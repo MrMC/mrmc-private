@@ -19,7 +19,11 @@
  */
 
 #import "platform/darwin/tvos/FocusLayerViewSlider.h"
+
+#import "Application.h"
+#import "FileItem.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
+#import "platform/darwin/tvos/ProgressThumbNailer.h"
 #import "guilib/GUISliderControl.h"
 #import "utils/log.h"
 
@@ -55,7 +59,6 @@
 	self = [super initWithFrame:frame];
 	if (self)
 	{
-    self.value = 0.0;
 
     self->min = 0.0;
     self->max = 100.0;
@@ -63,6 +66,23 @@
     self->animationSpeed = 1.0;
     self->decelerationRate = 0.92;
     self->decelerationMaxVelocity = 1000;
+    float percentage = 0.0;
+    self->thumbImage = nullptr;
+    self->thumbNailer = nullptr;
+    if (g_application.m_pPlayer->IsPlayingVideo())
+    {
+      // get percentage from application, includes stacks
+      percentage = g_application.GetPercentage() / 100.0;
+      self->thumbNailer = new CProgressThumbNailer(g_application.CurrentFileItem());
+    }
+    // initial slider position
+    [self set:percentage];
+    /*
+    self._value = distance * (double)(percentage > 1 ? 1 : (percentage < 0 ? 0 : percentage)) + min;;
+    self->thumb = self._value;
+    self->thumbConstant = self._value;
+    */
+
 
     auto pan = [[UIPanGestureRecognizer alloc]
       initWithTarget:self action:@selector(handlePanGesture:)];
@@ -79,6 +99,12 @@
     [self addGestureRecognizer:tapRecognizer];
   }
 	return self;
+}
+
+- (void)dealloc
+{
+  SAFE_DELETE(self->thumbNailer);
+  CGImageRelease(self->thumbImage);
 }
 
 - (double)value
@@ -157,6 +183,12 @@
     videoRect.origin.x = CGRectGetMaxX(self.bounds) - videoRect.size.width;
   CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
   CGContextFillRect(ctx, videoRect);
+
+  if (self->thumbImage)
+  {
+    // image is scaled, if necessary, to fit into rect
+    CGContextDrawImage(ctx, videoRect, self->thumbImage);
+  }
 
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
   CGContextSetLineWidth(ctx, 0.5);
@@ -256,6 +288,13 @@
   thumbRect = CGRectMake(thumbPoint.x, thumbPoint.y, barRect.size.height, barRect.size.height);
   if (CGRectGetMaxX(thumbRect) > CGRectGetMaxX(self.bounds))
     thumbRect.origin.x = CGRectGetMaxX(self.bounds) - thumbRect.size.width;
+  if (self->thumbNailer)
+  {
+    if (!self->thumbNailer->IsInitialized())
+      self->thumbNailer->Initialize();
+    CGImageRelease(self->thumbImage);
+    self->thumbImage = self->thumbNailer->ExtractThumb(100.0 * ((self.value - min) / distance));
+  }
   [self setNeedsDisplay];
   // seekerLabel.text = [delegate slider:self textWithValue:value];
   //seekerLabel.text = delegate?.slider(self, textWithValue: value) ?? "\(Int(value))"
