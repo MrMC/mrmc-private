@@ -307,6 +307,14 @@
     self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
 }
 
+- (double) getSeekTimeSeconds
+{
+  if (self->thumbNailer)
+    return 1000.0 * self->thumbNailer->GetTimeMilliSeconds();
+
+  return -1;
+}
+
 - (void)updateViews:(id)arg
 {
   if (distance == 0.0)
