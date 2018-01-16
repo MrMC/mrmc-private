@@ -42,6 +42,7 @@
 #include "DVDDemuxers/DVDFactoryDemuxer.h"
 #include "DVDDemuxers/DVDDemuxFFmpeg.h"
 #include "DVDCodecs/DVDCodecs.h"
+#include "DVDCodecs/DVDCodecUtils.h"
 #include "DVDCodecs/DVDFactoryCodec.h"
 #include "DVDCodecs/Video/DVDVideoCodec.h"
 #include "DVDCodecs/Video/DVDVideoCodecFFmpeg.h"
@@ -265,7 +266,8 @@ CGImageRef CProgressThumbNailer::ExtractThumb(int seekTime)
       int scaledLineSize = nWidth * 3;
 
       struct SwsContext *context = sws_getContext(picture.iWidth, picture.iHeight,
-            AV_PIX_FMT_YUV420P, nWidth, nHeight, AV_PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+            (AVPixelFormat)CDVDCodecUtils::PixfmtFromEFormat(picture.format), nWidth, nHeight,
+            AV_PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
       if (context)
       {
         // CGImages have flipped in y-axis coordinated, we can do the flip as we convert/scale
