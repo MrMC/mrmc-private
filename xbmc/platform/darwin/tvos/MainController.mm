@@ -141,7 +141,6 @@ MainController *g_xbmcController;
 @property (nonatomic, nullable) FocusLayerView *focusViewBottom;
 @property (nonatomic, assign) FocusLayer focusLayer;
 @property (strong, nonatomic) NSTimer *focusIdleTimer;
-@property (nonatomic, nullable) FocusLayerViewSlider *m_slider;
 @end
 
 #pragma mark - MainController implementation
@@ -1284,7 +1283,6 @@ CGRect swipeStartingParentViewRect;
       case UIPressTypeMenu:
       case UIPressTypeSelect:
       case UIPressTypePlayPause:
-        _m_slider = press.responder;
         break;
       default:
       return NO;
