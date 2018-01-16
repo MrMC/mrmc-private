@@ -22,6 +22,7 @@
 
 #import "Application.h"
 #import "FileItem.h"
+#import "messaging/ApplicationMessenger.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/ProgressThumbNailer.h"
 #import "guilib/GUISliderControl.h"
@@ -226,6 +227,7 @@
   CLog::Log(LOGDEBUG, "Slider::handleDownTapGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
+  KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
 }
 
 //--------------------------------------------------------------
