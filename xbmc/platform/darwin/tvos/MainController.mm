@@ -1480,12 +1480,15 @@ CGRect swipeStartingParentViewRect;
           {
             FocusLayerViewSlider *viewSlider = (FocusLayerViewSlider*)_focusLayer.infocus.view;
             double percentage = [viewSlider getSeekTimePercentage];
-            if (g_application.m_pPlayer->GetPercentage() != (float)percentage)
+            // only seek if change is more than 0.5%
+            if (fabs(g_application.m_pPlayer->GetPercentage() - (float)percentage) > 0.5f)
             {
               g_application.SeekPercentage(percentage, true);
               // turn off display after seek.
               g_infoManager.SetDisplayAfterSeek(0);
             }
+            else
+              [self sendButtonPressed:SiriRemote_PausePlayClick];
           }
           else
             [self sendButtonPressed:SiriRemote_PausePlayClick];
