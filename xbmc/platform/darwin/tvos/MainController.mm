@@ -29,6 +29,7 @@
 #import "Application.h"
 
 #import "CompileInfo.h"
+#import "GUIInfoManager.h"
 #import "Util.h"
 #import "cores/AudioEngine/AEFactory.h"
 #import "guilib/GUIWindowManager.h"
@@ -140,7 +141,7 @@ MainController *g_xbmcController;
 @property (nonatomic, nullable) FocusLayerView *focusViewBottom;
 @property (nonatomic, assign) FocusLayer focusLayer;
 @property (strong, nonatomic) NSTimer *focusIdleTimer;
-@property (nonatomic, assign) FocusLayerViewSlider *m_slider;
+@property (nonatomic, nullable) FocusLayerViewSlider *m_slider;
 @end
 
 #pragma mark - MainController implementation
@@ -1482,6 +1483,8 @@ CGRect swipeStartingParentViewRect;
             FocusLayerViewSlider *viewSlider = (FocusLayerViewSlider*)_focusLayer.infocus.view;
             double percentage = [viewSlider getSeekTimePercentage];
             g_application.SeekPercentage(percentage, true);
+            // turn off display after seek.
+            g_infoManager.SetDisplayAfterSeek(0);
           }
           else
             [self sendButtonPressed:SiriRemote_PausePlayClick];
