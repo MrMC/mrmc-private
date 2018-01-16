@@ -49,5 +49,6 @@ class CProgressThumbNailer;
 @property (nonatomic) double _value;
 
 - (double) getSeekTimeSeconds;
+- (double) getSeekTimePercentage;
 
 @end

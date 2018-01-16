@@ -315,6 +315,19 @@
   return -1;
 }
 
+- (double) getSeekTimePercentage
+{
+  if (self->thumbNailer)
+  {
+    int seekTime =  self->thumbNailer->GetTimeMilliSeconds() - 10000;
+    int totalTime =  self->thumbNailer->GetTotalTimeMilliSeconds();
+    double percentage = (double)seekTime / totalTime;
+    return 100.0 * percentage;
+  }
+
+  return -1;
+}
+
 - (void)updateViews:(id)arg
 {
   if (distance == 0.0)
