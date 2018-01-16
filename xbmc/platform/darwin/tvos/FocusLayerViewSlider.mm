@@ -146,12 +146,15 @@
   CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
   CGContextFillRect(ctx, videoRect);
 
-  CGImageRef newThumbImage = self->thumbNailer->GetThumb();
-  if (newThumbImage)
+  if (self->thumbNailer)
   {
-    CGImageRelease(self->thumbImage);
-    self->thumbImage = newThumbImage;
-    CLog::Log(LOGDEBUG, "Slider::drawRect:got newThumbImage");
+    CGImageRef newThumbImage = self->thumbNailer->GetThumb();
+    if (newThumbImage)
+    {
+      CGImageRelease(self->thumbImage);
+      self->thumbImage = newThumbImage;
+      CLog::Log(LOGDEBUG, "Slider::drawRect:got newThumbImage");
+    }
   }
   if (self->thumbImage)
   {
