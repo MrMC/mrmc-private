@@ -26,6 +26,7 @@
 #import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/ProgressThumbNailer.h"
 #import "guilib/GUISliderControl.h"
+#import "utils/MathUtils.h"
 #import "utils/log.h"
 
 #pragma mark -
@@ -34,6 +35,8 @@
 - (id)initWithFrame:(CGRect)frame
 {
   barRect = frame;
+  barRect.origin.x += barRect.size.height/2;
+  barRect.size.width -= barRect.size.height;
   // standard 16:9 video rect
   videoRect = CGRectMake(0, 0, 400, 225);
 
@@ -52,8 +55,7 @@
   else
   {
     // if in upper area, expand down
-    frame.origin.y += videoRect.size.height + frame.size.height + 2;
-    frame.size.height += videoRect.size.height;
+    frame.size.height += videoRect.size.height + frame.size.height + 2;
     videoRectIsAboveBar = false;
   }
 
@@ -76,7 +78,9 @@
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
       // get percentage from application, includes stacks
-      percentage = g_application.GetPercentage() / 100.0;
+      double seekTime = g_application.GetTime();
+      double totalTime = g_application.GetTotalTime();
+      percentage = seekTime / totalTime;
       self->thumbNailer = new CProgressThumbNailer(g_application.CurrentFileItem());
     }
     // initial slider position
@@ -131,14 +135,48 @@
   [self updateViews:nil];
 }
 
+- (void)set:(double)percentage
+{
+  self.value = distance * (double)(percentage > 1 ? 1 : (percentage < 0 ? 0 : percentage)) + min;
+  CLog::Log(LOGDEBUG, "Slider::set percentage(%f), value(%f)", percentage, self.value);
+  if (self->thumbNailer)
+    self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
+}
+
+- (double) getSeekTimeSeconds
+{
+  if (self->thumbNailer)
+    return 1000.0 * self->thumbNailer->GetTimeMilliSeconds();
+
+  return -1;
+}
+
+- (double) getSeekTimePercentage
+{
+  if (self->thumbNailer)
+  {
+    int seekTime = self->thumbNailer->GetTimeMilliSeconds() - 2000;
+    int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
+    double percentage = (double)seekTime / totalTime;
+    CLog::Log(LOGDEBUG, "Slider::getSeekTimePercentage(%f), value(%f)", percentage, self.value);
+    return 100.0 * percentage;
+  }
+
+  return -1;
+}
+
 - (void)drawRect:(CGRect)rect
 {
   [super drawRect:rect];
   CGContextRef ctx = UIGraphicsGetCurrentContext();
-#if 0
+#if 1
   CGContextSetLineWidth(ctx, 1.0);
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
   CGContextStrokeRect(ctx, self.bounds);
+
+  CGContextSetLineWidth(ctx, 1.0);
+  CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
+  CGContextStrokeRect(ctx, barRect);
 
   CGContextSetLineWidth(ctx, 1.0);
   CGContextSetStrokeColorWithColor(ctx, [[UIColor orangeColor] CGColor]);
@@ -159,7 +197,7 @@
   if (videoRectIsAboveBar)
     videoRect.origin.y = thumbRect.origin.y - (videoRect.size.height + 2);
   else
-    videoRect.origin.y = thumbRect.origin.y + (videoRect.size.height + 2);
+    videoRect.origin.y = thumbRect.origin.y + (thumbRect.size.height + 4);
   // clamp left/right sides to left/right sides of bar
   if (CGRectGetMinX(videoRect) < CGRectGetMinX(self.bounds))
     videoRect.origin.x = self.bounds.origin.x;
@@ -201,6 +239,25 @@
   }
 }
 
+- (void)updateViews:(id)arg
+{
+  if (distance == 0.0)
+    return;
+  thumb = barRect.size.width * (CGFloat)((self.value - min) / distance);
+  CGPoint thumbPoint = CGPointMake(barRect.origin.x + thumb - barRect.size.height/2, barRect.origin.y);
+  thumbRect = CGRectMake(thumbPoint.x, thumbPoint.y, barRect.size.height, barRect.size.height);
+  if (CGRectGetMaxX(thumbRect) > CGRectGetMaxX(self.bounds))
+    thumbRect.origin.x = CGRectGetMaxX(self.bounds) - thumbRect.size.width;
+
+  dispatch_async(dispatch_get_main_queue(),^{
+    [self setNeedsDisplay];
+  });
+
+  // call ourselves back in 100ms
+  SEL singleParamSelector = @selector(updateViews:);
+  [self performSelector:singleParamSelector withObject:nil afterDelay:0.100];
+}
+
 //--------------------------------------------------------------
 - (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
 {
@@ -227,7 +284,10 @@
   CLog::Log(LOGDEBUG, "Slider::handleDownTapGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
-  KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
+  /*
+  KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
+    TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
+  */
 }
 
 //--------------------------------------------------------------
@@ -241,6 +301,7 @@
     if (self->thumbNailer)
     {
       int seekTime =  self->thumbNailer->GetTimeMilliSeconds() - 10000;
+      if (seekTime < 0) seekTime = 0;
       int totalTime =  self->thumbNailer->GetTotalTimeMilliSeconds();
       double percentage = (double)seekTime / totalTime;
       [self set:percentage];
@@ -261,6 +322,7 @@
     {
       int seekTime =  self->thumbNailer->GetTimeMilliSeconds() + 10000;
       int totalTime =  self->thumbNailer->GetTotalTimeMilliSeconds();
+      if (seekTime > totalTime) seekTime = totalTime;
       double percentage = (double)seekTime / totalTime;
       [self set:percentage];
       thumbConstant = thumb;
@@ -299,59 +361,6 @@
     default:
       break;
   }
-}
-
-- (void)set:(double)percentage
-{
-  self.value = distance * (double)(percentage > 1 ? 1 : (percentage < 0 ? 0 : percentage)) + min;
-  CLog::Log(LOGDEBUG, "Slider::set percentage(%f), value(%f)", percentage, self.value);
-  if (self->thumbNailer)
-    self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
-}
-
-- (double) getSeekTimeSeconds
-{
-  if (self->thumbNailer)
-    return 1000.0 * self->thumbNailer->GetTimeMilliSeconds();
-
-  return -1;
-}
-
-- (double) getSeekTimePercentage
-{
-  if (self->thumbNailer)
-  {
-    int seekTime =  self->thumbNailer->GetTimeMilliSeconds() - 10000;
-    int totalTime =  self->thumbNailer->GetTotalTimeMilliSeconds();
-    double percentage = (double)seekTime / totalTime;
-    return 100.0 * percentage;
-  }
-
-  return -1;
-}
-
-- (void)updateViews:(id)arg
-{
-  if (distance == 0.0)
-    return;
-  thumb = barRect.size.width * (CGFloat)((self.value - min) / distance);
-  CGPoint thumbPoint = CGPointMake(barRect.origin.x + thumb, barRect.origin.y);
-  thumbRect = CGRectMake(thumbPoint.x, thumbPoint.y, barRect.size.height, barRect.size.height);
-  if (CGRectGetMaxX(thumbRect) > CGRectGetMaxX(self.bounds))
-    thumbRect.origin.x = CGRectGetMaxX(self.bounds) - thumbRect.size.width;
-
-  if (self->thumbNailer)
-  {
-    if (!self->thumbImage)
-    {
-      // no thumbImage yet, thumbNailer might still be busy
-      SEL singleParamSelector = @selector(updateViews:);
-      [self performSelector:singleParamSelector withObject:nil afterDelay:0.100];
-    }
-  }
-  dispatch_async(dispatch_get_main_queue(),^{
-    [self setNeedsDisplay];
-  });
 }
 
 //--------------------------------------------------------------
