@@ -1846,6 +1846,9 @@ CGRect debugView2;
       }
       else
       {
+        if (!m_enableRemoteExpertMode && g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
+          return NO;
+        
         swipeNoMore = true;
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Not in same parent view");
         switch (context.focusHeading)
@@ -1869,6 +1872,9 @@ CGRect debugView2;
     }
   }
 
+  if (!m_enableRemoteExpertMode && g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
+    return NO;
+  
   switch (context.focusHeading)
   {
     case UIFocusHeadingUp:
