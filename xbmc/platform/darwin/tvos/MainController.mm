@@ -140,6 +140,7 @@ MainController *g_xbmcController;
 @property (nonatomic, nullable) FocusLayerView *focusViewBottom;
 @property (nonatomic, assign) FocusLayer focusLayer;
 @property (strong, nonatomic) NSTimer *focusIdleTimer;
+@property (nonatomic, assign) FocusLayerViewSlider *m_slider;
 @end
 
 #pragma mark - MainController implementation
@@ -1282,6 +1283,7 @@ CGRect swipeStartingParentViewRect;
       case UIPressTypeMenu:
       case UIPressTypeSelect:
       case UIPressTypePlayPause:
+        _m_slider = press.responder;
         break;
       default:
       return NO;
@@ -1479,8 +1481,10 @@ CGRect swipeStartingParentViewRect;
           {
             FocusLayerViewSlider *viewSlider = (FocusLayerViewSlider*)_focusLayer.infocus.view;
             double percentage = [viewSlider getSeekTimePercentage];
+            g_application.SeekPercentage(percentage, true);
           }
-          [self sendButtonPressed:SiriRemote_PausePlayClick];
+          else
+            [self sendButtonPressed:SiriRemote_PausePlayClick];
         }
         else
         {
