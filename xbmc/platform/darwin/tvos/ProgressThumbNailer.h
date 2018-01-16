@@ -21,6 +21,8 @@
 
 #import <string>
 #import "FileItem.h"
+#import "threads/Thread.h"
+#import "threads/CriticalSection.h"
 
 class CDVDInputStream;
 class CDVDDemux;
@@ -28,22 +30,34 @@ class CDVDVideoCodec;
 typedef struct CGImage* CGImageRef;
 
 class CProgressThumbNailer
+: public CThread
 {
 public:
   CProgressThumbNailer(const CFileItem& item);
  ~CProgressThumbNailer();
 
-  bool Initialize();
   bool IsInitialized() { return m_videoCodec != nullptr; };
-  CGImageRef ExtractThumb(float percentage);
+  void RequestThumbsAsTime(int seekTime);
+  void RequestThumbAsPercentage(float percentage);
+  CGImageRef GetThumb();
 
 private:
+  void Process();
+  CGImageRef ExtractThumb(int seekTime);
+
   std::string m_path;
   std::string m_redactPath;
   float m_aspect;
-  bool  m_forced_aspect;
-  CDVDInputStream *m_inputStream = nullptr;
-  CDVDDemux *m_demuxer = nullptr;
-  CDVDVideoCodec *m_videoCodec = nullptr;
+  bool m_forced_aspect;
+  int m_seekTime = -1;
+  int m_seekTimeOld = -1;
+  int m_seekPercentage = -1;
+  int m_seekPercentageOld = -1;
+  CEvent m_processSleep;
+  CGImageRef m_thumbImage = nullptr;;
   int m_videoStream = -1;
+  CCriticalSection m_critical;
+  CDVDInputStream *m_inputStream = nullptr;
+  CDVDDemux *m_videoDemuxer = nullptr;
+  CDVDVideoCodec *m_videoCodec = nullptr;
 };

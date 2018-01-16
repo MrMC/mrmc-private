@@ -30,8 +30,6 @@
 #pragma mark -
 @implementation FocusLayerViewSlider
 
-@synthesize delegate;
-
 - (id)initWithFrame:(CGRect)frame
 {
   barRect = frame;
@@ -59,12 +57,15 @@
 	self = [super initWithFrame:frame];
 	if (self)
 	{
+    self._value = 0.0;
 
     self->min = 0.0;
     self->max = 100.0;
+    self->thumb = 0.0;
+    self->thumbConstant = 0.0;
     self->distance = 100;
-    self->animationSpeed = 1.0;
-    self->decelerationRate = 0.92;
+    //self->decelerationRate = 0.92;
+    self->decelerationRate = 0.84;
     self->decelerationMaxVelocity = 1000;
     float percentage = 0.0;
     self->thumbImage = nullptr;
@@ -77,12 +78,6 @@
     }
     // initial slider position
     [self set:percentage];
-    /*
-    self._value = distance * (double)(percentage > 1 ? 1 : (percentage < 0 ? 0 : percentage)) + min;;
-    self->thumb = self._value;
-    self->thumbConstant = self._value;
-    */
-
 
     auto pan = [[UIPanGestureRecognizer alloc]
       initWithTarget:self action:@selector(handlePanGesture:)];
@@ -109,53 +104,20 @@
 
 - (double)value
 {
-  //CGUISliderControl *sliderControl = (CGUISliderControl*)self->core;
-  //if (sliderControl)
-  //  self._value = sliderControl->GetPercentage(CGUISliderControl::RangeSelectorLower);
   return self._value;
 }
 
 - (void)setValue:(double)newValue
 {
-  //CGUISliderControl *sliderControl = (CGUISliderControl*)self->core;
-  //if (sliderControl)
-  //  sliderControl->SetPercentage(newValue, CGUISliderControl::RangeSelectorLower);
   self._value = newValue;
-  [self updateViews];
-  //delegate?.slider(self, didChangeValue: value)
-}
-
-- (void)set:(double)value animated:(bool)animated
-{
-  [self stopDeceleratingTimer];
-  if (distance == 0.0)
-  {
-    self.value = value;
-    return;
-  }
-  double duration = fabs(self.value - value) / distance * animationSpeed;
-  self.value = value;
-  if (animated)
-  {
-    [UIView animateWithDuration:duration
-     animations:^{
-      [self setNeedsLayout];
-      [self layoutIfNeeded];
-    }
-    completion:^(BOOL finished){ }];
-  }
-  else
-  {
-    self.value = value;
-  }
+  [self updateViews:nil];
 }
 
 - (void)drawRect:(CGRect)rect
 {
   [super drawRect:rect];
   CGContextRef ctx = UIGraphicsGetCurrentContext();
-
-/*
+#if 0
   CGContextSetLineWidth(ctx, 1.0);
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
   CGContextStrokeRect(ctx, self.bounds);
@@ -163,7 +125,7 @@
   CGContextSetLineWidth(ctx, 1.0);
   CGContextSetStrokeColorWithColor(ctx, [[UIColor orangeColor] CGColor]);
   CGContextStrokeRect(ctx, thumbRect);
-*/
+#endif
 
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
   CGContextSetLineWidth(ctx, 2.0);
@@ -184,10 +146,24 @@
   CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
   CGContextFillRect(ctx, videoRect);
 
+  CGImageRef newThumbImage = self->thumbNailer->GetThumb();
+  if (newThumbImage)
+  {
+    CGImageRelease(self->thumbImage);
+    self->thumbImage = newThumbImage;
+    CLog::Log(LOGDEBUG, "Slider::drawRect:got newThumbImage");
+  }
   if (self->thumbImage)
   {
-    // image is scaled, if necessary, to fit into rect
-    CGContextDrawImage(ctx, videoRect, self->thumbImage);
+    // image will be scaled, if necessary, to fit into rect
+    // but we need to keep the correct aspect ration
+    size_t width = CGImageGetWidth(self->thumbImage);
+    size_t height = CGImageGetHeight(self->thumbImage);
+    float aspect = (float)width / height;
+    CGRect videoBounds = videoRect;
+    videoBounds.size.height = videoRect.size.width / aspect;
+    videoBounds.origin.y += videoRect.size.height - videoBounds.size.height;
+    CGContextDrawImage(ctx, videoBounds, self->thumbImage);
   }
 
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
@@ -237,7 +213,6 @@
 {
   CLog::Log(LOGDEBUG, "Slider::handleTapGesture");
   [self stopDeceleratingTimer];
-  //[delegate sliderDidTap:self];
 }
 
 //--------------------------------------------------------------
@@ -277,9 +252,11 @@
 {
   self.value = distance * (double)(percentage > 1 ? 1 : (percentage < 0 ? 0 : percentage)) + min;
   CLog::Log(LOGDEBUG, "Slider::set percentage(%f), value(%f)", percentage, self.value);
+  if (self->thumbNailer)
+    self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
 }
 
-- (void)updateViews
+- (void)updateViews:(id)arg
 {
   if (distance == 0.0)
     return;
@@ -288,16 +265,19 @@
   thumbRect = CGRectMake(thumbPoint.x, thumbPoint.y, barRect.size.height, barRect.size.height);
   if (CGRectGetMaxX(thumbRect) > CGRectGetMaxX(self.bounds))
     thumbRect.origin.x = CGRectGetMaxX(self.bounds) - thumbRect.size.width;
+
   if (self->thumbNailer)
   {
-    if (!self->thumbNailer->IsInitialized())
-      self->thumbNailer->Initialize();
-    CGImageRelease(self->thumbImage);
-    self->thumbImage = self->thumbNailer->ExtractThumb(100.0 * ((self.value - min) / distance));
+    if (!self->thumbImage)
+    {
+      // no thumbImage yet, thumbNailer might still be busy
+      SEL singleParamSelector = @selector(updateViews:);
+      [self performSelector:singleParamSelector withObject:nil afterDelay:0.100];
+    }
   }
-  [self setNeedsDisplay];
-  // seekerLabel.text = [delegate slider:self textWithValue:value];
-  //seekerLabel.text = delegate?.slider(self, textWithValue: value) ?? "\(Int(value))"
+  dispatch_async(dispatch_get_main_queue(),^{
+    [self setNeedsDisplay];
+  });
 }
 
 //--------------------------------------------------------------

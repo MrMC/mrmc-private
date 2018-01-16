@@ -23,15 +23,6 @@
 #import "platform/darwin/tvos/FocusLayerView.h"
 
 class CProgressThumbNailer;
-@class FocusLayerViewSlider;
-
-@protocol FocusLayerViewSliderDelegate
-  - (void)slider:(FocusLayerViewSlider*)slider textWithValue:(double)value;
-
-  - (void)sliderDidTap:(FocusLayerViewSlider*)slider;
-  - (void)slider:(FocusLayerViewSlider*)slider didChangeValue:(double)value;
-  - (void)slider:(FocusLayerViewSlider*)slider didUpdateFocusInContext:(UIFocusUpdateContext*)context withAnimationCoordinator:   (UIFocusAnimationCoordinator*)coordinator;
-@end
 
 @interface FocusLayerViewSlider  : FocusLayerView  <UIGestureRecognizerDelegate>
 {
@@ -43,19 +34,17 @@ class CProgressThumbNailer;
   double thumb;
   double thumbConstant;
   double distance;
-  CGFloat deceleratingVelocity;
-  NSTimer *deceleratingTimer;
-  double  animationSpeed;
   CGFloat decelerationRate;
+  CGFloat deceleratingVelocity;
   CGFloat decelerationMaxVelocity;
+  NSTimer *deceleratingTimer;
 
-  CGRect thumbRect;
   CGRect barRect;
+  CGRect thumbRect;
   CGRect videoRect;
   CGImageRef thumbImage;
   CProgressThumbNailer *thumbNailer;
 }
 @property (nonatomic) double _value;
-@property (nonatomic, weak) id<FocusLayerViewSliderDelegate> delegate;
 
 @end

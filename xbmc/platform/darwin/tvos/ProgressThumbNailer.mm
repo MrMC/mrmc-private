@@ -21,19 +21,17 @@
 #import "ProgressThumbNailer.h"
 
 #import <UIKit/UIKit.h>
-#import <CoreFoundation/CoreFoundation.h>
 
-#include "threads/SystemClock.h"
 #include "DVDFileInfo.h"
+#include "DVDStreamInfo.h"
 #include "FileItem.h"
+#include "cores/FFmpeg.h"
 #include "settings/AdvancedSettings.h"
-#include "pictures/Picture.h"
+#include "threads/SystemClock.h"
 #include "video/VideoInfoTag.h"
 #include "filesystem/StackDirectory.h"
 #include "utils/log.h"
-#include "utils/URIUtils.h"
 
-#include "DVDStreamInfo.h"
 #include "DVDInputStreams/DVDInputStream.h"
 #ifdef HAVE_LIBBLURAY
 #include "DVDInputStreams/DVDInputStreamBluray.h"
@@ -47,17 +45,9 @@
 #include "DVDCodecs/DVDFactoryCodec.h"
 #include "DVDCodecs/Video/DVDVideoCodec.h"
 #include "DVDCodecs/Video/DVDVideoCodecFFmpeg.h"
-#include "DVDDemuxers/DVDDemuxVobsub.h"
-
-#include "libavcodec/avcodec.h"
-#include "libswscale/swscale.h"
-#include "filesystem/File.h"
-#include "cores/FFmpeg.h"
-#include "TextureCache.h"
-#include "Util.h"
-#include "utils/LangCodeExpander.h"
 
 CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item)
+: CThread("ProgressThumbNailer")
 {
   m_path = item.GetPath();
   if (item.IsVideoDb() && item.HasVideoInfoTag())
@@ -65,16 +55,51 @@ CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item)
 
   if (item.IsStack())
     m_path = XFILE::CStackDirectory::GetFirstStackedFile(item.GetPath());
+
+  CThread::Create();
 }
 
 CProgressThumbNailer::~CProgressThumbNailer()
 {
+  if (IsRunning())
+  {
+    m_bStop = true;
+    m_processSleep.Set();
+    StopThread();
+  }
+
   SAFE_DELETE(m_videoCodec);
-  SAFE_DELETE(m_demuxer);
+  SAFE_DELETE(m_videoDemuxer);
   SAFE_DELETE(m_inputStream);
 }
 
-bool CProgressThumbNailer::Initialize()
+void CProgressThumbNailer::RequestThumbsAsTime(int seekTime)
+{
+  if (m_seekTime != seekTime)
+  {
+    m_seekTime = seekTime;
+    m_processSleep.Set();
+  }
+}
+
+void CProgressThumbNailer::RequestThumbAsPercentage(float percentage)
+{
+  if (m_seekPercentage != percentage)
+  {
+    m_seekPercentage = percentage;
+    m_processSleep.Set();
+  }
+}
+
+CGImageRef CProgressThumbNailer::GetThumb()
+{
+  CSingleLock lock(m_critical);
+  CGImageRef thumbImage = m_thumbImage;
+  m_thumbImage = nullptr;
+  return thumbImage;
+}
+
+void CProgressThumbNailer::Process()
 {
   m_redactPath = CURL::GetRedacted(m_path);
 
@@ -83,7 +108,7 @@ bool CProgressThumbNailer::Initialize()
   if (!m_inputStream)
   {
     CLog::Log(LOGERROR, "CProgressThumbNailer::ExtractThumb: Error creating stream for %s", m_redactPath.c_str());
-    return false;
+    return;
   }
 
   if (m_inputStream->IsStreamType(DVDSTREAM_TYPE_DVD)
@@ -91,43 +116,44 @@ bool CProgressThumbNailer::Initialize()
   {
     CLog::Log(LOGDEBUG, "CProgressThumbNailer::ExtractThumb: disc streams not supported for thumb extraction, file: %s", m_redactPath.c_str());
     SAFE_DELETE(m_inputStream);
-    return false;
+    return;
   }
 
   if (m_inputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
   {
     SAFE_DELETE(m_inputStream);
-    return false;
+    return;
   }
 
+  m_inputStream->SetNoCaching();
   if (!m_inputStream->Open())
   {
     CLog::Log(LOGERROR, "InputStream: Error opening, %s", m_redactPath.c_str());
     SAFE_DELETE(m_inputStream);
-    return false;
+    return;
   }
 
   try
   {
-    m_demuxer = CDVDFactoryDemuxer::CreateDemuxer(m_inputStream, true);
-    if(!m_demuxer)
+    m_videoDemuxer = CDVDFactoryDemuxer::CreateDemuxer(m_inputStream, true);
+    if(!m_videoDemuxer)
     {
       SAFE_DELETE(m_inputStream);
       CLog::Log(LOGERROR, "%s - Error creating demuxer", __FUNCTION__);
-      return false;
+      return;
     }
   }
   catch(...)
   {
     CLog::Log(LOGERROR, "%s - Exception thrown when opening demuxer", __FUNCTION__);
-    SAFE_DELETE(m_demuxer);
+    SAFE_DELETE(m_videoDemuxer);
     SAFE_DELETE(m_inputStream);
-    return false;
+    return;
   }
 
-  for (int i = 0; i < m_demuxer->GetNrOfStreams(); i++)
+  for (int i = 0; i < m_videoDemuxer->GetNrOfStreams(); i++)
   {
-    CDemuxStream* pStream = m_demuxer->GetStream(i);
+    CDemuxStream* pStream = m_videoDemuxer->GetStream(i);
     if (pStream)
     {
       // ignore if it's a picture attachment (e.g. jpeg artwork)
@@ -140,134 +166,143 @@ bool CProgressThumbNailer::Initialize()
 
   if (m_videoStream != -1)
   {
-    CDVDStreamInfo hints(*m_demuxer->GetStream(m_videoStream), true);
+    CDVDStreamInfo hints(*m_videoDemuxer->GetStream(m_videoStream), true);
     hints.software = true;
     CDVDCodecOptions dvdOptions;
     m_videoCodec = CDVDFactoryCodec::OpenCodec(new CDVDVideoCodecFFmpeg(), hints, dvdOptions);
-    if (m_videoCodec)
+    if (!m_videoCodec)
     {
-      m_aspect = hints.aspect;
-      m_forced_aspect = hints.forced_aspect;
-      return true;
+      CLog::Log(LOGERROR, "%s - Error creating codec", __FUNCTION__);
+      return;
     }
+    m_aspect = hints.aspect;
+    m_forced_aspect = hints.forced_aspect;
   }
 
-  SAFE_DELETE(m_videoCodec);
-  SAFE_DELETE(m_demuxer);
-  SAFE_DELETE(m_inputStream);
-  return false;
+  int totalLen = m_videoDemuxer->GetStreamLength();
+  while (!m_bStop)
+  {
+    // check percentage first, and convert to seekTime
+    if (m_seekPercentageOld != m_seekPercentage)
+    {
+      m_seekPercentageOld = m_seekPercentage;
+      m_seekTime = 0.5 + (m_seekPercentageOld * totalLen) / 100;
+    }
+    // check seekTime
+    if (m_seekTimeOld != m_seekTime)
+    {
+      m_seekTimeOld = m_seekTime;
+      CGImageRef thumbImage = ExtractThumb(m_seekTimeOld);
+
+      CSingleLock lock(m_critical);
+      if (m_thumbImage)
+        CGImageRelease(m_thumbImage);
+      m_thumbImage = thumbImage;
+    }
+    m_processSleep.WaitMSec(50);
+    m_processSleep.Reset();
+  }
 }
 
-CGImageRef CProgressThumbNailer::ExtractThumb(float percentage)
+CGImageRef CProgressThumbNailer::ExtractThumb(int seekTime)
 {
+  if (!m_videoDemuxer || !m_videoCodec)
+    return nullptr;
+
   unsigned int nTime = XbmcThreads::SystemClockMillis();
 
   CGImageRef cgImageRef = nullptr;
   int packetsTried = 0;
-  if (m_videoCodec)
+  //CLog::Log(LOGDEBUG,"%s - seeking to pos %dms (total: %dms) in %s", __FUNCTION__, nSeekTo, totalLen, m_redactPath.c_str());
+  // timebase is ms
+  if (m_videoDemuxer->SeekTime(seekTime, true))
   {
-    // timebase is ms
-    int totalLen = m_demuxer->GetStreamLength();
-    int nSeekTo = (percentage * totalLen) / 100;
+    int iDecoderState = VC_ERROR;
+    DVDVideoPicture picture = {0};
 
-    //CLog::Log(LOGDEBUG,"%s - seeking to pos %dms (total: %dms) in %s", __FUNCTION__, nSeekTo, totalLen, m_redactPath.c_str());
-    if (m_demuxer->SeekTime(nSeekTo, true))
+    // num streams * 160 frames, should get a valid frame, if not abort.
+    int abort_index = m_videoDemuxer->GetNrOfStreams() * 160;
+    do
     {
-      int iDecoderState = VC_ERROR;
-      DVDVideoPicture picture = {0};
+      DemuxPacket* pPacket = m_videoDemuxer->Read();
+      packetsTried++;
+      if (!pPacket)
+        break;
 
-      // num streams * 160 frames, should get a valid frame, if not abort.
-      int abort_index = m_demuxer->GetNrOfStreams() * 160;
-      do
+      if (pPacket->iStreamId != m_videoStream)
       {
-        DemuxPacket* pPacket = m_demuxer->Read();
-        packetsTried++;
-        if (!pPacket)
-          break;
-
-        if (pPacket->iStreamId != m_videoStream)
-        {
-          CDVDDemuxUtils::FreeDemuxPacket(pPacket);
-          continue;
-        }
-
-        iDecoderState = m_videoCodec->Decode(pPacket->pData, pPacket->iSize, pPacket->dts, pPacket->pts);
         CDVDDemuxUtils::FreeDemuxPacket(pPacket);
-
-        if (iDecoderState & VC_ERROR)
-          break;
-
-        if (iDecoderState & VC_PICTURE)
-        {
-          memset(&picture, 0, sizeof(DVDVideoPicture));
-          if (m_videoCodec->GetPicture(&picture))
-          {
-            if (!(picture.iFlags & DVP_FLAG_DROPPED))
-              break;
-          }
-        }
-
-      } while (abort_index--);
-
-      if (iDecoderState & VC_PICTURE && !(picture.iFlags & DVP_FLAG_DROPPED))
-      {
-        unsigned int nWidth = g_advancedSettings.GetThumbSize();
-        double aspect = (double)picture.iDisplayWidth / (double)picture.iDisplayHeight;
-        if(m_forced_aspect && m_aspect != 0)
-          aspect = m_aspect;
-        unsigned int nHeight = (unsigned int)((double)g_advancedSettings.GetThumbSize() / aspect);
-
-        //AVPicture scaledPicture;
-        //avpicture_alloc(&scaledPicture, AV_PIX_FMT_RGB24, nWidth, nHeight);
-
-        uint8_t *scaledData = (uint8_t*)av_malloc(nWidth * nHeight * 3);
-        int scaledLineSize = nWidth * 3;
-
-        struct SwsContext *context = sws_getContext(picture.iWidth, picture.iHeight,
-              AV_PIX_FMT_YUV420P, nWidth, nHeight, AV_PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
-        if (context)
-        {
-
-          // CGImages have flipped in y-axis coordinated, we can do the flip as we convert/scale
-          uint8_t * flipData = scaledData + (scaledLineSize * (nHeight -1));
-          int flipLineSize = -scaledLineSize;
-          //uint8_t * flipData = scaledPicture.data[0] + (scaledPicture.linesize[0] * (nHeight -1));
-          //int flipLineSize = - scaledPicture.linesize[0];
-
-          uint8_t *src[] = { picture.data[0], picture.data[1], picture.data[2], 0 };
-          int     srcStride[] = { picture.iLineSize[0], picture.iLineSize[1], picture.iLineSize[2], 0 };
-          uint8_t *dst[] = { flipData, 0, 0, 0 };
-          int     dstStride[] = { flipLineSize, 0, 0, 0 };
-          sws_scale(context, src, srcStride, 0, picture.iHeight, dst, dstStride);
-          sws_freeContext(context);
-
-          CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
-          //CFDataRef data = CFDataCreateWithBytesNoCopy(kCFAllocatorDefault, scaledPicture.data[0], scaledPicture.linesize[0]*nHeight, kCFAllocatorNull);
-          CFDataRef data = CFDataCreate(kCFAllocatorDefault, scaledData, scaledLineSize * nHeight);
-          CGDataProviderRef provider = CGDataProviderCreateWithCFData(data);
-          CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-          cgImageRef = CGImageCreate(nWidth,
-                             nHeight,
-                             8,
-                             24,
-                             scaledLineSize,
-                             colorSpace,
-                             bitmapInfo,
-                             provider,
-                             NULL,
-                             NO,
-                             kCGRenderingIntentDefault);
-          CGColorSpaceRelease(colorSpace);
-          CGDataProviderRelease(provider);
-          CFRelease(data);
-        }
-        av_free(scaledData);
-        //avpicture_free(&scaledPicture);
+        continue;
       }
-      else
+
+      iDecoderState = m_videoCodec->Decode(pPacket->pData, pPacket->iSize, pPacket->dts, pPacket->pts);
+      CDVDDemuxUtils::FreeDemuxPacket(pPacket);
+
+      if (iDecoderState & VC_ERROR)
+        break;
+
+      if (iDecoderState & VC_PICTURE)
       {
-        CLog::Log(LOGDEBUG,"%s - decode failed in %s after %d packets.", __FUNCTION__, m_redactPath.c_str(), packetsTried);
+        memset(&picture, 0, sizeof(DVDVideoPicture));
+        if (m_videoCodec->GetPicture(&picture))
+        {
+          if (!(picture.iFlags & DVP_FLAG_DROPPED))
+            break;
+        }
       }
+
+    } while (abort_index--);
+
+    if (iDecoderState & VC_PICTURE && !(picture.iFlags & DVP_FLAG_DROPPED))
+    {
+      unsigned int nWidth = g_advancedSettings.GetThumbSize();
+      double aspect = (double)picture.iDisplayWidth / (double)picture.iDisplayHeight;
+      if(m_forced_aspect && m_aspect != 0)
+        aspect = m_aspect;
+      unsigned int nHeight = (unsigned int)((double)g_advancedSettings.GetThumbSize() / aspect);
+
+      uint8_t *scaledData = (uint8_t*)av_malloc(nWidth * nHeight * 3);
+      int scaledLineSize = nWidth * 3;
+
+      struct SwsContext *context = sws_getContext(picture.iWidth, picture.iHeight,
+            AV_PIX_FMT_YUV420P, nWidth, nHeight, AV_PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+      if (context)
+      {
+        // CGImages have flipped in y-axis coordinated, we can do the flip as we convert/scale
+        uint8_t * flipData = scaledData + (scaledLineSize * (nHeight -1));
+        int flipLineSize = -scaledLineSize;
+
+        uint8_t *src[] = { picture.data[0], picture.data[1], picture.data[2], 0 };
+        int     srcStride[] = { picture.iLineSize[0], picture.iLineSize[1], picture.iLineSize[2], 0 };
+        uint8_t *dst[] = { flipData, 0, 0, 0 };
+        int     dstStride[] = { flipLineSize, 0, 0, 0 };
+        sws_scale(context, src, srcStride, 0, picture.iHeight, dst, dstStride);
+        sws_freeContext(context);
+
+        CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
+        CFDataRef data = CFDataCreate(kCFAllocatorDefault, scaledData, scaledLineSize * nHeight);
+        CGDataProviderRef provider = CGDataProviderCreateWithCFData(data);
+        CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+        cgImageRef = CGImageCreate(nWidth,
+                           nHeight,
+                           8,
+                           24,
+                           scaledLineSize,
+                           colorSpace,
+                           bitmapInfo,
+                           provider,
+                           NULL,
+                           NO,
+                           kCGRenderingIntentDefault);
+        CGColorSpaceRelease(colorSpace);
+        CGDataProviderRelease(provider);
+        CFRelease(data);
+      }
+      av_free(scaledData);
+    }
+    else
+    {
+      CLog::Log(LOGDEBUG,"%s - decode failed in %s after %d packets.", __FUNCTION__, m_redactPath.c_str(), packetsTried);
     }
   }
 
