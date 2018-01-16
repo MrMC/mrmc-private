@@ -1471,10 +1471,15 @@ CGRect swipeStartingParentViewRect;
       [self.m_holdTimer invalidate];
       if (self.m_holdCounter < 1)
       {
-        if (g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO && !m_enableRemoteExpertMode)
+        if (!m_enableRemoteExpertMode && g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
         {
           // idea here is that if user does not use ExpertMode, it shoud behave like "Netflix" in fullscreen
           // woudl have been easier to do this in keymap, but we could not make it backward compatible
+          if (!m_enableRemoteExpertMode && [_focusLayer.infocus.view isKindOfClass:[FocusLayerViewSlider class]] )
+          {
+            FocusLayerViewSlider *viewSlider = (FocusLayerViewSlider*)_focusLayer.infocus.view;
+            double percentage = [viewSlider getSeekTimePercentage];
+          }
           [self sendButtonPressed:SiriRemote_PausePlayClick];
         }
         else
