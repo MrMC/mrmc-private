@@ -38,8 +38,10 @@ public:
 
   bool IsInitialized() { return m_videoCodec != nullptr; };
   void RequestThumbsAsTime(int seekTime);
-  void RequestThumbAsPercentage(float percentage);
+  void RequestThumbAsPercentage(double percentage);
   CGImageRef GetThumb();
+  int GetTimeMilliSeconds() { return m_seekTimeMilliSecondsOld; };
+  int GetTotalTimeMilliSeconds() { return m_totalTimeMilliSeconds; };
 
 private:
   void Process();
@@ -49,10 +51,11 @@ private:
   std::string m_redactPath;
   float m_aspect;
   bool m_forced_aspect;
-  int m_seekTime = -1;
-  int m_seekTimeOld = -1;
-  int m_seekPercentage = -1;
-  int m_seekPercentageOld = -1;
+  double m_seekPercentage = -1;
+  double m_seekPercentageOld = -1;
+  int m_seekTimeMilliSeconds = -1;
+  int m_seekTimeMilliSecondsOld = -1;
+  int m_totalTimeMilliSeconds = -1;
   CEvent m_processSleep;
   CGImageRef m_thumbImage = nullptr;;
   int m_videoStream = -1;

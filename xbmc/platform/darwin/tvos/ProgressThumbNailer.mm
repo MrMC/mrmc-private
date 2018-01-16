@@ -76,14 +76,14 @@ CProgressThumbNailer::~CProgressThumbNailer()
 
 void CProgressThumbNailer::RequestThumbsAsTime(int seekTime)
 {
-  if (m_seekTime != seekTime)
+  if (m_seekTimeMilliSeconds != seekTime)
   {
-    m_seekTime = seekTime;
+    m_seekTimeMilliSeconds = seekTime;
     m_processSleep.Set();
   }
 }
 
-void CProgressThumbNailer::RequestThumbAsPercentage(float percentage)
+void CProgressThumbNailer::RequestThumbAsPercentage(double percentage)
 {
   if (m_seekPercentage != percentage)
   {
@@ -180,20 +180,20 @@ void CProgressThumbNailer::Process()
     m_forced_aspect = hints.forced_aspect;
   }
 
-  int totalLen = m_videoDemuxer->GetStreamLength();
+  m_totalTimeMilliSeconds = m_videoDemuxer->GetStreamLength();
   while (!m_bStop)
   {
     // check percentage first, and convert to seekTime
     if (m_seekPercentageOld != m_seekPercentage)
     {
       m_seekPercentageOld = m_seekPercentage;
-      m_seekTime = 0.5 + (m_seekPercentageOld * totalLen) / 100;
+      m_seekTimeMilliSeconds = 0.5 + (m_seekPercentageOld * m_totalTimeMilliSeconds) / 100;
     }
     // check seekTime
-    if (m_seekTimeOld != m_seekTime)
+    if (m_seekTimeMilliSecondsOld != m_seekTimeMilliSeconds)
     {
-      m_seekTimeOld = m_seekTime;
-      CGImageRef thumbImage = ExtractThumb(m_seekTimeOld);
+      m_seekTimeMilliSecondsOld = m_seekTimeMilliSeconds;
+      CGImageRef thumbImage = ExtractThumb(m_seekTimeMilliSecondsOld);
 
       CSingleLock lock(m_critical);
       if (m_thumbImage)
@@ -225,8 +225,8 @@ CGImageRef CProgressThumbNailer::ExtractThumb(int seekTime)
     int abort_index = m_videoDemuxer->GetNrOfStreams() * 160;
     do
     {
-      DemuxPacket* pPacket = m_videoDemuxer->Read();
       packetsTried++;
+      DemuxPacket* pPacket = m_videoDemuxer->Read();
       if (!pPacket)
         break;
 

@@ -46,12 +46,14 @@
     // if in lower area, expand up
     frame.origin.y -= videoRect.size.height + 2;
     frame.size.height += videoRect.size.height + frame.size.height;
+    videoRectIsAboveBar = true;
   }
   else
   {
     // if in upper area, expand down
     frame.origin.y += videoRect.size.height + frame.size.height + 2;
     frame.size.height += videoRect.size.height;
+    videoRectIsAboveBar = false;
   }
 
 	self = [super initWithFrame:frame];
@@ -84,14 +86,29 @@
     pan.delegate = self;
     [self addGestureRecognizer:pan];
 
-    auto tapRecognizer = [[UITapGestureRecognizer alloc]
-      initWithTarget: self action: @selector(handleTapGesture:)];
-    tapRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeUpArrow],
-                                         [NSNumber numberWithInteger:UIPressTypeDownArrow],
-                                         [NSNumber numberWithInteger:UIPressTypeLeftArrow],
-                                         [NSNumber numberWithInteger:UIPressTypeRightArrow]];
-    tapRecognizer.delegate  = self;
-    [self addGestureRecognizer:tapRecognizer];
+    auto tapUpRecognizer = [[UITapGestureRecognizer alloc]
+      initWithTarget: self action: @selector(handleUpTapGesture:)];
+    tapUpRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
+    tapUpRecognizer.delegate  = self;
+    [self addGestureRecognizer:tapUpRecognizer];
+
+    auto tapDownRecognizer = [[UITapGestureRecognizer alloc]
+      initWithTarget: self action: @selector(handleDownTapGesture:)];
+    tapDownRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
+    tapDownRecognizer.delegate  = self;
+    [self addGestureRecognizer:tapDownRecognizer];
+
+    auto tapLeftRecognizer = [[UITapGestureRecognizer alloc]
+      initWithTarget: self action: @selector(handleLeftTapGesture:)];
+    tapLeftRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+    tapLeftRecognizer.delegate  = self;
+    [self addGestureRecognizer:tapLeftRecognizer];
+
+    auto tapRightRecognizer = [[UITapGestureRecognizer alloc]
+      initWithTarget: self action: @selector(handleRightTapGesture:)];
+    tapRightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
+    tapRightRecognizer.delegate  = self;
+    [self addGestureRecognizer:tapRightRecognizer];
   }
 	return self;
 }
@@ -127,6 +144,7 @@
   CGContextStrokeRect(ctx, thumbRect);
 #endif
 
+  // draw the vertical tick mark in the bar to show current position
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
   CGContextSetLineWidth(ctx, 2.0);
   CGPoint thumbPointerBGN = CGPointMake(CGRectGetMidX(thumbRect), CGRectGetMinY(thumbRect));
@@ -137,8 +155,11 @@
 
   videoRect = CGRectMake(0, 0, 400, 225);
   videoRect.origin.x = CGRectGetMidX(thumbRect) - videoRect.size.width/2;
-  videoRect.origin.y = thumbRect.origin.y - videoRect.size.height;
-  videoRect.origin.y -= 2;
+  if (videoRectIsAboveBar)
+    videoRect.origin.y = thumbRect.origin.y - (videoRect.size.height + 2);
+  else
+    videoRect.origin.y = thumbRect.origin.y + (videoRect.size.height + 2);
+  // clamp left/right sides to left/right sides of bar
   if (CGRectGetMinX(videoRect) < CGRectGetMinX(self.bounds))
     videoRect.origin.x = self.bounds.origin.x;
   if (CGRectGetMaxX(videoRect) > CGRectGetMaxX(self.bounds))
@@ -163,12 +184,16 @@
     float aspect = (float)width / height;
     CGRect videoBounds = videoRect;
     videoBounds.size.height = videoRect.size.width / aspect;
-    videoBounds.origin.y += videoRect.size.height - videoBounds.size.height;
-
+    if (videoRectIsAboveBar)
+      videoBounds.origin.y += videoRect.size.height - videoBounds.size.height;
+    else
+      videoBounds.origin.y -= videoRect.size.height - videoBounds.size.height;
+    // clear to black the under video area, might not need this
     CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
     CGContextFillRect(ctx, videoBounds);
+    // now we can draw the video thumb image
     CGContextDrawImage(ctx, videoBounds, self->thumbImage);
-
+    // draw a thin white frame around the video thumb image
     CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
     CGContextSetLineWidth(ctx, 0.5);
     CGContextStrokeRect(ctx, videoBounds);
@@ -185,38 +210,60 @@
     withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
   CLog::Log(LOGDEBUG, "Slider::didUpdateFocusInContext");
-  [super didUpdateFocusInContext:context withAnimationCoordinator:coordinator];
-  if (context.nextFocusedView == self)
+}
+
+//--------------------------------------------------------------
+- (IBAction)handleUpTapGesture:(UITapGestureRecognizer *)sender
+{
+  CLog::Log(LOGDEBUG, "Slider::handleUpTapGesture");
+  if (self->deceleratingTimer)
+    [self stopDeceleratingTimer];
+}
+
+//--------------------------------------------------------------
+- (IBAction)handleDownTapGesture:(UITapGestureRecognizer *)sender
+{
+  CLog::Log(LOGDEBUG, "Slider::handleDownTapGesture");
+  if (self->deceleratingTimer)
+    [self stopDeceleratingTimer];
+}
+
+//--------------------------------------------------------------
+- (IBAction)handleLeftTapGesture:(UITapGestureRecognizer *)sender
+{
+  CLog::Log(LOGDEBUG, "Slider::handleLeftTapGesture");
+  if (self->deceleratingTimer)
+    [self stopDeceleratingTimer];
+  else
   {
-    /*
-    coordinator.addCoordinatedAnimations({ () -> Void in
-        self.seekerView.transform = CGAffineTransform(translationX: 0, y: -12)
-        self.seekerLabelBackgroundInnerView.backgroundColor = .white
-        self.seekerLabel.textColor = .black
-        self.seekerLabelBackgroundView.layer.shadowOpacity = 0.5
-        self.seekLineView.layer.shadowOpacity = 0.5
-        }, completion: nil)
-    */
-  }
-  else if (context.previouslyFocusedView == self)
-  {
-    /*
-    coordinator.addCoordinatedAnimations({ () -> Void in
-        self.seekerView.transform = .identity
-        self.seekerLabelBackgroundInnerView.backgroundColor = .lightGray
-        self.seekerLabel.textColor = .white
-        self.seekerLabelBackgroundView.layer.shadowOpacity = 0
-        self.seekLineView.layer.shadowOpacity = 0
-        }, completion: nil)
-    */
+    if (self->thumbNailer)
+    {
+      int seekTime =  self->thumbNailer->GetTimeMilliSeconds() - 10000;
+      int totalTime =  self->thumbNailer->GetTotalTimeMilliSeconds();
+      double percentage = (double)seekTime / totalTime;
+      [self set:percentage];
+      thumbConstant = thumb;
+    }
   }
 }
 
 //--------------------------------------------------------------
-- (IBAction)handleTapGesture:(UITapGestureRecognizer *)sender
+- (IBAction)handleRightTapGesture:(UITapGestureRecognizer *)sender
 {
-  CLog::Log(LOGDEBUG, "Slider::handleTapGesture");
-  [self stopDeceleratingTimer];
+  CLog::Log(LOGDEBUG, "Slider::handleRightTapGesture");
+  if (self->deceleratingTimer)
+    [self stopDeceleratingTimer];
+  else
+  {
+    if (self->thumbNailer)
+    {
+      int seekTime =  self->thumbNailer->GetTimeMilliSeconds() + 10000;
+      int totalTime =  self->thumbNailer->GetTotalTimeMilliSeconds();
+      double percentage = (double)seekTime / totalTime;
+      [self set:percentage];
+      thumbConstant = thumb;
+    }
+  }
 }
 
 //--------------------------------------------------------------
