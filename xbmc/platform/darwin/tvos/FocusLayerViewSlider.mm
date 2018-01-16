@@ -143,8 +143,6 @@
     videoRect.origin.x = self.bounds.origin.x;
   if (CGRectGetMaxX(videoRect) > CGRectGetMaxX(self.bounds))
     videoRect.origin.x = CGRectGetMaxX(self.bounds) - videoRect.size.width;
-  CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
-  CGContextFillRect(ctx, videoRect);
 
   if (self->thumbNailer)
   {
@@ -166,12 +164,15 @@
     CGRect videoBounds = videoRect;
     videoBounds.size.height = videoRect.size.width / aspect;
     videoBounds.origin.y += videoRect.size.height - videoBounds.size.height;
-    CGContextDrawImage(ctx, videoBounds, self->thumbImage);
-  }
 
-  CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
-  CGContextSetLineWidth(ctx, 0.5);
-  CGContextStrokeRect(ctx, videoRect);
+    CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
+    CGContextFillRect(ctx, videoBounds);
+    CGContextDrawImage(ctx, videoBounds, self->thumbImage);
+
+    CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
+    CGContextSetLineWidth(ctx, 0.5);
+    CGContextStrokeRect(ctx, videoBounds);
+  }
 }
 
 //--------------------------------------------------------------
@@ -232,7 +233,7 @@
       break;
     case UIGestureRecognizerStateChanged:
       {
-        double swipesForFullRange = 8.0;
+        double swipesForFullRange = 9.0;
         double leading = thumbConstant + translation.x / swipesForFullRange;
         [self set:leading / barRect.size.width];
       }
