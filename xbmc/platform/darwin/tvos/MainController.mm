@@ -22,7 +22,6 @@
  *
  */
 
-#define slidertesting 0
 #define dumpviewsonload 0
 
 #import "system.h"
@@ -59,7 +58,6 @@
 #import "services/lighteffects/LightEffectServices.h"
 #import "utils/LiteUtils.h"
 #import "utils/StringObfuscation.h"
-#import "utils/StringHasher.h"
 #import "utils/SeekHandler.h"
 #import "utils/log.h"
 
@@ -1420,10 +1418,17 @@ CGRect swipeStartingParentViewRect;
       CLog::Log(LOGDEBUG, "SiriMenuHandler:StateEnded");
       if (g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
       {
-        if (m_stopPlaybackOnMenu)
-          CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP);
+        if (!m_enableRemoteExpertMode && (g_application.m_pPlayer->IsPlaying() && g_application.m_pPlayer->IsPaused()))
+        {
+          [self sendButtonPressed:SiriRemote_PausePlayClick];
+        }
         else
-          [self sendButtonPressed:SiriRemote_MenuClickAtHome];
+        {
+          if (m_stopPlaybackOnMenu)
+            CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_STOP);
+          else
+            [self sendButtonPressed:SiriRemote_MenuClickAtHome];
+        }
       }
       else
       {
@@ -1465,7 +1470,19 @@ CGRect swipeStartingParentViewRect;
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateEnded");
       [self.m_holdTimer invalidate];
       if (self.m_holdCounter < 1)
-        [self sendButtonPressed:SiriRemote_CenterClick];
+      {
+        if (g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO && !m_enableRemoteExpertMode)
+        {
+          // idea here is that if user does not use ExpertMode, it shoud behave like "Netflix" in fullscreen
+          // woudl have been easier to do this in keymap, but we could not make it backward compatible
+          [self sendButtonPressed:SiriRemote_PausePlayClick];
+        }
+        else
+        {
+          [self sendButtonPressed:SiriRemote_CenterClick];
+        }
+      }
+      
       // start remote timeout
       [self startRemoteTimer];
       break;
@@ -1971,7 +1988,6 @@ CGRect debugView2;
 //--------------------------------------------------------------
 - (void) loadFocusLayerViews:(std::vector<FocusLayerControl>&)focusViews
 {
-  using namespace StringHasher;
   // build up new focusLayer from core items.
   [self clearSubViews];
 
@@ -1985,17 +2001,12 @@ CGRect debugView2;
     auto &view = *viewsIt;
 
     FocusLayerView *focusLayerView = nil;
-    switch(mkhash(view.type.c_str()))
-    {
-#if slidertesting
-      case "slider"_mkhash:
-        focusLayerView = [[FocusLayerViewSlider alloc] initWithFrame:view.rect];
-        break;
-#endif
-      default:
-        focusLayerView = [[FocusLayerView alloc] initWithFrame:view.rect];
-        break;
-    }
+
+    if (view.type == "slider" && !m_enableRemoteExpertMode)
+      focusLayerView = [[FocusLayerViewSlider alloc] initWithFrame:view.rect];
+    else
+      focusLayerView = [[FocusLayerView alloc] initWithFrame:view.rect];
+
     [focusLayerView setFocusable:false];
     if (view.type == "window" || view.type == "dialog")
     {
@@ -2015,17 +2026,12 @@ CGRect debugView2;
     {
       auto &item = *itemsIt;
       FocusLayerView *focusLayerItem = nil;
-      switch(mkhash(item.type.c_str()))
-      {
-#if slidertesting
-        case "slider"_mkhash:
-          focusLayerItem = [[FocusLayerViewSlider alloc] initWithFrame:item.rect];
-          break;
-#endif
-        default:
-          focusLayerItem = [[FocusLayerView alloc] initWithFrame:item.rect];
-          break;
-      }
+      
+      if (item.type == "slider" && !m_enableRemoteExpertMode)
+        focusLayerItem = [[FocusLayerViewSlider alloc] initWithFrame:item.rect];
+      else
+        focusLayerItem = [[FocusLayerView alloc] initWithFrame:item.rect];
+
       [focusLayerItem setFocusable:true];
       focusLayerItem->core = item.core;
       item.view = focusLayerItem;
