@@ -154,7 +154,6 @@ MainController *g_xbmcController;
 @synthesize m_remoteIdleTimeout;
 @synthesize m_enableRemoteIdle;
 @synthesize m_focusIdleState;
-@synthesize m_focusIdleTimeout;
 @synthesize m_enableRemoteExpertMode;
 @synthesize m_stopPlaybackOnMenu;
 
@@ -1301,8 +1300,8 @@ CGRect swipeStartingParentViewRect;
     case UIPressTypeMenu:
     {
       // menu is special.
-      //  a) if at our home view, should return to atv home screen.
-      //  b) if not, let it pass to us.
+      //  a) if at our home view, should return to atv home screen
+      //  b) if not, let it pass to us
       int focusedWindowID = g_windowManager.GetFocusedWindow();
       if (focusedWindowID == WINDOW_HOME)
       {
@@ -1731,12 +1730,18 @@ CGRect debugView2;
         focusLayerViewRect.origin.x + focusLayerViewRect.size.width,
         focusLayerViewRect.origin.y + focusLayerViewRect.size.height);
     }
+    // need a focusable view or risk bouncing out on menu presses
+    if ( [_focusLayer.infocus.view canBecomeFocused] == NO )
+      [self.focusView setFocusable:true];
     return @[(UIView*)_focusLayer.infocus.view];
   }
   else
   {
     CLog::Log(LOGDEBUG, "preferredFocusEnvironments");
-    return [super preferredFocusEnvironments];
+    // need a focusable view or risk bouncing out on menu presses
+    if ( [self.focusView canBecomeFocused] == NO )
+      [self.focusView setFocusable:true];
+    return @[(UIView*)self.focusView];
   }
 }
 

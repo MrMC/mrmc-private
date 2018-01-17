@@ -78,7 +78,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   BOOL                        m_stopPlaybackOnMenu;
   BOOL                        m_nativeKeyboardActive;
   BOOL                        m_focusIdleState;
-  CGFloat                     m_focusIdleTimeout;
 }
 
 // why are these properties ?

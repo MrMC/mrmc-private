@@ -113,18 +113,6 @@ typedef enum SiriRemoteTypes
     tapUpRecognizer.delegate  = self;
     [self addGestureRecognizer:tapUpRecognizer];
 
-    auto tapDownRecognizer = [[UITapGestureRecognizer alloc]
-      initWithTarget: self action: @selector(handleDownTapGesture:)];
-    tapDownRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
-    tapDownRecognizer.delegate  = self;
-    [self addGestureRecognizer:tapDownRecognizer];
-
-    auto tapLeftRecognizer = [[UITapGestureRecognizer alloc]
-      initWithTarget: self action: @selector(handleLeftTapGesture:)];
-    tapLeftRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
-    tapLeftRecognizer.delegate  = self;
-    [self addGestureRecognizer:tapLeftRecognizer];
-
     auto tapRightRecognizer = [[UITapGestureRecognizer alloc]
       initWithTarget: self action: @selector(handleRightTapGesture:)];
     tapRightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
@@ -144,6 +132,21 @@ typedef enum SiriRemoteTypes
     rightRecognizer.minimumPressDuration = 0.01;
     rightRecognizer.delegate = self;
     [self addGestureRecognizer: rightRecognizer];
+
+    auto downRecognizer = [[UILongPressGestureRecognizer alloc]
+      initWithTarget: self action: @selector(IRRemoteDownArrowPressed:)];
+    downRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
+    downRecognizer.minimumPressDuration = 0.01;
+    downRecognizer.delegate = self;
+    [self addGestureRecognizer: downRecognizer];
+
+    auto *swipeDown = [[UISwipeGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handleDownSwipeGesture:)];
+    swipeDown.delaysTouchesBegan = NO;
+    swipeDown.direction = UISwipeGestureRecognizerDirectionDown;
+    swipeDown.delegate = self;
+    [self  addGestureRecognizer:swipeDown];
+
   }
 	return self;
 }
@@ -378,6 +381,10 @@ typedef enum SiriRemoteTypes
   {
     return [self isFocused];
   }
+  else if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]])
+  {
+    return [self isFocused];
+  }
   return NO;
 }
 
@@ -406,15 +413,13 @@ typedef enum SiriRemoteTypes
 }
 
 //--------------------------------------------------------------
-- (IBAction) handleDownTapGesture:(UITapGestureRecognizer *)sender
+- (IBAction) handleDownSwipeGesture:(UISwipeGestureRecognizer *)sender
 {
-  CLog::Log(LOGDEBUG, "Slider::handleDownTapGesture");
+  CLog::Log(LOGDEBUG, "Slider::handleDownSwipeGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
-  /*
   KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
     TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
-  */
 }
 
 //--------------------------------------------------------------
@@ -672,6 +677,23 @@ static int keyPressTimerFiredCount = 0;
     case UIGestureRecognizerStateChanged:
     case UIGestureRecognizerStateCancelled:
       [self stopKeyPressTimer];
+      break;
+    default:
+      break;
+  }
+}
+
+- (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer *)sender
+{
+  switch (sender.state)
+  {
+    case UIGestureRecognizerStateBegan:
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
+      break;
+    case UIGestureRecognizerStateEnded:
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
       break;
     default:
       break;
