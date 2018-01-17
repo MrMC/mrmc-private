@@ -1478,17 +1478,23 @@ CGRect swipeStartingParentViewRect;
           // would have been easier to do this in keymap, but we could not make it backward compatible
           if ([_focusLayer.infocus.view isKindOfClass:[FocusLayerViewSlider class]] )
           {
+            double appTotalTime = g_application.GetTotalTime();
+            double appPercentage = g_application.GetPercentage();
+            double appSeekTime = appPercentage * appTotalTime;
             FocusLayerViewSlider *viewSlider = (FocusLayerViewSlider*)_focusLayer.infocus.view;
             double percentage = [viewSlider getSeekTimePercentage];
-            // only seek if change is more than 0.5%
-            if (fabs(g_application.m_pPlayer->GetPercentage() - (float)percentage) > 0.5f)
+            double seekTime = percentage * appTotalTime;
+            // only seek if change is more than 500ms
+            if (fabs(appSeekTime - seekTime) > 0.5)
             {
               g_application.SeekPercentage(percentage, true);
               // turn off display after seek.
               g_infoManager.SetDisplayAfterSeek(0);
             }
             else
+            {
               [self sendButtonPressed:SiriRemote_PausePlayClick];
+            }
           }
           else
           {
@@ -2025,12 +2031,7 @@ CGRect debugView2;
     auto &view = *viewsIt;
 
     FocusLayerView *focusLayerView = nil;
-
-    if (view.type == "slider" && !m_enableRemoteExpertMode)
-      focusLayerView = [[FocusLayerViewSlider alloc] initWithFrame:view.rect];
-    else
-      focusLayerView = [[FocusLayerView alloc] initWithFrame:view.rect];
-
+    focusLayerView = [[FocusLayerView alloc] initWithFrame:view.rect];
     [focusLayerView setFocusable:false];
     if (view.type == "window" || view.type == "dialog")
     {
@@ -2050,12 +2051,10 @@ CGRect debugView2;
     {
       auto &item = *itemsIt;
       FocusLayerView *focusLayerItem = nil;
-      
-      if (item.type == "slider" && !m_enableRemoteExpertMode)
+      if (!m_enableRemoteExpertMode && item.type == "progress")
         focusLayerItem = [[FocusLayerViewSlider alloc] initWithFrame:item.rect];
       else
         focusLayerItem = [[FocusLayerView alloc] initWithFrame:item.rect];
-
       [focusLayerItem setFocusable:true];
       focusLayerItem->core = item.core;
       item.view = focusLayerItem;
@@ -2091,7 +2090,7 @@ CGRect debugView2;
           for (size_t indx = 0; indx < _focusLayer.views[andx].items.size(); ++indx)
           {
             CGUIControl *guiControl = (CGUIControl*)_focusLayer.views[andx].items[indx].core;
-            if (guiControl->GetControlType() == CGUIControl::GUICONTROL_SLIDER)
+            if (guiControl->GetControlType() == CGUIControl::GUICONTROL_PROGRESS)
             {
               preferredItem.type = _focusLayer.views[andx].items[indx].type;
               preferredItem.rect = _focusLayer.views[andx].items[indx].rect;

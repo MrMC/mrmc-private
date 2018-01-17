@@ -42,6 +42,7 @@ class CProgressThumbNailer;
   CGRect barRect;
   CGRect thumbRect;
   CGRect videoRect;
+  CGRect displayRect;
   bool   videoRectIsAboveBar;
   CGImageRef thumbImage;
   CProgressThumbNailer *thumbNailer;

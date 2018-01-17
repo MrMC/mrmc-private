@@ -34,9 +34,9 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
+  displayRect = CGRectInset([UIScreen mainScreen].bounds, 0, 100);
+
   barRect = frame;
-  barRect.origin.x += barRect.size.height/2;
-  barRect.size.width -= barRect.size.height;
   // standard 16:9 video rect
   videoRect = CGRectMake(0, 0, 400, 225);
 
@@ -49,13 +49,13 @@
   {
     // if in lower area, expand up
     frame.origin.y -= videoRect.size.height + 2;
-    frame.size.height += videoRect.size.height + frame.size.height;
+    frame.size.height += videoRect.size.height + 2;
     videoRectIsAboveBar = true;
   }
   else
   {
     // if in upper area, expand down
-    frame.size.height += videoRect.size.height + frame.size.height + 2;
+    frame.size.height += videoRect.size.height + 2;
     videoRectIsAboveBar = false;
   }
 
@@ -69,7 +69,6 @@
     self->thumb = 0.0;
     self->thumbConstant = 0.0;
     self->distance = 100;
-    //self->decelerationRate = 0.92;
     self->decelerationRate = 0.84;
     self->decelerationMaxVelocity = 1000;
     float percentage = 0.0;
@@ -155,13 +154,13 @@
 {
   if (self->thumbNailer)
   {
-    int seekTime = self->thumbNailer->GetTimeMilliSeconds() - 2000;
+    int seekTime = self->thumbNailer->GetTimeMilliSeconds();
+    if (seekTime < 0) seekTime = 0;
     int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
     double percentage = (double)seekTime / totalTime;
     CLog::Log(LOGDEBUG, "Slider::getSeekTimePercentage(%f), value(%f)", percentage, self.value);
     return 100.0 * percentage;
   }
-
   return -1;
 }
 
@@ -254,8 +253,8 @@
   });
 
   // call ourselves back in 100ms
-  SEL singleParamSelector = @selector(updateViews:);
-  [self performSelector:singleParamSelector withObject:nil afterDelay:0.100];
+  //SEL singleParamSelector = @selector(updateViews:);
+  //[self performSelector:singleParamSelector withObject:nil afterDelay:0.100];
 }
 
 //--------------------------------------------------------------
