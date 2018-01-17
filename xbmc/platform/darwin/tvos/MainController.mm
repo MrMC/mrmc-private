@@ -1405,7 +1405,7 @@ CGRect swipeStartingParentViewRect;
   // before any other gesture handler (pan, swap) or
   // shouldUpdateFocusInContext/didUpdateFocusInContext
   // but this routine will get called AFTER the above.
-  CLog::Log(LOGDEBUG, "SiriArrowHandler:FocusActionTap");
+  //CLog::Log(LOGDEBUG, "SiriArrowHandler:FocusActionTap");
   // start remote timeout
   [self startRemoteTimer];
 }
@@ -1690,19 +1690,23 @@ CGRect debugView2;
     if (!CGRectEqualToRect(debugView1, parentViewRect))
     {
       debugView1 = parentViewRect;
+      /*
       CLog::Log(LOGDEBUG, "preferredFocusEnvironments: parentViewRect %f, %f, %f, %f",
         parentViewRect.origin.x,  parentViewRect.origin.y,
         parentViewRect.origin.x + parentViewRect.size.width,
         parentViewRect.origin.y + parentViewRect.size.height);
+      */
     }
     CGRect focusLayerViewRect = _focusLayer.infocus.view.bounds;
     if (!CGRectEqualToRect(debugView2, focusLayerViewRect))
     {
       debugView2 = focusLayerViewRect;
+      /*
       CLog::Log(LOGDEBUG, "preferredFocusEnvironments: focusLayerViewRect %f, %f, %f, %f",
         focusLayerViewRect.origin.x,  focusLayerViewRect.origin.y,
         focusLayerViewRect.origin.x + focusLayerViewRect.size.width,
         focusLayerViewRect.origin.y + focusLayerViewRect.size.height);
+      */
     }
 
     NSMutableArray *viewArray = [NSMutableArray array];
@@ -1731,8 +1735,11 @@ CGRect debugView2;
         focusLayerViewRect.origin.y + focusLayerViewRect.size.height);
     }
     // need a focusable view or risk bouncing out on menu presses
-    if ( [_focusLayer.infocus.view canBecomeFocused] == NO )
-      [self.focusView setFocusable:true];
+    if (g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
+    {
+      if ( [_focusLayer.infocus.view canBecomeFocused] == NO )
+        [self.focusView setFocusable:true];
+    }
     return @[(UIView*)_focusLayer.infocus.view];
   }
   else
@@ -2178,7 +2185,7 @@ CGRect debugView2;
     else
     {
       [self loadFocusLayerViews:focusViews];
-      CLog::Log(LOGDEBUG, "updateFocusLayer:hideViews(%s), rebuild", hideViews ? "yes":"no");
+      //CLog::Log(LOGDEBUG, "updateFocusLayer:hideViews(%s), rebuild", hideViews ? "yes":"no");
     }
   }
   [self.focusView setNeedsDisplay];
