@@ -2063,7 +2063,7 @@ CGRect debugView2;
     {
       auto &item = *itemsIt;
       FocusLayerView *focusLayerItem = nil;
-      if (!m_enableRemoteExpertMode && item.type == "progress")
+      if (!m_enableRemoteExpertMode && item.type == "progress" && g_application.m_pPlayer->CanSeek())
         focusLayerItem = [[FocusLayerViewPlayerProgress alloc] initWithFrame:item.rect];
       else
         focusLayerItem = [[FocusLayerView alloc] initWithFrame:item.rect];
