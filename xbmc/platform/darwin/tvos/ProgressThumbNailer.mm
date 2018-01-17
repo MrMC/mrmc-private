@@ -94,7 +94,6 @@ ThumbNailerImage CProgressThumbNailer::GetThumb()
   CSingleLock lock(m_critical);
   ThumbNailerImage thumbImage = m_thumbImage;
   m_thumbImage = ThumbNailerImage();
-  m_extract = false;
   return thumbImage;
 }
 
@@ -218,6 +217,7 @@ void CProgressThumbNailer::SetThumb(const ThumbNailerImage &thumbNailerImage)
   if (m_thumbImage.image)
     CGImageRelease(m_thumbImage.image);
   m_thumbImage = thumbNailerImage;
+  m_extract = false;
 }
 
 ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)

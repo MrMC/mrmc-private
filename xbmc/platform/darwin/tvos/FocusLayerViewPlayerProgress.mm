@@ -27,6 +27,7 @@
 #import "platform/darwin/tvos/ProgressThumbNailer.h"
 #import "guilib/GUISliderControl.h"
 #import "utils/MathUtils.h"
+#import "utils/StringUtils.h"
 #import "utils/log.h"
 
 typedef enum SiriRemoteTypes
@@ -129,155 +130,25 @@ typedef enum SiriRemoteTypes
     tapRightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
     tapRightRecognizer.delegate  = self;
     [self addGestureRecognizer:tapRightRecognizer];
-      
-      
-    [self createIRDirectionRecognisers];
 
+    auto leftRecognizer = [[UILongPressGestureRecognizer alloc]
+      initWithTarget: self action: @selector(IRRemoteLeftArrowPressed:)];
+    leftRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+    leftRecognizer.minimumPressDuration = 0.01;
+    leftRecognizer.delegate = self;
+    [self addGestureRecognizer: leftRecognizer];
+
+    auto rightRecognizer = [[UILongPressGestureRecognizer alloc]
+      initWithTarget: self action: @selector(IRRemoteRightArrowPressed:)];
+    rightRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
+    rightRecognizer.minimumPressDuration = 0.01;
+    rightRecognizer.delegate = self;
+    [self addGestureRecognizer: rightRecognizer];
   }
 	return self;
 }
 
-//--------------------------------------------------------------
-- (void)createIRDirectionRecognisers
-{
-  auto leftRecognizer = [[UILongPressGestureRecognizer alloc]
-                         initWithTarget: self action: @selector(IRRemoteLeftArrowPressed:)];
-  leftRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
-  leftRecognizer.minimumPressDuration = 0.01;
-  leftRecognizer.delegate = self;
-  [self addGestureRecognizer: leftRecognizer];
-  
-  auto rightRecognizer = [[UILongPressGestureRecognizer alloc]
-                          initWithTarget: self action: @selector(IRRemoteRightArrowPressed:)];
-  rightRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
-  rightRecognizer.minimumPressDuration = 0.01;
-  rightRecognizer.delegate = self;
-  [self addGestureRecognizer: rightRecognizer];
-}
-
-- (void)sendButtonPressed:(int)buttonId
-{
-  if (buttonId == IR_Left)
-  {
-    [self setPercentage:[self getSeekTimePercentage]/100.0 - 0.025];
-  }
-  else if (buttonId == IR_Right)
-  {
-    [self setPercentage:[self getSeekTimePercentage]/100.0 + 0.025];
-  }
-}
-
-// start repeating after 0.25s
-#define REPEATED_KEYPRESS_DELAY_S 0.25
-// pause 0.05s (50ms) between keypresses
-#define REPEATED_KEYPRESS_PAUSE_S 0.15
-//--------------------------------------------------------------
-static CFAbsoluteTime keyPressTimerStartSeconds;
-
-//- (void)startKeyPressTimer:(XBMCKey)keyId
-- (void)startKeyPressTimer:(int)keyId
-{
-  [self startKeyPressTimer:keyId doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
-}
-
-- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay
-{
-  [self startKeyPressTimer:keyId doBeforeDelay:doBeforeDelay withDelay:delay withInterval:REPEATED_KEYPRESS_PAUSE_S];
-}
-
-static int keyPressTimerFiredCount = 0;
-- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay withInterval:(NSTimeInterval)interval
-{
-  //PRINT_SIGNATURE();
-  if (self.pressAutoRepeatTimer != nil)
-    [self stopKeyPressTimer];
-  
-  if (doBeforeDelay)
-    [self sendButtonPressed:keyId];
-  
-  NSNumber *number = [NSNumber numberWithInt:keyId];
-  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
-  
-  keyPressTimerFiredCount = 0;
-  keyPressTimerStartSeconds = CFAbsoluteTimeGetCurrent() + delay;
-  // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
-  // and fires every REPEATED_KEYPRESS_PAUSE_S
-  NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
-                                            interval:interval
-                                              target:self
-                                            selector:@selector(keyPressTimerCallback:)
-                                            userInfo:number
-                                             repeats:YES];
-  
-  // schedule the timer to the runloop
-  [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
-  self.pressAutoRepeatTimer = timer;
-}
-- (void)stopKeyPressTimer
-{
-  //PRINT_SIGNATURE();
-  if (self.pressAutoRepeatTimer != nil)
-  {
-    [self.pressAutoRepeatTimer invalidate];
-    self.pressAutoRepeatTimer = nil;
-  }
-}
-- (int)getKeyPressTimerCount
-{
-  return keyPressTimerFiredCount;
-}
-- (void)keyPressTimerCallback:(NSTimer*)theTimer
-{
-  NSNumber *keyId = [theTimer userInfo];
-  CFAbsoluteTime secondsFromStart = CFAbsoluteTimeGetCurrent() - keyPressTimerStartSeconds;
-  if (secondsFromStart > 1.5f)
-  {
-    [self sendButtonPressed:[keyId intValue]];
-  }
-  else
-  {
-    [self sendButtonPressed:[keyId intValue]];
-  }
-  keyPressTimerFiredCount++;
-}
-
-#define REPEATED_IRPRESS_DELAY_S 0.35
-- (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
-{
-  switch (sender.state)
-  {
-    case UIGestureRecognizerStateBegan:
-      [self sendButtonPressed:IR_Left];
-      [self startKeyPressTimer:IR_Left doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
-      break;
-    case UIGestureRecognizerStateEnded:
-    case UIGestureRecognizerStateChanged:
-    case UIGestureRecognizerStateCancelled:
-      [self stopKeyPressTimer];
-      break;
-    default:
-      break;
-  }
-}
-- (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
-{
-  switch (sender.state)
-  {
-    case UIGestureRecognizerStateBegan:
-      [self sendButtonPressed:IR_Right];
-      [self startKeyPressTimer:IR_Right doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
-      break;
-    case UIGestureRecognizerStateEnded:
-    case UIGestureRecognizerStateChanged:
-    case UIGestureRecognizerStateCancelled:
-      [self stopKeyPressTimer];
-      break;
-    default:
-      break;
-  }
-}
-
-- (void)removeFromSuperview;
+- (void)removeFromSuperview
 {
   [self->deceleratingTimer invalidate];
   SAFE_DELETE(self->thumbNailer);
@@ -348,7 +219,7 @@ static int keyPressTimerFiredCount = 0;
 {
   [super drawRect:rect];
   CGContextRef ctx = UIGraphicsGetCurrentContext();
-#if 1
+#if 0
   CGContextSetLineWidth(ctx, 1.0);
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
   CGContextStrokeRect(ctx, self.bounds);
@@ -411,11 +282,50 @@ static int keyPressTimerFiredCount = 0;
     CGContextFillRect(ctx, videoBounds);
     // now we can draw the video thumb image
     CGContextDrawImage(ctx, videoBounds, self->thumbImage.image);
+
+    // with time text (H:M:S) on top
+    std::string timeString = StringUtils::SecondsToTimeString(self->thumbImage.time/1000, TIME_FORMAT_HH_MM_SS);
+    [self drawString:ctx withCString:timeString inRect:videoBounds];
+
     // draw a thin white frame around the video thumb image
     CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
     CGContextSetLineWidth(ctx, 0.5);
     CGContextStrokeRect(ctx, videoBounds);
   }
+}
+
+- (void) drawString:(CGContextRef) ctx withCString:(const std::string&)cstring inRect:(CGRect)videoRect
+{
+  NSString *string = [NSString stringWithUTF8String:cstring.c_str()];
+
+  CGRect contextRect = videoRect;
+  contextRect.origin.y = CGRectGetMaxY(videoRect) - videoRect.size.height / 4;
+  contextRect.size.height = videoRect.size.height / 4;
+
+  /// Make a copy of the default paragraph style
+  NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+  /// Set line break mode
+  paragraphStyle.lineBreakMode = NSLineBreakByTruncatingTail;
+  /// Set text alignment
+  paragraphStyle.alignment = NSTextAlignmentCenter;
+
+  NSDictionary *attributes = @{ NSFontAttributeName: [UIFont systemFontOfSize:32],
+    NSForegroundColorAttributeName: [UIColor whiteColor],
+    NSParagraphStyleAttributeName: paragraphStyle };
+
+  CGSize size = [string sizeWithAttributes:attributes];
+
+  CGRect textRect = CGRectMake(contextRect.origin.x + floorf((contextRect.size.width - size.width) / 2),
+    contextRect.origin.y + floorf((contextRect.size.height - size.height) / 2),
+    size.width, size.height);
+
+  textRect.origin.y = CGRectGetMaxY(videoRect) - (textRect.size.height + 8);
+
+  CGRect underRect = CGRectInset(textRect, -4, 0);
+  CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
+  CGContextFillRect(ctx, underRect);
+
+  [string drawInRect:textRect withAttributes:attributes];
 }
 
 - (void) updateView
@@ -437,6 +347,44 @@ static int keyPressTimerFiredCount = 0;
   [self performSelectorOnMainThread:@selector(updateView) withObject:nil  waitUntilDone:NO];
 }
 
+- (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+  CLog::Log(LOGDEBUG, "Slider::gestureRecognizer:shouldReceiveTouch");
+  return YES;
+}
+
+- (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
+{
+  CLog::Log(LOGDEBUG, "Slider::gestureRecognizer:shouldReceivePress");
+  return YES;
+}
+
+- (BOOL) gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+{
+  CLog::Log(LOGDEBUG, "Slider::gestureRecognizerShouldBegin");
+  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]])
+  {
+    UIPanGestureRecognizer *panGestureRecognizer = (UIPanGestureRecognizer*)gestureRecognizer;
+    CGPoint translation = [panGestureRecognizer translationInView:self];
+    CLog::Log(LOGDEBUG, "Slider::gestureRecognizerShouldBegin x(%f), y(%f)", translation.x, translation.y);
+    if (fabs(translation.x) > fabs(translation.y))
+      return [self isFocused];
+  }
+  else if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]])
+  {
+    return [self isFocused];
+  }
+  else if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]])
+  {
+    return [self isFocused];
+  }
+  return NO;
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+  return YES;
+}
 //--------------------------------------------------------------
 - (BOOL) shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
 {
@@ -481,6 +429,12 @@ static int keyPressTimerFiredCount = 0;
     {
       // seek back 10 seconds
       int seekTime = self->thumbNailer->GetTimeMilliSeconds() - 10000;
+      if (seekTime == -1)
+      {
+        thumbConstant = thumb;
+        [self setPercentage:thumbConstant / barRect.size.width];
+        return;
+      }
       if (seekTime < 0)
         seekTime = 0;
       int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
@@ -506,6 +460,12 @@ static int keyPressTimerFiredCount = 0;
     {
       // seek forward 10 seconds
       int seekTime = self->thumbNailer->GetTimeMilliSeconds() + 10000;
+      if (seekTime == -1)
+      {
+        thumbConstant = thumb;
+        [self setPercentage:thumbConstant / barRect.size.width];
+        return;
+      }
       if (seekTime < 0)
         seekTime = 0;
       int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
@@ -577,43 +537,145 @@ static int keyPressTimerFiredCount = 0;
   self->deceleratingVelocity = 0.0;
 }
 
-- (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+//--------------------------------------------------------------
+- (void)sendButtonPressed:(int)buttonId
 {
-  CLog::Log(LOGDEBUG, "Slider::gestureRecognizer:shouldReceiveTouch");
-  return YES;
+  if (self->thumbNailer)
+  {
+    int seekTime = self->thumbNailer->GetTimeMilliSeconds();
+    if (seekTime == -1)
+    {
+      thumbConstant = thumb;
+      [self setPercentage:thumbConstant / barRect.size.width];
+      return;
+    }
+    if (buttonId == IR_Left)
+    {
+      // seek back 10 seconds
+      if (keyPressTimerFiredCount < 4)
+        seekTime -= 10000;
+      else
+        seekTime -= 10000 * keyPressTimerFiredCount;
+    }
+    else if (buttonId == IR_Right)
+    {
+      // seek forward 10 seconds
+      if (keyPressTimerFiredCount < 4)
+        seekTime += 10000;
+      else
+        seekTime += 10000 * keyPressTimerFiredCount;
+    }
+    if (seekTime < 0)
+      seekTime = 0;
+    int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
+    if (seekTime > totalTime)
+      seekTime = totalTime;
+    CLog::Log(LOGDEBUG, "Slider::handleLeftTapGesture:seekTime(%d)", seekTime);
+    double percentage = (double)seekTime / totalTime;
+    [self setPercentage:percentage];
+    thumbConstant = thumb;
+  }
+}
+// start repeating after 0.25s
+#define REPEATED_KEYPRESS_DELAY_S 0.25
+// pause 0.05s (50ms) between keypresses
+#define REPEATED_KEYPRESS_PAUSE_S 0.15
+//--------------------------------------------------------------
+static CFAbsoluteTime keyPressTimerStartSeconds;
+
+//- (void)startKeyPressTimer:(XBMCKey)keyId
+- (void)startKeyPressTimer:(int)keyId
+{
+  [self startKeyPressTimer:keyId doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
 }
 
-- (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay
 {
-  CLog::Log(LOGDEBUG, "Slider::gestureRecognizer:shouldReceivePress");
-  return YES;
+  [self startKeyPressTimer:keyId doBeforeDelay:doBeforeDelay withDelay:delay withInterval:REPEATED_KEYPRESS_PAUSE_S];
 }
 
-- (BOOL) gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+static int keyPressTimerFiredCount = 0;
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay withInterval:(NSTimeInterval)interval
 {
-  CLog::Log(LOGDEBUG, "Slider::gestureRecognizerShouldBegin");
-  if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]])
+  //PRINT_SIGNATURE();
+  if (self.pressAutoRepeatTimer != nil)
+    [self stopKeyPressTimer];
+
+  if (doBeforeDelay)
+    [self sendButtonPressed:keyId];
+
+  NSNumber *number = [NSNumber numberWithInt:keyId];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
+
+  keyPressTimerFiredCount = 0;
+  keyPressTimerStartSeconds = CFAbsoluteTimeGetCurrent() + delay;
+  // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
+  // and fires every REPEATED_KEYPRESS_PAUSE_S
+  NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
+                                            interval:interval
+                                              target:self
+                                            selector:@selector(keyPressTimerCallback:)
+                                            userInfo:number
+                                             repeats:YES];
+
+  // schedule the timer to the runloop
+  [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+  self.pressAutoRepeatTimer = timer;
+}
+- (void)stopKeyPressTimer
+{
+  //PRINT_SIGNATURE();
+  if (self.pressAutoRepeatTimer != nil)
   {
-    UIPanGestureRecognizer *panGestureRecognizer = (UIPanGestureRecognizer*)gestureRecognizer;
-    CGPoint translation = [panGestureRecognizer translationInView:self];
-    CLog::Log(LOGDEBUG, "Slider::gestureRecognizerShouldBegin x(%f), y(%f)", translation.x, translation.y);
-    if (fabs(translation.x) > fabs(translation.y))
-      return [self isFocused];
+    [self.pressAutoRepeatTimer invalidate];
+    self.pressAutoRepeatTimer = nil;
   }
-  else if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]])
-  {
-    return [self isFocused];
-  }
-  else if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]])
-  {
-    return [self isFocused];
-  }
-  return NO;
+}
+- (void)keyPressTimerCallback:(NSTimer*)theTimer
+{
+  NSNumber *keyId = [theTimer userInfo];
+  CFAbsoluteTime secondsFromStart = CFAbsoluteTimeGetCurrent() - keyPressTimerStartSeconds;
+  if (secondsFromStart > 1.5f)
+    [self sendButtonPressed:[keyId intValue]];
+  else
+    [self sendButtonPressed:[keyId intValue]];
+  keyPressTimerFiredCount++;
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+#define REPEATED_IRPRESS_DELAY_S 0.35
+- (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
 {
-  return YES;
+  switch (sender.state)
+  {
+    case UIGestureRecognizerStateBegan:
+      [self sendButtonPressed:IR_Left];
+      [self startKeyPressTimer:IR_Left doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      break;
+    case UIGestureRecognizerStateEnded:
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
+      [self stopKeyPressTimer];
+      break;
+    default:
+      break;
+  }
+}
+- (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
+{
+  switch (sender.state)
+  {
+    case UIGestureRecognizerStateBegan:
+      [self sendButtonPressed:IR_Right];
+      [self startKeyPressTimer:IR_Right doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      break;
+    case UIGestureRecognizerStateEnded:
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
+      [self stopKeyPressTimer];
+      break;
+    default:
+      break;
+  }
 }
 
 @end
