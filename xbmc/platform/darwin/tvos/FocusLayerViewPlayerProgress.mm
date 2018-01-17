@@ -264,7 +264,7 @@
     return;
   thumb = barRect.size.width * (CGFloat)((self.value - min) / distance);
   CGPoint thumbPoint = CGPointMake(barRect.origin.x + thumb, barRect.origin.y);
-  thumbRect = CGRectMake(thumbPoint.x, thumbPoint.y, barRect.size.height, barRect.size.height);
+  thumbRect = CGRectMake(thumbPoint.x - barRect.size.height/2, thumbPoint.y, barRect.size.height, barRect.size.height);
 
   dispatch_async(dispatch_get_main_queue(),^{
     [self setNeedsDisplay];
