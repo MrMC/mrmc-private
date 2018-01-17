@@ -29,6 +29,17 @@
 #import "utils/MathUtils.h"
 #import "utils/log.h"
 
+typedef enum SiriRemoteTypes
+{
+  IR_Left = 1,
+  IR_Right = 2,
+} IRRemoteTypes;
+
+@interface FocusLayerViewPlayerProgress ()
+@property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
+@property (strong, nonatomic) NSTimer *remoteIdleTimer;
+@end
+
 #pragma mark -
 @implementation FocusLayerViewPlayerProgress
 
@@ -118,8 +129,152 @@
     tapRightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
     tapRightRecognizer.delegate  = self;
     [self addGestureRecognizer:tapRightRecognizer];
+      
+      
+    [self createIRDirectionRecognisers];
+
   }
 	return self;
+}
+
+//--------------------------------------------------------------
+- (void)createIRDirectionRecognisers
+{
+  auto leftRecognizer = [[UILongPressGestureRecognizer alloc]
+                         initWithTarget: self action: @selector(IRRemoteLeftArrowPressed:)];
+  leftRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+  leftRecognizer.minimumPressDuration = 0.01;
+  leftRecognizer.delegate = self;
+  [self addGestureRecognizer: leftRecognizer];
+  
+  auto rightRecognizer = [[UILongPressGestureRecognizer alloc]
+                          initWithTarget: self action: @selector(IRRemoteRightArrowPressed:)];
+  rightRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  rightRecognizer.minimumPressDuration = 0.01;
+  rightRecognizer.delegate = self;
+  [self addGestureRecognizer: rightRecognizer];
+}
+
+- (void)sendButtonPressed:(int)buttonId
+{
+  if (buttonId == IR_Left)
+  {
+    [self setPercentage:[self getSeekTimePercentage]/100.0 - 0.025];
+  }
+  else if (buttonId == IR_Right)
+  {
+    [self setPercentage:[self getSeekTimePercentage]/100.0 + 0.025];
+  }
+}
+
+// start repeating after 0.25s
+#define REPEATED_KEYPRESS_DELAY_S 0.25
+// pause 0.05s (50ms) between keypresses
+#define REPEATED_KEYPRESS_PAUSE_S 0.15
+//--------------------------------------------------------------
+static CFAbsoluteTime keyPressTimerStartSeconds;
+
+//- (void)startKeyPressTimer:(XBMCKey)keyId
+- (void)startKeyPressTimer:(int)keyId
+{
+  [self startKeyPressTimer:keyId doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+}
+
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay
+{
+  [self startKeyPressTimer:keyId doBeforeDelay:doBeforeDelay withDelay:delay withInterval:REPEATED_KEYPRESS_PAUSE_S];
+}
+
+static int keyPressTimerFiredCount = 0;
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay withInterval:(NSTimeInterval)interval
+{
+  //PRINT_SIGNATURE();
+  if (self.pressAutoRepeatTimer != nil)
+    [self stopKeyPressTimer];
+  
+  if (doBeforeDelay)
+    [self sendButtonPressed:keyId];
+  
+  NSNumber *number = [NSNumber numberWithInt:keyId];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
+  
+  keyPressTimerFiredCount = 0;
+  keyPressTimerStartSeconds = CFAbsoluteTimeGetCurrent() + delay;
+  // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
+  // and fires every REPEATED_KEYPRESS_PAUSE_S
+  NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
+                                            interval:interval
+                                              target:self
+                                            selector:@selector(keyPressTimerCallback:)
+                                            userInfo:number
+                                             repeats:YES];
+  
+  // schedule the timer to the runloop
+  [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+  self.pressAutoRepeatTimer = timer;
+}
+- (void)stopKeyPressTimer
+{
+  //PRINT_SIGNATURE();
+  if (self.pressAutoRepeatTimer != nil)
+  {
+    [self.pressAutoRepeatTimer invalidate];
+    self.pressAutoRepeatTimer = nil;
+  }
+}
+- (int)getKeyPressTimerCount
+{
+  return keyPressTimerFiredCount;
+}
+- (void)keyPressTimerCallback:(NSTimer*)theTimer
+{
+  NSNumber *keyId = [theTimer userInfo];
+  CFAbsoluteTime secondsFromStart = CFAbsoluteTimeGetCurrent() - keyPressTimerStartSeconds;
+  if (secondsFromStart > 1.5f)
+  {
+    [self sendButtonPressed:[keyId intValue]];
+  }
+  else
+  {
+    [self sendButtonPressed:[keyId intValue]];
+  }
+  keyPressTimerFiredCount++;
+}
+
+#define REPEATED_IRPRESS_DELAY_S 0.35
+- (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
+{
+  switch (sender.state)
+  {
+    case UIGestureRecognizerStateBegan:
+      [self sendButtonPressed:IR_Left];
+      [self startKeyPressTimer:IR_Left doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      break;
+    case UIGestureRecognizerStateEnded:
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
+      [self stopKeyPressTimer];
+      break;
+    default:
+      break;
+  }
+}
+- (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
+{
+  switch (sender.state)
+  {
+    case UIGestureRecognizerStateBegan:
+      [self sendButtonPressed:IR_Right];
+      [self startKeyPressTimer:IR_Right doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      break;
+    case UIGestureRecognizerStateEnded:
+    case UIGestureRecognizerStateChanged:
+    case UIGestureRecognizerStateCancelled:
+      [self stopKeyPressTimer];
+      break;
+    default:
+      break;
+  }
 }
 
 - (void)removeFromSuperview;
@@ -446,6 +601,10 @@
       return [self isFocused];
   }
   else if ([gestureRecognizer isKindOfClass:[UITapGestureRecognizer class]])
+  {
+    return [self isFocused];
+  }
+  else if ([gestureRecognizer isKindOfClass:[UILongPressGestureRecognizer class]])
   {
     return [self isFocused];
   }
