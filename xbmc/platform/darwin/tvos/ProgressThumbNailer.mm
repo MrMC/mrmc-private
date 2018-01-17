@@ -22,34 +22,35 @@
 
 #import <UIKit/UIKit.h>
 
-#include "DVDFileInfo.h"
-#include "DVDStreamInfo.h"
-#include "FileItem.h"
-#include "cores/FFmpeg.h"
-#include "settings/AdvancedSettings.h"
-#include "threads/SystemClock.h"
-#include "video/VideoInfoTag.h"
-#include "filesystem/StackDirectory.h"
-#include "utils/log.h"
+#import "DVDFileInfo.h"
+#import "DVDStreamInfo.h"
+#import "FileItem.h"
+#import "cores/FFmpeg.h"
+#import "cores/dvdplayer/DVDInputStreams/DVDInputStream.h"
+#import "cores/dvdplayer/DVDInputStreams/DVDInputStreamBluray.h"
+#import "cores/dvdplayer/DVDInputStreams/DVDFactoryInputStream.h"
+#import "cores/dvdplayer/DVDDemuxers/DVDDemux.h"
+#import "cores/dvdplayer/DVDDemuxers/DVDDemuxUtils.h"
+#import "cores/dvdplayer/DVDDemuxers/DVDFactoryDemuxer.h"
+#import "cores/dvdplayer/DVDDemuxers/DVDDemuxFFmpeg.h"
+#import "cores/dvdplayer/DVDCodecs/DVDCodecs.h"
+#import "cores/dvdplayer/DVDCodecs/DVDCodecUtils.h"
+#import "cores/dvdplayer/DVDCodecs/DVDFactoryCodec.h"
+#import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
+#import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h"
+#import "cores/dvdplayer/DVDClock.h"
+#import "filesystem/StackDirectory.h"
+#import "platform/darwin/tvos/FocusLayerViewSlider.h"
+#import "settings/AdvancedSettings.h"
+#import "threads/SystemClock.h"
+#import "video/VideoInfoTag.h"
+#import "utils/log.h"
 
-#include "DVDInputStreams/DVDInputStream.h"
-#ifdef HAVE_LIBBLURAY
-#include "DVDInputStreams/DVDInputStreamBluray.h"
-#endif
-#include "DVDInputStreams/DVDFactoryInputStream.h"
-#include "DVDDemuxers/DVDDemux.h"
-#include "DVDDemuxers/DVDDemuxUtils.h"
-#include "DVDDemuxers/DVDFactoryDemuxer.h"
-#include "DVDDemuxers/DVDDemuxFFmpeg.h"
-#include "DVDCodecs/DVDCodecs.h"
-#include "DVDCodecs/DVDCodecUtils.h"
-#include "DVDCodecs/DVDFactoryCodec.h"
-#include "DVDCodecs/Video/DVDVideoCodec.h"
-#include "DVDCodecs/Video/DVDVideoCodecFFmpeg.h"
 
-CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item)
+CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item, id obj)
 : CThread("ProgressThumbNailer")
 {
+  m_obj = obj;
   m_path = item.GetPath();
   if (item.IsVideoDb() && item.HasVideoInfoTag())
     m_path = item.GetVideoInfoTag()->m_strFileNameAndPath;
@@ -125,6 +126,9 @@ void CProgressThumbNailer::Process()
     return;
   }
 
+  if (m_bStop)
+    return;
+
   m_inputStream->SetNoCaching();
   if (!m_inputStream->Open())
   {
@@ -132,6 +136,9 @@ void CProgressThumbNailer::Process()
     SAFE_DELETE(m_inputStream);
     return;
   }
+
+  if (m_bStop)
+    return;
 
   try
   {
@@ -150,6 +157,9 @@ void CProgressThumbNailer::Process()
     SAFE_DELETE(m_inputStream);
     return;
   }
+
+  if (m_bStop)
+    return;
 
   for (int i = 0; i < m_videoDemuxer->GetNrOfStreams(); i++)
   {
@@ -191,36 +201,45 @@ void CProgressThumbNailer::Process()
     // check seekTime
     if (m_seekTimeMilliSecondsOld != m_seekTimeMilliSeconds)
     {
+      CLog::Log(LOGERROR, "ExtractThumb - requested(%d)", m_seekTimeMilliSeconds);
+      SetThumb(ExtractThumb(m_seekTimeMilliSeconds));
       m_seekTimeMilliSecondsOld = m_seekTimeMilliSeconds;
-      CGImageRef thumbImage = ExtractThumb(m_seekTimeMilliSecondsOld);
-
-      CSingleLock lock(m_critical);
-      if (m_thumbImage.image)
-        CGImageRelease(m_thumbImage.image);
-      m_thumbImage.image = thumbImage;
-      m_thumbImage.time = m_seekTimeMilliSecondsOld;
+      if ([m_obj isKindOfClass:[FocusLayerViewSlider class]] )
+      {
+        FocusLayerViewSlider *viewSlider = (FocusLayerViewSlider*)m_obj;
+        [viewSlider updateViewMainThread];
+      }
     }
-    m_processSleep.WaitMSec(50);
+    m_processSleep.WaitMSec(10);
     m_processSleep.Reset();
   }
 }
 
-CGImageRef CProgressThumbNailer::ExtractThumb(int seekTime)
+void CProgressThumbNailer::SetThumb(const ThumbNailerImage &thumbNailerImage)
+{
+  CSingleLock lock(m_critical);
+  if (m_thumbImage.image)
+    CGImageRelease(m_thumbImage.image);
+  m_thumbImage = thumbNailerImage;
+}
+
+ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
 {
   if (!m_videoDemuxer || !m_videoCodec)
-    return nullptr;
+    return ThumbNailerImage();
 
   unsigned int nTime = XbmcThreads::SystemClockMillis();
 
-  CGImageRef cgImageRef = nullptr;
   int packetsTried = 0;
-  //CLog::Log(LOGDEBUG,"%s - seeking to pos %dms (total: %dms) in %s", __FUNCTION__, nSeekTo, totalLen, m_redactPath.c_str());
+  ThumbNailerImage thumbNailerImage;
   // timebase is ms
   if (m_videoDemuxer->SeekTime(seekTime, true))
   {
     int iDecoderState = VC_ERROR;
     DVDVideoPicture picture = {0};
 
+    if (m_bStop)
+      return thumbNailerImage;
     // num streams * 160 frames, should get a valid frame, if not abort.
     int abort_index = m_videoDemuxer->GetNrOfStreams() * 160;
     do
@@ -238,6 +257,8 @@ CGImageRef CProgressThumbNailer::ExtractThumb(int seekTime)
 
       iDecoderState = m_videoCodec->Decode(pPacket->pData, pPacket->iSize, pPacket->dts, pPacket->pts);
       CDVDDemuxUtils::FreeDemuxPacket(pPacket);
+      if (m_bStop)
+        return thumbNailerImage;
 
       if (iDecoderState & VC_ERROR)
         break;
@@ -281,11 +302,14 @@ CGImageRef CProgressThumbNailer::ExtractThumb(int seekTime)
         sws_scale(context, src, srcStride, 0, picture.iHeight, dst, dstStride);
         sws_freeContext(context);
 
+        if (m_bStop)
+          return thumbNailerImage;
+
         CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
         CFDataRef data = CFDataCreate(kCFAllocatorDefault, scaledData, scaledLineSize * nHeight);
         CGDataProviderRef provider = CGDataProviderCreateWithCFData(data);
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        cgImageRef = CGImageCreate(nWidth,
+        CGImageRef cgImageRef = CGImageCreate(nWidth,
                            nHeight,
                            8,
                            24,
@@ -299,6 +323,18 @@ CGImageRef CProgressThumbNailer::ExtractThumb(int seekTime)
         CGColorSpaceRelease(colorSpace);
         CGDataProviderRelease(provider);
         CFRelease(data);
+
+        if (cgImageRef)
+        {
+          if (picture.pts != DVD_NOPTS_VALUE)
+            thumbNailerImage.time = DVD_TIME_TO_MSEC(picture.pts);
+          else if (picture.dts != DVD_NOPTS_VALUE)
+            thumbNailerImage.time = DVD_TIME_TO_MSEC(picture.dts);
+          else
+            thumbNailerImage.time = seekTime;
+          thumbNailerImage.image = cgImageRef;
+        }
+
       }
       av_free(scaledData);
     }
@@ -309,6 +345,6 @@ CGImageRef CProgressThumbNailer::ExtractThumb(int seekTime)
   }
 
   unsigned int nTotalTime = XbmcThreads::SystemClockMillis() - nTime;
-  CLog::Log(LOGDEBUG,"%s - measured %u ms to extract thumb in %d packets. ", __FUNCTION__, nTotalTime, packetsTried);
-  return cgImageRef;
+  CLog::Log(LOGDEBUG,"%s - measured %u ms to extract thumb at %d in %d packets. ", __FUNCTION__, nTotalTime, thumbNailerImage.time, packetsTried);
+  return thumbNailerImage;
 }

@@ -39,7 +39,6 @@ class CProgressThumbNailer;
   CGFloat deceleratingVelocity;
   CGFloat decelerationMaxVelocity;
   NSTimer *deceleratingTimer;
-  NSTimer *updateTimer;
 
   CGRect barRect;
   CGRect thumbRect;
@@ -52,5 +51,6 @@ class CProgressThumbNailer;
 
 - (double) getSeekTimeSeconds;
 - (double) getSeekTimePercentage;
+- (void)   updateViewMainThread;
 
 @end

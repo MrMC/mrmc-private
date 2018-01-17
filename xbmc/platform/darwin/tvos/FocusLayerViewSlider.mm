@@ -47,19 +47,19 @@
   {
     videoRectIsAboveBar = true;
     // if in lower area, expand up
-    frame.origin.y -= videoRect.size.height + 8;
-    frame.size.height += videoRect.size.height + 8;
+    frame.origin.y -= videoRect.size.height + 10;
+    frame.size.height += videoRect.size.height + 10;
   }
   else
   {
     videoRectIsAboveBar = false;
     // if in upper area, expand down
-    frame.size.height += videoRect.size.height + 8;
+    frame.size.height += videoRect.size.height + 10;
   }
-  // allow video thumb image to extend 50 of left/right sides
-  screenRect = CGRectInset(screenRect, 50, 0);
+  // allow video thumb image to extend within 50 of left/right sides
   frame.origin.x -= videoRect.size.width/2;
   frame.size.width += videoRect.size.width;
+  screenRect = CGRectInset(screenRect, 50, 0);
   frame = CGRectIntersection(frame, screenRect);
 
 	self = [super initWithFrame:frame];
@@ -69,10 +69,12 @@
 
     self->min = 0.0;
     self->max = 100.0;
+    self->distance = 100;
     self->thumb = 0.0;
     self->thumbConstant = 0.0;
-    self->distance = 100;
-    self->decelerationRate = 0.84;
+    // controls the rate of deceleration,
+    // ie. how fast the auto pan slows down
+    self->decelerationRate = 0.50;
     self->decelerationMaxVelocity = 1000;
     float percentage = 0.0;
     self->thumbNailer = nullptr;
@@ -82,10 +84,11 @@
       double seekTime = g_application.GetTime();
       double totalTime = g_application.GetTotalTime();
       percentage = seekTime / totalTime;
-      self->thumbNailer = new CProgressThumbNailer(g_application.CurrentFileItem());
+      self->thumbNailer = new CProgressThumbNailer(g_application.CurrentFileItem(), self);
     }
     // initial slider position
-    [self set:percentage];
+    [self setPercentage:percentage];
+    thumbConstant = thumb;
 
     auto pan = [[UIPanGestureRecognizer alloc]
       initWithTarget:self action:@selector(handlePanGesture:)];
@@ -121,7 +124,6 @@
 
 - (void)dealloc
 {
-  [self->updateTimer invalidate];
   [self->deceleratingTimer invalidate];
   SAFE_DELETE(self->thumbNailer);
   CGImageRelease(self->thumbImage.image);
@@ -136,10 +138,10 @@
 - (void)setValue:(double)newValue
 {
   self._value = newValue;
-  [self updateViews];
+  [self updateView];
 }
 
-- (void)set:(double)percentage
+- (void)setPercentage:(double)percentage
 {
   self.value = distance * (double)(percentage > 1 ? 1 : (percentage < 0 ? 0 : percentage)) + min;
   CLog::Log(LOGDEBUG, "Slider::set percentage(%f), value(%f)", percentage, self.value);
@@ -150,8 +152,17 @@
 - (double) getSeekTimeSeconds
 {
   if (self->thumbNailer)
-    return 1000.0 * self->thumbNailer->GetTimeMilliSeconds();
-
+  {
+    // take the seek time (ms) of the displayed thumb
+    int seekTime = self->thumbImage.time;
+    if (seekTime < 0)
+      seekTime = 0;
+    int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
+    if (seekTime > totalTime)
+      seekTime = totalTime;
+    // return seconds
+    return 1000.0 * seekTime;
+  }
   return -1;
 }
 
@@ -159,9 +170,13 @@
 {
   if (self->thumbNailer)
   {
-    int seekTime = self->thumbImage.time - 500;
-    if (seekTime < 0) seekTime = 0;
+    // take the seek time (ms) of the displayed thumb
+    int seekTime = self->thumbImage.time;
+    if (seekTime < 0)
+      seekTime = 0;
     int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
+    if (seekTime > totalTime)
+      seekTime = totalTime;
     double percentage = (double)seekTime / totalTime;
     CLog::Log(LOGDEBUG, "Slider::getSeekTimePercentage(%f), value(%f)", percentage, self.value);
     return 100.0 * percentage;
@@ -199,9 +214,9 @@
   videoRect = CGRectMake(0, 0, 400, 225);
   videoRect.origin.x = CGRectGetMidX(thumbRect) - videoRect.size.width/2;
   if (videoRectIsAboveBar)
-    videoRect.origin.y = thumbRect.origin.y - (videoRect.size.height + 8);
+    videoRect.origin.y = thumbRect.origin.y - (videoRect.size.height + 10);
   else
-    videoRect.origin.y = thumbRect.origin.y + (thumbRect.size.height + 8);
+    videoRect.origin.y = thumbRect.origin.y + (thumbRect.size.height + 10);
   // clamp left/right sides to left/right sides of bar
   if (CGRectGetMinX(videoRect) < CGRectGetMinX(self.bounds))
     videoRect.origin.x = self.bounds.origin.x;
@@ -215,7 +230,7 @@
     {
       CGImageRelease(self->thumbImage.image);
       self->thumbImage = newThumbImage;
-      CLog::Log(LOGDEBUG, "Slider::drawRect:got newThumbImage");
+      CLog::Log(LOGDEBUG, "Slider::drawRect:got newThumbImage at %d", newThumbImage.time);
     }
   }
   if (self->thumbImage.image)
@@ -243,7 +258,7 @@
   }
 }
 
-- (void)updateViews
+- (void)updateView
 {
   if (distance == 0.0)
     return;
@@ -254,6 +269,12 @@
   dispatch_async(dispatch_get_main_queue(),^{
     [self setNeedsDisplay];
   });
+}
+
+//--------------------------------------------------------------
+- (void) updateViewMainThread
+{
+  [self performSelectorOnMainThread:@selector(updateView) withObject:nil  waitUntilDone:NO];
 }
 
 //--------------------------------------------------------------
@@ -298,11 +319,16 @@
   {
     if (self->thumbNailer)
     {
-      int seekTime =  self->thumbNailer->GetTimeMilliSeconds() - 10000;
-      if (seekTime < 0) seekTime = 0;
-      int totalTime =  self->thumbNailer->GetTotalTimeMilliSeconds();
+      // seek back 10 seconds
+      int seekTime = self->thumbNailer->GetTimeMilliSeconds() - 10000;
+      if (seekTime < 0)
+        seekTime = 0;
+      int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
+      if (seekTime > totalTime)
+        seekTime = totalTime;
+      CLog::Log(LOGDEBUG, "Slider::handleLeftTapGesture:seekTime(%d)", seekTime);
       double percentage = (double)seekTime / totalTime;
-      [self set:percentage];
+      [self setPercentage:percentage];
       thumbConstant = thumb;
     }
   }
@@ -318,11 +344,16 @@
   {
     if (self->thumbNailer)
     {
-      int seekTime =  self->thumbNailer->GetTimeMilliSeconds() + 10000;
-      int totalTime =  self->thumbNailer->GetTotalTimeMilliSeconds();
-      if (seekTime > totalTime) seekTime = totalTime;
+      // seek forward 10 seconds
+      int seekTime = self->thumbNailer->GetTimeMilliSeconds() + 10000;
+      if (seekTime < 0)
+        seekTime = 0;
+      int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
+      if (seekTime > totalTime)
+        seekTime = totalTime;
+      CLog::Log(LOGDEBUG, "Slider::handleRightTapGesture:seekTime(%d)", seekTime);
       double percentage = (double)seekTime / totalTime;
-      [self set:percentage];
+      [self setPercentage:percentage];
       thumbConstant = thumb;
     }
   }
@@ -344,7 +375,7 @@
       {
         double swipesForFullRange = 9.0;
         double leading = thumbConstant + translation.x / swipesForFullRange;
-        [self set:leading / barRect.size.width];
+        [self setPercentage:leading / barRect.size.width];
       }
       break;
     case UIGestureRecognizerStateEnded:
@@ -364,13 +395,19 @@
 //--------------------------------------------------------------
 - (void)handleDeceleratingTimer:(id)obj
 {
-  double leading = thumbConstant + deceleratingVelocity * 0.01;
-  [self set:(double)leading / barRect.size.width];
-  thumbConstant = thumb;
+  // invalidate is a request to stop timer,
+  // we want updates to stop immediatly
+  // when stopDeceleratingTimer is called.
+  if (self->deceleratingTimer)
+  {
+    double leading = thumbConstant + deceleratingVelocity * 0.01;
+    [self setPercentage:(double)leading / barRect.size.width];
+    thumbConstant = thumb;
 
-  deceleratingVelocity *= decelerationRate;
-  if (![self isFocused] || fabs(deceleratingVelocity) < 1.0)
-    [self stopDeceleratingTimer];
+    deceleratingVelocity *= decelerationRate;
+    if (![self isFocused] || fabs(deceleratingVelocity) < 1.0)
+      [self stopDeceleratingTimer];
+  }
 }
 
 - (void)stopDeceleratingTimer
