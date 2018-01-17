@@ -29,6 +29,12 @@ class CDVDDemux;
 class CDVDVideoCodec;
 typedef struct CGImage* CGImageRef;
 
+typedef struct ThumbNailerImage
+{
+  int time = 0;
+  CGImageRef image = nullptr;
+} ThumbNailerImage;
+
 class CProgressThumbNailer
 : public CThread
 {
@@ -39,7 +45,7 @@ public:
   bool IsInitialized() { return m_videoCodec != nullptr; };
   void RequestThumbsAsTime(int seekTime);
   void RequestThumbAsPercentage(double percentage);
-  CGImageRef GetThumb();
+  ThumbNailerImage GetThumb();
   int GetTimeMilliSeconds() { return m_seekTimeMilliSecondsOld; };
   int GetTotalTimeMilliSeconds() { return m_totalTimeMilliSeconds; };
 
@@ -57,7 +63,7 @@ private:
   int m_seekTimeMilliSecondsOld = -1;
   int m_totalTimeMilliSeconds = -1;
   CEvent m_processSleep;
-  CGImageRef m_thumbImage = nullptr;;
+  ThumbNailerImage m_thumbImage;
   int m_videoStream = -1;
   CCriticalSection m_critical;
   CDVDInputStream *m_inputStream = nullptr;

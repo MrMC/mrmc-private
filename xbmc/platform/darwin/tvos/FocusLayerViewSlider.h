@@ -21,6 +21,7 @@
 
 #import <UIKit/UIKit.h>
 #import "platform/darwin/tvos/FocusLayerView.h"
+#import "platform/darwin/tvos/ProgressThumbNailer.h"
 
 class CProgressThumbNailer;
 
@@ -38,13 +39,13 @@ class CProgressThumbNailer;
   CGFloat deceleratingVelocity;
   CGFloat decelerationMaxVelocity;
   NSTimer *deceleratingTimer;
+  NSTimer *updateTimer;
 
   CGRect barRect;
   CGRect thumbRect;
   CGRect videoRect;
-  CGRect displayRect;
   bool   videoRectIsAboveBar;
-  CGImageRef thumbImage;
+  ThumbNailerImage thumbImage;
   CProgressThumbNailer *thumbNailer;
 }
 @property (nonatomic) double _value;

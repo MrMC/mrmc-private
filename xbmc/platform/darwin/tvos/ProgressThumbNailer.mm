@@ -68,7 +68,6 @@ CProgressThumbNailer::~CProgressThumbNailer()
     m_processSleep.Set();
     StopThread();
   }
-
   SAFE_DELETE(m_videoCodec);
   SAFE_DELETE(m_videoDemuxer);
   SAFE_DELETE(m_inputStream);
@@ -92,11 +91,11 @@ void CProgressThumbNailer::RequestThumbAsPercentage(double percentage)
   }
 }
 
-CGImageRef CProgressThumbNailer::GetThumb()
+ThumbNailerImage CProgressThumbNailer::GetThumb()
 {
   CSingleLock lock(m_critical);
-  CGImageRef thumbImage = m_thumbImage;
-  m_thumbImage = nullptr;
+  ThumbNailerImage thumbImage = m_thumbImage;
+  m_thumbImage = ThumbNailerImage();
   return thumbImage;
 }
 
@@ -196,9 +195,10 @@ void CProgressThumbNailer::Process()
       CGImageRef thumbImage = ExtractThumb(m_seekTimeMilliSecondsOld);
 
       CSingleLock lock(m_critical);
-      if (m_thumbImage)
-        CGImageRelease(m_thumbImage);
-      m_thumbImage = thumbImage;
+      if (m_thumbImage.image)
+        CGImageRelease(m_thumbImage.image);
+      m_thumbImage.image = thumbImage;
+      m_thumbImage.time = m_seekTimeMilliSecondsOld;
     }
     m_processSleep.WaitMSec(50);
     m_processSleep.Reset();

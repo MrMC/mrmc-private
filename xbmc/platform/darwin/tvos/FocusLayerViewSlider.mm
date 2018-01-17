@@ -34,8 +34,6 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-  displayRect = CGRectInset([UIScreen mainScreen].bounds, 0, 100);
-
   barRect = frame;
   // standard 16:9 video rect
   videoRect = CGRectMake(0, 0, 400, 225);
@@ -47,17 +45,22 @@
   // to thumbnail pict and thumbnail pict area
   if (barRect.origin.y > screenRect.size.height/2)
   {
-    // if in lower area, expand up
-    frame.origin.y -= videoRect.size.height + 2;
-    frame.size.height += videoRect.size.height + 2;
     videoRectIsAboveBar = true;
+    // if in lower area, expand up
+    frame.origin.y -= videoRect.size.height + 8;
+    frame.size.height += videoRect.size.height + 8;
   }
   else
   {
-    // if in upper area, expand down
-    frame.size.height += videoRect.size.height + 2;
     videoRectIsAboveBar = false;
+    // if in upper area, expand down
+    frame.size.height += videoRect.size.height + 8;
   }
+  // allow video thumb image to extend 50 of left/right sides
+  screenRect = CGRectInset(screenRect, 50, 0);
+  frame.origin.x -= videoRect.size.width/2;
+  frame.size.width += videoRect.size.width;
+  frame = CGRectIntersection(frame, screenRect);
 
 	self = [super initWithFrame:frame];
 	if (self)
@@ -72,7 +75,6 @@
     self->decelerationRate = 0.84;
     self->decelerationMaxVelocity = 1000;
     float percentage = 0.0;
-    self->thumbImage = nullptr;
     self->thumbNailer = nullptr;
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
@@ -119,8 +121,11 @@
 
 - (void)dealloc
 {
+  [self->updateTimer invalidate];
+  [self->deceleratingTimer invalidate];
   SAFE_DELETE(self->thumbNailer);
-  CGImageRelease(self->thumbImage);
+  CGImageRelease(self->thumbImage.image);
+  self->thumbImage.image = nil;
 }
 
 - (double)value
@@ -131,7 +136,7 @@
 - (void)setValue:(double)newValue
 {
   self._value = newValue;
-  [self updateViews:nil];
+  [self updateViews];
 }
 
 - (void)set:(double)percentage
@@ -154,7 +159,7 @@
 {
   if (self->thumbNailer)
   {
-    int seekTime = self->thumbNailer->GetTimeMilliSeconds();
+    int seekTime = self->thumbImage.time - 500;
     if (seekTime < 0) seekTime = 0;
     int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
     double percentage = (double)seekTime / totalTime;
@@ -168,7 +173,7 @@
 {
   [super drawRect:rect];
   CGContextRef ctx = UIGraphicsGetCurrentContext();
-#if 1
+#if 0
   CGContextSetLineWidth(ctx, 1.0);
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
   CGContextStrokeRect(ctx, self.bounds);
@@ -194,9 +199,9 @@
   videoRect = CGRectMake(0, 0, 400, 225);
   videoRect.origin.x = CGRectGetMidX(thumbRect) - videoRect.size.width/2;
   if (videoRectIsAboveBar)
-    videoRect.origin.y = thumbRect.origin.y - (videoRect.size.height + 2);
+    videoRect.origin.y = thumbRect.origin.y - (videoRect.size.height + 8);
   else
-    videoRect.origin.y = thumbRect.origin.y + (thumbRect.size.height + 4);
+    videoRect.origin.y = thumbRect.origin.y + (thumbRect.size.height + 8);
   // clamp left/right sides to left/right sides of bar
   if (CGRectGetMinX(videoRect) < CGRectGetMinX(self.bounds))
     videoRect.origin.x = self.bounds.origin.x;
@@ -205,20 +210,20 @@
 
   if (self->thumbNailer)
   {
-    CGImageRef newThumbImage = self->thumbNailer->GetThumb();
-    if (newThumbImage)
+    ThumbNailerImage newThumbImage = self->thumbNailer->GetThumb();
+    if (newThumbImage.image)
     {
-      CGImageRelease(self->thumbImage);
+      CGImageRelease(self->thumbImage.image);
       self->thumbImage = newThumbImage;
       CLog::Log(LOGDEBUG, "Slider::drawRect:got newThumbImage");
     }
   }
-  if (self->thumbImage)
+  if (self->thumbImage.image)
   {
     // image will be scaled, if necessary, to fit into rect
     // but we need to keep the correct aspect ration
-    size_t width = CGImageGetWidth(self->thumbImage);
-    size_t height = CGImageGetHeight(self->thumbImage);
+    size_t width = CGImageGetWidth(self->thumbImage.image);
+    size_t height = CGImageGetHeight(self->thumbImage.image);
     float aspect = (float)width / height;
     CGRect videoBounds = videoRect;
     videoBounds.size.height = videoRect.size.width / aspect;
@@ -230,7 +235,7 @@
     CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
     CGContextFillRect(ctx, videoBounds);
     // now we can draw the video thumb image
-    CGContextDrawImage(ctx, videoBounds, self->thumbImage);
+    CGContextDrawImage(ctx, videoBounds, self->thumbImage.image);
     // draw a thin white frame around the video thumb image
     CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
     CGContextSetLineWidth(ctx, 0.5);
@@ -238,23 +243,17 @@
   }
 }
 
-- (void)updateViews:(id)arg
+- (void)updateViews
 {
   if (distance == 0.0)
     return;
   thumb = barRect.size.width * (CGFloat)((self.value - min) / distance);
-  CGPoint thumbPoint = CGPointMake(barRect.origin.x + thumb - barRect.size.height/2, barRect.origin.y);
+  CGPoint thumbPoint = CGPointMake(barRect.origin.x + thumb, barRect.origin.y);
   thumbRect = CGRectMake(thumbPoint.x, thumbPoint.y, barRect.size.height, barRect.size.height);
-  if (CGRectGetMaxX(thumbRect) > CGRectGetMaxX(self.bounds))
-    thumbRect.origin.x = CGRectGetMaxX(self.bounds) - thumbRect.size.width;
 
   dispatch_async(dispatch_get_main_queue(),^{
     [self setNeedsDisplay];
   });
-
-  // call ourselves back in 100ms
-  //SEL singleParamSelector = @selector(updateViews:);
-  //[self performSelector:singleParamSelector withObject:nil afterDelay:0.100];
 }
 
 //--------------------------------------------------------------
