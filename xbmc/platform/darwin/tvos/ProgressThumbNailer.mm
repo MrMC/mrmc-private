@@ -40,7 +40,7 @@
 #import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h"
 #import "cores/dvdplayer/DVDClock.h"
 #import "filesystem/StackDirectory.h"
-#import "platform/darwin/tvos/FocusLayerViewSlider.h"
+#import "platform/darwin/tvos/FocusLayerViewPlayerProgress.h"
 #import "settings/AdvancedSettings.h"
 #import "threads/SystemClock.h"
 #import "video/VideoInfoTag.h"
@@ -204,10 +204,10 @@ void CProgressThumbNailer::Process()
       CLog::Log(LOGERROR, "ExtractThumb - requested(%d)", m_seekTimeMilliSeconds);
       SetThumb(ExtractThumb(m_seekTimeMilliSeconds));
       m_seekTimeMilliSecondsOld = m_seekTimeMilliSeconds;
-      if ([m_obj isKindOfClass:[FocusLayerViewSlider class]] )
+      if ([m_obj isKindOfClass:[FocusLayerViewPlayerProgress class]] )
       {
-        FocusLayerViewSlider *viewSlider = (FocusLayerViewSlider*)m_obj;
-        [viewSlider updateViewMainThread];
+        FocusLayerViewPlayerProgress *viewPlayerProgress = (FocusLayerViewPlayerProgress*)m_obj;
+        [viewPlayerProgress updateViewMainThread];
       }
     }
     m_processSleep.WaitMSec(10);

@@ -46,7 +46,7 @@
 #import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/FocusLayerView.h"
-#import "platform/darwin/tvos/FocusLayerViewSlider.h"
+#import "platform/darwin/tvos/FocusLayerViewPlayerProgress.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainApplication.h"
 #import "platform/darwin/tvos/TVOSTopShelf.h"
@@ -1254,8 +1254,8 @@ CGRect swipeStartingParentViewRect;
   if ( [touch.view isKindOfClass:[KeyboardView class]] )
     return NO;
 
-  // same for FocusLayerViewSlider
-  if ( [touch.view isKindOfClass:[FocusLayerViewSlider class]] )
+  // same for FocusLayerViewPlayerProgress
+  if ( [touch.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
     return NO;
 
   // important, this gestureRecognizer gets called before any other tap/pas/swipe handler
@@ -1274,8 +1274,8 @@ CGRect swipeStartingParentViewRect;
   // Block the recognition of press gestures from other views
   if ( [press.responder isKindOfClass:[KeyboardView class]] )
     return NO;
-  // same for FocusLayerViewSlider
-  if ( [press.responder isKindOfClass:[FocusLayerViewSlider class]] )
+  // same for FocusLayerViewPlayerProgress
+  if ( [press.responder isKindOfClass:[FocusLayerViewPlayerProgress class]] )
   {
     switch (press.type)
     {
@@ -1476,13 +1476,13 @@ CGRect swipeStartingParentViewRect;
         {
           // idea here is that if user does not use ExpertMode, it shoud behave like "Netflix" in fullscreen
           // would have been easier to do this in keymap, but we could not make it backward compatible
-          if ([_focusLayer.infocus.view isKindOfClass:[FocusLayerViewSlider class]] )
+          if ([_focusLayer.infocus.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
           {
             double appTotalTime = g_application.GetTotalTime();
             double appPercentage = g_application.GetPercentage();
             double appSeekTime = appPercentage * appTotalTime;
-            FocusLayerViewSlider *viewSlider = (FocusLayerViewSlider*)_focusLayer.infocus.view;
-            double percentage = [viewSlider getSeekTimePercentage];
+            FocusLayerViewPlayerProgress *viewPlayerProgress = (FocusLayerViewPlayerProgress*)_focusLayer.infocus.view;
+            double percentage = [viewPlayerProgress getSeekTimePercentage];
             double seekTime = percentage * appTotalTime;
             // only seek if change is more than 500ms
             if (fabs(appSeekTime - seekTime) > 0.5)
@@ -1817,7 +1817,7 @@ CGRect debugView2;
   if (remoteIdleState)
     return NO;
 
-  if ( [context.previouslyFocusedItem isKindOfClass:[FocusLayerViewSlider class]] )
+  if ( [context.previouslyFocusedItem isKindOfClass:[FocusLayerViewPlayerProgress class]] )
     return NO;
 
 
@@ -2052,7 +2052,7 @@ CGRect debugView2;
       auto &item = *itemsIt;
       FocusLayerView *focusLayerItem = nil;
       if (!m_enableRemoteExpertMode && item.type == "progress")
-        focusLayerItem = [[FocusLayerViewSlider alloc] initWithFrame:item.rect];
+        focusLayerItem = [[FocusLayerViewPlayerProgress alloc] initWithFrame:item.rect];
       else
         focusLayerItem = [[FocusLayerView alloc] initWithFrame:item.rect];
       [focusLayerItem setFocusable:true];

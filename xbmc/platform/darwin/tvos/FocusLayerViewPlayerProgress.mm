@@ -18,7 +18,7 @@
  *
  */
 
-#import "platform/darwin/tvos/FocusLayerViewSlider.h"
+#import "platform/darwin/tvos/FocusLayerViewPlayerProgress.h"
 
 #import "Application.h"
 #import "FileItem.h"
@@ -30,7 +30,7 @@
 #import "utils/log.h"
 
 #pragma mark -
-@implementation FocusLayerViewSlider
+@implementation FocusLayerViewPlayerProgress
 
 - (id)initWithFrame:(CGRect)frame
 {

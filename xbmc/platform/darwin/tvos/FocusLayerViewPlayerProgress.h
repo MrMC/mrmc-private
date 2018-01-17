@@ -25,7 +25,7 @@
 
 class CProgressThumbNailer;
 
-@interface FocusLayerViewSlider  : FocusLayerView  <UIGestureRecognizerDelegate>
+@interface FocusLayerViewPlayerProgress  : FocusLayerView  <UIGestureRecognizerDelegate>
 {
 @public
   double max;
