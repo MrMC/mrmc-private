@@ -122,28 +122,33 @@
 	return self;
 }
 
-- (void)dealloc
+- (void)removeFromSuperview;
 {
   [self->deceleratingTimer invalidate];
   SAFE_DELETE(self->thumbNailer);
   CGImageRelease(self->thumbImage.image);
   self->thumbImage.image = nil;
+  [super removeFromSuperview];
 }
 
-- (double)value
+- (double) value
 {
   return self._value;
 }
 
-- (void)setValue:(double)newValue
+- (void) setValue:(double)newValue
 {
   self._value = newValue;
   [self updateView];
 }
 
-- (void)setPercentage:(double)percentage
+- (void) setPercentage:(double)percentage
 {
-  self.value = distance * (double)(percentage > 1 ? 1 : (percentage < 0 ? 0 : percentage)) + min;
+  if (percentage < 0)
+    percentage = 0;
+  if (percentage > 1)
+    percentage = 1;
+  self.value = (distance * percentage) + min;
   CLog::Log(LOGDEBUG, "Slider::set percentage(%f), value(%f)", percentage, self.value);
   if (self->thumbNailer)
     self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
@@ -184,11 +189,11 @@
   return -1;
 }
 
-- (void)drawRect:(CGRect)rect
+- (void) drawRect:(CGRect)rect
 {
   [super drawRect:rect];
   CGContextRef ctx = UIGraphicsGetCurrentContext();
-#if 0
+#if 1
   CGContextSetLineWidth(ctx, 1.0);
   CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
   CGContextStrokeRect(ctx, self.bounds);
@@ -258,7 +263,7 @@
   }
 }
 
-- (void)updateView
+- (void) updateView
 {
   if (distance == 0.0)
     return;
@@ -278,19 +283,19 @@
 }
 
 //--------------------------------------------------------------
-- (BOOL)shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
+- (BOOL) shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
 {
   return YES;
 }
 
-- (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
+- (void) didUpdateFocusInContext:(UIFocusUpdateContext *)context
     withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
   CLog::Log(LOGDEBUG, "Slider::didUpdateFocusInContext");
 }
 
 //--------------------------------------------------------------
-- (IBAction)handleUpTapGesture:(UITapGestureRecognizer *)sender
+- (IBAction) handleUpTapGesture:(UITapGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "Slider::handleUpTapGesture");
   if (self->deceleratingTimer)
@@ -298,7 +303,7 @@
 }
 
 //--------------------------------------------------------------
-- (IBAction)handleDownTapGesture:(UITapGestureRecognizer *)sender
+- (IBAction) handleDownTapGesture:(UITapGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "Slider::handleDownTapGesture");
   if (self->deceleratingTimer)
@@ -310,7 +315,7 @@
 }
 
 //--------------------------------------------------------------
-- (IBAction)handleLeftTapGesture:(UITapGestureRecognizer *)sender
+- (IBAction) handleLeftTapGesture:(UITapGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "Slider::handleLeftTapGesture");
   if (self->deceleratingTimer)
@@ -335,7 +340,7 @@
 }
 
 //--------------------------------------------------------------
-- (IBAction)handleRightTapGesture:(UITapGestureRecognizer *)sender
+- (IBAction) handleRightTapGesture:(UITapGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "Slider::handleRightTapGesture");
   if (self->deceleratingTimer)
@@ -360,7 +365,7 @@
 }
 
 //--------------------------------------------------------------
-- (IBAction)handlePanGesture:(UIPanGestureRecognizer *)sender
+- (IBAction) handlePanGesture:(UIPanGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "Slider::handlePanGesture");
   CGPoint translation = [sender translationInView:self];
@@ -393,7 +398,7 @@
 }
 
 //--------------------------------------------------------------
-- (void)handleDeceleratingTimer:(id)obj
+- (void) handleDeceleratingTimer:(id)obj
 {
   // invalidate is a request to stop timer,
   // we want updates to stop immediatly
@@ -410,31 +415,33 @@
   }
 }
 
-- (void)stopDeceleratingTimer
+- (void) stopDeceleratingTimer
 {
   [self->deceleratingTimer invalidate];
   self->deceleratingTimer = nil;
   self->deceleratingVelocity = 0.0;
 }
 
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+- (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
   CLog::Log(LOGDEBUG, "Slider::gestureRecognizer:shouldReceiveTouch");
   return YES;
 }
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
+
+- (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
 {
   CLog::Log(LOGDEBUG, "Slider::gestureRecognizer:shouldReceivePress");
   return YES;
 }
 
-- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
+- (BOOL) gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
   CLog::Log(LOGDEBUG, "Slider::gestureRecognizerShouldBegin");
   if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]])
   {
     UIPanGestureRecognizer *panGestureRecognizer = (UIPanGestureRecognizer*)gestureRecognizer;
     CGPoint translation = [panGestureRecognizer translationInView:self];
+    CLog::Log(LOGDEBUG, "Slider::gestureRecognizerShouldBegin x(%f), y(%f)", translation.x, translation.y);
     if (fabs(translation.x) > fabs(translation.y))
       return [self isFocused];
   }

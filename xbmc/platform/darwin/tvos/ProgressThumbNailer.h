@@ -19,6 +19,7 @@
  *
  */
 
+#import <atomic>
 #import <string>
 #import "FileItem.h"
 #import "threads/Thread.h"
@@ -65,6 +66,7 @@ private:
   int m_seekTimeMilliSecondsOld = -1;
   int m_totalTimeMilliSeconds = -1;
   CEvent m_processSleep;
+  std::atomic<bool> m_extract;
   ThumbNailerImage m_thumbImage;
   int m_videoStream = -1;
   CCriticalSection m_critical;

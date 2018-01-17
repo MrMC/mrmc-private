@@ -52,6 +52,7 @@ CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item, id obj)
 {
   m_obj = obj;
   m_path = item.GetPath();
+  m_extract = false;
   if (item.IsVideoDb() && item.HasVideoInfoTag())
     m_path = item.GetVideoInfoTag()->m_strFileNameAndPath;
 
@@ -76,20 +77,16 @@ CProgressThumbNailer::~CProgressThumbNailer()
 
 void CProgressThumbNailer::RequestThumbsAsTime(int seekTime)
 {
-  if (m_seekTimeMilliSeconds != seekTime)
-  {
-    m_seekTimeMilliSeconds = seekTime;
-    m_processSleep.Set();
-  }
+  m_seekTimeMilliSeconds = seekTime;
+  m_extract = true;
+  m_processSleep.Set();
 }
 
 void CProgressThumbNailer::RequestThumbAsPercentage(double percentage)
 {
-  if (m_seekPercentage != percentage)
-  {
-    m_seekPercentage = percentage;
-    m_processSleep.Set();
-  }
+  m_seekPercentage = percentage;
+  m_extract = true;
+  m_processSleep.Set();
 }
 
 ThumbNailerImage CProgressThumbNailer::GetThumb()
@@ -97,6 +94,7 @@ ThumbNailerImage CProgressThumbNailer::GetThumb()
   CSingleLock lock(m_critical);
   ThumbNailerImage thumbImage = m_thumbImage;
   m_thumbImage = ThumbNailerImage();
+  m_extract = false;
   return thumbImage;
 }
 
@@ -192,15 +190,14 @@ void CProgressThumbNailer::Process()
   m_totalTimeMilliSeconds = m_videoDemuxer->GetStreamLength();
   while (!m_bStop)
   {
-    // check percentage first, and convert to seekTime
-    if (m_seekPercentageOld != m_seekPercentage)
+    if (m_extract)
     {
-      m_seekPercentageOld = m_seekPercentage;
-      m_seekTimeMilliSeconds = 0.5 + (m_seekPercentageOld * m_totalTimeMilliSeconds) / 100;
-    }
-    // check seekTime
-    if (m_seekTimeMilliSecondsOld != m_seekTimeMilliSeconds)
-    {
+      // check percentage first, and convert to seekTime
+      if (m_seekPercentageOld != m_seekPercentage)
+      {
+        m_seekPercentageOld = m_seekPercentage;
+        m_seekTimeMilliSeconds = 0.5 + (m_seekPercentageOld * m_totalTimeMilliSeconds) / 100;
+      }
       CLog::Log(LOGERROR, "ExtractThumb - requested(%d)", m_seekTimeMilliSeconds);
       SetThumb(ExtractThumb(m_seekTimeMilliSeconds));
       m_seekTimeMilliSecondsOld = m_seekTimeMilliSeconds;
