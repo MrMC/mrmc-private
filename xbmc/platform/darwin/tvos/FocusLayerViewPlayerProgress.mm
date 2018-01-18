@@ -605,6 +605,7 @@ static int keyPressTimerFiredCount = 0;
   //PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
     [self stopKeyPressTimer];
+  keyPressTimerFiredCount = 0;
 
   if (doBeforeDelay)
     [self sendButtonPressed:keyId];
@@ -612,7 +613,6 @@ static int keyPressTimerFiredCount = 0;
   NSNumber *number = [NSNumber numberWithInt:keyId];
   NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
 
-  keyPressTimerFiredCount = 0;
   keyPressTimerStartSeconds = CFAbsoluteTimeGetCurrent() + delay;
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
@@ -635,6 +635,7 @@ static int keyPressTimerFiredCount = 0;
     [self.pressAutoRepeatTimer invalidate];
     self.pressAutoRepeatTimer = nil;
   }
+  keyPressTimerFiredCount = 0;
 }
 - (void)keyPressTimerCallback:(NSTimer*)theTimer
 {

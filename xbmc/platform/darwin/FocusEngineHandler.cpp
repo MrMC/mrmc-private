@@ -436,6 +436,8 @@ void CFocusEngineHandler::SetGUIFocusabilityItems(const CFocusabilityTracker &fo
       std::vector<GUIFocusabilityItem> verifiedItems;
       for (auto it = items.begin(); it != items.end(); ++it)
       {
+        if (!(*it).control)
+          continue;
         if ((*it).control->HasProcessed() && (*it).control->IsVisible())
           verifiedItems.push_back(*it);
       }
