@@ -60,6 +60,7 @@
 #import "utils/LiteUtils.h"
 #import "utils/StringObfuscation.h"
 #import "utils/SeekHandler.h"
+#import "utils/URIUtils.h"
 #import "utils/log.h"
 
 #import <MediaPlayer/MPMediaItem.h>
@@ -666,6 +667,30 @@ MainController *g_xbmcController;
 {
   m_enableRemoteExpertMode = enable;
   [self startRemoteTimer];
+}
+
+- (bool)hasPlayerProgressScrubbing
+{
+  if (m_enableRemoteExpertMode)
+    return false;
+  if (g_windowManager.GetFocusedWindow() != WINDOW_FULLSCREEN_VIDEO)
+    return false;
+  if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->CanSeek())
+    return false;
+
+  CFileItem &fileItem = g_application.CurrentFileItem();
+  if (fileItem.IsLiveTV()
+  ||  URIUtils::IsUPnP(fileItem.GetPath())
+  ||  URIUtils::IsBluray(fileItem.GetPath())
+  ||  fileItem.IsBDFile()
+  ||  fileItem.IsDVD()
+  ||  fileItem.IsDiscImage()
+  ||  fileItem.IsDVDFile(false, true)
+  ||  fileItem.IsDiscStub()
+  ||  fileItem.IsPlayList())
+    return false;
+
+  return true;
 }
 
 - (void)stopPlaybackOnMenu:(BOOL)enable
@@ -1418,7 +1443,7 @@ CGRect swipeStartingParentViewRect;
       CLog::Log(LOGDEBUG, "SiriMenuHandler:StateEnded");
       if (g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
       {
-        if (!m_enableRemoteExpertMode && (g_application.m_pPlayer->IsPlaying() && g_application.m_pPlayer->IsPaused()))
+        if ([self hasPlayerProgressScrubbing] && (g_application.m_pPlayer->IsPlayingVideo() && g_application.m_pPlayer->IsPaused()))
         {
           [self sendButtonPressed:SiriRemote_PausePlayClick];
         }
@@ -1471,7 +1496,7 @@ CGRect swipeStartingParentViewRect;
       [self.m_holdTimer invalidate];
       if (self.m_holdCounter < 1)
       {
-        if (!m_enableRemoteExpertMode && g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
+        if ([self hasPlayerProgressScrubbing])
         {
           // idea here is that if user does not use ExpertMode, it shoud behave like "Netflix" in fullscreen
           // would have been easier to do this in keymap, but we could not make it backward compatible
@@ -1869,7 +1894,7 @@ CGRect debugView2;
       }
       else
       {
-        if (!m_enableRemoteExpertMode && g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
+        if ([self hasPlayerProgressScrubbing])
           return NO;
         
         swipeNoMore = true;
@@ -1895,7 +1920,7 @@ CGRect debugView2;
     }
   }
 
-  if (!m_enableRemoteExpertMode && g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
+  if ([self hasPlayerProgressScrubbing])
     return NO;
   
   switch (context.focusHeading)
@@ -2037,6 +2062,8 @@ CGRect debugView2;
   if (!focusViews.empty())
     CLog::Log(LOGDEBUG, "updateFocusLayer: begin");
 #endif
+
+  bool hasPlayerProgressScrubbing = [self hasPlayerProgressScrubbing];
   int viewCount = 0;
   for (auto viewsIt = focusViews.begin(); viewsIt != focusViews.end(); ++viewsIt)
   {
@@ -2063,7 +2090,7 @@ CGRect debugView2;
     {
       auto &item = *itemsIt;
       FocusLayerView *focusLayerItem = nil;
-      if (!m_enableRemoteExpertMode && item.type == "progress" && g_application.m_pPlayer->CanSeek())
+      if (hasPlayerProgressScrubbing && item.type == "progress")
         focusLayerItem = [[FocusLayerViewPlayerProgress alloc] initWithFrame:item.rect];
       else
         focusLayerItem = [[FocusLayerView alloc] initWithFrame:item.rect];
