@@ -107,11 +107,11 @@ typedef enum SiriRemoteTypes
     pan.delegate = self;
     [self addGestureRecognizer:pan];
 
-    auto tapUpRecognizer = [[UITapGestureRecognizer alloc]
-      initWithTarget: self action: @selector(handleUpTapGesture:)];
-    tapUpRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
-    tapUpRecognizer.delegate  = self;
-    [self addGestureRecognizer:tapUpRecognizer];
+    auto tapLeftRecognizer = [[UITapGestureRecognizer alloc]
+      initWithTarget: self action: @selector(handleLeftTapGesture:)];
+    tapLeftRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+    tapLeftRecognizer.delegate  = self;
+    [self addGestureRecognizer:tapLeftRecognizer];
 
     auto tapRightRecognizer = [[UITapGestureRecognizer alloc]
       initWithTarget: self action: @selector(handleRightTapGesture:)];
@@ -405,14 +405,6 @@ typedef enum SiriRemoteTypes
 }
 
 //--------------------------------------------------------------
-- (IBAction) handleUpTapGesture:(UITapGestureRecognizer *)sender
-{
-  CLog::Log(LOGDEBUG, "Slider::handleUpTapGesture");
-  if (self->deceleratingTimer)
-    [self stopDeceleratingTimer];
-}
-
-//--------------------------------------------------------------
 - (IBAction) handleDownSwipeGesture:(UISwipeGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "Slider::handleDownSwipeGesture");
@@ -433,13 +425,14 @@ typedef enum SiriRemoteTypes
     if (self->thumbNailer)
     {
       // seek back 10 seconds
-      int seekTime = self->thumbNailer->GetTimeMilliSeconds() - 10000;
+      int seekTime = self->thumbNailer->GetTimeMilliSeconds();
       if (seekTime == -1)
       {
         thumbConstant = thumb;
         [self setPercentage:thumbConstant / barRect.size.width];
         return;
       }
+      seekTime -= 10000;
       if (seekTime < 0)
         seekTime = 0;
       int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
@@ -464,13 +457,14 @@ typedef enum SiriRemoteTypes
     if (self->thumbNailer)
     {
       // seek forward 10 seconds
-      int seekTime = self->thumbNailer->GetTimeMilliSeconds() + 10000;
+      int seekTime = self->thumbNailer->GetTimeMilliSeconds();
       if (seekTime == -1)
       {
         thumbConstant = thumb;
         [self setPercentage:thumbConstant / barRect.size.width];
         return;
       }
+      seekTime += 10000;
       if (seekTime < 0)
         seekTime = 0;
       int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
@@ -557,18 +551,12 @@ typedef enum SiriRemoteTypes
     if (buttonId == IR_Left)
     {
       // seek back 10 seconds
-      if (keyPressTimerFiredCount < 4)
-        seekTime -= 10000;
-      else
-        seekTime -= 10000 * keyPressTimerFiredCount;
+      seekTime -= 10000;
     }
     else if (buttonId == IR_Right)
     {
       // seek forward 10 seconds
-      if (keyPressTimerFiredCount < 4)
-        seekTime += 10000;
-      else
-        seekTime += 10000 * keyPressTimerFiredCount;
+      seekTime += 10000;
     }
     if (seekTime < 0)
       seekTime = 0;

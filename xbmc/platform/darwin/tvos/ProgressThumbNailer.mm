@@ -139,7 +139,7 @@ void CProgressThumbNailer::Process()
 
   try
   {
-    m_videoDemuxer = CDVDFactoryDemuxer::CreateDemuxer(m_inputStream, true);
+    m_videoDemuxer = CDVDFactoryDemuxer::CreateDemuxer(m_inputStream, false);
     if(!m_videoDemuxer)
     {
       SAFE_DELETE(m_inputStream);
@@ -227,10 +227,15 @@ ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
 
   unsigned int nTime = XbmcThreads::SystemClockMillis();
 
+  // flush demuxer and reset codec on entry, we have no
+  // clue about previous state.
+  m_videoDemuxer->Flush();
+  m_videoCodec->Reset();
+
   int packetsTried = 0;
   ThumbNailerImage thumbNailerImage;
   // timebase is ms
-  if (m_videoDemuxer->SeekTime(seekTime, true))
+  if (m_videoDemuxer->SeekTime(seekTime, false))
   {
     int iDecoderState = VC_ERROR;
     DVDVideoPicture picture = {0};
@@ -280,12 +285,13 @@ ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
         aspect = m_aspect;
       unsigned int nHeight = (unsigned int)((double)g_advancedSettings.GetThumbSize() / aspect);
 
-      uint8_t *scaledData = (uint8_t*)av_malloc(nWidth * nHeight * 3);
       int scaledLineSize = nWidth * 3;
+      uint8_t *scaledData = (uint8_t*)av_malloc(scaledLineSize * nHeight);
 
-      struct SwsContext *context = sws_getContext(picture.iWidth, picture.iHeight,
-            (AVPixelFormat)CDVDCodecUtils::PixfmtFromEFormat(picture.format), nWidth, nHeight,
-            AV_PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+      struct SwsContext *context = sws_getContext(
+        picture.iWidth, picture.iHeight, (AVPixelFormat)CDVDCodecUtils::PixfmtFromEFormat(picture.format),
+        nWidth, nHeight, AV_PIX_FMT_RGB24,
+        SWS_FAST_BILINEAR, NULL, NULL, NULL);
       if (context)
       {
         // CGImages have flipped in y-axis coordinated, we can do the flip as we convert/scale
