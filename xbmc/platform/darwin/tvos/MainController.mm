@@ -159,7 +159,7 @@ MainController *g_xbmcController;
 @synthesize m_focusIdleState;
 @synthesize m_enableRemoteExpertMode;
 @synthesize m_stopPlaybackOnMenu;
-@synthesize m_tapDirection;
+@synthesize m_clickDirection;
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -186,7 +186,7 @@ MainController *g_xbmcController;
   m_window.autoresizingMask = 0;
   m_window.autoresizesSubviews = NO;
 
-  m_tapDirection = TAP_NONE;
+  m_clickDirection = CLICK_NONE;
 
   [self enableScreenSaver];
 
@@ -687,7 +687,7 @@ MainController *g_xbmcController;
   if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->CanSeek())
     return false;
 
-  if (m_tapDirection == TAP_LEFT || m_tapDirection == TAP_RIGHT)
+  if (m_clickDirection == CLICK_LEFT || m_clickDirection == CLICK_RIGHT)
     return false;
 
   CFileItem &fileItem = g_application.CurrentFileItem();
@@ -1058,31 +1058,9 @@ MainController *g_xbmcController;
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-#pragma mark - internal key press methods
-- (void)sendButtonPressed:(int)buttonId
-{
-  // if native keyboard is up, we don't want to send any button presses to MrMC
-  if (m_nativeKeyboardActive)
-    return;
-  
-  int actionID;
-  std::string actionName;
-  // Translate using custom controller translator.
-  if (CButtonTranslator::GetInstance().TranslateCustomControllerString(
-    CFocusEngineHandler::GetInstance().GetFocusWindowID(),
-    "SiriRemote", buttonId, actionID, actionName))
-  {
-    CInputManager::GetInstance().QueueAction(CAction(actionID, 1.0f, 0.0f, actionName, 0, buttonId), true);
-  }
-  else
-    CLog::Log(LOGDEBUG, "sendButtonPressed, ERROR mapping customcontroller action. CustomController: %s %i", "SiriRemote", buttonId);
-}
-
-//--------------------------------------------------------------
-//--------------------------------------------------------------
 #pragma mark - remote idle timer
 //--------------------------------------------------------------
-// ignore remoet/siri events if the timer is expired
+// ignore remote/siri events if the timer is expired
 - (void)startRemoteTimer
 {
   m_remoteIdleState = false;
@@ -1128,6 +1106,8 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 - (void)createSiriSwipeGestureRecognizers
 {
+  // these are for tracking tap/pan/swipe state only,
+  // tvOS focus engine will handle the navigation.
   UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc]
     initWithTarget:self action:@selector(SiriSwipeHandler:)];
   swipeLeft.delaysTouchesBegan = NO;
@@ -1162,8 +1142,8 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 - (void)createSiriPanGestureRecognizers
 {
-  //PRINT_SIGNATURE();
-  // for pan gestures with one finger
+  // these are for tracking tap/pan/swipe state only,
+  // tvOS focus engine will handle the navigation.
   auto pan = [[UIPanGestureRecognizer alloc]
     initWithTarget:self action:@selector(SiriPanHandler:)];
   pan.delegate = self;
@@ -1172,8 +1152,8 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 - (void)createSiriPressGesturecognizers
 {
-  //PRINT_SIGNATURE();
-  // we always have these under tvos, both ir and siri remotes respond to these
+  // we always have these under tvos,
+  // both ir and siri remotes respond to these
   auto menuRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriMenuHandler:)];
   menuRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeMenu]];
@@ -1187,50 +1167,40 @@ MainController *g_xbmcController;
   longSelectRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: longSelectRecognizer];
 
-  /*
-  auto selectRecognizer = [[UITapGestureRecognizer alloc]
-    initWithTarget: self action: @selector(SiriSelectHandler:)];
-  selectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
-  selectRecognizer.delegate = self;
-  [self.focusView addGestureRecognizer: selectRecognizer];
-  */
   auto playPauseRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriPlayPauseHandler:)];
   playPauseRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypePlayPause]];
   playPauseRecognizer.delegate  = self;
   [self.focusView addGestureRecognizer: playPauseRecognizer];
 
-/*
-  // taps on siri remote pad or presses on ir remote
-  // left/right/up/down
-  auto upRecognizer = [[UITapGestureRecognizer alloc]
-    initWithTarget: self action: @selector(SiriArrowHandler:)];
+  // ir remote presses only, left/right/up/down
+  auto upRecognizer = [[UILongPressGestureRecognizer alloc]
+    initWithTarget: self action: @selector(IRRemoteUpArrowPressed:)];
   upRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
-  upRecognizer.numberOfTapsRequired = 1;
+  upRecognizer.minimumPressDuration = 0.001;
   upRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: upRecognizer];
 
-  auto downRecognizer = [[UITapGestureRecognizer alloc]
-    initWithTarget: self action: @selector(SiriArrowHandler:)];
+  auto downRecognizer = [[UILongPressGestureRecognizer alloc]
+    initWithTarget: self action: @selector(IRRemoteDownArrowPressed:)];
   downRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
-  downRecognizer.numberOfTapsRequired = 1;
+  downRecognizer.minimumPressDuration = 0.001;
   downRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: downRecognizer];
 
-  auto leftRecognizer = [[UITapGestureRecognizer alloc]
-    initWithTarget: self action: @selector(SiriArrowHandler:)];
+  auto leftRecognizer = [[UILongPressGestureRecognizer alloc]
+    initWithTarget: self action: @selector(IRRemoteLeftArrowPressed:)];
   leftRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
-  leftRecognizer.numberOfTapsRequired = 1;
+  leftRecognizer.minimumPressDuration = 0.001;
   leftRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: leftRecognizer];
 
-  auto rightRecognizer = [[UITapGestureRecognizer alloc]
-    initWithTarget: self action: @selector(SiriArrowHandler:)];
+  auto rightRecognizer = [[UILongPressGestureRecognizer alloc]
+    initWithTarget: self action: @selector(IRRemoteRightArrowPressed:)];
   rightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
-  rightRecognizer.numberOfTapsRequired = 1;
+  rightRecognizer.minimumPressDuration = 0.001;
   rightRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: rightRecognizer];
-  */
 }
 //--------------------------------------------------------------
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
@@ -1363,10 +1333,7 @@ CGRect swipeStartingParentViewRect;
 
     // single press keys
     case UIPressTypeSelect:
-      CLog::Log(LOGDEBUG, "UIPressTypeSelect");
-      break;
     case UIPressTypePlayPause:
-      CLog::Log(LOGDEBUG, "UIPressTypePlayPause");
       break;
 
     // auto-repeat keys
@@ -1374,7 +1341,6 @@ CGRect swipeStartingParentViewRect;
     case UIPressTypeDownArrow:
     case UIPressTypeLeftArrow:
     case UIPressTypeRightArrow:
-      CLog::Log(LOGDEBUG, "UIPressTypeXXXXArrow");
       break;
 
     default:
@@ -1388,7 +1354,8 @@ CGRect swipeStartingParentViewRect;
 //--------------------------------------------------------------
 - (void)initGameController
 {
-  // dpad axis values range from -1.0 to 1.0
+  // dpad axis values ranges from -1.0 to 1.0
+  // where -1,-1 is top, left on trackpad.
   // referenced from center of touchpad.
   [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidConnectNotification
     object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note)
@@ -1409,43 +1376,51 @@ CGRect swipeStartingParentViewRect;
 
       if (startPoint.x > 0.5)
       {
-        m_tapDirection = TAP_RIGHT;
         if (gamepad.buttonA.pressed)
+        {
+          m_clickDirection = CLICK_RIGHT;
           NSLog(@"microGamepad: user clicked finger near right side of remote");
-        else
-          NSLog(@"microGamepad: user touched finger near right side of remote");
+        }
       }
 
       if (startPoint.x < -0.5)
       {
-        m_tapDirection = TAP_LEFT;
         if (gamepad.buttonA.pressed)
+        {
+          m_clickDirection = CLICK_LEFT;
           NSLog(@"microGamepad: user clicked finger near left side of remote");
-        else
-          NSLog(@"microGamepad: user touched finger near left side of remote");
+        }
       }
 
       if (startPoint.x == 0 && startPoint.y == 0)
       {
-        m_tapDirection = TAP_NONE;
+        m_clickDirection = CLICK_NONE;
         NSLog(@"microGamepad: user released finger from touch surface");
       }
     };
-    /*
-    self.gcController.microGamepad.dpad.valueChangedHandler =
-    ^(GCControllerDirectionPad *dpad, float xValue, float yValue) {
-
-      if (xValue > 0.7)
-        m_tapDirection = TAP_RIGHT;
-
-      if (xValue < -0.7)
-        m_tapDirection = TAP_LEFT;
-
-      if (xValue == 0 && yValue == 0)
-        m_tapDirection = TAP_NONE;
-    };
-    */
   }];
+}
+
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+#pragma mark - internal key press methods
+- (void)sendButtonPressed:(int)buttonId
+{
+  // if native keyboard is up, we don't want to send any button presses to MrMC
+  if (m_nativeKeyboardActive)
+    return;
+
+  int actionID;
+  std::string actionName;
+  // Translate using custom controller translator.
+  if (CButtonTranslator::GetInstance().TranslateCustomControllerString(
+    CFocusEngineHandler::GetInstance().GetFocusWindowID(),
+    "SiriRemote", buttonId, actionID, actionName))
+  {
+    CInputManager::GetInstance().QueueAction(CAction(actionID, 1.0f, 0.0f, actionName, 0, buttonId), true);
+  }
+  else
+    CLog::Log(LOGDEBUG, "sendButtonPressed, ERROR mapping customcontroller action. CustomController: %s %i", "SiriRemote", buttonId);
 }
 
 //--------------------------------------------------------------
@@ -1454,6 +1429,7 @@ CGRect swipeStartingParentViewRect;
 //--------------------------------------------------------------
 - (IBAction)SiriSwipeHandler:(UISwipeGestureRecognizer *)sender
 {
+  // for state tracking only, tvOS focus engine will handle the navigation
   if (!m_remoteIdleState)
   {
     if (m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
@@ -1486,6 +1462,7 @@ CGRect swipeStartingParentViewRect;
 //--------------------------------------------------------------
 - (IBAction)SiriPanHandler:(UIPanGestureRecognizer *)sender
 {
+  // for state tracking only, tvOS focus engine will handle the navigation
   if (!m_remoteIdleState)
   {
     if (m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
@@ -1517,37 +1494,6 @@ CGRect swipeStartingParentViewRect;
   }
 }
 //--------------------------------------------------------------
-- (IBAction)SiriArrowHandler:(UIGestureRecognizer *)sender
-{
-  // we need this gesture handler to get a call into
-  // shouldReceivePress where we can set FocusActionType
-  // before any other gesture handler (pan, swap) or
-  // shouldUpdateFocusInContext/didUpdateFocusInContext
-  // but this routine will get called AFTER the above.
-  CLog::Log(LOGDEBUG, "SiriArrowHandler:FocusActionTap");
-  // start remote timeout
-  if (!m_remoteIdleState)
-  {
-    if (m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
-    {
-      switch (sender.state)
-      {
-        case UIGestureRecognizerStateBegan:
-          break;
-        case UIGestureRecognizerStateCancelled:
-          CLog::Log(LOGDEBUG, "SiriArrowHandler:StateCancelled");
-          break;
-        case UIGestureRecognizerStateEnded:
-          CLog::Log(LOGDEBUG, "SiriArrowHandler:StateEnded");
-          break;
-        default:
-          break;
-      }
-    }
-  }
-  [self startRemoteTimer];
-}
-//--------------------------------------------------------------
 - (void)SiriMenuHandler:(UITapGestureRecognizer *)sender
 {
   switch (sender.state)
@@ -1574,13 +1520,13 @@ CGRect swipeStartingParentViewRect;
       {
         [self sendButtonPressed:SiriRemote_MenuClick];
       }
-      // start remote timeout
-      [self startRemoteTimer];
       break;
     }
     default:
       break;
   }
+  // start remote timeout
+  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (void)SiriLongSelectHoldHandler
@@ -1643,11 +1589,11 @@ CGRect swipeStartingParentViewRect;
         }
         else
         {
-          if( m_tapDirection != TAP_NONE)
+          if( m_clickDirection != CLICK_NONE)
           {
-            if ( m_tapDirection == TAP_RIGHT)
+            if ( m_clickDirection == CLICK_RIGHT)
               [self sendButtonPressed:SiriRemote_RightTap];
-            else if ( m_tapDirection == TAP_LEFT)
+            else if ( m_clickDirection == CLICK_LEFT)
               [self sendButtonPressed:SiriRemote_LeftTap];
           }
           else
@@ -1664,22 +1610,8 @@ CGRect swipeStartingParentViewRect;
     default:
       break;
   }
-}
-//--------------------------------------------------------------
-- (void)SiriSelectHandler:(UITapGestureRecognizer *)sender
-{
-  switch (sender.state)
-  {
-    case UIGestureRecognizerStateEnded:
-      CLog::Log(LOGDEBUG, "SiriSelectHandler:StateEnded");
-      [self sendButtonPressed:SiriRemote_CenterClick];
-      break;
-    case UIGestureRecognizerStateCancelled:
-      CLog::Log(LOGDEBUG, "SiriSelectHandler:StateCancelled");
-      break;
-    default:
-      break;
-  }
+  // start remote timeout
+  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (void)SiriPlayPauseHandler:(UITapGestureRecognizer *) sender
@@ -1696,6 +1628,171 @@ CGRect swipeStartingParentViewRect;
       break;
   }
 }
+
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+#pragma mark - IR remote directional handlers
+// only used during video playback, tvOS focus engine will
+// automatically include IR directional navigation.
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+// start repeating after 0.25s
+#define REPEATED_KEYPRESS_DELAY_S 0.25
+// pause 0.05s (50ms) between keypresses
+#define REPEATED_KEYPRESS_PAUSE_S 0.15
+//--------------------------------------------------------------
+static CFAbsoluteTime keyPressTimerStartSeconds;
+
+- (void)startKeyPressTimer:(int)keyId
+{
+  [self startKeyPressTimer:keyId doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+}
+
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay
+{
+  [self startKeyPressTimer:keyId doBeforeDelay:doBeforeDelay withDelay:delay withInterval:REPEATED_KEYPRESS_PAUSE_S];
+}
+
+- (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay withInterval:(NSTimeInterval)interval
+{
+  if (self.pressAutoRepeatTimer != nil)
+    [self stopKeyPressTimer];
+
+  if (doBeforeDelay)
+    [self sendButtonPressed:keyId];
+
+  NSNumber *number = [NSNumber numberWithInt:keyId];
+  NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
+
+  keyPressTimerStartSeconds = CFAbsoluteTimeGetCurrent() + delay;
+  // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
+  // and fires every REPEATED_KEYPRESS_PAUSE_S
+  NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
+    interval:interval target:self selector:@selector(keyPressTimerCallback:) userInfo:number repeats:YES];
+
+  // schedule the timer to the runloop
+  [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
+  self.pressAutoRepeatTimer = timer;
+}
+- (void)stopKeyPressTimer
+{
+  if (self.pressAutoRepeatTimer != nil)
+  {
+    [self.pressAutoRepeatTimer invalidate];
+    self.pressAutoRepeatTimer = nil;
+  }
+}
+- (void)keyPressTimerCallback:(NSTimer*)theTimer
+{
+  NSNumber *keyId = [theTimer userInfo];
+  [self sendButtonPressed:[keyId intValue]];
+}
+
+- (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
+{
+  // only used during video playback, tvOS focus engine will
+  // include IR key pressing
+  if (!m_remoteIdleState && [self hasPlayerProgressScrubbing])
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteLeftArrowPressed");
+          [self startKeyPressTimer:SiriRemote_LeftTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          break;
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateChanged:
+        case UIGestureRecognizerStateCancelled:
+          [self stopKeyPressTimer];
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  [self startRemoteTimer];
+}
+- (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
+{
+  // only used during video playback, tvOS focus engine will
+  // include IR key pressing
+  if (!m_remoteIdleState && [self hasPlayerProgressScrubbing])
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteRightArrowPressed");
+          [self startKeyPressTimer:SiriRemote_RightTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          break;
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateChanged:
+        case UIGestureRecognizerStateCancelled:
+          [self stopKeyPressTimer];
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  [self startRemoteTimer];
+}
+- (IBAction)IRRemoteUpArrowPressed:(UIGestureRecognizer *)sender
+{
+  // only used during video playback, tvOS focus engine will
+  // include IR key pressing
+  if (!m_remoteIdleState && [self hasPlayerProgressScrubbing])
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteUpArrowPressed");
+          [self startKeyPressTimer:SiriRemote_UpTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          break;
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateChanged:
+        case UIGestureRecognizerStateCancelled:
+          [self stopKeyPressTimer];
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  [self startRemoteTimer];
+}
+- (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer *)sender
+{
+  // only used during video playback, tvOS focus engine will
+  // include IR key pressing
+  if (!m_remoteIdleState && [self hasPlayerProgressScrubbing])
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteDownArrowPressed");
+          [self startKeyPressTimer:SiriRemote_DownTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          break;
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateChanged:
+        case UIGestureRecognizerStateCancelled:
+          [self stopKeyPressTimer];
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  [self startRemoteTimer];
+}
+
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 - (void)remoteControlReceivedWithEvent:(UIEvent*)receivedEvent
@@ -1979,9 +2076,15 @@ CGRect debugView2;
   if (remoteIdleState)
     return NO;
 
+  // disallow focus changes when playing video
+  // we handle those directly. Otherwise taps/swipes will cause
+  // wild seeks.
+  if ([self hasPlayerProgressScrubbing])
+    return NO;
+  /*
   if ( [context.previouslyFocusedItem isKindOfClass:[FocusLayerViewPlayerProgress class]] )
     return NO;
-
+  */
 
   CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: focusActionType %s", focusActionTypeNames[focusActionType]);
 
@@ -2019,9 +2122,6 @@ CGRect debugView2;
       }
       else
       {
-        if ([self hasPlayerProgressScrubbing] && g_application.m_pPlayer->IsPaused())
-          return NO;
-        
         swipeNoMore = true;
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Not in same parent view");
         switch (context.focusHeading)
@@ -2044,9 +2144,6 @@ CGRect debugView2;
       }
     }
   }
-
-  if ([self hasPlayerProgressScrubbing] && g_application.m_pPlayer->IsPaused())
-    return NO;
   
   switch (context.focusHeading)
   {

@@ -40,10 +40,10 @@ typedef enum
 
 typedef enum
 {
-  TAP_NONE = 0,
-  TAP_LEFT,
-  TAP_RIGHT,
-} TAP_DIRECTION;
+  CLICK_NONE = 0,
+  CLICK_LEFT,
+  CLICK_RIGHT,
+} CLICK_DIRECTION;
 
 typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 {
@@ -85,7 +85,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   BOOL                        m_stopPlaybackOnMenu;
   BOOL                        m_nativeKeyboardActive;
   BOOL                        m_focusIdleState;
-  TAP_DIRECTION               m_tapDirection;
+  CLICK_DIRECTION             m_clickDirection;
 }
 
 // why are these properties ?
@@ -102,7 +102,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 @property CGFloat             m_focusIdleTimeout;
 @property BOOL                m_enableRemoteExpertMode;
 @property BOOL                m_stopPlaybackOnMenu;
-@property TAP_DIRECTION       m_tapDirection;
+@property CLICK_DIRECTION     m_clickDirection;
 
 - (void)onPlayDelayed:(NSDictionary *)item;
 - (void)onSpeedChanged:(NSDictionary *)item;
