@@ -159,6 +159,7 @@ MainController *g_xbmcController;
 @synthesize m_focusIdleState;
 @synthesize m_enableRemoteExpertMode;
 @synthesize m_stopPlaybackOnMenu;
+@synthesize m_tapDirection;
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -185,6 +186,8 @@ MainController *g_xbmcController;
   m_window.autoresizingMask = 0;
   m_window.autoresizesSubviews = NO;
 
+  m_tapDirection = TAP_NONE;
+  
   [self enableScreenSaver];
 
   [m_window makeKeyAndVisible];
@@ -684,6 +687,9 @@ MainController *g_xbmcController;
   if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->CanSeek())
     return false;
 
+  if (m_tapDirection == TAP_LEFT || m_tapDirection == TAP_RIGHT)
+    return false;
+  
   CFileItem &fileItem = g_application.CurrentFileItem();
   if (fileItem.IsLiveTV()
   ||  URIUtils::IsUPnP(fileItem.GetPath())
@@ -1391,43 +1397,17 @@ bool clickedDown = false;
   {
     self.gcController = note.object;
     self.gcController.microGamepad.reportsAbsoluteDpadValues = YES;
-    self.gcController.microGamepad.valueChangedHandler = ^(GCMicroGamepad *gamepad, GCControllerElement *element)
-    {
-      CGPoint startPoint = CGPointMake(
-        gamepad.dpad.xAxis.value, gamepad.dpad.yAxis.value);
-      NSLog(@"microGamepad: A(%d), U(%d), D(%d), L(%d), R(%d), point %@",
-        gamepad.buttonA.pressed,
-        gamepad.dpad.up.pressed,
-        gamepad.dpad.down.pressed,
-        gamepad.dpad.left.pressed,
-        gamepad.dpad.right.pressed,
-        NSStringFromCGPoint(startPoint));
+    self.gcController.microGamepad.dpad.valueChangedHandler =
+    ^(GCControllerDirectionPad *dpad, float xValue, float yValue) {
 
-      if (startPoint.x > 0.5)
-      {
-        if (gamepad.buttonA.pressed)
-          NSLog(@"microGamepad: user clicked finger near right side of remote");
-        else
-          NSLog(@"microGamepad: user touched finger near right side of remote");
-      }
+      if (xValue > 0.7)
+        m_tapDirection = TAP_RIGHT;
 
-      if (startPoint.x < -0.5)
-      {
-        if (gamepad.buttonA.pressed)
-          NSLog(@"microGamepad: user clicked finger near left side of remote");
-        else
-          NSLog(@"microGamepad: user touched finger near left side of remote");
-      }
+      if (xValue < -0.7)
+        m_tapDirection = TAP_LEFT;
 
-      if (startPoint.x == 0 && startPoint.y == 0)
-      {
-        NSLog(@"microGamepad: user released finger from touch surface");
-      }
-      touchDown = gamepad.dpad.up.pressed ||
-                  gamepad.dpad.down.pressed ||
-                  gamepad.dpad.left.pressed ||
-                  gamepad.dpad.right.pressed;
-      clickedDown = gamepad.buttonA.pressed && touchDown;
+      if (xValue == 0 && yValue == 0)
+        m_tapDirection = TAP_NONE;
     };
   }];
 }
@@ -1627,7 +1607,15 @@ bool clickedDown = false;
         }
         else
         {
-          [self sendButtonPressed:SiriRemote_CenterClick];
+          if( m_tapDirection != TAP_NONE)
+          {
+            if ( m_tapDirection == TAP_RIGHT)
+              [self sendButtonPressed:SiriRemote_RightTap];
+            else if ( m_tapDirection == TAP_LEFT)
+              [self sendButtonPressed:SiriRemote_LeftTap];
+          }
+          else
+            [self sendButtonPressed:SiriRemote_CenterClick];
         }
       }
       

@@ -38,6 +38,13 @@ typedef enum
   MC_BACKGROUND_RESTORE,
 } MC_STATES;
 
+typedef enum
+{
+  TAP_NONE = 0,
+  TAP_LEFT,
+  TAP_RIGHT,
+} TAP_DIRECTION;
+
 typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 {
   UIPanGestureRecognizerDirectionUndefined,
@@ -78,6 +85,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   BOOL                        m_stopPlaybackOnMenu;
   BOOL                        m_nativeKeyboardActive;
   BOOL                        m_focusIdleState;
+  TAP_DIRECTION               m_tapDirection;
 }
 
 // why are these properties ?
@@ -94,6 +102,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 @property CGFloat             m_focusIdleTimeout;
 @property BOOL                m_enableRemoteExpertMode;
 @property BOOL                m_stopPlaybackOnMenu;
+@property TAP_DIRECTION       m_tapDirection;
 
 - (void)onPlayDelayed:(NSDictionary *)item;
 - (void)onSpeedChanged:(NSDictionary *)item;
