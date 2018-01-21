@@ -41,7 +41,7 @@ class CProgressThumbNailer
 : public CThread
 {
 public:
-  CProgressThumbNailer(const CFileItem& item, id obj);
+  CProgressThumbNailer(const CFileItem& item, int width, id obj);
  ~CProgressThumbNailer();
 
   bool IsInitialized() { return m_videoCodec != nullptr; };
@@ -55,6 +55,7 @@ private:
   void QueueExtractThumb(int seekTime);
 
   id m_obj;
+  int m_width;
   std::string m_path;
   std::string m_redactPath;
   float m_aspect;

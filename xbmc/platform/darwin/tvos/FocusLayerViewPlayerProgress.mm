@@ -27,6 +27,7 @@
 #import "platform/darwin/tvos/ProgressThumbNailer.h"
 #import "platform/darwin/tvos/FocusLayerViewPlayerProgressSettings.h"
 #import "guilib/GUISliderControl.h"
+#import "video/VideoInfoTag.h"
 #import "utils/MathUtils.h"
 #import "utils/StringUtils.h"
 #import "utils/log.h"
@@ -96,11 +97,16 @@ typedef enum SiriRemoteTypes
     self->slideDownView = nil;
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
+      double totalTimeSeconds;
+      CFileItem &fileitem = g_application.CurrentFileItem();
+      if (fileitem.HasVideoInfoTag())
+        totalTimeSeconds = fileitem.GetVideoInfoTag()->m_streamDetails.GetVideoDuration();
+      else
+        totalTimeSeconds = g_application.GetTotalTime();
       // get percentage from application, includes stacks
       double seekTime = g_application.GetTime();
-      double totalTime = g_application.GetTotalTime();
-      percentage = seekTime / totalTime;
-      self->thumbNailer = new CProgressThumbNailer(g_application.CurrentFileItem(), self);
+      percentage = seekTime / totalTimeSeconds;
+      self->thumbNailer = new CProgressThumbNailer(fileitem, 400, self);
     }
     // initial slider position
     [self setPercentage:percentage];

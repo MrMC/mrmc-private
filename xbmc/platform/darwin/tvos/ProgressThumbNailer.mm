@@ -41,16 +41,16 @@
 #import "cores/dvdplayer/DVDClock.h"
 #import "filesystem/StackDirectory.h"
 #import "platform/darwin/tvos/FocusLayerViewPlayerProgress.h"
-#import "settings/AdvancedSettings.h"
 #import "threads/SystemClock.h"
 #import "video/VideoInfoTag.h"
 #import "utils/log.h"
 
 
-CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item, id obj)
+CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item, int width, id obj)
 : CThread("ProgressThumbNailer")
 {
   m_obj = obj;
+  m_width = width;
   m_path = item.GetPath();
   if (item.IsVideoDb() && item.HasVideoInfoTag())
     m_path = item.GetVideoInfoTag()->m_strFileNameAndPath;
@@ -173,6 +173,7 @@ void CProgressThumbNailer::Process()
     CDVDStreamInfo hints(*m_videoDemuxer->GetStream(m_videoStream), true);
     hints.software = true;
     CDVDCodecOptions dvdOptions;
+    dvdOptions.m_keys.push_back(CDVDCodecOption("skip-deinterlacing", "1"));
     m_videoCodec = CDVDFactoryCodec::OpenCodec(new CDVDVideoCodecFFmpeg(), hints, dvdOptions);
     if (!m_videoCodec)
     {
@@ -265,11 +266,11 @@ void CProgressThumbNailer::QueueExtractThumb(int seekTime)
 
     if (iDecoderState & VC_PICTURE && !(picture.iFlags & DVP_FLAG_DROPPED))
     {
-      unsigned int nWidth = g_advancedSettings.GetThumbSize();
+      unsigned int nWidth = m_width;
       double aspect = (double)picture.iDisplayWidth / (double)picture.iDisplayHeight;
       if(m_forced_aspect && m_aspect != 0)
         aspect = m_aspect;
-      unsigned int nHeight = (unsigned int)((double)g_advancedSettings.GetThumbSize() / aspect);
+      unsigned int nHeight = (unsigned int)((double)m_width / aspect);
 
       int scaledLineSize = nWidth * 3;
       uint8_t *scaledData = (uint8_t*)av_malloc(scaledLineSize * nHeight);
