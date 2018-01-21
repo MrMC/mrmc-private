@@ -32,20 +32,12 @@
 #import "utils/StringUtils.h"
 #import "utils/log.h"
 
-typedef enum SiriRemoteTypes
-{
-  IR_Left = 1,
-  IR_Right = 2,
-  IR_LeftFast = 3,
-  IR_RightFast = 4,
-} IRRemoteTypes;
-
 @interface FocusLayerViewPlayerProgress ()
 @property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
 @property (strong, nonatomic) NSTimer *remoteIdleTimer;
 @end
 
-#pragma mark -
+#pragma mark - FocusLayerViewPlayerProgress implementation
 @implementation FocusLayerViewPlayerProgress
 
 - (id)initWithFrame:(CGRect)frame
@@ -367,6 +359,33 @@ typedef enum SiriRemoteTypes
   [self performSelectorOnMainThread:@selector(updateView) withObject:nil  waitUntilDone:NO];
 }
 
+#pragma mark - tvOS focus engine routines
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
+{
+  if (self->slideDownView)
+    return @[self->slideDownView, (UIView*)self];
+
+  return @[(UIView*)self];
+}
+//--------------------------------------------------------------
+- (BOOL) shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
+{
+  if (self->slideDownView)
+    return NO;
+  return YES;
+}
+
+- (void) didUpdateFocusInContext:(UIFocusUpdateContext *)context
+    withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
+{
+  CLog::Log(LOGDEBUG, "PlayerProgress::didUpdateFocusInContext");
+}
+
+#pragma mark - touch/gesture handlers
+//--------------------------------------------------------------
+//--------------------------------------------------------------
 - (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
   if (self->slideDownView)
@@ -374,7 +393,7 @@ typedef enum SiriRemoteTypes
   CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizer:shouldReceiveTouch");
   return YES;
 }
-
+//--------------------------------------------------------------
 - (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
 {
   if (self->slideDownView)
@@ -382,7 +401,7 @@ typedef enum SiriRemoteTypes
   CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizer:shouldReceivePress");
   return YES;
 }
-
+//--------------------------------------------------------------
 - (BOOL) gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
   CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizerShouldBegin");
@@ -408,38 +427,11 @@ typedef enum SiriRemoteTypes
   }
   return NO;
 }
-
+//--------------------------------------------------------------
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
   return YES;
 }
-
-- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
-{
-  if (self->slideDownView)
-    return @[self->slideDownView, (UIView*)self];
-
-  return @[(UIView*)self];
-}
-//--------------------------------------------------------------
-- (BOOL) shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
-{
-  if (self->slideDownView)
-    return NO;
-  return YES;
-}
-
-- (void) didUpdateFocusInContext:(UIFocusUpdateContext *)context
-    withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
-{
-  CLog::Log(LOGDEBUG, "PlayerProgress::didUpdateFocusInContext");
-}
-
-- (void)subtitleButtonMethod:(UIButton*)button
-{
-  NSLog(@"Button  clicked.");
-}
-
 //--------------------------------------------------------------
 - (IBAction) handleUpSwipeGesture:(UISwipeGestureRecognizer *)sender
 {
@@ -488,7 +480,6 @@ typedef enum SiriRemoteTypes
     TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
 #endif
 }
-
 //--------------------------------------------------------------
 - (IBAction) handlePanGesture:(UIPanGestureRecognizer *)sender
 {
@@ -521,7 +512,6 @@ typedef enum SiriRemoteTypes
       break;
   }
 }
-
 //--------------------------------------------------------------
 - (void) handleDeceleratingTimer:(id)obj
 {
@@ -539,7 +529,7 @@ typedef enum SiriRemoteTypes
       [self stopDeceleratingTimer];
   }
 }
-
+//--------------------------------------------------------------
 - (void) stopDeceleratingTimer
 {
   [self->deceleratingTimer invalidate];
@@ -547,6 +537,16 @@ typedef enum SiriRemoteTypes
   self->deceleratingVelocity = 0.0;
 }
 
+#pragma mark - IR remote handlers
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+typedef enum IRRemoteTypes
+{
+  IR_Left = 1,
+  IR_Right = 2,
+  IR_LeftFast = 3,
+  IR_RightFast = 4,
+} IRRemoteTypes;
 //--------------------------------------------------------------
 - (void)sendButtonPressed:(int)buttonId
 {
@@ -585,7 +585,6 @@ typedef enum SiriRemoteTypes
 //--------------------------------------------------------------
 static CFAbsoluteTime keyPressTimerStartSeconds;
 
-//- (void)startKeyPressTimer:(XBMCKey)keyId
 - (void)startKeyPressTimer:(int)keyId
 {
   [self startKeyPressTimer:keyId doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
@@ -598,7 +597,6 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 
 - (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay withInterval:(NSTimeInterval)interval
 {
-  //PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
     [self stopKeyPressTimer];
 
@@ -612,11 +610,7 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   // schedule repeated timer which starts after REPEATED_KEYPRESS_DELAY_S
   // and fires every REPEATED_KEYPRESS_PAUSE_S
   NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
-                                            interval:interval
-                                              target:self
-                                            selector:@selector(keyPressTimerCallback:)
-                                            userInfo:number
-                                             repeats:YES];
+    interval:interval target:self selector:@selector(keyPressTimerCallback:) userInfo:number repeats:YES];
 
   // schedule the timer to the runloop
   [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
@@ -624,7 +618,6 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 }
 - (void)stopKeyPressTimer
 {
-  //PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
   {
     [self.pressAutoRepeatTimer invalidate];
@@ -654,8 +647,7 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   {
     case UIGestureRecognizerStateBegan:
       CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteLeftArrowPressed");
-      [self sendButtonPressed:IR_Left];
-      [self startKeyPressTimer:IR_Left doBeforeDelay:false withDelay:REPEATED_KEYPRESS_DELAY_S];
+      [self startKeyPressTimer:IR_Left doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
       break;
     case UIGestureRecognizerStateEnded:
     case UIGestureRecognizerStateChanged:
@@ -672,8 +664,7 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   {
     case UIGestureRecognizerStateBegan:
       CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteRightArrowPressed");
-      [self sendButtonPressed:IR_Right];
-      [self startKeyPressTimer:IR_Right doBeforeDelay:false withDelay:REPEATED_KEYPRESS_DELAY_S];
+      [self startKeyPressTimer:IR_Right doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
       break;
     case UIGestureRecognizerStateEnded:
     case UIGestureRecognizerStateChanged:
@@ -704,4 +695,3 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 }
 
 @end
-  
