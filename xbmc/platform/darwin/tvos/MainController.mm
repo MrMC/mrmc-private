@@ -142,6 +142,7 @@ MainController *g_xbmcController;
 @property (nonatomic, nullable) FocusLayerView *focusViewBottom;
 @property (nonatomic, assign) FocusLayer focusLayer;
 @property (strong, nonatomic) NSTimer *focusIdleTimer;
+@property (strong) GCController* gcController;
 @end
 
 #pragma mark - MainController implementation
@@ -281,6 +282,7 @@ MainController *g_xbmcController;
   [self createSiriSwipeGestureRecognizers];
   [self createSiriPanGestureRecognizers];
   [self createCustomControlCenter];
+  [self initGameController];
   // startup with idle timer running
   [self startRemoteTimer];
 
@@ -673,8 +675,11 @@ MainController *g_xbmcController;
 {
   if (m_enableRemoteExpertMode)
     return false;
-  if (g_windowManager.GetFocusedWindow() != WINDOW_FULLSCREEN_VIDEO)
+
+  CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+  if (focusWindow && focusWindow->GetID() != WINDOW_FULLSCREEN_VIDEO)
     return false;
+
   if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->CanSeek())
     return false;
 
@@ -1174,44 +1179,51 @@ MainController *g_xbmcController;
   longSelectRecognizer.minimumPressDuration = 0.001;
   longSelectRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: longSelectRecognizer];
-  
+
+  /*
   auto selectRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriSelectHandler:)];
   selectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
   selectRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: selectRecognizer];
-
+  */
   auto playPauseRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriPlayPauseHandler:)];
   playPauseRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypePlayPause]];
   playPauseRecognizer.delegate  = self;
   [self.focusView addGestureRecognizer: playPauseRecognizer];
-  
+
+/*
   // taps on siri remote pad or presses on ir remote
   // left/right/up/down
   auto upRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriArrowHandler:)];
   upRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeUpArrow]];
+  upRecognizer.numberOfTapsRequired = 1;
   upRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: upRecognizer];
 
   auto downRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriArrowHandler:)];
   downRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeDownArrow]];
+  downRecognizer.numberOfTapsRequired = 1;
   downRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: downRecognizer];
 
   auto leftRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriArrowHandler:)];
   leftRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
+  leftRecognizer.numberOfTapsRequired = 1;
   leftRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: leftRecognizer];
 
   auto rightRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriArrowHandler:)];
   rightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  rightRecognizer.numberOfTapsRequired = 1;
   rightRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: rightRecognizer];
+  */
 }
 //--------------------------------------------------------------
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
@@ -1327,7 +1339,7 @@ CGRect swipeStartingParentViewRect;
       // menu is special.
       //  a) if at our home view, should return to atv home screen
       //  b) if not, let it pass to us
-      int focusedWindowID = g_windowManager.GetFocusedWindow();
+      int focusedWindowID = CFocusEngineHandler::GetInstance().GetFocusWindowID();
       if (focusedWindowID == WINDOW_HOME)
       {
         CLog::Log(LOGDEBUG, "shouldReceivePress:focusedWindowID == WINDOW_HOME");
@@ -1338,7 +1350,10 @@ CGRect swipeStartingParentViewRect;
 
     // single press keys
     case UIPressTypeSelect:
+      CLog::Log(LOGDEBUG, "UIPressTypeSelect");
+      break;
     case UIPressTypePlayPause:
+      CLog::Log(LOGDEBUG, "UIPressTypePlayPause");
       break;
 
     // auto-repeat keys
@@ -1346,6 +1361,7 @@ CGRect swipeStartingParentViewRect;
     case UIPressTypeDownArrow:
     case UIPressTypeLeftArrow:
     case UIPressTypeRightArrow:
+      CLog::Log(LOGDEBUG, "UIPressTypeXXXXArrow");
       break;
 
     default:
@@ -1354,6 +1370,61 @@ CGRect swipeStartingParentViewRect;
 
   return handled;
 }
+
+//--------------------------------------------------------------
+//--------------------------------------------------------------
+bool touchDown = false;
+bool clickedDown = false;
+- (void)initGameController
+{
+  // dpad axis values range from -1.0 to 1.0
+  // referenced from center of touchpad.
+  [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidConnectNotification
+    object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note)
+  {
+    self.gcController = note.object;
+    self.gcController.microGamepad.reportsAbsoluteDpadValues = YES;
+    self.gcController.microGamepad.valueChangedHandler = ^(GCMicroGamepad *gamepad, GCControllerElement *element)
+    {
+      CGPoint startPoint = CGPointMake(
+        gamepad.dpad.xAxis.value, gamepad.dpad.yAxis.value);
+      NSLog(@"microGamepad: A(%d), U(%d), D(%d), L(%d), R(%d), point %@",
+        gamepad.buttonA.pressed,
+        gamepad.dpad.up.pressed,
+        gamepad.dpad.down.pressed,
+        gamepad.dpad.left.pressed,
+        gamepad.dpad.right.pressed,
+        NSStringFromCGPoint(startPoint));
+
+      if (startPoint.x > 0.5)
+      {
+        if (gamepad.buttonA.pressed)
+          NSLog(@"microGamepad: user clicked finger near right side of remote");
+        else
+          NSLog(@"microGamepad: user touched finger near right side of remote");
+      }
+
+      if (startPoint.x < -0.5)
+      {
+        if (gamepad.buttonA.pressed)
+          NSLog(@"microGamepad: user clicked finger near left side of remote");
+        else
+          NSLog(@"microGamepad: user touched finger near left side of remote");
+      }
+
+      if (startPoint.x == 0 && startPoint.y == 0)
+      {
+        NSLog(@"microGamepad: user released finger from touch surface");
+      }
+      touchDown = gamepad.dpad.up.pressed ||
+                  gamepad.dpad.down.pressed ||
+                  gamepad.dpad.left.pressed ||
+                  gamepad.dpad.right.pressed;
+      clickedDown = gamepad.buttonA.pressed && touchDown;
+    };
+  }];
+}
+
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 #pragma mark - touch/gesture handlers
@@ -1430,8 +1501,27 @@ CGRect swipeStartingParentViewRect;
   // before any other gesture handler (pan, swap) or
   // shouldUpdateFocusInContext/didUpdateFocusInContext
   // but this routine will get called AFTER the above.
-  //CLog::Log(LOGDEBUG, "SiriArrowHandler:FocusActionTap");
+  CLog::Log(LOGDEBUG, "SiriArrowHandler:FocusActionTap");
   // start remote timeout
+  if (!m_remoteIdleState)
+  {
+    if (m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          break;
+        case UIGestureRecognizerStateCancelled:
+          CLog::Log(LOGDEBUG, "SiriArrowHandler:StateCancelled");
+          break;
+        case UIGestureRecognizerStateEnded:
+          CLog::Log(LOGDEBUG, "SiriArrowHandler:StateEnded");
+          break;
+        default:
+          break;
+      }
+    }
+  }
   [self startRemoteTimer];
 }
 //--------------------------------------------------------------
@@ -1440,8 +1530,10 @@ CGRect swipeStartingParentViewRect;
   switch (sender.state)
   {
     case UIGestureRecognizerStateEnded:
+    {
       CLog::Log(LOGDEBUG, "SiriMenuHandler:StateEnded");
-      if (g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
+      CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+      if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
       {
         if ([self hasPlayerProgressScrubbing] && (g_application.m_pPlayer->IsPlayingVideo() && g_application.m_pPlayer->IsPaused()))
         {
@@ -1462,6 +1554,7 @@ CGRect swipeStartingParentViewRect;
       // start remote timeout
       [self startRemoteTimer];
       break;
+    }
     default:
       break;
   }
@@ -1760,7 +1853,8 @@ CGRect debugView2;
         focusLayerViewRect.origin.y + focusLayerViewRect.size.height);
     }
     // need a focusable view or risk bouncing out on menu presses
-    if (g_windowManager.GetFocusedWindow() == WINDOW_FULLSCREEN_VIDEO)
+    CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+    if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
     {
       if ( [_focusLayer.infocus.view canBecomeFocused] == NO )
         [self.focusView setFocusable:true];

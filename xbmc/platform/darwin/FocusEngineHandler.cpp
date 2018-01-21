@@ -207,6 +207,13 @@ void CFocusEngineHandler::InvalidateFocus(CGUIControl *control)
     m_focus.items.erase(foundControl);
 }
 
+CGUIWindow*
+CFocusEngineHandler::GetFocusWindow()
+{
+  CSingleLock lock(m_focusLock);
+  return m_focus.window;
+}
+
 const int
 CFocusEngineHandler::GetFocusWindowID()
 {
