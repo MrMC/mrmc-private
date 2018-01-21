@@ -52,7 +52,6 @@ CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item, id obj)
 {
   m_obj = obj;
   m_path = item.GetPath();
-  m_extract = false;
   if (item.IsVideoDb() && item.HasVideoInfoTag())
     m_path = item.GetVideoInfoTag()->m_strFileNameAndPath;
 
@@ -75,26 +74,24 @@ CProgressThumbNailer::~CProgressThumbNailer()
   SAFE_DELETE(m_inputStream);
 }
 
-void CProgressThumbNailer::RequestThumbsAsTime(int seekTime)
-{
-  m_seekTimeMilliSeconds = seekTime;
-  m_extract = true;
-  m_processSleep.Set();
-}
-
 void CProgressThumbNailer::RequestThumbAsPercentage(double percentage)
 {
-  m_seekPercentage = percentage;
-  m_extract = true;
+  m_seekQueue.push(percentage);
   m_processSleep.Set();
 }
 
 ThumbNailerImage CProgressThumbNailer::GetThumb()
 {
-  CSingleLock lock(m_critical);
-  ThumbNailerImage thumbImage = m_thumbImage;
-  m_thumbImage = ThumbNailerImage();
-  return thumbImage;
+  ThumbNailerImage thumbImage;
+  if (!m_thumbImages.empty())
+  {
+    CSingleLock lock(m_thumbImagesCritical);
+    ThumbNailerImage thumbImage = m_thumbImages.back();
+    while (!m_thumbImages.empty())
+      m_thumbImages.pop();
+    return thumbImage;
+  }
+  return ThumbNailerImage();
 }
 
 void CProgressThumbNailer::Process()
@@ -189,41 +186,30 @@ void CProgressThumbNailer::Process()
   m_totalTimeMilliSeconds = m_videoDemuxer->GetStreamLength();
   while (!m_bStop)
   {
-    if (m_extract)
+    if (!m_seekQueue.empty())
     {
-      // check percentage first, and convert to seekTime
-      if (m_seekPercentageOld != m_seekPercentage)
-      {
-        m_seekPercentageOld = m_seekPercentage;
-        m_seekTimeMilliSeconds = 0.5 + (m_seekPercentageOld * m_totalTimeMilliSeconds) / 100;
-      }
-      CLog::Log(LOGERROR, "ExtractThumb - requested(%d)", m_seekTimeMilliSeconds);
-      SetThumb(ExtractThumb(m_seekTimeMilliSeconds));
-      m_seekTimeMilliSecondsOld = m_seekTimeMilliSeconds;
-      if ([m_obj isKindOfClass:[FocusLayerViewPlayerProgress class]] )
-      {
-        FocusLayerViewPlayerProgress *viewPlayerProgress = (FocusLayerViewPlayerProgress*)m_obj;
-        [viewPlayerProgress updateViewMainThread];
-      }
+      CSingleLock lock(m_seekQueueCritical);
+      double percent = m_seekQueue.back();
+      while (!m_seekQueue.empty())
+        m_seekQueue.pop();
+      lock.Leave();
+
+      if (percent < 100.0)
+        m_seekTimeMilliSeconds = 0.5 + (percent * m_totalTimeMilliSeconds) / 100;
+      else
+        m_seekTimeMilliSeconds = m_totalTimeMilliSeconds;
+      CLog::Log(LOGDEBUG, "QueueExtractThumb - requested(%d)", m_seekTimeMilliSeconds);
+      QueueExtractThumb(m_seekTimeMilliSeconds);
     }
     m_processSleep.WaitMSec(10);
     m_processSleep.Reset();
   }
 }
 
-void CProgressThumbNailer::SetThumb(const ThumbNailerImage &thumbNailerImage)
-{
-  CSingleLock lock(m_critical);
-  if (m_thumbImage.image)
-    CGImageRelease(m_thumbImage.image);
-  m_thumbImage = thumbNailerImage;
-  m_extract = false;
-}
-
-ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
+void CProgressThumbNailer::QueueExtractThumb(int seekTime)
 {
   if (!m_videoDemuxer || !m_videoCodec)
-    return ThumbNailerImage();
+    return;
 
   unsigned int nTime = XbmcThreads::SystemClockMillis();
 
@@ -235,13 +221,13 @@ ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
   int packetsTried = 0;
   ThumbNailerImage thumbNailerImage;
   // timebase is ms
-  if (m_videoDemuxer->SeekTime(seekTime, false))
+  if (m_videoDemuxer->SeekTime(seekTime, true))
   {
     int iDecoderState = VC_ERROR;
     DVDVideoPicture picture = {0};
 
     if (m_bStop)
-      return thumbNailerImage;
+      return;
     // num streams * 160 frames, should get a valid frame, if not abort.
     int abort_index = m_videoDemuxer->GetNrOfStreams() * 160;
     do
@@ -260,7 +246,7 @@ ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
       iDecoderState = m_videoCodec->Decode(pPacket->pData, pPacket->iSize, pPacket->dts, pPacket->pts);
       CDVDDemuxUtils::FreeDemuxPacket(pPacket);
       if (m_bStop)
-        return thumbNailerImage;
+        return;
 
       if (iDecoderState & VC_ERROR)
         break;
@@ -306,7 +292,7 @@ ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
         sws_freeContext(context);
 
         if (m_bStop)
-          return thumbNailerImage;
+          return;
 
         CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
         CFDataRef data = CFDataCreate(kCFAllocatorDefault, scaledData, scaledLineSize * nHeight);
@@ -336,6 +322,13 @@ ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
           else
             thumbNailerImage.time = seekTime;
           thumbNailerImage.image = cgImageRef;
+          CSingleLock lock(m_thumbImagesCritical);
+          m_thumbImages.push(thumbNailerImage);
+          if ([m_obj isKindOfClass:[FocusLayerViewPlayerProgress class]] )
+          {
+            FocusLayerViewPlayerProgress *viewPlayerProgress = (FocusLayerViewPlayerProgress*)m_obj;
+            [viewPlayerProgress updateViewMainThread];
+          }
         }
 
       }
@@ -349,5 +342,5 @@ ThumbNailerImage CProgressThumbNailer::ExtractThumb(int seekTime)
 
   unsigned int nTotalTime = XbmcThreads::SystemClockMillis() - nTime;
   CLog::Log(LOGDEBUG,"%s - measured %u ms to extract thumb at %d in %d packets. ", __FUNCTION__, nTotalTime, thumbNailerImage.time, packetsTried);
-  return thumbNailerImage;
+  return;
 }

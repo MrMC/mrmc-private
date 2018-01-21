@@ -35,6 +35,8 @@ typedef enum SiriRemoteTypes
 {
   IR_Left = 1,
   IR_Right = 2,
+  IR_LeftFast = 3,
+  IR_RightFast = 4,
 } IRRemoteTypes;
 
 @interface FocusLayerViewPlayerProgress ()
@@ -624,15 +626,13 @@ typedef enum SiriRemoteTypes
       return;
     }
     if (buttonId == IR_Left)
-    {
-      // seek back 10 seconds
       seekTime -= 10000;
-    }
+    else if (buttonId == IR_LeftFast)
+      seekTime -= 60000;
     else if (buttonId == IR_Right)
-    {
-      // seek forward 10 seconds
       seekTime += 10000;
-    }
+    else if (buttonId == IR_RightFast)
+      seekTime += 60000;
     if (seekTime < 0)
       seekTime = 0;
     int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
@@ -662,13 +662,11 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   [self startKeyPressTimer:keyId doBeforeDelay:doBeforeDelay withDelay:delay withInterval:REPEATED_KEYPRESS_PAUSE_S];
 }
 
-static int keyPressTimerFiredCount = 0;
 - (void)startKeyPressTimer:(int)keyId doBeforeDelay:(bool)doBeforeDelay withDelay:(NSTimeInterval)delay withInterval:(NSTimeInterval)interval
 {
   //PRINT_SIGNATURE();
   if (self.pressAutoRepeatTimer != nil)
     [self stopKeyPressTimer];
-  keyPressTimerFiredCount = 0;
 
   if (doBeforeDelay)
     [self sendButtonPressed:keyId];
@@ -698,27 +696,32 @@ static int keyPressTimerFiredCount = 0;
     [self.pressAutoRepeatTimer invalidate];
     self.pressAutoRepeatTimer = nil;
   }
-  keyPressTimerFiredCount = 0;
 }
 - (void)keyPressTimerCallback:(NSTimer*)theTimer
 {
   NSNumber *keyId = [theTimer userInfo];
   CFAbsoluteTime secondsFromStart = CFAbsoluteTimeGetCurrent() - keyPressTimerStartSeconds;
   if (secondsFromStart > 1.5f)
-    [self sendButtonPressed:[keyId intValue]];
+  {
+    int keyvalue = [keyId intValue];
+    if (keyvalue == IR_Left)
+      keyvalue = IR_LeftFast;
+    if (keyvalue == IR_Right)
+      keyvalue = IR_RightFast;
+    [self sendButtonPressed:keyvalue];
+  }
   else
     [self sendButtonPressed:[keyId intValue]];
-  keyPressTimerFiredCount++;
 }
 
-#define REPEATED_IRPRESS_DELAY_S 0.35
+#define REPEATED_IRPRESS_DELAY_S 0.10
 - (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
 {
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
       [self sendButtonPressed:IR_Left];
-      [self startKeyPressTimer:IR_Left doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      [self startKeyPressTimer:IR_Left doBeforeDelay:true withDelay:REPEATED_IRPRESS_DELAY_S];
       break;
     case UIGestureRecognizerStateEnded:
     case UIGestureRecognizerStateChanged:

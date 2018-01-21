@@ -21,6 +21,7 @@
 
 #import <atomic>
 #import <string>
+#import <queue>
 #import "FileItem.h"
 #import "threads/Thread.h"
 #import "threads/CriticalSection.h"
@@ -44,32 +45,28 @@ public:
  ~CProgressThumbNailer();
 
   bool IsInitialized() { return m_videoCodec != nullptr; };
-  void RequestThumbsAsTime(int seekTime);
   void RequestThumbAsPercentage(double percentage);
   ThumbNailerImage GetThumb();
-  int GetTimeMilliSeconds() { return m_seekTimeMilliSecondsOld; };
+  int GetTimeMilliSeconds() { return m_seekTimeMilliSeconds; };
   int GetTotalTimeMilliSeconds() { return m_totalTimeMilliSeconds; };
 
 private:
   void Process();
-  ThumbNailerImage ExtractThumb(int seekTime);
-  void SetThumb(const ThumbNailerImage &thumbNailerImage);
+  void QueueExtractThumb(int seekTime);
 
   id m_obj;
   std::string m_path;
   std::string m_redactPath;
   float m_aspect;
   bool m_forced_aspect;
-  double m_seekPercentage = -1;
-  double m_seekPercentageOld = -1;
   int m_seekTimeMilliSeconds = -1;
-  int m_seekTimeMilliSecondsOld = -1;
   int m_totalTimeMilliSeconds = -1;
   CEvent m_processSleep;
-  std::atomic<bool> m_extract;
-  ThumbNailerImage m_thumbImage;
+  std::queue<double> m_seekQueue;
+  CCriticalSection m_seekQueueCritical;
+  std::queue<ThumbNailerImage> m_thumbImages;
+  CCriticalSection m_thumbImagesCritical;
   int m_videoStream = -1;
-  CCriticalSection m_critical;
   CDVDInputStream *m_inputStream = nullptr;
   CDVDDemux *m_videoDemuxer = nullptr;
   CDVDVideoCodec *m_videoCodec = nullptr;
