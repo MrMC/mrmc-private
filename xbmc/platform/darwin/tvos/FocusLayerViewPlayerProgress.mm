@@ -25,6 +25,7 @@
 #import "messaging/ApplicationMessenger.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/ProgressThumbNailer.h"
+#import "platform/darwin/tvos/FocusLayerViewPlayerProgressSettings.h"
 #import "guilib/GUISliderControl.h"
 #import "utils/MathUtils.h"
 #import "utils/StringUtils.h"
@@ -90,6 +91,7 @@ typedef enum SiriRemoteTypes
     self->decelerationMaxVelocity = 1000;
     float percentage = 0.0;
     self->thumbNailer = nullptr;
+    self->slideDownView = nil;
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
       // get percentage from application, includes stacks
@@ -140,6 +142,13 @@ typedef enum SiriRemoteTypes
     downRecognizer.delegate = self;
     [self addGestureRecognizer: downRecognizer];
 
+    auto *swipeUp = [[UISwipeGestureRecognizer alloc]
+    initWithTarget:self action:@selector(handleUpSwipeGesture:)];
+    swipeUp.delaysTouchesBegan = NO;
+    swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
+    swipeUp.delegate = self;
+    [self  addGestureRecognizer:swipeUp];
+
     auto *swipeDown = [[UISwipeGestureRecognizer alloc]
     initWithTarget:self action:@selector(handleDownSwipeGesture:)];
     swipeDown.delaysTouchesBegan = NO;
@@ -178,7 +187,7 @@ typedef enum SiriRemoteTypes
   if (percentage > 1)
     percentage = 1;
   self.value = (distance * percentage) + min;
-  CLog::Log(LOGDEBUG, "Slider::set percentage(%f), value(%f)", percentage, self.value);
+  CLog::Log(LOGDEBUG, "PlayerProgress::set percentage(%f), value(%f)", percentage, self.value);
   if (self->thumbNailer)
     self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
 }
@@ -212,10 +221,19 @@ typedef enum SiriRemoteTypes
     if (seekTime > totalTime)
       seekTime = totalTime;
     double percentage = (double)seekTime / totalTime;
-    CLog::Log(LOGDEBUG, "Slider::getSeekTimePercentage(%f), value(%f)", percentage, self.value);
+    CLog::Log(LOGDEBUG, "PlayerProgress::getSeekTimePercentage(%f), value(%f)", percentage, self.value);
     return 100.0 * percentage;
   }
   return -1;
+}
+
+//--------------------------------------------------------------
+- (BOOL)canBecomeFocused
+{
+  if (self->slideDownView)
+    return NO;
+
+  return YES;
 }
 
 - (void) drawRect:(CGRect)rect
@@ -264,7 +282,7 @@ typedef enum SiriRemoteTypes
     {
       CGImageRelease(self->thumbImage.image);
       self->thumbImage = newThumbImage;
-      CLog::Log(LOGDEBUG, "Slider::drawRect:got newThumbImage at %d", newThumbImage.time);
+      CLog::Log(LOGDEBUG, "PlayerProgress::drawRect:got newThumbImage at %d", newThumbImage.time);
     }
   }
   if (self->thumbImage.image)
@@ -352,24 +370,28 @@ typedef enum SiriRemoteTypes
 
 - (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-  CLog::Log(LOGDEBUG, "Slider::gestureRecognizer:shouldReceiveTouch");
+  if (self->slideDownView)
+    return NO;
+  CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizer:shouldReceiveTouch");
   return YES;
 }
 
 - (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
 {
-  CLog::Log(LOGDEBUG, "Slider::gestureRecognizer:shouldReceivePress");
+  if (self->slideDownView)
+    return NO;
+  CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizer:shouldReceivePress");
   return YES;
 }
 
 - (BOOL) gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
-  CLog::Log(LOGDEBUG, "Slider::gestureRecognizerShouldBegin");
+  CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizerShouldBegin");
   if ([gestureRecognizer isKindOfClass:[UIPanGestureRecognizer class]])
   {
     UIPanGestureRecognizer *panGestureRecognizer = (UIPanGestureRecognizer*)gestureRecognizer;
     CGPoint translation = [panGestureRecognizer translationInView:self];
-    CLog::Log(LOGDEBUG, "Slider::gestureRecognizerShouldBegin x(%f), y(%f)", translation.x, translation.y);
+    CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizerShouldBegin x(%f), y(%f)", translation.x, translation.y);
     if (fabs(translation.x) > fabs(translation.y))
       return [self isFocused];
   }
@@ -392,32 +414,85 @@ typedef enum SiriRemoteTypes
 {
   return YES;
 }
+- (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
+{
+  if (self->slideDownView)
+    return @[self->slideDownView, (UIView*)self];
+
+  return @[(UIView*)self];
+}
 //--------------------------------------------------------------
 - (BOOL) shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
 {
+  if (self->slideDownView)
+    return NO;
   return YES;
 }
 
 - (void) didUpdateFocusInContext:(UIFocusUpdateContext *)context
     withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
-  CLog::Log(LOGDEBUG, "Slider::didUpdateFocusInContext");
+  CLog::Log(LOGDEBUG, "PlayerProgress::didUpdateFocusInContext");
+}
+
+- (void)subtitleButtonMethod:(UIButton*)button
+{
+  NSLog(@"Button  clicked.");
 }
 
 //--------------------------------------------------------------
-- (IBAction) handleDownSwipeGesture:(UISwipeGestureRecognizer *)sender
+- (IBAction) handleUpSwipeGesture:(UISwipeGestureRecognizer *)sender
 {
-  CLog::Log(LOGDEBUG, "Slider::handleDownSwipeGesture");
+  CLog::Log(LOGDEBUG, "PlayerProgress::handleDownSwipeGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
+  if (self->slideDownView)
+  {
+    [UIView animateWithDuration:0.5
+      animations:^{
+        CGRect frame = CGRectOffset([self->slideDownView frame], 0.0, -100.0);
+        [self->slideDownView setFrame:frame];
+        [self->slideDownView layoutIfNeeded];
+      }
+      completion:^(BOOL finished){
+        [self->slideDownView removeFromSuperview];
+        self->slideDownView = nil;
+      }];
+  }
+}
+//--------------------------------------------------------------
+- (IBAction) handleDownSwipeGesture:(UISwipeGestureRecognizer *)sender
+{
+  CLog::Log(LOGDEBUG, "PlayerProgress::handleDownSwipeGesture");
+  if (self->deceleratingTimer)
+    [self stopDeceleratingTimer];
+  if (self->slideDownView)
+    [self->slideDownView removeFromSuperview];
+#if 0
+  CGRect frameRect = [UIScreen mainScreen].bounds;
+  frameRect.size.height = 100.0;
+  frameRect.origin.y = -100.0;
+  self->slideDownView = [[FocusLayerViewPlayerProgressSettings alloc] initWithFrame:frameRect];
+  [self addSubview:self->slideDownView];
+  [UIView animateWithDuration:0.5
+    animations:^{
+      CGRect frame = CGRectOffset([self->slideDownView frame], 0.0, 100.0);
+      [self->slideDownView setFrame:frame];
+      [self->slideDownView layoutIfNeeded];
+    }
+    completion:^(BOOL finished){
+      [self setNeedsFocusUpdate];
+    }];
+#else
   KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
     TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
+#endif
 }
 
 //--------------------------------------------------------------
 - (IBAction) handleLeftTapGesture:(UITapGestureRecognizer *)sender
 {
-  CLog::Log(LOGDEBUG, "Slider::handleLeftTapGesture");
+  CLog::Log(LOGDEBUG, "PlayerProgress::handleLeftTapGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
   else
@@ -438,7 +513,7 @@ typedef enum SiriRemoteTypes
       int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
       if (seekTime > totalTime)
         seekTime = totalTime;
-      CLog::Log(LOGDEBUG, "Slider::handleLeftTapGesture:seekTime(%d)", seekTime);
+      CLog::Log(LOGDEBUG, "PlayerProgress::handleLeftTapGesture:seekTime(%d)", seekTime);
       double percentage = (double)seekTime / totalTime;
       [self setPercentage:percentage];
       thumbConstant = thumb;
@@ -449,7 +524,7 @@ typedef enum SiriRemoteTypes
 //--------------------------------------------------------------
 - (IBAction) handleRightTapGesture:(UITapGestureRecognizer *)sender
 {
-  CLog::Log(LOGDEBUG, "Slider::handleRightTapGesture");
+  CLog::Log(LOGDEBUG, "PlayerProgress::handleRightTapGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
   else
@@ -470,7 +545,7 @@ typedef enum SiriRemoteTypes
       int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
       if (seekTime > totalTime)
         seekTime = totalTime;
-      CLog::Log(LOGDEBUG, "Slider::handleRightTapGesture:seekTime(%d)", seekTime);
+      CLog::Log(LOGDEBUG, "PlayerProgress::handleRightTapGesture:seekTime(%d)", seekTime);
       double percentage = (double)seekTime / totalTime;
       [self setPercentage:percentage];
       thumbConstant = thumb;
@@ -481,7 +556,7 @@ typedef enum SiriRemoteTypes
 //--------------------------------------------------------------
 - (IBAction) handlePanGesture:(UIPanGestureRecognizer *)sender
 {
-  CLog::Log(LOGDEBUG, "Slider::handlePanGesture");
+  CLog::Log(LOGDEBUG, "PlayerProgress::handlePanGesture");
   CGPoint translation = [sender translationInView:self];
   CGPoint velocity =  [sender velocityInView:self];
   switch (sender.state)
@@ -563,7 +638,7 @@ typedef enum SiriRemoteTypes
     int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
     if (seekTime > totalTime)
       seekTime = totalTime;
-    CLog::Log(LOGDEBUG, "Slider::handleLeftTapGesture:seekTime(%d)", seekTime);
+    CLog::Log(LOGDEBUG, "PlayerProgress::handleLeftTapGesture:seekTime(%d)", seekTime);
     double percentage = (double)seekTime / totalTime;
     [self setPercentage:percentage];
     thumbConstant = thumb;

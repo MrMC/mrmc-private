@@ -21,37 +21,12 @@
 
 #import <UIKit/UIKit.h>
 #import "platform/darwin/tvos/FocusLayerView.h"
-#import "platform/darwin/tvos/ProgressThumbNailer.h"
 
-class CProgressThumbNailer;
-
-@interface FocusLayerViewPlayerProgress  : FocusLayerView  <UIGestureRecognizerDelegate>
+@interface FocusLayerViewPlayerProgressSettings  : FocusLayerView  <UIGestureRecognizerDelegate>
 {
-@public
-  double max;
-  double min;
-
 @private
-  double thumb;
-  double thumbConstant;
-  double distance;
-  CGFloat decelerationRate;
-  CGFloat deceleratingVelocity;
-  CGFloat decelerationMaxVelocity;
-  NSTimer *deceleratingTimer;
-
-  CGRect barRect;
-  CGRect thumbRect;
-  CGRect videoRect;
-  bool   videoRectIsAboveBar;
-  ThumbNailerImage thumbImage;
-  CProgressThumbNailer *thumbNailer;
-  UIView *slideDownView;
+  UIView *subtilesView;
+  UIView *settingsView;
 }
-@property (nonatomic) double _value;
-
-- (double) getSeekTimeSeconds;
-- (double) getSeekTimePercentage;
-- (void)   updateViewMainThread;
 
 @end
