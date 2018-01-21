@@ -27,6 +27,7 @@
 @private
   UIView *subtilesView;
   UIView *settingsView;
+  UIView *preferredFocus;
 }
 
 @end

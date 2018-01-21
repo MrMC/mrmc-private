@@ -47,6 +47,7 @@
 #import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/FocusLayerView.h"
 #import "platform/darwin/tvos/FocusLayerViewPlayerProgress.h"
+#import "platform/darwin/tvos/FocusLayerViewPlayerProgressSettings.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainApplication.h"
 #import "platform/darwin/tvos/TVOSTopShelf.h"
@@ -1293,6 +1294,8 @@ CGRect swipeStartingParentViewRect;
   // same for FocusLayerViewPlayerProgress
   if ( [touch.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
     return NO;
+  if ( [touch.view isKindOfClass:[FocusLayerViewPlayerProgressSettings class]] )
+    return NO;
 
   // important, this gestureRecognizer gets called before any other tap/pas/swipe handler
   // including shouldUpdateFocusInContext/didUpdateFocusInContext. So we can
@@ -1324,6 +1327,10 @@ CGRect swipeStartingParentViewRect;
       return NO;
     }
   }
+  /*
+  if ( [_focusLayer.infocus.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
+    return NO;
+  */
 
   BOOL handled = YES;
   // important, this gestureRecognizer gets called before any other press handler

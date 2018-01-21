@@ -212,7 +212,17 @@
 
   return YES;
 }
+/*
+//--------------------------------------------------------------
+-(id)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+  if (self->slideDownView)
+    return self->slideDownView;
 
+  return [super hitTest:point withEvent:event];
+}
+*/
+//--------------------------------------------------------------
 - (void) drawRect:(CGRect)rect
 {
   [super drawRect:rect];

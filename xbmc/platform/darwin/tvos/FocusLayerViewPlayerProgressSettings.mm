@@ -35,10 +35,10 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-	self = [super initWithFrame:frame];
-	if (self)
-	{
-    self.userInteractionEnabled = NO;
+  frame = CGRectInset(frame, -400, 0);
+  self = [super initWithFrame:frame];
+  if (self)
+  {
     self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6f];
 
     UIButton *subtilesButton = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -66,6 +66,8 @@
     settingsButton.userInteractionEnabled = YES;
     self->settingsView = settingsButton;
     [self addSubview:self->settingsView];
+
+    preferredFocus = self->subtilesView;
 
 /*
     CGRect buttonRect = CGRectMake(0, 0, 360.0, 60.0);
@@ -125,6 +127,13 @@
     swipeRight.direction = UISwipeGestureRecognizerDirectionRight;
     swipeRight.delegate = self;
     [self addGestureRecognizer:swipeRight];
+
+    auto longSelectRecognizer = [[UILongPressGestureRecognizer alloc]
+      initWithTarget: self action: @selector(handleLongSelect:)];
+    longSelectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
+    longSelectRecognizer.minimumPressDuration = 0.001;
+    longSelectRecognizer.delegate = self;
+    [self addGestureRecognizer: longSelectRecognizer];
   }
 	return self;
 }
@@ -136,13 +145,11 @@
   [super removeFromSuperview];
 }
 
-/*
 //--------------------------------------------------------------
 - (BOOL)canBecomeFocused
 {
   return YES;
 }
-*/
 
 - (void)drawRect:(CGRect)rect
 {
@@ -211,7 +218,7 @@
 //--------------------------------------------------------------
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
-  return @[self->subtilesView, self->settingsView];
+  return @[preferredFocus];
 }
 //--------------------------------------------------------------
 - (BOOL) shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
@@ -245,16 +252,42 @@
 - (IBAction) handleLeftSwipeGesture:(UISwipeGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "PlayerProgressSettings::handleLeftSwipeGesture");
+  if (preferredFocus == self->subtilesView)
+    preferredFocus = self->settingsView;
+  else if (preferredFocus == self->settingsView)
+    preferredFocus = self->subtilesView;
 }
 //--------------------------------------------------------------
 - (IBAction) handleRightSwipeGesture:(UISwipeGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "PlayerProgressSettings::handleRightSwipeGesture");
+  if (preferredFocus == self->subtilesView)
+    preferredFocus = self->settingsView;
+  else if (preferredFocus == self->settingsView)
+    preferredFocus = self->subtilesView;
 }
 //--------------------------------------------------------------
 - (IBAction) handleUpSwipeGesture:(UISwipeGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "PlayerProgressSettings::handleUpSwipeGesture");
+}
+//--------------------------------------------------------------
+- (void)handleLongSelect:(UITapGestureRecognizer *)sender
+{
+  switch (sender.state)
+  {
+    case UIGestureRecognizerStateBegan:
+      CLog::Log(LOGDEBUG, "handleLongSelect:StateBegan");
+      break;
+    case UIGestureRecognizerStateEnded:
+      CLog::Log(LOGDEBUG, "handleLongSelect:StateEnded");
+      break;
+    case UIGestureRecognizerStateCancelled:
+      CLog::Log(LOGDEBUG, "handleLongSelect:StateCancelled");
+      break;
+    default:
+      break;
+  }
 }
 
 @end
