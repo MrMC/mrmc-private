@@ -187,7 +187,7 @@ MainController *g_xbmcController;
   m_window.autoresizesSubviews = NO;
 
   m_tapDirection = TAP_NONE;
-  
+
   [self enableScreenSaver];
 
   [m_window makeKeyAndVisible];
@@ -689,7 +689,7 @@ MainController *g_xbmcController;
 
   if (m_tapDirection == TAP_LEFT || m_tapDirection == TAP_RIGHT)
     return false;
-  
+
   CFileItem &fileItem = g_application.CurrentFileItem();
   if (fileItem.IsLiveTV()
   ||  URIUtils::IsUPnP(fileItem.GetPath())
@@ -1386,8 +1386,6 @@ CGRect swipeStartingParentViewRect;
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
-bool touchDown = false;
-bool clickedDown = false;
 - (void)initGameController
 {
   // dpad axis values range from -1.0 to 1.0
@@ -1397,6 +1395,43 @@ bool clickedDown = false;
   {
     self.gcController = note.object;
     self.gcController.microGamepad.reportsAbsoluteDpadValues = YES;
+    self.gcController.microGamepad.valueChangedHandler = ^(GCMicroGamepad *gamepad, GCControllerElement *element)
+    {
+      CGPoint startPoint = CGPointMake(
+        gamepad.dpad.xAxis.value, gamepad.dpad.yAxis.value);
+      NSLog(@"microGamepad: A(%d), U(%d), D(%d), L(%d), R(%d), point %@",
+        gamepad.buttonA.pressed,
+        gamepad.dpad.up.pressed,
+        gamepad.dpad.down.pressed,
+        gamepad.dpad.left.pressed,
+        gamepad.dpad.right.pressed,
+        NSStringFromCGPoint(startPoint));
+
+      if (startPoint.x > 0.5)
+      {
+        m_tapDirection = TAP_RIGHT;
+        if (gamepad.buttonA.pressed)
+          NSLog(@"microGamepad: user clicked finger near right side of remote");
+        else
+          NSLog(@"microGamepad: user touched finger near right side of remote");
+      }
+
+      if (startPoint.x < -0.5)
+      {
+        m_tapDirection = TAP_LEFT;
+        if (gamepad.buttonA.pressed)
+          NSLog(@"microGamepad: user clicked finger near left side of remote");
+        else
+          NSLog(@"microGamepad: user touched finger near left side of remote");
+      }
+
+      if (startPoint.x == 0 && startPoint.y == 0)
+      {
+        m_tapDirection = TAP_NONE;
+        NSLog(@"microGamepad: user released finger from touch surface");
+      }
+    };
+    /*
     self.gcController.microGamepad.dpad.valueChangedHandler =
     ^(GCControllerDirectionPad *dpad, float xValue, float yValue) {
 
@@ -1409,6 +1444,7 @@ bool clickedDown = false;
       if (xValue == 0 && yValue == 0)
         m_tapDirection = TAP_NONE;
     };
+    */
   }];
 }
 
@@ -1522,7 +1558,7 @@ bool clickedDown = false;
       CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
       if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
       {
-        if ([self hasPlayerProgressScrubbing] && (g_application.m_pPlayer->IsPlayingVideo() && g_application.m_pPlayer->IsPaused()))
+        if ([self hasPlayerProgressScrubbing] && g_application.m_pPlayer->IsPaused())
         {
           [self sendButtonPressed:SiriRemote_PausePlayClick];
         }
@@ -1983,7 +2019,7 @@ CGRect debugView2;
       }
       else
       {
-        if ([self hasPlayerProgressScrubbing])
+        if ([self hasPlayerProgressScrubbing] && g_application.m_pPlayer->IsPaused())
           return NO;
         
         swipeNoMore = true;
@@ -2009,7 +2045,7 @@ CGRect debugView2;
     }
   }
 
-  if ([self hasPlayerProgressScrubbing])
+  if ([self hasPlayerProgressScrubbing] && g_application.m_pPlayer->IsPaused())
     return NO;
   
   switch (context.focusHeading)
@@ -2152,7 +2188,7 @@ CGRect debugView2;
     CLog::Log(LOGDEBUG, "updateFocusLayer: begin");
 #endif
 
-  bool hasPlayerProgressScrubbing = [self hasPlayerProgressScrubbing];
+  bool hasPlayerProgressScrubbing = [self hasPlayerProgressScrubbing] && g_application.m_pPlayer->IsPaused();
   int viewCount = 0;
   for (auto viewsIt = focusViews.begin(); viewsIt != focusViews.end(); ++viewsIt)
   {
