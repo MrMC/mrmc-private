@@ -92,23 +92,24 @@ typedef enum SiriRemoteTypes
     // ie. how fast the auto pan slows down
     self->decelerationRate = 0.50;
     self->decelerationMaxVelocity = 1000;
-    float percentage = 0.0;
+    self->totalTimeSeconds = -1;
+    self->seekTimeSeconds = 0.0;
     self->thumbNailer = nullptr;
     self->slideDownView = nil;
+    float percentage = 0.0;
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
-      double totalTimeSeconds;
       CFileItem &fileitem = g_application.CurrentFileItem();
       if (fileitem.HasVideoInfoTag())
-        totalTimeSeconds = fileitem.GetVideoInfoTag()->m_streamDetails.GetVideoDuration();
-      else
-        totalTimeSeconds = g_application.GetTotalTime();
+        self->totalTimeSeconds = fileitem.GetVideoInfoTag()->m_streamDetails.GetVideoDuration();
+      if (self->totalTimeSeconds <= 0)
+        self->totalTimeSeconds = g_application.GetTotalTime();
       // get percentage from application, includes stacks
-      double seekTime = g_application.GetTime();
-      percentage = seekTime / totalTimeSeconds;
+      self->seekTimeSeconds = g_application.GetTime();
+      percentage = self->seekTimeSeconds / self->totalTimeSeconds;
       self->thumbNailer = new CProgressThumbNailer(fileitem, 400, self);
     }
-    // initial slider position
+    // initial slider position and kick off a thumb image gen
     [self setPercentage:percentage];
     thumbConstant = thumb;
 
@@ -116,18 +117,6 @@ typedef enum SiriRemoteTypes
       initWithTarget:self action:@selector(handlePanGesture:)];
     pan.delegate = self;
     [self addGestureRecognizer:pan];
-
-    auto tapLeftRecognizer = [[UITapGestureRecognizer alloc]
-      initWithTarget: self action: @selector(handleLeftTapGesture:)];
-    tapLeftRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeLeftArrow]];
-    tapLeftRecognizer.delegate  = self;
-    [self addGestureRecognizer:tapLeftRecognizer];
-
-    auto tapRightRecognizer = [[UITapGestureRecognizer alloc]
-      initWithTarget: self action: @selector(handleRightTapGesture:)];
-    tapRightRecognizer.allowedPressTypes  = @[[NSNumber numberWithInteger:UIPressTypeRightArrow]];
-    tapRightRecognizer.delegate  = self;
-    [self addGestureRecognizer:tapRightRecognizer];
 
     auto leftRecognizer = [[UILongPressGestureRecognizer alloc]
       initWithTarget: self action: @selector(IRRemoteLeftArrowPressed:)];
@@ -197,24 +186,10 @@ typedef enum SiriRemoteTypes
   self.value = (distance * percentage) + min;
   CLog::Log(LOGDEBUG, "PlayerProgress::set percentage(%f), value(%f)", percentage, self.value);
   if (self->thumbNailer)
-    self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
-}
-
-- (double) getSeekTimeSeconds
-{
-  if (self->thumbNailer)
   {
-    // take the seek time (ms) of the displayed thumb
-    int seekTime = self->thumbImage.time;
-    if (seekTime < 0)
-      seekTime = 0;
-    int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
-    if (seekTime > totalTime)
-      seekTime = totalTime;
-    // return seconds
-    return 1000.0 * seekTime;
+    self->seekTimeSeconds = percentage * self->totalTimeSeconds;
+    self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
   }
-  return -1;
 }
 
 - (double) getSeekTimePercentage
@@ -222,13 +197,15 @@ typedef enum SiriRemoteTypes
   if (self->thumbNailer)
   {
     // take the seek time (ms) of the displayed thumb
-    int seekTime = self->thumbImage.time;
-    if (seekTime < 0)
-      seekTime = 0;
-    int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
-    if (seekTime > totalTime)
-      seekTime = totalTime;
-    double percentage = (double)seekTime / totalTime;
+    int seekTimeMilliSeconds = self->seekTimeSeconds;
+    if (self->thumbImage.image)
+      seekTimeMilliSeconds = self->thumbImage.time;
+    if (seekTimeMilliSeconds < 0)
+      seekTimeMilliSeconds = 0;
+    int totalTimeMilliSeconds = self->totalTimeSeconds * 1000;
+    if (seekTimeMilliSeconds > totalTimeMilliSeconds)
+      seekTimeMilliSeconds = totalTimeMilliSeconds;
+    double percentage = (double)seekTimeMilliSeconds / totalTimeMilliSeconds;
     CLog::Log(LOGDEBUG, "PlayerProgress::getSeekTimePercentage(%f), value(%f)", percentage, self.value);
     return 100.0 * percentage;
   }
@@ -293,37 +270,46 @@ typedef enum SiriRemoteTypes
       CLog::Log(LOGDEBUG, "PlayerProgress::drawRect:got newThumbImage at %d", newThumbImage.time);
     }
   }
-  if (self->thumbImage.image)
+
+  CGRect videoBounds = videoRect;
+  bool haveThumbImage = self->thumbImage.image != nil;
+  if (haveThumbImage)
   {
     // image will be scaled, if necessary, to fit into rect
     // but we need to keep the correct aspect ration
     size_t width = CGImageGetWidth(self->thumbImage.image);
     size_t height = CGImageGetHeight(self->thumbImage.image);
     float aspect = (float)width / height;
-    CGRect videoBounds = videoRect;
     videoBounds.size.height = videoRect.size.width / aspect;
     if (videoRectIsAboveBar)
       videoBounds.origin.y += videoRect.size.height - videoBounds.size.height;
     else
       videoBounds.origin.y -= videoRect.size.height - videoBounds.size.height;
+
     // clear to black the under video area, might not need this
     CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
     CGContextFillRect(ctx, videoBounds);
     // now we can draw the video thumb image
     CGContextDrawImage(ctx, videoBounds, self->thumbImage.image);
 
-    // with time text (H:M:S) on top
-    std::string timeString = StringUtils::SecondsToTimeString(self->thumbImage.time/1000, TIME_FORMAT_HH_MM_SS);
-    [self drawString:ctx withCString:timeString inRect:videoBounds];
-
     // draw a thin white frame around the video thumb image
     CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
     CGContextSetLineWidth(ctx, 0.5);
     CGContextStrokeRect(ctx, videoBounds);
   }
+
+  // always show time text (H:M:S)
+  int imageTime = self->seekTimeSeconds;
+  if (haveThumbImage)
+  {
+    // prefer matching time with thumb image
+    imageTime = self->thumbImage.time / 1000;
+  }
+  std::string timeString = StringUtils::SecondsToTimeString(imageTime, TIME_FORMAT_HH_MM_SS);
+  [self drawString:ctx withCString:timeString inRect:videoBounds drawFrame:!haveThumbImage];
 }
 
-- (void) drawString:(CGContextRef) ctx withCString:(const std::string&)cstring inRect:(CGRect)videoRect
+- (void) drawString:(CGContextRef) ctx withCString:(const std::string&)cstring inRect:(CGRect)videoRect drawFrame:(bool)drawFrame
 {
   NSString *string = [NSString stringWithUTF8String:cstring.c_str()];
 
@@ -348,12 +334,17 @@ typedef enum SiriRemoteTypes
     contextRect.origin.y + floorf((contextRect.size.height - size.height) / 2),
     size.width, size.height);
 
-  textRect.origin.y = CGRectGetMaxY(videoRect) - (textRect.size.height + 8);
+  textRect.origin.y = CGRectGetMaxY(videoRect) - textRect.size.height;
 
   CGRect underRect = CGRectInset(textRect, -4, 0);
   CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
   CGContextFillRect(ctx, underRect);
-
+  if (drawFrame)
+  {
+    CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
+    CGContextSetLineWidth(ctx, 0.5);
+    CGContextStrokeRect(ctx, underRect);
+  }
   [string drawInRect:textRect withAttributes:attributes];
 }
 
@@ -422,6 +413,7 @@ typedef enum SiriRemoteTypes
 {
   return YES;
 }
+
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
   if (self->slideDownView)
@@ -498,70 +490,6 @@ typedef enum SiriRemoteTypes
 }
 
 //--------------------------------------------------------------
-- (IBAction) handleLeftTapGesture:(UITapGestureRecognizer *)sender
-{
-  CLog::Log(LOGDEBUG, "PlayerProgress::handleLeftTapGesture");
-  if (self->deceleratingTimer)
-    [self stopDeceleratingTimer];
-  else
-  {
-    if (self->thumbNailer)
-    {
-      // seek back 10 seconds
-      int seekTime = self->thumbNailer->GetTimeMilliSeconds();
-      if (seekTime == -1)
-      {
-        thumbConstant = thumb;
-        [self setPercentage:thumbConstant / barRect.size.width];
-        return;
-      }
-      seekTime -= 10000;
-      if (seekTime < 0)
-        seekTime = 0;
-      int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
-      if (seekTime > totalTime)
-        seekTime = totalTime;
-      CLog::Log(LOGDEBUG, "PlayerProgress::handleLeftTapGesture:seekTime(%d)", seekTime);
-      double percentage = (double)seekTime / totalTime;
-      [self setPercentage:percentage];
-      thumbConstant = thumb;
-    }
-  }
-}
-
-//--------------------------------------------------------------
-- (IBAction) handleRightTapGesture:(UITapGestureRecognizer *)sender
-{
-  CLog::Log(LOGDEBUG, "PlayerProgress::handleRightTapGesture");
-  if (self->deceleratingTimer)
-    [self stopDeceleratingTimer];
-  else
-  {
-    if (self->thumbNailer)
-    {
-      // seek forward 10 seconds
-      int seekTime = self->thumbNailer->GetTimeMilliSeconds();
-      if (seekTime == -1)
-      {
-        thumbConstant = thumb;
-        [self setPercentage:thumbConstant / barRect.size.width];
-        return;
-      }
-      seekTime += 10000;
-      if (seekTime < 0)
-        seekTime = 0;
-      int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
-      if (seekTime > totalTime)
-        seekTime = totalTime;
-      CLog::Log(LOGDEBUG, "PlayerProgress::handleRightTapGesture:seekTime(%d)", seekTime);
-      double percentage = (double)seekTime / totalTime;
-      [self setPercentage:percentage];
-      thumbConstant = thumb;
-    }
-  }
-}
-
-//--------------------------------------------------------------
 - (IBAction) handlePanGesture:(UIPanGestureRecognizer *)sender
 {
   CLog::Log(LOGDEBUG, "PlayerProgress::handlePanGesture");
@@ -624,28 +552,28 @@ typedef enum SiriRemoteTypes
 {
   if (self->thumbNailer)
   {
-    int seekTime = self->thumbNailer->GetTimeMilliSeconds();
-    if (seekTime == -1)
+    int seekTimeMilliSeconds = self->seekTimeSeconds * 1000;
+    if (seekTimeMilliSeconds == -1)
     {
       thumbConstant = thumb;
       [self setPercentage:thumbConstant / barRect.size.width];
       return;
     }
     if (buttonId == IR_Left)
-      seekTime -= 10000;
+      seekTimeMilliSeconds -= 10000;
     else if (buttonId == IR_LeftFast)
-      seekTime -= 60000;
+      seekTimeMilliSeconds -= 60000;
     else if (buttonId == IR_Right)
-      seekTime += 10000;
+      seekTimeMilliSeconds += 10000;
     else if (buttonId == IR_RightFast)
-      seekTime += 60000;
-    if (seekTime < 0)
-      seekTime = 0;
-    int totalTime = self->thumbNailer->GetTotalTimeMilliSeconds();
-    if (seekTime > totalTime)
-      seekTime = totalTime;
-    CLog::Log(LOGDEBUG, "PlayerProgress::handleLeftTapGesture:seekTime(%d)", seekTime);
-    double percentage = (double)seekTime / totalTime;
+      seekTimeMilliSeconds += 60000;
+    if (seekTimeMilliSeconds < 0)
+      seekTimeMilliSeconds = 0;
+    int totalTimeMilliSeconds = self->totalTimeSeconds * 1000;
+    if (seekTimeMilliSeconds > totalTimeMilliSeconds)
+      seekTimeMilliSeconds = totalTimeMilliSeconds;
+    CLog::Log(LOGDEBUG, "PlayerProgress::sendButtonPressed:seekTime(%d)", seekTimeMilliSeconds);
+    double percentage = (double)seekTimeMilliSeconds / totalTimeMilliSeconds;
     [self setPercentage:percentage];
     thumbConstant = thumb;
   }
@@ -720,14 +648,14 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
     [self sendButtonPressed:[keyId intValue]];
 }
 
-#define REPEATED_IRPRESS_DELAY_S 0.10
 - (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
 {
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
+      CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteLeftArrowPressed");
       [self sendButtonPressed:IR_Left];
-      [self startKeyPressTimer:IR_Left doBeforeDelay:true withDelay:REPEATED_IRPRESS_DELAY_S];
+      [self startKeyPressTimer:IR_Left doBeforeDelay:false withDelay:REPEATED_KEYPRESS_DELAY_S];
       break;
     case UIGestureRecognizerStateEnded:
     case UIGestureRecognizerStateChanged:
@@ -743,8 +671,9 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
+      CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteRightArrowPressed");
       [self sendButtonPressed:IR_Right];
-      [self startKeyPressTimer:IR_Right doBeforeDelay:false withDelay:REPEATED_IRPRESS_DELAY_S];
+      [self startKeyPressTimer:IR_Right doBeforeDelay:false withDelay:REPEATED_KEYPRESS_DELAY_S];
       break;
     case UIGestureRecognizerStateEnded:
     case UIGestureRecognizerStateChanged:
@@ -761,6 +690,7 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
+      CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteDownArrowPressed");
       KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
         TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
       break;

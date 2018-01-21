@@ -44,13 +44,14 @@ class CProgressThumbNailer;
   CGRect thumbRect;
   CGRect videoRect;
   bool   videoRectIsAboveBar;
+  double seekTimeSeconds;
+  double totalTimeSeconds;
   ThumbNailerImage thumbImage;
   CProgressThumbNailer *thumbNailer;
   UIView *slideDownView;
 }
 @property (nonatomic) double _value;
 
-- (double) getSeekTimeSeconds;
 - (double) getSeekTimePercentage;
 - (void)   updateViewMainThread;
 

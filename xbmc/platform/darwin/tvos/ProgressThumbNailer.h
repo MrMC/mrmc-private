@@ -47,8 +47,6 @@ public:
   bool IsInitialized() { return m_videoCodec != nullptr; };
   void RequestThumbAsPercentage(double percentage);
   ThumbNailerImage GetThumb();
-  int GetTimeMilliSeconds() { return m_seekTimeMilliSeconds; };
-  int GetTotalTimeMilliSeconds() { return m_totalTimeMilliSeconds; };
 
 private:
   void Process();

@@ -52,11 +52,16 @@ CProgressThumbNailer::CProgressThumbNailer(const CFileItem& item, int width, id 
   m_obj = obj;
   m_width = width;
   m_path = item.GetPath();
+  m_redactPath = CURL::GetRedacted(m_path);
+
   if (item.IsVideoDb() && item.HasVideoInfoTag())
     m_path = item.GetVideoInfoTag()->m_strFileNameAndPath;
 
   if (item.IsStack())
     m_path = XFILE::CStackDirectory::GetFirstStackedFile(item.GetPath());
+
+  if (item.HasVideoInfoTag())
+    m_totalTimeMilliSeconds = 1000.0 * item.GetVideoInfoTag()->m_streamDetails.GetVideoDuration();
 
   CThread::Create();
 }
@@ -86,18 +91,16 @@ ThumbNailerImage CProgressThumbNailer::GetThumb()
   if (!m_thumbImages.empty())
   {
     CSingleLock lock(m_thumbImagesCritical);
-    ThumbNailerImage thumbImage = m_thumbImages.back();
+    // grab latest generated thumb
+    thumbImage = m_thumbImages.back();
     while (!m_thumbImages.empty())
       m_thumbImages.pop();
-    return thumbImage;
   }
-  return ThumbNailerImage();
+  return thumbImage;
 }
 
 void CProgressThumbNailer::Process()
 {
-  m_redactPath = CURL::GetRedacted(m_path);
-
   CFileItem item(m_path, false);
   m_inputStream = CDVDFactoryInputStream::CreateInputStream(NULL, item);
   if (!m_inputStream)
@@ -184,13 +187,15 @@ void CProgressThumbNailer::Process()
     m_forced_aspect = hints.forced_aspect;
   }
 
-  m_totalTimeMilliSeconds = m_videoDemuxer->GetStreamLength();
+  if (m_totalTimeMilliSeconds <= 0)
+    m_totalTimeMilliSeconds = m_videoDemuxer->GetStreamLength();
   while (!m_bStop)
   {
     if (!m_seekQueue.empty())
     {
       CSingleLock lock(m_seekQueueCritical);
       double percent = m_seekQueue.back();
+      // grab last submitted seek percent
       while (!m_seekQueue.empty())
         m_seekQueue.pop();
       lock.Leave();
@@ -325,13 +330,13 @@ void CProgressThumbNailer::QueueExtractThumb(int seekTime)
           thumbNailerImage.image = cgImageRef;
           CSingleLock lock(m_thumbImagesCritical);
           m_thumbImages.push(thumbNailerImage);
+          lock.Leave();
           if ([m_obj isKindOfClass:[FocusLayerViewPlayerProgress class]] )
           {
             FocusLayerViewPlayerProgress *viewPlayerProgress = (FocusLayerViewPlayerProgress*)m_obj;
             [viewPlayerProgress updateViewMainThread];
           }
         }
-
       }
       av_free(scaledData);
     }
