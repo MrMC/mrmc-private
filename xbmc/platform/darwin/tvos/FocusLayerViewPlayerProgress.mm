@@ -100,6 +100,7 @@
       self->seekTimeSeconds = g_application.GetTime();
       percentage = self->seekTimeSeconds / self->totalTimeSeconds;
       self->thumbNailer = new CProgressThumbNailer(fileitem, 400, self);
+      //TODO: grab initial thumb from renderer.
     }
     // initial slider position and kick off a thumb image gen
     [self setPercentage:percentage];
@@ -189,7 +190,7 @@
   if (self->thumbNailer)
   {
     // take the seek time (ms) of the displayed thumb
-    int seekTimeMilliSeconds = self->seekTimeSeconds;
+    int seekTimeMilliSeconds = self->seekTimeSeconds * 1000;
     if (self->thumbImage.image)
       seekTimeMilliSeconds = self->thumbImage.time;
     if (seekTimeMilliSeconds < 0)
@@ -212,16 +213,6 @@
 
   return YES;
 }
-/*
-//--------------------------------------------------------------
--(id)hitTest:(CGPoint)point withEvent:(UIEvent *)event
-{
-  if (self->slideDownView)
-    return self->slideDownView;
-
-  return [super hitTest:point withEvent:event];
-}
-*/
 //--------------------------------------------------------------
 - (void) drawRect:(CGRect)rect
 {
@@ -301,13 +292,15 @@
   }
 
   // always show time text (H:M:S)
-  int imageTime = self->seekTimeSeconds;
+  int imageTimeSeconds = self->seekTimeSeconds;
+  /*
   if (haveThumbImage)
   {
     // prefer matching time with thumb image
-    imageTime = self->thumbImage.time / 1000;
+    imageTimeSeconds = self->thumbImage.time / 1000;
   }
-  std::string timeString = StringUtils::SecondsToTimeString(imageTime, TIME_FORMAT_HH_MM_SS);
+  */
+  std::string timeString = StringUtils::SecondsToTimeString(imageTimeSeconds, TIME_FORMAT_HH_MM_SS);
   [self drawString:ctx withCString:timeString inRect:videoBounds drawFrame:!haveThumbImage];
 }
 

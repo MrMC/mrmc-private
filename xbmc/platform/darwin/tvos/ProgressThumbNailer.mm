@@ -38,6 +38,7 @@
 #import "cores/dvdplayer/DVDCodecs/DVDFactoryCodec.h"
 #import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodec.h"
 #import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecFFmpeg.h"
+#import "cores/dvdplayer/DVDCodecs/Video/DVDVideoCodecVideoToolBox.h"
 #import "cores/dvdplayer/DVDClock.h"
 #import "filesystem/StackDirectory.h"
 #import "platform/darwin/tvos/FocusLayerViewPlayerProgress.h"
@@ -178,6 +179,7 @@ void CProgressThumbNailer::Process()
     CDVDCodecOptions dvdOptions;
     dvdOptions.m_keys.push_back(CDVDCodecOption("skip-deinterlacing", "1"));
     m_videoCodec = CDVDFactoryCodec::OpenCodec(new CDVDVideoCodecFFmpeg(), hints, dvdOptions);
+    //m_videoCodec = CDVDFactoryCodec::OpenCodec(new CDVDVideoCodecVideoToolBox(), hints, dvdOptions);
     if (!m_videoCodec)
     {
       CLog::Log(LOGERROR, "%s - Error creating codec", __FUNCTION__);
@@ -219,9 +221,8 @@ void CProgressThumbNailer::QueueExtractThumb(int seekTime)
 
   unsigned int nTime = XbmcThreads::SystemClockMillis();
 
-  // flush demuxer and reset codec on entry, we have no
+  // reset codec on entry, we have no
   // clue about previous state.
-  m_videoDemuxer->Flush();
   m_videoCodec->Reset();
 
   int packetsTried = 0;
