@@ -1352,6 +1352,11 @@ CGRect swipeStartingParentViewRect;
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
+// The whole purpose of this function is to break a single
+// select click into left, right and center clicks.
+// This is the only way to detect the location of click.
+// It could also be used to detect if a use has a finger
+// resting on the track pad.
 - (void)initGameController
 {
   // dpad axis values ranges from -1.0 to 1.0
@@ -1366,6 +1371,7 @@ CGRect swipeStartingParentViewRect;
     {
       CGPoint startPoint = CGPointMake(
         gamepad.dpad.xAxis.value, gamepad.dpad.yAxis.value);
+      /*
       NSLog(@"microGamepad: A(%d), U(%d), D(%d), L(%d), R(%d), point %@",
         gamepad.buttonA.pressed,
         gamepad.dpad.up.pressed,
@@ -1373,13 +1379,13 @@ CGRect swipeStartingParentViewRect;
         gamepad.dpad.left.pressed,
         gamepad.dpad.right.pressed,
         NSStringFromCGPoint(startPoint));
-
+      */
       if (startPoint.x > 0.5)
       {
         if (gamepad.buttonA.pressed)
         {
           m_clickDirection = CLICK_RIGHT;
-          NSLog(@"microGamepad: user clicked finger near right side of remote");
+          //NSLog(@"microGamepad: user clicked finger near right side of remote");
         }
       }
 
@@ -1388,14 +1394,14 @@ CGRect swipeStartingParentViewRect;
         if (gamepad.buttonA.pressed)
         {
           m_clickDirection = CLICK_LEFT;
-          NSLog(@"microGamepad: user clicked finger near left side of remote");
+          //NSLog(@"microGamepad: user clicked finger near left side of remote");
         }
       }
 
       if (startPoint.x == 0 && startPoint.y == 0)
       {
         m_clickDirection = CLICK_NONE;
-        NSLog(@"microGamepad: user released finger from touch surface");
+        //NSLog(@"microGamepad: user released finger from touch surface");
       }
     };
   }];
@@ -1700,7 +1706,10 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
       {
         case UIGestureRecognizerStateBegan:
           CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteLeftArrowPressed");
-          [self startKeyPressTimer:SiriRemote_LeftTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          if (g_application.m_pPlayer->IsPaused())
+            [self startKeyPressTimer:SiriRemote_LeftTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          else
+            [self sendButtonPressed:SiriRemote_LeftTap];
           break;
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateChanged:
@@ -1726,7 +1735,10 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
       {
         case UIGestureRecognizerStateBegan:
           CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteRightArrowPressed");
-          [self startKeyPressTimer:SiriRemote_RightTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          if (g_application.m_pPlayer->IsPaused())
+            [self startKeyPressTimer:SiriRemote_RightTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          else
+            [self sendButtonPressed:SiriRemote_RightTap];
           break;
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateChanged:
@@ -1752,7 +1764,10 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
       {
         case UIGestureRecognizerStateBegan:
           CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteUpArrowPressed");
-          [self startKeyPressTimer:SiriRemote_UpTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          if (g_application.m_pPlayer->IsPaused())
+            [self startKeyPressTimer:SiriRemote_UpTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          else
+            [self sendButtonPressed:SiriRemote_UpTap];
           break;
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateChanged:
@@ -1778,7 +1793,10 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
       {
         case UIGestureRecognizerStateBegan:
           CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteDownArrowPressed");
-          [self startKeyPressTimer:SiriRemote_DownTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          if (g_application.m_pPlayer->IsPaused())
+            [self startKeyPressTimer:SiriRemote_DownTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          else
+            [self sendButtonPressed:SiriRemote_DownTap];
           break;
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateChanged:
@@ -2333,8 +2351,9 @@ CGRect debugView2;
   [self updateFocusLayerInFocus];
 }
 //--------------------------------------------------------------
-- (void) updateFocusLayerInFocus
+- (bool) updateFocusLayerInFocus
 {
+  FocusLayerControl oldItem = _focusLayer.infocus;
   FocusLayerControl preferredItem;
   // default to focusView and in focus control
   preferredItem.view = self.focusView;
@@ -2358,7 +2377,7 @@ CGRect debugView2;
               preferredItem.view = _focusLayer.views[andx].items[indx].view;
               preferredItem.core = _focusLayer.views[andx].items[indx].core;
               _focusLayer.infocus = preferredItem;
-              return;
+              return (_focusLayer.infocus.view != oldItem.view);
             }
           }
         }
@@ -2391,6 +2410,7 @@ CGRect debugView2;
   }
   // setup the 'in focus' view
   _focusLayer.infocus = preferredItem;
+  return (_focusLayer.infocus.view != oldItem.view);
 }
 //--------------------------------------------------------------
 - (void) updateFocusLayerMainThread
@@ -2431,8 +2451,7 @@ CGRect debugView2;
     [self initFocusLayerViews:focusViews withCoreViews:coreViews];
     if (FocusLayerViewsAreEqual(focusViews, _focusLayer.views))
     {
-      [self updateFocusLayerInFocus];
-      needUpdate = false;
+      needUpdate = [self updateFocusLayerInFocus];
     }
     else
     {
