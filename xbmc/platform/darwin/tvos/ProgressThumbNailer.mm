@@ -118,7 +118,7 @@ void CProgressThumbNailer::Process()
     return;
   }
 
-  if (m_inputStream->IsStreamType(DVDSTREAM_TYPE_PVRMANAGER))
+  if (m_inputStream->IsStreamType(DVDSTREAM_TYPE_TV))
   {
     SAFE_DELETE(m_inputStream);
     return;
