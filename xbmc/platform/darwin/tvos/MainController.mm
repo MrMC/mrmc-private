@@ -1572,10 +1572,10 @@ CGRect swipeStartingParentViewRect;
           {
             double appTotalTime = g_application.GetTotalTime();
             double appPercentage = g_application.GetPercentage();
-            double appSeekTime = appPercentage * appTotalTime;
+            double appSeekTime = appPercentage * appTotalTime / 100;
             FocusLayerViewPlayerProgress *viewPlayerProgress = (FocusLayerViewPlayerProgress*)_focusLayer.infocus.view;
             double percentage = [viewPlayerProgress getSeekTimePercentage];
-            double seekTime = percentage * appTotalTime;
+            double seekTime = percentage * appTotalTime / 100;
             // only seek if change is more than 500ms
             if (fabs(appSeekTime - seekTime) > 0.5)
             {
