@@ -480,7 +480,7 @@
       [self setNeedsFocusUpdate];
     }];
 #else
-  g_windowManager.ActivateWindow(11200);
+  KODI::MESSAGING::CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTIVATE_WINDOW, 11200, 0);
 #endif
 }
 //--------------------------------------------------------------
