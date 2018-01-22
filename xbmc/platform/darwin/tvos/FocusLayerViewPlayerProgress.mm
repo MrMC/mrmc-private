@@ -480,7 +480,7 @@
       [self setNeedsFocusUpdate];
     }];
 #else
-  KODI::MESSAGING::CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTIVATE_WINDOW, 11200, 0);
+  KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, 11200, 0);
 #endif
 }
 //--------------------------------------------------------------
@@ -685,8 +685,7 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   {
     case UIGestureRecognizerStateBegan:
       CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteDownArrowPressed");
-      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
-        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD)));
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, 11200, 0);
       break;
     case UIGestureRecognizerStateEnded:
     case UIGestureRecognizerStateChanged:
