@@ -2401,6 +2401,7 @@ CGRect debugView2;
 //--------------------------------------------------------------
 - (void) updateFocusLayer
 {
+  bool needUpdate = false;
   bool isBusy = CFocusEngineHandler::GetInstance().IsBusy();
   bool hideViews = CFocusEngineHandler::GetInstance().NeedToHideViews();
   std::vector<FocusEngineCoreViews> coreViews;
@@ -2415,6 +2416,7 @@ CGRect debugView2;
     _focusLayer.Reset();
     [self clearSubViews];
     [self updateFocusLayerInFocus];
+    needUpdate = true;
   }
   else
   {
@@ -2430,19 +2432,24 @@ CGRect debugView2;
     if (FocusLayerViewsAreEqual(focusViews, _focusLayer.views))
     {
       [self updateFocusLayerInFocus];
+      needUpdate = false;
     }
     else
     {
       [self loadFocusLayerViews:focusViews];
+      needUpdate = true;
       //CLog::Log(LOGDEBUG, "updateFocusLayer:hideViews(%s), rebuild", hideViews ? "yes":"no");
     }
   }
-  [self.focusView setNeedsDisplay];
-  // if the focus update is accepted by the focus engine,
-  // focus is reset to the preferred focused view
-  [self setNeedsFocusUpdate];
-  // tells the focus engine to force a focus update immediately
-  [self updateFocusIfNeeded];
+  if (needUpdate)
+  {
+    [self.focusView setNeedsDisplay];
+    // if the focus update is accepted by the focus engine,
+    // focus is reset to the preferred focused view
+    [self setNeedsFocusUpdate];
+    // tells the focus engine to force a focus update immediately
+    [self updateFocusIfNeeded];
+  }
 }
 
 #pragma mark - Now Playing routines
