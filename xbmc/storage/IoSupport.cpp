@@ -38,7 +38,7 @@
 #if defined(TARGET_DARWIN)
 #include <sys/param.h>
 #include <mach-o/dyld.h>
-#if defined(TARGET_DARWIN_OSX)
+#if !!defined(TARGET_OS_SIMULATOR) && defined(TARGET_DARWIN_OSX)
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOBSD.h>
 #include <IOKit/storage/IOCDTypes.h>
@@ -102,9 +102,8 @@ void CIoSupport::FreeReadBuffer()
 }
 
 int CIoSupport::ReadSector(HANDLE hDevice, uint32_t dwSector, char* lpczBuffer)
-
 {
-#if defined(TARGET_DARWIN) && defined(HAS_DVD_DRIVE)
+#if !defined(TARGET_OS_SIMULATOR) && defined(TARGET_DARWIN) && defined(HAS_DVD_DRIVE)
   dk_cd_read_t cd_read;
   memset( &cd_read, 0, sizeof(cd_read) );
 
@@ -179,7 +178,7 @@ int CIoSupport::ReadSector(HANDLE hDevice, uint32_t dwSector, char* lpczBuffer)
 int CIoSupport::ReadSectorMode2(HANDLE hDevice, uint32_t dwSector, char* lpczBuffer)
 {
 #ifdef HAS_DVD_DRIVE
-#if defined(TARGET_DARWIN)
+#if !defined(TARGET_OS_SIMULATOR) && defined(TARGET_DARWIN)
   dk_cd_read_t cd_read;
 
   memset( &cd_read, 0, sizeof(cd_read) );
