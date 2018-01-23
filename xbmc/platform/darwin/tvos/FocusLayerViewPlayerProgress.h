@@ -48,7 +48,6 @@ class CProgressThumbNailer;
   double totalTimeSeconds;
   ThumbNailerImage thumbImage;
   CProgressThumbNailer *thumbNailer;
-  UIView *slideDownView;
 }
 @property (nonatomic) double _value;
 

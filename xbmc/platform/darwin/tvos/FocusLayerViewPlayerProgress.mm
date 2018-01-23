@@ -25,7 +25,6 @@
 #import "messaging/ApplicationMessenger.h"
 #import "platform/darwin/NSLogDebugHelpers.h"
 #import "platform/darwin/tvos/ProgressThumbNailer.h"
-#import "platform/darwin/tvos/FocusLayerViewPlayerProgressSettings.h"
 #import "guilib/GUISliderControl.h"
 #import "guilib/GUIWindowManager.h"
 #import "video/VideoInfoTag.h"
@@ -88,7 +87,6 @@
     self->totalTimeSeconds = -1;
     self->seekTimeSeconds = 0.0;
     self->thumbNailer = nullptr;
-    self->slideDownView = nil;
     float percentage = 0.0;
     if (g_application.m_pPlayer->IsPlayingVideo())
     {
@@ -209,9 +207,6 @@
 //--------------------------------------------------------------
 - (BOOL)canBecomeFocused
 {
-  if (self->slideDownView)
-    return NO;
-
   return YES;
 }
 //--------------------------------------------------------------
@@ -368,16 +363,11 @@
 //--------------------------------------------------------------
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
-  if (self->slideDownView)
-    return @[self->slideDownView, (UIView*)self];
-
   return @[(UIView*)self];
 }
 //--------------------------------------------------------------
 - (BOOL) shouldUpdateFocusInContext:(UIFocusUpdateContext *)context
 {
-  if (self->slideDownView)
-    return NO;
   return YES;
 }
 
@@ -392,16 +382,12 @@
 //--------------------------------------------------------------
 - (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-  if (self->slideDownView)
-    return NO;
   CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizer:shouldReceiveTouch");
   return YES;
 }
 //--------------------------------------------------------------
 - (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceivePress:(UIPress *)press
 {
-  if (self->slideDownView)
-    return NO;
   CLog::Log(LOGDEBUG, "PlayerProgress::gestureRecognizer:shouldReceivePress");
   return YES;
 }
@@ -442,19 +428,6 @@
   CLog::Log(LOGDEBUG, "PlayerProgress::handleDownSwipeGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
-  if (self->slideDownView)
-  {
-    [UIView animateWithDuration:0.5
-      animations:^{
-        CGRect frame = CGRectOffset([self->slideDownView frame], 0.0, -100.0);
-        [self->slideDownView setFrame:frame];
-        [self->slideDownView layoutIfNeeded];
-      }
-      completion:^(BOOL finished){
-        [self->slideDownView removeFromSuperview];
-        self->slideDownView = nil;
-      }];
-  }
 }
 //--------------------------------------------------------------
 - (IBAction) handleDownSwipeGesture:(UISwipeGestureRecognizer *)sender
@@ -462,26 +435,7 @@
   CLog::Log(LOGDEBUG, "PlayerProgress::handleDownSwipeGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
-  if (self->slideDownView)
-    [self->slideDownView removeFromSuperview];
-#if 0
-  CGRect frameRect = [UIScreen mainScreen].bounds;
-  frameRect.size.height = 100.0;
-  frameRect.origin.y = -100.0;
-  self->slideDownView = [[FocusLayerViewPlayerProgressSettings alloc] initWithFrame:frameRect];
-  [self addSubview:self->slideDownView];
-  [UIView animateWithDuration:0.5
-    animations:^{
-      CGRect frame = CGRectOffset([self->slideDownView frame], 0.0, 100.0);
-      [self->slideDownView setFrame:frame];
-      [self->slideDownView layoutIfNeeded];
-    }
-    completion:^(BOOL finished){
-      [self setNeedsFocusUpdate];
-    }];
-#else
   KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, 11200, 0);
-#endif
 }
 //--------------------------------------------------------------
 - (IBAction) handlePanGesture:(UIPanGestureRecognizer *)sender

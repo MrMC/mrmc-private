@@ -47,7 +47,6 @@
 #import "platform/darwin/tvos/MainEAGLView.h"
 #import "platform/darwin/tvos/FocusLayerView.h"
 #import "platform/darwin/tvos/FocusLayerViewPlayerProgress.h"
-#import "platform/darwin/tvos/FocusLayerViewPlayerProgressSettings.h"
 #import "platform/darwin/tvos/MainController.h"
 #import "platform/darwin/tvos/MainApplication.h"
 #import "platform/darwin/tvos/TVOSTopShelf.h"
@@ -1176,15 +1175,9 @@ MainController *g_xbmcController;
   doubletap.delegate = self;
   [self.focusView addGestureRecognizer:doubletap];
 
-  auto tripletap = [[UITapGestureRecognizer alloc]
-    initWithTarget:self action:@selector(SiriTripleTapHandler:)];
-  tripletap.numberOfTapsRequired = 3;
-  tripletap.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeUpArrow],
-                            [NSNumber numberWithInteger:UIPressTypeDownArrow],
-                            [NSNumber numberWithInteger:UIPressTypeLeftArrow],
-                            [NSNumber numberWithInteger:UIPressTypeRightArrow]];
-  tripletap.delegate = self;
-  [self.focusView addGestureRecognizer:tripletap];
+  [singletap setDelaysTouchesBegan:YES];
+  [doubletap setDelaysTouchesBegan:YES];
+  [singletap requireGestureRecognizerToFail:doubletap];
 }
 //--------------------------------------------------------------
 - (void)createSiriPressGesturecognizers
@@ -1306,8 +1299,6 @@ CGRect swipeStartingParentViewRect;
 
   // same for FocusLayerViewPlayerProgress
   if ( [touch.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
-    return NO;
-  if ( [touch.view isKindOfClass:[FocusLayerViewPlayerProgressSettings class]] )
     return NO;
 
   // important, this gestureRecognizer gets called before any other tap/pas/swipe handler
@@ -1555,13 +1546,6 @@ CGRect swipeStartingParentViewRect;
   }
 }
 //--------------------------------------------------------------
-- (void)SiriSingleTapHandlerTimer
-{
-  CLog::Log(LOGDEBUG, "SiriSingleTapHandlerTimer");
-  if ([self hasPlayerProgressScrubbing] && !g_application.m_pPlayer->IsPaused())
-    g_infoManager.SetDisplayAfterSeek(2500);
-}
-//--------------------------------------------------------------
 - (void)SiriSingleTapHandler:(UITapGestureRecognizer *)sender
 {
   if (!m_remoteIdleState)
@@ -1571,10 +1555,9 @@ CGRect swipeStartingParentViewRect;
       switch (sender.state)
       {
         case UIGestureRecognizerStateEnded:
-          //CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
-          [self.m_doubleTapTimer invalidate];
-          [self.m_trippleTapTimer invalidate];
-          self.m_singleTapTimer = [NSTimer scheduledTimerWithTimeInterval:0.40 target:self selector:@selector(SiriSingleTapHandlerTimer) userInfo:nil repeats:NO];
+          CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
+          if ([self hasPlayerProgressScrubbing] && !g_application.m_pPlayer->IsPaused())
+            g_infoManager.SetDisplayAfterSeek(2500);
           break;
         default:
           CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateOther %ld", (long)sender.state);
@@ -1586,12 +1569,6 @@ CGRect swipeStartingParentViewRect;
   [self startRemoteTimer];
 }
 //--------------------------------------------------------------
-- (void)SiriDoubleTapHandlerTimer
-{
-  CLog::Log(LOGDEBUG, "SiriSDoubleTapHandlerTimer");
-  // placeholder
-}
-//--------------------------------------------------------------
 - (void)SiriDoubleTapHandler:(UITapGestureRecognizer *)sender
 {
   if (!m_remoteIdleState)
@@ -1601,47 +1578,15 @@ CGRect swipeStartingParentViewRect;
       switch (sender.state)
       {
         case UIGestureRecognizerStateEnded:
-          //CLog::Log(LOGDEBUG, "SiriDoubleTapHandler:StateEnded");
-          [self.m_singleTapTimer invalidate];
-          [self.m_trippleTapTimer invalidate];
-          self.m_doubleTapTimer = [NSTimer scheduledTimerWithTimeInterval:0.40 target:self selector:@selector(SiriDoubleTapHandlerTimer) userInfo:nil repeats:NO];
+          CLog::Log(LOGDEBUG, "SiriDoubleTapHandler:StateEnded");
+          if ([self hasPlayerProgressScrubbing] && !g_application.m_pPlayer->IsPaused())
+          {
+            KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
+              TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_SUBTITLES)));
+          }
           break;
        default:
           CLog::Log(LOGDEBUG, "SiriDoubleTapHandler:StateOther %ld", (long)sender.state);
-          break;
-      }
-    }
-  }
-  // start remote timeout
-  [self startRemoteTimer];
-}
-//--------------------------------------------------------------
-- (void)SiriTripleTapHandlerTimer
-{
-  CLog::Log(LOGDEBUG, "SiriTripleTapHandlerTimer");
-  if ([self hasPlayerProgressScrubbing] && !g_application.m_pPlayer->IsPaused())
-  {
-    KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
-      TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_SUBTITLES)));
-  }
-}
-//--------------------------------------------------------------
-- (void)SiriTripleTapHandler:(UITapGestureRecognizer *)sender
-{
-  if (!m_remoteIdleState)
-  {
-    if (m_appAlive == YES)
-    {
-      switch (sender.state)
-      {
-        case UIGestureRecognizerStateEnded:
-          //CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateEnded");
-          [self.m_singleTapTimer invalidate];
-          [self.m_doubleTapTimer invalidate];
-          self.m_trippleTapTimer = [NSTimer scheduledTimerWithTimeInterval:0.40 target:self selector:@selector(SiriTripleTapHandlerTimer) userInfo:nil repeats:NO];
-          break;
-       default:
-          CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateOther %ld", (long)sender.state);
           break;
       }
     }
