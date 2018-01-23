@@ -71,6 +71,15 @@ CProgressThumbNailer::~CProgressThumbNailer()
 {
   if (IsRunning())
   {
+    if (m_videoCodec)
+      m_videoCodec->Reset();
+
+    if (m_videoDemuxer)
+      m_videoDemuxer->Abort();
+
+    if (m_inputStream)
+      m_inputStream->Abort();
+
     m_bStop = true;
     m_processSleep.Set();
     StopThread();
