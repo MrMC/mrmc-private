@@ -19,13 +19,8 @@
  */
 
 #include "GUIDialogOSDSettings.h"
-#include "Application.h"
 #include "GUIUserMessages.h"
-#include "guilib/GUIWindowManager.h"
 #include "input/Key.h"
-#include "input/InputManager.h"
-
-using namespace PVR;
 
 CGUIDialogOSDSettings::CGUIDialogOSDSettings(void)
     : CGUIDialog(WINDOW_DIALOG_OSD_SETTINGS, "OSDSettings.xml")
@@ -62,4 +57,3 @@ bool CGUIDialogOSDSettings::OnMessage(CGUIMessage& message)
 {
   return CGUIDialog::OnMessage(message);
 }
-

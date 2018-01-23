@@ -670,19 +670,6 @@ void CGUIWindowFullScreen::ToggleOSD()
   MarkDirtyRegion();
 }
 
-void CGUIWindowFullScreen::ToggleOSDSettings()
-{
-  CGUIDialogVideoOSD *pOSD = (CGUIDialogVideoOSD *)g_windowManager.GetWindow(WINDOW_DIALOG_OSD_SETTINGS);
-  if (pOSD)
-  {
-    if (pOSD->IsDialogRunning())
-      pOSD->Close();
-    else
-      pOSD->Open();
-  }
-  MarkDirtyRegion();
-}
-
 void CGUIWindowFullScreen::TriggerOSD()
 {
   CGUIDialogVideoOSD *pOSD = (CGUIDialogVideoOSD *)g_windowManager.GetWindow(WINDOW_DIALOG_VIDEO_OSD);
@@ -693,4 +680,17 @@ void CGUIWindowFullScreen::TriggerOSD()
       pOSD->SetAutoClose(iSec * 1000);
     pOSD->Open();
   }
+}
+
+void CGUIWindowFullScreen::ToggleOSDSettings()
+{
+  CGUIDialog *pOSD = (CGUIDialog*)g_windowManager.GetWindow(WINDOW_DIALOG_OSD_SETTINGS);
+  if (pOSD)
+  {
+    if (pOSD->IsDialogRunning())
+      pOSD->Close();
+    else
+      pOSD->Open();
+  }
+  MarkDirtyRegion();
 }
