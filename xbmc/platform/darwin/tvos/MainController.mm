@@ -239,32 +239,32 @@ MainController *g_xbmcController;
   focusRectTop.size.height = 200;
   self.focusViewTop = [[FocusLayerView alloc] initWithFrame:focusRectTop];
   [self.focusViewTop setFocusable:true];
-  [self.focusViewTop setViewVisable:false];
+  [self.focusViewTop setViewVisible:false];
 
   CGRect focusRectLeft = focusRect;
   focusRectLeft.origin.x -= 200;
   focusRectLeft.size.width = 200;
   self.focusViewLeft = [[FocusLayerView alloc] initWithFrame:focusRectLeft];
   [self.focusViewLeft setFocusable:true];
-  [self.focusViewLeft setViewVisable:false];
+  [self.focusViewLeft setViewVisible:false];
 
   CGRect focusRectRight = focusRect;
   focusRectRight.origin.x += focusRect.size.width;
   focusRectRight.size.width = 200;
   self.focusViewRight = [[FocusLayerView alloc] initWithFrame:focusRectRight];
   [self.focusViewRight setFocusable:true];
-  [self.focusViewRight setViewVisable:false];
+  [self.focusViewRight setViewVisible:false];
 
   CGRect focusRectBottom = focusRect;
   focusRectBottom.origin.y += focusRect.size.height;
   focusRectBottom.size.height = 200;
   self.focusViewBottom = [[FocusLayerView alloc] initWithFrame:focusRectBottom];
   [self.focusViewBottom setFocusable:true];
-  [self.focusViewBottom setViewVisable:false];
+  [self.focusViewBottom setViewVisible:false];
 
   self.focusView = [[FocusLayerView alloc] initWithFrame:focusRect];
   [self.focusView setFocusable:true];
-  [self.focusView setViewVisable:false];
+  [self.focusView setViewVisible:false];
   // focus layer lives above m_glView
   [self.view insertSubview:self.focusView aboveSubview:m_glView];
 
@@ -285,6 +285,7 @@ MainController *g_xbmcController;
   [self createSiriPressGesturecognizers];
   [self createSiriSwipeGestureRecognizers];
   [self createSiriPanGestureRecognizers];
+  [self createSiriTapGestureRecognizers];
   [self createCustomControlCenter];
   [self initGameController];
   // startup with idle timer running
@@ -687,7 +688,10 @@ MainController *g_xbmcController;
   if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->CanSeek())
     return false;
 
-  if (m_clickDirection == CLICK_LEFT || m_clickDirection == CLICK_RIGHT)
+  if (m_clickDirection == CLICK_UP   ||
+      m_clickDirection == CLICK_DOWN ||
+      m_clickDirection == CLICK_LEFT ||
+      m_clickDirection == CLICK_RIGHT)
     return false;
 
   CFileItem &fileItem = g_application.CurrentFileItem();
@@ -1150,6 +1154,39 @@ MainController *g_xbmcController;
   [self.focusView addGestureRecognizer:pan];
 }
 //--------------------------------------------------------------
+- (void)createSiriTapGestureRecognizers
+{
+  auto singletap = [[UITapGestureRecognizer alloc]
+    initWithTarget:self action:@selector(SiriSingleTapHandler:)];
+  singletap.numberOfTapsRequired = 1;
+  singletap.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeUpArrow],
+                            [NSNumber numberWithInteger:UIPressTypeDownArrow],
+                            [NSNumber numberWithInteger:UIPressTypeLeftArrow],
+                            [NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  singletap.delegate = self;
+  [self.focusView addGestureRecognizer:singletap];
+
+  auto doubletap = [[UITapGestureRecognizer alloc]
+    initWithTarget:self action:@selector(SiriDoubleTapHandler:)];
+  doubletap.numberOfTapsRequired = 2;
+  doubletap.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeUpArrow],
+                            [NSNumber numberWithInteger:UIPressTypeDownArrow],
+                            [NSNumber numberWithInteger:UIPressTypeLeftArrow],
+                            [NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  doubletap.delegate = self;
+  [self.focusView addGestureRecognizer:doubletap];
+
+  auto tripletap = [[UITapGestureRecognizer alloc]
+    initWithTarget:self action:@selector(SiriTripleTapHandler:)];
+  tripletap.numberOfTapsRequired = 3;
+  tripletap.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeUpArrow],
+                            [NSNumber numberWithInteger:UIPressTypeDownArrow],
+                            [NSNumber numberWithInteger:UIPressTypeLeftArrow],
+                            [NSNumber numberWithInteger:UIPressTypeRightArrow]];
+  tripletap.delegate = self;
+  [self.focusView addGestureRecognizer:tripletap];
+}
+//--------------------------------------------------------------
 - (void)createSiriPressGesturecognizers
 {
   // we always have these under tvos,
@@ -1276,7 +1313,7 @@ CGRect swipeStartingParentViewRect;
   // important, this gestureRecognizer gets called before any other tap/pas/swipe handler
   // including shouldUpdateFocusInContext/didUpdateFocusInContext. So we can
   // setup the initial focusActionType to tap.
-  CLog::Log(LOGDEBUG, "shouldReceiveTouch:FocusActionTap, %ld", (long)gestureRecognizer.state);
+  //CLog::Log(LOGDEBUG, "shouldReceiveTouch:FocusActionTap, %ld", (long)gestureRecognizer.state);
   focusActionType = FocusActionTap;
   return YES;
 }
@@ -1312,7 +1349,7 @@ CGRect swipeStartingParentViewRect;
   // important, this gestureRecognizer gets called before any other press handler
   // including shouldUpdateFocusInContext/didUpdateFocusInContext. So we can
   // setup the initial focusActionType to tap.
-  CLog::Log(LOGDEBUG, "shouldReceivePress:FocusActionTap, %ld", (long)gestureRecognizer.state);
+  //CLog::Log(LOGDEBUG, "shouldReceivePress:FocusActionTap, %ld", (long)gestureRecognizer.state);
   focusActionType = FocusActionTap;
   switch (press.type)
   {
@@ -1380,7 +1417,7 @@ CGRect swipeStartingParentViewRect;
         gamepad.dpad.right.pressed,
         NSStringFromCGPoint(startPoint));
       */
-      if (startPoint.x > 0.5)
+      if (startPoint.x > 0.65)
       {
         if (gamepad.buttonA.pressed)
         {
@@ -1389,12 +1426,30 @@ CGRect swipeStartingParentViewRect;
         }
       }
 
-      if (startPoint.x < -0.5)
+      if (startPoint.x < -0.65)
       {
         if (gamepad.buttonA.pressed)
         {
           m_clickDirection = CLICK_LEFT;
           //NSLog(@"microGamepad: user clicked finger near left side of remote");
+        }
+      }
+
+      if (startPoint.y > 0.65)
+      {
+        if (gamepad.buttonA.pressed)
+        {
+          m_clickDirection = CLICK_UP;
+          //NSLog(@"microGamepad: user clicked finger near top of remote");
+        }
+      }
+
+      if (startPoint.y < -0.65)
+      {
+        if (gamepad.buttonA.pressed)
+        {
+          m_clickDirection = CLICK_DOWN;
+          //NSLog(@"microGamepad: user clicked finger near bottom of remote");
         }
       }
 
@@ -1500,6 +1555,101 @@ CGRect swipeStartingParentViewRect;
   }
 }
 //--------------------------------------------------------------
+- (void)SiriSingleTapHandlerTimer
+{
+  CLog::Log(LOGDEBUG, "SiriSingleTapHandlerTimer");
+  if ([self hasPlayerProgressScrubbing] && !g_application.m_pPlayer->IsPaused())
+    g_infoManager.SetDisplayAfterSeek(2500);
+}
+//--------------------------------------------------------------
+- (void)SiriSingleTapHandler:(UITapGestureRecognizer *)sender
+{
+  if (!m_remoteIdleState)
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateEnded:
+          //CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
+          [self.m_doubleTapTimer invalidate];
+          [self.m_trippleTapTimer invalidate];
+          self.m_singleTapTimer = [NSTimer scheduledTimerWithTimeInterval:0.40 target:self selector:@selector(SiriSingleTapHandlerTimer) userInfo:nil repeats:NO];
+          break;
+        default:
+          CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateOther %ld", (long)sender.state);
+          break;
+      }
+    }
+  }
+  // start remote timeout
+  [self startRemoteTimer];
+}
+//--------------------------------------------------------------
+- (void)SiriDoubleTapHandlerTimer
+{
+  CLog::Log(LOGDEBUG, "SiriSDoubleTapHandlerTimer");
+  // placeholder
+}
+//--------------------------------------------------------------
+- (void)SiriDoubleTapHandler:(UITapGestureRecognizer *)sender
+{
+  if (!m_remoteIdleState)
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateEnded:
+          //CLog::Log(LOGDEBUG, "SiriDoubleTapHandler:StateEnded");
+          [self.m_singleTapTimer invalidate];
+          [self.m_trippleTapTimer invalidate];
+          self.m_doubleTapTimer = [NSTimer scheduledTimerWithTimeInterval:0.40 target:self selector:@selector(SiriDoubleTapHandlerTimer) userInfo:nil repeats:NO];
+          break;
+       default:
+          CLog::Log(LOGDEBUG, "SiriDoubleTapHandler:StateOther %ld", (long)sender.state);
+          break;
+      }
+    }
+  }
+  // start remote timeout
+  [self startRemoteTimer];
+}
+//--------------------------------------------------------------
+- (void)SiriTripleTapHandlerTimer
+{
+  CLog::Log(LOGDEBUG, "SiriTripleTapHandlerTimer");
+  if ([self hasPlayerProgressScrubbing] && !g_application.m_pPlayer->IsPaused())
+  {
+    KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
+      TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_SUBTITLES)));
+  }
+}
+//--------------------------------------------------------------
+- (void)SiriTripleTapHandler:(UITapGestureRecognizer *)sender
+{
+  if (!m_remoteIdleState)
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateEnded:
+          //CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateEnded");
+          [self.m_singleTapTimer invalidate];
+          [self.m_doubleTapTimer invalidate];
+          self.m_trippleTapTimer = [NSTimer scheduledTimerWithTimeInterval:0.40 target:self selector:@selector(SiriTripleTapHandlerTimer) userInfo:nil repeats:NO];
+          break;
+       default:
+          CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateOther %ld", (long)sender.state);
+          break;
+      }
+    }
+  }
+  // start remote timeout
+  [self startRemoteTimer];
+}
+//--------------------------------------------------------------
 - (void)SiriMenuHandler:(UITapGestureRecognizer *)sender
 {
   switch (sender.state)
@@ -1595,18 +1745,32 @@ CGRect swipeStartingParentViewRect;
         }
         else
         {
-          if( m_clickDirection != CLICK_NONE)
+          if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
           {
-            if ( m_clickDirection == CLICK_RIGHT)
-              [self sendButtonPressed:SiriRemote_RightTap];
-            else if ( m_clickDirection == CLICK_LEFT)
-              [self sendButtonPressed:SiriRemote_LeftTap];
+            switch(m_clickDirection)
+            {
+              case CLICK_UP:
+                [self sendButtonPressed:SiriRemote_UpTap];
+                break;
+              case CLICK_DOWN:
+                [self sendButtonPressed:SiriRemote_DownTap];
+                break;
+              case CLICK_LEFT:
+                [self sendButtonPressed:SiriRemote_LeftTap];
+                break;
+              case CLICK_RIGHT:
+                [self sendButtonPressed:SiriRemote_RightTap];
+                break;
+              case CLICK_NONE:
+                break;
+            }
           }
           else
+          {
             [self sendButtonPressed:SiriRemote_CenterClick];
+          }
         }
       }
-      
       // start remote timeout
       [self startRemoteTimer];
       break;
@@ -2094,17 +2258,11 @@ CGRect debugView2;
   if (remoteIdleState)
     return NO;
 
-  // disallow focus changes when playing video
-  // we handle those directly. Otherwise taps/swipes will cause
-  // wild seeks.
+  CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: focusActionType %s", focusActionTypeNames[focusActionType]);
+  // do not allow focus changes when playing video
+  // we handle those directly. Otherwise taps/swipes will cause wild seeks.
   if ([self hasPlayerProgressScrubbing])
     return NO;
-  /*
-  if ( [context.previouslyFocusedItem isKindOfClass:[FocusLayerViewPlayerProgress class]] )
-    return NO;
-  */
-
-  CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: focusActionType %s", focusActionTypeNames[focusActionType]);
 
   // previouslyFocusedItem may be nil if no item was focused.
   CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: previous %p, next %p",
@@ -2198,6 +2356,8 @@ CGRect debugView2;
       }
       break;
     case UIFocusHeadingNone:
+      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingNone");
+      break;
     case UIFocusHeadingNext:
     case UIFocusHeadingPrevious:
       break;
@@ -2315,7 +2475,7 @@ CGRect debugView2;
     if (view.type == "window" || view.type == "dialog")
     {
       [focusLayerView setFocusable:true];
-      [focusLayerView setViewVisable:false];
+      [focusLayerView setViewVisible:false];
     }
     focusLayerView->core = view.core;
     view.view = focusLayerView;
