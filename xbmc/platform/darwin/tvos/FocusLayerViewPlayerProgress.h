@@ -43,6 +43,7 @@ class CProgressThumbNailer;
   CGRect barRect;
   CGRect thumbRect;
   CGRect videoRect;
+  UIColor *videoRectColor;
   bool   videoRectIsAboveBar;
   double seekTimeSeconds;
   double totalTimeSeconds;
