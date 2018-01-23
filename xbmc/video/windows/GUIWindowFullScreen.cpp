@@ -142,7 +142,7 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
   case ACTION_SHOW_OSD_SETTINGS:
     ToggleOSDSettings();
     return true;
-      
+
   case ACTION_TRIGGER_OSD:
     TriggerOSD();
     return true;

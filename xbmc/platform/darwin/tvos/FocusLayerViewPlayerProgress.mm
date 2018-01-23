@@ -446,7 +446,8 @@
   CLog::Log(LOGDEBUG, "PlayerProgress::handleDownSwipeGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
-  KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD_SETTINGS)));
+  KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
+    TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD_SETTINGS)));
 }
 //--------------------------------------------------------------
 - (IBAction) handlePanGesture:(UIPanGestureRecognizer *)sender
@@ -650,7 +651,8 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   {
     case UIGestureRecognizerStateBegan:
       CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteDownArrowPressed");
-      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTIVATE_WINDOW, 11200, 0);
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
+        TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD_SETTINGS)));
       break;
     case UIGestureRecognizerStateEnded:
     case UIGestureRecognizerStateChanged:
