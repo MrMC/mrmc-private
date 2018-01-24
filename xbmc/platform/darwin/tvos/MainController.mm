@@ -1411,7 +1411,7 @@ FocusLayerView *swipeStartingParent;
         gamepad.dpad.right.pressed,
         NSStringFromCGPoint(startPoint));
       */
-      if (startPoint.x > 0.7)
+      if (startPoint.x > 0.65)
       {
         if (gamepad.buttonA.pressed)
         {
@@ -1420,7 +1420,7 @@ FocusLayerView *swipeStartingParent;
         }
       }
 
-      if (startPoint.x < -0.7)
+      if (startPoint.x < -0.65)
       {
         if (gamepad.buttonA.pressed)
         {
@@ -1429,7 +1429,7 @@ FocusLayerView *swipeStartingParent;
         }
       }
 
-      if (startPoint.y > 0.7)
+      if (startPoint.y > 0.65)
       {
         if (gamepad.buttonA.pressed)
         {
@@ -1438,7 +1438,7 @@ FocusLayerView *swipeStartingParent;
         }
       }
 
-      if (startPoint.y < -0.7)
+      if (startPoint.y < -0.65)
       {
         if (gamepad.buttonA.pressed)
         {
@@ -1447,7 +1447,7 @@ FocusLayerView *swipeStartingParent;
         }
       }
 
-      if (startPoint.x == 0 && startPoint.y == 0)
+      if (!gamepad.buttonA.pressed)
       {
         m_clickDirection = CLICK_WAS_RELEASED;
         //NSLog(@"microGamepad: user released finger from touch surface");
@@ -1558,7 +1558,7 @@ FocusLayerView *swipeStartingParent;
         CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
         if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
         {
-          //show (2.5sec)/hide normal progress bar
+          //show (2.5sec auto hide)/hide normal progress bar
           if (g_infoManager.GetDisplayAfterSeek())
             g_infoManager.SetDisplayAfterSeek(0);
           else
@@ -1689,10 +1689,10 @@ bool longSelectDuringVideoPlayback = false;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      clickDirectionAtStateBegan = m_clickDirection;
-      longSelectDuringVideoPlayback = g_application.m_pPlayer->IsPlayingVideo();
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateBegan");
       self.m_holdCounter = 0;
+      clickDirectionAtStateBegan = m_clickDirection;
+      longSelectDuringVideoPlayback = g_application.m_pPlayer->IsPlayingVideo();
       self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(SiriLongSelectHoldHandler) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateChanged:
@@ -1733,40 +1733,45 @@ bool longSelectDuringVideoPlayback = false;
             }
             else
             {
+              // resume playback
               [self sendButtonPressed:SiriRemote_PausePlayClick];
             }
           }
           else
           {
-            // normal progress bar was up
+            // pause playback
             [self sendButtonPressed:SiriRemote_PausePlayClick];
           }
         }
         else
         {
-          if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+          if (clickDirectionAtStateBegan == CLICK_WAS_RELEASED)
           {
-            switch(clickDirectionAtStateBegan)
-            {
-              case CLICK_IS_UP:
-                [self sendButtonPressed:SiriRemote_UpTap];
-                break;
-              case CLICK_IS_DOWN:
-                [self sendButtonPressed:SiriRemote_DownTap];
-                break;
-              case CLICK_IS_LEFT:
-                [self sendButtonPressed:SiriRemote_LeftTap];
-                break;
-              case CLICK_IS_RIGHT:
-                [self sendButtonPressed:SiriRemote_RightTap];
-                break;
-              default:
-                break;
-            }
+            [self sendButtonPressed:SiriRemote_CenterClick];
           }
           else
           {
-            [self sendButtonPressed:SiriRemote_CenterClick];
+            if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+            {
+              switch(clickDirectionAtStateBegan)
+              {
+                case CLICK_IS_UP:
+                  [self sendButtonPressed:SiriRemote_UpTap];
+                  break;
+                case CLICK_IS_DOWN:
+                  [self sendButtonPressed:SiriRemote_DownTap];
+                  break;
+                case CLICK_IS_LEFT:
+                  [self sendButtonPressed:SiriRemote_LeftTap];
+                  break;
+                case CLICK_IS_RIGHT:
+                  [self sendButtonPressed:SiriRemote_RightTap];
+                  break;
+                default:
+                  CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateEnded:CLICK_WAS_RELEASED");
+                  break;
+              }
+            }
           }
         }
       }
