@@ -337,7 +337,7 @@
   if (videoRectIsAboveBar)
     textRect.origin.y = CGRectGetMaxY(videoRect) - textRect.size.height;
   else
-    textRect.origin.y = CGRectGetMinY(videoRect);
+    textRect.origin.y = CGRectGetMinY(videoRect) + 1.0;
 
   CGRect underRect = CGRectInset(textRect, -4.0, 0.0);
   CGContextSetFillColorWithColor(ctx, [[UIColor blackColor] CGColor]);
