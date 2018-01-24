@@ -322,7 +322,7 @@
   /// Set text alignment
   paragraphStyle.alignment = NSTextAlignmentCenter;
 
-  NSDictionary *attributes = @{ NSFontAttributeName: [UIFont systemFontOfSize:32],
+  NSDictionary *attributes = @{ NSFontAttributeName: [UIFont systemFontOfSize:28],
     NSForegroundColorAttributeName: [UIColor whiteColor],
     NSParagraphStyleAttributeName: paragraphStyle };
 
