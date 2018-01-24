@@ -1776,6 +1776,13 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
                 [self sendButtonPressed:SiriRemote_PausePlayClick];
               }
             }
+            else
+            {
+              // if we are not in progress bar,
+              // then some other window/dialog is in front
+              // so we are just like navigating around
+              [self sendButtonPressed:SiriRemote_CenterClick];
+            }
             break;
         }
       }
