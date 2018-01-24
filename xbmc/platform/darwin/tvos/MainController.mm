@@ -185,7 +185,7 @@ MainController *g_xbmcController;
   m_window.autoresizingMask = 0;
   m_window.autoresizesSubviews = NO;
 
-  m_clickDirection = CLICK_WAS_RELEASED;
+  m_clickDirection = CLICK_SELECT_OR_RELEASED;
 
   [self enableScreenSaver];
 
@@ -685,13 +685,6 @@ MainController *g_xbmcController;
     return false;
 
   if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->CanSeek())
-    return false;
-
-  // warning, this condition is only valid while select button is down.
-  if (m_clickDirection == CLICK_IS_UP   ||
-      m_clickDirection == CLICK_IS_DOWN ||
-      m_clickDirection == CLICK_IS_LEFT ||
-      m_clickDirection == CLICK_IS_RIGHT)
     return false;
 
   CFileItem &fileItem = g_application.CurrentFileItem();
@@ -1415,7 +1408,7 @@ FocusLayerView *swipeStartingParent;
       {
         if (gamepad.buttonA.pressed)
         {
-          m_clickDirection = CLICK_IS_RIGHT;
+          m_clickDirection = CLICK_RIGHT;
           //NSLog(@"microGamepad: user clicked finger near right side of remote");
         }
       }
@@ -1424,7 +1417,7 @@ FocusLayerView *swipeStartingParent;
       {
         if (gamepad.buttonA.pressed)
         {
-          m_clickDirection = CLICK_IS_LEFT;
+          m_clickDirection = CLICK_LEFT;
           //NSLog(@"microGamepad: user clicked finger near left side of remote");
         }
       }
@@ -1433,7 +1426,7 @@ FocusLayerView *swipeStartingParent;
       {
         if (gamepad.buttonA.pressed)
         {
-          m_clickDirection = CLICK_IS_UP;
+          m_clickDirection = CLICK_UP;
           //NSLog(@"microGamepad: user clicked finger near top of remote");
         }
       }
@@ -1442,14 +1435,14 @@ FocusLayerView *swipeStartingParent;
       {
         if (gamepad.buttonA.pressed)
         {
-          m_clickDirection = CLICK_IS_DOWN;
+          m_clickDirection = CLICK_DOWN;
           //NSLog(@"microGamepad: user clicked finger near bottom of remote");
         }
       }
 
       if (!gamepad.buttonA.pressed)
       {
-        m_clickDirection = CLICK_WAS_RELEASED;
+        m_clickDirection = CLICK_SELECT_OR_RELEASED;
         //NSLog(@"microGamepad: user released finger from touch surface");
       }
     };
@@ -1650,24 +1643,30 @@ FocusLayerView *swipeStartingParent;
   [self startRemoteTimer];
 }
 
-CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_WAS_RELEASED;
-bool longSelectDuringVideoPlayback = false;
+typedef enum
+{
+  SELECT_NAVIGATION = 0,
+  SELECT_VIDEOPLAY,
+  SELECT_VIDEOPAUSED,
+} SELECT_STATE;
+SELECT_STATE selectState = SELECT_NAVIGATION;
+CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
 //--------------------------------------------------------------
 - (void)SiriLongSelectHoldHandler
 {
   self.m_holdCounter++;
-  if (longSelectDuringVideoPlayback)
+  if (selectState == SELECT_VIDEOPLAY)
   {
     if (self.m_holdCounter == 1)
     {
       switch(clickDirectionAtStateBegan)
       {
-        case CLICK_IS_LEFT:
+        case CLICK_LEFT:
           // use 4X speed rewind.
           [self sendButtonPressed:SiriRemote_IR_Rewind];
           [self sendButtonPressed:SiriRemote_IR_Rewind];
           break;
-        case CLICK_IS_RIGHT:
+        case CLICK_RIGHT:
           // use 4X speed forward.
           [self sendButtonPressed:SiriRemote_IR_FastForward];
           [self sendButtonPressed:SiriRemote_IR_FastForward];
@@ -1691,13 +1690,20 @@ bool longSelectDuringVideoPlayback = false;
     case UIGestureRecognizerStateBegan:
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateBegan");
       self.m_holdCounter = 0;
+      // assume we are navigating
+      selectState = SELECT_NAVIGATION;
+      if (g_application.m_pPlayer->IsPlayingVideo())
+      {
+        selectState = SELECT_VIDEOPLAY;
+        if (g_application.m_pPlayer->IsPaused())
+          selectState = SELECT_VIDEOPAUSED;
+      }
       clickDirectionAtStateBegan = m_clickDirection;
-      longSelectDuringVideoPlayback = g_application.m_pPlayer->IsPlayingVideo();
       self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(SiriLongSelectHoldHandler) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateChanged:
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateChanged");
-      if (!longSelectDuringVideoPlayback)
+      if (selectState == SELECT_NAVIGATION)
       {
         if (self.m_holdCounter > 1)
         {
@@ -1711,78 +1717,91 @@ bool longSelectDuringVideoPlayback = false;
       [self.m_holdTimer invalidate];
       if (self.m_holdCounter < 1)
       {
-        if ([self hasPlayerProgressScrubbing])
+        // hold timer never fired,
+        // this is a normal press/release cycle
+        switch(selectState)
         {
-          // idea here is that if user does not use ExpertMode, it shoud behave like "Netflix" in fullscreen
-          // would have been easier to do this in keymap, but we could not make it backward compatible
-          if ([_focusLayer.infocus.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
-          {
-            // progress bar with scrubber was up
-            double appTotalTime = g_application.GetTotalTime();
-            double appPercentage = g_application.GetPercentage();
-            double appSeekTime = appPercentage * appTotalTime / 100;
-            FocusLayerViewPlayerProgress *viewPlayerProgress = (FocusLayerViewPlayerProgress*)_focusLayer.infocus.view;
-            double percentage = [viewPlayerProgress getSeekTimePercentage];
-            double seekTime = percentage * appTotalTime / 100;
-            // only seek if change is more than 500ms
-            if (fabs(appSeekTime - seekTime) > 0.5)
-            {
-              g_application.SeekPercentage(percentage, true);
-              // turn off display after seek.
-              g_infoManager.SetDisplayAfterSeek(0);
-            }
-            else
-            {
-              // resume playback
-              [self sendButtonPressed:SiriRemote_PausePlayClick];
-            }
-          }
-          else
-          {
-            // pause playback
-            [self sendButtonPressed:SiriRemote_PausePlayClick];
-          }
-        }
-        else
-        {
-          if (clickDirectionAtStateBegan == CLICK_WAS_RELEASED)
-          {
+          case SELECT_NAVIGATION:
+            // user was nav'ing around in skin and clicked
             [self sendButtonPressed:SiriRemote_CenterClick];
-          }
-          else
-          {
-            if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+            break;
+          case SELECT_VIDEOPLAY:
+            // fullscreen video was playing but not paused
+            switch(clickDirectionAtStateBegan)
             {
-              switch(clickDirectionAtStateBegan)
+              case CLICK_UP:
+                // big/chapter seek or channel change for pvr
+                [self sendButtonPressed:SiriRemote_UpTap];
+                break;
+              case CLICK_DOWN:
+                // big/chapter seek or channel change for pvr
+                [self sendButtonPressed:SiriRemote_DownTap];
+                break;
+              case CLICK_LEFT:
+                // seek backward
+                [self sendButtonPressed:SiriRemote_LeftTap];
+                break;
+              case CLICK_RIGHT:
+                // seek forward
+                [self sendButtonPressed:SiriRemote_RightTap];
+                break;
+              case CLICK_SELECT_OR_RELEASED:
+                // pause playback
+                [self sendButtonPressed:SiriRemote_PausePlayClick];
+                break;
+            }
+            break;
+          case SELECT_VIDEOPAUSED:
+            // idea here is that if user does not use ExpertMode, it shoud behave like "Netflix" in fullscreen
+            // would have been easier to do this in keymap, but we could not make it backward compatible
+            if ([_focusLayer.infocus.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
+            {
+              // progress bar with scrubber was up
+              double appTotalTime = g_application.GetTotalTime();
+              double appPercentage = g_application.GetPercentage();
+              double appSeekTime = appPercentage * appTotalTime / 100;
+              FocusLayerViewPlayerProgress *viewPlayerProgress = (FocusLayerViewPlayerProgress*)_focusLayer.infocus.view;
+              double percentage = [viewPlayerProgress getSeekTimePercentage];
+              double seekTime = percentage * appTotalTime / 100;
+              // only seek if change is more than 500ms
+              if (fabs(appSeekTime - seekTime) > 0.5)
               {
-                case CLICK_IS_UP:
-                  [self sendButtonPressed:SiriRemote_UpTap];
-                  break;
-                case CLICK_IS_DOWN:
-                  [self sendButtonPressed:SiriRemote_DownTap];
-                  break;
-                case CLICK_IS_LEFT:
-                  [self sendButtonPressed:SiriRemote_LeftTap];
-                  break;
-                case CLICK_IS_RIGHT:
-                  [self sendButtonPressed:SiriRemote_RightTap];
-                  break;
-                default:
-                  CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateEnded:CLICK_WAS_RELEASED");
-                  break;
+                g_application.SeekPercentage(percentage, true);
+                // turn off display after seek.
+                g_infoManager.SetDisplayAfterSeek(0);
+              }
+              else
+              {
+                // resume playback
+                [self sendButtonPressed:SiriRemote_PausePlayClick];
               }
             }
-          }
+            break;
         }
       }
-      else if (longSelectDuringVideoPlayback)
+      else
       {
-        // restore to normal playback speed.
-        if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
-          CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
+        // hold timer fired,
+        // this is a press/hold/release cycle
+        switch(selectState)
+        {
+          case SELECT_NAVIGATION:
+            // hold timer handled button press, do nothing
+            break;
+          case SELECT_VIDEOPLAY:
+            // hold timer put us into ff/rw
+            // restore to normal playback speed.
+            if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+              CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
+          case SELECT_VIDEOPAUSED:
+            // do nothing
+            break;
+        }
       }
+      selectState = SELECT_NAVIGATION;
       break;
     case UIGestureRecognizerStateCancelled:
+      selectState = SELECT_NAVIGATION;
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateCancelled");
       break;
     default:

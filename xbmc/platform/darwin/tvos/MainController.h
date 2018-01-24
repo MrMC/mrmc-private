@@ -40,11 +40,11 @@ typedef enum
 
 typedef enum
 {
-  CLICK_WAS_RELEASED = 0,
-  CLICK_IS_LEFT,
-  CLICK_IS_RIGHT,
-  CLICK_IS_UP,
-  CLICK_IS_DOWN,
+  CLICK_SELECT_OR_RELEASED = 0,
+  CLICK_LEFT,
+  CLICK_RIGHT,
+  CLICK_UP,
+  CLICK_DOWN,
 } CLICK_DIRECTION;
 
 typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
