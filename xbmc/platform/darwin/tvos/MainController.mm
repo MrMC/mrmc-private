@@ -1896,24 +1896,27 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 {
   // only used during video playback, tvOS focus engine will
   // include IR key pressing
-  if (m_appAlive == YES)
+  if ([self hasPlayerProgressScrubbing])
   {
-    switch (sender.state)
+    if (m_appAlive == YES)
     {
-      case UIGestureRecognizerStateBegan:
-        CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteLeftArrowPressed");
-        if (g_application.m_pPlayer->IsPaused())
-          [self startKeyPressTimer:SiriRemote_LeftTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
-        else
-          [self sendButtonPressed:SiriRemote_LeftTap];
-        break;
-      case UIGestureRecognizerStateEnded:
-      case UIGestureRecognizerStateChanged:
-      case UIGestureRecognizerStateCancelled:
-        [self stopKeyPressTimer];
-        break;
-      default:
-        break;
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteLeftArrowPressed");
+          if (g_application.m_pPlayer->IsPaused())
+            [self startKeyPressTimer:SiriRemote_LeftTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
+          else
+            [self sendButtonPressed:SiriRemote_LeftTap];
+          break;
+        case UIGestureRecognizerStateEnded:
+        case UIGestureRecognizerStateChanged:
+        case UIGestureRecognizerStateCancelled:
+          [self stopKeyPressTimer];
+          break;
+        default:
+          break;
+      }
     }
   }
   [self startRemoteTimer];
