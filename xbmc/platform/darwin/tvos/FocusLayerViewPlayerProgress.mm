@@ -33,6 +33,12 @@
 #import "utils/StringUtils.h"
 #import "utils/log.h"
 
+
+// has to be a global as this object will get
+// destroyed when core settings window pops up.
+static bool gOSDSettingsWasUp = false;
+static double gScrubbedPercentForRestore = -1;
+
 @interface FocusLayerViewPlayerProgress ()
 @property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
 @property (strong, nonatomic) NSTimer *remoteIdleTimer;
@@ -110,6 +116,14 @@
       percentage = self->seekTimeSeconds / self->totalTimeSeconds;
       self->thumbNailer = new CProgressThumbNailer(fileitem, 400, self);
       //TODO: grab initial thumb from renderer.
+    }
+    // restore scrubbed position if user has popped up
+    // the OSDSettings core window and backed out
+    if (gOSDSettingsWasUp)
+    {
+      gOSDSettingsWasUp = false;
+      if (gScrubbedPercentForRestore > 0)
+        percentage = gScrubbedPercentForRestore;
     }
     // set initial slider position and kick off a thumb image gen
     [self setPercentage:percentage];
@@ -191,6 +205,7 @@
     self->seekTimeSeconds = percentage * self->totalTimeSeconds;
     self->thumbNailer->RequestThumbAsPercentage(100.0 * percentage);
   }
+  gScrubbedPercentForRestore = percentage;
 }
 
 - (double) getSeekTimePercentage
@@ -335,7 +350,7 @@
   // place time string at bottom or top depending on
   // if video thumb image is above or below progress bar
   if (videoRectIsAboveBar)
-    textRect.origin.y = CGRectGetMaxY(videoRect) - textRect.size.height;
+    textRect.origin.y = CGRectGetMaxY(videoRect) - textRect.size.height - 1;
   else
     textRect.origin.y = CGRectGetMinY(videoRect) + 1.0;
 
@@ -450,6 +465,7 @@
   CLog::Log(LOGDEBUG, "PlayerProgress::handleDownSwipeGesture");
   if (self->deceleratingTimer)
     [self stopDeceleratingTimer];
+  gOSDSettingsWasUp = true;
   KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
     TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD_SETTINGS)));
 }
