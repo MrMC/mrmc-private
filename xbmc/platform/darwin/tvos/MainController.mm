@@ -185,7 +185,7 @@ MainController *g_xbmcController;
   m_window.autoresizingMask = 0;
   m_window.autoresizesSubviews = NO;
 
-  m_clickDirection = CLICK_SELECT_OR_RELEASED;
+  m_clickDirection = CLICK_NONE;
 
   [self enableScreenSaver];
 
@@ -1442,7 +1442,7 @@ FocusLayerView *swipeStartingParent;
 
       if (!gamepad.buttonA.pressed)
       {
-        m_clickDirection = CLICK_SELECT_OR_RELEASED;
+        m_clickDirection = CLICK_NONE;
         //NSLog(@"microGamepad: user released finger from touch surface");
       }
     };
@@ -1650,7 +1650,7 @@ typedef enum
   SELECT_VIDEOPAUSED,
 } SELECT_STATE;
 SELECT_STATE selectState = SELECT_NAVIGATION;
-CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
+CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
 //--------------------------------------------------------------
 - (void)SiriLongSelectHoldHandler
 {
@@ -1745,7 +1745,7 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
                 // seek forward
                 [self sendButtonPressed:SiriRemote_RightTap];
                 break;
-              case CLICK_SELECT_OR_RELEASED:
+              case CLICK_NONE:
                 // pause playback
                 [self sendButtonPressed:SiriRemote_PausePlayClick];
                 break;

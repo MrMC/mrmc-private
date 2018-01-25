@@ -40,7 +40,7 @@ typedef enum
 
 typedef enum
 {
-  CLICK_SELECT_OR_RELEASED = 0,
+  CLICK_NONE = 0,
   CLICK_LEFT,
   CLICK_RIGHT,
   CLICK_UP,
