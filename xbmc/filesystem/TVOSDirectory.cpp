@@ -40,20 +40,33 @@ CTVOSDirectory::~CTVOSDirectory()
 
 bool CTVOSDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
+  // To see user home xml files in the file manager,
+  // we have to populate a list on a directory request.
   std::string rootpath = CSpecialProtocol::TranslatePath(url);
+  // quick return check, we do not care if
+  // not going to user home.
   size_t found = rootpath.find("Caches/home/userdata");
   if (found == std::string::npos)
     return false;
 
-  // we never save directories but files with full paths
+  // The directory request will point to the right path '.../home/userdata/..'
+  // so we ask for files in ending directory, if we get xml file paths back
+  // then we are re-vectoring them to persistent storage and need to
+  // create CFileItems that will tranlate into CTVOSFile object later
+  // when accessed.
+
+  // GetDirectoryContents will return full paths
   std::vector<std::string> contents;
   CDarwinNSUserDefaults::GetDirectoryContents(rootpath, contents);
   for (const auto &path : contents)
   {
     std::string itemLabel = URIUtils::GetFileName(path);
     CFileItemPtr pItem(new CFileItem(itemLabel));
+    // we only save files to persistent storage
     pItem->m_bIsFolder = false;
-    pItem->SetPath(URIUtils::AddFileToFolder("file://", path));
+    // path must a full path, with no protocol
+    // or they will not get intercepted in CFileFactory
+    pItem->SetPath(path);
     if (!(m_flags & DIR_FLAG_NO_FILE_INFO))
     {
       struct __stat64 buffer;
@@ -61,7 +74,7 @@ bool CTVOSDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       CURL url2(pItem->GetPath());
       if (tvOSFile.Stat(url2, &buffer) == 0)
       {
-        // fake the file datetime
+        // fake the datetime
         FILETIME fileTime, localTime;
         TimeTToFileTime(buffer.st_mtime, &fileTime);
         FileTimeToLocalFileTime(&fileTime, &localTime);

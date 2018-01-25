@@ -48,16 +48,18 @@ bool CSpecialProtocolDirectory::GetDirectory(const CURL& url, CFileItemList &ite
   { // replace our paths as necessary
     items.SetURL(url);
 
-#if defined(TARGET_DARWIN_TVOS)
-    CTVOSDirectory tvOSDirectory;
-    //tvOSDirectory.GetDirectory(url, items);
-#endif
     for (int i = 0; i < items.Size(); i++)
     {
       CFileItemPtr item = items[i];
       if (StringUtils::StartsWith(item->GetPath(), translatedPath))
         item->SetPath(URIUtils::AddFileToFolder(pathToUrl, item->GetPath().substr(translatedPath.size())));
     }
+#if defined(TARGET_DARWIN_TVOS)
+    // do not alter the path of items
+    // or CTVOSFile will break.
+    CTVOSDirectory tvOSDirectory;
+    tvOSDirectory.GetDirectory(url, items);
+#endif
     return true;
   }
   return false;
