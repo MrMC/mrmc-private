@@ -50,7 +50,7 @@ bool CSpecialProtocolDirectory::GetDirectory(const CURL& url, CFileItemList &ite
 
 #if defined(TARGET_DARWIN_TVOS)
     CTVOSDirectory tvOSDirectory;
-    tvOSDirectory.GetDirectory(url, items);
+    //tvOSDirectory.GetDirectory(url, items);
 #endif
     for (int i = 0; i < items.Size(); i++)
     {
