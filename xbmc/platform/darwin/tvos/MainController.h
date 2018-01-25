@@ -91,9 +91,11 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 }
 
 // why are these properties ?
-@property (nonatomic, strong) NSTimer *m_holdTimer;
+@property (nonatomic, strong) NSTimer *m_selectHoldTimer;
+@property (nonatomic, strong) NSTimer *m_irArrowHoldTimer;
 @property (nonatomic, retain) NSDictionary *m_nowPlayingInfo;
-@property int                 m_holdCounter;
+@property int                 m_selectHoldCounter;
+@property int                 m_irArrowHoldCounter;
 @property CGFloat             m_screenScale;
 @property int                 m_screenIdx;
 @property CGSize              m_screensize;

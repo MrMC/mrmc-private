@@ -1654,10 +1654,10 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
 //--------------------------------------------------------------
 - (void)SiriLongSelectHoldHandler
 {
-  self.m_holdCounter++;
+  self.m_selectHoldCounter++;
   if (selectState == SELECT_VIDEOPLAY)
   {
-    if (self.m_holdCounter == 1)
+    if (self.m_selectHoldCounter == 1)
     {
       switch(clickDirectionAtStateBegan)
       {
@@ -1678,7 +1678,7 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
   }
   else
   {
-    [self.m_holdTimer invalidate];
+    [self.m_selectHoldTimer invalidate];
     [self sendButtonPressed:SiriRemote_CenterHold];
   }
 }
@@ -1689,7 +1689,7 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
   {
     case UIGestureRecognizerStateBegan:
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateBegan");
-      self.m_holdCounter = 0;
+      self.m_selectHoldCounter = 0;
       // assume we are navigating
       selectState = SELECT_NAVIGATION;
       if (g_application.m_pPlayer->IsPlayingVideo())
@@ -1699,23 +1699,23 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
           selectState = SELECT_VIDEOPAUSED;
       }
       clickDirectionAtStateBegan = m_clickDirection;
-      self.m_holdTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(SiriLongSelectHoldHandler) userInfo:nil repeats:YES];
+      self.m_selectHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(SiriLongSelectHoldHandler) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateChanged:
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateChanged");
       if (selectState == SELECT_NAVIGATION)
       {
-        if (self.m_holdCounter > 1)
+        if (self.m_selectHoldCounter > 1)
         {
-          [self.m_holdTimer invalidate];
+          [self.m_selectHoldTimer invalidate];
           [self sendButtonPressed:SiriRemote_CenterHold];
         }
       }
       break;
     case UIGestureRecognizerStateEnded:
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateEnded");
-      [self.m_holdTimer invalidate];
-      if (self.m_holdCounter < 1)
+      [self.m_selectHoldTimer invalidate];
+      if (self.m_selectHoldCounter < 1)
       {
         // hold timer never fired,
         // this is a normal press/release cycle
@@ -1808,8 +1808,9 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
       selectState = SELECT_NAVIGATION;
       break;
     case UIGestureRecognizerStateCancelled:
-      selectState = SELECT_NAVIGATION;
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateCancelled");
+      [self.m_selectHoldTimer invalidate];
+      selectState = SELECT_NAVIGATION;
       break;
     default:
       break;
@@ -1837,14 +1838,107 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_SELECT_OR_RELEASED;
 //--------------------------------------------------------------
 #pragma mark - IR remote directional handlers
 // only used during video playback, tvOS focus engine will
-// automatically include IR directional navigation.
+// automatically include IR directional events during navigation.
 //--------------------------------------------------------------
+- (void)IRLeftArrowArrowHoldHandler
+{
+  self.m_irArrowHoldCounter++;
+  [self.m_irArrowHoldTimer invalidate];
+  // use 4X speed rewind.
+  [self sendButtonPressed:SiriRemote_IR_Rewind];
+  [self sendButtonPressed:SiriRemote_IR_Rewind];
+}
+- (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
+{
+  if ([self hasPlayerProgressScrubbing])
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          CLog::Log(LOGDEBUG, "IRRemoteLeftArrowPressed:StateBegan");
+          self.m_irArrowHoldCounter = 0;
+          self.m_irArrowHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1
+            target:self selector:@selector(IRLeftArrowArrowHoldHandler) userInfo:nil repeats:YES];
+          break;
+        case UIGestureRecognizerStateEnded:
+          CLog::Log(LOGDEBUG, "IRRemoteLeftArrowPressed:StateEnded");
+          [self.m_irArrowHoldTimer invalidate];
+          if (self.m_irArrowHoldCounter < 1)
+          {
+            [self sendButtonPressed:SiriRemote_LeftTap];
+          }
+          else
+          {
+            // hold timer put us into ff/rw
+            // restore to normal playback speed.
+            if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+              CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
+          }
+        case UIGestureRecognizerStateCancelled:
+          [self.m_irArrowHoldTimer invalidate];
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  [self startRemoteTimer];
+}
+//--------------------------------------------------------------
+- (void)IRRightArrowArrowHoldHandler
+{
+  self.m_irArrowHoldCounter++;
+  [self.m_irArrowHoldTimer invalidate];
+  // use 4X speed fastforeward.
+  [self sendButtonPressed:SiriRemote_IR_FastForward];
+  [self sendButtonPressed:SiriRemote_IR_FastForward];
+}
+- (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
+{
+  if ([self hasPlayerProgressScrubbing])
+  {
+    if (m_appAlive == YES)
+    {
+      switch (sender.state)
+      {
+        case UIGestureRecognizerStateBegan:
+          CLog::Log(LOGDEBUG, "IRRemoteRightArrowPressed:StateBegan");
+          self.m_irArrowHoldCounter = 0;
+          self.m_irArrowHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1
+            target:self selector:@selector(IRRightArrowArrowHoldHandler) userInfo:nil repeats:YES];
+          break;
+        case UIGestureRecognizerStateEnded:
+          CLog::Log(LOGDEBUG, "IRRemoteRightArrowPressed:StateEnded");
+          [self.m_irArrowHoldTimer invalidate];
+          if (self.m_irArrowHoldCounter < 1)
+          {
+            [self sendButtonPressed:SiriRemote_RightTap];
+          }
+          else
+          {
+            // hold timer put us into ff/rw
+            // restore to normal playback speed.
+            if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+              CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PLAYER_PLAY)));
+          }
+          break;
+        case UIGestureRecognizerStateCancelled:
+          [self.m_irArrowHoldTimer invalidate];
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  [self startRemoteTimer];
+}
 //--------------------------------------------------------------
 // start repeating after 0.25s
 #define REPEATED_KEYPRESS_DELAY_S 0.25
 // pause 0.05s (50ms) between keypresses
 #define REPEATED_KEYPRESS_PAUSE_S 0.15
-//--------------------------------------------------------------
 static CFAbsoluteTime keyPressTimerStartSeconds;
 
 - (void)startKeyPressTimer:(int)keyId
@@ -1891,69 +1985,8 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   NSNumber *keyId = [theTimer userInfo];
   [self sendButtonPressed:[keyId intValue]];
 }
-
-- (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
-{
-  // only used during video playback, tvOS focus engine will
-  // include IR key pressing
-  if ([self hasPlayerProgressScrubbing])
-  {
-    if (m_appAlive == YES)
-    {
-      switch (sender.state)
-      {
-        case UIGestureRecognizerStateBegan:
-          CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteLeftArrowPressed");
-          if (g_application.m_pPlayer->IsPaused())
-            [self startKeyPressTimer:SiriRemote_LeftTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
-          else
-            [self sendButtonPressed:SiriRemote_LeftTap];
-          break;
-        case UIGestureRecognizerStateEnded:
-        case UIGestureRecognizerStateChanged:
-        case UIGestureRecognizerStateCancelled:
-          [self stopKeyPressTimer];
-          break;
-        default:
-          break;
-      }
-    }
-  }
-  [self startRemoteTimer];
-}
-- (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
-{
-  // only used during video playback, tvOS focus engine will
-  // include IR key pressing
-  if ([self hasPlayerProgressScrubbing])
-  {
-    if (m_appAlive == YES)
-    {
-      switch (sender.state)
-      {
-        case UIGestureRecognizerStateBegan:
-          CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteRightArrowPressed");
-          if (g_application.m_pPlayer->IsPaused())
-            [self startKeyPressTimer:SiriRemote_RightTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
-          else
-            [self sendButtonPressed:SiriRemote_RightTap];
-          break;
-        case UIGestureRecognizerStateEnded:
-        case UIGestureRecognizerStateChanged:
-        case UIGestureRecognizerStateCancelled:
-          [self stopKeyPressTimer];
-          break;
-        default:
-          break;
-      }
-    }
-  }
-  [self startRemoteTimer];
-}
 - (IBAction)IRRemoteUpArrowPressed:(UIGestureRecognizer *)sender
 {
-  // only used during video playback, tvOS focus engine will
-  // include IR key pressing
   if ([self hasPlayerProgressScrubbing])
   {
     if (m_appAlive == YES)
@@ -1981,8 +2014,6 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 }
 - (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer *)sender
 {
-  // only used during video playback, tvOS focus engine will
-  // include IR key pressing
   if ([self hasPlayerProgressScrubbing])
   {
     if (m_appAlive == YES)

@@ -671,6 +671,7 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   {
     case UIGestureRecognizerStateBegan:
       CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteDownArrowPressed");
+      gOSDSettingsWasUp = true;
       KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
         TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_OSD_SETTINGS)));
       break;
