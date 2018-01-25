@@ -43,6 +43,11 @@ bool CSpecialProtocolDirectory::GetDirectory(const CURL& url, CFileItemList &ite
   if (CDirectory::GetDirectory(translatedPath, items, m_strFileMask, m_flags | DIR_FLAG_GET_HIDDEN))
   { // replace our paths as necessary
     items.SetURL(url);
+
+#if defined(TARGET_DARWIN_TVOS)
+    CTVOSDirectory tvOSDirectory;
+    tvOSDirectory.GetDirectory(url, items);
+#endif
     for (int i = 0; i < items.Size(); i++)
     {
       CFileItemPtr item = items[i];
