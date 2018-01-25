@@ -26,6 +26,10 @@
 #include "FileItem.h"
 #include "URL.h"
 
+#if defined(TARGET_DARWIN_TVOS)
+#include "TVOSDirectory.h"
+#endif
+
 using namespace XFILE;
 
 CSpecialProtocolDirectory::CSpecialProtocolDirectory(void)
