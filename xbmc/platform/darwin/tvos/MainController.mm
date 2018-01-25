@@ -132,7 +132,6 @@ MainController *g_xbmcController;
 #pragma mark - MainController interface
 @interface MainController ()
 @property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
-@property (strong, nonatomic) NSTimer *remoteIdleTimer;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) float displayRate;
 @property (strong, nonatomic) UITapGestureRecognizer *doubleTapRecognizer;
@@ -154,8 +153,6 @@ MainController *g_xbmcController;
 @synthesize m_screenIdx;
 @synthesize m_screensize;
 @synthesize m_nowPlayingInfo;
-@synthesize m_remoteIdleState;
-@synthesize m_remoteIdleTimeout;
 @synthesize m_enableRemoteIdle;
 @synthesize m_focusIdleState;
 @synthesize m_enableRemoteExpertMode;
@@ -289,8 +286,6 @@ MainController *g_xbmcController;
   [self createSiriTapGestureRecognizers];
   [self createCustomControlCenter];
   [self initGameController];
-  // startup with idle timer running
-  [self startRemoteTimer];
 
   if (__builtin_available(tvOS 11.2, *))
   {
@@ -660,21 +655,16 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 - (void)setRemoteIdleTimeout:(int)timeout
 {
-  m_remoteIdleTimeout = (float)timeout;
-  [self startRemoteTimer];
 }
 
 - (void)enableRemoteIdle:(BOOL)enable
 {
-  //PRINT_SIGNATURE();
   m_enableRemoteIdle = enable;
-  [self startRemoteTimer];
 }
 
 - (void)enableRemoteExpertMode:(BOOL)enable
 {
   m_enableRemoteExpertMode = enable;
-  [self startRemoteTimer];
 }
 
 - (bool)hasPlayerProgressScrubbing
@@ -707,7 +697,6 @@ MainController *g_xbmcController;
 - (void)stopPlaybackOnMenu:(BOOL)enable
 {
   m_stopPlaybackOnMenu = enable;
-  [self startRemoteTimer];
 }
 
 //--------------------------------------------------------------
@@ -1053,46 +1042,6 @@ MainController *g_xbmcController;
         switchState.c_str(), refreshRate, dynamicRangeString.c_str());
     }
   }
-}
-
-//--------------------------------------------------------------
-//--------------------------------------------------------------
-#pragma mark - remote idle timer
-//--------------------------------------------------------------
-// ignore remote/siri events if the timer is expired
-- (void)startRemoteTimer
-{
-  m_remoteIdleState = false;
-  if (self.remoteIdleTimer != nil)
-    [self stopRemoteTimer];
-  if (m_enableRemoteIdle)
-  {
-    NSDate *fireDate = [NSDate dateWithTimeIntervalSinceNow:m_remoteIdleTimeout];
-    NSTimer *timer = [[NSTimer alloc] initWithFireDate:fireDate
-                                      interval:0.0
-                                      target:self
-                                      selector:@selector(setRemoteIdleState)
-                                      userInfo:nil
-                                      repeats:NO];
-    
-    [[NSRunLoop currentRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
-    self.remoteIdleTimer = timer;
-  }
-}
-
-- (void)stopRemoteTimer
-{
-  if (self.remoteIdleTimer != nil)
-  {
-    [self.remoteIdleTimer invalidate];
-    self.remoteIdleTimer = nil;
-  }
-  m_remoteIdleState = false;
-}
-
-- (void)setRemoteIdleState
-{
-  m_remoteIdleState = true;
 }
 
 //--------------------------------------------------------------
@@ -1497,68 +1446,56 @@ FocusLayerView *swipeStartingParent;
 //--------------------------------------------------------------
 - (IBAction)SiriSwipeHandler:(UISwipeGestureRecognizer *)sender
 {
-  // for state tracking only, tvOS focus engine will handle the navigation
-  if (!m_remoteIdleState)
+  if (m_appAlive == YES)
   {
-    if (m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
+    switch (sender.state)
     {
-      switch (sender.state)
-      {
-        case UIGestureRecognizerStateRecognized:
-          {
-            swipeNoMore = false;
-            swipeCounter = 0;
-            focusActionType = FocusActionSwipe;
-            CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized:FocusActionSwipe");
-            swipeStartingParent = [self findParentView:_focusLayer.infocus.view];
-            swipeStartingParentViewRect = swipeStartingParent.bounds;
-            CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized: %f, %f, %f, %f",
-              swipeStartingParentViewRect.origin.x,
-              swipeStartingParentViewRect.origin.y,
-              swipeStartingParentViewRect.origin.x + swipeStartingParentViewRect.size.width,
-              swipeStartingParentViewRect.origin.y + swipeStartingParentViewRect.size.height);
-          }
-          break;
-        default:
-          break;
-      }
+      case UIGestureRecognizerStateRecognized:
+        {
+          swipeNoMore = false;
+          swipeCounter = 0;
+          focusActionType = FocusActionSwipe;
+          CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized:FocusActionSwipe");
+          swipeStartingParent = [self findParentView:_focusLayer.infocus.view];
+          swipeStartingParentViewRect = swipeStartingParent.bounds;
+          CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized: %f, %f, %f, %f",
+            swipeStartingParentViewRect.origin.x,
+            swipeStartingParentViewRect.origin.y,
+            swipeStartingParentViewRect.origin.x + swipeStartingParentViewRect.size.width,
+            swipeStartingParentViewRect.origin.y + swipeStartingParentViewRect.size.height);
+        }
+        break;
+      default:
+        break;
     }
   }
-  // start remote timeout
-  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (IBAction)SiriPanHandler:(UIPanGestureRecognizer *)sender
 {
-  // for state tracking only, tvOS focus engine will handle the navigation
-  if (!m_remoteIdleState)
+  if (m_appAlive == YES)
   {
-    if (m_appAlive == YES)//NO GESTURES BEFORE WE ARE UP AND RUNNING
+    switch (sender.state)
     {
-      switch (sender.state)
-      {
-        case UIGestureRecognizerStateBegan:
-          {
-            panNoMore = false;
-            focusActionType = FocusActionPan;
-            CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan:FocusActionPan");
-            FocusLayerView *parentView = [self findParentView:_focusLayer.infocus.view];
-            swipeStartingParentViewRect = parentView.bounds;
-            swipeStartingParentViewRect = parentView.bounds;
-            CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan: %f, %f, %f, %f",
-              swipeStartingParentViewRect.origin.x,
-              swipeStartingParentViewRect.origin.y,
-              swipeStartingParentViewRect.origin.x + swipeStartingParentViewRect.size.width,
-              swipeStartingParentViewRect.origin.y + swipeStartingParentViewRect.size.height);
-          }
-          break;
-        default:
-          break;
-      }
+      case UIGestureRecognizerStateBegan:
+        {
+          panNoMore = false;
+          focusActionType = FocusActionPan;
+          CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan:FocusActionPan");
+          FocusLayerView *parentView = [self findParentView:_focusLayer.infocus.view];
+          swipeStartingParentViewRect = parentView.bounds;
+          swipeStartingParentViewRect = parentView.bounds;
+          CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan: %f, %f, %f, %f",
+            swipeStartingParentViewRect.origin.x,
+            swipeStartingParentViewRect.origin.y,
+            swipeStartingParentViewRect.origin.x + swipeStartingParentViewRect.size.width,
+            swipeStartingParentViewRect.origin.y + swipeStartingParentViewRect.size.height);
+        }
+        break;
+      default:
+        break;
     }
   }
-  // start remote timeout
-  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (void)SiriSingleTapHandler:(UITapGestureRecognizer *)sender
@@ -1568,22 +1505,23 @@ FocusLayerView *swipeStartingParent;
     switch (sender.state)
     {
       case UIGestureRecognizerStateEnded:
-        if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
         {
-          CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
-          //show (2.5sec auto hide)/hide normal progress bar
-          if (g_infoManager.GetDisplayAfterSeek())
-            g_infoManager.SetDisplayAfterSeek(0);
-          else
-            g_infoManager.SetDisplayAfterSeek(2500);
+          CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+          if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO && !g_application.m_pPlayer->IsPaused())
+          {
+            CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
+            //show (2.5sec auto hide)/hide normal progress bar
+            if (g_infoManager.GetDisplayAfterSeek())
+              g_infoManager.SetDisplayAfterSeek(0);
+            else
+              g_infoManager.SetDisplayAfterSeek(2500);
+          }
         }
         break;
       default:
         break;
     }
   }
-  // start remote timeout
-  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (void)SiriDoubleTapHandler:(UITapGestureRecognizer *)sender
@@ -1600,8 +1538,6 @@ FocusLayerView *swipeStartingParent;
         break;
     }
   }
-  // start remote timeout
-  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (void)SiriTripleTapHandler:(UITapGestureRecognizer *)sender
@@ -1611,19 +1547,20 @@ FocusLayerView *swipeStartingParent;
     switch (sender.state)
     {
       case UIGestureRecognizerStateEnded:
-        if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
         {
-          CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateEnded");
-          KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
-            TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_SUBTITLES)));
+          CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+          if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO && !g_application.m_pPlayer->IsPaused())
+          {
+            CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateEnded");
+            KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
+              TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_SUBTITLES)));
+          }
         }
         break;
      default:
         break;
     }
   }
-  // start remote timeout
-  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (void)SiriMenuHandler:(UITapGestureRecognizer *)sender
@@ -1659,8 +1596,6 @@ FocusLayerView *swipeStartingParent;
     default:
       break;
   }
-  // start remote timeout
-  [self startRemoteTimer];
 }
 
 typedef enum
@@ -1708,18 +1643,21 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
   switch (sender.state)
   {
     case UIGestureRecognizerStateBegan:
-      CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateBegan");
-      self.m_selectHoldCounter = 0;
-      // assume we are navigating
-      selectState = SELECT_NAVIGATION;
-      if (g_application.m_pPlayer->IsPlayingVideo())
       {
-        selectState = SELECT_VIDEOPLAY;
-        if (g_application.m_pPlayer->IsPaused())
-          selectState = SELECT_VIDEOPAUSED;
+        CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateBegan");
+        self.m_selectHoldCounter = 0;
+        // assume we are navigating
+        selectState = SELECT_NAVIGATION;
+        CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+        if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
+        {
+          selectState = SELECT_VIDEOPLAY;
+          if (g_application.m_pPlayer->IsPaused())
+            selectState = SELECT_VIDEOPAUSED;
+        }
+        clickDirectionAtStateBegan = m_clickDirection;
+        self.m_selectHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(SiriLongSelectHoldHandler) userInfo:nil repeats:YES];
       }
-      clickDirectionAtStateBegan = m_clickDirection;
-      self.m_selectHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(SiriLongSelectHoldHandler) userInfo:nil repeats:YES];
       break;
     case UIGestureRecognizerStateChanged:
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateChanged");
@@ -1835,8 +1773,6 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
     default:
       break;
   }
-  // start remote timeout
-  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (void)SiriPlayPauseHandler:(UITapGestureRecognizer *) sender
@@ -1846,8 +1782,6 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
     case UIGestureRecognizerStateEnded:
       CLog::Log(LOGDEBUG, "SiriPlayPauseHandler:StateEnded");
       [self sendButtonPressed:SiriRemote_PausePlayClick];
-      // start remote timeout
-      [self startRemoteTimer];
       break;
     default:
       break;
@@ -1904,7 +1838,6 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
       }
     }
   }
-  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 - (void)IRRightArrowArrowHoldHandler
@@ -1952,7 +1885,6 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
       }
     }
   }
-  [self startRemoteTimer];
 }
 //--------------------------------------------------------------
 // start repeating after 0.25s
@@ -2030,7 +1962,6 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
       }
     }
   }
-  [self startRemoteTimer];
 }
 - (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer *)sender
 {
@@ -2057,7 +1988,6 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
       }
     }
   }
-  [self startRemoteTimer];
 }
 
 //--------------------------------------------------------------
@@ -2111,8 +2041,6 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
         LOG(@"unhandled subtype: %d", (int)receivedEvent.subtype);
         break;
     }
-    // start remote timeout
-    [self startRemoteTimer];
   }
 }
 
@@ -2272,10 +2200,14 @@ CGRect debugView2;
 {
   if (context.focusHeading != UIFocusHeadingNone)
   {
-    // track focus idle time, if focus was idled,
-    // allow wrapping in lists, else no wrapping in lists
-    g_windowManager.SetWrapOverride(!m_focusIdleState);
-    [self startFocusTimer];
+    // this only matter during swipes
+    if (focusActionType == FocusActionSwipe)
+    {
+      // track focus idle time, if focus was idled,
+      // allow wrapping in lists, else no wrapping in lists
+      g_windowManager.SetWrapOverride(!m_focusIdleState);
+      [self startFocusTimer];
+    }
   }
 
   // if we had a focus change, send the heading down to core
@@ -2340,16 +2272,6 @@ CGRect debugView2;
   // We can use this to handle slide out panels that are represented by hidden views
   // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
   // So detect the focus request, post direction message to core and cancel tvOS focus update.
-
-  // check remote/siri idler
-  // start/restart the idle timer
-  // if was idle, ignore focus change till next time,
-  // this is to trap out spurious taps/pans/swipes
-  // when the siri remote is picked up.
-  bool remoteIdleState = m_remoteIdleState;
-  [self startRemoteTimer];
-  if (remoteIdleState)
-    return NO;
 
   CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: focusActionType %s", focusActionTypeNames[focusActionType]);
   // do not allow focus changes when playing video

@@ -80,8 +80,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   BOOL                        m_disableIdleTimer;
   NSConditionLock            *m_animationThreadLock;
   NSThread                   *m_animationThread;
-  BOOL                        m_remoteIdleState;
-  CGFloat                     m_remoteIdleTimeout;
   BOOL                        m_enableRemoteIdle;
   BOOL                        m_enableRemoteExpertMode;
   BOOL                        m_stopPlaybackOnMenu;
