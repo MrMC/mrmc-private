@@ -135,6 +135,8 @@ MainController *g_xbmcController;
 @property (strong, nonatomic) NSTimer *remoteIdleTimer;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) float displayRate;
+@property (strong, nonatomic) UITapGestureRecognizer *doubleTapRecognizer;
+@property (strong, nonatomic) UITapGestureRecognizer *tripleTapRecognizer;
 @property (nonatomic, nullable) FocusLayerView *focusView;
 @property (nonatomic, nullable) FocusLayerView *focusViewLeft;
 @property (nonatomic, nullable) FocusLayerView *focusViewRight;
@@ -1155,23 +1157,23 @@ MainController *g_xbmcController;
   singletap.delegate = self;
   [self.focusView addGestureRecognizer:singletap];
 
-  auto doubletap = [[UITapGestureRecognizer alloc]
+  self.doubleTapRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget:self action:@selector(SiriDoubleTapHandler:)];
-  doubletap.numberOfTapsRequired = 2;
-  doubletap.allowedPressTypes = @[];
-  doubletap.allowedTouchTypes = @[@(UITouchTypeIndirect)];
-  [self.focusView addGestureRecognizer:doubletap];
+  self.doubleTapRecognizer.numberOfTapsRequired = 2;
+  self.doubleTapRecognizer.allowedPressTypes = @[];
+  self.doubleTapRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirect)];
+  [self.focusView addGestureRecognizer:self.doubleTapRecognizer];
 
-  auto tripletap = [[UITapGestureRecognizer alloc]
+  self.tripleTapRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget:self action:@selector(SiriTripleTapHandler:)];
-  tripletap.numberOfTapsRequired = 3;
-  tripletap.allowedPressTypes = @[];
-  tripletap.allowedTouchTypes = @[@(UITouchTypeIndirect)];
-  tripletap.delegate = self;
-  [self.focusView addGestureRecognizer:tripletap];
+  self.tripleTapRecognizer.numberOfTapsRequired = 3;
+  self.tripleTapRecognizer.allowedPressTypes = @[];
+  self.tripleTapRecognizer.allowedTouchTypes = @[@(UITouchTypeIndirect)];
+  self.tripleTapRecognizer.delegate = self;
+  [self.focusView addGestureRecognizer:self.tripleTapRecognizer];
 
-  [singletap requireGestureRecognizerToFail:doubletap];
-  [doubletap requireGestureRecognizerToFail:tripletap];
+  [singletap requireGestureRecognizerToFail:self.doubleTapRecognizer];
+  [self.doubleTapRecognizer requireGestureRecognizerToFail:self.tripleTapRecognizer];
 }
 //--------------------------------------------------------------
 - (void)createSiriPressGesturecognizers
@@ -1296,6 +1298,24 @@ FocusLayerView *swipeStartingParent;
   // same for FocusLayerViewPlayerProgress
   if ( [touch.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
     return NO;
+
+  // only had double/triple tap recognizers enabled
+  // during fulscreen video playback, or they slow down tap navigation
+  CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+  if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
+  {
+    if (!self.doubleTapRecognizer.enabled)
+      self.doubleTapRecognizer.enabled = YES;
+    if (!self.tripleTapRecognizer.enabled)
+      self.tripleTapRecognizer.enabled = YES;
+  }
+  else
+  {
+    if (self.doubleTapRecognizer.enabled)
+      self.doubleTapRecognizer.enabled = NO;
+    if (self.tripleTapRecognizer.enabled)
+      self.tripleTapRecognizer.enabled = NO;
+  }
 
   // important, this gestureRecognizer gets called before any other tap/pas/swipe handler
   // including shouldUpdateFocusInContext/didUpdateFocusInContext. So we can
@@ -1548,9 +1568,9 @@ FocusLayerView *swipeStartingParent;
     switch (sender.state)
     {
       case UIGestureRecognizerStateEnded:
-        CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
         if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
         {
+          CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
           //show (2.5sec auto hide)/hide normal progress bar
           if (g_infoManager.GetDisplayAfterSeek())
             g_infoManager.SetDisplayAfterSeek(0);
@@ -1591,9 +1611,9 @@ FocusLayerView *swipeStartingParent;
     switch (sender.state)
     {
       case UIGestureRecognizerStateEnded:
-        CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateEnded");
         if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
         {
+          CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateEnded");
           KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
             TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_SUBTITLES)));
         }
@@ -2266,6 +2286,8 @@ CGRect debugView2;
         [self sendButtonPressed:SiriRemote_UpSwipe];
       else
         [self sendButtonPressed:SiriRemote_UpTap];
+      if (context.nextFocusedItem == self.focusViewTop)
+        [self setNeedsFocusUpdate];
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingUp");
       break;
     case UIFocusHeadingDown:
@@ -2273,6 +2295,8 @@ CGRect debugView2;
         [self sendButtonPressed:SiriRemote_DownSwipe];
       else
         [self sendButtonPressed:SiriRemote_DownTap];
+      if (context.nextFocusedItem == self.focusViewBottom)
+        [self setNeedsFocusUpdate];
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingDown");
       break;
     case UIFocusHeadingLeft:
@@ -2280,6 +2304,8 @@ CGRect debugView2;
         [self sendButtonPressed:SiriRemote_LeftSwipe];
       else
         [self sendButtonPressed:SiriRemote_LeftTap];
+      if (context.nextFocusedItem == self.focusViewLeft)
+        [self setNeedsFocusUpdate];
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingLeft");
       break;
     case UIFocusHeadingRight:
@@ -2287,6 +2313,8 @@ CGRect debugView2;
         [self sendButtonPressed:SiriRemote_RightSwipe];
       else
         [self sendButtonPressed:SiriRemote_RightTap];
+      if (context.nextFocusedItem == self.focusViewRight)
+        [self setNeedsFocusUpdate];
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingRight");
       break;
     case UIFocusHeadingNone:
@@ -2396,49 +2424,8 @@ CGRect debugView2;
       }
     }
   }
-  
-  switch (context.focusHeading)
-  {
-    case UIFocusHeadingUp:
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingUp");
-      if (context.nextFocusedItem == self.focusViewTop)
-      {
-        [self sendButtonPressed:SiriRemote_UpTap];
-        return NO;
-      }
-      break;
-    case UIFocusHeadingDown:
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingDown");
-      if (context.nextFocusedItem == self.focusViewBottom)
-      {
-        [self sendButtonPressed:SiriRemote_DownTap];
-        return NO;
-      }
-      break;
-    case UIFocusHeadingLeft:
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingLeft");
-      if (context.nextFocusedItem == self.focusViewLeft)
-      {
-        [self sendButtonPressed:SiriRemote_LeftTap];
-        return NO;
-      }
-      break;
-    case UIFocusHeadingRight:
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingRight");
-      if (context.nextFocusedItem == self.focusViewRight)
-      {
-        [self sendButtonPressed:SiriRemote_RightTap];
-        return NO;
-      }
-      break;
-    case UIFocusHeadingNone:
-      CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext:UIFocusHeadingNone");
-      break;
-    case UIFocusHeadingNext:
-    case UIFocusHeadingPrevious:
-      break;
-  }
-  return [super shouldUpdateFocusInContext:context];
+
+  return YES;
 }
 //--------------------------------------------------------------
 - (FocusLayerView*)findParentView:(FocusLayerView *)thisView
