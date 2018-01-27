@@ -2474,8 +2474,6 @@ CGRect debugView2;
   {
     auto &view = *viewsIt;
 
-    if (view.type == "window")
-      continue;
     FocusLayerView *focusLayerView = nil;
     focusLayerView = [[FocusLayerView alloc] initWithFrame:view.rect];
     [focusLayerView setFocusable:false];
