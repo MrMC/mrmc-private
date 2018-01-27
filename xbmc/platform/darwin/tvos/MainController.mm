@@ -1391,7 +1391,7 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
         weakSelf.m_touchPosition = TOUCH_LEFT;
       else if (CGRectContainsPoint(selectRightBounds, startPoint))
         weakSelf.m_touchPosition = TOUCH_RIGHT;
-#if 1
+#if 0
       NSLog(@"microGamepad: A(%d), U(%d), D(%d), L(%d), R(%d), point %@",
         gamepad.buttonA.pressed,
         gamepad.dpad.up.pressed,
@@ -1818,9 +1818,10 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
 }
 - (IBAction)IRRemoteLeftArrowPressed:(UIGestureRecognizer *)sender
 {
-  if ([self hasPlayerProgressScrubbing])
+  if (m_appAlive == YES)
   {
-    if (m_appAlive == YES)
+    CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+    if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
     {
       switch (sender.state)
       {
@@ -1865,9 +1866,10 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
 }
 - (IBAction)IRRemoteRightArrowPressed:(UIGestureRecognizer *)sender
 {
-  if ([self hasPlayerProgressScrubbing])
+  if (m_appAlive == YES)
   {
-    if (m_appAlive == YES)
+    CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+    if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
     {
       switch (sender.state)
       {
@@ -1954,9 +1956,10 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 }
 - (IBAction)IRRemoteUpArrowPressed:(UIGestureRecognizer *)sender
 {
-  if ([self hasPlayerProgressScrubbing])
+  if (m_appAlive == YES)
   {
-    if (m_appAlive == YES)
+    CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+    if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
     {
       switch (sender.state)
       {
@@ -1980,9 +1983,10 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 }
 - (IBAction)IRRemoteDownArrowPressed:(UIGestureRecognizer *)sender
 {
-  if ([self hasPlayerProgressScrubbing])
+  if (m_appAlive == YES)
   {
-    if (m_appAlive == YES)
+    CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
+    if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
     {
       switch (sender.state)
       {
