@@ -1639,12 +1639,14 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
       switch(m_touchPositionAtStateBegan)
       {
         case TOUCH_LEFT:
-          // use 4X speed rewind.
+          // use 8X speed rewind.
+          [self sendButtonPressed:SiriRemote_IR_Rewind];
           [self sendButtonPressed:SiriRemote_IR_Rewind];
           [self sendButtonPressed:SiriRemote_IR_Rewind];
           break;
         case TOUCH_RIGHT:
-          // use 4X speed forward.
+          // use 8X speed forward.
+          [self sendButtonPressed:SiriRemote_IR_FastForward];
           [self sendButtonPressed:SiriRemote_IR_FastForward];
           [self sendButtonPressed:SiriRemote_IR_FastForward];
           break;
@@ -1809,7 +1811,8 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
 {
   self.m_irArrowHoldCounter++;
   [self.m_irArrowHoldTimer invalidate];
-  // use 4X speed rewind.
+  // use 8X speed rewind.
+  [self sendButtonPressed:SiriRemote_IR_Rewind];
   [self sendButtonPressed:SiriRemote_IR_Rewind];
   [self sendButtonPressed:SiriRemote_IR_Rewind];
 }
@@ -1855,7 +1858,8 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
 {
   self.m_irArrowHoldCounter++;
   [self.m_irArrowHoldTimer invalidate];
-  // use 4X speed fastforeward.
+  // use 8X speed fastforeward.
+  [self sendButtonPressed:SiriRemote_IR_FastForward];
   [self sendButtonPressed:SiriRemote_IR_FastForward];
   [self sendButtonPressed:SiriRemote_IR_FastForward];
 }
