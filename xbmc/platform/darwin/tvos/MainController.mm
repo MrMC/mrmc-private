@@ -2292,7 +2292,8 @@ CGRect debugView2;
   // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
   // So detect the focus request, post direction message to core and cancel tvOS focus update.
 
-  CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: focusActionType %s", focusActionTypeNames[focusActionType]);
+  CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: swipeCounter(%d), focusActionType %s",
+    swipeCounter, focusActionTypeNames[focusActionType]);
   // do not allow focus changes when playing video
   // we handle those directly. Otherwise taps/swipes will cause wild seeks.
   if ([self hasPlayerProgressScrubbing])
@@ -2473,7 +2474,7 @@ CGRect debugView2;
   {
     auto &view = *viewsIt;
 
-    if (view.type == "window" || view.type == "dialog")
+    if (view.type == "window")
       continue;
     FocusLayerView *focusLayerView = nil;
     focusLayerView = [[FocusLayerView alloc] initWithFrame:view.rect];
