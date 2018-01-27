@@ -134,6 +134,7 @@ MainController *g_xbmcController;
 @property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) float displayRate;
+@property (strong, nonatomic) UIPanGestureRecognizer *panRecognizer;
 @property (strong, nonatomic) UITapGestureRecognizer *doubleTapRecognizer;
 @property (strong, nonatomic) UITapGestureRecognizer *tripleTapRecognizer;
 @property (nonatomic, nullable) FocusLayerView *focusView;
@@ -157,7 +158,7 @@ MainController *g_xbmcController;
 @synthesize m_focusIdleState;
 @synthesize m_enableRemoteExpertMode;
 @synthesize m_stopPlaybackOnMenu;
-@synthesize m_clickDirection;
+@synthesize m_touchPosition;
 
 //--------------------------------------------------------------
 //--------------------------------------------------------------
@@ -184,7 +185,7 @@ MainController *g_xbmcController;
   m_window.autoresizingMask = 0;
   m_window.autoresizesSubviews = NO;
 
-  m_clickDirection = CLICK_NONE;
+  m_touchPosition = TOUCH_CENTER;
 
   [self enableScreenSaver];
 
@@ -680,7 +681,7 @@ MainController *g_xbmcController;
     return false;
 
   CFileItem &fileItem = g_application.CurrentFileItem();
-  if (fileItem.IsLiveTV()
+  if (fileItem.IsPVR()
   ||  URIUtils::IsUPnP(fileItem.GetPath())
   ||  URIUtils::IsBluray(fileItem.GetPath())
   ||  fileItem.IsBDFile()
@@ -1088,10 +1089,10 @@ MainController *g_xbmcController;
 {
   // these are for tracking tap/pan/swipe state only,
   // tvOS focus engine will handle the navigation.
-  auto pan = [[UIPanGestureRecognizer alloc]
+  self.panRecognizer = [[UIPanGestureRecognizer alloc]
     initWithTarget:self action:@selector(SiriPanHandler:)];
-  pan.delegate = self;
-  [self.focusView addGestureRecognizer:pan];
+  self.panRecognizer.delegate = self;
+  [self.focusView addGestureRecognizer:self.panRecognizer];
 }
 //--------------------------------------------------------------
 - (void)createSiriTapGestureRecognizers
@@ -1134,9 +1135,9 @@ MainController *g_xbmcController;
   menuRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeMenu]];
   menuRecognizer.delegate  = self;
   [self.focusView addGestureRecognizer: menuRecognizer];
-  
+
   auto longSelectRecognizer = [[UILongPressGestureRecognizer alloc]
-                           initWithTarget: self action: @selector(SiriLongSelectHandler:)];
+    initWithTarget: self action: @selector(SiriLongSelectHandler:)];
   longSelectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
   longSelectRecognizer.minimumPressDuration = 0.001;
   longSelectRecognizer.delegate = self;
@@ -1257,6 +1258,10 @@ FocusLayerView *swipeStartingParent;
       self.doubleTapRecognizer.enabled = YES;
     if (!self.tripleTapRecognizer.enabled)
       self.tripleTapRecognizer.enabled = YES;
+    // disable pan recognizer so we can
+    // seek/ff/rw while keep a finger on touchpad
+    if (self.self.panRecognizer.enabled)
+      self.self.panRecognizer.enabled = NO;
   }
   else
   {
@@ -1264,6 +1269,9 @@ FocusLayerView *swipeStartingParent;
       self.doubleTapRecognizer.enabled = NO;
     if (self.tripleTapRecognizer.enabled)
       self.tripleTapRecognizer.enabled = NO;
+    // enable pan recognizer for navigation
+    if (!self.self.panRecognizer.enabled)
+      self.self.panRecognizer.enabled = YES;
   }
 
   // important, this gestureRecognizer gets called before any other tap/pas/swipe handler
@@ -1296,10 +1304,6 @@ FocusLayerView *swipeStartingParent;
       return NO;
     }
   }
-  /*
-  if ( [_focusLayer.infocus.view isKindOfClass:[FocusLayerViewPlayerProgress class]] )
-    return NO;
-  */
 
   BOOL handled = YES;
   // important, this gestureRecognizer gets called before any other press handler
@@ -1350,21 +1354,44 @@ FocusLayerView *swipeStartingParent;
 // This is the only way to detect the location of click.
 // It could also be used to detect if a use has a finger
 // resting on the track pad.
+CGRect selectUpBounds    = { 0.4f,  0.0f, 1.2f, 0.4f};
+CGRect selectDownBounds  = { 0.4f,  1.6f, 1.2f, 0.4f};
+CGRect selectLeftBounds  = { 0.0f,  0.0f, 0.4f, 2.0f};
+CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
+//--------------------------------------------------------------
 - (void)initGameController
 {
-  // dpad axis values ranges from -1.0 to 1.0
-  // where -1,-1 is top, left on trackpad.
-  // referenced from center of touchpad.
   [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidConnectNotification
     object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note)
   {
+    // Capturing 'self' strongly in this block is likely to lead to a retain cycle
+    // so creating a weak reference to self for access inside the block
+    __weak MainController *weakSelf = self;
+
     self.gcController = note.object;
     self.gcController.microGamepad.reportsAbsoluteDpadValues = YES;
     self.gcController.microGamepad.valueChangedHandler = ^(GCMicroGamepad *gamepad, GCControllerElement *element)
     {
+      // dpad axis values ranges from -1.0 to 1.0
+      // where -1, -1 is bottom, left on trackpad.
+      // referenced from center (0, 0) of touchpad.
       CGPoint startPoint = CGPointMake(
         gamepad.dpad.xAxis.value, gamepad.dpad.yAxis.value);
-      /*
+      // translate to (0,0) in top, left, (2,2) bottom, right
+      // do this so we can use CGRectContainsPoint and bounding rects
+      startPoint.x += 1.0;
+      startPoint.y  = 1.0 - startPoint.y;
+
+      weakSelf.m_touchPosition = TOUCH_CENTER;
+      if (CGRectContainsPoint(selectUpBounds, startPoint))
+        weakSelf.m_touchPosition = TOUCH_UP;
+      else if (CGRectContainsPoint(selectDownBounds, startPoint))
+        weakSelf.m_touchPosition = TOUCH_DOWN;
+      else if (CGRectContainsPoint(selectLeftBounds, startPoint))
+        weakSelf.m_touchPosition = TOUCH_LEFT;
+      else if (CGRectContainsPoint(selectRightBounds, startPoint))
+        weakSelf.m_touchPosition = TOUCH_RIGHT;
+#if 1
       NSLog(@"microGamepad: A(%d), U(%d), D(%d), L(%d), R(%d), point %@",
         gamepad.buttonA.pressed,
         gamepad.dpad.up.pressed,
@@ -1372,48 +1399,25 @@ FocusLayerView *swipeStartingParent;
         gamepad.dpad.left.pressed,
         gamepad.dpad.right.pressed,
         NSStringFromCGPoint(startPoint));
-      */
-      if (startPoint.x > 0.65)
+      switch(weakSelf.m_touchPosition)
       {
-        if (gamepad.buttonA.pressed)
-        {
-          m_clickDirection = CLICK_RIGHT;
-          //NSLog(@"microGamepad: user clicked finger near right side of remote");
-        }
+        case TOUCH_UP:
+          NSLog(@"microGamepad: TOUCH_UP");
+          break;
+        case TOUCH_DOWN:
+          NSLog(@"microGamepad: TOUCH_DOWN");
+          break;
+        case TOUCH_LEFT:
+          NSLog(@"microGamepad: TOUCH_LEFT");
+          break;
+        case TOUCH_RIGHT:
+          NSLog(@"microGamepad: TOUCH_RIGHT");
+          break;
+        case TOUCH_CENTER:
+          NSLog(@"microGamepad: TOUCH_CENTER");
+          break;
       }
-
-      if (startPoint.x < -0.65)
-      {
-        if (gamepad.buttonA.pressed)
-        {
-          m_clickDirection = CLICK_LEFT;
-          //NSLog(@"microGamepad: user clicked finger near left side of remote");
-        }
-      }
-
-      if (startPoint.y > 0.65)
-      {
-        if (gamepad.buttonA.pressed)
-        {
-          m_clickDirection = CLICK_UP;
-          //NSLog(@"microGamepad: user clicked finger near top of remote");
-        }
-      }
-
-      if (startPoint.y < -0.65)
-      {
-        if (gamepad.buttonA.pressed)
-        {
-          m_clickDirection = CLICK_DOWN;
-          //NSLog(@"microGamepad: user clicked finger near bottom of remote");
-        }
-      }
-
-      if (!gamepad.buttonA.pressed)
-      {
-        m_clickDirection = CLICK_NONE;
-        //NSLog(@"microGamepad: user released finger from touch surface");
-      }
+#endif
     };
   }];
 }
@@ -1446,6 +1450,8 @@ FocusLayerView *swipeStartingParent;
 //--------------------------------------------------------------
 - (IBAction)SiriSwipeHandler:(UISwipeGestureRecognizer *)sender
 {
+  // these are for tracking tap/pan/swipe state only,
+  // tvOS focus engine will handle the navigation.
   if (m_appAlive == YES)
   {
     switch (sender.state)
@@ -1466,6 +1472,7 @@ FocusLayerView *swipeStartingParent;
         }
         break;
       default:
+        //CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized:other %ld", sender.state);
         break;
     }
   }
@@ -1473,6 +1480,8 @@ FocusLayerView *swipeStartingParent;
 //--------------------------------------------------------------
 - (IBAction)SiriPanHandler:(UIPanGestureRecognizer *)sender
 {
+  // these are for tracking tap/pan/swipe state only,
+  // tvOS focus engine will handle the navigation.
   if (m_appAlive == YES)
   {
     switch (sender.state)
@@ -1597,7 +1606,20 @@ FocusLayerView *swipeStartingParent;
       break;
   }
 }
-
+//--------------------------------------------------------------
+- (void)SiriPlayPauseHandler:(UITapGestureRecognizer *) sender
+{
+  switch (sender.state)
+  {
+    case UIGestureRecognizerStateEnded:
+      CLog::Log(LOGDEBUG, "SiriPlayPauseHandler:StateEnded");
+      [self sendButtonPressed:SiriRemote_PausePlayClick];
+      break;
+    default:
+      break;
+  }
+}
+//--------------------------------------------------------------
 typedef enum
 {
   SELECT_NAVIGATION = 0,
@@ -1605,7 +1627,7 @@ typedef enum
   SELECT_VIDEOPAUSED,
 } SELECT_STATE;
 SELECT_STATE selectState = SELECT_NAVIGATION;
-CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
+TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
 //--------------------------------------------------------------
 - (void)SiriLongSelectHoldHandler
 {
@@ -1614,14 +1636,14 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
   {
     if (self.m_selectHoldCounter == 1)
     {
-      switch(clickDirectionAtStateBegan)
+      switch(m_touchPositionAtStateBegan)
       {
-        case CLICK_LEFT:
+        case TOUCH_LEFT:
           // use 4X speed rewind.
           [self sendButtonPressed:SiriRemote_IR_Rewind];
           [self sendButtonPressed:SiriRemote_IR_Rewind];
           break;
-        case CLICK_RIGHT:
+        case TOUCH_RIGHT:
           // use 4X speed forward.
           [self sendButtonPressed:SiriRemote_IR_FastForward];
           [self sendButtonPressed:SiriRemote_IR_FastForward];
@@ -1655,7 +1677,7 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
           if (g_application.m_pPlayer->IsPaused())
             selectState = SELECT_VIDEOPAUSED;
         }
-        clickDirectionAtStateBegan = m_clickDirection;
+        m_touchPositionAtStateBegan = m_touchPosition;
         self.m_selectHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(SiriLongSelectHoldHandler) userInfo:nil repeats:YES];
       }
       break;
@@ -1685,27 +1707,30 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
             break;
           case SELECT_VIDEOPLAY:
             // fullscreen video was playing but not paused
-            switch(clickDirectionAtStateBegan)
+            switch(m_touchPositionAtStateBegan)
             {
-              case CLICK_UP:
+              case TOUCH_UP:
                 // big/chapter seek or channel change for pvr
                 [self sendButtonPressed:SiriRemote_UpTap];
                 break;
-              case CLICK_DOWN:
+              case TOUCH_DOWN:
                 // big/chapter seek or channel change for pvr
                 [self sendButtonPressed:SiriRemote_DownTap];
                 break;
-              case CLICK_LEFT:
+              case TOUCH_LEFT:
                 // seek backward
                 [self sendButtonPressed:SiriRemote_LeftTap];
                 break;
-              case CLICK_RIGHT:
+              case TOUCH_RIGHT:
                 // seek forward
                 [self sendButtonPressed:SiriRemote_RightTap];
                 break;
-              case CLICK_NONE:
+              case TOUCH_CENTER:
                 // pause playback
-                [self sendButtonPressed:SiriRemote_PausePlayClick];
+                if ([self hasPlayerProgressScrubbing])
+                  [self sendButtonPressed:SiriRemote_PausePlayClick];
+                else
+                  [self sendButtonPressed:SiriRemote_CenterClick];
                 break;
             }
             break;
@@ -1774,20 +1799,6 @@ CLICK_DIRECTION clickDirectionAtStateBegan = CLICK_NONE;
       break;
   }
 }
-//--------------------------------------------------------------
-- (void)SiriPlayPauseHandler:(UITapGestureRecognizer *) sender
-{
-  switch (sender.state)
-  {
-    case UIGestureRecognizerStateEnded:
-      CLog::Log(LOGDEBUG, "SiriPlayPauseHandler:StateEnded");
-      [self sendButtonPressed:SiriRemote_PausePlayClick];
-      break;
-    default:
-      break;
-  }
-}
-
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 #pragma mark - IR remote directional handlers
@@ -2454,6 +2465,8 @@ CGRect debugView2;
   {
     auto &view = *viewsIt;
 
+    if (view.type == "window" || view.type == "dialog")
+      continue;
     FocusLayerView *focusLayerView = nil;
     focusLayerView = [[FocusLayerView alloc] initWithFrame:view.rect];
     [focusLayerView setFocusable:false];
