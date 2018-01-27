@@ -681,9 +681,9 @@ MainController *g_xbmcController;
     return false;
 
   CFileItem &fileItem = g_application.CurrentFileItem();
-  if (fileItem.IsPVR()
-  ||  URIUtils::IsUPnP(fileItem.GetPath())
+  if (URIUtils::IsLiveTV(fileItem.GetPath())
   ||  URIUtils::IsBluray(fileItem.GetPath())
+  ||  fileItem.IsPVR()
   ||  fileItem.IsBDFile()
   ||  fileItem.IsDVD()
   ||  fileItem.IsDiscImage()
