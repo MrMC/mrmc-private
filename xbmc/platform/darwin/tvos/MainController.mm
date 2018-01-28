@@ -37,8 +37,6 @@
 #import "input/Key.h"
 #import "input/ButtonTranslator.h"
 #import "input/InputManager.h"
-#import "input/touch/ITouchActionHandler.h"
-#import "input/touch/generic/GenericTouchActionHandler.h"
 #import "interfaces/AnnouncementManager.h"
 #import "network/NetworkServices.h"
 #import "messaging/ApplicationMessenger.h"
@@ -1649,7 +1647,7 @@ typedef enum
   SELECT_VIDEOPAUSED,
 } SELECT_STATE;
 SELECT_STATE selectState = SELECT_NAVIGATION;
-TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
+TOUCH_POSITION touchPositionAtStateBegan = TOUCH_CENTER;
 //--------------------------------------------------------------
 - (void)SiriLongSelectHoldHandler
 {
@@ -1658,7 +1656,7 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
   {
     if (self.m_selectHoldCounter == 1)
     {
-      switch(m_touchPositionAtStateBegan)
+      switch(touchPositionAtStateBegan)
       {
         case TOUCH_LEFT:
           // use 8X speed rewind.
@@ -1703,7 +1701,7 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
           if (g_application.m_pPlayer->IsPaused())
             selectState = SELECT_VIDEOPAUSED;
         }
-        m_touchPositionAtStateBegan = m_touchPosition;
+        touchPositionAtStateBegan = m_touchPosition;
         self.m_selectHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(SiriLongSelectHoldHandler) userInfo:nil repeats:YES];
       }
       break;
@@ -1737,20 +1735,26 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
             break;
           case SELECT_VIDEOPLAY:
             // fullscreen video was playing but not paused
-            switch(m_touchPositionAtStateBegan)
+            switch(touchPositionAtStateBegan)
             {
               case TOUCH_UP:
-                if (![self hasPlayerProgressScrubbing])
                 {
-                  // big/chapter seek or channel change for pvr
-                  [self sendButtonPressed:SiriRemote_UpTap];
+                  int champterCount = g_application.m_pPlayer->GetChapterCount();
+                  if (champterCount > 0 || ![self hasPlayerProgressScrubbing])
+                  {
+                    // chapter seek or channel change for pvr
+                    [self sendButtonPressed:SiriRemote_UpTap];
+                  }
                 }
                 break;
               case TOUCH_DOWN:
-                if (![self hasPlayerProgressScrubbing])
                 {
-                  // big/chapter seek or channel change for pvr
-                  [self sendButtonPressed:SiriRemote_DownTap];
+                  int champterCount = g_application.m_pPlayer->GetChapterCount();
+                  if (champterCount > 0 || ![self hasPlayerProgressScrubbing])
+                  {
+                    // chapter seek or channel change for pvr
+                    [self sendButtonPressed:SiriRemote_DownTap];
+                  }
                 }
                 break;
               case TOUCH_LEFT:
