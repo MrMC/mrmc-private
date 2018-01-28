@@ -23,6 +23,7 @@
  */
 
 #define dumpviewsonload 0
+#define logfocus 0
 
 #import "system.h"
 
@@ -1214,12 +1215,14 @@ MainController *g_xbmcController;
 // (ie directional taps on trackpad are similar to directional presses on ir remotes)
 // The tvOS focus engine will call shouldUpdateFocusInContext/didUpdateFocusInContext
 // but we need to know which focus action type so we can do the right thing.
+#if logfocus
 static const char* focusActionTypeNames[] = {
   "none",
   "tap",
   "pan",
   "swipe",
 };
+#endif
 typedef enum FocusActionTypes
 {
   FocusActionTap  = 1,
@@ -1460,15 +1463,19 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
           swipeCounter = 0;
           swipeOrPanNoMore = false;
           focusActionType = FocusActionSwipe;
+#if logfocus
           CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized:FocusActionSwipe");
+#endif
           swipeStartingParent = [self findParentView:_focusLayer.infocus.view];
           swipeStartingParentViewRect = swipeStartingParent.bounds;
           swipeStartingFocusedOrientation = [self getFocusedOrientation];
+#if logfocus
           CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized:ParentViewRect %f, %f, %f, %f",
             swipeStartingParentViewRect.origin.x,
             swipeStartingParentViewRect.origin.y,
             swipeStartingParentViewRect.origin.x + swipeStartingParentViewRect.size.width,
             swipeStartingParentViewRect.origin.y + swipeStartingParentViewRect.size.height);
+#endif
         }
         break;
       default:
@@ -1491,15 +1498,19 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
           swipeCounter = 0;
           swipeOrPanNoMore = false;
           focusActionType = FocusActionPan;
+#if logfocus
           CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan:FocusActionPan");
+#endif
           FocusLayerView *parentView = [self findParentView:_focusLayer.infocus.view];
           swipeStartingParentViewRect = parentView.bounds;
           swipeStartingParentViewRect = parentView.bounds;
+#if logfocus
           CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan: %f, %f, %f, %f",
             swipeStartingParentViewRect.origin.x,
             swipeStartingParentViewRect.origin.y,
             swipeStartingParentViewRect.origin.x + swipeStartingParentViewRect.size.width,
             swipeStartingParentViewRect.origin.y + swipeStartingParentViewRect.size.height);
+#endif
         }
         break;
       default:
@@ -1519,7 +1530,9 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
           CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
           if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO && !g_application.m_pPlayer->IsPaused())
           {
+#if logfocus
             CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
+#endif
             //show (2.5sec auto hide)/hide normal progress bar
             if (g_infoManager.GetDisplayAfterSeek())
               g_infoManager.SetDisplayAfterSeek(0);
@@ -1541,7 +1554,9 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
     switch (sender.state)
     {
       case UIGestureRecognizerStateEnded:
+#if logfocus
         CLog::Log(LOGDEBUG, "SiriDoubleTapHandler:StateEnded");
+#endif
         // placeholder to alter progress bar time display
         break;
      default:
@@ -1561,7 +1576,9 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
           CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
           if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO && !g_application.m_pPlayer->IsPaused())
           {
+#if logfocus
             CLog::Log(LOGDEBUG, "SiriTripleTapHandler:StateEnded");
+#endif
             KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(
               TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_SHOW_SUBTITLES)));
           }
@@ -1579,7 +1596,9 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
   {
     case UIGestureRecognizerStateEnded:
     {
+#if logfocus
       CLog::Log(LOGDEBUG, "SiriMenuHandler:StateEnded");
+#endif
       CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
       if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
       {
@@ -1613,7 +1632,9 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
   switch (sender.state)
   {
     case UIGestureRecognizerStateEnded:
+#if logfocus
       CLog::Log(LOGDEBUG, "SiriPlayPauseHandler:StateEnded");
+#endif
       [self sendButtonPressed:SiriRemote_PausePlayClick];
       break;
     default:
@@ -1669,7 +1690,9 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
   {
     case UIGestureRecognizerStateBegan:
       {
+#if logfocus
         CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateBegan");
+#endif
         self.m_selectHoldCounter = 0;
         // assume we are navigating
         selectState = SELECT_NAVIGATION;
@@ -1685,7 +1708,9 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
       }
       break;
     case UIGestureRecognizerStateChanged:
+#if logfocus
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateChanged");
+#endif
       if (selectState == SELECT_NAVIGATION)
       {
         if (self.m_selectHoldCounter > 1)
@@ -1696,7 +1721,9 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
       }
       break;
     case UIGestureRecognizerStateEnded:
+#if logfocus
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateEnded");
+#endif
       [self.m_selectHoldTimer invalidate];
       if (self.m_selectHoldCounter < 1)
       {
@@ -1800,7 +1827,9 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
       selectState = SELECT_NAVIGATION;
       break;
     case UIGestureRecognizerStateCancelled:
+#if logfocus
       CLog::Log(LOGDEBUG, "SiriLongSelectHandler:StateCancelled");
+#endif
       [self.m_selectHoldTimer invalidate];
       selectState = SELECT_NAVIGATION;
       break;
@@ -1833,13 +1862,17 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
       switch (sender.state)
       {
         case UIGestureRecognizerStateBegan:
+#if logfocus
           CLog::Log(LOGDEBUG, "IRRemoteLeftArrowPressed:StateBegan");
+#endif
           self.m_irArrowHoldCounter = 0;
           self.m_irArrowHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1
             target:self selector:@selector(IRLeftArrowArrowHoldHandler) userInfo:nil repeats:YES];
           break;
         case UIGestureRecognizerStateEnded:
+#if logfocus
           CLog::Log(LOGDEBUG, "IRRemoteLeftArrowPressed:StateEnded");
+#endif
           [self.m_irArrowHoldTimer invalidate];
           if (self.m_irArrowHoldCounter < 1)
           {
@@ -1881,13 +1914,17 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
       switch (sender.state)
       {
         case UIGestureRecognizerStateBegan:
+#if logfocus
           CLog::Log(LOGDEBUG, "IRRemoteRightArrowPressed:StateBegan");
+#endif
           self.m_irArrowHoldCounter = 0;
           self.m_irArrowHoldTimer = [NSTimer scheduledTimerWithTimeInterval:1
             target:self selector:@selector(IRRightArrowArrowHoldHandler) userInfo:nil repeats:YES];
           break;
         case UIGestureRecognizerStateEnded:
+#if logfocus
           CLog::Log(LOGDEBUG, "IRRemoteRightArrowPressed:StateEnded");
+#endif
           [self.m_irArrowHoldTimer invalidate];
           if (self.m_irArrowHoldCounter < 1)
           {
@@ -1971,7 +2008,9 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
       switch (sender.state)
       {
         case UIGestureRecognizerStateBegan:
+#if logfocus
           CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteUpArrowPressed");
+#endif
           if (g_application.m_pPlayer->IsPaused())
             [self startKeyPressTimer:SiriRemote_UpTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
           else
@@ -1998,7 +2037,9 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
       switch (sender.state)
       {
         case UIGestureRecognizerStateBegan:
+#if logfocus
           CLog::Log(LOGDEBUG, "PlayerProgress::IRRemoteDownArrowPressed");
+#endif
           if (g_application.m_pPlayer->IsPaused())
             [self startKeyPressTimer:SiriRemote_DownTap doBeforeDelay:true withDelay:REPEATED_KEYPRESS_DELAY_S];
           else
@@ -2020,7 +2061,9 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
 //--------------------------------------------------------------
 - (void)remoteControlReceivedWithEvent:(UIEvent*)receivedEvent
 {
+#if logfocus
   CLog::Log(LOGDEBUG, "remoteControlReceivedWithEvent");
+#endif
   if (receivedEvent.type == UIEventTypeRemoteControl)
   {
     switch (receivedEvent.subtype)
@@ -2198,6 +2241,7 @@ CGRect debugView2;
   }
   else if (_focusLayer.infocus.view)
   {
+#if logfocus
     CGRect focusLayerViewRect = _focusLayer.infocus.view.bounds;
     if (!CGRectEqualToRect(debugView2, focusLayerViewRect))
     {
@@ -2207,6 +2251,7 @@ CGRect debugView2;
         focusLayerViewRect.origin.x + focusLayerViewRect.size.width,
         focusLayerViewRect.origin.y + focusLayerViewRect.size.height);
     }
+#endif
     // need a focusable view or risk bouncing out on menu presses
     CGUIWindow *focusWindow = CFocusEngineHandler::GetInstance().GetFocusWindow();
     if (focusWindow && focusWindow->GetID() == WINDOW_FULLSCREEN_VIDEO)
@@ -2218,7 +2263,9 @@ CGRect debugView2;
   }
   else
   {
+#if logfocus
     CLog::Log(LOGDEBUG, "preferredFocusEnvironments");
+#endif
     // need a focusable view or risk bouncing out on menu presses
     if ( [self.focusView canBecomeFocused] == NO )
       [self.focusView setFocusable:true];
@@ -2240,7 +2287,9 @@ CGRect debugView2;
         [self sendButtonPressed:SiriRemote_UpTap];
       if (context.nextFocusedItem == self.focusViewTop)
         [self setNeedsFocusUpdate];
+#if logfocus
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingUp");
+#endif
       break;
     case UIFocusHeadingDown:
       if (focusActionType == FocusActionSwipe)
@@ -2249,7 +2298,9 @@ CGRect debugView2;
         [self sendButtonPressed:SiriRemote_DownTap];
       if (context.nextFocusedItem == self.focusViewBottom)
         [self setNeedsFocusUpdate];
+#if logfocus
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingDown");
+#endif
       break;
     case UIFocusHeadingLeft:
       if (focusActionType == FocusActionSwipe)
@@ -2258,7 +2309,9 @@ CGRect debugView2;
         [self sendButtonPressed:SiriRemote_LeftTap];
       if (context.nextFocusedItem == self.focusViewLeft)
         [self setNeedsFocusUpdate];
+#if logfocus
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingLeft");
+#endif
       break;
     case UIFocusHeadingRight:
       if (focusActionType == FocusActionSwipe)
@@ -2267,7 +2320,9 @@ CGRect debugView2;
         [self sendButtonPressed:SiriRemote_RightTap];
       if (context.nextFocusedItem == self.focusViewRight)
         [self setNeedsFocusUpdate];
+#if logfocus
       CLog::Log(LOGDEBUG, "didUpdateFocusInContext:UIFocusHeadingRight");
+#endif
       break;
     case UIFocusHeadingNone:
     case UIFocusHeadingNext:
@@ -2292,6 +2347,7 @@ CGRect debugView2;
   // We can use this to handle slide out panels that are represented by hidden views
   // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
   // So detect the focus request, post direction message to core and cancel tvOS focus update.
+#if logfocus
   std::string focusedOrientation = "UNDEFINED";
   switch([self getFocusedOrientation])
   {
@@ -2307,15 +2363,17 @@ CGRect debugView2;
 
   CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: count(%d), %s, type %s",
     swipeCounter, focusedOrientation.c_str(), focusActionTypeNames[focusActionType]);
+#endif
   // do not allow focus changes when playing video
   // we handle those directly. Otherwise taps/swipes will cause wild seeks.
   if ([self hasPlayerProgressScrubbing])
     return NO;
 
   // previouslyFocusedItem may be nil if no item was focused.
+#if logfocus
   CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: previous %p, next %p",
     context.previouslyFocusedItem, context.nextFocusedItem);
-
+#endif
   if (focusActionType == FocusActionPan || focusActionType == FocusActionSwipe)
   {
     swipeCounter++;
@@ -2334,17 +2392,19 @@ CGRect debugView2;
     if (swipeStartingFocusedOrientation != [self getFocusedOrientation])
       swipeOrPanNoMore = true;
 
+    CGRect nextFocusedItemRect = ((FocusLayerView*)context.nextFocusedItem).bounds;
+#if logfocus
     CGRect previousItemRect = ((FocusLayerView*)context.previouslyFocusedItem).bounds;
     CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: previousItemRect %f, %f, %f, %f",
       previousItemRect.origin.x, previousItemRect.origin.y,
       previousItemRect.origin.x + previousItemRect.size.width,
       previousItemRect.origin.y + previousItemRect.size.height);
 
-    CGRect nextFocusedItemRect = ((FocusLayerView*)context.nextFocusedItem).bounds;
     CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: nextFocusedItemRect %f, %f, %f, %f",
       nextFocusedItemRect.origin.x, nextFocusedItemRect.origin.y,
       nextFocusedItemRect.origin.x + nextFocusedItemRect.size.width,
       nextFocusedItemRect.origin.y + nextFocusedItemRect.size.height);
+#endif
 
     if (!CGRectContainsRect(swipeStartingParentViewRect, nextFocusedItemRect))
     {
@@ -2353,12 +2413,16 @@ CGRect debugView2;
           context.nextFocusedItem == self.focusViewRight ||
           context.nextFocusedItem == self.focusViewBottom )
       {
+#if logfocus
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Hit in borderView");
+#endif
       }
       else
       {
         swipeOrPanNoMore = true;
+#if logfocus
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Not in same parent view");
+#endif
       }
       [self setNeedsFocusUpdate];
     }
@@ -2369,6 +2433,9 @@ CGRect debugView2;
 //--------------------------------------------------------------
 - (FocusLayerView*)findParentView:(FocusLayerView *)thisView
 {
+  if (!thisView)
+    return nullptr;
+
   FocusLayerView *parentView = nullptr;
   for (auto viewIt = _focusLayer.views.begin(); viewIt != _focusLayer.views.end(); ++viewIt)
   {
