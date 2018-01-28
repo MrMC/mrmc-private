@@ -1230,12 +1230,11 @@ typedef enum FocusActionTypes
 // set the correct type before shouldUpdateFocusInContext is hit
 int focusActionType = FocusActionTap;
 
-bool tapNoMore = false;
-bool panNoMore = false;
-bool swipeNoMore = false;
 int swipeCounter = 0;
+bool swipeOrPanNoMore = false;
 CGRect swipeStartingParentViewRect;
 FocusLayerView *swipeStartingParent;
+ORIENTATION swipeStartingFocusedOrientation;
 //--------------------------------------------------------------
 // called before touchesBegan:withEvent: is called on the gesture recognizer
 // for a new touch. return NO to prevent the gesture recognizer from seeing this touch
@@ -1458,13 +1457,14 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
     {
       case UIGestureRecognizerStateRecognized:
         {
-          swipeNoMore = false;
           swipeCounter = 0;
+          swipeOrPanNoMore = false;
           focusActionType = FocusActionSwipe;
           CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized:FocusActionSwipe");
           swipeStartingParent = [self findParentView:_focusLayer.infocus.view];
           swipeStartingParentViewRect = swipeStartingParent.bounds;
-          CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized: %f, %f, %f, %f",
+          swipeStartingFocusedOrientation = [self getFocusedOrientation];
+          CLog::Log(LOGDEBUG, "SiriSwipeHandler:StateRecognized:ParentViewRect %f, %f, %f, %f",
             swipeStartingParentViewRect.origin.x,
             swipeStartingParentViewRect.origin.y,
             swipeStartingParentViewRect.origin.x + swipeStartingParentViewRect.size.width,
@@ -1488,7 +1488,8 @@ CGRect selectRightBounds = { 1.6f,  0.0f, 0.4f, 2.0f};
     {
       case UIGestureRecognizerStateBegan:
         {
-          panNoMore = false;
+          swipeCounter = 0;
+          swipeOrPanNoMore = false;
           focusActionType = FocusActionPan;
           CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan:FocusActionPan");
           FocusLayerView *parentView = [self findParentView:_focusLayer.infocus.view];
@@ -1712,12 +1713,18 @@ TOUCH_POSITION m_touchPositionAtStateBegan = TOUCH_CENTER;
             switch(m_touchPositionAtStateBegan)
             {
               case TOUCH_UP:
-                // big/chapter seek or channel change for pvr
-                [self sendButtonPressed:SiriRemote_UpTap];
+                if (![self hasPlayerProgressScrubbing])
+                {
+                  // big/chapter seek or channel change for pvr
+                  [self sendButtonPressed:SiriRemote_UpTap];
+                }
                 break;
               case TOUCH_DOWN:
-                // big/chapter seek or channel change for pvr
-                [self sendButtonPressed:SiriRemote_DownTap];
+                if (![self hasPlayerProgressScrubbing])
+                {
+                  // big/chapter seek or channel change for pvr
+                  [self sendButtonPressed:SiriRemote_DownTap];
+                }
                 break;
               case TOUCH_LEFT:
                 // seek backward
@@ -2130,9 +2137,15 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
     return nil;
 }
 
+//--------------------------------------------------------------
+-(ORIENTATION)getFocusedOrientation
+{
+  return CFocusEngineHandler::GetInstance().GetFocusOrientation();
+}
+
+//--------------------------------------------------------------
 CGRect debugView1;
 CGRect debugView2;
-//--------------------------------------------------------------
 - (NSArray<id<UIFocusEnvironment>> *)preferredFocusEnvironments
 {
   // The order of the items in the preferredFocusEnvironments array is the
@@ -2217,18 +2230,6 @@ CGRect debugView2;
 - (void)didUpdateFocusInContext:(UIFocusUpdateContext *)context
   withAnimationCoordinator:(UIFocusAnimationCoordinator *)coordinator
 {
-  if (context.focusHeading != UIFocusHeadingNone)
-  {
-    // this only matter during swipes
-    if (focusActionType == FocusActionSwipe)
-    {
-      // track focus idle time, if focus was idled,
-      // allow wrapping in lists, else no wrapping in lists
-      g_windowManager.SetWrapOverride(!m_focusIdleState);
-      [self startFocusTimer];
-    }
-  }
-
   // if we had a focus change, send the heading down to core
   switch (context.focusHeading)
   {
@@ -2291,9 +2292,21 @@ CGRect debugView2;
   // We can use this to handle slide out panels that are represented by hidden views
   // Above/Below/Right/Left (self.focusViewTop and friends) which are subviews the main focus View.
   // So detect the focus request, post direction message to core and cancel tvOS focus update.
+  std::string focusedOrientation = "UNDEFINED";
+  switch([self getFocusedOrientation])
+  {
+    case VERTICAL:
+      focusedOrientation = "VERTICAL";
+      break;
+    case HORIZONTAL:
+      focusedOrientation = "HORIZONTAL";
+      break;
+    default:
+      break;
+  }
 
-  CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: swipeCounter(%d), focusActionType %s",
-    swipeCounter, focusActionTypeNames[focusActionType]);
+  CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: count(%d), %s, type %s",
+    swipeCounter, focusedOrientation.c_str(), focusActionTypeNames[focusActionType]);
   // do not allow focus changes when playing video
   // we handle those directly. Otherwise taps/swipes will cause wild seeks.
   if ([self hasPlayerProgressScrubbing])
@@ -2303,12 +2316,23 @@ CGRect debugView2;
   CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: previous %p, next %p",
     context.previouslyFocusedItem, context.nextFocusedItem);
 
-  if (focusActionType == FocusActionSwipe)
+  if (focusActionType == FocusActionPan || focusActionType == FocusActionSwipe)
   {
     swipeCounter++;
+    if (context.focusHeading != UIFocusHeadingNone)
+    {
+      // track focus idle time, if focus was idled,
+      // allow wrapping in lists, else no wrapping in lists
+      g_windowManager.SetWrapOverride(!m_focusIdleState);
+      [self startFocusTimer];
+    }
+
     // swipes are the problem child :)
-    if (swipeNoMore)
+    if (swipeOrPanNoMore)
       return NO;
+
+    if (swipeStartingFocusedOrientation != [self getFocusedOrientation])
+      swipeOrPanNoMore = true;
 
     CGRect previousItemRect = ((FocusLayerView*)context.previouslyFocusedItem).bounds;
     CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: previousItemRect %f, %f, %f, %f",
@@ -2321,18 +2345,8 @@ CGRect debugView2;
       nextFocusedItemRect.origin.x, nextFocusedItemRect.origin.y,
       nextFocusedItemRect.origin.x + nextFocusedItemRect.size.width,
       nextFocusedItemRect.origin.y + nextFocusedItemRect.size.height);
-/*
-    if (CGRectEqualToRect(nextFocusedItemRect, self.focusView.frame))
-    {
-      if (swipeCounter > 1)
-      {
-        swipeNoMore = true;
-        //[self setNeedsFocusUpdate];
-        return NO;
-      }
-    }
-*/
-    if (!CGRectIntersectsRect(swipeStartingParentViewRect, nextFocusedItemRect))
+
+    if (!CGRectContainsRect(swipeStartingParentViewRect, nextFocusedItemRect))
     {
       if (context.nextFocusedItem == self.focusViewTop ||
           context.nextFocusedItem == self.focusViewLeft ||
@@ -2340,30 +2354,13 @@ CGRect debugView2;
           context.nextFocusedItem == self.focusViewBottom )
       {
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Hit in borderView");
-        [self setNeedsFocusUpdate];
       }
       else
       {
-        swipeNoMore = true;
+        swipeOrPanNoMore = true;
         CLog::Log(LOGDEBUG, "shouldUpdateFocusInContext: Not in same parent view");
-        switch (context.focusHeading)
-        {
-          case UIFocusHeadingUp:
-            [self sendButtonPressed:SiriRemote_UpTap];
-            break;
-          case UIFocusHeadingDown:
-            [self sendButtonPressed:SiriRemote_DownTap];
-            break;
-          case UIFocusHeadingLeft:
-            [self sendButtonPressed:SiriRemote_LeftTap];
-            break;
-          case UIFocusHeadingRight:
-            [self sendButtonPressed:SiriRemote_RightTap];
-            break;
-        }
-        [self setNeedsFocusUpdate];
-        return NO;
       }
+      [self setNeedsFocusUpdate];
     }
   }
 
