@@ -153,7 +153,6 @@ MainController *g_xbmcController;
 @synthesize m_screenIdx;
 @synthesize m_screensize;
 @synthesize m_nowPlayingInfo;
-@synthesize m_enableRemoteIdle;
 @synthesize m_focusIdleState;
 @synthesize m_enableRemoteExpertMode;
 @synthesize m_stopPlaybackOnMenu;
@@ -653,15 +652,6 @@ MainController *g_xbmcController;
 }
 
 //--------------------------------------------------------------
-- (void)setRemoteIdleTimeout:(int)timeout
-{
-}
-
-- (void)enableRemoteIdle:(BOOL)enable
-{
-  m_enableRemoteIdle = enable;
-}
-
 - (void)enableRemoteExpertMode:(BOOL)enable
 {
   m_enableRemoteExpertMode = enable;

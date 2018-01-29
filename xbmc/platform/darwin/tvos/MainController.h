@@ -80,7 +80,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   BOOL                        m_disableIdleTimer;
   NSConditionLock            *m_animationThreadLock;
   NSThread                   *m_animationThread;
-  BOOL                        m_enableRemoteIdle;
   BOOL                        m_enableRemoteExpertMode;
   BOOL                        m_stopPlaybackOnMenu;
   BOOL                        m_nativeKeyboardActive;
@@ -97,9 +96,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 @property CGFloat             m_screenScale;
 @property int                 m_screenIdx;
 @property CGSize              m_screensize;
-@property BOOL                m_remoteIdleState;
-@property CGFloat             m_remoteIdleTimeout;
-@property BOOL                m_enableRemoteIdle;
 @property BOOL                m_focusIdleState;
 @property CGFloat             m_focusIdleTimeout;
 @property BOOL                m_enableRemoteExpertMode;
@@ -142,8 +138,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void) disableScreenSaver;
 - (void) enableScreenSaver;
 - (bool) resetSystemIdleTimer;
-- (void) setRemoteIdleTimeout:(int)timeout;
-- (void) enableRemoteIdle:(BOOL)enable;
 - (void) enableRemoteExpertMode:(BOOL)enable;
 - (void) stopPlaybackOnMenu:(BOOL)enable;
 
