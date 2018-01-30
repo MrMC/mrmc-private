@@ -38,8 +38,28 @@ CTVOSDirectory::~CTVOSDirectory()
 {
 }
 
+bool CTVOSDirectory::WantsDirectory(const CURL& url)
+{
+  std::string rootpath = CSpecialProtocol::TranslatePath(url);
+  size_t found = rootpath.find("Caches/home/userdata");
+  if (found == std::string::npos)
+    return false;
+
+  return true;
+}
+
 bool CTVOSDirectory::GetDirectory(const CURL& url, CFileItemList &items)
 {
+  // tvos keeps dirs and non-xml files in non-persistent Caches directory
+  // xml files are vectored into NSUserDefaults which is persistent, so
+  // we fetch dirs and non-xml files using CPosixDirectory, then fill
+  // in any missing xml files from NSUserDefaults. The incoming url
+  // will be a path, ending at some dir, so we only need to fetch any
+  // xml files that might be at that dir level.
+  bool rtn = CPosixDirectory::GetDirectory(url, items);
+  if (!rtn)
+    return false;
+
   // To see user home xml files in the file manager,
   // we have to populate a list on a directory request.
   std::string rootpath = CSpecialProtocol::TranslatePath(url);
@@ -47,7 +67,7 @@ bool CTVOSDirectory::GetDirectory(const CURL& url, CFileItemList &items)
   // not going to user home.
   size_t found = rootpath.find("Caches/home/userdata");
   if (found == std::string::npos)
-    return false;
+    return rtn;
 
   // The directory request will point to the right path '.../home/userdata/..'
   // so we ask for files in ending directory, if we get xml file paths back
@@ -86,16 +106,20 @@ bool CTVOSDirectory::GetDirectory(const CURL& url, CFileItemList &items)
     items.Add(pItem);
   }
 
-  return !contents.empty();
+  return rtn || !contents.empty();
+}
+
+bool CTVOSDirectory::Create(const CURL& url)
+{
+  return CPosixDirectory::Create(url);
 }
 
 bool CTVOSDirectory::Exists(const CURL& url)
 {
-  return true;
+  return CPosixDirectory::Exists(url);
 }
 
-DIR_CACHE_TYPE CTVOSDirectory::GetCacheType(const CURL& url) const
+bool CTVOSDirectory::Remove(const CURL& url)
 {
-  return DIR_CACHE_NEVER;
+  return CPosixDirectory::Remove(url);
 }
-

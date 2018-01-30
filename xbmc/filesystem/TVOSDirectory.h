@@ -20,17 +20,21 @@
  */
 
 #include "filesystem/IDirectory.h"
+#include "filesystem/posix/PosixDirectory.h"
 
 namespace XFILE
 {
-  class CTVOSDirectory : public IDirectory
+  class CTVOSDirectory : public CPosixDirectory
   {
   public:
     CTVOSDirectory();
     virtual ~CTVOSDirectory();
 
+    bool static WantsDirectory(const CURL& url);
+
     virtual bool GetDirectory(const CURL& url, CFileItemList &items);
+    virtual bool Create(const CURL& url);
     virtual bool Exists(const CURL& url);
-    virtual DIR_CACHE_TYPE GetCacheType(const CURL& url) const;
+    virtual bool Remove(const CURL& url);
   };
 }

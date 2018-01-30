@@ -26,10 +26,6 @@
 #include "FileItem.h"
 #include "URL.h"
 
-#if defined(TARGET_DARWIN_TVOS)
-#include "TVOSDirectory.h"
-#endif
-
 using namespace XFILE;
 
 CSpecialProtocolDirectory::CSpecialProtocolDirectory(void)
@@ -54,12 +50,6 @@ bool CSpecialProtocolDirectory::GetDirectory(const CURL& url, CFileItemList &ite
       if (StringUtils::StartsWith(item->GetPath(), translatedPath))
         item->SetPath(URIUtils::AddFileToFolder(pathToUrl, item->GetPath().substr(translatedPath.size())));
     }
-#if defined(TARGET_DARWIN_TVOS)
-    // do not alter the path of items
-    // or CTVOSFile will break.
-    CTVOSDirectory tvOSDirectory;
-    tvOSDirectory.GetDirectory(url, items);
-#endif
     return true;
   }
   return false;
