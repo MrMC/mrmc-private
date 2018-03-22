@@ -716,6 +716,7 @@ AC_SUBST([ARCH])
 if test "$target_platform" = "target_android" ; then
   USE_ANDROID=1
   webserver_checkdepends=yes
+  LIBS="$LIBS -landroidjni"
   AC_DEFINE(HAS_EGLGLES, [1], [Define if supporting EGL based GLES Framebuffer])
 fi
 
@@ -2285,7 +2286,6 @@ OUTPUT_FILES="$OUTPUT_FILES tools/android/packaging/xbmc/strings.xml"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/DllPaths_generated_android.h"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/android/activity/Makefile"
 OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/android/loader/Makefile"
-OUTPUT_FILES="$OUTPUT_FILES xbmc/platform/android/jni/Makefile"
 fi
 
 if test "$use_webserver" = "yes"; then
