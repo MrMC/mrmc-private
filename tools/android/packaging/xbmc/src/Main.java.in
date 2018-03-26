@@ -228,7 +228,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   public void openGooglePlayStore()
   {
     // string below is linking to our full app on Google Play store
-    final String appPackageName = "@APP_PACKAGE@";
+    final String appPackageName = "tv.mrmc.mrmc";
     try {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
     } catch (android.content.ActivityNotFoundException anfe) {
