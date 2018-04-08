@@ -20,9 +20,6 @@ $(TARBALLS_LOCATION)/$(ARCHIVE):
 $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM); mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
-	cd $(PLATFORM); autoreconf -vif
-	cd media;
-	cd $(PLATFORM); $(CONFIGURE)
 
 .installed-$(PLATFORM): $(PLATFORM)
 	rm -rf $(PREFIX)/mrmc/addons/$(LIBNAME)
