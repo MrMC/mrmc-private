@@ -14,6 +14,11 @@ RSYNC_SKIN +=--exclude .DS_Store* --exclude LICENSE.txt --exclude README.md --ex
 RSYNC_SKIN +=--include /media/Textures.xbt
 RSYNC_SKIN +=--exclude /media/*
 
+SKIN_FILES = $(shell find $(PLATFORM) -type f -name "*" | sed 's/ /\\ /g')
+SKIN_MEDIA  = $(shell find $(PLATFORM)/media -type f -name "*jpg" | sed 's/ /\\ /g')
+SKIN_MEDIA += $(shell find $(PLATFORM)/media -type f -name "*png | sed 's/ /\\ /g'")
+SKIN_MEDIA += $(shell find $(PLATFORM)/media -type f -name "*gif | sed 's/ /\\ /g'")
+
 TARGET = $(PLATFORM)/media/Textures.xbt
 
 CLEAN_FILES=$(ARCHIVE) $(PLATFORM)
@@ -28,15 +33,14 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM); mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 
-$(TARGET): $(PLATFORM) 
+$(TARGET): $(PLATFORM) $(SKIN_MEDIA)
 ifeq ($(findstring arm, $(CPU)), arm)
 	$(NATIVEPREFIX)/bin/TexturePacker -dupecheck -use_none -input $(PLATFORM)/media -output $(TARGET)
 else
 	$(NATIVEPREFIX)/bin/TexturePacker -dupecheck -input $(PLATFORM)/media -output $(TARGET)
 endif
 
-
-.installed-$(PLATFORM): $(TARGET)
+.installed-$(PLATFORM): $(TARGET) $(SKIN_FILES)
 	rm -rf $(PREFIX)/mrmc/addons/$(SKINNAME)
 	mkdir -p $(PREFIX)/mrmc/addons/$(SKINNAME)
 	$(RSYNC_SKIN) $(PLATFORM)/* $(PREFIX)/mrmc/addons/$(SKINNAME)
@@ -48,8 +52,6 @@ clean:
 
 distclean::
 	rm -rf $(PLATFORM) .installed-$(PLATFORM) $(PREFIX)/mrmc/addons/$(SKINNAME)
-	rm -f $(TARGET)
 
 distcleanfiles::
 	rm -rf $(PLATFORM) .installed-$(PLATFORM) $(PREFIX)/mrmc/addons/$(SKINNAME) $(TARBALLS_LOCATION)/$(ARCHIVE)
-	rm -f $(TARGET)
