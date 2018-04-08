@@ -2,12 +2,19 @@
 DEPS= ../../../Makefile.include Makefile
 
 # lib name
-LIBNAME=skin.sio2
+SKINNAME=skin.sio2
 VERSION=1.0.0
-SOURCE=$(LIBNAME)-$(VERSION)
+SOURCE=$(SKINNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
 REALARCHIVE=mrmc.tar.gz
 BASE_URL=https://github.com/MrMC/skin.sio2/archive
+
+RSYNC_SKIN =rsync -av
+RSYNC_SKIN +=--exclude .DS_Store* --exclude LICENSE.txt --exclude README.md --exclude changelog.txt
+RSYNC_SKIN +=--include /media/Textures.xbt
+RSYNC_SKIN +=--exclude /media/*
+
+TARGET = $(PLATFORM)/media/Textures.xbt
 
 CLEAN_FILES=$(ARCHIVE) $(PLATFORM)
 
@@ -21,18 +28,28 @@ $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM); mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
 
-.installed-$(PLATFORM): $(PLATFORM)
-	rm -rf $(PREFIX)/mrmc/addons/$(LIBNAME)
-	mkdir -p $(PREFIX)/mrmc/addons/$(LIBNAME)
-	cp -rf $(PLATFORM)/* $(PREFIX)/mrmc/addons/$(LIBNAME)
-	rm -f $(PREFIX)/mrmc/addons/$(LIBNAME)/README.md
+$(TARGET): $(PLATFORM) 
+ifeq ($(findstring arm, $(CPU)), arm)
+	$(NATIVEPREFIX)/bin/TexturePacker -dupecheck -use_none -input $(PLATFORM)/media -output $(TARGET)
+else
+	$(NATIVEPREFIX)/bin/TexturePacker -dupecheck -input $(PLATFORM)/media -output $(TARGET)
+endif
+
+
+.installed-$(PLATFORM): $(TARGET)
+	rm -rf $(PREFIX)/mrmc/addons/$(SKINNAME)
+	mkdir -p $(PREFIX)/mrmc/addons/$(SKINNAME)
+	$(RSYNC_SKIN) $(PLATFORM)/* $(PREFIX)/mrmc/addons/$(SKINNAME)
 	touch $@
 
 clean:
-	rm -rf .installed-$(PLATFORM) $(PREFIX)/mrmc/addons/$(LIBNAME)
+	rm -rf .installed-$(PLATFORM) $(PREFIX)/mrmc/addons/$(SKINNAME)
+	rm -f $(TARGET)
 
 distclean::
-	rm -rf $(PLATFORM) .installed-$(PLATFORM) $(PREFIX)/mrmc/addons/$(LIBNAME)
+	rm -rf $(PLATFORM) .installed-$(PLATFORM) $(PREFIX)/mrmc/addons/$(SKINNAME)
+	rm -f $(TARGET)
 
 distcleanfiles::
-	rm -rf $(PLATFORM) .installed-$(PLATFORM) $(PREFIX)/mrmc/addons/$(LIBNAME) $(TARBALLS_LOCATION)/$(ARCHIVE)
+	rm -rf $(PLATFORM) .installed-$(PLATFORM) $(PREFIX)/mrmc/addons/$(SKINNAME) $(TARBALLS_LOCATION)/$(ARCHIVE)
+	rm -f $(TARGET)
