@@ -96,26 +96,21 @@ bool CEmbyUtils::HasLibrary(std::string strLibrary)
 
 void CEmbyUtils::SetHasLibrary()
 {
-  int music = 0;
-  int movie = 0;
-  int tvshow = 0;
-  int picture = 0;
+  b_MusicLibrary = false;
+  b_MovieLibrary = false;
+  b_TvShowLibrary = false;
+  b_PictureLibrary = false;
   std::vector<CEmbyClientPtr> clients;
   CEmbyServices::GetInstance().GetClients(clients);
   for (const auto &client : clients)
   {
     if (client->GetViewInfoForMusicContent().size() > 0)
-      music += 1;
+      b_MusicLibrary = true;
     if (client->GetViewInfoForTVShowContent().size() > 0)
-      tvshow += 1;
+      b_TvShowLibrary = true;
     if (client->GetViewInfoForMovieContent().size() > 0)
-      movie += 1;
+      b_MovieLibrary = true;
   }
-  
-  b_MusicLibrary = picture > 0;
-  b_MovieLibrary = movie > 0;
-  b_TvShowLibrary = tvshow > 0;
-  b_PictureLibrary = picture > 0;
 }
 
 void CEmbyUtils::GetClientHosts(std::vector<std::string>& hosts)
