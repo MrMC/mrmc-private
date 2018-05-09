@@ -168,6 +168,14 @@ bool CServicesManager::HasServices()
   return rtn;
 }
 
+bool CServicesManager::HasLibrary(std::string strLibrary)
+{
+  
+  bool rtn = CPlexUtils::HasLibrary(strLibrary) ||
+             CEmbyUtils::HasLibrary(strLibrary);
+  return rtn;
+}
+
 bool CServicesManager::HasPlexServices()
 {
   return CPlexUtils::HasClients();

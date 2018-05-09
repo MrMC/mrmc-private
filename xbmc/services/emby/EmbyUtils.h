@@ -53,6 +53,7 @@ class CEmbyUtils
 {
 public:
   static bool HasClients();
+  static bool HasLibrary(std::string strLibrary);
   static void GetClientHosts(std::vector<std::string>& hosts);
   static bool GetIdentity(CURL url, int timeout);
   static void PrepareApiCall(const std::string& userId, const std::string& accessToken, XFILE::CCurlFile &curl);

@@ -40,6 +40,7 @@ class CPlexUtils
 {
 public:
   static bool HasClients();
+  static bool HasLibrary(std::string strLibrary);
   static void GetClientHosts(std::vector<std::string>& hosts);
   static bool GetIdentity(CURL url, int timeout);
   static void GetDefaultHeaders(XFILE::CCurlFile *curl);
@@ -106,4 +107,7 @@ private:
   static int ParsePlexCVariant(const CVariant &item);
   static int ParsePlexMediaXML(TiXmlDocument xml);
   static void RemoveSubtitleProperties(CFileItem &item);
+  static bool b_MusicLibrary;
+  static bool b_MovieLibrary;
+  static bool b_TvShowLibrary;
 };

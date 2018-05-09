@@ -96,6 +96,22 @@ bool CPlexUtils::HasClients()
   return CPlexServices::GetInstance().HasClients();
 }
 
+bool CPlexUtils::HasLibrary(std::string strLibrary)
+{
+  std::vector<CPlexClientPtr> clients;
+  CPlexServices::GetInstance().GetClients(clients);
+  for (const auto &client : clients)
+  {
+    if (strLibrary == "music")
+      return client->GetArtistContent().size() > 0;
+    else if (strLibrary == "tvshows")
+      return client->GetTvContent().size() > 0;
+    else if (strLibrary == "movies")
+      return client->GetMovieContent().size() > 0;
+  }
+  return false;
+}
+
 void CPlexUtils::GetClientHosts(std::vector<std::string>& hosts)
 {
   std::vector<CPlexClientPtr> clients;

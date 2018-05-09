@@ -78,6 +78,22 @@ bool CEmbyUtils::HasClients()
   return CEmbyServices::GetInstance().HasClients();
 }
 
+bool CEmbyUtils::HasLibrary(std::string strLibrary)
+{
+  std::vector<CEmbyClientPtr> clients;
+  CEmbyServices::GetInstance().GetClients(clients);
+  for (const auto &client : clients)
+  {
+    if (strLibrary == "music")
+      return client->GetViewInfoForMusicContent().size() > 0;
+    else if (strLibrary == "tvshows")
+      return client->GetViewInfoForTVShowContent().size() > 0;
+    else if (strLibrary == "movies")
+      return client->GetViewInfoForMovieContent().size() > 0;
+  }
+  return false;
+}
+
 void CEmbyUtils::GetClientHosts(std::vector<std::string>& hosts)
 {
   std::vector<CEmbyClientPtr> clients;
