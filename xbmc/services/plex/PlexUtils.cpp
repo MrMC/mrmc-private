@@ -55,6 +55,10 @@ static int  g_pingSec = 0;
 static CFileItem m_curItem;
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
+bool CPlexUtils::b_MusicLibrary = false;
+bool CPlexUtils::b_MovieLibrary = false;
+bool CPlexUtils::b_TvShowLibrary = false;
+bool CPlexUtils::b_PictureLibrary = false;
 
 static void removeLeadingSlash(std::string &path)
 {
@@ -98,18 +102,39 @@ bool CPlexUtils::HasClients()
 
 bool CPlexUtils::HasLibrary(std::string strLibrary)
 {
+  if (strLibrary == "music")
+    return HasMusicLibrary();
+  else if (strLibrary == "tvshows")
+    return HasTvShowLibrary();
+  else if (strLibrary == "movies")
+    return HasMovieLibrary();
+  return false;
+}
+
+void CPlexUtils::SetHasLibrary()
+{
+  int music = 0;
+  int movie = 0;
+  int tvshow = 0;
+  int picture = 0;
   std::vector<CPlexClientPtr> clients;
   CPlexServices::GetInstance().GetClients(clients);
   for (const auto &client : clients)
   {
-    if (strLibrary == "music")
-      return client->GetArtistContent().size() > 0;
-    else if (strLibrary == "tvshows")
-      return client->GetTvContent().size() > 0;
-    else if (strLibrary == "movies")
-      return client->GetMovieContent().size() > 0;
+    if (client->GetArtistContent().size() > 0)
+      music += 1;
+    if (client->GetTvContent().size() > 0)
+      tvshow += 1;
+    if (client->GetMovieContent().size() > 0)
+      movie += 1;
+    if (client->GetPhotoContent().size() > 0)
+      picture += 1;
   }
-  return false;
+  
+  b_MusicLibrary = picture > 0;
+  b_MovieLibrary = movie > 0;
+  b_TvShowLibrary = tvshow > 0;
+  b_PictureLibrary = picture > 0;
 }
 
 void CPlexUtils::GetClientHosts(std::vector<std::string>& hosts)

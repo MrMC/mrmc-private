@@ -73,6 +73,11 @@ static const uint64_t TicksToSecondsFactor = 10000000;
 
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
+bool CEmbyUtils::b_MusicLibrary = false;
+bool CEmbyUtils::b_MovieLibrary = false;
+bool CEmbyUtils::b_TvShowLibrary = false;
+bool CEmbyUtils::b_PictureLibrary = false;
+
 bool CEmbyUtils::HasClients()
 {
   return CEmbyServices::GetInstance().HasClients();
@@ -80,18 +85,37 @@ bool CEmbyUtils::HasClients()
 
 bool CEmbyUtils::HasLibrary(std::string strLibrary)
 {
+  if (strLibrary == "music")
+    return HasMusicLibrary();
+  else if (strLibrary == "tvshows")
+    return HasTvShowLibrary();
+  else if (strLibrary == "movies")
+    return HasMovieLibrary();
+  return false;
+}
+
+void CEmbyUtils::SetHasLibrary()
+{
+  int music = 0;
+  int movie = 0;
+  int tvshow = 0;
+  int picture = 0;
   std::vector<CEmbyClientPtr> clients;
   CEmbyServices::GetInstance().GetClients(clients);
   for (const auto &client : clients)
   {
-    if (strLibrary == "music")
-      return client->GetViewInfoForMusicContent().size() > 0;
-    else if (strLibrary == "tvshows")
-      return client->GetViewInfoForTVShowContent().size() > 0;
-    else if (strLibrary == "movies")
-      return client->GetViewInfoForMovieContent().size() > 0;
+    if (client->GetViewInfoForMusicContent().size() > 0)
+      music += 1;
+    if (client->GetViewInfoForTVShowContent().size() > 0)
+      tvshow += 1;
+    if (client->GetViewInfoForMovieContent().size() > 0)
+      movie += 1;
   }
-  return false;
+  
+  b_MusicLibrary = picture > 0;
+  b_MovieLibrary = movie > 0;
+  b_TvShowLibrary = tvshow > 0;
+  b_PictureLibrary = picture > 0;
 }
 
 void CEmbyUtils::GetClientHosts(std::vector<std::string>& hosts)

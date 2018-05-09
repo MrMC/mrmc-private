@@ -40,13 +40,20 @@ class CPlexUtils
 {
 public:
   static bool HasClients();
-  static bool HasLibrary(std::string strLibrary);
   static void GetClientHosts(std::vector<std::string>& hosts);
   static bool GetIdentity(CURL url, int timeout);
   static void GetDefaultHeaders(XFILE::CCurlFile *curl);
   static void SetPlexItemProperties(CFileItem &item);
   static void SetPlexItemProperties(CFileItem &item, const CPlexClientPtr &client);
 
+  // GUI helpers
+  static bool HasLibrary(std::string strLibrary);
+  static bool HasMusicLibrary() { return b_MusicLibrary; };
+  static bool HasMovieLibrary() { return b_MovieLibrary; };
+  static bool HasTvShowLibrary(){ return b_TvShowLibrary; };
+  static bool HasPictureLibrary() { return b_PictureLibrary; };
+  static void SetHasLibrary();
+  
   // Plex Server Utils
   static void SetWatched(CFileItem &item);
   static void SetUnWatched(CFileItem &item);
@@ -110,4 +117,5 @@ private:
   static bool b_MusicLibrary;
   static bool b_MovieLibrary;
   static bool b_TvShowLibrary;
+  static bool b_PictureLibrary;
 };
