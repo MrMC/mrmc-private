@@ -253,7 +253,7 @@ void CGUIDialogOSDSettings::SetupButtons()
         pAudioButton->SetID(id);
         pAudioButton->SetVisible(true);
         if (selAudio == i)
-          pAudioButton->SetLabel("✓" + m_audioButtons[i].second);
+          pAudioButton->SetLabel("✓ " + m_audioButtons[i].second);
         else
           pAudioButton->SetLabel(m_audioButtons[i].second);
         
