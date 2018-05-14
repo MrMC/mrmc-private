@@ -68,8 +68,6 @@ void CGUIDialogOSDSettings::OnInitWindow()
 void CGUIDialogOSDSettings::OnDeinitWindow(int nextWindowID)
 {
   ClearButtons();
-  m_subButtons.clear();
-  m_audioButtons.clear();
   CGUIDialog::OnDeinitWindow(nextWindowID);
 }
 
@@ -111,7 +109,7 @@ bool CGUIDialogOSDSettings::OnMessage(CGUIMessage& message)
         if (g_application.m_pPlayer->GetSubtitleVisible())
         {
           m_subsEnabled = false;
-          g_application.m_pPlayer->SetSubtitleVisible(m_subsEnabled);
+          g_application.m_pPlayer->SetSubtitleVisible(false);
         }
       }
       else if (subButton == 1)
@@ -121,9 +119,12 @@ bool CGUIDialogOSDSettings::OnMessage(CGUIMessage& message)
       }
       else
       {
-        m_subsEnabled = true;
-        g_application.m_pPlayer->SetSubtitleVisible(true);
-        g_application.m_pPlayer->SetSubtitle(subButton - m_subsButtonOffset);
+        if (!m_subsEnabled || g_application.m_pPlayer->GetSubtitle() != subButton - m_subsButtonOffset)
+        {
+          m_subsEnabled = true;
+          g_application.m_pPlayer->SetSubtitleVisible(true);
+          g_application.m_pPlayer->SetSubtitle(subButton - m_subsButtonOffset);
+        }
       }
       UpdateSelectedSubs(subButton);
     }
@@ -132,8 +133,11 @@ bool CGUIDialogOSDSettings::OnMessage(CGUIMessage& message)
       if (m_audioButtons.size() > 1)
       {
         int audioButton = (int)m_audioButtons[message.GetSenderId() - AUDIO_BUTTON_START].first;
-        g_application.m_pPlayer->SetAudioStream(audioButton);
-        UpdateSelectedAudio(audioButton);
+        if (g_application.m_pPlayer->GetAudioStream() != audioButton)
+        {
+          g_application.m_pPlayer->SetAudioStream(audioButton);
+          UpdateSelectedAudio(audioButton);
+        }
       }
     }
     return true;
@@ -310,4 +314,6 @@ void CGUIDialogOSDSettings::ClearButtons()
     if (control)
       RemoveControl(control);
   }
+  m_subButtons.clear();
+  m_audioButtons.clear();
 }
