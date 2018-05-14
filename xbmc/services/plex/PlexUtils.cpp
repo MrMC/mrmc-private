@@ -564,26 +564,23 @@ bool CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(CFileItemList &items, boo
     {
       if (limitTo == 2 && !client->IsOwned())
         continue;
-
-      std::vector<PlexSectionsContent> contents;
+      CURL curl(client->GetUrl());
+      curl.SetProtocol(client->GetProtocol());
+      curl.SetFileName(curl.GetFileName() + "hubs/home/");
+      
       if (tvShow)
-        contents = client->GetTvContent();
-      else
-        contents = client->GetMovieContent();
-      for (const auto &content : contents)
       {
-        CURL curl(client->GetUrl());
-        curl.SetProtocol(client->GetProtocol());
-        curl.SetFileName(curl.GetFileName() + content.section + "/");
-
-        if (tvShow)
-          rtn = GetPlexRecentlyAddedEpisodes(plexItems, curl.Get(), 10, unWatched);
-        else
-          rtn = GetPlexRecentlyAddedMovies(plexItems, curl.Get(), 10, unWatched);
-
-        for (int item = 0; item < plexItems.Size(); ++item)
-          CPlexUtils::SetPlexItemProperties(*plexItems[item], client);
+        curl.SetProtocolOption("type","2");
+        rtn = GetPlexRecentlyAddedEpisodes(plexItems, curl.Get(), 10, unWatched);
       }
+      else
+      {
+        curl.SetProtocolOption("type","1");
+        rtn = GetPlexRecentlyAddedMovies(plexItems, curl.Get(), 10, unWatched);
+      }
+      for (int item = 0; item < plexItems.Size(); ++item)
+        CPlexUtils::SetPlexItemProperties(*plexItems[item], client);
+
       SetPlexItemProperties(plexItems);
       items.Append(plexItems);
       plexItems.ClearItems();
@@ -608,26 +605,24 @@ bool CPlexUtils::GetAllPlexInProgress(CFileItemList &items, bool tvShow)
     {
       if (limitTo == 2 && !client->IsOwned())
         continue;
-
-      std::vector<PlexSectionsContent> contents;
+      
+      CURL curl(client->GetUrl());
+      curl.SetProtocol(client->GetProtocol());
+      curl.SetFileName(curl.GetFileName() + "hubs/home/");
+      
       if (tvShow)
-        contents = client->GetTvContent();
-      else
-        contents = client->GetMovieContent();
-      for (const auto &content : contents)
       {
-        CURL curl(client->GetUrl());
-        curl.SetProtocol(client->GetProtocol());
-        curl.SetFileName(curl.GetFileName() + content.section + "/");
-        
-        if (tvShow)
-          GetPlexInProgressShows(plexItems, curl.Get(), 10);
-        else
-          GetPlexInProgressMovies(plexItems, curl.Get(), 10);
-        
-        for (int item = 0; item < plexItems.Size(); ++item)
-          CPlexUtils::SetPlexItemProperties(*plexItems[item], client);
+        curl.SetProtocolOption("type","2");
+        GetPlexInProgressShows(plexItems, curl.Get(), 10);
       }
+      else
+      {
+        curl.SetProtocolOption("type","1");
+        GetPlexInProgressMovies(plexItems, curl.Get(), 10);
+      }
+      for (int item = 0; item < plexItems.Size(); ++item)
+        CPlexUtils::SetPlexItemProperties(*plexItems[item], client);
+
       SetPlexItemProperties(plexItems);
       items.Append(plexItems);
       plexItems.ClearItems();
@@ -2023,6 +2018,7 @@ CVariant CPlexUtils::GetPlexCVariant(std::string url, std::string filter)
   curlfile.SetRequestHeader("Accept-Encoding", "gzip");
   GetDefaultHeaders(&curlfile);
 
+  StringUtils::Replace(url, "|","?");
   CURL curl(url);
   // this is key to get back gzip encoded content
   curl.SetProtocolOption("seekable", "0");
