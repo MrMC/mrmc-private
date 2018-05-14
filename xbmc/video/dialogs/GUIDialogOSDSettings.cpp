@@ -108,8 +108,11 @@ bool CGUIDialogOSDSettings::OnMessage(CGUIMessage& message)
       int subButton = (int)m_subButtons[message.GetSenderId() - SUB_BUTTON_START].first;
       if (subButton == 0)
       {
-        m_subsEnabled = !g_application.m_pPlayer->GetSubtitleVisible();
-        g_application.m_pPlayer->SetSubtitleVisible(m_subsEnabled);
+        if (g_application.m_pPlayer->GetSubtitleVisible())
+        {
+          m_subsEnabled = false;
+          g_application.m_pPlayer->SetSubtitleVisible(m_subsEnabled);
+        }
       }
       else if (subButton == 1)
       {
@@ -178,7 +181,7 @@ void CGUIDialogOSDSettings::SetupButtons()
       if (m_subsEnabled)
         m_subButtons.Add(0, g_localizeStrings.Get(16039));
       else
-        m_subButtons.Add(0, g_localizeStrings.Get(16041));
+        m_subButtons.Add(0, "✓ " + g_localizeStrings.Get(16039));
     }
     m_subButtons.Add(1, g_localizeStrings.Get(33003));
     
@@ -277,7 +280,7 @@ void CGUIDialogOSDSettings::UpdateSelectedSubs(int selected)
   if (m_subsEnabled)
     ((CGUIButtonControl *)pButton)->SetLabel(g_localizeStrings.Get(16039));
   else
-    ((CGUIButtonControl *)pButton)->SetLabel(g_localizeStrings.Get(16041));
+    ((CGUIButtonControl *)pButton)->SetLabel("✓ " + g_localizeStrings.Get(16039));
 
   CGUIButtonControl *pSubSelectButton = (CGUIButtonControl*)pGroupList->GetControl(SUB_BUTTON_START + selected);
   if (pSubSelectButton)
