@@ -1279,7 +1279,7 @@ bool CPlexUtils::ParsePlexVideos(CFileItemList &items, CURL url, const CVariant 
     if (season > -1)
     {
       value = item["thumb"].asString();
-      url.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+      url.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
       imagePath = url.Get();
       plexItem->SetArt("thumb", imagePath);
       plexItem->SetArt("tvshow.thumb", imagePath);
@@ -1298,14 +1298,14 @@ bool CPlexUtils::ParsePlexVideos(CFileItemList &items, CURL url, const CVariant 
       plexItem->GetVideoInfoTag()->m_strShowTitle = item["grandparentTitle"].asString();
 
       value = item["thumb"].asString();
-      url.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+      url.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
       imagePath = url.Get();
       plexItem->SetArt("thumb", imagePath);
 
       value = item["parentThumb"].asString();
       if (value.empty())
         value = item["grandparentThumb"].asString();
-      url.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+      url.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
       imagePath = url.Get();
       plexItem->SetArt("tvshow.poster", imagePath);
       plexItem->SetArt("tvshow.thumb", imagePath);
@@ -1320,7 +1320,7 @@ bool CPlexUtils::ParsePlexVideos(CFileItemList &items, CURL url, const CVariant 
       plexItem->SetLabel(item["title"].asString());
 
       value = item["thumb"].asString();
-      url.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+      url.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
       imagePath = url.Get();
       plexItem->SetArt("thumb", imagePath);
       plexItem->SetIconImage(imagePath);
@@ -1424,7 +1424,7 @@ bool CPlexUtils::ParsePlexSeries(CFileItemList &items, const CURL &url, const CV
     plexItem->GetVideoInfoTag()->SetPlot(item["summary"].asString());
 
     value = item["thumb"].asString();
-    curl.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+    curl.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
     plexItem->SetArt("thumb", curl.Get());
 
     value = item["banner"].asString();
@@ -1510,7 +1510,7 @@ bool CPlexUtils::ParsePlexSeasons(CFileItemList &items, const CURL &url, const C
       plexItem->SetProperty("PlexShowKey", mediacontainer["key"].asString());
 
       value = mediacontainer["art"].asString();
-      curl.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+      curl.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
       plexItem->SetArt("fanart", curl.Get());
 
       value = mediacontainer["banner"].asString();
@@ -1519,7 +1519,7 @@ bool CPlexUtils::ParsePlexSeasons(CFileItemList &items, const CURL &url, const C
 
       /// -------
       value = item["thumb"].asString();
-      curl.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+      curl.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
       plexItem->SetArt("thumb", curl.Get());
 
       time_t addedTime = item["addedAt"].asInteger();
@@ -1642,7 +1642,7 @@ bool CPlexUtils::ParsePlexSongs(CFileItemList &items, const CURL &url, const CVa
         plexItem->GetMusicInfoTag()->SetDuration(item["duration"].asInteger()/1000);
 
         value = item["thumb"].asString();
-        curl.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+        curl.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
         plexItem->SetArt("thumb", curl.Get());
 
         value = item["art"].asString();
@@ -1713,7 +1713,7 @@ bool CPlexUtils::ParsePlexArtistsAlbum(CFileItemList &items, const CURL &url, co
     plexItem->GetMusicInfoTag()->SetYear(item["year"].asInteger());
 
     value = item["thumb"].asString();
-    curl.SetFileName("photo/:/transcode?height=314&width=314&url=" + value);
+    curl.SetFileName("photo/:/transcode?height=800&width=800&url=" + value);
     plexItem->SetArt("thumb", curl.Get());
     plexItem->SetProperty("thumb", curl.Get());
 
