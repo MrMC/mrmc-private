@@ -530,7 +530,7 @@ bool CPlexUtils::GetPlexInProgressMovies(CFileItemList &items, const std::string
 {
   bool rtn = false;
   CURL curl(url);
-  curl.SetFileName(curl.GetFileName() + "onDeck");
+  curl.SetFileName(curl.GetFileName() + "continueWatching");
   curl.SetProtocolOptions(curl.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
 
   CVariant variant = GetPlexCVariant(curl.Get());
