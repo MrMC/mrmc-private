@@ -1345,7 +1345,7 @@ bool CPlexUtils::ParsePlexVideos(CFileItemList &items, CURL url, const CVariant 
     time_t lastPlayed = item["lastViewedAt"].asInteger();
     plexItem->GetVideoInfoTag()->m_lastPlayed = CDateTime(lastPlayed);
 
-    url.SetFileName("photo/:/transcode?width=2560&height=1440&quality=90&url=" + fanart);
+    url.SetFileName("photo/:/transcode?width=1920&height=1080&quality=90&url=" + fanart);
     plexItem->SetArt("fanart", url.Get());
 
     plexItem->GetVideoInfoTag()->SetYear(item["year"].asInteger());
@@ -1432,7 +1432,7 @@ bool CPlexUtils::ParsePlexSeries(CFileItemList &items, const CURL &url, const CV
     plexItem->SetArt("banner", curl.Get());
 
     value = item["art"].asString();
-    curl.SetFileName("photo/:/transcode?width=2560&height=1440&quality=90&url=" + value);
+    curl.SetFileName("photo/:/transcode?width=1920&height=1080&quality=90&url=" + value);
     plexItem->SetArt("fanart", curl.Get());
 
     plexItem->GetVideoInfoTag()->SetYear(item["year"].asInteger());
@@ -1646,7 +1646,7 @@ bool CPlexUtils::ParsePlexSongs(CFileItemList &items, const CURL &url, const CVa
         plexItem->SetArt("thumb", curl.Get());
 
         value = item["art"].asString();
-        curl.SetFileName("photo/:/transcode?width=2560&height=1440&quality=90&url=" + value);
+        curl.SetFileName("photo/:/transcode?width=1920&height=1080&quality=90&url=" + value);
         plexItem->SetArt("fanart", curl.Get());
 
         time_t addedTime = item["addedAt"].asInteger();
@@ -1718,7 +1718,7 @@ bool CPlexUtils::ParsePlexArtistsAlbum(CFileItemList &items, const CURL &url, co
     plexItem->SetProperty("thumb", curl.Get());
 
     value = item["art"].asString();
-    curl.SetFileName("photo/:/transcode?width=2560&height=1440&quality=90&url=" + value);
+    curl.SetFileName("photo/:/transcode?width=1920&height=1080&quality=90&url=" + value);
     plexItem->SetArt("fanart", curl.Get());
     plexItem->SetProperty("fanart", curl.Get());
 
