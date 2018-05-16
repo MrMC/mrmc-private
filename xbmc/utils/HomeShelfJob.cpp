@@ -70,14 +70,17 @@ CHomeShelfJob::~CHomeShelfJob()
 
 bool CHomeShelfJob::UpdateVideo()
 {
+  CSingleLock lock(m_critsection);
   CGUIWindow* home = g_windowManager.GetWindow(WINDOW_HOME);
 
   if ( home == NULL )
     return false;
 
+  // idea here is that if button 4000 exists in the home screen skin is compatible
+  // with new Server layouts and should only display RA and inProgress for those servers
+  const CGUIControl *btnServers = home->GetControl(4000);
+  
   CLog::Log(LOGDEBUG, "CHomeShelfJob::UpdateVideos() - Running HomeShelf screen update");
-
-  CSingleLock lock(m_critsection);
 
   CVideoDatabase videodatabase;
   videodatabase.Open();
@@ -131,9 +134,20 @@ bool CHomeShelfJob::UpdateVideo()
         m_HomeShelfTVPR->Add(item);
       }
     }
-    // get InProgress TVSHOWS and MOVIES from any enabled service
-    CServicesManager::GetInstance().GetAllInProgressShows(*m_HomeShelfTVPR, NUM_ITEMS);
-    CServicesManager::GetInstance().GetAllInProgressMovies(*m_HomeShelfMoviesPR, NUM_ITEMS);
+    if (!btnServers)
+    {
+      // get InProgress TVSHOWS and MOVIES from any enabled service
+      CServicesManager::GetInstance().GetAllInProgressShows(*m_HomeShelfTVPR, NUM_ITEMS);
+      CServicesManager::GetInstance().GetAllInProgressMovies(*m_HomeShelfMoviesPR, NUM_ITEMS);
+    }
+    else
+    {
+      // get InProgress TVSHOWS and MOVIES for chosen server in Home Screen
+      std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
+      std::string serverUUID = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
+      CServicesManager::GetInstance().GetInProgressShows(*m_HomeShelfTVPR, NUM_ITEMS, serverType, serverUUID);
+      CServicesManager::GetInstance().GetInProgressMovies(*m_HomeShelfMoviesPR, NUM_ITEMS, serverType, serverUUID);
+    }
   }
   
   if (homeScreenItemSelector == 1 || homeScreenItemSelector == 3) // 1 is recently added, 3 is both
@@ -195,9 +209,20 @@ bool CHomeShelfJob::UpdateVideo()
       }
     }
 
-    // get recently added TVSHOWS and MOVIES from any enabled service
-    CServicesManager::GetInstance().GetAllRecentlyAddedShows(*m_HomeShelfTVRA, NUM_ITEMS, homeScreenWatched);
-    CServicesManager::GetInstance().GetAllRecentlyAddedMovies(*m_HomeShelfMoviesRA, NUM_ITEMS, homeScreenWatched);
+    if (!btnServers)
+    {
+      // get recently added TVSHOWS and MOVIES from any enabled service
+      CServicesManager::GetInstance().GetAllRecentlyAddedShows(*m_HomeShelfTVRA, NUM_ITEMS, homeScreenWatched);
+      CServicesManager::GetInstance().GetAllRecentlyAddedMovies(*m_HomeShelfMoviesRA, NUM_ITEMS, homeScreenWatched);
+    }
+    else
+    {
+      // get recently added TVSHOWS and MOVIES for chosen server in Home Screen
+      std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
+      std::string serverUUID = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
+      CServicesManager::GetInstance().GetRecentlyAddedShows(*m_HomeShelfTVRA, NUM_ITEMS, homeScreenWatched, serverType, serverUUID);
+      CServicesManager::GetInstance().GetRecentlyAddedMovies(*m_HomeShelfMoviesRA, NUM_ITEMS, homeScreenWatched, serverType, serverUUID);
+    }
   }
   
   videodatabase.Close();
@@ -219,6 +244,15 @@ bool CHomeShelfJob::UpdateMusic()
 
   CSingleLock lock(m_critsection);
 
+  CGUIWindow* home = g_windowManager.GetWindow(WINDOW_HOME);
+  
+  if ( home == NULL )
+    return false;
+  
+  // idea here is that if button 4000 exists in the home screen skin is compatible
+  // with new Server layouts and should only display RA and inProgress for those servers
+  const CGUIControl *btnServers = home->GetControl(4000);
+  
   CMusicDatabase musicdatabase;
   musicdatabase.Open();
   if (musicdatabase.HasContent())
@@ -240,9 +274,19 @@ bool CHomeShelfJob::UpdateMusic()
     }
     musicdatabase.Close();
   }
-
-  // get recently added ALBUMS from any enabled service
-  CServicesManager::GetInstance().GetAllRecentlyAddedAlbums(*m_HomeShelfMusicAlbums, NUM_ITEMS);
+  
+  if (!btnServers)
+  {
+    // get recently added ALBUMS from any enabled service
+    CServicesManager::GetInstance().GetAllRecentlyAddedAlbums(*m_HomeShelfMusicAlbums, NUM_ITEMS);
+  }
+  else
+  {
+    // get recently added ALBUMS for chosen server in Home Screen
+    std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
+    std::string serverUUID = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
+    CServicesManager::GetInstance().GetRecentlyAddedAlbums(*m_HomeShelfMusicAlbums, NUM_ITEMS, serverType, serverUUID);
+  }
   
   return true;
 }

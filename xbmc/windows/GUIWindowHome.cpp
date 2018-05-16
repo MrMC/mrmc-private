@@ -33,6 +33,7 @@
 #include "utils/StringUtils.h"
 #include "utils/URIUtils.h"
 #include "dialogs/GUIDialogKaiToast.h"
+#include "dialogs/GUIDialogSelect.h"
 #include "guilib/LocalizeStrings.h"
 #include "settings/Settings.h"
 #include "playlists/PlayList.h"
@@ -42,6 +43,8 @@
 #include "music/MusicDatabase.h"
 #include "filesystem/CloudUtils.h"
 #include "filesystem/StackDirectory.h"
+#include "utils/Base64URL.h"
+#include "listproviders/StaticProvider.h"
 
 #define CONTROL_HOMESHELFMOVIESRA      8000
 #define CONTROL_HOMESHELFTVSHOWSRA     8001
@@ -51,6 +54,8 @@
 #define CONTROL_HOMESHELFMOVIESPR      8010
 #define CONTROL_HOMESHELFTVSHOWSPR     8011
 
+#define CONTROL_HOME_LIST              9000
+#define CONTROL_SERVER_BUTTON          4000
 
 using namespace ANNOUNCEMENT;
 
@@ -126,7 +131,15 @@ void CGUIWindowHome::OnInitWindow()
   }
   
   if (CServicesManager::GetInstance().HasServices())
+  {
     m_updateHS = (Audio | Video);
+    SetupServices();
+  }
+  else
+  {
+    SET_CONTROL_HIDDEN(CONTROL_SERVER_BUTTON);
+    SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , "Server");
+  }
   
   if (!m_firstRun)
     AddHomeShelfJobs( m_updateHS );
@@ -168,6 +181,7 @@ void CGUIWindowHome::Announce(AnnouncementFlag flag, const char *sender, const c
 
   CGUIMessage reload(GUI_MSG_NOTIFY_ALL, GetID(), 0, GUI_MSG_REFRESH_THUMBS, ra_flag);
   g_windowManager.SendThreadMessage(reload, GetID());
+  SetupServices();
 }
 
 void CGUIWindowHome::AddHomeShelfJobs(int flag)
@@ -389,6 +403,51 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
       }
       return true;
     }
+    else if (iControl == CONTROL_SERVER_BUTTON)
+    {
+      // ask the user what to do
+      CGUIDialogSelect* selectDialog = static_cast<CGUIDialogSelect*>(g_windowManager.GetWindow(WINDOW_DIALOG_SELECT));
+      selectDialog->Reset();
+      selectDialog->SetHeading("Choose a server");
+      
+      std::vector<CPlexClientPtr>  plexClients;
+      CPlexServices::GetInstance().GetClients(plexClients);
+      for (const auto &client : plexClients)
+      {
+        CFileItem item("Plex - " + client->GetServerName());
+        item.SetProperty("type", "plex");
+        item.SetProperty("uuid", client->GetUuid());
+        selectDialog->Add(item);
+      }
+      
+      std::vector<CEmbyClientPtr>  embyClients;
+      CEmbyServices::GetInstance().GetClients(embyClients);
+      for (const auto &client : embyClients)
+      {
+        CFileItem item("Emby - " + client->GetServerName());
+        item.SetProperty("type", "emby");
+        item.SetProperty("uuid", client->GetUuid());
+        selectDialog->Add(item);
+      }
+      
+      selectDialog->EnableButton(false, 0);
+      selectDialog->Open();
+      
+      // check if the user has chosen one of the results
+      const CFileItemPtr selectedItem = selectDialog->GetSelectedFileItem();
+      if (selectedItem->HasProperty("type"))
+      {
+        std::string type = selectedItem->GetProperty("type").asString();
+        std::string uuid = selectedItem->GetProperty("uuid").asString();
+        CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_TYPE,type);
+        CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_UUID,uuid);
+        CSettings::GetInstance().Save();
+        SetupServices();
+        ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+        ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
+      }
+      return true;
+    }
     break;
   }
   default:
@@ -499,4 +558,165 @@ bool CGUIWindowHome::PlayHomeShelfItem(CFileItem itemPtr)
     g_playlistPlayer.Play(0);
   }
   return true;
+}
+
+void CGUIWindowHome::SetupServices()
+{
+  if (CServicesManager::GetInstance().HasServices())
+    SET_CONTROL_VISIBLE(CONTROL_SERVER_BUTTON);
+  else
+    return;
+  
+  CSingleLock lock(m_critsection);
+  CFileItemList* sections = new CFileItemList();
+  std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
+  std::string serverUUID = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
+  
+  if (serverType == "plex")
+  {
+    if (CPlexServices::GetInstance().HasClients())
+    {
+      CPlexClientPtr plexClient = CPlexServices::GetInstance().GetClient(serverUUID);
+      if (plexClient)
+      {
+        sections->Append(*AddPlexSection(plexClient));
+        SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , plexClient->GetServerName());
+      }
+    }
+  }
+  else if (serverType == "emby")
+  {
+    if (CEmbyServices::GetInstance().HasClients())
+    {
+      CEmbyClientPtr embyClient = CEmbyServices::GetInstance().GetClient(serverUUID);
+      if (embyClient)
+      {
+        sections->Append(*AddEmbySection(embyClient));
+        SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , embyClient->GetServerName());
+      }
+    }
+  }
+  
+  if (sections->Size() < 1)
+  {
+    // we can test if its empty and pic some random owned server?
+  }
+  
+  CGUIMessage message(GUI_MSG_LABEL_BIND_ADD, GetID(), CONTROL_HOME_LIST, 0, 0, sections);
+  g_windowManager.SendThreadMessage(message);
+  CONTROL_SELECT_ITEM(CONTROL_HOME_LIST,0);
+}
+std::vector<PlexSectionsContent> CGUIWindowHome::GetPlexSections(CPlexClientPtr client)
+{
+  std::vector<PlexSectionsContent> sections;
+  std::vector<PlexSectionsContent> contents = client->GetMovieContent();
+  sections.insert(sections.begin(), contents.begin(),contents.end());
+  contents = client->GetTvContent();
+  sections.insert(sections.begin(), contents.begin(),contents.end());
+  contents = client->GetArtistContent();
+  sections.insert(sections.begin(), contents.begin(),contents.end());
+//  contents = client->GetPhotoContent();
+//  sections.insert(sections.begin(), contents.begin(),contents.end());
+  return sections;
+}
+
+CFileItemList* CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
+{
+  CFileItemList* sections = new CFileItemList();
+  std::vector<PlexSectionsContent> contents = GetPlexSections(client);
+  for (const auto &content : contents)
+  {
+    CFileItemPtr item(new CFileItem());
+    item->SetLabel(content.title);
+    item->SetLabel2("Plex-" + client->GetServerName());
+    CURL curl(client->GetUrl());
+    curl.SetProtocol(client->GetProtocol());
+    std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), content.type == "artist" ? "":"all");
+    curl.SetFileName(filename);
+    
+    // add onclick action
+    std::string strAction;
+    CGUIAction clickAction;
+    CGUIAction::cond_action_pair pair;
+    
+    if (content.type == "movie")
+    {
+      strAction = "plex://movies/titles/" + Base64URL::Encode(curl.Get());
+      item->SetProperty("type","Movies");
+    }
+    else if (content.type == "show")
+    {
+      strAction = "plex://tvshows/titles/" + Base64URL::Encode(curl.Get());
+      item->SetProperty("type","TvShows");
+    }
+    else if (content.type == "artist")
+    {
+      strAction = "plex://music/root/" + Base64URL::Encode(curl.Get());
+      item->SetProperty("type","Music");
+    }
+    
+    pair.action = "ActivateWindow(Videos," + strAction +  ",return)";
+    clickAction.m_actions.push_back(pair);
+    
+    CGUIStaticItemPtr staticItem(new CGUIStaticItem(*item));
+    staticItem->SetClickActions(clickAction);
+    sections->Add(staticItem);
+  }
+  return sections;
+}
+
+std::vector<EmbyViewInfo> CGUIWindowHome::GetEmbySections(CEmbyClientPtr client)
+{
+  std::vector<EmbyViewInfo> sections;
+  std::vector<EmbyViewInfo> contents = client->GetViewInfoForMovieContent();
+  sections.insert(sections.begin(), contents.begin(),contents.end());
+  contents = client->GetViewInfoForTVShowContent();
+  sections.insert(sections.begin(), contents.begin(),contents.end());
+  contents = client->GetViewInfoForMusicContent();
+  sections.insert(sections.begin(), contents.begin(),contents.end());
+  return sections;
+}
+
+CFileItemList* CGUIWindowHome::AddEmbySection(CEmbyClientPtr client)
+{
+  CFileItemList* sections = new CFileItemList();
+  std::vector<EmbyViewInfo> contents = GetEmbySections(client);
+  for (const auto &content : contents)
+  {
+    CFileItemPtr item(new CFileItem());
+    item->SetLabel(content.name);
+    item->SetLabel2("Emby-" + client->GetServerName());
+    CURL curl(client->GetUrl());
+    curl.SetProtocol(client->GetProtocol());
+    curl.SetFileName(content.prefix);
+    
+    // add onclick action
+    std::string strAction;
+    CGUIAction clickAction;
+    CGUIAction::cond_action_pair pair;
+    
+    if (content.mediaType == "movies")
+    {
+      strAction = "emby://movies/titles/" + Base64URL::Encode(curl.Get());
+      item->SetProperty("type","Movies");
+    }
+    else if (content.mediaType == "tvshows")
+    {
+      strAction = "emby://tvshows/titles/" + Base64URL::Encode(curl.Get());
+      item->SetProperty("type","TvShows");
+    }
+    else if (content.mediaType == "music")
+    {
+      strAction = "emby://music/root/" + Base64URL::Encode(curl.Get());
+      item->SetProperty("type","Music");
+    }
+    
+    pair.action = "ActivateWindow(Videos," + strAction +  ",return)";
+    clickAction.m_actions.push_back(pair);
+    
+    CGUIStaticItemPtr staticItem(new CGUIStaticItem(*item));
+    staticItem->SetClickActions(clickAction);
+    sections->Add(staticItem);
+  }
+  return sections;
 }

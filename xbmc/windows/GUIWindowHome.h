@@ -25,6 +25,11 @@
 #include "guilib/GUIWindow.h"
 #include "interfaces/IAnnouncer.h"
 #include "utils/Job.h"
+#include "services/plex/PlexServices.h"
+#include "services/emby/EmbyServices.h"
+#include "services/emby/EmbyUtils.h"
+#include "services/emby/EmbyViewCache.h"
+#include "services/emby/EmbyClient.h"
 
 class CVariant;
 
@@ -59,4 +64,14 @@ private:
   CFileItemList*               m_HomeShelfMusicSongs;
   CFileItemList*               m_HomeShelfMusicVideos;
   CFileItemList*               m_HomeShelfMusicAlbums;
+  
+  // services below
+  void SetupServices();
+  // plex service
+  CFileItemList* AddPlexSection(CPlexClientPtr client);
+  std::vector<PlexSectionsContent> GetPlexSections(CPlexClientPtr client);
+  // emby service
+  CFileItemList* AddEmbySection(CEmbyClientPtr client);
+  std::vector<EmbyViewInfo>    GetEmbySections(CEmbyClientPtr client);
+  
 };

@@ -4040,6 +4040,24 @@
           <level>4</level>
           <default>true</default>
         </setting>
+        <setting id="general.servertype" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="general.serveruuid" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
       </group>
     </category>
   </section>

@@ -460,6 +460,8 @@ const std::string CSettings::SETTING_GENERAL_ADDONUPDATES = "general.addonupdate
 const std::string CSettings::SETTING_GENERAL_ADDONNOTIFICATIONS = "general.addonnotifications";
 const std::string CSettings::SETTING_GENERAL_ADDONFOREIGNFILTER = "general.addonforeignfilter";
 const std::string CSettings::SETTING_GENERAL_ADDONBROKENFILTER = "general.addonbrokenfilter";
+const std::string CSettings::SETTING_GENERAL_SERVER_TYPE = "general.servertype";
+const std::string CSettings::SETTING_GENERAL_SERVER_UUID = "general.serveruuid";
 
 
 const std::string CSettings::SETTING_MYSQL_ENABLED = "mysql.enabled";

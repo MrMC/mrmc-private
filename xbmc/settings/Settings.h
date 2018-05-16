@@ -419,6 +419,8 @@ public:
   static const std::string SETTING_GENERAL_ADDONNOTIFICATIONS;
   static const std::string SETTING_GENERAL_ADDONFOREIGNFILTER;
   static const std::string SETTING_GENERAL_ADDONBROKENFILTER;
+  static const std::string SETTING_GENERAL_SERVER_TYPE;
+  static const std::string SETTING_GENERAL_SERVER_UUID;
   
   static const std::string SETTING_MYSQL_ENABLED;
   static const std::string SETTING_MYSQL_HOST;
