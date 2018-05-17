@@ -2487,8 +2487,7 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
       bReturn = g_application.IsMusicScanning();
       break;
     case LIBRARY_HASSERVICES:
-      // depreciate the "hasServices" skin call .. Library.HasContent(xxxxx) will cover it from now
-      bReturn = false;
+      bReturn = CServicesManager::GetInstance().HasServices();
       break;
     case SYSTEM_PLATFORM_LINUX:
 #if defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
