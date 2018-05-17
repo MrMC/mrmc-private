@@ -607,31 +607,62 @@ void CGUIWindowHome::SetupServices()
     }
   }
   
-  if ((CPlexServices::GetInstance().GetNumberOfClients() +
-      CEmbyServices::GetInstance().GetNumberOfClients() ) == 1)
+  // if total number of servers is 1, no need to show the button
+  bool onlyOne = (CPlexServices::GetInstance().GetNumberOfClients() +
+                  CEmbyServices::GetInstance().GetNumberOfClients()) == 1;
+  if (onlyOne)
+    SET_CONTROL_HIDDEN(CONTROL_SERVER_BUTTON);
+  else
+    SET_CONTROL_VISIBLE(CONTROL_SERVER_BUTTON);
+  
+  // if we are here, and there is no sections that means thet user hasnt selected the server
+  // or that selected server is no longer available... if there is only one server, use that one..
+  // otherwise pick first owned server
+  if (sections->Size() < 1)
   {
-    // if total number of servers is 1, no need to show the button
-    // set uuid to that one server
+
     std::string uuid;
     std::string type;
     if (CPlexServices::GetInstance().HasClients())
     {
       std::vector<CPlexClientPtr> plexClients;
       CPlexServices::GetInstance().GetClients(plexClients);
-      uuid = plexClients[0]->GetUuid();
-      type = "plex";
+      if (onlyOne)
+      {
+        uuid = plexClients[0]->GetUuid();
+        type = "plex";
+      }
+      else
+      {
+        for (const auto &client : plexClients)
+        {
+          if (client->IsOwned())
+            uuid = client->GetUuid();
+        }
+      }
     }
     else if (CEmbyServices::GetInstance().HasClients())
     {
       std::vector<CEmbyClientPtr> embyClients;
       CEmbyServices::GetInstance().GetClients(embyClients);
-      uuid = embyClients[0]->GetUuid();
-      type = "emby";
+      if (onlyOne)
+      {
+        uuid = embyClients[0]->GetUuid();
+        type = "emby";
+      }
+      else
+      {
+        for (const auto &client : embyClients)
+        {
+          if (client->IsOwned())
+            uuid = client->GetUuid();
+        }
+      }
     }
     CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_TYPE, type);
     CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_UUID, uuid);
     CSettings::GetInstance().Save();
-    SET_CONTROL_HIDDEN(CONTROL_SERVER_BUTTON);
+    SetupServices();
   }
   
   if (sections->Size() < 1)
