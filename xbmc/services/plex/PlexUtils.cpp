@@ -100,38 +100,6 @@ bool CPlexUtils::HasClients()
   return CPlexServices::GetInstance().HasClients();
 }
 
-bool CPlexUtils::HasLibrary(std::string strLibrary)
-{
-  if (strLibrary == "music")
-    return HasMusicLibrary();
-  else if (strLibrary == "tvshows")
-    return HasTvShowLibrary();
-  else if (strLibrary == "movies")
-    return HasMovieLibrary();
-  return false;
-}
-
-void CPlexUtils::SetHasLibrary()
-{
-  b_MusicLibrary = false;
-  b_MovieLibrary = false;
-  b_TvShowLibrary = false;
-  b_PictureLibrary = false;
-  std::vector<CPlexClientPtr> clients;
-  CPlexServices::GetInstance().GetClients(clients);
-  for (const auto &client : clients)
-  {
-    if (client->GetArtistContent().size() > 0)
-      b_MusicLibrary = true;
-    if (client->GetTvContent().size() > 0)
-      b_TvShowLibrary = true;
-    if (client->GetMovieContent().size() > 0)
-      b_MovieLibrary = true;
-    if (client->GetPhotoContent().size() > 0)
-      b_PictureLibrary = true;
-  }
-}
-
 void CPlexUtils::GetClientHosts(std::vector<std::string>& hosts)
 {
   std::vector<CPlexClientPtr> clients;

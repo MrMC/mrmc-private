@@ -6287,10 +6287,6 @@ bool CGUIInfoManager::GetLibraryBool(int condition)
 {
   if (condition == LIBRARY_HAS_MUSIC)
   {
-    if (CServicesManager::GetInstance().HasServices())
-    {
-      return CServicesManager::GetInstance().HasLibrary("music");
-    }
     if (m_libraryHasMusic < 0)
     { // query
       CMusicDatabase db;
@@ -6304,10 +6300,6 @@ bool CGUIInfoManager::GetLibraryBool(int condition)
   }
   else if (condition == LIBRARY_HAS_MOVIES)
   {
-    if (CServicesManager::GetInstance().HasServices())
-    {
-      return CServicesManager::GetInstance().HasLibrary("movies");
-    }
     if (m_libraryHasMovies < 0)
     {
       CVideoDatabase db;
@@ -6334,10 +6326,6 @@ bool CGUIInfoManager::GetLibraryBool(int condition)
   }
   else if (condition == LIBRARY_HAS_TVSHOWS)
   {
-    if (CServicesManager::GetInstance().HasServices())
-    {
-      return CServicesManager::GetInstance().HasLibrary("tvshows");
-    }
     if (m_libraryHasTVShows < 0)
     {
       CVideoDatabase db;

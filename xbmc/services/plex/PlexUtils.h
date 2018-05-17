@@ -115,8 +115,4 @@ private:
   static int ParsePlexCVariant(const CVariant &item);
   static int ParsePlexMediaXML(TiXmlDocument xml);
   static void RemoveSubtitleProperties(CFileItem &item);
-  static bool b_MusicLibrary;
-  static bool b_MovieLibrary;
-  static bool b_TvShowLibrary;
-  static bool b_PictureLibrary;
 };
