@@ -412,12 +412,18 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
       
       std::vector<CPlexClientPtr>  plexClients;
       CPlexServices::GetInstance().GetClients(plexClients);
+      std::string uuid = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
+      int counter = 0;
+      int selected = 0;
       for (const auto &client : plexClients)
       {
         CFileItem item("Plex - " + client->GetServerName());
         item.SetProperty("type", "plex");
         item.SetProperty("uuid", client->GetUuid());
         selectDialog->Add(item);
+        if (uuid == client->GetUuid())
+          selected = counter;
+        counter++;
       }
       
       std::vector<CEmbyClientPtr>  embyClients;
@@ -428,8 +434,12 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
         item.SetProperty("type", "emby");
         item.SetProperty("uuid", client->GetUuid());
         selectDialog->Add(item);
+        if (uuid == client->GetUuid())
+          selected = counter;
+        counter++;
       }
       
+      selectDialog->SetSelected(selected);
       selectDialog->EnableButton(false, 0);
       selectDialog->Open();
       
@@ -597,9 +607,36 @@ void CGUIWindowHome::SetupServices()
     }
   }
   
+  if ((CPlexServices::GetInstance().GetNumberOfClients() +
+      CEmbyServices::GetInstance().GetNumberOfClients() ) == 1)
+  {
+    // if total number of servers is 1, no need to show the button
+    // set uuid to that one server
+    std::string uuid;
+    std::string type;
+    if (CPlexServices::GetInstance().HasClients())
+    {
+      std::vector<CPlexClientPtr> plexClients;
+      CPlexServices::GetInstance().GetClients(plexClients);
+      uuid = plexClients[0]->GetUuid();
+      type = "plex";
+    }
+    else if (CEmbyServices::GetInstance().HasClients())
+    {
+      std::vector<CEmbyClientPtr> embyClients;
+      CEmbyServices::GetInstance().GetClients(embyClients);
+      uuid = embyClients[0]->GetUuid();
+      type = "emby";
+    }
+    CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_TYPE, type);
+    CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_UUID, uuid);
+    CSettings::GetInstance().Save();
+    SET_CONTROL_HIDDEN(CONTROL_SERVER_BUTTON);
+  }
+  
   if (sections->Size() < 1)
   {
-    // we can test if its empty and pic some random owned server?
+    // we can test if its empty and pick some random owned server?
   }
   
   CGUIMessage message(GUI_MSG_LABEL_BIND_ADD, GetID(), CONTROL_HOME_LIST, 0, 0, sections);
@@ -632,7 +669,9 @@ CFileItemList* CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
     curl.SetProtocol(client->GetProtocol());
     std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), content.type == "artist" ? "":"all");
     curl.SetFileName(filename);
-    
+    item->SetProperty("service",true);
+    item->SetProperty("servicetype","plex");
+    item->SetProperty("base64url",Base64URL::Encode(curl.Get()));
     // add onclick action
     std::string strAction;
     CGUIAction clickAction;
@@ -688,7 +727,9 @@ CFileItemList* CGUIWindowHome::AddEmbySection(CEmbyClientPtr client)
     CURL curl(client->GetUrl());
     curl.SetProtocol(client->GetProtocol());
     curl.SetFileName(content.prefix);
-    
+    item->SetProperty("service",true);
+    item->SetProperty("servicetype","emby");
+    item->SetProperty("base64url",Base64URL::Encode(curl.Get()));
     // add onclick action
     std::string strAction;
     CGUIAction clickAction;
