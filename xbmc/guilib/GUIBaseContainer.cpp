@@ -438,6 +438,8 @@ bool CGUIBaseContainer::OnMessage(CGUIMessage& message)
       for (int i = 0; i < items->Size(); i++)
         m_items.insert(m_items.begin(),items->Get(i));
       UpdateLayout(true);
+      UpdateScrollByLetter();
+      SelectItem(message.GetParam1());
     }
     if (message.GetMessage() == GUI_MSG_ITEM_SELECT)
     {
