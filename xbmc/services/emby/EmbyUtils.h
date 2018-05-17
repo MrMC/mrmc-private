@@ -53,6 +53,7 @@ class CEmbyUtils
 {
 public:
   static bool HasClients();
+  static bool HasLibrary(std::string strLibrary);
   static void GetClientHosts(std::vector<std::string>& hosts);
   static bool GetIdentity(CURL url, int timeout);
   static void PrepareApiCall(const std::string& userId, const std::string& accessToken, XFILE::CCurlFile &curl);
@@ -61,14 +62,6 @@ public:
   static uint64_t TicksToSeconds(uint64_t ticks);
   static uint64_t SecondsToTicks(uint64_t seconds);
 
-  // GUI helpers
-  static bool HasLibrary(std::string strLibrary);
-  static bool HasMusicLibrary() { return b_MusicLibrary; };
-  static bool HasMovieLibrary() { return b_MovieLibrary; };
-  static bool HasTvShowLibrary(){ return b_TvShowLibrary; };
-  static bool HasPictureLibrary() { return b_PictureLibrary; };
-  static void SetHasLibrary();
-  
   #pragma mark - Emby Server Utils
   static void SetWatched(CFileItem &item);
   static void SetUnWatched(CFileItem &item);
@@ -127,9 +120,5 @@ private:
   static void GetMusicDetails(CFileItem &item, const CVariant &variant);
   static void GetMediaDetals(CFileItem &item, const CVariant &variant, std::string id = "0");
   static void RemoveSubtitleProperties(CFileItem &item);
-  static bool b_MusicLibrary;
-  static bool b_MovieLibrary;
-  static bool b_TvShowLibrary;
-  static bool b_PictureLibrary;
   
 };

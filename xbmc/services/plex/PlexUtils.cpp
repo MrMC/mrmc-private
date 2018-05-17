@@ -55,10 +55,6 @@ static int  g_pingSec = 0;
 static CFileItem m_curItem;
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
-bool CPlexUtils::b_MusicLibrary = false;
-bool CPlexUtils::b_MovieLibrary = false;
-bool CPlexUtils::b_TvShowLibrary = false;
-bool CPlexUtils::b_PictureLibrary = false;
 
 static void removeLeadingSlash(std::string &path)
 {

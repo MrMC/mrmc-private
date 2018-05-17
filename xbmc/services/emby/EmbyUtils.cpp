@@ -73,11 +73,6 @@ static const uint64_t TicksToSecondsFactor = 10000000;
 
 static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
 
-bool CEmbyUtils::b_MusicLibrary = false;
-bool CEmbyUtils::b_MovieLibrary = false;
-bool CEmbyUtils::b_TvShowLibrary = false;
-bool CEmbyUtils::b_PictureLibrary = false;
-
 bool CEmbyUtils::HasClients()
 {
   return CEmbyServices::GetInstance().HasClients();
