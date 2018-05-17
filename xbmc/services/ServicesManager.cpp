@@ -407,7 +407,10 @@ void CServicesManager::GetRecentlyAddedMovies(CFileItemList &recentlyAdded, int 
     CPlexUtils::GetPlexRecentlyAddedMovies(plexItems, curl.Get(), 10, watched);
 
     for (int item = 0; item < plexItems.Size(); ++item)
+    {
       CPlexUtils::SetPlexItemProperties(*plexItems[item], plexClient);
+      plexItems[item]->SetProperty("ItemType", g_localizeStrings.Get(681));
+    }
     
     CPlexUtils::SetPlexItemProperties(plexItems);
     recentlyAdded.Append(plexItems);
@@ -447,7 +450,10 @@ void CServicesManager::GetRecentlyAddedShows(CFileItemList &recentlyAdded, int i
     CPlexUtils::GetPlexRecentlyAddedEpisodes(plexItems, curl.Get(), 10, watched);
     
     for (int item = 0; item < plexItems.Size(); ++item)
+    {
       CPlexUtils::SetPlexItemProperties(*plexItems[item], plexClient);
+      plexItems[item]->SetProperty("ItemType", g_localizeStrings.Get(681));
+    }
     
     CPlexUtils::SetPlexItemProperties(plexItems);
     recentlyAdded.Append(plexItems);
@@ -490,7 +496,10 @@ void CServicesManager::GetRecentlyAddedAlbums(CFileItemList &recentlyAdded, int 
     
     CPlexUtils::GetPlexArtistsOrAlbum(plexItems, curl.Get(), true);
     for (int item = 0; item < plexItems.Size(); ++item)
+    {
       CPlexUtils::SetPlexItemProperties(*plexItems[item], plexClient);
+      plexItems[item]->SetProperty("ItemType", g_localizeStrings.Get(681));
+    }
     
     CPlexUtils::SetPlexItemProperties(plexItems);
     recentlyAdded.Append(plexItems);
@@ -535,7 +544,10 @@ void CServicesManager::GetInProgressShows(CFileItemList &inProgress, int itemLim
     CPlexUtils::GetPlexInProgressShows(plexItems, curl.Get(), 10);
     
     for (int item = 0; item < plexItems.Size(); ++item)
+    {
       CPlexUtils::SetPlexItemProperties(*plexItems[item], plexClient);
+      plexItems[item]->SetProperty("ItemType", g_localizeStrings.Get(682));
+    }
     
     CPlexUtils::SetPlexItemProperties(plexItems);
     inProgress.Append(plexItems);
@@ -575,7 +587,10 @@ void CServicesManager::GetInProgressMovies(CFileItemList &inProgress, int itemLi
     CPlexUtils::GetPlexInProgressMovies(plexItems, curl.Get(), 10);
     
     for (int item = 0; item < plexItems.Size(); ++item)
+    {
       CPlexUtils::SetPlexItemProperties(*plexItems[item], plexClient);
+      plexItems[item]->SetProperty("ItemType", g_localizeStrings.Get(682));
+    }
     
     CPlexUtils::SetPlexItemProperties(plexItems);
     inProgress.Append(plexItems);

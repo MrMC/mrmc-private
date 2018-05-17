@@ -604,7 +604,6 @@ void CGUIWindowHome::SetupServices()
   
   CGUIMessage message(GUI_MSG_LABEL_BIND_ADD, GetID(), CONTROL_HOME_LIST, 0, 0, sections);
   g_windowManager.SendThreadMessage(message);
-  CONTROL_SELECT_ITEM(CONTROL_HOME_LIST,0);
 }
 std::vector<PlexSectionsContent> CGUIWindowHome::GetPlexSections(CPlexClientPtr client)
 {
