@@ -574,7 +574,7 @@ void CServicesManager::GetInProgressMovies(CFileItemList &inProgress, int itemLi
     CFileItemList plexItems;
     CURL curl(plexClient->GetUrl());
     curl.SetProtocol(plexClient->GetProtocol());
-    curl.SetFileName(curl.GetFileName() + "hubs/home/");
+    curl.SetFileName(curl.GetFileName() + "hubs/home/continueWatching");
     curl.SetProtocolOption("type","1");
     CPlexUtils::GetPlexInProgressMovies(plexItems, curl.Get(), 10);
     

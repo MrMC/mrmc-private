@@ -423,7 +423,10 @@ bool CPlexUtils::GetPlexRecentlyAddedEpisodes(CFileItemList &items, const std::s
 {
   bool rtn = false;
   CURL curl(url);
-  curl.SetFileName(curl.GetFileName() + "recentlyAdded");
+  // special case below, we can reuse base64 string
+  std::string fileName = curl.GetFileName();
+  StringUtils::TrimRight(fileName, "all");
+  curl.SetFileName(fileName + "recentlyAdded");
   if (!watched)
     curl.SetOption("unwatched","1");
   curl.SetProtocolOptions(curl.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
@@ -448,7 +451,10 @@ bool CPlexUtils::GetPlexInProgressShows(CFileItemList &items, const std::string 
   bool rtn = false;
   CURL curl(url);
   std::string strXML;
-  curl.SetFileName(curl.GetFileName() + "onDeck");
+  // special case below, we can reuse base64 string
+  std::string fileName = curl.GetFileName();
+  StringUtils::TrimRight(fileName, "all");
+  curl.SetFileName(fileName + "onDeck");
   curl.SetProtocolOptions(curl.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
 
   CVariant variant = GetPlexCVariant(curl.Get());
@@ -470,7 +476,10 @@ bool CPlexUtils::GetPlexRecentlyAddedMovies(CFileItemList &items, const std::str
 {
   bool rtn = false;
   CURL curl(url);
-  curl.SetFileName(curl.GetFileName() + "recentlyAdded");
+  // special case below, we can reuse base64 string
+  std::string fileName = curl.GetFileName();
+  StringUtils::TrimRight(fileName, "all");
+  curl.SetFileName(fileName + "recentlyAdded");
   if (!watched)
     curl.SetOption("unwatched","1");
   curl.SetProtocolOptions(curl.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
@@ -494,7 +503,13 @@ bool CPlexUtils::GetPlexInProgressMovies(CFileItemList &items, const std::string
 {
   bool rtn = false;
   CURL curl(url);
-  curl.SetFileName(curl.GetFileName() + "continueWatching");
+  // special case below, we can reuse base64 string
+  std::string fileName = curl.GetFileName();
+  if (StringUtils::Replace(fileName, "/all" , "") > 0)
+  {
+    fileName = fileName + "/onDeck";
+  }
+  curl.SetFileName(fileName);
   curl.SetProtocolOptions(curl.GetProtocolOptions() + StringUtils::Format("&X-Plex-Container-Start=0&X-Plex-Container-Size=%i", limit));
 
   CVariant variant = GetPlexCVariant(curl.Get());
