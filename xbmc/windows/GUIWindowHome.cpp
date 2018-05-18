@@ -572,6 +572,12 @@ bool CGUIWindowHome::PlayHomeShelfItem(CFileItem itemPtr)
 
 void CGUIWindowHome::SetupServices()
 {
+  // idea here is that if button 4000 exists in the home screen skin is compatible
+  // with new Server layouts on home
+  const CGUIControl *btnServers = GetControl(4000);
+  if (!btnServers)
+    return;
+  
   if (CServicesManager::GetInstance().HasServices())
     SET_CONTROL_VISIBLE(CONTROL_SERVER_BUTTON);
   else
@@ -709,8 +715,7 @@ CFileItemList* CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
     item->SetLabel2("Plex-" + client->GetServerName());
     CURL curl(client->GetUrl());
     curl.SetProtocol(client->GetProtocol());
-    std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), content.type == "artist" ? "":"all");
-    curl.SetFileName(filename);
+
     item->SetProperty("service",true);
     item->SetProperty("servicetype","plex");
     item->SetProperty("base64url",Base64URL::Encode(curl.Get()));
@@ -719,19 +724,30 @@ CFileItemList* CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
     CGUIAction clickAction;
     CGUIAction::cond_action_pair pair;
     
+    std::string filters;
+    std::string sufix = "all";
+    if (CSettings::GetInstance().GetBool(CSettings::SETTING_MYVIDEOS_FLATTEN))
+    {
+      filters = "filters/";
+      sufix = "";
+    }
+    
+    std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), content.type == "artist" ? "":sufix.c_str());
+    curl.SetFileName(filename);
+    
     if (content.type == "movie")
     {
-      strAction = "plex://movies/titles/" + Base64URL::Encode(curl.Get());
+      strAction = "plex://movies/titles/" + filters + Base64URL::Encode(curl.Get());
       item->SetProperty("type","Movies");
     }
     else if (content.type == "show")
     {
-      strAction = "plex://tvshows/titles/" + Base64URL::Encode(curl.Get());
+      strAction = "plex://tvshows/titles/"  + filters + Base64URL::Encode(curl.Get());
       item->SetProperty("type","TvShows");
     }
     else if (content.type == "artist")
     {
-      strAction = "plex://music/root/" + Base64URL::Encode(curl.Get());
+      strAction = "plex://music/root/"  + filters + Base64URL::Encode(curl.Get());
       item->SetProperty("type","Music");
     }
     
