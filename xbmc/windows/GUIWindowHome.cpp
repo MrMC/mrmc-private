@@ -637,7 +637,16 @@ void CGUIWindowHome::SetupServices()
         for (const auto &client : plexClients)
         {
           if (client->IsOwned())
+          {
             uuid = client->GetUuid();
+            CPlexClientPtr plexClient = CPlexServices::GetInstance().GetClient(uuid);
+            if (plexClient)
+            {
+              sections->Append(*AddPlexSection(plexClient));
+              SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , plexClient->GetServerName());
+              break;
+            }
+          }
         }
       }
     }
@@ -655,19 +664,21 @@ void CGUIWindowHome::SetupServices()
         for (const auto &client : embyClients)
         {
           if (client->IsOwned())
+          {
             uuid = client->GetUuid();
+            CEmbyClientPtr embyClient = CEmbyServices::GetInstance().GetClient(uuid);
+            if (embyClient)
+            {
+              sections->Append(*AddEmbySection(embyClient));
+              SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , embyClient->GetServerName());
+            }
+          }
         }
       }
     }
     CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_TYPE, type);
     CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_UUID, uuid);
     CSettings::GetInstance().Save();
-    SetupServices();
-  }
-  
-  if (sections->Size() < 1)
-  {
-    // we can test if its empty and pick some random owned server?
   }
   
   CGUIMessage message(GUI_MSG_LABEL_BIND_ADD, GetID(), CONTROL_HOME_LIST, 0, 0, sections);
