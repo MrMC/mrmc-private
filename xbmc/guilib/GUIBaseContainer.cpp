@@ -430,17 +430,6 @@ bool CGUIBaseContainer::OnMessage(CGUIMessage& message)
         return true;
       }
     }
-    if (message.GetMessage() == GUI_MSG_LABEL_BIND_ADD && message.GetPointer())
-    {
-      Reset();
-      UpdateListProvider(true);
-      CFileItemList *items = (CFileItemList *)message.GetPointer();
-      for (int i = 0; i < items->Size(); i++)
-        m_items.insert(m_items.begin(),items->Get(i));
-      UpdateLayout(true);
-      UpdateScrollByLetter();
-      SelectItem(message.GetParam1());
-    }
     if (message.GetMessage() == GUI_MSG_ITEM_SELECT)
     {
       SelectItem(message.GetParam1());

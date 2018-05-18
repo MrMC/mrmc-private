@@ -161,8 +161,6 @@
  */
 #define GUI_MSG_UI_READY       49
 
-#define GUI_MSG_LABEL_BIND_ADD     50
-
 #define GUI_MSG_USER         1000
 
 /*!
