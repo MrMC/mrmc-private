@@ -31,6 +31,19 @@
 #include "services/emby/EmbyViewCache.h"
 #include "services/emby/EmbyClient.h"
 
+typedef struct
+{
+  std::string name;
+  CVariant value;
+} ButtonProperty;
+
+typedef struct
+{
+  std::string onclick;
+  std::string label;
+  std::vector<ButtonProperty> properties;
+} HomeButton;
+
 class CVariant;
 
 class CGUIWindowHome :
@@ -67,11 +80,14 @@ private:
   
   // services below
   void SetupServices();
+  void SetupStaticHomeButtons(CFileItemList &sections);
+  CFileItemPtr MakeButton(HomeButton button);
+  CFileItemList* m_buttonSections;
   // plex service
-  CFileItemList* AddPlexSection(CPlexClientPtr client);
+  void  AddPlexSection(CPlexClientPtr client);
   std::vector<PlexSectionsContent> GetPlexSections(CPlexClientPtr client);
   // emby service
-  CFileItemList* AddEmbySection(CEmbyClientPtr client);
+  void AddEmbySection(CEmbyClientPtr client);
   std::vector<EmbyViewInfo>    GetEmbySections(CEmbyClientPtr client);
   
 };

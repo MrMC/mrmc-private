@@ -20,6 +20,7 @@
 
 #include "GUIUserMessages.h"
 #include "GUIWindowHome.h"
+#include "GUIInfoManager.h"
 #include "input/Key.h"
 #include "guilib/WindowIDs.h"
 #include "utils/JobManager.h"
@@ -44,7 +45,10 @@
 #include "filesystem/CloudUtils.h"
 #include "filesystem/StackDirectory.h"
 #include "utils/Base64URL.h"
-#include "listproviders/StaticProvider.h"
+#include "guiinfo/GUIInfoLabels.h"
+#include "pvr/PVRManager.h"
+#include "interfaces/builtins/Builtins.h"
+#include "addons/AddonManager.h"
 
 #define CONTROL_HOMESHELFMOVIESRA      8000
 #define CONTROL_HOMESHELFTVSHOWSRA     8001
@@ -77,6 +81,7 @@ CGUIWindowHome::CGUIWindowHome(void) : CGUIWindow(WINDOW_HOME, "Home.xml"),
   m_HomeShelfMusicVideos = new CFileItemList;
 
   CAnnouncementManager::GetInstance().AddAnnouncer(this);
+  m_buttonSections = new CFileItemList;
 }
 
 CGUIWindowHome::~CGUIWindowHome(void)
@@ -139,6 +144,7 @@ void CGUIWindowHome::OnInitWindow()
   {
     SET_CONTROL_HIDDEN(CONTROL_SERVER_BUTTON);
     SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , "Server");
+    SetupStaticHomeButtons(*m_buttonSections);
   }
   
   if (!m_firstRun)
@@ -458,6 +464,16 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
       }
       return true;
     }
+    else if (selectAction && iControl == CONTROL_HOME_LIST)
+    {
+      CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_HOME_LIST);
+      OnMessage(msg);
+      
+      int item = msg.GetParam1();
+      CFileItem selectedItem(*new CFileItem(*m_buttonSections->Get(item)));
+      CBuiltins::GetInstance().Execute(selectedItem.GetPath());
+      return true;
+    }
     break;
   }
   default:
@@ -574,17 +590,18 @@ void CGUIWindowHome::SetupServices()
 {
   // idea here is that if button 4000 exists in the home screen skin is compatible
   // with new Server layouts on home
-  const CGUIControl *btnServers = GetControl(4000);
+  const CGUIControl *btnServers = GetControl(CONTROL_SERVER_BUTTON);
   if (!btnServers)
     return;
   
   if (CServicesManager::GetInstance().HasServices())
     SET_CONTROL_VISIBLE(CONTROL_SERVER_BUTTON);
-  else
-    return;
   
   CSingleLock lock(m_critsection);
-  CFileItemList* sections = new CFileItemList();
+  m_buttonSections->ClearItems();
+  
+  SetupStaticHomeButtons(*m_buttonSections);
+  
   std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
   std::string serverUUID = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
   
@@ -595,7 +612,7 @@ void CGUIWindowHome::SetupServices()
       CPlexClientPtr plexClient = CPlexServices::GetInstance().GetClient(serverUUID);
       if (plexClient)
       {
-        sections->Append(*AddPlexSection(plexClient));
+        AddPlexSection(plexClient);
         SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , plexClient->GetServerName());
       }
     }
@@ -607,7 +624,7 @@ void CGUIWindowHome::SetupServices()
       CEmbyClientPtr embyClient = CEmbyServices::GetInstance().GetClient(serverUUID);
       if (embyClient)
       {
-        sections->Append(*AddEmbySection(embyClient));
+        AddEmbySection(embyClient);
         SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , embyClient->GetServerName());
       }
     }
@@ -624,7 +641,7 @@ void CGUIWindowHome::SetupServices()
   // if we are here, and there is no sections that means thet user hasnt selected the server
   // or that selected server is no longer available... if there is only one server, use that one..
   // otherwise pick first owned server
-  if (sections->Size() < 1)
+  if (m_buttonSections->Size() < 1)
   {
 
     std::string uuid;
@@ -648,7 +665,7 @@ void CGUIWindowHome::SetupServices()
             CPlexClientPtr plexClient = CPlexServices::GetInstance().GetClient(uuid);
             if (plexClient)
             {
-              sections->Append(*AddPlexSection(plexClient));
+              AddPlexSection(plexClient);
               SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , plexClient->GetServerName());
               break;
             }
@@ -675,7 +692,7 @@ void CGUIWindowHome::SetupServices()
             CEmbyClientPtr embyClient = CEmbyServices::GetInstance().GetClient(uuid);
             if (embyClient)
             {
-              sections->Append(*AddEmbySection(embyClient));
+              AddEmbySection(embyClient);
               SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , embyClient->GetServerName());
             }
           }
@@ -687,9 +704,338 @@ void CGUIWindowHome::SetupServices()
     CSettings::GetInstance().Save();
   }
   
-  CGUIMessage message(GUI_MSG_LABEL_BIND_ADD, GetID(), CONTROL_HOME_LIST, 0, 0, sections);
+  CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_HOME_LIST);
+  OnMessage(msg);
+  
+  int item = msg.GetParam1();
+  
+  CGUIMessage message(GUI_MSG_LABEL_BIND, GetID(), CONTROL_HOME_LIST, item, 0, m_buttonSections);
   g_windowManager.SendThreadMessage(message);
+  
+  
 }
+
+void CGUIWindowHome::SetupStaticHomeButtons(CFileItemList &sections)
+{
+  bool hasMovies = g_infoManager.GetLibraryBool(LIBRARY_HAS_MOVIES);
+  bool hasTvShows = g_infoManager.GetLibraryBool(LIBRARY_HAS_TVSHOWS);
+  bool hasMusic = g_infoManager.GetLibraryBool(LIBRARY_HAS_MUSIC);
+  bool hasMusicVideos = g_infoManager.GetLibraryBool(LIBRARY_HAS_MUSICVIDEOS);
+  bool hasPictures = g_infoManager.GetLibraryBool(LIBRARY_HAS_PICTURES);
+  bool hasExtensions = ADDON::CAddonMgr::GetInstance().HasExtensions();
+  
+  bool hasLiveTv = g_infoManager.GetBool(PVR_HAS_TV_CHANNELS);
+  bool hasRadio = g_infoManager.GetBool(PVR_HAS_RADIO_CHANNELS);
+  
+  const CGUIControl *btnFavourites = GetControl(4001);
+  
+  HomeButton button;
+  ButtonProperty property;
+  CFileItemPtr ptrButton;
+  
+  CFileItemList* staticSections = new CFileItemList;
+
+  // Movies Button
+  if (hasMovies)
+  {
+    button.label = g_localizeStrings.Get(342);
+    button.onclick = "ActivateWindow(Videos,MovieTitlesLocal,return)";
+    // type
+    property.name = "type";
+    property.value = "movies";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[5000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "movies";
+    button.properties.push_back(property);
+    // submenu
+    property.name = "submenu";
+    property.value = true;
+    button.properties.push_back(property);
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // TVShows Button
+  if (hasTvShows)
+  {
+    button.label = g_localizeStrings.Get(20343);
+    button.onclick = "ActivateWindow(Videos,TVShowTitlesLocal,return)";
+    // type
+    property.name = "type";
+    property.value = "tvshows";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[6000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "tvshows";
+    button.properties.push_back(property);
+    // submenu
+    property.name = "submenu";
+    property.value = true;
+    button.properties.push_back(property);
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // Videos Button
+  if (!(hasMovies | hasTvShows | hasMusic))
+  {
+    button.label = g_localizeStrings.Get(20094);
+    button.onclick = "ActivateWindow(MediaSources,root)";
+    // type
+    property.name = "type";
+    property.value = "videos";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[11000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "video";
+    button.properties.push_back(property);
+
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // Music Button
+  if (hasMusic)
+  {
+    button.label = g_localizeStrings.Get(2);
+    button.onclick = "ActivateWindow(Music,rootLocal,return)";
+    // type
+    property.name = "type";
+    property.value = "music";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[7000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "music";
+    button.properties.push_back(property);
+    // submenu
+    property.name = "submenu";
+    property.value = true;
+    button.properties.push_back(property);
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // MusicVideos Button
+  if (hasMusicVideos)
+  {
+    button.label = g_localizeStrings.Get(20389);
+    button.onclick = "ActivateWindow(Videos,musicvideos,return)";
+    // type
+    property.name = "type";
+    property.value = "videos";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[16000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "musicvideos";
+    button.properties.push_back(property);
+
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // LiveTV Button
+  if (hasLiveTv)
+  {
+    button.label = g_localizeStrings.Get(19020);
+    button.onclick = "ActivateWindow(TVChannels)";
+    // type
+    property.name = "type";
+    property.value = "livetv";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[12000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "livetv";
+    button.properties.push_back(property);
+    // submenu
+    property.name = "submenu";
+    property.value = true;
+    button.properties.push_back(property);
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // Radio Button
+  if (hasRadio)
+  {
+    button.label = g_localizeStrings.Get(19021);
+    button.onclick = "ActivateWindow(RadioChannels)";
+    // type
+    property.name = "type";
+    property.value = "radio";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[13000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "radio";
+    button.properties.push_back(property);
+    // submenu
+    property.name = "submenu";
+    property.value = true;
+    button.properties.push_back(property);
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // Pictures Button
+  if (hasPictures)
+  {
+    button.label = g_localizeStrings.Get(1);
+    button.onclick = "ActivateWindow(Pictures)";
+    // type
+    property.name = "type";
+    property.value = "pictures";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[4000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "pictures";
+    button.properties.push_back(property);
+
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // Extensions Button, some skins might have separate Favourites button, outside home menu list
+  if (!btnFavourites)
+  {
+    button.label = g_localizeStrings.Get(10134);
+    button.onclick = "ActivateWindow(favourites)";
+    // type
+    property.name = "type";
+    property.value = "favorites";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[14000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "favorites";
+    button.properties.push_back(property);
+    
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // Extensions Button
+  if (hasExtensions)
+  {
+    button.label = g_localizeStrings.Get(24001);
+    button.onclick = "ActivateWindow(Programs,Addons,return)";
+    // type
+    property.name = "type";
+    property.value = "extensions";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[19000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "addons";
+    button.properties.push_back(property);
+    
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  // Settings Button
+  if (!btnFavourites)
+  {
+    button.label = g_localizeStrings.Get(10004);
+    button.onclick = "ActivateWindow(settings)";
+    // type
+    property.name = "type";
+    property.value = "system";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[14000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "system";
+    button.properties.push_back(property);
+    // submenu
+    property.name = "submenu";
+    property.value = true;
+    button.properties.push_back(property);
+    
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // QUIT Button
+  if (!btnFavourites && !(g_infoManager.GetBool(SYSTEM_PLATFORM_DARWIN_TVOS) | g_infoManager.GetBool(SYSTEM_PLATFORM_DARWIN_IOS)))
+  {
+    button.label = g_localizeStrings.Get(13009);
+    button.onclick = "ActivateWindow(shutdownmenu)";
+    // type
+    property.name = "type";
+    property.value = "quit";
+    button.properties.push_back(property);
+
+    // id
+    property.name = "id";
+    property.value = "quit";
+    button.properties.push_back(property);
+    
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  CGUIMessage message(GUI_MSG_LABEL_BIND, GetID(), CONTROL_HOME_LIST, 0, 0, staticSections);
+  g_windowManager.SendThreadMessage(message);
+  
+  sections.Append(*staticSections);
+  
+}
+
+CFileItemPtr CGUIWindowHome::MakeButton(HomeButton button)
+{
+  CFileItemPtr item(new CFileItem());
+  item->SetLabel(button.label);
+  for (const auto &property : button.properties)
+  {
+    // add all properties
+    item->SetProperty(property.name,property.value);
+  }
+  item->SetPath(button.onclick);
+
+  return item;
+}
+
+
 std::vector<PlexSectionsContent> CGUIWindowHome::GetPlexSections(CPlexClientPtr client)
 {
   std::vector<PlexSectionsContent> sections;
@@ -704,9 +1050,8 @@ std::vector<PlexSectionsContent> CGUIWindowHome::GetPlexSections(CPlexClientPtr 
   return sections;
 }
 
-CFileItemList* CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
+void CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
 {
-  CFileItemList* sections = new CFileItemList();
   std::vector<PlexSectionsContent> contents = GetPlexSections(client);
   for (const auto &content : contents)
   {
@@ -718,12 +1063,7 @@ CFileItemList* CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
 
     item->SetProperty("service",true);
     item->SetProperty("servicetype","plex");
-    item->SetProperty("base64url",Base64URL::Encode(curl.Get()));
-    // add onclick action
     std::string strAction;
-    CGUIAction clickAction;
-    CGUIAction::cond_action_pair pair;
-    
     std::string filters;
     std::string sufix = "all";
     if (CSettings::GetInstance().GetBool(CSettings::SETTING_MYVIDEOS_FLATTEN))
@@ -731,10 +1071,8 @@ CFileItemList* CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
       filters = "filters/";
       sufix = "";
     }
-    
     std::string filename = StringUtils::Format("%s/%s", content.section.c_str(), content.type == "artist" ? "":sufix.c_str());
     curl.SetFileName(filename);
-    
     if (content.type == "movie")
     {
       strAction = "plex://movies/titles/" + filters + Base64URL::Encode(curl.Get());
@@ -750,15 +1088,11 @@ CFileItemList* CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
       strAction = "plex://music/root/"  + filters + Base64URL::Encode(curl.Get());
       item->SetProperty("type","Music");
     }
-    
-    pair.action = "ActivateWindow(Videos," + strAction +  ",return)";
-    clickAction.m_actions.push_back(pair);
-    
-    CGUIStaticItemPtr staticItem(new CGUIStaticItem(*item));
-    staticItem->SetClickActions(clickAction);
-    sections->Add(staticItem);
+    item->SetProperty("base64url",Base64URL::Encode(curl.Get()));
+    item->SetProperty("submenu",CSettings::GetInstance().GetBool(CSettings::SETTING_MYVIDEOS_FLATTEN));
+    item->SetPath("ActivateWindow(Videos," + strAction +  ",return)");
+    m_buttonSections->AddFront(item,0);
   }
-  return sections;
 }
 
 std::vector<EmbyViewInfo> CGUIWindowHome::GetEmbySections(CEmbyClientPtr client)
@@ -773,9 +1107,8 @@ std::vector<EmbyViewInfo> CGUIWindowHome::GetEmbySections(CEmbyClientPtr client)
   return sections;
 }
 
-CFileItemList* CGUIWindowHome::AddEmbySection(CEmbyClientPtr client)
+void CGUIWindowHome::AddEmbySection(CEmbyClientPtr client)
 {
-  CFileItemList* sections = new CFileItemList();
   std::vector<EmbyViewInfo> contents = GetEmbySections(client);
   for (const auto &content : contents)
   {
@@ -788,33 +1121,26 @@ CFileItemList* CGUIWindowHome::AddEmbySection(CEmbyClientPtr client)
     item->SetProperty("service",true);
     item->SetProperty("servicetype","emby");
     item->SetProperty("base64url",Base64URL::Encode(curl.Get()));
-    // add onclick action
     std::string strAction;
-    CGUIAction clickAction;
-    CGUIAction::cond_action_pair pair;
-    
     if (content.mediaType == "movies")
     {
       strAction = "emby://movies/titles/" + Base64URL::Encode(curl.Get());
       item->SetProperty("type","Movies");
+      item->SetProperty("submenu",true);
     }
     else if (content.mediaType == "tvshows")
     {
       strAction = "emby://tvshows/titles/" + Base64URL::Encode(curl.Get());
       item->SetProperty("type","TvShows");
+      item->SetProperty("submenu",true);
     }
     else if (content.mediaType == "music")
     {
       strAction = "emby://music/root/" + Base64URL::Encode(curl.Get());
       item->SetProperty("type","Music");
+      item->SetProperty("submenu",true);
     }
-    
-    pair.action = "ActivateWindow(Videos," + strAction +  ",return)";
-    clickAction.m_actions.push_back(pair);
-    
-    CGUIStaticItemPtr staticItem(new CGUIStaticItem(*item));
-    staticItem->SetClickActions(clickAction);
-    sections->Add(staticItem);
+    item->SetPath("ActivateWindow(Videos," + strAction +  ",return)");
+    m_buttonSections->AddFront(item,0);
   }
-  return sections;
 }
