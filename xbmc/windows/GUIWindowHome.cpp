@@ -145,7 +145,7 @@ void CGUIWindowHome::OnInitWindow()
   else
   {
     SET_CONTROL_HIDDEN(CONTROL_SERVER_BUTTON);
-    SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , "Server");
+    SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , g_localizeStrings.Get(231));
     SetupStaticHomeButtons(*m_buttonSections);
   }
   
@@ -602,7 +602,10 @@ void CGUIWindowHome::SetupServices()
     return;
   
   if (CServicesManager::GetInstance().HasServices())
+  {
     SET_CONTROL_VISIBLE(CONTROL_SERVER_BUTTON);
+    SET_CONTROL_LABEL(CONTROL_SERVER_BUTTON , g_localizeStrings.Get(231));
+  }
   
   CSingleLock lock(m_critsection);
   m_buttonSections->ClearItems();
