@@ -802,28 +802,6 @@ void CGUIWindowHome::SetupStaticHomeButtons(CFileItemList &sections)
     staticSections->Add(ptrButton);
   }
   
-  // MediaSources Button
-  if (showMediaSources)
-  {
-    button.label = g_localizeStrings.Get(20094);
-    button.onclick = "ActivateWindow(MediaSources,root)";
-    // type
-    property.name = "type";
-    property.value = "videos";
-    button.properties.push_back(property);
-    // menu_id
-    property.name = "menu_id";
-    property.value = "$NUMBER[11000]";
-    button.properties.push_back(property);
-    // id
-    property.name = "id";
-    property.value = "video";
-    button.properties.push_back(property);
-
-    ptrButton = MakeButton(button);
-    staticSections->Add(ptrButton);
-  }
-  
   // Music Button
   if (hasMusic)
   {
@@ -962,6 +940,28 @@ void CGUIWindowHome::SetupStaticHomeButtons(CFileItemList &sections)
     // id
     property.name = "id";
     property.value = "favorites";
+    button.properties.push_back(property);
+    
+    ptrButton = MakeButton(button);
+    staticSections->Add(ptrButton);
+  }
+  
+  // MediaSources Button
+  if (showMediaSources)
+  {
+    button.label = g_localizeStrings.Get(20094);
+    button.onclick = "ActivateWindow(MediaSources,root)";
+    // type
+    property.name = "type";
+    property.value = "videos";
+    button.properties.push_back(property);
+    // menu_id
+    property.name = "menu_id";
+    property.value = "$NUMBER[11000]";
+    button.properties.push_back(property);
+    // id
+    property.name = "id";
+    property.value = "video";
     button.properties.push_back(property);
     
     ptrButton = MakeButton(button);
