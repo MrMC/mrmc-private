@@ -49,6 +49,7 @@
 #include "pvr/PVRManager.h"
 #include "interfaces/builtins/Builtins.h"
 #include "addons/AddonManager.h"
+#include "settings/SkinSettings.h"
 
 #define CONTROL_HOMESHELFMOVIESRA      8000
 #define CONTROL_HOMESHELFTVSHOWSRA     8001
@@ -60,6 +61,7 @@
 
 #define CONTROL_HOME_LIST              9000
 #define CONTROL_SERVER_BUTTON          4000
+#define CONTROL_FAVOURITES_BUTTON      4001
 
 using namespace ANNOUNCEMENT;
 
@@ -722,17 +724,27 @@ void CGUIWindowHome::SetupServices()
 
 void CGUIWindowHome::SetupStaticHomeButtons(CFileItemList &sections)
 {
-  bool hasMovies = g_infoManager.GetLibraryBool(LIBRARY_HAS_MOVIES);
-  bool hasTvShows = g_infoManager.GetLibraryBool(LIBRARY_HAS_TVSHOWS);
-  bool hasMusic = g_infoManager.GetLibraryBool(LIBRARY_HAS_MUSIC);
-  bool hasMusicVideos = g_infoManager.GetLibraryBool(LIBRARY_HAS_MUSICVIDEOS);
-  bool hasPictures = g_infoManager.GetLibraryBool(LIBRARY_HAS_PICTURES);
-  bool hasExtensions = ADDON::CAddonMgr::GetInstance().HasExtensions();
+  bool hasMovies = (g_infoManager.GetLibraryBool(LIBRARY_HAS_MOVIES) &&
+                    !g_SkinInfo->GetSkinSettingBool("HomeMenuNoMovieButton"));
+  bool hasTvShows = (g_infoManager.GetLibraryBool(LIBRARY_HAS_TVSHOWS) &&
+                     !g_SkinInfo->GetSkinSettingBool("HomeMenuNoTVShowButton"));
+  bool hasMusic = (g_infoManager.GetLibraryBool(LIBRARY_HAS_MUSIC) &&
+                   !g_SkinInfo->GetSkinSettingBool("HomeMenuNoMusicButton"));
+  bool hasMusicVideos = (g_infoManager.GetLibraryBool(LIBRARY_HAS_MUSICVIDEOS) &&
+                         !g_SkinInfo->GetSkinSettingBool("HomeMenuNoMusicVideoButton"));
+  bool hasPictures = (g_infoManager.GetLibraryBool(LIBRARY_HAS_PICTURES) &&
+                      !g_SkinInfo->GetSkinSettingBool("HomeMenuNoPicturesButton"));
+
+  bool hasLiveTv = (g_infoManager.GetBool(PVR_HAS_TV_CHANNELS) &&
+                    !g_SkinInfo->GetSkinSettingBool("HomeMenuNoTVButton"));
+  bool hasRadio = (g_infoManager.GetBool(PVR_HAS_RADIO_CHANNELS) &&
+                    !g_SkinInfo->GetSkinSettingBool("HomeMenuNoRadioButton"));
+  bool hasExtensions = (ADDON::CAddonMgr::GetInstance().HasExtensions() &&
+                        !g_SkinInfo->GetSkinSettingBool("HomeMenuNoAddonsButton"));
   
-  bool hasLiveTv = g_infoManager.GetBool(PVR_HAS_TV_CHANNELS);
-  bool hasRadio = g_infoManager.GetBool(PVR_HAS_RADIO_CHANNELS);
-  
-  const CGUIControl *btnFavourites = GetControl(4001);
+  bool showFavourites = !g_SkinInfo->GetSkinSettingBool("HomeMenuNoFavButton");
+  bool showMediaSources = !g_SkinInfo->GetSkinSettingBool("HomeMenuNoMediaSourceButton");
+  const CGUIControl *btnFavourites = GetControl(CONTROL_FAVOURITES_BUTTON);
   
   HomeButton button;
   ButtonProperty property;
@@ -790,8 +802,8 @@ void CGUIWindowHome::SetupStaticHomeButtons(CFileItemList &sections)
     staticSections->Add(ptrButton);
   }
   
-  // Videos Button
-  if (!(hasMovies | hasTvShows | hasMusic))
+  // MediaSources Button
+  if (showMediaSources)
   {
     button.label = g_localizeStrings.Get(20094);
     button.onclick = "ActivateWindow(MediaSources,root)";
@@ -863,7 +875,10 @@ void CGUIWindowHome::SetupStaticHomeButtons(CFileItemList &sections)
   if (hasLiveTv)
   {
     button.label = g_localizeStrings.Get(19020);
-    button.onclick = "ActivateWindow(TVChannels)";
+    if (g_SkinInfo->GetSkinSettingBool("tv_to_gude"))
+      button.onclick = "ActivateWindow(TvGuide)";
+    else
+      button.onclick = "ActivateWindow(TVChannels)";
     // type
     property.name = "type";
     property.value = "livetv";
@@ -932,7 +947,7 @@ void CGUIWindowHome::SetupStaticHomeButtons(CFileItemList &sections)
   }
   
   // Extensions Button, some skins might have separate Favourites button, outside home menu list
-  if (!btnFavourites)
+  if (!btnFavourites && showFavourites)
   {
     button.label = g_localizeStrings.Get(10134);
     button.onclick = "ActivateWindow(favourites)";
