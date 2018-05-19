@@ -419,8 +419,13 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
       std::vector<CPlexClientPtr>  plexClients;
       CPlexServices::GetInstance().GetClients(plexClients);
       std::string uuid = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
-      int counter = 0;
+      int counter = 1;
       int selected = 0;
+      // add fake "none" button
+      CFileItem item(g_localizeStrings.Get(231));
+      item.SetProperty("type", "none");
+      item.SetProperty("type", "none");
+      selectDialog->Add(item);
       for (const auto &client : plexClients)
       {
         CFileItem item("Plex - " + client->GetServerName());
@@ -633,10 +638,10 @@ void CGUIWindowHome::SetupServices()
   // if total number of servers is 1, no need to show the button
   bool onlyOne = (CPlexServices::GetInstance().GetNumberOfClients() +
                   CEmbyServices::GetInstance().GetNumberOfClients()) == 1;
-  if (onlyOne)
-    SET_CONTROL_HIDDEN(CONTROL_SERVER_BUTTON);
-  else
-    SET_CONTROL_VISIBLE(CONTROL_SERVER_BUTTON);
+//  if (onlyOne)
+//    SET_CONTROL_HIDDEN(CONTROL_SERVER_BUTTON);
+//  else
+//    SET_CONTROL_VISIBLE(CONTROL_SERVER_BUTTON);
   
   // if we are here, and there is no sections that means thet user hasnt selected the server
   // or that selected server is no longer available... if there is only one server, use that one..
@@ -1066,7 +1071,7 @@ void CGUIWindowHome::AddPlexSection(CPlexClientPtr client)
     std::string strAction;
     std::string filters;
     std::string sufix = "all";
-    if (CSettings::GetInstance().GetBool(CSettings::SETTING_MYVIDEOS_FLATTEN))
+    if (!CSettings::GetInstance().GetBool(CSettings::SETTING_MYVIDEOS_FLATTEN))
     {
       filters = "filters/";
       sufix = "";
