@@ -418,13 +418,13 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         items.SetLabel(g_localizeStrings.Get(36917));
         items.SetContent("artists");
       }
-      if (path == "albums")
+      else if (path == "albums")
       {
         CPlexUtils::GetPlexArtistsOrAlbum(items,Base64URL::Decode(section), true);
         items.SetLabel(g_localizeStrings.Get(36919));
         items.SetContent("albums");
       }
-      if (path == "songs")
+      else if (path == "songs")
       {
         CPlexUtils::GetPlexSongs(items,Base64URL::Decode(section));
         items.SetLabel(g_localizeStrings.Get(36921));
@@ -434,6 +434,21 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       {
         CPlexUtils::GetPlexRecentlyAddedAlbums(items, Base64URL::Decode(section));
         items.SetLabel(g_localizeStrings.Get(359));
+        items.SetContent("albums");
+      }
+      else if (path == "filters")
+      {
+        CPlexUtils::GetPlexFilters(items, Base64URL::Decode(section), "plex://music/");
+        items.SetLabel(g_localizeStrings.Get(359));
+        items.SetContent("albums");
+      }
+      else
+      {
+        std::string parentPath = "plex://music/filter/";
+        if (path.empty() ||  path == "all")
+          parentPath += "albums/";
+        filter = "";
+        CPlexUtils::GetPlexFilter(items, Base64URL::Decode(section), parentPath, filter);
         items.SetContent("albums");
       }
     }

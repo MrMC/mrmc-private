@@ -615,6 +615,7 @@ bool CPlexUtils::GetPlexFilter(CFileItemList &items, std::string url, std::strin
 {
   bool rtn = false;
   CVariant variant = GetPlexCVariant(url, filter);
+  std::string librarySectionID = variant["MediaContainer"]["librarySectionID"].asString();
   if (!variant.isNull() && variant.isObject() && variant.isMember("MediaContainer"))
   {
     CVariant directory(variant["MediaContainer"]["Directory"]);
@@ -636,7 +637,13 @@ bool CPlexUtils::GetPlexFilter(CFileItemList &items, std::string url, std::strin
           pItem->m_bIsShareOrDrive = false;
           if (fastKey.empty())
           {
-            plex.SetFileName(plex.GetFileName() + "/" + key);
+            if (librarySectionID == "6")
+            {
+              removeLeadingSlash(key);
+              plex.SetFileName(key);
+            }
+            else
+              plex.SetFileName(plex.GetFileName() + "/" + key);
           }
           else
           {
@@ -699,7 +706,12 @@ bool CPlexUtils::GetPlexFilters(CFileItemList &items, std::string url, std::stri
             std::string path = "titles/";
             if (librarySectionID == "2" && (key == "recentlyAdded" || key == "recentlyViewed" || key == "newest"))
               path = "seasons/";
-              
+            
+            if (librarySectionID == "6" && (key == "albums" || key == "genre" || key == "decade"))
+            {
+              path = "albums/";
+            }
+            
             plex.SetFileName(fileName + key);
             pItem->SetPath(parentPath + path + Base64URL::Encode(plex.Get()));
           }
@@ -1221,6 +1233,8 @@ bool CPlexUtils::GetPlexAlbumSongs(CFileItem item, CFileItemList &items)
 bool CPlexUtils::GetPlexArtistsOrAlbum(CFileItemList &items, std::string url, bool album)
 {
   bool rtn = false;
+  if(album)
+    url += "&type=9";
   CVariant variant = GetPlexCVariant(url);
   if (!variant.isNull() && variant.isObject() && variant.isMember("MediaContainer"))
   {
