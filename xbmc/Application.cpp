@@ -212,6 +212,8 @@
 #include <androidjni/ApplicationInfo.h>
 #include <androidjni/System.h>
 #include "platform/android/activity/XBMCApp.h"
+#include "platform/android/service/XBMCService.h"
+#include "platform/android/service/XBMCService.h"
 #include "platform/android/activity/AndroidFeatures.h"
 #endif
 
@@ -271,6 +273,8 @@ CApplication::CApplication(void)
   m_dpmsIsManual = false;
   m_iScreenSaveLock = 0;
   m_bInitializing = true;
+  m_bGUIInitialized = false;
+  m_bGUICreated = false;
   m_eForcedNextPlayer = EPC_NONE;
   m_strPlayListFile = "";
   m_nextPlaylistItem = -1;
@@ -550,13 +554,12 @@ bool CApplication::Create()
         CJNIBuild::PRODUCT.c_str(), CJNIBuild::DEVICE.c_str(), CJNIBuild::BOARD.c_str(),
         CJNIBuild::MANUFACTURER.c_str(), CJNIBuild::BRAND.c_str(), CJNIBuild::MODEL.c_str(), CJNIBuild::HARDWARE.c_str());
   std::string extstorage;
-  bool extready = CXBMCApp::GetExternalStorage(extstorage);
+  bool extready = CXBMCService::GetExternalStorage(extstorage);
   CLog::Log(LOGNOTICE, "External storage path = %s; status = %s", extstorage.c_str(), extready ? "ok" : "nok");
   CLog::Log(LOGNOTICE, "System library paths = %s", CJNISystem::getProperty("java.library.path").c_str());
-  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCApp::get()->getApplicationInfo().nativeLibraryDir.c_str());
-  CLog::Log(LOGNOTICE, "APK = %s", CXBMCApp::get()->getPackageResourcePath().c_str());
+  CLog::Log(LOGNOTICE, "App library path = %s", CXBMCService::get()->getApplicationInfo().nativeLibraryDir.c_str());
+  CLog::Log(LOGNOTICE, "APK = %s", CXBMCService::get()->getPackageResourcePath().c_str());
   CLog::Log(LOGNOTICE, "HasTouchScreen = %s", CAndroidFeatures::HasTouchScreen() ? "yes" : "no");
-  CLog::Log(LOGNOTICE, "IsNightMode = %s", CXBMCApp::IsNightMode() ? "yes" : "no");
 #endif
 
 #if defined(__arm__) || defined(__arm64__) || defined(__aarch64__)
@@ -708,6 +711,8 @@ bool CApplication::Create()
 
 bool CApplication::CreateGUI()
 {
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
   m_renderGUI = true;
 #ifdef HAS_SDL
   CLog::Log(LOGNOTICE, "Setup SDL");
@@ -786,7 +791,7 @@ bool CApplication::CreateGUI()
     CDisplaySettings::GetInstance().SetCurrentResolution(RES_DESKTOP);
     sav_res = true;
   }
-  if (!InitWindow())
+  if (!InitWindow(CDisplaySettings::GetInstance().GetCurrentResolution()))
   {
     return false;
   }
@@ -808,7 +813,112 @@ bool CApplication::CreateGUI()
             info.iHeight,
             info.strMode.c_str());
 
-  g_windowManager.Initialize();
+  // Make sure we have at least the default skin
+  std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
+  std::string skin = CSkinSettings::GetInstance().CheckFallbackSkin();
+  if (!LoadSkin(skin) && !LoadSkin(defaultSkin))
+  {
+    CLog::Log(LOGERROR, "Default skin '%s' not found! Terminating..", defaultSkin.c_str());
+    return false;
+  }
+
+  // fallback skin has changed, we need to save the setting
+  if (CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN) != skin)
+  {
+    // m_skinReverting = true == no skin change prompt
+    m_skinReverting = true;
+    CSettings::GetInstance().SetString(CSettings::SETTING_LOOKANDFEEL_SKIN, skin);
+    CSettings::GetInstance().Save();
+  }
+
+  m_bGUICreated = true;
+
+  CLog::Log(LOGDEBUG, ">>> %s", __PRETTY_FUNCTION__);
+  return true;
+}
+
+bool CApplication::DestroyGUI()
+{
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
+
+  UnloadSkin();
+
+  g_Windowing.DestroyRenderSystem();
+  g_Windowing.DestroyWindowSystem();
+
+  m_bGUICreated = false;
+
+  return true;
+}
+
+bool CApplication::StartGUI()
+{
+  CLog::Log(LOGDEBUG, "CApplication: Start GUI");
+
+#if !defined(TARGET_DARWIN_TVOS)
+  g_peripherals.Initialise();
+#endif
+  CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
+
+  if (CSettings::GetInstance().GetBool(CSettings::SETTING_MASTERLOCK_STARTUPLOCK) &&
+      CProfilesManager::GetInstance().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE &&
+     !CProfilesManager::GetInstance().GetMasterProfile().getLockCode().empty())
+  {
+     g_passwordManager.CheckStartUpLock();
+  }
+
+  bool uiInitializationFinished = true;
+  // check if we should use the login screen
+  if (CProfilesManager::GetInstance().UsingLoginScreen())
+  {
+    // the login screen still needs to perform additional initialization
+    uiInitializationFinished = false;
+
+    g_windowManager.ActivateWindow(WINDOW_LOGIN_SCREEN);
+  }
+  else
+  {
+#ifdef HAS_JSONRPC
+    CJSONRPC::Initialize();
+#endif
+    ADDON::CAddonMgr::GetInstance().StartServices(false);
+
+    // start the PVR manager
+    StartPVRManager();
+
+    // activate the configured start window
+    int firstWindow = g_SkinInfo->GetFirstWindow();
+    g_windowManager.ActivateWindow(firstWindow);
+
+    // the startup window is considered part of the initialization as it most likely switches to the final window
+    uiInitializationFinished = firstWindow != WINDOW_STARTUP_ANIM;
+
+    CStereoscopicsManager::GetInstance().Initialize();
+  }
+
+//  std::string skin = CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
+//  if ((!CSettings::GetInstance().GetBool(CSettings::SETTING_LOOKANDFEEL_NEWSKINCHECKED)))
+//  {
+//    if (CSkinSettings::GetInstance().MigrateToNewSkin(skin))
+//    {
+//      m_skinReverting = true;
+//      LoadSkin("skin.opacity");
+//    }
+//  }
+
+#if defined(TARGET_DARWIN_TVOS)
+  // Migrate to Ariana for old AppleTV users
+  std::string skin = CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
+  if (!CSettings::GetInstance().GetBool(CSettings::SETTING_LOOKANDFEEL_ARIANASKINCHECKED))
+  {
+    if (CSkinSettings::GetInstance().MigrateToAriana(skin))
+    {
+      m_skinReverting = true;
+      LoadSkin("skin.ariana");
+    }
+
+  }
+#endif
 
   return true;
 }
@@ -1058,10 +1168,6 @@ bool CApplication::Initialize()
     StringUtils::Format(g_localizeStrings.Get(178).c_str(), g_sysinfo.GetAppName().c_str()),
     "special://xbmc/media/icon256x256.png", EventLevelBasic)));
 
-#if !defined(TARGET_DARWIN_TVOS)
-  g_peripherals.Initialise();
-#endif
-
   // Load curl so curl_global_init gets called before any service threads
   // are started. Unloading will have no effect as curl is never fully unloaded.
   // To quote man curl_global_init:
@@ -1080,67 +1186,16 @@ bool CApplication::Initialize()
 
   // Init DPMS, before creating the corresponding setting control.
   m_dpms = new DPMSSupport();
-  bool uiInitializationFinished = true;
+
+  g_windowManager.CreateWindows();
   if (g_windowManager.Initialized())
   {
-    CSettings::GetInstance().GetSetting(CSettings::SETTING_POWERMANAGEMENT_DISPLAYSOFF)->SetRequirementsMet(m_dpms->IsSupported());
-
-    g_windowManager.CreateWindows();
-    /* window id's 3000 - 3100 are reserved for python */
-
-    // initialize splash window after splash screen disappears
-    // because we need a real window in the background which gets
-    // rendered while we load the main window or enter the master lock key
-    if (g_advancedSettings.m_splashImage)
-      g_windowManager.ActivateWindow(WINDOW_SPLASH);
-
-    // Make sure we have at least the default skin
-    std::string defaultSkin = ((const CSettingString*)CSettings::GetInstance().GetSetting(CSettings::SETTING_LOOKANDFEEL_SKIN))->GetDefault();
-    std::string skin = CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
-    if (!LoadSkin(skin) && !LoadSkin(defaultSkin))
-    {
-      CLog::Log(LOGERROR, "Default skin '%s' not found! Terminating..", defaultSkin.c_str());
-      return false;
-    }
-
-    if (CSettings::GetInstance().GetBool(CSettings::SETTING_MASTERLOCK_STARTUPLOCK) &&
-        CProfilesManager::GetInstance().GetMasterProfile().getLockMode() != LOCK_MODE_EVERYONE &&
-       !CProfilesManager::GetInstance().GetMasterProfile().getLockCode().empty())
-    {
-       g_passwordManager.CheckStartUpLock();
-    }
-
-    // check if we should use the login screen
-    if (CProfilesManager::GetInstance().UsingLoginScreen())
-    {
-      // the login screen still needs to perform additional initialization
-      uiInitializationFinished = false;
-
-      g_windowManager.ActivateWindow(WINDOW_LOGIN_SCREEN);
-    }
-    else
-    {
-#ifdef HAS_JSONRPC
-      CJSONRPC::Initialize();
-#endif
-      ADDON::CAddonMgr::GetInstance().StartServices(false);
-
-      // start the PVR manager
-      StartPVRManager();
-
-      // activate the configured start window
-      int firstWindow = g_SkinInfo->GetFirstWindow();
-      g_windowManager.ActivateWindow(firstWindow);
-
-      // the startup window is considered part of the initialization as it most likely switches to the final window
-      uiInitializationFinished = firstWindow != WINDOW_STARTUP_ANIM;
-
-      CStereoscopicsManager::GetInstance().Initialize();
-    }
-
+    StartGUI();
   }
   else //No GUI Created
   {
+    CLog::Log(LOGDEBUG, "CApplication: No GUI");
+
 #ifdef HAS_JSONRPC
     CJSONRPC::Initialize();
 #endif
@@ -1183,14 +1238,6 @@ bool CApplication::Initialize()
                     CPeripheralImon::GetCountOfImonsConflictWithDInput() == 0 );
 #endif
 
-//  // if the user interfaces has been fully initialized let everyone know
-//  if (uiInitializationFinished)
-//  {
-//    CGUIMessage msg(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UI_READY);
-//    g_windowManager.SendThreadMessage(msg);
-//  }
-
-  //CUtil::DumpSettingsFile();
   return true;
 }
 
@@ -1701,6 +1748,7 @@ void CApplication::UnloadSkin(bool forReload /* = false */)
 //  The g_SkinInfo shared_ptr ought to be reset here
 // but there are too many places it's used without checking for NULL
 // and as a result a race condition on exit can cause a crash.
+  g_SkinInfo.reset();
 }
 
 bool CApplication::LoadUserWindows()
@@ -2481,18 +2529,43 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
   break;
 
 #ifdef TARGET_ANDROID
-  case TMSG_DISPLAY_SETUP:
-    // If we are rendering GUI, we are in first run
+  case TMSG_DISPLAY_INIT:
     if (m_renderGUI)
       break;
+
+    // Wait for main window
+    if (!*CXBMCApp::GetNativeWindow(30000))
+      break;
+
+    CreateGUI();
+    if (!g_application.IsGUIInitialized())
+      StartGUI();
+
+    break;
+
+  case TMSG_DISPLAY_SETUP:
+    if (m_renderGUI)
+      break;
+
+    if (!g_application.IsGUICreated())
+      CreateGUI();
+
     // We might come from a refresh rate switch destroying the native window; use the context resolution
     InitWindow(g_graphicsContext.GetVideoResolution());
     SetRenderGUI(true);
     break;
 
-  case TMSG_DISPLAY_DESTROY:
+  case TMSG_DISPLAY_CLEANUP:
     DestroyWindow();
     SetRenderGUI(false);
+    break;
+
+  case TMSG_DISPLAY_DESTROY:
+    if (g_application.IsGUICreated())
+    {
+      DestroyGUI();
+      SetRenderGUI(false);
+    }
     break;
 #endif
 
@@ -2928,9 +3001,7 @@ void CApplication::Stop(int exitCode)
 
     CloseNetworkShares();
 
-    g_Windowing.DestroyRenderSystem();
-    g_Windowing.DestroyWindow();
-    g_Windowing.DestroyWindowSystem();
+    DestroyGUI();
 
     g_audioManager.DeInitialize();
     // shutdown the AudioEngine
@@ -4216,6 +4287,8 @@ bool CApplication::OnMessage(CGUIMessage& message)
         
         if (m_fallbackLanguageLoaded)
           CGUIDialogOK::ShowAndGetInput(CVariant{24133}, CVariant{24134});
+
+        m_bGUIInitialized = true;
       }
     }
     break;
@@ -5300,7 +5373,6 @@ void CApplication::StartDatabase()
     g_advancedSettings.setInternalMYSQL(((CSettingBool*)mysqlSetting)->GetValue(), false);
   }
 
-  DisableScreensaver(true);
   // initialize (and update as needed) our databases
   // m_dbInitializing is a memeber var to work around
   // race in CEvent where signaled is set and WaitMSec
@@ -5324,7 +5396,6 @@ void CApplication::StartDatabase()
     else
       ++iDots;
   }
-  DisableScreensaver(false);
 }
 
 void CApplication::InitEnvironment()
