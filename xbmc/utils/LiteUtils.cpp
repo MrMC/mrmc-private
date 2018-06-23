@@ -28,6 +28,7 @@
 #include "guilib/GUIWindowManager.h"
 #include "guilib/GUIMessage.h"
 #include "guilib/LocalizeStrings.h"
+#include "utils/purchases/InAppPurchase.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
 #if defined(TARGET_ANDROID)
@@ -63,13 +64,7 @@ void CLiteUtils::ShowIsLiteDialog(int preTruncateSize)
 
   std::string line2 = StringUtils::Format(g_localizeStrings.Get(897).c_str(), preTruncateSize, GetItemSizeLimit());
   std::string line3;
-  std::string path;
 #if defined(TARGET_DARWIN)
-  #if defined(TARGET_DARWIN_TVOS)
-    path = "https://itunes.apple.com/us/app/mrmc/id1059536415?mt=8&at=11l4L8";
-  #elif defined(TARGET_DARWIN_IOS)
-    path = "https://itunes.apple.com/us/app/mrmc-touch/id1062986407?mt=8&at=11l4L8";
-  #endif
   line3 = StringUtils::Format(g_localizeStrings.Get(898).c_str(), "Apple");
 #elif defined(TARGET_ANDROID)
   line3 = StringUtils::Format(g_localizeStrings.Get(898).c_str(), CAndroidFeatures::IsAmazonDevice() ? "Amazon":"Google Play");
@@ -89,24 +84,11 @@ void CLiteUtils::ShowIsLiteDialog(int preTruncateSize)
     pDialog->Open();
 
     if (pDialog->IsConfirmed())
-    {
-#if defined(TARGET_DARWIN)
-      CDarwinUtils::OpenAppWithOpenURL(path);
-#elif defined(TARGET_ANDROID)
-      if (CAndroidFeatures::IsAmazonDevice())
-        CXBMCApp::get()->openAmazonStore();
-      else
-        CXBMCApp::get()->openGooglePlayStore();
-#endif
-    }
+      g_windowManager.ActivateWindow(WINDOW_SETTINGS_APPSTORE);
   }
 }
 
 bool CLiteUtils::IsLite()
 {
-  bool res = false;
-#if defined(APP_PACKAGE_LITE)
-  res = true;
-#endif
-  return res;
+  return !CInAppPurchase::GetInstance().IsActivated();
 }

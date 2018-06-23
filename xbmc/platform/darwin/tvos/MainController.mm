@@ -478,8 +478,6 @@ MainController *g_xbmcController;
       return inActive;
 
     NSURL *url = [NSURL URLWithString:@"mrmc://wakeup"];
-    if (CLiteUtils::IsLite())
-      url = [NSURL URLWithString:@"mrmclite://wakeup"];
     [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
   }
 

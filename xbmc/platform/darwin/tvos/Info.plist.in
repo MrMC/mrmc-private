@@ -55,5 +55,8 @@
     <string>opengles-3</string>
   </array>
   <key>UIUserInterfaceStyle</key>
-    <string>Automatic</string></dict>
+    <string>Automatic</string>
+  <key>KeychainGroup</key>
+    <string>$(AppIdentifierPrefix)MrMC4.0</string>
+</dict>
 </plist>

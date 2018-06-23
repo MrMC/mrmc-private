@@ -133,6 +133,7 @@ typedef void (^RMStoreSuccessBlock)();
     NSMutableDictionary *_addPaymentParameters; // HACK: We use a dictionary of product identifiers because the returned SKPayment is different from the one we add to the queue. Bad Apple.
     NSMutableDictionary *_products;
     NSMutableSet *_productsRequestDelegates;
+    NSMutableSet *_productsRequests;
     
     NSMutableArray *_restoredTransactions;
     
@@ -154,6 +155,7 @@ typedef void (^RMStoreSuccessBlock)();
         _addPaymentParameters = [NSMutableDictionary dictionary];
         _products = [NSMutableDictionary dictionary];
         _productsRequestDelegates = [NSMutableSet set];
+        _productsRequests = [NSMutableSet set];
         _restoredTransactions = [NSMutableArray array];
         [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     }
@@ -240,7 +242,9 @@ typedef void (^RMStoreSuccessBlock)();
     [_productsRequestDelegates addObject:delegate];
  
     SKProductsRequest *productsRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:identifiers];
-	productsRequest.delegate = delegate;
+	  productsRequest.delegate = delegate;
+
+    [_productsRequests addObject:productsRequest];
     
     [productsRequest start];
 }
@@ -739,6 +743,11 @@ typedef void (^RMStoreSuccessBlock)();
     [_productsRequestDelegates removeObject:delegate];
 }
 
+- (void)removeProductsRequest:(SKProductsRequest*)productsRequest
+{
+    [_productsRequests removeObject:productsRequest];
+}
+
 @end
 
 @implementation RMProductsRequestDelegate
@@ -767,12 +776,13 @@ typedef void (^RMStoreSuccessBlock)();
     [[NSNotificationCenter defaultCenter] postNotificationName:RMSKProductsRequestFinished object:self.store userInfo:userInfo];
 }
 
-- (void)requestDidFinish:(SKRequest *)request
+- (void)requestDidFinish:(SKProductsRequest *)request
 {
     [self.store removeProductsRequestDelegate:self];
+    [self.store removeProductsRequest:request];
 }
 
-- (void)request:(SKRequest *)request didFailWithError:(NSError *)error
+- (void)request:(SKProductsRequest *)request didFailWithError:(NSError *)error
 {
     RMStoreLog(@"products request failed with error %@", error.debugDescription);
     if (self.failureBlock)
@@ -786,6 +796,7 @@ typedef void (^RMStoreSuccessBlock)();
     }
     [[NSNotificationCenter defaultCenter] postNotificationName:RMSKProductsRequestFailed object:self.store userInfo:userInfo];
     [self.store removeProductsRequestDelegate:self];
+    [self.store removeProductsRequest:request];
 }
 
 @end
