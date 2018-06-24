@@ -848,6 +848,7 @@ bool CApplication::DestroyGUI()
   g_Windowing.DestroyRenderSystem();
   g_Windowing.DestroyWindowSystem();
 
+  m_bGUIInitialized = false;
   m_bGUICreated = false;
 
   return true;
@@ -855,7 +856,7 @@ bool CApplication::DestroyGUI()
 
 bool CApplication::StartGUI()
 {
-  CLog::Log(LOGDEBUG, "CApplication: Start GUI");
+  CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
 #if !defined(TARGET_DARWIN_TVOS)
   g_peripherals.Initialise();
@@ -2549,6 +2550,7 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
 
 #ifdef TARGET_ANDROID
   case TMSG_DISPLAY_INIT:
+    CLog::Log(LOGDEBUG, "TMSG_DISPLAY_INIT");
     if (m_renderGUI)
       break;
 
@@ -2563,11 +2565,14 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
     break;
 
   case TMSG_DISPLAY_SETUP:
+      CLog::Log(LOGDEBUG, "TMSG_DISPLAY_SETUP");
     if (m_renderGUI)
       break;
 
     if (!g_application.IsGUICreated())
       CreateGUI();
+    if (!g_application.IsGUIInitialized())
+      StartGUI();
 
     // We might come from a refresh rate switch destroying the native window; use the context resolution
     InitWindow(g_graphicsContext.GetVideoResolution());
@@ -2575,11 +2580,13 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
     break;
 
   case TMSG_DISPLAY_CLEANUP:
+      CLog::Log(LOGDEBUG, "TMSG_DISPLAY_CLEANUP");
     DestroyWindow();
     SetRenderGUI(false);
     break;
 
   case TMSG_DISPLAY_DESTROY:
+      CLog::Log(LOGDEBUG, "TMSG_DISPLAY_DESTROY");
     if (g_application.IsGUICreated())
     {
       DestroyGUI();
@@ -2866,8 +2873,8 @@ void CApplication::FrameMove(bool processEvents, bool processGUI)
       if (!m_skipGuiRender)
         g_windowManager.Process(CTimeUtils::GetFrameTime());
     }
-    g_windowManager.FrameMove();
   }
+  g_windowManager.FrameMove();
 }
 
 
