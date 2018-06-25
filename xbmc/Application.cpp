@@ -75,6 +75,7 @@
 #endif
 #include "utils/SystemInfo.h"
 #include "utils/TimeUtils.h"
+#include "utils/Weather.h"
 #include "GUILargeTextureManager.h"
 #include "TextureCache.h"
 #include "playlists/SmartPlayList.h"
@@ -841,7 +842,7 @@ bool CApplication::DestroyGUI()
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
-  UnloadSkin();
+  UnloadSkin(true);
 
   g_Windowing.DestroyRenderSystem();
   g_Windowing.DestroyWindowSystem();
@@ -879,13 +880,16 @@ bool CApplication::StartGUI()
   }
   else
   {
+    if (!IsInitialized())
+    {
 #ifdef HAS_JSONRPC
-    CJSONRPC::Initialize();
+      CJSONRPC::Initialize();
 #endif
-    ADDON::CAddonMgr::GetInstance().StartServices(false);
+      ADDON::CAddonMgr::GetInstance().StartServices(false);
 
-    // start the PVR manager
-    StartPVRManager();
+      // start the PVR manager
+      StartPVRManager();
+    }
 
     // activate the configured start window
     int firstWindow = g_SkinInfo->GetFirstWindow();
@@ -920,6 +924,9 @@ bool CApplication::StartGUI()
 
   }
 #endif
+
+  g_sysinfo.Refresh();
+  g_weatherManager.Refresh();
 
   return true;
 }
@@ -1201,9 +1208,10 @@ bool CApplication::Initialize()
     CJSONRPC::Initialize();
 #endif
     ADDON::CAddonMgr::GetInstance().StartServices(false);
+
+    g_sysinfo.Refresh();
   }
 
-  g_sysinfo.Refresh();
 
   CLog::Log(LOGINFO, "removing tempfiles");
   CUtil::RemoveTempFiles();
@@ -1632,7 +1640,7 @@ bool CApplication::LoadSkin(const SkinPtr& skin)
   std::vector<int> currentModelessWindows;
   g_windowManager.GetActiveModelessWindows(currentModelessWindows);
 
-  UnloadSkin();
+  UnloadSkin(true);
 
   CLog::Log(LOGINFO, "  load skin from: %s (version: %s)", skin->Path().c_str(), skin->Version().asString().c_str());
   g_SkinInfo = skin;
@@ -1744,11 +1752,9 @@ void CApplication::UnloadSkin(bool forReload /* = false */)
 
   g_colorManager.Clear();
 
-  g_infoManager.Clear();
+  if (!forReload)
+    g_infoManager.Clear();
 
-//  The g_SkinInfo shared_ptr ought to be reset here
-// but there are too many places it's used without checking for NULL
-// and as a result a race condition on exit can cause a crash.
   g_SkinInfo.reset();
 }
 
@@ -4288,10 +4294,6 @@ bool CApplication::OnMessage(CGUIMessage& message)
       }
       else if (message.GetParam1() == GUI_MSG_UI_READY)
       {
-        // remove splash window
-        if (g_windowManager.GetWindow(WINDOW_SPLASH))
-          g_windowManager.Delete(WINDOW_SPLASH);
-        
         if (m_fallbackLanguageLoaded)
           CGUIDialogOK::ShowAndGetInput(CVariant{24133}, CVariant{24134});
 
