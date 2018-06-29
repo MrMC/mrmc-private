@@ -845,6 +845,7 @@ bool CApplication::DestroyGUI()
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
   UnloadSkin(true);
+  g_windowManager.ClearWindowHistory();
 
   g_Windowing.DestroyRenderSystem();
   g_Windowing.DestroyWindowSystem();
