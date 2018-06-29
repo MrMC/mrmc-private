@@ -742,10 +742,13 @@ void CNWClient::SendFilesPlayed()
     playedFiles.apiSecret = m_PlayerInfo.apiSecret;
 
     std::string charbuffer(buffer.get());
-    buffer.clear();
+    // the file buffer is NOT null terminated :)
+    charbuffer[buffer.size()] = 0x00;
     std::vector<std::string> lines = StringUtils::Split(charbuffer, '\n');
     for (auto line: lines)
     {
+      if (line.empty())
+        continue;
       std::vector<std::string> items = StringUtils::Split(line, ',');
       TVAPI_File playedFile;
       switch(items.size())
@@ -814,7 +817,8 @@ void CNWClient::SendFilesDownloaded()
     downloadedFiles.apiSecret = m_PlayerInfo.apiSecret;
 
     std::string charbuffer(buffer.get());
-    buffer.clear();
+    // the file buffer is NOT null terminated :)
+    charbuffer[buffer.size()] = 0x00;
     std::vector<std::string> lines = StringUtils::Split(charbuffer, '\n');
     for (auto line: lines)
     {
