@@ -2546,9 +2546,7 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
     if (!*CXBMCApp::GetNativeWindow(30000))
       break;
 
-    if (!CreateGUI())
-      abort();
-
+    CreateGUI();
     if (!g_application.IsGUIInitialized())
       StartGUI();
 
@@ -2559,8 +2557,8 @@ void CApplication::OnApplicationMessage(ThreadMessage* pMsg)
     if (m_renderGUI)
       break;
 
-    if (!g_application.IsGUICreated() && !CreateGUI())
-      abort();
+    if (!g_application.IsGUICreated())
+      CreateGUI();
     if (!g_application.IsGUIInitialized())
       StartGUI();
 
