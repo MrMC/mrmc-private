@@ -496,7 +496,7 @@ void CXBMCApp::onLowMemory()
     if (m_playback_state & PLAYBACK_STATE_PLAYING)
       CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
 
-    CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_DESTROY);
+    finish();
   }
 }
 
