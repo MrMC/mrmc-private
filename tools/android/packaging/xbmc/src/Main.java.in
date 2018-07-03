@@ -47,6 +47,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private static final String TAG = "@APP_NAME_UC@";
   private static final int INTENT_RESULT_PROJECT_CODE = 34658;
   private static final int INTENT_MAKE_BROWSABLE_REQUEST_CODE = 39001;
+  private static final int XBMC_EXITCODE_UNINITIALIZED = -99;
+  private static final int XBMC_EXITCODE_QUIT = 0;
   private static final int XBMC_EXITCODE_POWERDOWN = 64;
   private static final int XBMC_EXITCODE_RESTARTAPP= 65;
   private static final int XBMC_EXITCODE_REBOOT    = 66;
@@ -67,7 +69,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private int mProjectionIntentId = 0;
 
   public String mDeviceName = Build.MODEL;
-  public int mExitCode = 0;
+  public int mExitCode = XBMC_EXITCODE_UNINITIALIZED;
   native void _onNewIntent(Intent intent);
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
   native void _doFrame(long frameTimeNanos);
@@ -393,8 +395,8 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   @Override
   public void onDestroy()
   {
-    // kill keepalive
-    stopService(new Intent(this, Service.class));
+    if (mExitCode == XBMC_EXITCODE_QUIT)
+      stopService(new Intent(this, Service.class));
 
     getApplicationContext().getContentResolver().unregisterContentObserver(mSettingsContentObserver);
     handler.removeCallbacks(leanbackUpdateRunnable);
