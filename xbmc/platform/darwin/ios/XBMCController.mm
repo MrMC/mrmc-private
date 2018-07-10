@@ -74,7 +74,7 @@ XBMCController *g_xbmcController;
 @synthesize m_screenScale;
 @synthesize m_touchBeginSignaled;
 @synthesize m_screenIdx;
-@synthesize m_screensize;
+@synthesize m_screenRect;
 @synthesize m_networkAutoSuspendTimer;
 @synthesize m_nowPlayingInfo;
 
@@ -562,6 +562,7 @@ XBMCController *g_xbmcController;
   
     m_glView.opaque = NO;
     m_glView.backgroundColor = [UIColor clearColor];
+
     [self.view addSubview: m_glView];
 
     [self.view setNeedsDisplay];
@@ -571,10 +572,29 @@ XBMCController *g_xbmcController;
     [self setVolumeChangeObserver];
   }
 }
+
+-(void)viewDidLayoutSubviews
+{
+  [super viewDidLayoutSubviews];
+  CGRect bounds = [UIScreen mainScreen].bounds;
+  UIEdgeInsets safeArea = UIEdgeInsetsZero;
+  if (__builtin_available(iOS 11.0, *))
+    safeArea = self.view.safeAreaInsets;
+  CGRect frame = CGRectMake(safeArea.left, safeArea.top,
+    bounds.size.width  - safeArea.left   - safeArea.right,
+    bounds.size.height - safeArea.bottom - safeArea.top);
+
+  m_glView.frame = frame;
+
+  // safe time to update screenRect, loadView is too early
+  m_screenRect = CGRectMake(frame.origin.x * m_screenScale, frame.origin.y * m_screenScale, frame.size.width * m_screenScale, frame.size.height * m_screenScale);
+}
+
 //--------------------------------------------------------------
 -(void)viewDidLoad
 {
   [super viewDidLoad];
+
   CGRect frame = CGRectMake(0, -100, 10, 0);
   MPVolumeView *volumeView = [[MPVolumeView alloc] initWithFrame:frame];
   [volumeView sizeToFit];
@@ -708,21 +728,9 @@ XBMCController *g_xbmcController;
     return FALSE;
 }
 //--------------------------------------------------------------
-- (CGSize) getScreenSize
+- (CGRect) getScreenRect
 {
-  if ([NSThread currentThread] != [NSThread mainThread])
-  {
-    dispatch_sync(dispatch_get_main_queue(), ^{
-      m_screensize.width  = m_glView.bounds.size.width  * m_screenScale;
-      m_screensize.height = m_glView.bounds.size.height * m_screenScale;
-    });
-  }
-  else
-  {
-    m_screensize.width  = m_glView.bounds.size.width  * m_screenScale;
-    m_screensize.height = m_glView.bounds.size.height * m_screenScale;
-  }
-  return m_screensize;
+  return m_screenRect;
 }
 //--------------------------------------------------------------
 - (CGFloat) getScreenScale:(UIScreen *)screen;

@@ -157,7 +157,7 @@ MainController *g_xbmcController;
 
 @synthesize m_screenScale;
 @synthesize m_screenIdx;
-@synthesize m_screensize;
+@synthesize m_screenRect;
 @synthesize m_nowPlayingInfo;
 @synthesize m_focusIdleState;
 @synthesize m_enableRemoteExpertMode;
@@ -283,9 +283,8 @@ MainController *g_xbmcController;
 {
   [super viewDidLoad];
 
-  // safe time to update screensize, loadView is too early
-  m_screensize.width  = m_glView.bounds.size.width  * m_screenScale;
-  m_screensize.height = m_glView.bounds.size.height * m_screenScale;
+  // safe time to update screenRect, loadView is too early
+  m_screenRect = CGRectMake(m_glView.bounds.origin.x * m_screenScale, m_glView.bounds.origin.y * m_screenScale, m_glView.bounds.size.width * m_screenScale, m_glView.bounds.size.height * m_screenScale);
 
   [self createSiriPressGesturecognizers];
   [self createSiriSwipeGestureRecognizers];
@@ -368,9 +367,9 @@ MainController *g_xbmcController;
     return FALSE;
 }
 //--------------------------------------------------------------
-- (CGSize)getScreenSize
+- (CGRect)getScreenRect
 {
-  return m_screensize;
+  return m_screenRect;
 }
 
 //--------------------------------------------------------------

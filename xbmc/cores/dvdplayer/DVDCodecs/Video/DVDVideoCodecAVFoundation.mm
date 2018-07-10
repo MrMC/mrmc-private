@@ -753,9 +753,13 @@ void CDVDVideoCodecAVFoundation::Process()
             if (!SrcRect.IsEmpty() && !DestRect.IsEmpty() && !ViewRect.IsEmpty())
             {
               // this makes zero sense, what is really going on with video scaling under avsamplebufferdisplaylayer ?
-              float realwidth  = [g_xbmcController getScreenSize].width  / g_xbmcController.m_screenScale;
-              float realheight = [g_xbmcController getScreenSize].height / g_xbmcController.m_screenScale;
-              CRect ScreenRect(0, 0, realwidth, realheight);
+              float screenScale = g_xbmcController.m_screenScale;
+              CGRect screenRect = [g_xbmcController getScreenRect];
+              float realX = screenRect.origin.x  / screenScale;
+              float realY = screenRect.origin.y  / screenScale;
+              float realwidth  = screenRect.size.width  / screenScale;
+              float realheight = screenRect.size.height / screenScale;
+              CRect ScreenRect(realX, realY, realwidth, realheight);
               CRect MappedRect = DestRect;
               MappedRect.MapRect(ViewRect, ScreenRect);
 

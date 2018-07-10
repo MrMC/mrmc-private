@@ -226,11 +226,11 @@ bool CWinSystemIOS::GetScreenResolution(int* w, int* h, double* fps, int screenI
   //for mainscreen use the eagl bounds
   //because mainscreen is build in
   //in 90° rotated
-  if(screenIdx == 0)
+  if (screenIdx == 0)
   {
-    screenSize = [g_xbmcController getScreenSize];
-    *w = screenSize.width;
-    *h = screenSize.height;
+    CGRect screenRect = [g_xbmcController getScreenRect];
+    *w = screenRect.size.width;
+    *h = screenRect.size.height;
   }
   CLog::Log(LOGDEBUG,"Current resolution Screen: %i with %i x %i",screenIdx, *w, *h);  
   return true;

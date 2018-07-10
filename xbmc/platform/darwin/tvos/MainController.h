@@ -64,7 +64,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   UIWindow                   *m_window;
   MainEAGLView               *m_glView;
   // Touch handling
-  CGSize                      m_screensize;
+  CGRect                      m_screenRect;
   CGFloat                     m_screenScale;
   int                         m_screenIdx;
 
@@ -97,7 +97,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 @property int                 m_irArrowHoldCounter;
 @property CGFloat             m_screenScale;
 @property int                 m_screenIdx;
-@property CGSize              m_screensize;
+@property CGRect              m_screenRect;
 @property BOOL                m_focusIdleState;
 @property CGFloat             m_focusIdleTimeout;
 @property BOOL                m_enableRemoteExpertMode;
@@ -129,7 +129,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 
 - (void) setFramebuffer;
 - (bool) presentFramebuffer;
-- (CGSize) getScreenSize;
+- (CGRect) getScreenRect;
 - (void) activateKeyboard:(UIView *)view;
 - (void) deactivateKeyboard:(UIView *)view;
 - (void) nativeKeyboardActive:(bool)active;

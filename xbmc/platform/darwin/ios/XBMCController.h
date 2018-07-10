@@ -38,7 +38,7 @@ typedef enum
   IOSEAGLView                *m_glView;
   int                         m_screensaverTimeout;
 	  // Touch handling
-  CGSize                      m_screensize;
+  CGRect                      m_screenRect;
   CGPoint                     m_lastGesturePoint;
   CGFloat                     m_screenScale;
   bool                        m_touchBeginSignaled;
@@ -67,7 +67,7 @@ typedef enum
 @property CGFloat             m_screenScale;
 @property bool                m_touchBeginSignaled;
 @property int                 m_screenIdx;
-@property CGSize              m_screensize;
+@property CGRect              m_screenRect;
 
 // message from which our instance is obtained
 - (void)onPlayDelayed:(NSDictionary *)item;
@@ -92,7 +92,7 @@ typedef enum
 - (void) observeDefaultCenterStuff: (NSNotification *) notification;
 - (void) setFramebuffer;
 - (bool) presentFramebuffer;
-- (CGSize) getScreenSize;
+- (CGRect) getScreenRect;
 - (CGFloat) getScreenScale:(UIScreen *)screen;
 - (void) createGestureRecognizers;
 - (void) activateKeyboard:(UIView *)view;
