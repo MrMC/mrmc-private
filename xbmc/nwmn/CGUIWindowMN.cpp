@@ -191,6 +191,12 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       return true;
     }
   }
+  else if (message.GetMessage() == GUI_MSG_WINDOW_INIT)
+  {
+    if (m_client)
+      m_client->StopPlaying();
+    return CGUIWindow::OnMessage(message);
+  }
   else if (message.GetMessage() == GUI_MSG_WINDOW_DEINIT)
   {
     // below prevents window from exiting into home

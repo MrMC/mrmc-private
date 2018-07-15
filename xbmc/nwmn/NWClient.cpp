@@ -247,19 +247,6 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
       std::string format = currentFile.GetProperty("video_format").asString();
       LogFilesPlayed(assetID,format);
     }
-    else if (strcmp(message, "OnStop") == 0)
-    {
-      if (data.isMember("end") && data["end"] == true)
-      {
-        #if ENABLE_NWCLIENT_DEBUGLOGS
-        CLog::Log(LOGDEBUG, "**MN** - CNWClient::Announce() - Playback stopped");
-        #endif
-        // playback stopped, someone hit back in gui.
-        StopThread();
-        StopPlaying();
-        m_totalAssets = 0;
-      }
-    }
   }
 }
 
@@ -315,6 +302,7 @@ void CNWClient::PausePlaying()
 
 void CNWClient::StopPlaying()
 {
+  StopThread();
   if (m_Player->IsPlaying())
     m_Player->StopPlaying();
   if (m_MediaManager)
@@ -322,6 +310,7 @@ void CNWClient::StopPlaying()
     m_MediaManager->ClearDownloads();
     m_MediaManager->ClearAssets();
   }
+  m_totalAssets = 0;
 }
 
 void CNWClient::PlayNext()
