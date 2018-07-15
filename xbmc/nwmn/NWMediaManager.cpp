@@ -243,7 +243,8 @@ void CNWMediaManager::Process()
               (*m_AssetUpdateCallBackFn)(m_AssetUpdateCallBackCtx, asset, AssetDownloadState::wasDownloaded);
             // erase front after verified and transfered
             download_lock.Enter();
-            m_download.erase(m_download.begin());
+            if (!m_download.empty())
+              m_download.erase(m_download.begin());
           }
         }
         else
