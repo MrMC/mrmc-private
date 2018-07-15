@@ -126,7 +126,7 @@ case $host in
     fi
     use_sdk="${use_sdk:-android-17}"
     deps_dir="$use_host-$use_sdk"
-    platform_cflags="-DANDROID -Os -fexceptions"
+    platform_cflags="-DANDROID -Os -fexceptions -fPIC -DPIC"
     if test "x$use_cpu" = "xarmeabi-v7a"; then
       platform_cflags+=" -march=armv7-a -mtune=cortex-a9 -mfloat-abi=softfp -mfpu=neon"
     fi
