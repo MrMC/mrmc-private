@@ -208,6 +208,7 @@ bool LoadLocalPlaylist(std::string home, NWPlaylist &playList)
       XMLUtils::GetString(assetElement, "available_from", availability);
       asset.available_from.SetFromDBDateTime(availability);
 
+      asset.valid = false;
       group.assets.push_back(asset);
       assetElement = assetElement->NextSiblingElement("asset");
     }
