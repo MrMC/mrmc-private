@@ -249,7 +249,7 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
     }
     else if (strcmp(message, "OnStop") == 0)
     {
-      if (data.isMember("end") && data["end"] == true)
+      if (data.isMember("end") && data["end"] == false)
       {
         #if ENABLE_NWCLIENT_DEBUGLOGS
         CLog::Log(LOGDEBUG, "**MN** - CNWClient::Announce() - Playback stopped");
@@ -540,13 +540,22 @@ bool CNWClient::GetProgamInfo()
     bool updateProgram = false;
     // if the fetched player's playlist id does not match the current
     if (std_stoi(m_PlayerInfo.playlist_id) != m_ProgramInfo.id)
+    {
+      CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo playlist_id changed");
       updateProgram = true;
+    }
     // if the fetched playlist modified date does not match the current.
     if (m_ProgramInfo.updated_date != playlist.updated_date)
+    {
+      CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo updated_date changed");
       updateProgram = true;
+    }
     // if we are forcing the update (ClientFetchUpdatePlayer or ClientTryUseExistingPlayer)
     if (m_StartupState != ClientUseUpdateInterval)
+    {
+      CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo not ClientUseUpdateInterval");
       updateProgram = true;
+    }
 
     if (updateProgram)
     {
@@ -1177,7 +1186,10 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownlo
     client->m_Player->MarkValidated(asset);
 
   if (downloadState == AssetDownloadState::wasDownloaded)
+  {
+    client->m_Player->MarkValidated(asset);
     client->LogFilesDownLoaded(std_to_string(asset.id),asset.type);
+  }
 
   if (client->m_Player->IsPlaying() || !client->m_bypassDownloadWait)
   {
