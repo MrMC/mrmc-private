@@ -594,10 +594,14 @@ bool CNWClient::GetProgamInfo()
       // queue all assets belonging to this playlist
       m_Player->QueueProgramInfo(m_ProgramInfo);
       int total_assets = 0;
+      m_MediaManager->ClearAssets();
       for (auto group : m_ProgramInfo.groups)
       {
-        total_assets += group.assets.size();
-        m_MediaManager->QueueAssetsForDownload(group.assets);
+        if (!group.assets.empty())
+        {
+          total_assets += group.assets.size();
+          m_MediaManager->QueueAssetsForDownload(group.assets);
+        }
       }
       m_totalAssets = total_assets;
 
@@ -638,10 +642,14 @@ bool CNWClient::GetProgamInfo()
           // queue all assets belonging to this mediagroup
           m_Player->QueueProgramInfo(m_ProgramInfo);
           int total_assets = 0;
+          m_MediaManager->ClearAssets();
           for (auto group : m_ProgramInfo.groups)
           {
-            total_assets += group.assets.size();
-            m_MediaManager->QueueAssetsForDownload(group.assets);
+            if (!group.assets.empty())
+            {
+              total_assets += group.assets.size();
+              m_MediaManager->QueueAssetsForDownload(group.assets);
+            }
           }
           m_totalAssets = total_assets;
         }

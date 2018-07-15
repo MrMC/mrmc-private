@@ -57,6 +57,7 @@ CNWPlayer::~CNWPlayer()
 void CNWPlayer::Reset()
 {
   CSingleLock lock(m_media_lock);
+  CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::Reset()");
   StopPlaying();
   // new empty playlist
   m_playlist = NWPlaylist();
@@ -146,7 +147,7 @@ void CNWPlayer::MarkValidated(NWAsset &asset)
           #if ENABLE_NWPLAYER_DEBUGLOGS
           CLog::Log(LOGDEBUG, "**NW** - NW Asset - %s validated", m_playlist.groups[g].assets[a].video_localpath.c_str());
           #endif
-          break;
+          return;
         }
       }
     }

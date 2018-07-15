@@ -44,6 +44,7 @@ CNWMediaManager::~CNWMediaManager()
 
 void CNWMediaManager::ClearAssets()
 {
+  CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::ClearAssets");
   if (!m_assets.empty())
   {
     CSingleLock lock(m_assets_lock);
@@ -59,6 +60,7 @@ void CNWMediaManager::ClearAssets()
 
 void CNWMediaManager::ClearDownloads()
 {
+  CLog::Log(LOGDEBUG, "**NW** - CNWMediaManager::ClearDownloads");
   if (!m_download.empty())
   {
     CSingleLock lock(m_download_lock);
