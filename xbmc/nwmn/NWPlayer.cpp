@@ -60,7 +60,7 @@ void CNWPlayer::Reset()
   StopPlaying();
   // new empty playlist
   m_playlist = NWPlaylist();
-  CApplicationMessenger::GetInstance().SendMsg(TMSG_PLAYLISTPLAYER_CLEAR, PLAYLIST_VIDEO);
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_CLEAR, PLAYLIST_VIDEO);
 }
 
 void CNWPlayer::Play()
@@ -69,7 +69,7 @@ void CNWPlayer::Play()
   #if ENABLE_NWPLAYER_DEBUGLOGS
   CLog::Log(LOGDEBUG, "**NW** - CNWPlayer::Play() playback enabled");
   #endif
-  CApplicationMessenger::GetInstance().SendMsg(TMSG_PLAYLISTPLAYER_CLEAR, PLAYLIST_VIDEO);
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_PLAYLISTPLAYER_CLEAR, PLAYLIST_VIDEO);
   m_playing = true;
 }
 
@@ -242,6 +242,7 @@ void CNWPlayer::Process()
 
               auto fileItemList = new CFileItemList();
               fileItemList->Add(item);
+              // this must be a SendMsg :(
               CApplicationMessenger::GetInstance().SendMsg(TMSG_PLAYLISTPLAYER_ADD, PLAYLIST_VIDEO, -1, static_cast<void*>(fileItemList));
 
               // play!
