@@ -249,11 +249,11 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
     }
     else if (strcmp(message, "OnStop") == 0)
     {
-      #if ENABLE_NWCLIENT_DEBUGLOGS
-      CLog::Log(LOGDEBUG, "**MN** - CNWClient::Announce() - Playback stopped");
-      #endif
-      if (data.isMember("end") && data["end"] == false)
+      if (data.isMember("end") && data["end"] == true)
       {
+        #if ENABLE_NWCLIENT_DEBUGLOGS
+        CLog::Log(LOGDEBUG, "**MN** - CNWClient::Announce() - Playback stopped");
+        #endif
         // playback stopped, someone hit back in gui.
         StopThread();
         StopPlaying();

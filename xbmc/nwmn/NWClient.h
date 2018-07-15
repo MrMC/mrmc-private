@@ -93,7 +93,7 @@ protected:
 
   void          ShowStartUpDialog(bool fetchAndUpdate);
   void          CloseStartUpDialog();
-  bool          ManageStartupDialog();
+  void          ManageStartupDialog();
 
   void          GetPlayerInfo();
   bool          GetProgamInfo();
