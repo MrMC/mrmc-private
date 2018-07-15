@@ -265,6 +265,9 @@ void CNWClient::Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender
 
 void CNWClient::Startup(bool bypass_authorization, bool fetchAndUpdate)
 {
+  CLog::Log(LOGDEBUG, "**NW** - CNWClient::Startup, bypass_authorization(%d), fetchAndUpdate(%d)"
+    ,bypass_authorization, fetchAndUpdate);
+
   ShowStartUpDialog(fetchAndUpdate);
 
   StopThread();
@@ -280,8 +283,8 @@ void CNWClient::Startup(bool bypass_authorization, bool fetchAndUpdate)
   SendPlayerStatus(kTVAPI_Status_Restarting);
 
   m_Startup = true;
-  m_StartupState = ClientFetchUpdatePlayer;
   m_bypassDownloadWait = false;
+  m_StartupState = ClientFetchUpdatePlayer;
   if (!fetchAndUpdate)
   {
     if (HasLocalPlayer(m_strHome) && HasLocalPlaylist(m_strHome))
@@ -364,13 +367,13 @@ void CNWClient::Process()
     if (m_StartupState != ClientUseUpdateInterval || time >= m_NextUpdateTime)
     {
       #if ENABLE_NWCLIENT_DEBUGLOGS
-      CLog::Log(LOGDEBUG, "**NW** - time = %s", time.GetAsDBDateTime().c_str());
-      CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
-      CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateInterval = %d days, %d hours, %d mins",
+      CLog::Log(LOGDEBUG, "**NW** - (process) time = %s", time.GetAsDBDateTime().c_str());
+      CLog::Log(LOGDEBUG, "**NW** - (process) m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
+      CLog::Log(LOGDEBUG, "**NW** - (process) m_NextUpdateInterval = %d days, %d hours, %d mins",
         m_NextUpdateInterval.GetDays(), m_NextUpdateInterval.GetHours(), m_NextUpdateInterval.GetMinutes());
       #endif
       m_NextUpdateTime += m_NextUpdateInterval;
-      CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
+      CLog::Log(LOGDEBUG, "**NW** - (process) new m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
 
       UpdateNetworkStatus();
       if (m_HasNetwork)
@@ -380,7 +383,7 @@ void CNWClient::Process()
       if (GetProgamInfo())
       {
         m_StartupState = ClientUseUpdateInterval;
-        if (m_bypassDownloadWait || m_PlayerInfo.allow_async_player != "no")
+        if (m_bypassDownloadWait)
           m_Player->Play();
       }
 
@@ -417,10 +420,11 @@ void CNWClient::CloseStartUpDialog()
     Sleep(10);
 }
 
-bool CNWClient::ManageStartupDialog()
+void CNWClient::ManageStartupDialog()
 {
-  if (!m_bypassDownloadWait && m_PlayerInfo.allow_async_player == "no")
+  if (!m_bypassDownloadWait)
   {
+    CLog::Log(LOGDEBUG, "**NW** - CNWClient::ManageStartupDialog m_bypassDownloadWait is false");
     if (m_dlgProgress->IsCanceled())
     {
       m_Startup = false;
@@ -447,6 +451,7 @@ bool CNWClient::ManageStartupDialog()
   }
   else
   {
+    CLog::Log(LOGDEBUG, "**NW** - CNWClient::ManageStartupDialog m_bypassDownloadWait is true");
     // when starting up, two choices
     // 1) dialog was canceled -> return to main window and idle
     // 2) dialog is up -> waiting for download, verify and start of playback
@@ -469,16 +474,14 @@ bool CNWClient::ManageStartupDialog()
       if (m_ClientCallBackFn)
         (*m_ClientCallBackFn)(m_ClientCallBackCtx, 2);
     }
-
   }
-
-  return m_Startup;
 }
 
 void CNWClient::GetPlayerInfo()
 {
   if (m_HasNetwork && m_StartupState != ClientTryUseExistingPlayer)
   {
+    CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetPlayerInfo fetching player info");
     TVAPI_Machine machine;
     machine.apiKey = m_PlayerInfo.apiKey;
     machine.apiSecret = m_PlayerInfo.apiSecret;
@@ -534,8 +537,20 @@ bool CNWClient::GetProgamInfo()
     playlist.apiSecret = m_PlayerInfo.apiSecret;
     TVAPI_GetPlaylist(playlist, m_PlayerInfo.playlist_id);
 
-    if (m_StartupState != ClientUseUpdateInterval || m_ProgramInfo.updated_date != playlist.updated_date)
+    bool updateProgram = false;
+    // if the fetched player's playlist id does not match the current
+    if (std_stoi(m_PlayerInfo.playlist_id) != m_ProgramInfo.id)
+      updateProgram = true;
+    // if the fetched playlist modified date does not match the current.
+    if (m_ProgramInfo.updated_date != playlist.updated_date)
+      updateProgram = true;
+    // if we are forcing the update (ClientFetchUpdatePlayer or ClientTryUseExistingPlayer)
+    if (m_StartupState != ClientUseUpdateInterval)
+      updateProgram = true;
+
+    if (updateProgram)
     {
+      CLog::Log(LOGDEBUG, "**NW** - CNWClient::GetProgamInfo fetching update");
       TVAPI_PlaylistItems playlistItems;
       playlistItems.apiKey = m_PlayerInfo.apiKey;
       playlistItems.apiSecret = m_PlayerInfo.apiSecret;
@@ -762,7 +777,8 @@ void CNWClient::SendFilesPlayed()
             playedFiles.files.push_back(playedFile);
             break;
           default:
-            CLog::Log(LOGDEBUG, "**NW** - SendFilesPlayed, split failed = %s", line.c_str());
+            if (!line.empty() && line[0] != 0x00)
+              CLog::Log(LOGDEBUG, "**NW** - SendFilesPlayed, split failed = %s", line.c_str());
             break;
       }
     }
@@ -835,7 +851,8 @@ void CNWClient::SendFilesDownloaded()
           downloadedFiles.files.push_back(downloadedFile);
           break;
         default:
-          CLog::Log(LOGDEBUG, "**NW** - SendFilesDownloaded, split failed = %s", line.c_str());
+          if (!line.empty() && line[0] != 0x00)
+            CLog::Log(LOGDEBUG, "**NW** - SendFilesDownloaded, split failed = %s", line.c_str());
           break;
       }
     }
@@ -936,8 +953,8 @@ void CNWClient::InitializeInternalsFromPlayer()
       m_NextUpdateTime += m_NextUpdateInterval;
 
     #if ENABLE_NWCLIENT_DEBUGLOGS
-    CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
-    CLog::Log(LOGDEBUG, "**NW** - m_NextUpdateInterval = %d days, %d hours, %d mins",
+    CLog::Log(LOGDEBUG, "**NW** - (from player) m_NextUpdateTime = %s", m_NextUpdateTime.GetAsDBDateTime().c_str());
+    CLog::Log(LOGDEBUG, "**NW** - (from player) m_NextUpdateInterval = %d days, %d hours, %d mins",
       m_NextUpdateInterval.GetDays(), m_NextUpdateInterval.GetHours(), m_NextUpdateInterval.GetMinutes());
     #endif
 
@@ -1162,7 +1179,7 @@ void CNWClient::AssetUpdateCallBack(const void *ctx, NWAsset &asset, AssetDownlo
   if (downloadState == AssetDownloadState::wasDownloaded)
     client->LogFilesDownLoaded(std_to_string(asset.id),asset.type);
 
-  if (client->m_Player->IsPlaying() || (!client->m_bypassDownloadWait &&client->m_PlayerInfo.allow_async_player == "no"))
+  if (client->m_Player->IsPlaying() || !client->m_bypassDownloadWait)
   {
     if (client->m_Startup && client->m_dlgProgress->IsDialogRunning())
     {
