@@ -842,7 +842,15 @@ bool CApplication::DestroyGUI()
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
 
-  UnloadSkin(true);
+  g_windowManager.DeInitialize();
+  CTextureCache::GetInstance().Deinitialize();
+
+  g_TextureManager.Cleanup();
+  g_largeTextureManager.CleanupUnusedImages(true);
+
+  g_fontManager.Clear();
+  g_colorManager.Clear();
+
   g_windowManager.ClearWindowHistory();
 
   g_Windowing.DestroyRenderSystem();
