@@ -87,6 +87,7 @@ public:
   void          RegisterPlayerCallBack(const void *ctx, PlayerCallBackFn fn);
   bool          DoAuthorize();
   bool          IsAuthorized();
+  bool          AllowExit();
 
 protected:
   virtual void  Process();

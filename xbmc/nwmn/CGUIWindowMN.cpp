@@ -231,6 +231,8 @@ bool CGUIWindowMN::OnAction(const CAction &action)
       m_client->StopPlaying();
       return true;
     }
+    if (m_client && m_client->AllowExit())
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().PostMsg(TMSG_QUIT);
     // this return blocks any other "back/esc" action, prevents us closing MN main screen
     return true;
   }
