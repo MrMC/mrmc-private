@@ -48,6 +48,8 @@
 #include "cores/IPlayer.h"
 #include "guiinfo/GUIInfoLabels.h"
 
+#include "nwmn/NWClient.h"
+
 #include <stdio.h>
 #include <algorithm>
 #if defined(TARGET_DARWIN)
@@ -115,7 +117,17 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
   if (action.GetID() == ACTION_STOP)
     return CGUIWindow::OnAction(action);
   else
+  {
+    if (action.GetID() == ACTION_PAUSE ||
+       (action.GetID() == ACTION_PLAYER_PLAY))
+    {
+      CNWClient* client = CNWClient::GetClient();
+      if (client && client->AllowExit() && client->IsPlaying())
+        client->PlayPause();
+    }
+
     return true;
+  }
 
   if (m_timeCodePosition > 0 && action.GetButtonCode())
   { // check whether we have a mapping in our virtual videotimeseek "window" and have a select action
