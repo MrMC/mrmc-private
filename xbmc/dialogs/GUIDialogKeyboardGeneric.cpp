@@ -193,7 +193,12 @@ bool CGUIDialogKeyboardGeneric::OnAction(const CAction &action)
 {
   bool handled = true;
   if (action.GetID() == (KEY_VKEY | XBMCVK_BACK))
-    Backspace();
+  {
+    if (m_text.empty())
+      OnOK();
+    else
+      Backspace();
+  }
   else if (action.GetID() == ACTION_ENTER || (m_isKeyboardNavigationMode && action.GetID() == ACTION_SELECT_ITEM))
     OnOK();
   else if (action.GetID() == ACTION_SHIFT)
