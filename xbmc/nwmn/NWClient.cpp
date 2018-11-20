@@ -303,6 +303,11 @@ void CNWClient::Startup(bool bypass_authorization, bool fetchAndUpdate)
     m_Player->Create();
 }
 
+bool CNWClient::IsPlaying()
+{
+  return m_Player->IsPlaying();
+}
+
 void CNWClient::PlayPause()
 {
   m_Player->PlayPause();
