@@ -49,6 +49,7 @@
 #include "guiinfo/GUIInfoLabels.h"
 
 #include "nwmn/NWClient.h"
+#include "messaging/ApplicationMessenger.h"
 
 #include <stdio.h>
 #include <algorithm>
@@ -121,9 +122,17 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
     if (action.GetID() == ACTION_PAUSE ||
        (action.GetID() == ACTION_PLAYER_PLAY))
     {
+      // handle the two cases, via NWClient or MW on-demand
       CNWClient* client = CNWClient::GetClient();
       if (client && client->AllowExit() && client->IsPlaying())
         client->PlayPause();
+      else
+      {
+        if (g_application.m_pPlayer->IsPaused())
+          CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_UNPAUSE);
+        else
+          CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PAUSE_IF_PLAYING);
+      }
     }
 
     return true;
