@@ -62,6 +62,15 @@
                         <width>400</width>
                         <height>40</height>
                         <texture>MNSkinFiles/buttonSelected.png</texture>
+                        <visible>Control.HasFocus(50)</visible>
+                    </control>
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>400</width>
+                        <height>40</height>
+                        <texture>MNSkinFiles/button.png</texture>
+                        <visible>!Control.HasFocus(50)</visible>
                     </control>
                     <control type="label">
                         <posx>13</posx>
@@ -126,6 +135,15 @@
                         <width>340</width>
                         <height>40</height>
                         <texture>MNSkinFiles/buttonSelected.png</texture>
+                        <visible>Control.HasFocus(50)</visible>
+                    </control>
+                    <control type="image">
+                        <posx>0</posx>
+                        <posy>0</posy>
+                        <width>340</width>
+                        <height>40</height>
+                        <texture>MNSkinFiles/button.png</texture>
+                        <visible>!Control.HasFocus(50)</visible>
                     </control>
                     <control type="label">
                         <posx>13</posx>
