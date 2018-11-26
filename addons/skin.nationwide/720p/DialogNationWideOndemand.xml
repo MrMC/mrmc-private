@@ -216,7 +216,7 @@
                         <posy>0</posy>
                         <width>222</width>
                         <height>128</height>
-                        <texture>MNSkinFiles/preview_frame.png</texture>
+                        <texture>MNSkinFiles/preview_frame_yellow.png</texture>
                     </control>
                     <control type="label">
                         <posx>110</posx>
