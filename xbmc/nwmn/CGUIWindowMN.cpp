@@ -176,6 +176,7 @@ bool CGUIWindowMN::OnMessage(CGUIMessage& message)
       m_client->GetProgamInfo(playList);
       if (!playList.groups.empty())
       {
+        CGUIWindowMNDemand::SetClient(m_client);
         CGUIWindowMNDemand::SetDialogMNPlaylist(playList);
         g_windowManager.ActivateWindow(WINDOW_MEMBERNET_DEMAND);
         m_client->StopPlaying();

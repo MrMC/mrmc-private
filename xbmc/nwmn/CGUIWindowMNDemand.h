@@ -42,10 +42,12 @@ public:
   static  CGUIWindowMNDemand* GetDialogMNDemand();
   static void   GetDialogMNPlaylist(NWPlaylist &playList);
   static void   SetDialogMNPlaylist(const NWPlaylist &playList);
+  static void   SetClient(CNWClient *client) {m_client = client;};
 
 protected:
   void SetCategoryItems();
 
   static CGUIWindowMNDemand *m_MNDemand;
   static NWPlaylist m_PlayList;
+  static CNWClient  *m_client;
 };

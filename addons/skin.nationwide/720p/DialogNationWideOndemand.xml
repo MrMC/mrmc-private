@@ -251,62 +251,62 @@
                 </focusedlayout>
             </control>
         </control>
-        <control type="group">
-            <visible>!system.getbool(mn.vertical)</visible>
-            <control type="button" id="80101">
-                <description>Network Test</description>
-                <posx>550</posx>
-                <posy>635</posy>
-                <label>Return to Playlist</label>
-                <onleft>50</onleft>
-                <onright>80102</onright>
-                <onup>1050</onup>
-                <ondown>1050</ondown>
-                <include>MNButtonSettings</include>
+        <control type="group" id="80200">
+            <control type="group">
+                <visible>!system.getbool(mn.vertical)</visible>
+                <control type="button" id="80101">
+                    <posx>550</posx>
+                    <posy>635</posy>
+                    <label>Return to Playlist</label>
+                    <onleft>50</onleft>
+                    <onright>80102</onright>
+                    <onup>1050</onup>
+                    <ondown>1050</ondown>
+                    <include>MNButtonSettings</include>
+                </control>
+                <control type="button" id="80102">
+                    <description>Back</description>
+                    <posx>900</posx>
+                    <posy>635</posy>
+                    <label>Return to Main Menu</label>
+                    <onleft>80101</onleft>
+                    <onright>50</onright>
+                    <onup>1050</onup>
+                    <ondown>1050</ondown>
+                    <include>MNButtonSettings</include>
+                    <onclick>back</onclick>
+                </control>
             </control>
-            <control type="button" id="80102">
-                <description>Back</description>
-                <posx>900</posx>
-                <posy>635</posy>
-                <label>Return to Main Menu</label>
-                <onleft>80101</onleft>
-                <onright>50</onright>
-                <onup>1050</onup>
-                <ondown>1050</ondown>
-                <include>MNButtonSettings</include>
-                <onclick>back</onclick>
+            <control type="group">
+                <visible>system.getbool(mn.vertical)</visible>
+                <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
+                  <effect type="slide" start="0,0" end="-225,-240" time="0" />
+                  <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
+                </animation>
+                <control type="button" id="80101">
+                    <posx>550</posx>
+                    <posy>635</posy>
+                    <label>Return to Playlist</label>
+                    <onleft>50</onleft>
+                    <onright>80102</onright>
+                    <onup>1050</onup>
+                    <ondown>1050</ondown>
+                    <include>MNButtonSettings</include>
+                </control>
+                <control type="button" id="80102">
+                    <description>Back</description>
+                    <posx>900</posx>
+                    <posy>635</posy>
+                    <label>Return to Main Menu</label>
+                    <onleft>80101</onleft>
+                    <onright>50</onright>
+                    <onup>1050</onup>
+                    <ondown>1050</ondown>
+                    <include>MNButtonSettings</include>
+                    <onclick>back</onclick>
+                </control>
             </control>
-        </control>
-        <control type="group">
-            <visible>system.getbool(mn.vertical)</visible>
-            <animation type="Conditional" condition="system.getbool(mn.vertical)" reversible="false">
-              <effect type="slide" start="0,0" end="-225,-240" time="0" />
-              <effect type="rotate" center="auto" start="-90" end="-90" time="0" />
-            </animation>
-            <control type="button" id="80101">
-                <description>Network Test</description>
-                <posx>550</posx>
-                <posy>635</posy>
-                <label>Return to Playlist</label>
-                <onleft>50</onleft>
-                <onright>80102</onright>
-                <onup>1050</onup>
-                <ondown>1050</ondown>
-                <include>MNButtonSettings</include>
-            </control>
-            <control type="button" id="80102">
-                <description>Back</description>
-                <posx>900</posx>
-                <posy>635</posy>
-                <label>Return to Main Menu</label>
-                <onleft>80101</onleft>
-                <onright>50</onright>
-                <onup>1050</onup>
-                <ondown>1050</ondown>
-                <include>MNButtonSettings</include>
-                <onclick>back</onclick>
-            </control>
-        </control>
+        </control>    
         <control type="group">
             <visible>Player.HasVideo</visible>
             <control type="image">

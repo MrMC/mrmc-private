@@ -41,9 +41,11 @@
 #define ONDEMAND_CATEGORY_LIST      50
 
 #define SETCATEGORYITEMS            80888
+#define FULLAPPGROUP                80200
 
 CGUIWindowMNDemand *CGUIWindowMNDemand::m_MNDemand = NULL;
 NWPlaylist CGUIWindowMNDemand::m_PlayList;
+CNWClient *CGUIWindowMNDemand::m_client;
 
 CGUIWindowMNDemand::CGUIWindowMNDemand()
 : CGUIWindow(WINDOW_MEMBERNET_DEMAND, "DialogNationWideOndemand.xml")
@@ -137,6 +139,10 @@ void CGUIWindowMNDemand::OnInitWindow()
 {
   FillAssets();
   CGUIWindow::OnInitWindow();
+  if (m_client && m_client->AllowExit())
+    SET_CONTROL_HIDDEN(FULLAPPGROUP);
+  else
+    SET_CONTROL_VISIBLE(FULLAPPGROUP);
 }
 
 void CGUIWindowMNDemand::OnWindowUnload()
