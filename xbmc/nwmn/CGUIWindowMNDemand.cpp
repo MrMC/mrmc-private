@@ -45,7 +45,7 @@
 
 CGUIWindowMNDemand *CGUIWindowMNDemand::m_MNDemand = NULL;
 NWPlaylist CGUIWindowMNDemand::m_PlayList;
-CNWClient *CGUIWindowMNDemand::m_client;
+CNWClient *CGUIWindowMNDemand::m_client = NULL;
 
 CGUIWindowMNDemand::CGUIWindowMNDemand()
 : CGUIWindow(WINDOW_MEMBERNET_DEMAND, "DialogNationWideOndemand.xml")
@@ -57,6 +57,7 @@ CGUIWindowMNDemand::CGUIWindowMNDemand()
 CGUIWindowMNDemand::~CGUIWindowMNDemand()
 {
   m_MNDemand = NULL;
+  m_client = NULL;
 }
 
 bool CGUIWindowMNDemand::OnMessage(CGUIMessage& message)
