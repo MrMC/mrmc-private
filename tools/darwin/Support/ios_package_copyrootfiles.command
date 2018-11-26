@@ -81,9 +81,7 @@ if [ "$ACTION" == build ] || [ "$ACTION" == install ]; then
   # ${LANGSYNC} "$XBMC_DEPENDS/mrmc/repo-resources/" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons"
   ${ADDONSYNC} "$XBMC_DEPENDS/mrmc/addons/" "$TARGET_BUILD_DIR/$TARGET_NAME/AppData/AppHome/addons"
 
-  # always sync skin.mrmc
-  # package_skin "${SYNC}" "$SRCROOT/addons/skin.mrmc"
-  # and move nwmn skin in as well
+  # always sync nwmn skin
   package_skin "${SYNC}" "$SRCROOT/addons/skin.nationwide"
 
 
