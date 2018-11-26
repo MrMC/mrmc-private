@@ -1059,7 +1059,7 @@ bool CApplication::Initialize()
       ADDON::CAddonMgr::GetInstance().StartServices(false);
 
       // start the PVR manager
-      StartPVRManager();
+//      StartPVRManager();
 
       // activate the configured start window
       int firstWindow = g_SkinInfo->GetFirstWindow();
