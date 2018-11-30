@@ -908,6 +908,8 @@ bool CApplication::StartGUI()
     uiInitializationFinished = firstWindow != WINDOW_STARTUP_ANIM;
 
     CStereoscopicsManager::GetInstance().Initialize();
+
+    m_bGUIInitialized = true;
   }
 
 //  std::string skin = CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
@@ -4303,8 +4305,6 @@ bool CApplication::OnMessage(CGUIMessage& message)
       {
         if (m_fallbackLanguageLoaded)
           CGUIDialogOK::ShowAndGetInput(CVariant{24133}, CVariant{24134});
-
-        m_bGUIInitialized = true;
       }
     }
     break;
