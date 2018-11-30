@@ -911,6 +911,8 @@ bool CApplication::StartGUI()
 
     CStereoscopicsManager::GetInstance().Initialize();
     CApplicationMessenger::GetInstance().SendMsg(TMSG_SETAUDIODSPSTATE, ACTIVE_AE_DSP_STATE_ON, ACTIVE_AE_DSP_SYNC_ACTIVATE); // send a blocking message to active AudioDSP engine
+
+    m_bGUIInitialized = true;
   }
 
 //  std::string skin = CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN);
@@ -4325,8 +4327,6 @@ bool CApplication::OnMessage(CGUIMessage& message)
       {
         if (m_fallbackLanguageLoaded)
           CGUIDialogOK::ShowAndGetInput(CVariant{24133}, CVariant{24134});
-
-        m_bGUIInitialized = true;
       }
     }
     break;

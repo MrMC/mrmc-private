@@ -421,6 +421,8 @@ void CXBMCApp::onResume()
   }
 */
   m_hasResumed = true;
+  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_SETUP);
+
 }
 
 void CXBMCApp::onPause()
@@ -444,6 +446,10 @@ void CXBMCApp::onPause()
 
   EnableWakeLock(false);
   m_hasResumed = false;
+
+  // If we have exited XBMC, it no longer exists.
+  if (!m_exiting)
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_CLEANUP);
 }
 
 void CXBMCApp::onStop()
@@ -1542,19 +1548,12 @@ void CXBMCApp::surfaceCreated(CJNISurfaceHolder holder)
     CLog::Log(LOGDEBUG, " => invalid ANativeWindow object");
     return;
   }
-  CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_SETUP);
 }
 
 void CXBMCApp::surfaceDestroyed(CJNISurfaceHolder holder)
 {
   CLog::Log(LOGDEBUG, "%s", __PRETTY_FUNCTION__);
-
-  // If we have exited XBMC, it no longer exists.
-  if (!m_exiting)
-  {
-    CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_CLEANUP);
-    m_window = NULL;
-  }
+  m_window = NULL;
 }
 
 void CXBMCApp::onLayoutChange(int left, int top, int width, int height)
