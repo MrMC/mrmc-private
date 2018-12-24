@@ -23,6 +23,9 @@ EXCLUDED_ADDONS += $(PKG_EXCLUDED_ADDONS)
 ifeq ($(lite),yes)
   MEDIAROOT = media.lite
   SPLASHPNG = Splash.lite.png
+else ifeq ($(dev),yes)
+  MEDIAROOT = media.dev
+  SPLASHPNG = Splash.dev.png
 else
   MEDIAROOT = media
   SPLASHPNG = Splash.png
