@@ -61,6 +61,9 @@ void CSplash::Show(const std::string& message)
     std::string splashName = "Splash.png";
     if (CLiteUtils::IsLite())
       splashName = "Splash.lite.png";
+#ifdef APP_PACKAGE_DEV
+    splashName = "Splash.dev.png";
+#endif
     std::string splashImage = "special://xbmc/media/" + splashName;
 
     m_image = new CGUIImage(0, 0, 0, 0, g_graphicsContext.GetWidth(), g_graphicsContext.GetHeight(), CTextureInfo(splashImage));
