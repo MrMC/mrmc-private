@@ -23,11 +23,6 @@
 #include "cores/AudioEngine/Interfaces/AESink.h"
 #include "cores/AudioEngine/Utils/AEDeviceInfo.h"
 
-#ifdef __OBJC__
-  @class AVPlayerSink;
-#else
-  class AVPlayerSink;
-#endif
 class CAESinkDARWINAVF : public CThread, public IAESink
 {
 public:
@@ -51,7 +46,6 @@ private:
   static AEDeviceInfoList m_devices;
   CAEDeviceInfo        m_info;
   AEAudioFormat        m_format;
-  AVPlayerSink        *m_avsink;
 
   virtual void         Process();
 
