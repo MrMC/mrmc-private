@@ -75,6 +75,7 @@ public:
   static void        CloneSystemFonts(const std::string &strPath);
   static void        ClearIOSInbox();
   static void        SetMrMCTouchFlag();
+  static bool        AudioAtmosEnabled();
 };
 
 #endif

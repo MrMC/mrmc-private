@@ -28,6 +28,7 @@
 #include "utils/log.h"
 #include "utils/URIUtils.h"
 #include "utils/StringUtils.h"
+#include "filesystem/SpecialProtocol.h"
 
 #include "CompileInfo.h"
 
@@ -1300,6 +1301,32 @@ void CDarwinUtils::SetMrMCTouchFlag()
   }
   else
     [persistence removeTransactions];
+#endif
+}
+
+#if defined(TARGET_DARWIN_IOS)
+static bool HaveAVAudioSink()
+{
+  static int haveAVAudioSink = -1;
+  if (haveAVAudioSink == -1)
+  {
+    std::string strFileName;
+    strFileName = CSpecialProtocol::TranslatePath("special://frameworks/libavaudiosink.framework/libavaudiosink");
+    haveAVAudioSink = XFILE::CFile::Exists(strFileName) ? 1:0;
+  }
+  return haveAVAudioSink == 1;
+}
+#endif
+
+bool CDarwinUtils::AudioAtmosEnabled()
+{
+#if defined(TARGET_DARWIN_IOS)
+  if (!HaveAVAudioSink())
+    return false;
+  AVAudioSession *mySession = [AVAudioSession sharedInstance];
+  return [mySession maximumOutputNumberOfChannels] > 8;
+#else
+  return false;
 #endif
 }
 

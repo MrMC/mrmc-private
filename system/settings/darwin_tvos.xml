@@ -100,8 +100,8 @@
       </group>
       <group id="3">
         <setting id="audiooutput.passthroughdevice" type="string">
-          <default>Default</default>
-          <visible>false</visible>
+          <default>false</default>
+          <visible>true</visible>
         </setting>
       </group>
     </category>
