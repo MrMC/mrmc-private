@@ -12,7 +12,7 @@
       </group>
       <group id="3">
         <setting id="audiooutput.eac3passthrough">
-          <visible>false</visible>
+          <visible>true</visible>
         </setting>
         <setting id="audiooutput.truehdpassthrough">
           <visible>false</visible>

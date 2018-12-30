@@ -91,7 +91,7 @@
       <group id="1">
         <setting id="audiooutput.audiodevice" type="string">
           <default>Default</default>
-          <visible>false</visible>
+          <visible>true</visible>
         </setting>
         <setting id="audiooutput.supportdtshdcpudecoding" type="boolean">
           <default>false</default>
@@ -101,7 +101,7 @@
       <group id="3">
         <setting id="audiooutput.passthroughdevice" type="string">
           <default>Default</default>
-          <visible>false</visible>
+          <visible>true</visible>
         </setting>
       </group>
     </category>
