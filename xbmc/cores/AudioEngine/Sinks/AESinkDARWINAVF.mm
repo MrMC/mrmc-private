@@ -21,59 +21,75 @@
 #include "cores/AudioEngine/Sinks/AESinkDARWINAVF.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #include "cores/AudioEngine/Utils/AERingBuffer.h"
-#include "cores/AudioEngine/Sinks/osx/CoreAudioHelpers.h"
 #include "platform/darwin/DarwinUtils.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
-#include "threads/Condition.h"
-#include "windowing/WindowingFactory.h"
-#include "platform/darwin/DarwinUtils.h"
 
-#include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
 
 #define AVMediaType AVMediaType_fooo
 #import <AVFoundation/AVFoundation.h>
 #undef AVMediaType
-
-#import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVAudioSession.h>
-
-#pragma mark - ResourceLoader
-
 
 static void *playbackLikelyToKeepUp = &playbackLikelyToKeepUp;
 static void *playbackBufferEmpty = &playbackBufferEmpty;
 static void *playbackBufferFull = &playbackBufferFull;
 
-@interface ResourceLoader : NSObject <AVAssetResourceLoaderDelegate>
-@property (nonatomic) FILE *fp;
-@property (nonatomic) bool canceled;
-@property (nonatomic) NSString *contentType;
-@property (nonatomic) unsigned int frameSize;
-@property (nonatomic) unsigned int transferCount;
-@property (nonatomic) NSData *dataAtOffsetZero;
-@property (nonatomic) AERingBuffer *avbuffer;
-- (id)initWithBuffer:(AERingBuffer*)buffer;
-- (void)cancel;
+#pragma mark - AVPlayerSink
+@interface AVPlayerSink : NSObject <AVAssetResourceLoaderDelegate>
+- (id)initWithFrameSize:(unsigned int)frameSize;
+- (void)stopPlayback;
+- (void)startPlayback:(CAEStreamInfo::DataType) type;
+- (void)playbackStatus;
 @end
 
-@implementation ResourceLoader
-- (id)initWithBuffer:(AERingBuffer*)buffer
+@interface AVPlayerSink ()
+@property (atomic) bool started;
+@property (atomic) bool canceled;
+@property (nonatomic) FILE *fp;
+@property (nonatomic) AVPlayer *avplayer;
+@property (nonatomic) AVPlayerItem *playerItem;
+@property (nonatomic) AERingBuffer *avbuffer;
+@property (nonatomic) unsigned int frameSize;
+@property (nonatomic) NSString *contentType;
+@property (nonatomic) unsigned int transferCount;
+@property (nonatomic) NSData *dataAtOffsetZero;
+@end
+
+@implementation AVPlayerSink
+- (id)initWithFrameSize:(unsigned int)frameSize;
 {
   self = [super init];
   if (self)
   {
+    _started = false;
     _canceled = false;
-    _avbuffer = buffer;
+    _avplayer = nullptr;
+    _avbuffer = new AERingBuffer(frameSize * 256);
+    _frameSize = frameSize;
     _transferCount = 0;
     std::string temppath(CDarwinUtils::GetUserTempDirectory());
     temppath += "CDVDAudioCodecAVFoundation.bin";
     _fp = fopen(temppath.c_str(), "rb");
   }
   return self;
+}
+
+- (void)dealloc
+{
+  _canceled = true;
+  _avplayer = nullptr;
+  _playerItem = nullptr;
+  SAFE_DELETE(_avbuffer);
+}
+
+#pragma mark - ResourceLoader
+- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
+  didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
+{
+  _canceled = true;
+  CLog::Log(LOGDEBUG, "avloader didCancelLoadingRequest");
 }
 
 - (NSError *)loaderCancelledError
@@ -102,7 +118,7 @@ static void *playbackBufferFull = &playbackBufferFull;
     contentRequest.contentLength = INT_MAX;
     // must be 'NO' to get player to start playing immediately
     contentRequest.byteRangeAccessSupported = NO;
-    NSLog(@"resourceLoader contentRequest %@", contentRequest);
+    NSLog(@"avloader contentRequest %@", contentRequest);
   }
 
   AVAssetResourceLoadingDataRequest* dataRequest = loadingRequest.dataRequest;
@@ -113,7 +129,7 @@ static void *playbackBufferFull = &playbackBufferFull;
     // 2) one from the beginning of the file
     // 3) one from the end of the file
     //NSLog(@"resourceLoader dataRequest %@", dataRequest);
-    CLog::Log(LOGDEBUG, "resourceLoader dataRequest bgn");
+    CLog::Log(LOGDEBUG, "avloader dataRequest bgn");
     NSInteger reqLen = dataRequest.requestedLength;
     if (reqLen == 2)
     {
@@ -123,7 +139,7 @@ static void *playbackBufferFull = &playbackBufferFull;
       usleep(250 * 1000);
       [dataRequest respondWithData:[NSData dataWithBytes:"\vw" length:2]];
       [loadingRequest finishLoading];
-      CLog::Log(LOGDEBUG, "resourceLoader check content tag");
+      CLog::Log(LOGDEBUG, "avloader check content tag");
     }
     else
     {
@@ -143,9 +159,9 @@ static void *playbackBufferFull = &playbackBufferFull;
         // just shove it back to make avplayer happy.
         usleep(250 * 1000);
         [dataRequest respondWithData:_dataAtOffsetZero];
-        CLog::Log(LOGDEBUG, "resourceLoader check endof");
+        CLog::Log(LOGDEBUG, "avloader check endof");
         [loadingRequest finishLoading];
-        CLog::Log(LOGDEBUG, "resourceLoader dataRequest end");
+        CLog::Log(LOGDEBUG, "avloader dataRequest end");
         return YES;
       }
 
@@ -159,7 +175,7 @@ static void *playbackBufferFull = &playbackBufferFull;
           if (_canceled)
           {
             [loadingRequest finishLoadingWithError:[self loaderCancelledError]];
-            CLog::Log(LOGDEBUG, "resourceLoader dataRequest end");
+            CLog::Log(LOGDEBUG, "avloader dataRequest end");
             return YES;
           }
           struct stat buf = {0};
@@ -168,7 +184,7 @@ static void *playbackBufferFull = &playbackBufferFull;
           if (dataRequest.requestedOffset + buffersize < (long long)filesize)
             break;
         }
-        CLog::Log(LOGDEBUG, "resourceLoader dataRequest _fp size(%zu)", filesize);
+        //CLog::Log(LOGDEBUG, "avloader dataRequest _fp size(%zu)", filesize);
       }
       else
       {
@@ -178,7 +194,7 @@ static void *playbackBufferFull = &playbackBufferFull;
           if (_canceled)
           {
             [loadingRequest finishLoadingWithError:[self loaderCancelledError]];
-            CLog::Log(LOGDEBUG, "resourceLoader dataRequest end");
+            CLog::Log(LOGDEBUG, "avloader dataRequest end");
             return YES;
           }
         }
@@ -206,16 +222,20 @@ static void *playbackBufferFull = &playbackBufferFull;
             if (dataRequest.requestsAllDataToEndOfResource == NO && dataRequest.requestedOffset == 0)
               _dataAtOffsetZero = [NSData dataWithBytes:buffer length:bytesToCopy];
             [dataRequest respondWithData:data];
-            CLog::Log(LOGDEBUG, "resourceLoader sending %lu bytes", (unsigned long)[data length]);
+            CLog::Log(LOGDEBUG, "avloader sending %lu bytes", (unsigned long)[data length]);
+            [self playbackStatus];
         }
         _transferCount += bytesToCopy;
-        CLog::Log(LOGDEBUG, "resourceLoader requestedLength:%zu, requestedOffset:%lld, currentOffset:%lld, _transferCount:%u, bufferbytes:%u",
-          dataRequest.requestedLength, dataRequest.requestedOffset, dataRequest.currentOffset, _transferCount, _avbuffer->GetReadSize());
+        if (_transferCount != dataRequest.currentOffset)
+        {
+          CLog::Log(LOGDEBUG, "avloader requestedLength:%zu, requestedOffset:%lld, currentOffset:%lld, _transferCount:%u, bufferbytes:%u",
+            dataRequest.requestedLength, dataRequest.requestedOffset, dataRequest.currentOffset, _transferCount, _avbuffer->GetReadSize());
+        }
         [loadingRequest finishLoading];
       }
       else
       {
-        CLog::Log(LOGDEBUG, "resourceLoader availableBytes %lu bytes", availableBytes);
+        CLog::Log(LOGDEBUG, "avloader availableBytes %lu bytes", availableBytes);
         //availableBytes = buffersize;
         //memset(&buffer, 0x00, buffersize);
         // maybe return an empty buffer so silence is played until we have data
@@ -223,67 +243,12 @@ static void *playbackBufferFull = &playbackBufferFull;
       }
     }
   }
-  CLog::Log(LOGDEBUG, "resourceLoader dataRequest end");
+  CLog::Log(LOGDEBUG, "avloader dataRequest end");
 
   return YES;
 }
 
-- (void)cancel
-{
-  _canceled = true;
-}
-
-- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
-  didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
-{
-  _canceled = true;
-  CLog::Log(LOGDEBUG, "resourceLoader didCancelLoadingRequest");
-}
-
-@end
-
-CCriticalSection g_avfmutex;
-XbmcThreads::ConditionVariable g_avfcondVar;
-
-#pragma mark - AVPlayerSink
-@interface AVPlayerSink : NSObject
-- (id)initWithFrameSize:(unsigned int)frameSize;
-- (void)stopPlayback;
-- (void)startPlayback:(CAEStreamInfo::DataType) type;
-- (unsigned int)addPackets:(uint8_t*)buffer withBytes:(unsigned int)bytes;
-@end
-
-@interface AVPlayerSink ()
-@property (nonatomic) AVPlayer *avplayer;
-@property (nonatomic) AVPlayerItem *playerItem;
-@property (nonatomic) ResourceLoader *resourceloader;
-@property (nonatomic) AERingBuffer *avbuffer;
-@property (nonatomic) unsigned int frameSize;
-@property (atomic) bool started;
-@end
-
-@implementation AVPlayerSink
-- (id)initWithFrameSize:(unsigned int)frameSize;
-{
-  self = [super init];
-  if (self)
-  {
-    _avplayer = nullptr;
-    _avbuffer = new AERingBuffer(frameSize * 256);
-    _frameSize = frameSize;
-    _started = false;
-  }
-  return self;
-}
-
-- (void)dealloc
-{
-  [_resourceloader cancel];
-  _avplayer = nullptr;
-  _playerItem = nullptr;
-  SAFE_DELETE(_avbuffer);
-}
-
+#pragma mark - ResourcePlayer
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
   if (object == _avplayer.currentItem && [keyPath isEqualToString:@"loadedTimeRanges"])
@@ -292,29 +257,35 @@ XbmcThreads::ConditionVariable g_avfcondVar;
     if (timeRanges && [timeRanges count])
     {
       CMTimeRange timerange = [[timeRanges objectAtIndex:0]CMTimeRangeValue];
-      CLog::Log(LOGDEBUG, "resourceLoader timerange.start %f", CMTimeGetSeconds(timerange.start));
-      CLog::Log(LOGDEBUG, "resourceLoader timerange.duration %f", CMTimeGetSeconds(timerange.duration));
-      if (CMTimeGetSeconds(timerange.duration) > 2.0)
-        [_avplayer play];
+      if (CMTimeGetSeconds(timerange.duration) > 4.0)
+      {
+        if ([_avplayer rate] == 0.0)
+        {
+          CLog::Log(LOGDEBUG, "avloader timerange.start %f", CMTimeGetSeconds(timerange.start));
+          CLog::Log(LOGDEBUG, "avloader timerange.duration %f", CMTimeGetSeconds(timerange.duration));
+          [_avplayer play];
+          _started = true;
+        }
+      }
     }
   }
   else if ([keyPath isEqualToString:@"playbackBufferFull"] )
   {
-    CLog::Log(LOGDEBUG, "resourceLoader playbackBufferFull");
+    CLog::Log(LOGDEBUG, "avloader playbackBufferFull");
     if (_avplayer.currentItem.playbackBufferEmpty)
     {
     }
   }
   else if ([keyPath isEqualToString:@"playbackBufferEmpty"] )
   {
-    CLog::Log(LOGDEBUG, "resourceLoader playbackBufferEmpty");
+    CLog::Log(LOGDEBUG, "avloader playbackBufferEmpty");
     if (_avplayer.currentItem.playbackBufferEmpty)
     {
     }
   }
   else if ([keyPath isEqualToString:@"playbackLikelyToKeepUp"])
   {
-    CLog::Log(LOGDEBUG, "resourceLoader playbackLikelyToKeepUp");
+    CLog::Log(LOGDEBUG, "avloader playbackLikelyToKeepUp");
     if (_avplayer.currentItem.playbackLikelyToKeepUp)
     {
     }
@@ -327,14 +298,6 @@ XbmcThreads::ConditionVariable g_avfcondVar;
 
 - (void)startPlayback:(CAEStreamInfo::DataType) type
 {
-  NSString *extension = @"ac3";
-  if (type == CAEStreamInfo::STREAM_TYPE_EAC3)
-    extension = @"ec3";
-  // needs leading dir ('fake') or pathExtension in ResourceLoader will fail
-  NSMutableString *url = [NSMutableString stringWithString:@"mrmc_streaming://fake/dummy."];
-  [url appendString:extension];
-  NSURL *ac3URL = [NSURL URLWithString: url];
-  AVURLAsset *asset = [AVURLAsset URLAssetWithURL:ac3URL options:nil];
 /*
   for (NSString *mime in [AVURLAsset audiovisualTypes])
     NSLog(@"AVURLAsset audiovisualTypes:%@", mime);
@@ -342,76 +305,56 @@ XbmcThreads::ConditionVariable g_avfcondVar;
   for (NSString *mime in [AVURLAsset audiovisualMIMETypes])
     NSLog(@"AVURLAsset audiovisualMIMETypes:%@", mime);
 */
-  _resourceloader = [[ResourceLoader alloc] initWithBuffer:_avbuffer];
-  _resourceloader.frameSize = _frameSize;
-  [asset.resourceLoader setDelegate:_resourceloader queue:dispatch_get_main_queue()];
+  // run on our own serial queue, keeps main thread from stalling us
+  // and lets us do long sleeps without stalling main thread.
+  dispatch_queue_t serialQueue = dispatch_queue_create("com.mrmc.loaderqueue", DISPATCH_QUEUE_SERIAL);
+      dispatch_async(serialQueue, ^{
+      NSString *extension = @"ac3";
+      if (type == CAEStreamInfo::STREAM_TYPE_EAC3)
+        extension = @"ec3";
+      // needs leading dir ('fake') or pathExtension in resourceLoader will fail
+      NSMutableString *url = [NSMutableString stringWithString:@"mrmc_streaming://fake/dummy."];
+      [url appendString:extension];
+      NSURL *ac3URL = [NSURL URLWithString: url];
+      AVURLAsset *asset = [AVURLAsset URLAssetWithURL:ac3URL options:nil];
+      [asset.resourceLoader setDelegate:self queue:serialQueue];
 
-  _playerItem = [AVPlayerItem playerItemWithAsset:asset];
-  [_playerItem addObserver:self forKeyPath:@"playbackBufferFull" options:NSKeyValueObservingOptionNew context:playbackBufferFull];
-  [_playerItem addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:playbackBufferEmpty];
-  [_playerItem addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionNew context:playbackLikelyToKeepUp];
-  [_playerItem addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:nil];
+      _playerItem = [AVPlayerItem playerItemWithAsset:asset];
+      [_playerItem addObserver:self forKeyPath:@"playbackBufferFull" options:NSKeyValueObservingOptionNew context:playbackBufferFull];
+      [_playerItem addObserver:self forKeyPath:@"playbackBufferEmpty" options:NSKeyValueObservingOptionNew context:playbackBufferEmpty];
+      [_playerItem addObserver:self forKeyPath:@"playbackLikelyToKeepUp" options:NSKeyValueObservingOptionNew context:playbackLikelyToKeepUp];
+      [_playerItem addObserver:self forKeyPath:@"loadedTimeRanges" options:NSKeyValueObservingOptionNew context:nil];
 
+      _avplayer = [[AVPlayer alloc] initWithPlayerItem:_playerItem];
+      _avplayer.automaticallyWaitsToMinimizeStalling = NO;
+      //_avplayer.currentItem.preferredForwardBufferDuration = 4.0;
+      _avplayer.currentItem.canUseNetworkResourcesForLiveStreamingWhilePaused = YES;
+      [_avplayer pause];
+    });
 
-  _avplayer = [[AVPlayer alloc] initWithPlayerItem:_playerItem];
-  _avplayer.automaticallyWaitsToMinimizeStalling = NO;
-  //_avplayer.currentItem.preferredForwardBufferDuration = 4.0;
-  _avplayer.currentItem.canUseNetworkResourcesForLiveStreamingWhilePaused = YES;
-  [_avplayer pause];
-  _started = true;
-
-  NSLog(@"AVURLAsset preferredForwardBufferDuration:%f", [_avplayer.currentItem preferredForwardBufferDuration]);
+  //NSLog(@"AVURLAsset preferredForwardBufferDuration:%f", [_avplayer.currentItem preferredForwardBufferDuration]);
 }
 
 - (void)stopPlayback
 {
-  [_resourceloader cancel];
-  usleep(100 * 1000);
+  _canceled = true;
   _avplayer = nullptr;
   _playerItem = nullptr;
   SAFE_DELETE(_avbuffer);
   _started = false;
 }
 
-- (unsigned int)addPackets:(uint8_t*)buffer withBytes:(unsigned int)bytes
+- (void)playbackStatus
 {
   AVPlayerStatus status = [_avplayer status];
   float rate = [_avplayer rate];
-  bool started = status != AVPlayerStatusUnknown;
   CMTime currentTime = [_playerItem currentTime];
-  CLog::Log(LOGDEBUG, "status: %d, rate(%f), currentTime: %f, writebytes: %u", (int)status, rate, CMTimeGetSeconds(currentTime), _avbuffer->GetWriteSize());
-
-  // use the passed in framesize instead of internal,
-  // writes are relative to AE formats. once written,
-  // CAAudioUnitSink owns them.
-  if (_avbuffer->GetWriteSize() < bytes)
-  { // no space to write - wait for a bit
-    CSingleLock lock(g_avfmutex);
-    unsigned int timeout = 900 * bytes / 48000;
-    if (!started)
-      timeout = 4500;
-
-    // we are using a timer here for beeing sure for timeouts
-    // g_avfcondVar can be woken spuriously as signaled
-    XbmcThreads::EndTime timer(timeout);
-    g_avfcondVar.wait(g_avfmutex, timeout);
-    if (!started && timer.IsTimePast())
-    {
-      CLog::Log(LOGERROR, "%s engine didn't start in %d ms!", __FUNCTION__, timeout);
-      return INT_MAX;
-    }
-  }
-
-  unsigned int write_bytes = std::min(bytes, _avbuffer->GetWriteSize());
-  if (write_bytes)
-    _avbuffer->Write(buffer, write_bytes);
-
-  return write_bytes;
+  CLog::Log(LOGDEBUG, "status: %d, rate(%f), currentTime: %f", (int)status, rate, CMTimeGetSeconds(currentTime));
 }
 
 @end
 
-#pragma mark - EnumerateDevices
+#pragma mark - AESinkDARWINAVF
 /***************************************************************************************/
 /***************************************************************************************/
 static void EnumerateDevices(AEDeviceInfoList &list)
@@ -426,10 +369,7 @@ static void EnumerateDevices(AEDeviceInfoList &list)
   device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_AC3);
   device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_EAC3);
   device.m_sampleRates.push_back(48000);
-  //device.m_sampleRates.push_back(192000);
-
   device.m_dataFormats.push_back(AE_FMT_RAW);
-  //device.m_dataFormats.push_back(AE_FMT_S16LE);
 
   // add channel info
   UInt32 maxChannels = [[AVAudioSession sharedInstance] maximumOutputNumberOfChannels];
@@ -443,20 +383,18 @@ static void EnumerateDevices(AEDeviceInfoList &list)
   list.push_back(device);
 }
 
-#pragma mark - AEDeviceInfoList
 /***************************************************************************************/
 /***************************************************************************************/
 AEDeviceInfoList CAESinkDARWINAVF::m_devices;
 
 CAESinkDARWINAVF::CAESinkDARWINAVF()
-  : CThread("CAESinkDARWINAVF"),
-    m_avsink(nullptr),
-    m_started(false),
-    m_draining(false),
-    m_sink_frameSize(0),
-    m_sinkbuffer_size(0),
-    m_sinkbuffer_level(0),
-    m_sinkbuffer_sec_per_byte(0)
+  : CThread("CAESinkDARWINAVF")
+  , m_avsink(nullptr)
+  , m_draining(false)
+  , m_sink_frameSize(0)
+  , m_sinkbuffer_size(0)
+  , m_sinkbuffer_level(0)
+  , m_sinkbuffer_sec_per_byte(0)
 {
 }
 
@@ -467,7 +405,6 @@ CAESinkDARWINAVF::~CAESinkDARWINAVF()
 
 bool CAESinkDARWINAVF::Initialize(AEAudioFormat &format, std::string &device)
 {
-  m_started = false;
   std::string route = CDarwinUtils::GetAudioRoute();
   // no route, no audio. bail and let AE kick back to NULL device
   if (route.empty())
@@ -490,32 +427,35 @@ bool CAESinkDARWINAVF::Initialize(AEAudioFormat &format, std::string &device)
     return false;
 
   bool passthrough = false;
-  if (format.m_dataFormat == AE_FMT_RAW)
+  if (format.m_dataFormat == AE_FMT_RAW && route.find("HDMI") != std::string::npos)
   {
+    passthrough = true;
+
+    // passthrough is always two channels/raw
+    CAEChannelInfo channel_info;
+    for (unsigned int i = 0; i < 2; ++i)
+      channel_info += AE_CH_RAW;
+    format.m_channelLayout = channel_info;
+
     format.m_dataFormat = AE_FMT_S16LE;
-    //format.m_channelLayout = AE_CH_LAYOUT_2_0;
-    if (route.find("HDMI") != std::string::npos)
+    format.m_frameSize = 1;
+
+    switch (format.m_streamInfo.m_type)
     {
-      passthrough = true;
-      switch (format.m_streamInfo.m_type)
-      {
-        case CAEStreamInfo::STREAM_TYPE_AC3:
-          if (!format.m_streamInfo.m_ac3FrameSize)
-            format.m_streamInfo.m_ac3FrameSize = 1536;
-          format.m_frames = format.m_streamInfo.m_ac3FrameSize;
-          format.m_frameSize = 1;
-        break;
-        case CAEStreamInfo::STREAM_TYPE_EAC3:
-          if (!format.m_streamInfo.m_ac3FrameSize)
-            format.m_streamInfo.m_ac3FrameSize = 1792;
-          format.m_frames = format.m_streamInfo.m_ac3FrameSize;
-          format.m_frames *= 4;
-          format.m_frameSize = 1;
-        break;
-        default:
-          passthrough = false;
-        break;
-      }
+      case CAEStreamInfo::STREAM_TYPE_AC3:
+        if (!format.m_streamInfo.m_ac3FrameSize)
+          format.m_streamInfo.m_ac3FrameSize = 1536;
+        format.m_frames = format.m_streamInfo.m_ac3FrameSize;
+      break;
+      case CAEStreamInfo::STREAM_TYPE_EAC3:
+        if (!format.m_streamInfo.m_ac3FrameSize)
+          format.m_streamInfo.m_ac3FrameSize = 1792;
+        // good for 1536 or 1792 packet size
+        format.m_frames = 10752;
+      break;
+      default:
+        passthrough = false;
+      break;
     }
   }
   m_format = format;
@@ -524,7 +464,7 @@ bool CAESinkDARWINAVF::Initialize(AEAudioFormat &format, std::string &device)
   {
     // setup a pretend 500ms internal buffer
     m_sink_frameSize = format.m_streamInfo.m_ac3FrameSize;
-    m_sinkbuffer_size = m_sink_frameSize * 40;
+    m_sinkbuffer_size = m_sink_frameSize * 20;
     m_sinkbuffer_sec_per_byte = 0.032 / m_sink_frameSize;
 
     m_draining = false;
@@ -546,7 +486,6 @@ bool CAESinkDARWINAVF::Initialize(AEAudioFormat &format, std::string &device)
 
 void CAESinkDARWINAVF::Deinitialize()
 {
-  m_started = false;
   [m_avsink stopPlayback];
   usleep(100 * 1000);
   m_avsink = nullptr;
@@ -558,7 +497,6 @@ void CAESinkDARWINAVF::Deinitialize()
 
 void CAESinkDARWINAVF::AddPause(unsigned int millis)
 {
-  //CLog::Log(LOGDEBUG, "%s %u", __FUNCTION__, millis);
   usleep(millis * 1000);
 
   uint8_t buffer[m_sink_frameSize];
@@ -580,12 +518,11 @@ double CAESinkDARWINAVF::GetCacheTotal()
 
 unsigned int CAESinkDARWINAVF::AddPackets(uint8_t **data, unsigned int frames, unsigned int offset, int64_t timestamp)
 {
+/*
   uint8_t *buffer = data[0] + (offset * m_format.m_frameSize);
   uint16_t firstWord = buffer[0] << 8 | buffer[1];
   CLog::Log(LOGDEBUG, "%s firstWord(0x%4.4X), frames(%u), offset(%u)", __FUNCTION__, firstWord, frames, offset);
-
-  //if (m_avsink && firstWord == 0x0B77)
-  //  [m_avsink addPackets:buffer withBytes:frames];
+*/
 
   int written = 0;
   int retries = 10;
@@ -646,7 +583,7 @@ void CAESinkDARWINAVF::Process()
     }
 
     // pretend we have a 64k audio buffer
-    unsigned int min_buffer_size = m_sink_frameSize * 20;
+    unsigned int min_buffer_size = m_sink_frameSize * 10;
     unsigned int read_bytes = m_sinkbuffer_level;
     if (read_bytes > min_buffer_size)
       read_bytes = min_buffer_size;
@@ -666,7 +603,7 @@ void CAESinkDARWINAVF::Process()
     if (m_sinkbuffer_level == 0)
     {
       // sleep this audio thread, we will get woken when we have audio data.
-      m_wake.WaitMSec(250);
+      m_wake.WaitMSec(50);
     }
   }
   SetPriority(THREAD_PRIORITY_NORMAL);

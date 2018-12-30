@@ -50,15 +50,14 @@ public:
 private:
   static AEDeviceInfoList m_devices;
   CAEDeviceInfo        m_info;
+  AEAudioFormat        m_format;
   AVPlayerSink        *m_avsink;
 
   virtual void         Process();
 
   CEvent               m_wake;
   CEvent               m_inited;
-  volatile bool        m_started;
   volatile bool        m_draining;
-  AEAudioFormat        m_format;
   unsigned int         m_sink_frameSize;
   unsigned int         m_sinkbuffer_size;  ///< total size of the buffer
   unsigned int         m_sinkbuffer_level; ///< current level in the buffer
