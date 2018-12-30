@@ -1,0 +1,13 @@
+diff --git a/libavformat/ac3dec.c b/libavformat/ac3dec.c
+index e85b0ac7c9..17562099cd 100644
+--- a/libavformat/ac3dec.c
++++ b/libavformat/ac3dec.c
+@@ -45,7 +45,7 @@ static int ac3_eac3_probe(AVProbeData *p, enum AVCodecID expected_codec_id)
+         for(frames = 0; buf2 < end; frames++) {
+             uint8_t buf3[4096];
+             int i;
+-            if(!memcmp(buf2, "\x1\x10\0\0\0\0\0\0", 8))
++            if(!memcmp(buf2, "\x1\x10", 2))
+                 buf2+=16;
+             if (buf[0] == 0x77 && buf[1] == 0x0B) {
+                 for(i=0; i<8; i+=2) {
