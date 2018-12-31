@@ -70,7 +70,6 @@ static void *playbackBufferFull = &playbackBufferFull;
   self = [super init];
   if (self)
   {
-    _started = false;
     _canceled = false;
     _avplayer = nullptr;
     _avbuffer = new AERingBuffer(frameSize * 256);
@@ -146,7 +145,7 @@ static void *playbackBufferFull = &playbackBufferFull;
       // ac3/eac3 has two byte tag of 0x0b77, \v is vertical tab == 0x0b
       [dataRequest respondWithData:[NSData dataWithBytes:"\vw" length:2]];
       [loadingRequest finishLoading];
-      CLog::Log(LOGDEBUG, "avloader check content tag");
+      CLog::Log(LOGDEBUG, "avloader check content tag, %u in buffer", _avbuffer->GetReadSize());
     }
     else
     {
@@ -164,7 +163,9 @@ static void *playbackBufferFull = &playbackBufferFull;
         // just shove it back to make avplayer happy.
         //usleep(250 * 1000);
         [dataRequest respondWithData:_dataAtOffsetZero];
-        CLog::Log(LOGDEBUG, "avloader check endof");
+        CLog::Log(LOGDEBUG, "avloader check endof, %u in buffer", _avbuffer->GetReadSize());
+        //CLog::Log(LOGDEBUG, "avloader requestedLength:%zu, requestedOffset:%lld, currentOffset:%lld, bufferbytes:%u",
+        //  dataRequest.requestedLength, dataRequest.requestedOffset, dataRequest.currentOffset, _avbuffer->GetReadSize());
         [loadingRequest finishLoading];
         CLog::Log(LOGDEBUG, "avloader dataRequest end");
         return YES;
@@ -180,6 +181,16 @@ static void *playbackBufferFull = &playbackBufferFull;
           CLog::Log(LOGDEBUG, "avloader dataRequest end");
           return YES;
         }
+      }
+      if (dataRequest.requestsAllDataToEndOfResource == YES && dataRequest.requestedLength > (long)requestedBytes)
+      {
+        // calc how many complete frames are present
+        size_t maxFrameBytes = _frameSize * (_avbuffer->GetReadSize() / _frameSize);
+        // limit to size of _readbuffer
+        if (maxFrameBytes > 65536)
+          maxFrameBytes = 65536;
+        //CLog::Log(LOGDEBUG, "avloader maxframebytes %lu", maxFrameBytes);
+        requestedBytes = maxFrameBytes;
       }
 
       _avbuffer->Read((unsigned char*)_readbuffer, requestedBytes);
@@ -230,8 +241,6 @@ static void *playbackBufferFull = &playbackBufferFull;
         {
           CLog::Log(LOGDEBUG, "avloader timerange.start %f", CMTimeGetSeconds(timerange.start));
           CLog::Log(LOGDEBUG, "avloader timerange.duration %f", CMTimeGetSeconds(timerange.duration));
-          //[_avplayer play];
-          _started = true;
         }
       }
     }
@@ -255,7 +264,6 @@ static void *playbackBufferFull = &playbackBufferFull;
     CLog::Log(LOGDEBUG, "avloader playbackLikelyToKeepUp");
     if (_avplayer.currentItem.playbackLikelyToKeepUp)
     {
-      _started = true;
     }
   }
   else
@@ -268,9 +276,20 @@ static void *playbackBufferFull = &playbackBufferFull;
 {
   if (data)
   {
-    unsigned int write_bytes = std::min(size, (int)_avbuffer->GetWriteSize());
-    if (write_bytes)
-      _avbuffer->Write(data, write_bytes);
+    int written = 0;
+    int retries = 10;
+    while (!_canceled && written < size && --retries)
+    {
+      int max_bytes = _avbuffer->GetWriteSize() / 2;
+      if (size > max_bytes)
+      {
+        int sleep_time_ms = 0.032;
+        usleep(sleep_time_ms * 1000);
+        continue;
+      }
+      _avbuffer->Write(data, size);
+      written = size;
+    }
   }
 }
 
@@ -327,7 +346,6 @@ static void *playbackBufferFull = &playbackBufferFull;
   _avplayer = nullptr;
   _playerItem = nullptr;
   SAFE_DELETE(_avbuffer);
-  _started = false;
 }
 
 - (double)playbackStatus
@@ -335,8 +353,20 @@ static void *playbackBufferFull = &playbackBufferFull;
   //AVPlayerStatus status = [_avplayer status];
   //float rate = [_avplayer rate];
   CMTime currentTime = [_playerItem currentTime];
+  double buffered = 0;
   double sink_s = CMTimeGetSeconds(currentTime);
   //CLog::Log(LOGDEBUG, "status: %d, rate(%f), currentTime: %f", (int)status, rate, sink_s);
+
+  NSArray *timeRanges = [_playerItem loadedTimeRanges];
+  if (timeRanges && [timeRanges count])
+  {
+    CMTimeRange timerange = [[timeRanges objectAtIndex:0]CMTimeRangeValue];
+    //CLog::Log(LOGDEBUG, "avloader timerange.start %f", CMTimeGetSeconds(timerange.start));
+    double duration = CMTimeGetSeconds(timerange.duration);
+    //CLog::Log(LOGDEBUG, "avloader timerange.duration %f", duration);
+    buffered = duration - sink_s;
+    CLog::Log(LOGDEBUG, "avloader time buffered %f", buffered);
+  }
 
   return sink_s;
 }
@@ -391,6 +421,7 @@ bool CDVDAudioCodecAVFoundation::Open(CDVDStreamInfo &hints, CDVDCodecOptions &o
         format.m_streamInfo.m_type = CAEStreamInfo::STREAM_TYPE_NULL;
     }
     m_format = format;
+    CAEFactory::Suspend();
     // fixme: move to decode so we know real frame size
     m_avsink = [[AVPlayerSink alloc] initWithFrameSize:1792];
     [m_avsink startPlayback:hints.codec];
@@ -413,6 +444,8 @@ void CDVDAudioCodecAVFoundation::Dispose()
   m_avsink = nullptr;
 
   CDVDAudioCodecPassthrough::Dispose();
+
+  CAEFactory::Resume();
 }
 
 int CDVDAudioCodecAVFoundation::Decode(uint8_t* pData, int iSize, double dts, double pts)
@@ -465,13 +498,11 @@ void CDVDAudioCodecAVFoundation::SetSpeed(int iSpeed)
     case DVD_PLAYSPEED_PAUSE:
       CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::SetSpeed Pause");
       [m_avsink speed:false];
-      //m_messages->enqueue(PAUSE);
       break;
     default:
     case DVD_PLAYSPEED_NORMAL:
       CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::SetSpeed Play");
       [m_avsink speed:true];
-      //m_messages->enqueue(PLAY);
       break;
   }
   m_speed = iSpeed;
@@ -506,7 +537,7 @@ void CDVDAudioCodecAVFoundation::Process()
       {
         sink_s = [m_avsink playbackStatus];
       }
-      CLog::Log(LOGDEBUG, "CDVDVideoCodecAVFoundation::Process player_s(%f), sink_s(%f)", player_s, sink_s);
+      CLog::Log(LOGDEBUG, "CDVDVideoCodecAVFoundation::Process player_s(%f), sink_s(%f), delta(%f)", player_s, sink_s, player_s - sink_s);
     }
     Sleep(100);
   }

@@ -34,6 +34,7 @@ CAudioSinkAVFoundation::CAudioSinkAVFoundation(volatile bool &bStop, CDVDClock *
 , m_pClock(clock)
 , m_speed(DVD_PLAYSPEED_NORMAL)
 , m_start(false)
+, m_startDelaySeconds(0.5)
 {
   m_bPassthrough = false;
   m_bPaused = true;
@@ -60,15 +61,20 @@ bool CAudioSinkAVFoundation::Create(const DVDAudioFrame &audioframe, AVCodecID c
   CSingleLock lock(m_critSection);
   m_bPassthrough = audioframe.passthrough;
 
+  //CAEFactory::Suspend();
+
   return true;
 }
 
 void CAudioSinkAVFoundation::Destroy()
 {
   CSingleLock lock (m_critSection);
+  CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Destroy");
   m_bPassthrough = false;
   m_bPaused = true;
   m_playingPts = DVD_NOPTS_VALUE;
+
+  //CAEFactory::Resume();
 }
 
 unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
@@ -77,7 +83,7 @@ unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
   if (!m_start && audioframe.nb_frames)
   {
     m_start = true;
-    m_timer.Set(4 * 1000);
+    m_timer.Set(m_startDelaySeconds * 1000);
   }
 
   CSingleLock lock (m_critSection);
@@ -93,6 +99,7 @@ unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
 void CAudioSinkAVFoundation::Drain()
 {
   CSingleLock lock (m_critSection);
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Drain");
 }
 
 void CAudioSinkAVFoundation::SetVolume(float volume)
@@ -114,19 +121,23 @@ float CAudioSinkAVFoundation::GetCurrentAttenuation()
 void CAudioSinkAVFoundation::Pause()
 {
   CSingleLock lock (m_critSection);
-  CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Pause - pausing audio stream");
+  CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Pause");
   m_playingPts = DVD_NOPTS_VALUE;
 }
 
 void CAudioSinkAVFoundation::Resume()
 {
   CSingleLock lock(m_critSection);
-  CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Resume - resume audio stream");
+  CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Resume");
 }
 
 double CAudioSinkAVFoundation::GetDelay()
 {
-  // returns the time it takes to play a packet if we add one at this time
+  // Returns the time in seconds that it will take
+  // for the next added packet to be heard from the speakers.
+  // used as audio cachetime in player during startup,
+  // in DVDPlayerAudio during RESYNC,
+  // and internally to offset passed pts in AddPackets
   CSingleLock lock (m_critSection);
 
   double delay = 0.3;
@@ -138,6 +149,7 @@ void CAudioSinkAVFoundation::Flush()
   m_bAbort = true;
 
   CSingleLock lock (m_critSection);
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Flush");
   m_playingPts = DVD_NOPTS_VALUE;
   m_syncError = 0.0;
   m_syncErrorTime = 0;
@@ -145,6 +157,7 @@ void CAudioSinkAVFoundation::Flush()
 
 void CAudioSinkAVFoundation::AbortAddPackets()
 {
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::AbortAddPackets");
   m_bAbort = true;
 }
 
@@ -168,7 +181,7 @@ double CAudioSinkAVFoundation::GetCacheTime()
   // ie. time of current cache in seconds.
   CSingleLock lock (m_critSection);
   if (m_timer.IsTimePast())
-    return 0.0;
+    return 0.3;
 
   return (double)m_timer.MillisLeft() / 1000.0;
 }
@@ -178,18 +191,22 @@ double CAudioSinkAVFoundation::GetCacheTotal()
   // total cache time of stream in seconds
   // returns total time a stream can buffer
   CSingleLock lock (m_critSection);
-  return 4.0;
+  return m_startDelaySeconds;
 }
 
 double CAudioSinkAVFoundation::GetMaxDelay()
 {
   // returns total time of audio in AE for the stream
+  // used as audio cachetotal in player during startu
   CSingleLock lock (m_critSection);
-  return 0.0;
+  return 1.0;
 }
 
 double CAudioSinkAVFoundation::GetPlayingPts()
 {
+  // passed to CDVDPlayerAudio and accessed by CDVDPlayerAudio::GetCurrentPts()
+  // which is used by CDVDPlayer to ONLY report a/v sync.
+  // Is not used for correcting a/v sync.
   if (m_playingPts == DVD_NOPTS_VALUE)
     return 0.0;
 
@@ -216,6 +233,7 @@ double CAudioSinkAVFoundation::GetSyncError()
 
 void CAudioSinkAVFoundation::SetSyncErrorCorrection(double correction)
 {
+  // lasts until next AddPacket/INSYNC/m_syncErrorTime != m_syncError
   m_syncError += correction;
 }
 
@@ -249,14 +267,13 @@ void CAudioSinkAVFoundation::SetResampleMode(int mode)
 double CAudioSinkAVFoundation::GetClock()
 {
   double absolute;
-  if (m_pClock)
-    return m_pClock->GetClock(absolute) / DVD_TIME_BASE * 1000;
-  else
-    return 0.0;
+  // absolute is not used in GetClock :)
+  return m_pClock->GetClock(absolute) / DVD_TIME_BASE * 1000;
 }
 
 double CAudioSinkAVFoundation::GetClockSpeed()
 {
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::AbortAddPackets");
   if (m_pClock)
     return m_pClock->GetClockSpeed();
   else

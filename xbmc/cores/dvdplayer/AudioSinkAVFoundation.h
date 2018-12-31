@@ -62,19 +62,20 @@ public:
   double GetClockSpeed();
 
 protected:
+  volatile bool& m_bStop;
+  CDVDClock *m_pClock;
+
   int m_speed;
   bool m_start;
+  double m_startDelaySeconds;
   bool m_bPaused;
   bool m_bPassthrough;
   double m_playingPts;
   double m_timeOfPts;
   double m_syncError;
   unsigned int m_syncErrorTime;
-  double m_resampleRatio;
   CCriticalSection m_critSection;
   std::atomic_bool m_bAbort;
 
-  volatile bool& m_bStop;
-  CDVDClock *m_pClock;
   XbmcThreads::EndTime m_timer;
 };
