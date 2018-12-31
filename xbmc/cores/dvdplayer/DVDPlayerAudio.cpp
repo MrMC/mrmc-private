@@ -30,6 +30,7 @@
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
 #ifdef TARGET_DARWIN_IOS
+#include "AudioSinkAVFoundation.h"
 #include "platform/darwin/DarwinUtils.h"
 #endif
 
@@ -448,6 +449,15 @@ void CDVDPlayerAudio::Process()
 
           m_dvdAudio->Destroy();
 
+#ifdef TARGET_DARWIN_TVOS
+          IAudioSink *renderer;
+          if (audioframe.passthrough)
+            renderer = new CAudioSinkAVFoundation((bool&)m_bStop, m_pClock);
+          else
+            renderer = new CDVDAudio((bool&)m_bStop, m_pClock);
+          SAFE_DELETE(m_dvdAudio);
+          m_dvdAudio = renderer;
+#endif
           if (!m_dvdAudio->Create(audioframe, m_streaminfo.codec, m_setsynctype == SYNC_RESAMPLE))
             CLog::Log(LOGERROR, "%s - failed to create audio renderer", __FUNCTION__);
 
