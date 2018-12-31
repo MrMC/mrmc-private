@@ -20,30 +20,20 @@
  *
  */
 
-#if (defined HAVE_CONFIG_H)
-  #include "config.h"
-#endif
+#include "IAudioSink.h"
 #include "threads/CriticalSection.h"
-#include "linux/PlatformDefs.h"
-
 #include "cores/AudioEngine/Utils/AEChannelInfo.h"
 #include "cores/AudioEngine/Interfaces/AEStream.h"
 #include <atomic>
 
-extern "C" {
-#include <libavcodec/avcodec.h>
-}
-
-typedef struct stDVDAudioFrame DVDAudioFrame;
-
 class CSingleLock;
 class CDVDClock;
 
-class CDVDAudio : IAEClockCallback
+class CDVDAudio : public IAudioSink, IAEClockCallback
 {
 public:
   CDVDAudio(volatile bool& bStop, CDVDClock *clock);
-  ~CDVDAudio();
+ ~CDVDAudio();
 
   void SetVolume(float fVolume);
   void SetDynamicRangeCompression(long drc);
@@ -67,7 +57,7 @@ public:
   void Drain();
   void AbortAddPackets();
 
-  void SetSpeed(int iSpeed);
+  void SetSpeed(int iSpeed) {};
   void SetResampleRatio(double ratio);
 
   double GetClock();
