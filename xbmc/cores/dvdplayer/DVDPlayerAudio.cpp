@@ -28,9 +28,6 @@
 #include "utils/MathUtils.h"
 #include "cores/AudioEngine/AEFactory.h"
 #include "cores/AudioEngine/Utils/AEUtil.h"
-#ifdef TARGET_RASPBERRY_PI
-#include "linux/RBP.h"
-#endif
 #ifdef TARGET_DARWIN_IOS
 #include "platform/darwin/DarwinUtils.h"
 #endif
@@ -88,14 +85,11 @@ CDVDPlayerAudio::~CDVDPlayerAudio()
 
   // close the stream, and don't wait for the audio to be finished
   // CloseStream(true);
+  SAFE_DELETE(m_dvdAudio);
 }
 
 bool CDVDPlayerAudio::AllowDTSHDDecode()
 {
-#ifdef TARGET_RASPBERRY_PI
-  if (g_RBP.RasberryPiVersion() == 1)
-    return false;
-#endif
   return true;
 }
 
@@ -161,6 +155,7 @@ void CDVDPlayerAudio::OpenStream(CDVDStreamInfo &hints, CDVDAudioCodec* codec)
 
   m_audioClock = 0;
   m_stalled = m_messageQueue.GetPacketCount(CDVDMsg::DEMUXER_PACKET) == 0;
+  m_pAudioCodec->SetClock(m_pClock);
 
   m_synctype = SYNC_DISCON;
   m_setsynctype = SYNC_DISCON;
@@ -349,6 +344,9 @@ void CDVDPlayerAudio::Process()
         m_dvdAudio.Pause();
       }
       m_speed = speed;
+
+      if (m_pAudioCodec)
+        m_pAudioCodec->SetSpeed(m_speed);
     }
     else if (pMsg->IsType(CDVDMsg::GENERAL_STREAMCHANGE))
     {
@@ -611,6 +609,7 @@ bool CDVDPlayerAudio::SwitchCodecIfNeeded()
 
   SAFE_DELETE(m_pAudioCodec);
   m_pAudioCodec = codec;
+  m_pAudioCodec->SetClock(m_pClock);
 
   return true;
 }

@@ -1,8 +1,8 @@
 #pragma once
 
 /*
- *      Copyright (C) 2010-2013 Team XBMC
- *      http://xbmc.org
+ *      Copyright (C) 2018 Team MrMC
+ *      http://mrmc.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -15,13 +15,14 @@
  *  GNU General Public License for more details.
  *
  *  You should have received a copy of the GNU General Public License
- *  along with XBMC; see the file COPYING.  If not, see
+ *  along with MrMC; see the file COPYING.  If not, see
  *  <http://www.gnu.org/licenses/>.
  *
  */
 
 #include "DVDAudioCodecPassthrough.h"
 #include "cores/AudioEngine/Utils/AEAudioFormat.h"
+#include "threads/Thread.h"
 
 #ifdef __OBJC__
   @class AVPlayerSink;
@@ -29,7 +30,7 @@
   class AVPlayerSink;
 #endif
 
-class CDVDAudioCodecAVFoundation : public CDVDAudioCodecPassthrough
+class CDVDAudioCodecAVFoundation : public CDVDAudioCodecPassthrough, CThread
 {
 public:
   CDVDAudioCodecAVFoundation();
@@ -38,11 +39,22 @@ public:
   virtual bool Open(CDVDStreamInfo &hints, CDVDCodecOptions &options);
   virtual void Dispose();
   virtual int  Decode(uint8_t* pData, int iSize, double dts, double pts);
+  virtual void GetData(DVDAudioFrame &frame);
   virtual void Reset();
   virtual const char* GetName() { return "passthrough-afv"; }
+  virtual void  SetClock(CDVDClock *clock);
+  virtual void  SetSpeed(int iSpeed);
+protected:
+  virtual void  Process();
 private:
-  AEAudioFormat      m_format;
-  AVPlayerSink      *m_avsink;
-  FILE              *m_fp;
+  double        GetPlayerClockSeconds();
+
+  AEAudioFormat       m_format;
+  AVPlayerSink       *m_avsink;
+  CDVDClock          *m_clock = nullptr;
+  double              m_dts;
+  double              m_pts;
+  int                 m_speed;
+  AVCodecID           m_codec;
 };
 

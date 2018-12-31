@@ -245,7 +245,7 @@ void CAESinkDARWINAVF::Process()
     }
 
     // pretend we have a 64k audio buffer
-    unsigned int min_buffer_size = m_sink_frameSize * 10;
+    unsigned int min_buffer_size = m_sink_frameSize * 4;
     unsigned int read_bytes = m_sinkbuffer_level;
     if (read_bytes > min_buffer_size)
       read_bytes = min_buffer_size;
