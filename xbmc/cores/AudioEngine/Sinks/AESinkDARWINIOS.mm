@@ -552,21 +552,13 @@ static void EnumerateDevices(AEDeviceInfoList &list)
   // if not hdmi,  CAESinkDARWINIOS::Initialize will kick back to 2 channel PCM
   device.m_deviceType = AE_DEVTYPE_HDMI;
 
-  //device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_AC3);
-  //device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_EAC3);
-  //device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_DTS_512);
-  //device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_DTS_1024);
-  //device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_DTS_2048);
-  //device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_DTSHD_CORE);
-  // ATV can not do below (yet :)
-  // device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_DTSHD);
-  // device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_TRUEHD);
+  device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_AC3);
+  device.m_streamTypes.push_back(CAEStreamInfo::STREAM_TYPE_EAC3);
 
   device.m_sampleRates.push_back(44100);
   device.m_sampleRates.push_back(48000);
-  // device.m_sampleRates.push_back(192000);
 
-  //device.m_dataFormats.push_back(AE_FMT_RAW);
+  device.m_dataFormats.push_back(AE_FMT_RAW);
   device.m_dataFormats.push_back(AE_FMT_S16LE);
   device.m_dataFormats.push_back(AE_FMT_FLOAT);
   // device.m_dataFormats.push_back(AE_FMT_S24LE3);
@@ -635,7 +627,6 @@ bool CAESinkDARWINIOS::Initialize(AEAudioFormat &format, std::string &device)
       if (route.find("HDMI") != std::string::npos)
       {
         passthrough = true;
-        return false;
       }
       else
       {

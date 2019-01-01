@@ -27,7 +27,6 @@
   #include "Sinks/AESinkALSA.h"
 #elif defined(TARGET_DARWIN_IOS)
   #include "Sinks/AESinkDARWINIOS.h"
-  #include "Sinks/AESinkDARWINAVF.h"
 #elif defined(TARGET_DARWIN_OSX)
   #include "Sinks/AESinkDARWINOSX.h"
 #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
@@ -64,7 +63,6 @@ void CAESinkFactory::ParseDevice(std::string &device, std::string &driver)
         driver == "ALSA"        ||
 #elif defined(TARGET_DARWIN_IOS)
         driver == "DARWINIOS"  ||
-        driver == "DARWINAVF"  ||
 #elif defined(TARGET_DARWIN_OSX)
         driver == "DARWINOSX"  ||
 #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
@@ -106,8 +104,6 @@ IAESink *CAESinkFactory::TrySink(std::string &driver, std::string &device, AEAud
 #elif defined(TARGET_DARWIN_IOS)
   if (driver == "DARWINIOS")
     sink = new CAESinkDARWINIOS();
-  else if (driver == "DARWINAVF")
-    sink = new CAESinkDARWINAVF();
 #elif defined(TARGET_DARWIN_OSX)
     sink = new CAESinkDARWINOSX();
 #elif defined(TARGET_LINUX) || defined(TARGET_FREEBSD)
@@ -206,12 +202,6 @@ void CAESinkFactory::EnumerateEx(AESinkInfoList &list, bool force)
   info.m_deviceInfoList.clear();
   info.m_sinkName = "DARWINIOS";
   CAESinkDARWINIOS::EnumerateDevicesEx(info.m_deviceInfoList, force);
-  if(!info.m_deviceInfoList.empty())
-    list.push_back(info);
-
-  info.m_deviceInfoList.clear();
-  info.m_sinkName = "DARWINAVF";
-  CAESinkDARWINAVF::EnumerateDevicesEx(info.m_deviceInfoList, force);
   if(!info.m_deviceInfoList.empty())
     list.push_back(info);
 

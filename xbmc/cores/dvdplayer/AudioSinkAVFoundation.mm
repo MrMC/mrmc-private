@@ -1,5 +1,5 @@
 /*
- *      Copyright (C) 2018 Team MrMC
+ *      Copyright (C) 2019 Team MrMC
  *      http://mrmc.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -18,15 +18,17 @@
  *
  */
 
-#include "DVDAudioCodecAVFoundation.h"
-#include "DVDCodecs/DVDCodecs.h"
-#include "DVDStreamInfo.h"
+#include "AudioSinkAVFoundation.h"
+
+#include "DVDClock.h"
+#include "DVDCodecs/Audio/DVDAudioCodec.h"
 #include "cores/AudioEngine/AEFactory.h"
+#include "cores/AudioEngine/Interfaces/AEStream.h"
+#include "cores/AudioEngine/Utils/AEAudioFormat.h"
 #include "cores/AudioEngine/Utils/AERingBuffer.h"
 #include "platform/darwin/DarwinUtils.h"
+#include "threads/SingleLock.h"
 #include "utils/log.h"
-
-#include <sys/stat.h>
 
 #define AVMediaType AVMediaType_fooo
 #import <AVFoundation/AVFoundation.h>
@@ -43,7 +45,9 @@ static void *playbackBufferFull = &playbackBufferFull;
 @interface AVPlayerSink : NSObject <AVAssetResourceLoaderDelegate>
 - (id)initWithFrameSize:(unsigned int)frameSize;
 - (void)addPackets:(uint8_t*)data size:(int)size dts:(double)dts pts:(double)pts;
-- (void)speed:(bool) state;
+- (void)play:(bool) state;
+- (void)drain;
+- (void)flush;
 - (void)stopPlayback;
 - (void)startPlayback:(AVCodecID) type;
 - (double)playbackStatus;
@@ -87,7 +91,6 @@ static void *playbackBufferFull = &playbackBufferFull;
   _playerItem = nullptr;
   SAFE_DELETE(_avbuffer);
   SAFE_DELETE(_readbuffer);
-
 }
 
 #pragma mark - ResourceLoader
@@ -272,7 +275,7 @@ static void *playbackBufferFull = &playbackBufferFull;
   }
 }
 
-- (void)addPackets:(uint8_t*)data size:(int)size dts:(double)dts pts:(double)pts;
+- (void)addPackets:(uint8_t*)data size:(int)size dts:(double)dts pts:(double)pts
 {
   if (data)
   {
@@ -293,12 +296,22 @@ static void *playbackBufferFull = &playbackBufferFull;
   }
 }
 
-- (void)speed:(bool) state;
+- (void)play:(bool) state
 {
   if (state)
     [_avplayer play];
   else
     [_avplayer pause];
+}
+
+- (void)drain
+{
+  // let audio play out
+}
+
+- (void)flush
+{
+  // flush audio to silence
 }
 
 - (void)startPlayback:(AVCodecID) type
@@ -373,122 +386,247 @@ static void *playbackBufferFull = &playbackBufferFull;
 
 @end
 
-
-#pragma mark - CDVDAudioCodecAVFoundation
+#pragma mark - CAudioSinkAVFoundation
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
-CDVDAudioCodecAVFoundation::CDVDAudioCodecAVFoundation(void)
-: CDVDAudioCodecPassthrough()
-, CThread("CDVDAudioCodecAVFoundation")
-, m_avsink(nullptr)
+CAudioSinkAVFoundation::CAudioSinkAVFoundation(volatile bool &bStop, CDVDClock *clock)
+: CThread("CAudioSinkAVFoundation")
+, m_bStop(bStop)
+, m_pClock(clock)
 , m_speed(DVD_PLAYSPEED_NORMAL)
+, m_start(false)
+, m_startDelaySeconds(0.5)
+, m_avsink(nullptr)
 {
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::CDVDAudioCodecAVFoundation");
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::CAudioSinkAVFoundation");
+  m_bPassthrough = false;
+  m_bPaused = true;
+  m_playingPts = DVD_NOPTS_VALUE;
+  m_timeOfPts = 0.0;
+  m_syncError = 0.0;
+  m_syncErrorTime = 0;
 }
 
-CDVDAudioCodecAVFoundation::~CDVDAudioCodecAVFoundation(void)
+CAudioSinkAVFoundation::~CAudioSinkAVFoundation()
 {
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::~CDVDAudioCodecAVFoundation");
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::~CAudioSinkAVFoundation");
   m_avsink = nullptr;
 }
 
-bool CDVDAudioCodecAVFoundation::Open(CDVDStreamInfo &hints, CDVDCodecOptions &options)
+bool CAudioSinkAVFoundation::Create(const DVDAudioFrame &audioframe, AVCodecID codec, bool needresampler)
 {
-  bool rtn = CDVDAudioCodecPassthrough::Open(hints, options);
-  if (rtn)
+  CLog::Log(LOGNOTICE,
+    "Creating audio stream (codec id: %i, channels: %i, sample rate: %i, %s)",
+    codec,
+    audioframe.format.m_channelLayout.Count(),
+    audioframe.format.m_sampleRate,
+    audioframe.passthrough ? "pass-through" : "no pass-through"
+  );
+
+  CSingleLock lock(m_critSection);
+  m_bPassthrough = audioframe.passthrough;
+
+  switch (codec)
   {
-    AEAudioFormat format;
-    format.m_dataFormat = AE_FMT_RAW;
-    format.m_sampleRate = hints.samplerate;
-    switch (hints.codec)
-    {
-      case AV_CODEC_ID_AC3:
-        format.m_streamInfo.m_type = CAEStreamInfo::STREAM_TYPE_AC3;
-        format.m_streamInfo.m_sampleRate = hints.samplerate;
-        break;
+    case AV_CODEC_ID_AC3:
+      //framesize;
+      break;
 
-      case AV_CODEC_ID_EAC3:
-        format.m_streamInfo.m_type = CAEStreamInfo::STREAM_TYPE_EAC3;
-        format.m_streamInfo.m_sampleRate = hints.samplerate;
-        break;
+    case AV_CODEC_ID_EAC3:
+      break;
 
-      case AV_CODEC_ID_TRUEHD:
-        format.m_streamInfo.m_type = CAEStreamInfo::STREAM_TYPE_TRUEHD;
-        format.m_streamInfo.m_sampleRate = hints.samplerate;
-        break;
-
-      default:
-        format.m_streamInfo.m_type = CAEStreamInfo::STREAM_TYPE_NULL;
-    }
-    m_format = format;
-    CAEFactory::Suspend();
-    // fixme: move to decode so we know real frame size
-    m_avsink = [[AVPlayerSink alloc] initWithFrameSize:1792];
-    [m_avsink startPlayback:hints.codec];
-
-    Create();
-    CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::Open");
+    default:
+      return false;
+      break;
   }
 
-  return rtn;
+  CAEFactory::Suspend();
+  // fixme: move to decode so we know real frame size
+  m_codec = codec;
+  m_frameSize = 1792;
+  m_avsink = [[AVPlayerSink alloc] initWithFrameSize:m_frameSize];
+  [m_avsink startPlayback:m_codec];
+
+  CThread::Create();
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Create");
+
+  return true;
 }
 
-void CDVDAudioCodecAVFoundation::Dispose()
+void CAudioSinkAVFoundation::Destroy()
 {
+  CSingleLock lock (m_critSection);
+  CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Destroy");
+
   m_bStop = true;
   StopThread();
 
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::Dispose");
   [m_avsink stopPlayback];
   usleep(100 * 1000);
   m_avsink = nullptr;
 
-  CDVDAudioCodecPassthrough::Dispose();
+  m_bPassthrough = false;
+  m_bPaused = true;
+  m_playingPts = DVD_NOPTS_VALUE;
 
   CAEFactory::Resume();
 }
 
-int CDVDAudioCodecAVFoundation::Decode(uint8_t* pData, int iSize, double dts, double pts)
+unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
 {
-  int rtn = CDVDAudioCodecPassthrough::Decode(pData, iSize, dts, pts);
-
-  if (iSize > 0 && (iSize != rtn))
-    CLog::Log(LOGDEBUG, "%s iSize(%d), rtn(%d)", __FUNCTION__, iSize, rtn);
-  else
+  m_bAbort = false;
+  if (!m_start && audioframe.nb_frames)
   {
-    if (m_avsink)
-    {
-      [m_avsink addPackets:pData size:iSize dts:dts pts:pts];
-    }
+    m_start = true;
+    m_timer.Set(m_startDelaySeconds * 1000);
   }
-  return rtn;
-}
 
-void CDVDAudioCodecAVFoundation::GetData(DVDAudioFrame &frame)
-{
-  CDVDAudioCodecPassthrough::GetData(frame);
-  /*
+  CSingleLock lock (m_critSection);
+  m_syncErrorTime = 0;
+  m_syncError = 0.0;
+
+  m_playingPts = audioframe.pts + audioframe.duration - GetDelay();
+  m_timeOfPts = m_pClock->GetAbsoluteClock();
+
   if (m_avsink)
   {
-    double sink_s = [m_avsink playbackStatus];
-    if (sink_s == 0.0 && GetPlayerClockSeconds() < 2.0)
-      frame.nb_frames = 0;
+    [m_avsink addPackets:audioframe.data[0] size:audioframe.nb_frames dts:0 pts:audioframe.pts];
   }
-  */
+
+  return audioframe.nb_frames;
 }
 
-void CDVDAudioCodecAVFoundation::Reset()
+void CAudioSinkAVFoundation::Drain()
 {
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::Reset");
-  CDVDAudioCodecPassthrough::Reset();
+  CSingleLock lock (m_critSection);
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Drain");
+  [m_avsink drain];
 }
 
-void CDVDAudioCodecAVFoundation::SetClock(CDVDClock *clock)
+float CAudioSinkAVFoundation::GetCurrentAttenuation()
 {
-  m_clock = clock;
+  CSingleLock lock (m_critSection);
+  return 1.0f;
 }
 
-void CDVDAudioCodecAVFoundation::SetSpeed(int iSpeed)
+void CAudioSinkAVFoundation::Pause()
+{
+  CSingleLock lock (m_critSection);
+  CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Pause");
+  m_playingPts = DVD_NOPTS_VALUE;
+  [m_avsink play:false];
+}
+
+void CAudioSinkAVFoundation::Resume()
+{
+  CSingleLock lock(m_critSection);
+  CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Resume");
+  [m_avsink play:true];
+}
+
+double CAudioSinkAVFoundation::GetDelay()
+{
+  // Returns the time in seconds that it will take
+  // for the next added packet to be heard from the speakers.
+  // used as audio cachetime in player during startup,
+  // in DVDPlayerAudio during RESYNC,
+  // and internally to offset passed pts in AddPackets
+  CSingleLock lock (m_critSection);
+
+  double delay = 0.3;
+  return delay * DVD_TIME_BASE;
+}
+
+void CAudioSinkAVFoundation::Flush()
+{
+  m_bAbort = true;
+
+  CSingleLock lock (m_critSection);
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Flush");
+  m_playingPts = DVD_NOPTS_VALUE;
+  m_syncError = 0.0;
+  m_syncErrorTime = 0;
+  [m_avsink flush];
+}
+
+void CAudioSinkAVFoundation::AbortAddPackets()
+{
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::AbortAddPackets");
+  m_bAbort = true;
+}
+
+bool CAudioSinkAVFoundation::IsValidFormat(const DVDAudioFrame &audioframe)
+{
+  if (audioframe.passthrough != m_bPassthrough)
+    return false;
+
+  return true;
+}
+
+double CAudioSinkAVFoundation::GetCacheTime()
+{
+  // Returns the time in seconds that it will take
+  // to underrun the cache if no sample is added.
+  // ie. time of current cache in seconds.
+  CSingleLock lock (m_critSection);
+  if (m_timer.IsTimePast())
+    return 0.3;
+
+  return (double)m_timer.MillisLeft() / 1000.0;
+}
+
+double CAudioSinkAVFoundation::GetCacheTotal()
+{
+  // total cache time of stream in seconds
+  // returns total time a stream can buffer
+  CSingleLock lock (m_critSection);
+  return m_startDelaySeconds;
+}
+
+double CAudioSinkAVFoundation::GetMaxDelay()
+{
+  // returns total time of audio in AE for the stream
+  // used as audio cachetotal in player during startu
+  CSingleLock lock (m_critSection);
+  return 1.0;
+}
+
+double CAudioSinkAVFoundation::GetPlayingPts()
+{
+  // passed to CDVDPlayerAudio and accessed by CDVDPlayerAudio::GetCurrentPts()
+  // which is used by CDVDPlayer to ONLY report a/v sync.
+  // Is not used for correcting a/v sync.
+  if (m_playingPts == DVD_NOPTS_VALUE)
+    return 0.0;
+
+  double now = m_pClock->GetAbsoluteClock();
+  double diff = now - m_timeOfPts;
+  double cache = GetCacheTime();
+  double played = 0.0;
+
+  if (diff < cache)
+    played = diff;
+  else
+    played = cache;
+
+  m_timeOfPts = now;
+  m_playingPts += played;
+  return m_playingPts;
+}
+
+double CAudioSinkAVFoundation::GetSyncError()
+{
+  // ErrorAdjust
+  return m_syncError;
+}
+
+void CAudioSinkAVFoundation::SetSyncErrorCorrection(double correction)
+{
+  // lasts until next AddPacket/INSYNC/m_syncErrorTime != m_syncError
+  m_syncError += correction;
+}
+
+void CAudioSinkAVFoundation::SetSpeed(int iSpeed)
 {
   if (iSpeed == m_speed)
     return;
@@ -496,33 +634,47 @@ void CDVDAudioCodecAVFoundation::SetSpeed(int iSpeed)
   switch(iSpeed)
   {
     case DVD_PLAYSPEED_PAUSE:
-      CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::SetSpeed Pause");
-      [m_avsink speed:false];
+      CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::SetSpeed Pause");
       break;
     default:
     case DVD_PLAYSPEED_NORMAL:
-      CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::SetSpeed Play");
-      [m_avsink speed:true];
+      CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::SetSpeed Play");
       break;
   }
   m_speed = iSpeed;
 }
 
-double CDVDAudioCodecAVFoundation::GetPlayerClockSeconds()
+double CAudioSinkAVFoundation::GetClock()
 {
-  if (!m_clock)
+  double absolute;
+  // absolute is not used in GetClock :)
+  return m_pClock->GetClock(absolute) / DVD_TIME_BASE * 1000;
+}
+
+double CAudioSinkAVFoundation::GetClockSpeed()
+{
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::AbortAddPackets");
+  if (m_pClock)
+    return m_pClock->GetClockSpeed();
+  else
+    return 1.0;
+}
+
+double CAudioSinkAVFoundation::GetPlayerClockSeconds()
+{
+  if (!m_pClock)
     return 0.0;
 
-  double seconds = m_clock->GetClock() / DVD_TIME_BASE;
+  double seconds = m_pClock->GetClock() / DVD_TIME_BASE;
   if (seconds > 0.0)
     return seconds;
   else
     return 0.0;
 }
 
-void CDVDAudioCodecAVFoundation::Process()
+void CAudioSinkAVFoundation::Process()
 {
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::Process Started");
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Process Started");
 
   // bump our priority to be level with the krAEken (ActiveAE)
   SetPriority(THREAD_PRIORITY_ABOVE_NORMAL);
@@ -537,11 +689,11 @@ void CDVDAudioCodecAVFoundation::Process()
       {
         sink_s = [m_avsink playbackStatus];
       }
-      CLog::Log(LOGDEBUG, "CDVDVideoCodecAVFoundation::Process player_s(%f), sink_s(%f), delta(%f)", player_s, sink_s, player_s - sink_s);
+      CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Process player_s(%f), sink_s(%f), delta(%f)", player_s, sink_s, player_s - sink_s);
     }
     Sleep(100);
   }
 
   SetPriority(THREAD_PRIORITY_NORMAL);
-  CLog::Log(LOGDEBUG, "CDVDAudioCodecAVFoundation::Process Stopped");
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Process Stopped");
 }

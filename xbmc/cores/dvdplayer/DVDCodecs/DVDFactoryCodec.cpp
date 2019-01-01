@@ -46,7 +46,6 @@
 #include "Audio/DVDAudioCodecPassthrough.h"
 #if defined(TARGET_DARWIN)
   #include "Audio/DVDAudioCodecAudioConverter.h"
-  #include "Audio/DVDAudioCodecAVFoundation.h"
 #endif
 #include "Overlay/DVDOverlayCodecSSA.h"
 #include "Overlay/DVDOverlayCodecText.h"
@@ -262,11 +261,7 @@ CDVDAudioCodec* CDVDFactoryCodec::CreateAudioCodec(CDVDStreamInfo &hint, bool al
   // we don't use passthrough if "sync playback to display" is enabled
   if (allowpassthrough)
   {
-#if defined(TARGET_DARWIN_IOS)
-    pCodec = OpenCodec(new CDVDAudioCodecAVFoundation(), hint, options);
-#else
     pCodec = OpenCodec(new CDVDAudioCodecPassthrough(), hint, options);
-#endif
     if( pCodec ) return pCodec;
   }
 

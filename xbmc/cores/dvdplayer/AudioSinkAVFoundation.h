@@ -1,7 +1,7 @@
 #pragma once
 
 /*
- *      Copyright (C) 2018 Team MrMC
+ *      Copyright (C) 2019 Team MrMC
  *      http://mrmc.tv
  *
  *  This Program is free software; you can redistribute it and/or modify
@@ -24,17 +24,24 @@
 #include "threads/SystemClock.h"
 #include "threads/CriticalSection.h"
 #include "cores/AudioEngine/Interfaces/AEStream.h"
+#include "threads/Thread.h"
 
 #include <atomic>
 
-class CAudioSinkAVFoundation : public IAudioSink, IAEClockCallback
+#ifdef __OBJC__
+  @class AVPlayerSink;
+#else
+  class AVPlayerSink;
+#endif
+
+class CAudioSinkAVFoundation : public IAudioSink, IAEClockCallback, CThread
 {
 public:
   CAudioSinkAVFoundation(volatile bool& bStop, CDVDClock *clock);
  ~CAudioSinkAVFoundation();
 
-  void SetVolume(float fVolume);
-  void SetDynamicRangeCompression(long drc);
+  void SetVolume(float fVolume) {};
+  void SetDynamicRangeCompression(long drc) {};
   float GetCurrentAttenuation();
   void Pause();
   void Resume();
@@ -49,19 +56,21 @@ public:
   double GetDelay(); // returns the time it takes to play a packet if we add one at this time
   double GetSyncError();
   void SetSyncErrorCorrection(double correction);
-  double GetResampleRatio();
-  void SetResampleMode(int mode);
+  double GetResampleRatio() { return 1.0; };
+  void SetResampleMode(int mode) {};
   void Flush();
   void Drain();
   void AbortAddPackets();
 
   void SetSpeed(int iSpeed);
-  void SetResampleRatio(double ratio);
+  void SetResampleRatio(double ratio) {};
 
   double GetClock();
   double GetClockSpeed();
 
 protected:
+  virtual void Process();
+
   volatile bool& m_bStop;
   CDVDClock *m_pClock;
 
@@ -78,4 +87,11 @@ protected:
   std::atomic_bool m_bAbort;
 
   XbmcThreads::EndTime m_timer;
+
+private:
+  double GetPlayerClockSeconds();
+
+  int m_frameSize;
+  AVCodecID m_codec;
+  AVPlayerSink *m_avsink = nullptr;
 };

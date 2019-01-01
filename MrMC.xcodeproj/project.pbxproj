@@ -1872,9 +1872,9 @@
 		F55BD31C1D246E240072FE3A /* ServicesManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD31B1D246E240072FE3A /* ServicesManager.cpp */; };
 		F55BD31D1D246E240072FE3A /* ServicesManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD31B1D246E240072FE3A /* ServicesManager.cpp */; };
 		F55BD31E1D246E240072FE3A /* ServicesManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55BD31B1D246E240072FE3A /* ServicesManager.cpp */; };
-		F55F0CF821D991FE005DC95F /* AudioSinkAVFoundation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.cpp */; };
-		F55F0CF921D991FE005DC95F /* AudioSinkAVFoundation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.cpp */; };
-		F55F0CFA21D991FE005DC95F /* AudioSinkAVFoundation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.cpp */; };
+		F55F0CF821D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */; };
+		F55F0CF921D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */; };
+		F55F0CFA21D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */; };
 		F5632F911CB9473A002027D9 /* Autorun.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5632F8F1CB9473A002027D9 /* Autorun.cpp */; };
 		F5632F921CB94787002027D9 /* ActiveAEDSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B723651C7C9A51006432AE /* ActiveAEDSP.cpp */; };
 		F5632F931CB9478B002027D9 /* ActiveAEDSPAddon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B723671C7C9A51006432AE /* ActiveAEDSPAddon.cpp */; };
@@ -1978,14 +1978,9 @@
 		F5AA30FB1BF014C100693976 /* DVDVideoCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AA30F91BF014C100693976 /* DVDVideoCodecAVFoundation.mm */; };
 		F5AACA680FB3DE2D00DBB77C /* GUIDialogSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AACA670FB3DE2D00DBB77C /* GUIDialogSelect.cpp */; };
 		F5AACA970FB3E2B800DBB77C /* GUIDialogSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AACA950FB3E2B800DBB77C /* GUIDialogSlider.cpp */; };
-		F5AB276821D3DB6700FC8641 /* AESinkDARWINAVF.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AB276621D3DB6700FC8641 /* AESinkDARWINAVF.mm */; };
-		F5AB276921D3DB6800FC8641 /* AESinkDARWINAVF.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AB276621D3DB6700FC8641 /* AESinkDARWINAVF.mm */; };
 		F5AB278621D5A40700FC8641 /* HueProviderRenderCapture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AB278021D5A40700FC8641 /* HueProviderRenderCapture.cpp */; };
 		F5AB278721D5A40700FC8641 /* HueProviderRenderCapture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AB278021D5A40700FC8641 /* HueProviderRenderCapture.cpp */; };
 		F5AB278821D5A40700FC8641 /* HueProviderRenderCapture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5AB278021D5A40700FC8641 /* HueProviderRenderCapture.cpp */; };
-		F5AB278B21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AB278A21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm */; };
-		F5AB278C21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AB278A21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm */; };
-		F5AB278D21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F5AB278A21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm */; };
 		F5AC304820B9A0C300A7A1ED /* ssdp.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC304220B9A0C300A7A1ED /* ssdp.c */; };
 		F5AC304920B9A0C300A7A1ED /* ssdp.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC304220B9A0C300A7A1ED /* ssdp.c */; };
 		F5AC304A20B9A0C300A7A1ED /* ssdp.c in Sources */ = {isa = PBXBuildFile; fileRef = F5AC304220B9A0C300A7A1ED /* ssdp.c */; };
@@ -5623,7 +5618,7 @@
 		F55BD31F1D3158E50072FE3A /* StringHasher.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StringHasher.h; sourceTree = "<group>"; };
 		F55F0CF521D991FD005DC95F /* IAudioSink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IAudioSink.h; sourceTree = "<group>"; };
 		F55F0CF621D991FE005DC95F /* AudioSinkAVFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioSinkAVFoundation.h; sourceTree = "<group>"; };
-		F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AudioSinkAVFoundation.cpp; sourceTree = "<group>"; };
+		F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AudioSinkAVFoundation.mm; sourceTree = "<group>"; };
 		F5632F8F1CB9473A002027D9 /* Autorun.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Autorun.cpp; sourceTree = "<group>"; };
 		F5632F901CB9473A002027D9 /* Autorun.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Autorun.h; sourceTree = "<group>"; };
 		F5632F971CB947FB002027D9 /* cddb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cddb.cpp; sourceTree = "<group>"; };
@@ -5753,12 +5748,8 @@
 		F5AACA670FB3DE2D00DBB77C /* GUIDialogSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogSelect.cpp; sourceTree = "<group>"; };
 		F5AACA950FB3E2B800DBB77C /* GUIDialogSlider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogSlider.cpp; sourceTree = "<group>"; };
 		F5AACA960FB3E2B800DBB77C /* GUIDialogSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogSlider.h; sourceTree = "<group>"; };
-		F5AB276621D3DB6700FC8641 /* AESinkDARWINAVF.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AESinkDARWINAVF.mm; path = Sinks/AESinkDARWINAVF.mm; sourceTree = "<group>"; };
-		F5AB276721D3DB6700FC8641 /* AESinkDARWINAVF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AESinkDARWINAVF.h; path = Sinks/AESinkDARWINAVF.h; sourceTree = "<group>"; };
 		F5AB278021D5A40700FC8641 /* HueProviderRenderCapture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HueProviderRenderCapture.cpp; sourceTree = "<group>"; };
 		F5AB278221D5A40700FC8641 /* HueProviderRenderCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HueProviderRenderCapture.h; sourceTree = "<group>"; };
-		F5AB278921D5AC0100FC8641 /* DVDAudioCodecAVFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVDAudioCodecAVFoundation.h; sourceTree = "<group>"; };
-		F5AB278A21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = DVDAudioCodecAVFoundation.mm; sourceTree = "<group>"; };
 		F5AC304020B9A0C300A7A1ED /* ssdp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ssdp.h; sourceTree = "<group>"; };
 		F5AC304220B9A0C300A7A1ED /* ssdp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ssdp.c; sourceTree = "<group>"; };
 		F5AC304C20B9A0F800A7A1ED /* HueUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HueUtils.cpp; sourceTree = "<group>"; };
@@ -8694,7 +8685,7 @@
 				E38E15570D25F9FA00618676 /* DVDInputStreams */,
 				E38E158E0D25F9FA00618676 /* DVDSubtitles */,
 				F55F0CF521D991FD005DC95F /* IAudioSink.h */,
-				F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.cpp */,
+				F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */,
 				F55F0CF621D991FE005DC95F /* AudioSinkAVFoundation.h */,
 				E38E14FC0D25F9F900618676 /* DVDAudio.cpp */,
 				E38E14FD0D25F9F900618676 /* DVDAudio.h */,
@@ -8756,8 +8747,6 @@
 				E38E15060D25F9F900618676 /* DVDAudioCodec.h */,
 				F58BF9791CDBBB21005BB003 /* DVDAudioCodecAudioConverter.cpp */,
 				F58BF97A1CDBBB21005BB003 /* DVDAudioCodecAudioConverter.h */,
-				F5AB278A21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm */,
-				F5AB278921D5AC0100FC8641 /* DVDAudioCodecAVFoundation.h */,
 				E38E15070D25F9F900618676 /* DVDAudioCodecFFmpeg.cpp */,
 				E38E15080D25F9F900618676 /* DVDAudioCodecFFmpeg.h */,
 				DFB6610615374E80006B8FF1 /* DVDAudioCodecPassthrough.cpp */,
@@ -10362,8 +10351,6 @@
 				F5CC228D1814F7F7006B5E91 /* AESinkDARWINIOS.h */,
 				F5CC22891814F7E9006B5E91 /* AESinkDARWINOSX.cpp */,
 				F5CC228A1814F7E9006B5E91 /* AESinkDARWINOSX.h */,
-				F5AB276621D3DB6700FC8641 /* AESinkDARWINAVF.mm */,
-				F5AB276721D3DB6700FC8641 /* AESinkDARWINAVF.h */,
 				F5CC234518150277006B5E91 /* AESinkNULL.cpp */,
 				F5CC234618150277006B5E91 /* AESinkNULL.h */,
 			);
@@ -11315,7 +11302,6 @@
 				E38E20B70D25F9FD00618676 /* GUIWindowMusicPlaylist.cpp in Sources */,
 				E38E20B80D25F9FD00618676 /* GUIWindowMusicPlaylistEditor.cpp in Sources */,
 				F5B723BC1C7C9CFD006432AE /* Weather.cpp in Sources */,
-				F5AB278B21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm in Sources */,
 				E38E20BB0D25F9FD00618676 /* GUIDialogVideoOSD.cpp in Sources */,
 				E38E20BC0D25F9FD00618676 /* GUIWindowPictures.cpp in Sources */,
 				E38E20BD0D25F9FD00618676 /* GUIWindowPointer.cpp in Sources */,
@@ -11461,7 +11447,7 @@
 				F5F2EF4B0E593E0D0092C37F /* DVDFileInfo.cpp in Sources */,
 				F5FDF51D0E7218950005B0A6 /* AsyncFileCopy.cpp in Sources */,
 				DF29BD021B5D913B00904347 /* EventsDirectory.cpp in Sources */,
-				F55F0CF821D991FE005DC95F /* AudioSinkAVFoundation.cpp in Sources */,
+				F55F0CF821D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */,
 				E4E91BB80E7F7338001F0546 /* NptXbmcFile.cpp in Sources */,
 				DF29BCEE1B5D911800904347 /* BaseEvent.cpp in Sources */,
 				F5FA25E120545C080078DF4B /* ListItem.cpp in Sources */,
@@ -12661,7 +12647,6 @@
 				E49912FC174E5DAD00741B6D /* GUILabel.cpp in Sources */,
 				E49912FD174E5DAD00741B6D /* GUILabelControl.cpp in Sources */,
 				E49912FE174E5DAD00741B6D /* GUIListContainer.cpp in Sources */,
-				F5AB276821D3DB6700FC8641 /* AESinkDARWINAVF.mm in Sources */,
 				E49912FF174E5DAD00741B6D /* GUIListGroup.cpp in Sources */,
 				E4991300174E5DAD00741B6D /* GUIListItem.cpp in Sources */,
 				E4991301174E5DAD00741B6D /* GUIListItemLayout.cpp in Sources */,
@@ -12842,7 +12827,7 @@
 				E49913B1174E5F3300741B6D /* UPnPSettings.cpp in Sources */,
 				E49913B2174E5F3700741B6D /* WebSocket.cpp in Sources */,
 				E49913B3174E5F3700741B6D /* WebSocketManager.cpp in Sources */,
-				F55F0CF921D991FE005DC95F /* AudioSinkAVFoundation.cpp in Sources */,
+				F55F0CF921D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */,
 				E49913B4174E5F3700741B6D /* WebSocketV13.cpp in Sources */,
 				E49913B5174E5F3700741B6D /* WebSocketV8.cpp in Sources */,
 				F5022F461E2D4404001BBF75 /* HDHomeRunFile.cpp in Sources */,
@@ -13352,7 +13337,6 @@
 				7CCDA83D192756250074CF51 /* NptThreads.cpp in Sources */,
 				F5B723F71C7CA014006432AE /* IoSupport.cpp in Sources */,
 				7CCDA846192756250074CF51 /* NptTime.cpp in Sources */,
-				F5AB278C21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm in Sources */,
 				7CCDA84F192756250074CF51 /* NptTls.cpp in Sources */,
 				7CCDA852192756250074CF51 /* NptUri.cpp in Sources */,
 				7CCDA85B192756250074CF51 /* NptUtils.cpp in Sources */,
@@ -13563,7 +13547,6 @@
 				F51D17201E29950600A03C93 /* getset.c in Sources */,
 				F5B724BE1C7E150C006432AE /* filefn.cpp in Sources */,
 				F5D13F451BAF0B6D0075A95C /* mysqldataset.cpp in Sources */,
-				F5AB276921D3DB6800FC8641 /* AESinkDARWINAVF.mm in Sources */,
 				F5D13F461BAF0B6D0075A95C /* qry_dat.cpp in Sources */,
 				F5D13F471BAF0B6D0075A95C /* sqlitedataset.cpp in Sources */,
 				F5D13F481BAF0B6D0075A95C /* Epg.cpp in Sources */,
@@ -13751,7 +13734,6 @@
 				F5D13FD71BAF0B6D0075A95C /* DirectoryNodeTitleTvShows.cpp in Sources */,
 				F5D13FD81BAF0B6D0075A95C /* DirectoryNodeTvShowsOverview.cpp in Sources */,
 				F5D13FD91BAF0B6D0075A95C /* QueryParams.cpp in Sources */,
-				F5AB278D21D5AC0200FC8641 /* DVDAudioCodecAVFoundation.mm in Sources */,
 				F5D13FDA1BAF0B6D0075A95C /* VideoDatabaseDirectory.cpp in Sources */,
 				F5FA267E20545C290078DF4B /* CallbackHandler.cpp in Sources */,
 				F5D13FDB1BAF0B6D0075A95C /* VirtualDirectory.cpp in Sources */,
@@ -14511,7 +14493,7 @@
 				F55902191C2F14D800349249 /* TVOSSettingsHandler.mm in Sources */,
 				F5D142271BAF0B6D0075A95C /* NptPosixNetwork.cpp in Sources */,
 				F5D142281BAF0B6D0075A95C /* NptPosixQueue.cpp in Sources */,
-				F55F0CFA21D991FE005DC95F /* AudioSinkAVFoundation.cpp in Sources */,
+				F55F0CFA21D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */,
 				F5D142291BAF0B6D0075A95C /* NptPosixSystem.cpp in Sources */,
 				F5D1422A1BAF0B6D0075A95C /* NptPosixThreads.cpp in Sources */,
 				F5D1422B1BAF0B6D0075A95C /* NptPosixTime.cpp in Sources */,
