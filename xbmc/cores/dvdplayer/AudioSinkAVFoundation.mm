@@ -50,7 +50,8 @@ static void *playbackBufferFull = &playbackBufferFull;
 - (void)flush;
 - (void)stopPlayback;
 - (void)startPlayback:(AVCodecID) type;
-- (double)playbackStatus;
+- (double)getClockSeconds;
+- (double)getBufferedSeconds;
 @end
 
 @interface AVPlayerSink ()
@@ -110,6 +111,8 @@ static void *playbackBufferFull = &playbackBufferFull;
   return error;
 }
 
+#define logDataRequestBgnEnd 0
+#define logDataRequestEndOf 0
 - (BOOL)resourceLoader:(AVAssetResourceLoader *)resourceLoader shouldWaitForLoadingOfRequestedResource:(AVAssetResourceLoadingRequest *)loadingRequest
 {
   AVAssetResourceLoadingContentInformationRequest* contentRequest = loadingRequest.contentInformationRequest;
@@ -139,7 +142,9 @@ static void *playbackBufferFull = &playbackBufferFull;
     // 2) one from the beginning of the file
     // 3) one from the end of the file
     //NSLog(@"resourceLoader dataRequest %@", dataRequest);
+#if logDataRequestBgnEnd
     CLog::Log(LOGDEBUG, "avloader dataRequest bgn");
+#endif
     NSInteger reqLen = dataRequest.requestedLength;
     if (reqLen == 2)
     {
@@ -166,11 +171,15 @@ static void *playbackBufferFull = &playbackBufferFull;
         // just shove it back to make avplayer happy.
         //usleep(250 * 1000);
         [dataRequest respondWithData:_dataAtOffsetZero];
+#if logDataRequestEndOf
         CLog::Log(LOGDEBUG, "avloader check endof, %u in buffer", _avbuffer->GetReadSize());
+#endif
         //CLog::Log(LOGDEBUG, "avloader requestedLength:%zu, requestedOffset:%lld, currentOffset:%lld, bufferbytes:%u",
         //  dataRequest.requestedLength, dataRequest.requestedOffset, dataRequest.currentOffset, _avbuffer->GetReadSize());
         [loadingRequest finishLoading];
+#if logDataRequestBgnEnd
         CLog::Log(LOGDEBUG, "avloader dataRequest end");
+#endif
         return YES;
       }
 
@@ -181,7 +190,9 @@ static void *playbackBufferFull = &playbackBufferFull;
         if (_canceled)
         {
           [loadingRequest finishLoadingWithError:[self loaderCancelledError]];
+#if logDataRequestBgnEnd
           CLog::Log(LOGDEBUG, "avloader dataRequest end");
+#endif
           return YES;
         }
       }
@@ -211,7 +222,7 @@ static void *playbackBufferFull = &playbackBufferFull;
         _transferCount += requestedBytes;
         if (_transferCount != dataRequest.currentOffset)
         {
-          CLog::Log(LOGDEBUG, "avloader requestedLength:%zu, requestedOffset:%lld, currentOffset:%lld, _transferCount:%u, bufferbytes:%u",
+          CLog::Log(LOGWARNING, "avloader requestedLength:%zu, requestedOffset:%lld, currentOffset:%lld, _transferCount:%u, bufferbytes:%u",
             dataRequest.requestedLength, dataRequest.requestedOffset, dataRequest.currentOffset, _transferCount, _avbuffer->GetReadSize());
         }
         [loadingRequest finishLoading];
@@ -223,7 +234,9 @@ static void *playbackBufferFull = &playbackBufferFull;
       }
     }
   }
+#if logDataRequestBgnEnd
   CLog::Log(LOGDEBUG, "avloader dataRequest end");
+#endif
 
   return YES;
 }
@@ -361,15 +374,16 @@ static void *playbackBufferFull = &playbackBufferFull;
   SAFE_DELETE(_avbuffer);
 }
 
-- (double)playbackStatus
+- (double)getClockSeconds
 {
-  //AVPlayerStatus status = [_avplayer status];
-  //float rate = [_avplayer rate];
   CMTime currentTime = [_playerItem currentTime];
-  double buffered = 0;
   double sink_s = CMTimeGetSeconds(currentTime);
-  //CLog::Log(LOGDEBUG, "status: %d, rate(%f), currentTime: %f", (int)status, rate, sink_s);
+  return sink_s;
+}
 
+- (double)getBufferedSeconds
+{
+  double buffered_s = 0.0;
   NSArray *timeRanges = [_playerItem loadedTimeRanges];
   if (timeRanges && [timeRanges count])
   {
@@ -377,11 +391,9 @@ static void *playbackBufferFull = &playbackBufferFull;
     //CLog::Log(LOGDEBUG, "avloader timerange.start %f", CMTimeGetSeconds(timerange.start));
     double duration = CMTimeGetSeconds(timerange.duration);
     //CLog::Log(LOGDEBUG, "avloader timerange.duration %f", duration);
-    buffered = duration - sink_s;
-    CLog::Log(LOGDEBUG, "avloader time buffered %f", buffered);
+    buffered_s = duration - [self getClockSeconds];
   }
-
-  return sink_s;
+  return buffered_s;
 }
 
 @end
@@ -395,6 +407,7 @@ CAudioSinkAVFoundation::CAudioSinkAVFoundation(volatile bool &bStop, CDVDClock *
 , m_pClock(clock)
 , m_speed(DVD_PLAYSPEED_NORMAL)
 , m_start(false)
+, m_startPts(DVD_NOPTS_VALUE)
 , m_startDelaySeconds(0.5)
 , m_avsink(nullptr)
 {
@@ -441,9 +454,11 @@ bool CAudioSinkAVFoundation::Create(const DVDAudioFrame &audioframe, AVCodecID c
   }
 
   CAEFactory::Suspend();
-  // fixme: move to decode so we know real frame size
+
   m_codec = codec;
-  m_frameSize = 1792;
+  m_frameSize = audioframe.format.m_streamInfo.m_ac3FrameSize;
+  m_start = false;
+  m_startPts = DVD_NOPTS_VALUE;
   m_avsink = [[AVPlayerSink alloc] initWithFrameSize:m_frameSize];
   [m_avsink startPlayback:m_codec];
 
@@ -467,6 +482,7 @@ void CAudioSinkAVFoundation::Destroy()
 
   m_bPassthrough = false;
   m_bPaused = true;
+  m_startPts = DVD_NOPTS_VALUE;
   m_playingPts = DVD_NOPTS_VALUE;
 
   CAEFactory::Resume();
@@ -478,6 +494,7 @@ unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
   if (!m_start && audioframe.nb_frames)
   {
     m_start = true;
+    m_startPts = audioframe.pts;
     m_timer.Set(m_startDelaySeconds * 1000);
   }
 
@@ -646,6 +663,7 @@ void CAudioSinkAVFoundation::SetSpeed(int iSpeed)
 
 double CAudioSinkAVFoundation::GetClock()
 {
+  // return clock time in milliseconds
   double absolute;
   // absolute is not used in GetClock :)
   return m_pClock->GetClock(absolute) / DVD_TIME_BASE * 1000;
@@ -653,23 +671,11 @@ double CAudioSinkAVFoundation::GetClock()
 
 double CAudioSinkAVFoundation::GetClockSpeed()
 {
-  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::AbortAddPackets");
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::GetClockSpeed");
   if (m_pClock)
     return m_pClock->GetClockSpeed();
   else
     return 1.0;
-}
-
-double CAudioSinkAVFoundation::GetPlayerClockSeconds()
-{
-  if (!m_pClock)
-    return 0.0;
-
-  double seconds = m_pClock->GetClock() / DVD_TIME_BASE;
-  if (seconds > 0.0)
-    return seconds;
-  else
-    return 0.0;
 }
 
 void CAudioSinkAVFoundation::Process()
@@ -681,15 +687,18 @@ void CAudioSinkAVFoundation::Process()
 
   while (!m_bStop)
   {
-    double player_s = GetPlayerClockSeconds();
+    double player_s = GetClock() / 1000.0;
     if (player_s > 0.0)
     {
       double sink_s = 0.0;
+      double buffered_s = 0.0;
       if (m_avsink)
       {
-        sink_s = [m_avsink playbackStatus];
+        sink_s = [m_avsink getClockSeconds] + m_startPts;
+        buffered_s = [m_avsink getBufferedSeconds];
       }
-      CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Process player_s(%f), sink_s(%f), delta(%f)", player_s, sink_s, player_s - sink_s);
+      CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Process buffered_s (%f), player_s(%f), sink_s(%f), delta(%f)",
+        buffered_s, player_s, sink_s, player_s - sink_s);
     }
     Sleep(100);
   }

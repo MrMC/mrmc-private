@@ -76,6 +76,7 @@ protected:
 
   int m_speed;
   bool m_start;
+  double m_startPts;
   double m_startDelaySeconds;
   bool m_bPaused;
   bool m_bPassthrough;
@@ -89,8 +90,6 @@ protected:
   XbmcThreads::EndTime m_timer;
 
 private:
-  double GetPlayerClockSeconds();
-
   int m_frameSize;
   AVCodecID m_codec;
   AVPlayerSink *m_avsink = nullptr;
