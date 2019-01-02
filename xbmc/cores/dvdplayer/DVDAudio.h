@@ -53,7 +53,7 @@ public:
   void SetSyncErrorCorrection(double correction);
   double GetResampleRatio();
   void SetResampleMode(int mode);
-  void Flush();
+  void Flush(bool retain);
   void Drain();
   void AbortAddPackets();
 

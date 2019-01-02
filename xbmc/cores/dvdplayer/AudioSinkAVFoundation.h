@@ -42,7 +42,7 @@ public:
 
   void SetVolume(float fVolume) {};
   void SetDynamicRangeCompression(long drc) {};
-  float GetCurrentAttenuation();
+  float GetCurrentAttenuation() { return 1.0f; };
   void Pause();
   void Resume();
   bool Create(const DVDAudioFrame &audioframe, AVCodecID codec, bool needresampler);
@@ -58,36 +58,30 @@ public:
   void SetSyncErrorCorrection(double correction);
   double GetResampleRatio() { return 1.0; };
   void SetResampleMode(int mode) {};
-  void Flush();
+  void Flush(bool retain);
   void Drain();
   void AbortAddPackets();
 
-  void SetSpeed(int iSpeed);
+  void SetSpeed(int iSpeed) {};
   void SetResampleRatio(double ratio) {};
 
   double GetClock();
-  double GetClockSpeed();
+  double GetClockSpeed() { return 1.0; };
 
 protected:
   virtual void Process();
+  double CalcSyncErrorSeconds();
 
   volatile bool& m_bStop;
   CDVDClock *m_pClock;
 
-  int m_speed;
-  bool m_start;
-  double m_startPts;
-  double m_startDelaySeconds;
-  bool m_bPaused;
-  bool m_bPassthrough;
-  double m_playingPts;
-  double m_timeOfPts;
-  double m_syncError;
-  unsigned int m_syncErrorTime;
+  double m_syncErrorDVDTime;
+  double m_syncErrorDVDTimeSecondsOld;
+  double m_startPtsSeconds;
   CCriticalSection m_critSection;
+  std::atomic_bool m_sync;
+  std::atomic_bool m_start;
   std::atomic_bool m_bAbort;
-
-  XbmcThreads::EndTime m_timer;
 
 private:
   int m_frameSize;

@@ -223,7 +223,7 @@ double CDVDAudio::GetDelay()
   return delay * DVD_TIME_BASE;
 }
 
-void CDVDAudio::Flush()
+void CDVDAudio::Flush(bool retain)
 {
   m_bAbort = true;
 

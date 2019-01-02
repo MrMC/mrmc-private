@@ -50,7 +50,7 @@ public:
   virtual void   SetSyncErrorCorrection(double correction) = 0;
   virtual double GetResampleRatio() = 0;
   virtual void SetResampleMode(int mode) = 0;
-  virtual void Flush() = 0;
+  virtual void Flush(bool retain = true) = 0;
   virtual void Drain() = 0;
   virtual void AbortAddPackets() = 0;
 
