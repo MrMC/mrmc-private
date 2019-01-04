@@ -50,7 +50,6 @@
 - (double)getClockSeconds;
 - (double)getBufferSeconds;
 - (double)getSinkBufferSeconds;
-- (double)getLatencySeconds;
 @end
 
 @interface AVPlayerSink ()
@@ -387,23 +386,8 @@
   return buffered_s;
 }
 
-- (double)getLatencySeconds
-{
-  return 0.0;
-  if ([self getClockSeconds] > 0.0)
-  {
-    AVAudioSession *mySession = [AVAudioSession sharedInstance];
-    double outputLatency = [mySession outputLatency];
-    double ioBufferDuration = [mySession IOBufferDuration];
-    double latency = outputLatency + ioBufferDuration;
-    //CLog::Log(LOGNOTICE, "avloader latency %f", latency);
-    return latency;
-  }
-  return 0.0;
-}
-
-
 @end
+
 #pragma mark - DolbyFrameParser
 /*
 class CDolbyFrameParser
@@ -618,7 +602,10 @@ unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
   {
     written = [m_avsink addPackets:audioframe.data[0] size:audioframe.nb_frames];
     double buffer_s = [m_avsink getBufferSeconds];
-    if (buffer_s > 3.0)
+    // native sink needs about 2.5 seconds of buffer
+    // it will get stuttery below 2 seconds as it pauses to
+    // wait for internal buffers to fill.
+    if (buffer_s > 2.5)
     {
       lock.Leave();
       Sleep(50);
@@ -660,7 +647,7 @@ double CAudioSinkAVFoundation::GetDelay()
   // 2) in DVDPlayerAudio during RESYNC
   // 3) and internally to offset passed pts in AddPackets
   CSingleLock lock (m_critSection);
-  double buffered_s = [m_avsink getBufferSeconds] + [m_avsink getLatencySeconds];
+  double buffered_s = [m_avsink getBufferSeconds];
   return buffered_s * DVD_TIME_BASE;
 }
 
@@ -669,7 +656,7 @@ double CAudioSinkAVFoundation::GetMaxDelay()
   // returns total time (seconds) of audio in AE for the stream
   // used as audio cachetotal in player during startup
   CSingleLock lock (m_critSection);
-  return 4.0;
+  return 3.0;
 }
 
 void CAudioSinkAVFoundation::Flush(bool retain)
@@ -717,7 +704,7 @@ double CAudioSinkAVFoundation::GetCacheTotal()
   // returns total time a stream can buffer
   // only used to signal start (cachetime >= cachetotal * 0.75)
   CSingleLock lock (m_critSection);
-  return 4.0;
+  return 3.0;
 }
 
 double CAudioSinkAVFoundation::GetPlayingPts()
@@ -736,7 +723,7 @@ double CAudioSinkAVFoundation::CalcSyncErrorSeconds()
   {
     double absolute;
     double player_s = m_pClock->GetClock(absolute) / DVD_TIME_BASE;
-    double sink_s = [m_avsink getClockSeconds] + m_startPtsSeconds + [m_avsink getLatencySeconds];
+    double sink_s = [m_avsink getClockSeconds] + m_startPtsSeconds;
     if (player_s > 0.0 && sink_s > 0.0)
       syncError = sink_s - player_s;
   }
@@ -780,7 +767,7 @@ void CAudioSinkAVFoundation::Process()
       buffer_s = [m_avsink getBufferSeconds];
       sinkBuffer_s = [m_avsink getSinkBufferSeconds];
     }
-    CLog::Log(LOGDEBUG, "avloader playerBuffered_s (%f), buffered_s (%f), player_s(%f), sink_s(%f), delta(%f)",
+    CLog::Log(LOGDEBUG, "avloader sinkBuffer_s (%f), buffer_s (%f), player_s(%f), sink_s(%f), delta(%f)",
       sinkBuffer_s, buffer_s, player_s, sink_s, player_s - sink_s);
 
     Sleep(250);
