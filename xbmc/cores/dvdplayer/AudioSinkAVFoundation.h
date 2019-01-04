@@ -78,10 +78,9 @@ protected:
   double m_syncErrorDVDTime;
   double m_syncErrorDVDTimeSecondsOld;
   double m_startPtsSeconds;
+  std::atomic_bool m_startPtsFlag;
   CCriticalSection m_critSection;
-  std::atomic_bool m_sync;
-  std::atomic_bool m_start;
-  std::atomic_bool m_bAbort;
+  std::atomic_bool m_abortAddPacketWait;
 
 private:
   int m_frameSize;
