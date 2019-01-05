@@ -203,7 +203,7 @@ void CDVDPlayerAudio::CloseStream(bool bWaitForBuffers)
   }
   else
   {
-    m_dvdAudio->Flush(false);
+    m_dvdAudio->Flush();
   }
 
   m_dvdAudio->Destroy();
