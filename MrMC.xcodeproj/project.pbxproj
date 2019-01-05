@@ -1875,6 +1875,8 @@
 		F55F0CF821D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */; };
 		F55F0CF921D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */; };
 		F55F0CFA21D991FE005DC95F /* AudioSinkAVFoundation.mm in Sources */ = {isa = PBXBuildFile; fileRef = F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */; };
+		F55F0CFE21E1570A005DC95F /* point1sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F55F0CFD21E1570A005DC95F /* point1sec.mp3 */; };
+		F55F0CFF21E1570A005DC95F /* point1sec.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F55F0CFD21E1570A005DC95F /* point1sec.mp3 */; };
 		F5632F911CB9473A002027D9 /* Autorun.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5632F8F1CB9473A002027D9 /* Autorun.cpp */; };
 		F5632F921CB94787002027D9 /* ActiveAEDSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B723651C7C9A51006432AE /* ActiveAEDSP.cpp */; };
 		F5632F931CB9478B002027D9 /* ActiveAEDSPAddon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B723671C7C9A51006432AE /* ActiveAEDSPAddon.cpp */; };
@@ -5619,6 +5621,7 @@
 		F55F0CF521D991FD005DC95F /* IAudioSink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IAudioSink.h; sourceTree = "<group>"; };
 		F55F0CF621D991FE005DC95F /* AudioSinkAVFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AudioSinkAVFoundation.h; sourceTree = "<group>"; };
 		F55F0CF721D991FE005DC95F /* AudioSinkAVFoundation.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AudioSinkAVFoundation.mm; sourceTree = "<group>"; };
+		F55F0CFD21E1570A005DC95F /* point1sec.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = point1sec.mp3; path = tools/darwin/packaging/ios/point1sec.mp3; sourceTree = SOURCE_ROOT; };
 		F5632F8F1CB9473A002027D9 /* Autorun.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Autorun.cpp; sourceTree = "<group>"; };
 		F5632F901CB9473A002027D9 /* Autorun.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Autorun.h; sourceTree = "<group>"; };
 		F5632F971CB947FB002027D9 /* cddb.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cddb.cpp; sourceTree = "<group>"; };
@@ -8494,6 +8497,7 @@
 			isa = PBXGroup;
 			children = (
 				183CB23A1C0B4C5A004218C2 /* Images.xcassets */,
+				F55F0CFD21E1570A005DC95F /* point1sec.mp3 */,
 			);
 			path = ios;
 			sourceTree = "<group>";
@@ -10832,6 +10836,7 @@
 				F59045641BA372A600DB589A /* Default-667h@2x.png in Resources */,
 				183CB23B1C0B4C5A004218C2 /* Images.xcassets in Resources */,
 				F59045671BA372A600DB589A /* InfoPlist.strings in Resources */,
+				F55F0CFE21E1570A005DC95F /* point1sec.mp3 in Resources */,
 				F5C28F141FC9014700F63834 /* Default-812h@3x.png in Resources */,
 				F59045651BA372A600DB589A /* Default-736h@3x.png in Resources */,
 			);
@@ -10841,6 +10846,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F55F0CFF21E1570A005DC95F /* point1sec.mp3 in Resources */,
 				F5D142B01BAF31FB0075A95C /* InfoPlist.strings in Resources */,
 				F5D142AB1BAF31FB0075A95C /* Assets.xcassets in Resources */,
 			);

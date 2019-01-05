@@ -33,6 +33,7 @@
 #else
   class AVPlayerSink;
 #endif
+class CAVSink;
 
 class CAudioSinkAVFoundation : public IAudioSink, IAEClockCallback, CThread
 {
@@ -81,9 +82,7 @@ protected:
   std::atomic_bool m_startPtsFlag;
   CCriticalSection m_critSection;
   std::atomic_bool m_abortAddPacketWait;
-
 private:
-  int m_frameSize;
-  AVCodecID m_codec;
-  AVPlayerSink *m_avsink = nullptr;
+  CAVSink *m_sink;
+  int m_frameSize = 0;
 };

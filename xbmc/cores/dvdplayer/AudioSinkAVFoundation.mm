@@ -36,49 +36,35 @@
 #undef AVMediaType
 #import <AVFoundation/AVAudioSession.h>
 
-#pragma mark - AVPlayerSink
-//-----------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------
-@interface AVPlayerSink : NSObject <AVAssetResourceLoaderDelegate>
-- (id)initWithFrameSize:(unsigned int)frameSize;
-- (int)addPackets:(uint8_t*)data size:(unsigned int)size;
-- (void)play:(bool) state;
-- (void)drain;
-- (void)flush;
-- (void)stopBuffering;
-- (void)startBuffering:(AVCodecID) type;
-- (double)getClockSeconds;
-- (double)getBufferSeconds;
-- (double)getSinkBufferSeconds;
-@end
-
-@interface AVPlayerSink ()
-@property (atomic) bool loaded;
-@property (atomic) bool canceled;
-@property (nonatomic) AVPlayer *avplayer;
-@property (nonatomic) AVPlayerItem *playerItem;
-@property (nonatomic) AERingBuffer *avbuffer;
+#pragma mark - AudioResourceLoader
+@interface AudioResourceLoader : NSObject <AVAssetResourceLoaderDelegate>
+@property (nonatomic) bool abortflag;
+@property (nonatomic) unsigned int frameBytes;
 @property (nonatomic) char *readbuffer;
-@property (nonatomic) unsigned int frameSize;
-@property (nonatomic) NSString *contentType;
+@property (nonatomic) size_t readbufferSize;
+@property (nonatomic) AERingBuffer *avbuffer;
 @property (nonatomic) unsigned int transferCount;
 @property (nonatomic) NSData *dataAtOffsetZero;
+- (id)initWithFrameBytes:(unsigned int)frameBytes;
+- (void)abort;
+- (int)write:(uint8_t*)data size:(unsigned int)size;
+- (double)bufferSeconds;
+- (double)transferSeconds;
 @end
 
-@implementation AVPlayerSink
-//-----------------------------------------------------------------------------------
-//-----------------------------------------------------------------------------------
-- (id)initWithFrameSize:(unsigned int)frameSize;
+@implementation AudioResourceLoader
+- (id)initWithFrameBytes:(unsigned int)frameBytes
 {
   self = [super init];
   if (self)
   {
-    _loaded = false;
-    _canceled = false;
-    _avplayer = nullptr;
-    _avbuffer = new AERingBuffer(frameSize * 64);
-    _readbuffer = new char[65536 * 2];
-    _frameSize = frameSize;
+    _abortflag = false;
+    _frameBytes = frameBytes;
+    _readbufferSize = _frameBytes * 64;
+    _avbuffer = new AERingBuffer(_readbufferSize);
+    // make readbuffer one frame larger
+    _readbufferSize += _frameBytes;
+    _readbuffer = new char[_readbufferSize];
     _transferCount = 0;
   }
   return self;
@@ -86,27 +72,15 @@
 
 - (void)dealloc
 {
-  _canceled = true;
-  _avplayer = nullptr;
-  _playerItem = nullptr;
   SAFE_DELETE(_avbuffer);
   SAFE_DELETE(_readbuffer);
 }
 
-#pragma mark - ResourceLoader
-//-----------------------------------------------------------------------------------
-- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
-  didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
-{
-  _canceled = true;
-  CLog::Log(LOGDEBUG, "avloader didCancelLoadingRequest");
-}
-
 - (NSError *)loaderCancelledError
 {
-  NSError *error = [[NSError alloc] initWithDomain:@"ResourceLoaderErrorDomain"
-    code:-1 userInfo:@{NSLocalizedDescriptionKey:@"Resource loader cancelled"}];
-
+  NSError *error = [[NSError alloc] initWithDomain:@"AudioResourceLoaderErrorDomain"
+    code:-1 userInfo:@{NSLocalizedDescriptionKey:@"avloader cancelled"}];
+  _abortflag = true;
   return error;
 }
 
@@ -117,17 +91,16 @@
 {
   AVAssetResourceLoadingContentInformationRequest* contentRequest = loadingRequest.contentInformationRequest;
 
+  if (_abortflag)
+  {
+    [loadingRequest finishLoadingWithError:[self loaderCancelledError]];
+    return YES;
+  }
+
   if (contentRequest)
   {
-    // figure out if this is ac3 or eac3
-    NSURL *resourceURL = [loadingRequest.request URL];
-    if ([resourceURL.pathExtension isEqualToString:@"ac3"])
-      contentRequest.contentType = @"public.ac3-audio";
-    else if ([resourceURL.pathExtension isEqualToString:@"eac3"])
-      contentRequest.contentType = @"public.enhanced-ac3-audio";
-    else if ([resourceURL.pathExtension isEqualToString:@"ec3"])
-      contentRequest.contentType = @"public.enhanced-ac3-audio";
-    // public.mpeg-2-transport-stream
+    // only handles eac3
+    contentRequest.contentType = @"public.enhanced-ac3-audio";
     // (2147483647) or 639.132037797619048 hours at 0.032 secs pre 1792 byte frame
     contentRequest.contentLength = INT_MAX;
     // must be 'NO' to get player to start playing immediately
@@ -158,11 +131,11 @@
     }
     else
     {
-      size_t requestedBytes = _frameSize * 2;
+      size_t requestedBytes = _frameBytes * 2;
       if (dataRequest.requestedOffset == 0)
       {
         // 2) above. make sure avplayer has enough frame blocks at startup
-        requestedBytes = _frameSize * 36;
+        requestedBytes = _frameBytes * 36;
       }
 
       if (dataRequest.requestsAllDataToEndOfResource == NO && dataRequest.requestedOffset != 0)
@@ -186,8 +159,7 @@
       // 2) from above and any other type of transfer
       while (_avbuffer->GetReadSize() < requestedBytes)
       {
-        usleep(1 * 1000);
-        if (_canceled)
+        if (_abortflag)
         {
           [loadingRequest finishLoadingWithError:[self loaderCancelledError]];
 #if logDataRequestBgnEnd
@@ -195,14 +167,15 @@
 #endif
           return YES;
         }
+        usleep(10 * 1000);
       }
       if (dataRequest.requestsAllDataToEndOfResource == YES && dataRequest.requestedLength > (long)requestedBytes)
       {
         // calc how many complete frames are present
-        size_t maxFrameBytes = _frameSize * (_avbuffer->GetReadSize() / _frameSize);
+        size_t maxFrameBytes = _frameBytes * (_avbuffer->GetReadSize() / _frameBytes);
         // limit to size of _readbuffer
-        if (maxFrameBytes > (65536 * 2))
-          maxFrameBytes = _frameSize * ((65536 * 2) / _frameSize);
+        if (maxFrameBytes > (_readbufferSize))
+          maxFrameBytes = _frameBytes * ((_readbufferSize) / _frameBytes);
         //CLog::Log(LOGDEBUG, "avloader maxframebytes %lu", maxFrameBytes);
         requestedBytes = maxFrameBytes;
       }
@@ -248,29 +221,19 @@
   return YES;
 }
 
-#pragma mark - ResourcePlayer
-//-----------------------------------------------------------------------------------
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+- (void)resourceLoader:(AVAssetResourceLoader *)resourceLoader
+  didCancelLoadingRequest:(AVAssetResourceLoadingRequest *)loadingRequest
 {
-  if (object == _playerItem && [keyPath isEqualToString:@"status"])
-  {
-      if (_avplayer.currentItem.status == AVPlayerItemStatusReadyToPlay)
-      {
-        CLog::Log(LOGDEBUG, "avloader AVPlayerItemStatusReadyToPlay");
-        [_avplayer prerollAtRate:2.0 completionHandler:^(BOOL finished)
-        {
-            if (finished)
-              _loaded = true;
-        }];
-      }
-  }
-  else
-  {
-    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-  }
+  _abortflag = true;
+  CLog::Log(LOGDEBUG, "avloader didCancelLoadingRequest");
 }
 
-- (int)addPackets:(uint8_t*)data size:(unsigned int)size
+- (void)abort
+{
+  _abortflag = true;
+}
+
+- (int)write:(uint8_t*)data size:(unsigned int)size
 {
   if (data && size > 0)
   {
@@ -282,28 +245,131 @@
   return 0;
 }
 
-- (void)play:(bool) state
+- (double)bufferSeconds
 {
-  if (state)
+  return ((double)_avbuffer->GetReadSize() / _frameBytes) * 0.032;
+}
+
+- (double)transferSeconds
+{
+  return ((double)_transferCount / _frameBytes) * 0.032;;
+}
+@end
+
+#pragma mark - AVPlayerSink
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+@interface AVPlayerSink : NSObject
+- (id)initWithFrameSize:(unsigned int)frameSize;
+- (void)close;
+- (int)addPackets:(uint8_t*)data size:(unsigned int)size;
+- (void)play:(bool) state;
+- (void)start;
+- (bool)loaded;
+- (void)flush;
+- (double)clockSeconds;
+- (double)bufferSeconds;
+- (double)sinkBufferSeconds;
+@end
+
+@interface AVPlayerSink ()
+@property (nonatomic) bool loadedFlag;
+@property (nonatomic) dispatch_queue_t serialQueue;
+@property (nonatomic) AVPlayer *avplayer;
+@property (nonatomic) AVPlayerItem *playerItem;
+@property (nonatomic) unsigned int frameSize;
+@property (nonatomic) NSString *contentType;
+@property (nonatomic) AudioResourceLoader *avLoader;
+@end
+
+@implementation AVPlayerSink
+//-----------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------
+- (id)initWithFrameSize:(unsigned int)frameSize;
+{
+  self = [super init];
+  if (self)
+  {
+    _loadedFlag = false;
+    _frameSize = frameSize;
+    _serialQueue = dispatch_queue_create("com.mrmc.loaderqueue", DISPATCH_QUEUE_SERIAL);
+
+    _avplayer = [[AVPlayer alloc] init];
+    // this little gem primes avplayer so next
+    // load with a playerItem is fast... go figure.
+    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
+    NSString *filepath = [bundle pathForResource:@"point1sec" ofType:@"mp3"];
+    AVPlayerItem *playerItem = [AVPlayerItem playerItemWithURL:[NSURL fileURLWithPath:filepath]];
+    [_avplayer replaceCurrentItemWithPlayerItem:playerItem];
     [_avplayer play];
-    //[_avplayer playImmediatelyAtRate:1.0];
+  }
+  if (![[[NSBundle mainBundle] bundleIdentifier] hasPrefix:[NSString stringWithUTF8String:"tv.mrmc.mrmc"]])
+    return nil;
+
+  return self;
+}
+
+- (void)close
+{
+  [_avplayer.currentItem.asset cancelLoading];
+  [_avplayer replaceCurrentItemWithPlayerItem:nil];
+  _avplayer = nullptr;
+  [_playerItem removeObserver:self forKeyPath:@"status"];
+  [_playerItem.asset cancelLoading];
+  _playerItem = nullptr;
+  [_avLoader abort];
+  _avLoader = nullptr;
+}
+
+- (void)dealloc
+{
+  [self close];
+}
+
+//-----------------------------------------------------------------------------------
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+  if (object == _playerItem && [keyPath isEqualToString:@"status"])
+  {
+      if (_avplayer.currentItem.status == AVPlayerItemStatusReadyToPlay)
+      {
+        if (abs([_avplayer rate]) > 0.0)
+          _loadedFlag = true;
+        else
+        {
+          // we can only preroll if not playing (rate == 0.0)
+          [_avplayer prerollAtRate:2.0 completionHandler:^(BOOL finished)
+          {
+            // set loaded regardless of finished or not.
+            _loadedFlag = true;
+          }];
+        }
+        CLog::Log(LOGDEBUG, "avloader AVPlayerItemStatusReadyToPlay loaded %d", _loadedFlag);
+      }
+  }
   else
   {
-    if (_loaded)
-      [_avplayer pause];
+    [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
   }
 }
 
-- (void)drain
+- (int)addPackets:(uint8_t*)data size:(unsigned int)size
 {
-  // let audio play out
+  if (data && size > 0)
+    return [_avLoader write:data size:size];
+
+  return size;
 }
 
-- (void)flush
+- (void)play:(bool)state
 {
+  if (state)
+    [_avplayer playImmediatelyAtRate:1.0];
+  else
+    [_avplayer pause];
 }
 
-- (void)startBuffering:(AVCodecID) type
+- (void)start
 {
 /*
   for (NSString *mime in [AVURLAsset audiovisualTypes])
@@ -313,38 +379,44 @@
     NSLog(@"AVURLAsset audiovisualMIMETypes:%@", mime);
 */
   // run on our own serial queue, keeps main thread from stalling us
-  // and lets us do long sleeps without stalling main thread.
-  dispatch_queue_t serialQueue = dispatch_queue_create("com.mrmc.loaderqueue", DISPATCH_QUEUE_SERIAL);
-    dispatch_async(serialQueue, ^{
-    NSString *extension = @"ac3";
-    if (type == AV_CODEC_ID_EAC3)
-      extension = @"ec3";
+  // and lets us do long sleeps waiting for data without stalling main thread.
+  dispatch_sync(_serialQueue, ^{
+    NSString *extension = @"ec3";
     // needs leading dir ('fake') or pathExtension in resourceLoader will fail
     NSMutableString *url = [NSMutableString stringWithString:@"mrmc_streaming://fake/dummy."];
     [url appendString:extension];
     NSURL *streamURL = [NSURL URLWithString: url];
     AVURLAsset *asset = [AVURLAsset URLAssetWithURL:streamURL options:nil];
-    [asset.resourceLoader setDelegate:self queue:serialQueue];
+    _avLoader = [[AudioResourceLoader alloc] initWithFrameBytes:_frameSize];
+    [asset.resourceLoader setDelegate:_avLoader queue:_serialQueue];
 
     _playerItem = [AVPlayerItem playerItemWithAsset:asset];
     [_playerItem addObserver:self forKeyPath:@"status" options:NSKeyValueObservingOptionNew context:nil];
 
-    _avplayer = [[AVPlayer alloc] initWithPlayerItem:_playerItem];
+    [_avplayer replaceCurrentItemWithPlayerItem:_playerItem];
     _avplayer.actionAtItemEnd = AVPlayerActionAtItemEndNone;
     _avplayer.automaticallyWaitsToMinimizeStalling = NO;
     _avplayer.currentItem.canUseNetworkResourcesForLiveStreamingWhilePaused = YES;
   });
 }
 
-- (void)stopBuffering
+- (bool)loaded
 {
-  _canceled = true;
-  _avplayer = nullptr;
-  _playerItem = nullptr;
-  usleep(100 * 1000);
+  return _loadedFlag;
 }
 
-- (double)getClockSeconds
+- (void)flush
+{
+  [_avplayer replaceCurrentItemWithPlayerItem:nil];
+  [_playerItem removeObserver:self forKeyPath:@"status"];
+  [_playerItem.asset cancelLoading];
+  _playerItem = nullptr;
+  [_avLoader abort];
+  _avLoader = nullptr;
+  [self start];
+}
+
+- (double)clockSeconds
 {
   CMTime currentTime = [_playerItem currentTime];
   double sink_s = CMTimeGetSeconds(currentTime);
@@ -354,11 +426,11 @@
     return 0.0;
 }
 
-- (double)getBufferSeconds
+- (double)bufferSeconds
 {
-  double avbufferSeconds = (_avbuffer->GetReadSize() / _frameSize) * 0.032;
-  double transferSeconds = (_transferCount / _frameSize) * 0.032;
-  double playerSeconds = [self getClockSeconds];
+  double avbufferSeconds = [_avLoader bufferSeconds];
+  double transferSeconds = [_avLoader transferSeconds];
+  double playerSeconds = [self clockSeconds];
   double seconds = (transferSeconds - playerSeconds) + avbufferSeconds;
   if (seconds < 0.0)
     seconds = 0.0;
@@ -366,7 +438,7 @@
   return seconds;
 }
 
-- (double)getSinkBufferSeconds
+- (double)sinkBufferSeconds
 {
   double buffered_s = 0.0;
   if (_playerItem)
@@ -378,7 +450,7 @@
       //CLog::Log(LOGDEBUG, "avloader timerange.start %f", CMTimeGetSeconds(timerange.start));
       double duration = CMTimeGetSeconds(timerange.duration);
       //CLog::Log(LOGDEBUG, "avloader timerange.duration %f", duration);
-      buffered_s = duration - [self getClockSeconds];
+      buffered_s = duration - [self clockSeconds];
       if (buffered_s < 0.0)
         buffered_s = 0.0;
     }
@@ -510,6 +582,94 @@ bool CDolbyFrameParser::parse_ec3()
 }
 */
 
+#pragma mark - CAVSink
+class CAVSink
+{
+  public:
+   ~CAVSink()
+    {
+      close();
+    };
+
+    bool open(const int framebytes)
+    {
+      m_frameSize = framebytes;
+      m_avsink = [[AVPlayerSink alloc] initWithFrameSize:m_frameSize];
+      if (!m_avsink)
+        return false;
+      [m_avsink start];
+      return true;
+    };
+    // close, going away
+    void close()
+    {
+      if (m_avsink)
+      {
+        [m_avsink close];
+        m_avsink = nullptr;
+      }
+    };
+    // add frame packets to sink buffers
+    int write(const uint8_t *buf, int len)
+    {
+      int written = 0;
+      if (m_avsink)
+        written = [m_avsink addPackets:(uint8_t*)buf size:len];
+      return written;
+    };
+    // start/stop audio playback
+    void play(const bool playpause)
+    {
+      if (m_avsink)
+        [m_avsink play:playpause];
+    };
+    // flush audio playback buffers
+    void flush()
+    {
+      if (m_avsink)
+        [m_avsink flush];
+    };
+    // return true when sink is ready to output audio after filling
+    bool ready()
+    {
+      if (m_avsink)
+        return [m_avsink loaded];
+      return false;
+    };
+    // time in seconds of when sound hits your ears
+    double time_s()
+    {
+      if (m_avsink)
+        return [m_avsink clockSeconds];
+      return 0.0;
+    };
+    // delay in seconds of adding data before it hits your ears
+    double delay_s()
+    {
+      if (m_avsink)
+        return [m_avsink bufferSeconds];
+      return 0.0;
+    };
+    // alternative delay_s method
+    double delay2_s()
+    {
+      if (m_avsink)
+        return [m_avsink sinkBufferSeconds];
+      return 0.0;
+    };
+    double mindelay_s()
+    {
+      return 2.5;
+    };
+    double maxdelay_s()
+    {
+      return 3.0;
+    };
+private:
+  int m_frameSize = 0;
+  AVPlayerSink *m_avsink = nullptr;
+};
+
 #pragma mark - CAudioSinkAVFoundation
 //-----------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------
@@ -519,7 +679,7 @@ CAudioSinkAVFoundation::CAudioSinkAVFoundation(volatile bool &bStop, CDVDClock *
 , m_pClock(clock)
 , m_startPtsSeconds(0)
 , m_startPtsFlag(false)
-, m_avsink(nullptr)
+, m_sink(nullptr)
 {
   CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::CAudioSinkAVFoundation");
   m_syncErrorDVDTime = 0.0;
@@ -529,11 +689,14 @@ CAudioSinkAVFoundation::CAudioSinkAVFoundation(volatile bool &bStop, CDVDClock *
 CAudioSinkAVFoundation::~CAudioSinkAVFoundation()
 {
   CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::~CAudioSinkAVFoundation");
-  m_avsink = nullptr;
+  SAFE_DELETE(m_sink);
 }
 
 bool CAudioSinkAVFoundation::Create(const DVDAudioFrame &audioframe, AVCodecID codec, bool needresampler)
 {
+  if (codec != AV_CODEC_ID_EAC3)
+    return false;
+
   CLog::Log(LOGNOTICE,
     "Creating audio stream (codec id: %i, channels: %i, sample rate: %i, %s)",
     codec,
@@ -545,14 +708,23 @@ bool CAudioSinkAVFoundation::Create(const DVDAudioFrame &audioframe, AVCodecID c
   CSingleLock lock(m_critSection);
 
   CAEFactory::Suspend();
+  // wait for AE to suspend
+  XbmcThreads::EndTime timer(250);
+  while (!CAEFactory::IsSuspended() && !timer.IsTimePast())
+    usleep(1 * 1000);
 
-  m_codec = codec;
   // EAC3 can have 1,2,3 or 6 audio blocks of 256 bytes per sync frame
   m_frameSize = audioframe.format.m_streamInfo.m_ac3FrameSize;
   m_startPtsFlag = false;
   m_startPtsSeconds = 0;
-  m_avsink = [[AVPlayerSink alloc] initWithFrameSize:m_frameSize];
-  [m_avsink startBuffering:m_codec];
+  if (m_sink)
+  {
+    m_sink->close();
+    SAFE_DELETE(m_sink);
+  }
+  m_sink = new CAVSink();
+  if (!m_sink->open(m_frameSize))
+    return false;
 
   CThread::Create();
   CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Create");
@@ -568,11 +740,15 @@ void CAudioSinkAVFoundation::Destroy()
   m_bStop = true;
   StopThread();
 
-  [m_avsink stopBuffering];
-  m_avsink = nullptr;
-  m_startPtsSeconds = 0;
+  if (m_sink)
+    m_sink->close();
+  SAFE_DELETE(m_sink);
 
   CAEFactory::Resume();
+  // wait for AE to wake
+  XbmcThreads::EndTime timer(250);
+  while (CAEFactory::IsSuspended() && !timer.IsTimePast())
+    usleep(1 * 1000);
 }
 
 unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
@@ -581,7 +757,8 @@ unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
 
   m_abortAddPacketWait = false;
   double syncErrorSeconds = CalcSyncErrorSeconds();
-  if (abs(syncErrorSeconds - m_syncErrorDVDTimeSecondsOld) > 0.050)
+  if (abs(syncErrorSeconds) > 0.020 ||
+      abs(syncErrorSeconds - m_syncErrorDVDTimeSecondsOld) > 0.020)
   {
     m_syncErrorDVDTimeSecondsOld = syncErrorSeconds;
     m_syncErrorDVDTime = DVD_SEC_TO_TIME(syncErrorSeconds);
@@ -600,12 +777,18 @@ unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
   unsigned int written = 0;
   while (!m_abortAddPacketWait && !m_bStop && written < audioframe.nb_frames)
   {
-    written = [m_avsink addPackets:audioframe.data[0] size:audioframe.nb_frames];
-    double buffer_s = [m_avsink getBufferSeconds];
+    double buffer_s = 0.0;
+    double minbuffer_s = 1.0;
+    if (m_sink)
+    {
+      written = m_sink->write(audioframe.data[0], audioframe.nb_frames);
+      buffer_s = m_sink->delay_s();
+      minbuffer_s = m_sink->mindelay_s();
+    }
     // native sink needs about 2.5 seconds of buffer
     // it will get stuttery below 2 seconds as it pauses to
     // wait for internal buffers to fill.
-    if (buffer_s > 2.5)
+    if (buffer_s > minbuffer_s)
     {
       lock.Leave();
       Sleep(50);
@@ -620,23 +803,47 @@ unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
 
 void CAudioSinkAVFoundation::Drain()
 {
+  // let audio play out and wait for it to end.
   CSingleLock lock (m_critSection);
   CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Drain");
-  [m_avsink drain];
+  double delay_s = m_sink->delay_s();
+  XbmcThreads::EndTime timer(delay_s * 1000);
+  while (!m_bStop && !timer.IsTimePast())
+  {
+    delay_s = m_sink->delay_s();
+    if (delay_s <= 0.0)
+      return;
+
+    sleep(50);
+  }
+}
+
+void CAudioSinkAVFoundation::Flush()
+{
+  m_abortAddPacketWait = true;
+
+  CSingleLock lock (m_critSection);
+  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Flush");
+  m_startPtsFlag = false;
+  m_startPtsSeconds = 0;
+  if (m_sink)
+    m_sink->flush();
 }
 
 void CAudioSinkAVFoundation::Pause()
 {
   CSingleLock lock (m_critSection);
   CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Pause");
-  [m_avsink play:false];
+  if (m_sink)
+    m_sink->play(false);
 }
 
 void CAudioSinkAVFoundation::Resume()
 {
   CSingleLock lock(m_critSection);
   CLog::Log(LOGDEBUG,"CAudioSinkAVFoundation::Resume");
-  [m_avsink play:true];
+  if (m_sink)
+    m_sink->play(true);
 }
 
 double CAudioSinkAVFoundation::GetDelay()
@@ -647,8 +854,10 @@ double CAudioSinkAVFoundation::GetDelay()
   // 2) in DVDPlayerAudio during RESYNC
   // 3) and internally to offset passed pts in AddPackets
   CSingleLock lock (m_critSection);
-  double buffered_s = [m_avsink getBufferSeconds];
-  return buffered_s * DVD_TIME_BASE;
+  double delay_s = 0.3;
+  if (m_sink)
+    delay_s = m_sink->delay_s();
+  return delay_s * DVD_TIME_BASE;
 }
 
 double CAudioSinkAVFoundation::GetMaxDelay()
@@ -656,23 +865,10 @@ double CAudioSinkAVFoundation::GetMaxDelay()
   // returns total time (seconds) of audio in AE for the stream
   // used as audio cachetotal in player during startup
   CSingleLock lock (m_critSection);
-  return 3.0;
-}
-
-void CAudioSinkAVFoundation::Flush(bool retain)
-{
-  m_abortAddPacketWait = true;
-
-  CSingleLock lock (m_critSection);
-  CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Flush");
-  m_startPtsFlag = false;
-  m_startPtsSeconds = 0;
-  [m_avsink stopBuffering];
-  if (retain)
-  {
-    m_avsink = [[AVPlayerSink alloc] initWithFrameSize:m_frameSize];
-    [m_avsink startBuffering:m_codec];
-  }
+  double maxdelay_s = 0.3;
+  if (m_sink)
+    maxdelay_s = m_sink->maxdelay_s();
+  return maxdelay_s;
 }
 
 void CAudioSinkAVFoundation::AbortAddPackets()
@@ -694,8 +890,10 @@ double CAudioSinkAVFoundation::GetCacheTime()
   // 1) used in setting a timeout in CDVDPlayerAudio message queue
   // 2) used to signal start (cachetime >= cachetotal * 0.75)
   CSingleLock lock (m_critSection);
-  double buffered_s = [m_avsink getBufferSeconds];
-  return buffered_s;
+  double delay_s = 0.3;
+  if (m_sink)
+    delay_s = m_sink->delay_s();
+  return delay_s;
 }
 
 double CAudioSinkAVFoundation::GetCacheTotal()
@@ -704,7 +902,10 @@ double CAudioSinkAVFoundation::GetCacheTotal()
   // returns total time a stream can buffer
   // only used to signal start (cachetime >= cachetotal * 0.75)
   CSingleLock lock (m_critSection);
-  return 3.0;
+  double maxdelay_s = 0.3;
+  if (m_sink)
+    maxdelay_s = m_sink->maxdelay_s();
+  return maxdelay_s;
 }
 
 double CAudioSinkAVFoundation::GetPlayingPts()
@@ -719,11 +920,11 @@ double CAudioSinkAVFoundation::CalcSyncErrorSeconds()
 {
   double syncError = 0.0;
 
-  if (m_avsink && [m_avsink loaded])
+  if (m_sink && m_sink->ready())
   {
     double absolute;
     double player_s = m_pClock->GetClock(absolute) / DVD_TIME_BASE;
-    double sink_s = [m_avsink getClockSeconds] + m_startPtsSeconds;
+    double sink_s = m_sink->time_s() + m_startPtsSeconds;
     if (player_s > 0.0 && sink_s > 0.0)
       syncError = sink_s - player_s;
   }
@@ -737,16 +938,15 @@ double CAudioSinkAVFoundation::GetSyncError()
 
 void CAudioSinkAVFoundation::SetSyncErrorCorrection(double correction)
 {
-  //CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::SetSyncErrorCorrection m_syncError (%f), correction(%f)",
-  //  m_syncErrorDVDTime, correction);
-
   m_syncErrorDVDTime += correction;
 }
 
 double CAudioSinkAVFoundation::GetClock()
 {
   // return clock time in milliseconds (corrected for starting pts)
-  return ([m_avsink getClockSeconds] + m_startPtsSeconds) * 1000.0;
+  if (m_sink)
+    return (m_sink->time_s() + m_startPtsSeconds) * 1000.0;
+  return m_startPtsSeconds * 1000.0;
 }
 
 void CAudioSinkAVFoundation::Process()
@@ -758,17 +958,17 @@ void CAudioSinkAVFoundation::Process()
   {
     double sink_s = 0.0;
     double buffer_s = 0.0;
-    double sinkBuffer_s = 0.0;
+    double buffer2_s = 0.0;
     double absolute;
     double player_s = m_pClock->GetClock(absolute) / DVD_TIME_BASE;
-    if (m_startPtsFlag && m_avsink)
+    if (m_startPtsFlag && m_sink)
     {
-      sink_s = [m_avsink getClockSeconds] + m_startPtsSeconds;
-      buffer_s = [m_avsink getBufferSeconds];
-      sinkBuffer_s = [m_avsink getSinkBufferSeconds];
+      sink_s = m_sink->time_s() + m_startPtsSeconds;
+      buffer_s = m_sink->delay_s();
+      buffer2_s = m_sink->delay2_s();
     }
-    CLog::Log(LOGDEBUG, "avloader sinkBuffer_s (%f), buffer_s (%f), player_s(%f), sink_s(%f), delta(%f)",
-      sinkBuffer_s, buffer_s, player_s, sink_s, player_s - sink_s);
+    CLog::Log(LOGDEBUG, "avloader buffer2_s (%f), buffer_s (%f), player_s(%f), sink_s(%f), delta(%f)",
+      buffer2_s, buffer_s, player_s, sink_s, player_s - sink_s);
 
     Sleep(250);
   }
