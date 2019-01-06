@@ -34,6 +34,7 @@
   class AVPlayerSink;
 #endif
 class CAVSink;
+class CDolbyFrameParser;
 
 class CAudioSinkAVFoundation : public IAudioSink, IAEClockCallback, CThread
 {
@@ -84,5 +85,6 @@ protected:
   std::atomic_bool m_abortAddPacketWait;
 private:
   CAVSink *m_sink;
+  CDolbyFrameParser *m_parser;
   int m_frameSize = 0;
 };

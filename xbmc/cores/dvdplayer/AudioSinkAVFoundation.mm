@@ -461,126 +461,345 @@
 @end
 
 #pragma mark - DolbyFrameParser
-/*
+// Undefined AC3 stream type.
+constexpr static int STREAM_TYPE_UNDEFINED = -1;
+// Type 0 AC3 stream type. See ETSI TS 102 366 E.1.3.1.1.
+// These frames comprise an independent stream or substream.
+// The programme may be decoded independently of any other
+// substreams that might exist in the bit stream
+constexpr static int STREAM_TYPE_TYPE0 = 0;
+// Type 1 AC3 stream type. See ETSI TS 102 366 E.1.3.1.1.
+// These frames comprise a dependent substream. The programme
+// shall be decoded in conjunction with the independent
+// substream with which it is associated
+constexpr static int STREAM_TYPE_TYPE1 = 1;
+// Type 2 AC3 stream type. See ETSI TS 102 366 E.1.3.1.1.
+// These frames comprise an independent stream or substream
+// that was previously coded in AC-3. Type 2 streams shall be
+// independently decodable, and may not have any dependent
+// streams associated with them.
+constexpr static int STREAM_TYPE_TYPE2 = 2;
+// The number of new samples per (E-)AC-3 audio block.
+constexpr static int AUDIO_SAMPLES_PER_AUDIO_BLOCK = 256;
+// Each syncframe has 6 blocks that provide 256 new audio samples. See ETSI TS 102 366 4.1.
+constexpr static int AC3_SYNCFRAME_AUDIO_SAMPLE_COUNT = 6 * AUDIO_SAMPLES_PER_AUDIO_BLOCK;
+// Sample rates, indexed by fscod.
+constexpr static int SAMPLE_RATE_BY_FSCOD[] = {48000, 44100, 32000};
+// Sample rates, indexed by fscod2 (E-AC-3).
+constexpr static int SAMPLE_RATE_BY_FSCOD2[] = {24000, 22050, 16000};
+// Channel counts, indexed by acmod.
+constexpr static int CHANNEL_COUNT_BY_ACMOD[] = {2, 1, 2, 3, 3, 4, 4, 5};
+// Number of audio blocks per E-AC-3 syncframe, indexed by numblkscod.
+constexpr static int BLOCKS_PER_SYNCFRAME_BY_NUMBLKSCOD[] = {1, 2, 3, 6};
+constexpr static int BLOCKS_PER_SYNCFRAME_BY_NUMBLKSCOD_LENGTH = 4;
+// Nominal bitrates in kbps, indexed by frmsizecod / 2. (See ETSI TS 102 366 table 4.13.)
+constexpr static int BITRATE_BY_HALF_FRMSIZECOD[] = {32, 40, 48, 56, 64, 80, 96,
+      112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640};
+// 16-bit words per syncframe, indexed by frmsizecod / 2. (See ETSI TS 102 366 table 4.13.)
+constexpr static int SYNCFRAME_SIZE_WORDS_BY_HALF_FRMSIZECOD_44_1[] = {69, 87, 104,
+      121, 139, 174, 208, 243, 278, 348, 417, 487, 557, 696, 835, 975, 1114, 1253, 1393};
+constexpr static int SYNCFRAME_SIZE_WORDS_BY_HALF_FRMSIZECOD_44_1_LENGTH = 19;
+
 class CDolbyFrameParser
 {
   public:
-    CDolbyFrameParser() {};
-   ~CDolbyFrameParser() {};
+   ~CDolbyFrameParser()
+    {
+      SAFE_DELETE(m_bs);
+    };
 
-    void open(const uint8_t *buf, int len);
-    void close();
-    bool parse();
+    std::string parse(const uint8_t *buf, int len);
  private:
-    bool parse_ac3();
-    bool parse_ec3();
-    CBitstreamReader *m_bs;
+    void parse_ac3();
+    int  ac3SyncframeSize(int fscod, int frmsizecod);
+    void parse_ec3();
+    void parse_eac3_bsi();
+    void analyze_ac3_skipfld();
+    bool parse_ac3_emdf();
+
+    CBitstreamReader *m_bs = nullptr;
+    std::string mimeType;
+    uint16_t syncword = 0;
+    uint16_t crc1 = 0;
+    int streamType = STREAM_TYPE_UNDEFINED;
+    int substreamid;
+    int sampleRate;
+    int acmod;
+    int frameSize;
+    int sampleCount;
+    bool lfeon;
+    int channelCount;
+    int bsid;
+    int fscod;
+    int frmsizecod;
+    int audioBlocks;
+    int numblkscod;
 };
 
-void CDolbyFrameParser::open(const uint8_t *buf, int len)
+std::string CDolbyFrameParser::parse(const uint8_t *buf, int len)
 {
-  m_bs = new CBitstreamReader(buf, len);
-}
-void CDolbyFrameParser::close()
-{
+  // assume correct endian for arch
+  if (buf[0] != 0x0b || buf[1] != 0x77)
+    return "";
+
+  bsid = buf[5] >> 3;
+
+  mimeType = "";
   SAFE_DELETE(m_bs);
-}
-bool CDolbyFrameParser::parse()
-{
-  //peek at sync word
-  if (m_bs->GetBits(16) != 0x0B77)
-    return false;
+  m_bs = new CBitstreamReader(buf, len);
 
-  //---- byte 0
-  m_bs->SkipBits(16);
-  //peek at bsid
-  int bsid = m_bs->GetBits(29) & 0x1F;
-  if (bsid >= 17)
-    return false;
   if (bsid <= 10)
-    return parse_ac3();
+    parse_ac3();
   else
-    return parse_ec3();
-}
-bool CDolbyFrameParser::parse_ac3()
-{
-  //---- byte 2
-  uint crc1         = m_bs->ReadBits(16);
-  //---- byte 4
-  uint fscod        = m_bs->ReadBits( 2);
-  uint frmsizecod   = m_bs->ReadBits( 6);
-  //---- byte 5
-  uint bsid         = m_bs->ReadBits( 5);
-  uint bsmod        = m_bs->ReadBits( 3);
-  uint acmod        = m_bs->ReadBits( 3);
+    parse_ec3();
 
-  if ((acmod & 1) && acmod != 1)
-    int cmixlev     = m_bs->ReadBits(2);
-  if (acmod & 4)
-    int surmixlev   = m_bs->ReadBits(2);
+  return mimeType;
+}
+
+void CDolbyFrameParser::parse_ac3()
+{
+  //---- byte 0 -> byte 1
+  syncword = m_bs->ReadBits(16);
+  //---- byte 2 -> byte 3
+  crc1 = m_bs->ReadBits(16);
+  //---- byte 4
+  fscod = m_bs->ReadBits(2);
+  int frmsizecod = m_bs->ReadBits(6);
+  frameSize = ac3SyncframeSize(fscod, frmsizecod);
+  if (frameSize <= 0)
+    return;
+
+  //---- byte 5
+  m_bs->SkipBits(5 + 3);  // bsid, bsmod
+  acmod = m_bs->ReadBits(3);
+  if ((acmod & 0x01) != 0 && acmod != 1)
+    m_bs->SkipBits(2);    // cmixlev
+  if ((acmod & 0x04) != 0)
+    m_bs->SkipBits(2);    // surmixlev
   if (acmod == 2)
-    int dsurmod     = m_bs->ReadBits(2);
-  int lfeon         = m_bs->ReadBits(1);
+    m_bs->SkipBits(2);    // dsurmod
 
-  if (fscod == 3 || frmsizecod >= 48)
-    return(false);
+  sampleRate = SAMPLE_RATE_BY_FSCOD[fscod];
+  sampleCount = AC3_SYNCFRAME_AUDIO_SAMPLE_COUNT;
+  lfeon = m_bs->ReadBits(1);
+  channelCount = CHANNEL_COUNT_BY_ACMOD[acmod] + (lfeon ? 1 : 0);
 
-  static int channels[] = {2, 1, 2, 3, 3, 4, 4, 5};
-  int nChannels = channels[acmod] + lfeon;
-
-  static int freq[] = {48000, 44100, 32000, 0};
-  int nSamplesPerSec = freq[fscod];
-
-  switch(bsid)
-  {
-    case 9:  nSamplesPerSec >>= 1; break;
-    case 10: nSamplesPerSec >>= 2; break;
-    case 11: nSamplesPerSec >>= 3; break;
-    default: break;
-  }
-
-  static int rate[] = {32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 384, 448, 512, 576, 640, 768, 896, 1024, 1152, 1280};
-  int nBytesPerSec = ( rate[ frmsizecod >> 1 ] * 1000 ) / 8;
-
-  return true;
+  mimeType = "AC3";
 }
-bool CDolbyFrameParser::parse_ec3()
+int CDolbyFrameParser::ac3SyncframeSize(int fscod, int frmsizecod)
 {
-  //---- byte 2
-  uint strmtyp      = m_bs->ReadBits( 2);
-  if (strmtyp == 3)
-    return false;
+  int halfFrmsizecod = frmsizecod / 2;
+  if (fscod < 0 || fscod >= BLOCKS_PER_SYNCFRAME_BY_NUMBLKSCOD_LENGTH || frmsizecod < 0
+      || halfFrmsizecod >= SYNCFRAME_SIZE_WORDS_BY_HALF_FRMSIZECOD_44_1_LENGTH) {
+    // Invalid values provided.
+    return 0;
+  }
+  int sampleRate = SAMPLE_RATE_BY_FSCOD[fscod];
+  if (sampleRate == 44100) {
+    return 2 * (SYNCFRAME_SIZE_WORDS_BY_HALF_FRMSIZECOD_44_1[halfFrmsizecod] + (frmsizecod % 2));
+  }
+  int bitrate = BITRATE_BY_HALF_FRMSIZECOD[halfFrmsizecod];
+  if (sampleRate == 32000) {
+    return 6 * bitrate;
+  } else { // sampleRate == 48000
+    return 4 * bitrate;
+  }
+}
 
-  uint substreamid  = m_bs->ReadBits( 3);
-  uint frmsize      = m_bs->ReadBits(11) + 1;
-  //---- byte 4
-  uint fscod        = m_bs->ReadBits( 2);
-  uint fscod2       = m_bs->ReadBits( 2); // only valid if fscod == 3
-  uint numblckscod  = fscod2;
-  uint acmod        = m_bs->ReadBits( 3);
-  uint lfeon        = m_bs->ReadBits( 1);
-  //---- byte 5
-  uint bsid         = m_bs->ReadBits( 5);
+void CDolbyFrameParser::parse_ec3()
+{
+  parse_eac3_bsi();
+}
 
-  static int channels[] = {2, 1, 2, 3, 3, 4, 4, 5};
-  uint nChannels = channels[acmod] + lfeon;
-
-  static int freq[] = {48000, 44100, 32000, 0};
-  int nSamplesPerSec;
-  if (fscod == 3)
-    nSamplesPerSec = freq[fscod2]/2;
-  else
-    nSamplesPerSec = freq[fscod];
-
-  int nBytesPerSec = 1000 *((frmsize * nSamplesPerSec) / (16 * 48000));
-
-  uint dialnorm     = m_bs->ReadBits( 5);
-  uint compre       = m_bs->ReadBits( 1);
-  if (compre)         m_bs->SkipBits( 8);
-
-  return true;
+void CDolbyFrameParser::parse_eac3_bsi()
+{
+}
+/*
+  // entry with stream pointing to syncword
+  // Syntax from ETSI TS 102 366 V1.2.1 subsections E.1.2.1 and E.1.2.2.
+  m_bs->SkipBits(16);          //skip syncword
+  m_bs->SkipBits(2+3+11+2+2+3+1);      //strmtyp,substreamid,frmsiz,fscod,numblkscod,acmod,lfeon
+  if(m_bs->GetBits(1))            //compre ..................................................................................... 1
+    m_bs->SkipBits(8);          //{compr} ......................................................................... 8
+  if(hdr->channel_mode == 0x0)       // if 1+1 mode (dual mono, so some items need a second value)
+  {
+    m_bs->SkipBits(5);          //dialnorm2 ............................................................................... 5
+    if(m_bs->GetBits(1))          //compr2e ................................................................................. 1
+      m_bs->SkipBits(8);        //{compr2} .................................................................... 8
+  }
+  if(hdr->frame_type == 0x1)        // if dependent stream
+  {
+    if(m_bs->GetBits(1))          //chanmape ................................................................................ 1
+      m_bs->SkipBits(16);        // {chanmap} ................................................................. 16
+  }
+  // mixing metadata
+  if(m_bs->GetBits(1))            //mixmdate ................................................................................... 1
+  {
+    if(hdr->channel_mode > 0x2)     // if more than 2 channels
+      m_bs->SkipBits(2);        //{dmixmod} ................................. 2
+    if((hdr->channel_mode & 0x1) && (hdr->channel_mode > 0x2)) // if three front channels exist
+      m_bs->SkipBits(6);        //ltrtcmixlev,lorocmixlev .......................................................................... 3
+    if(hdr->channel_mode & 0x4)     // if a surround channel exists
+      m_bs->SkipBits(6+3);        //ltrtsurmixlev,lorosurmixlev
+    if(hdr->lfe_on)           // if the LFE channel exists
+    {
+      if(m_bs->GetBits(1))         //lfemixlevcode
+        m_bs->SkipBits(5);      //lfemixlevcod
+    }
+    if(hdr->frame_type == 0x0)       // if independent stream
+    {
+      if(m_bs->GetBits(1))         //pgmscle
+        m_bs->SkipBits(6);      //pgmscl
+      if(hdr->channel_mode == 0x0)   // if 1+1 mode (dual mono, so some items need a second value)
+      {
+        if(m_bs->GetBits(1))       //pgmscl2e
+          m_bs->SkipBits(6);    //pgmscl2
+      }
+      if(m_bs->GetBits(1))         //extpgmscle
+        m_bs->SkipBits(6);      //extpgmscl
+      uint8_t mixdef = m_bs->GetBits(2);
+      if(mixdef == 0x1)         // mixing option 2
+        m_bs->SkipBits(1+1+3);    //premixcmpsel, drcsrc, premixcmpscl
+      else if(mixdef == 0x2)       // mixing option 3 {
+        m_bs->SkipBits(12);
+      }
+      else if(mixdef == 0x3)       // mixing option 4
+      {
+        uint8_t mixdeflen = m_bs->GetBits(5);  //mixdeflen
+        if (m_bs->GetBits(1))      //mixdata2e
+        {
+          m_bs->SkipBits(1+1+3);  //premixcmpsel,drcsrc,premixcmpscl
+          if(m_bs->GetBits(1))     //extpgmlscle
+            m_bs->SkipBits(4);  //extpgmlscl
+          if(m_bs->GetBits(1))     //extpgmcscle
+            m_bs->SkipBits(4);  //extpgmcscl
+          if(m_bs->GetBits(1))     //extpgmrscle
+            m_bs->SkipBits(4);  //extpgmrscl
+          if(m_bs->GetBits(1))     //extpgmlsscle
+            m_bs->SkipBits(4);  //extpgmlsscl
+          if(m_bs->GetBits(1))     //extpgmrsscle
+            m_bs->SkipBits(4);  //extpgmrsscl
+          if(m_bs->GetBits(1))     //extpgmlfescle
+            m_bs->SkipBits(4);  //extpgmlfescl
+          if(m_bs->GetBits(1))     //dmixscle
+            m_bs->SkipBits(4);  //dmixscl
+          if (m_bs->GetBits(1))    //addche
+          {
+            if(m_bs->GetBits(1))  //extpgmaux1scle
+              m_bs->SkipBits(4);//extpgmaux1scl
+            if(m_bs->GetBits(1))  //extpgmaux2scle
+              m_bs->SkipBits(4);//extpgmaux2scl
+          }
+        }
+        if(m_bs->GetBits(1))      //mixdata3e
+        {
+          m_bs->SkipBits(5);    //spchdat
+          if(m_bs->GetBits(1))    //addspchdate
+          {
+            m_bs->SkipBits(5+2);  //spchdat1,spchan1att
+            if(m_bs->GetBits(1))  //addspchdat1e
+              m_bs->SkipBits(5+3);  //spchdat2,spchan2att
+          }
+        }
+        //mixdata ........................................ (8*(mixdeflen+2)) - no. mixdata bits
+        m_bs->SkipBytes(mixdeflen + 2);
+        //mixdatafill ................................................................... 0 - 7
+        //used to round up the size of the mixdata field to the nearest byte
+        m_bs->ByteAlign();
+      }
+      if(hdr->channel_mode < 0x2) // if mono or dual mono source
+      {
+        if(m_bs->GetBits(1))      //paninfoe
+          m_bs->SkipBits(8+6);    //panmean,paninfo
+        if(hdr->channel_mode == 0x0) // if 1+1 mode (dual mono - some items need a second value)
+        {
+          if(m_bs->GetBits(1))    //paninfo2e
+            m_bs->SkipBits(8+6);  //panmean2,paninfo2
+        }
+      }
+      // mixing configuration information
+      if(m_bs->GetBits(1))        //frmmixcfginfoe
+      {
+        if(hdr->num_blocks == 1) {  //if(numblkscod == 0x0)
+          m_bs->SkipBits(5);    //blkmixcfginfo[0]
+        }
+        else
+        {
+          for(int blk = 0; blk < hdr->num_blocks; blk++)
+          {
+            if(m_bs->GetBits(1))  //blkmixcfginfoe[blk]
+              m_bs->SkipBits(5);//blkmixcfginfo[blk]
+          }
+        }
+      }
+    }
+  }
+  // informational metadata
+  if(m_bs->GetBits(1))            //infomdate
+  {
+    m_bs->SkipBits(3+1+1);        //bsmod,copyrightb,origbs
+    if(hdr->channel_mode == 0x2)    // if in 2/0 mode
+      m_bs->SkipBits(2+2);        //dsurmod,dheadphonmod
+    if(hdr->channel_mode >= 0x6)     // if both surround channels exist
+      m_bs->SkipBits(2);        //dsurexmod
+    if(m_bs->GetBits(1))          //audprodie
+      m_bs->SkipBits(5+2+1);      //mixlevel,roomtyp,adconvtyp
+    if(hdr->channel_mode == 0x0)    // if 1+1 mode (dual mono, so some items need a second value)
+    {
+      if(m_bs->GetBits(1))        //audprodi2e
+        m_bs->SkipBits(5+2+1);    //mixlevel2,roomtyp2,adconvtyp2
+    }
+    if(hdr->sr_code < 0x3)         // if not half sample rate
+      m_bs->SkipBits(1);        //sourcefscod
+  }
+  if(hdr->frame_type == 0x0 && hdr->num_blocks != 6)  //(numblkscod != 0x3)
+    m_bs->SkipBits(1);          //convsync
+  if(hdr->frame_type == 0x2)         // if bit stream converted from AC-3
+  {
+    uint8_t blkid = 0;
+    if(hdr->num_blocks == 6)       // 6 blocks per syncframe
+      blkid = 1;
+    else
+      blkid = m_bs->GetBits(1);
+    if(blkid)
+      m_bs->SkipBits(6);        //frmsizecod
+  }
+  if(m_bs->GetBits(1))            //addbsie
+  {
+    uint8_t addbsil = m_bs->GetBits(6) + 1;//addbsil
+    m_bs->SkipBytes(addbsil);        //addbsi
+  }
 }
 */
+//Atmos in E-AC-3 is detected by looking for OAMD payload (see ETSI TS 103 420)
+// in EMDF container in skipfld inside audblk() of E-AC-3 frame (see ETSI TS 102 366)
+void CDolbyFrameParser::analyze_ac3_skipfld()
+{
+  // take a look at frame's auxdata()
+  if (bsid != 16)
+    return;
+
+  uint16_t emdf_syncword;
+  while (m_bs->GetRemainingBits() > 16)
+  {
+    emdf_syncword = m_bs->PeekBits(16);
+    if (emdf_syncword == 0x5838) //NB! m_bs->head still points to emdf syncword because we peeked and did not get the bits!
+    {
+      if (parse_ac3_emdf())
+        break;
+    }
+    else
+    {
+      //EMDF syncword may start anywhere in stream, also mid-byte!
+      m_bs->SkipBits(1);
+    }
+  }
+}
+bool CDolbyFrameParser::parse_ac3_emdf()
+{
+  return false;
+}
+
 
 #pragma mark - CAVSink
 class CAVSink
@@ -689,6 +908,7 @@ CAudioSinkAVFoundation::CAudioSinkAVFoundation(volatile bool &bStop, CDVDClock *
 CAudioSinkAVFoundation::~CAudioSinkAVFoundation()
 {
   CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::~CAudioSinkAVFoundation");
+  SAFE_DELETE(m_parser);
   SAFE_DELETE(m_sink);
 }
 
@@ -726,6 +946,8 @@ bool CAudioSinkAVFoundation::Create(const DVDAudioFrame &audioframe, AVCodecID c
   if (!m_sink->open(m_frameSize))
     return false;
 
+  //m_parser = new CDolbyFrameParser();
+
   CThread::Create();
   CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::Create");
 
@@ -754,6 +976,11 @@ void CAudioSinkAVFoundation::Destroy()
 unsigned int CAudioSinkAVFoundation::AddPackets(const DVDAudioFrame &audioframe)
 {
   CSingleLock lock (m_critSection);
+  if (m_parser)
+  {
+    std::string dolbyformat = m_parser->parse(audioframe.data[0], audioframe.nb_frames);
+    CLog::Log(LOGDEBUG, "CAudioSinkAVFoundation::AddPackets dolbyformat %s", dolbyformat.c_str());
+  }
 
   m_abortAddPacketWait = false;
   double syncErrorSeconds = CalcSyncErrorSeconds();
