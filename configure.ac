@@ -484,6 +484,7 @@ fi
 # version can be overridden by setting the following as ENV vars when running configure
 APP_NAME=${APP_NAME-$(${AWK} '/APP_NAME/ {print $2}' version.txt)}
 APP_NAME_DISPLAY=${APP_NAME}
+APP_NAME_INSTALL=${APP_NAME}
 URL_SCHEME="mrmc"
 APP_SUFFIX=""
 if test "x$bundle_extension" = "xlite"; then
@@ -499,6 +500,7 @@ if test "x$bundle_extension" = "xdev"; then
   APP_SUFFIX=".dev"
 fi
 APP_NAME_LC=$(echo $APP_NAME | ${AWK} '{print tolower($0)}')
+APP_NAME_INSTALL_LC=$(echo $APP_NAME_INSTALL | ${AWK} '{print tolower($0)}')
 APP_NAME_UC=$(echo $APP_NAME | ${AWK} '{print toupper($0)}')
 APP_PACKAGE=${APP_PACKAGE-$(${AWK} '/APP_PACKAGE/ {print $2}' version.txt)}
 if test "$bundle_extension" != ""; then
@@ -525,8 +527,10 @@ if test "$APP_NAME" != "" && test "$APP_VERSION_MAJOR" != "" && test "$APP_VERSI
 
   AC_SUBST(APP_NAME)
   AC_SUBST(APP_NAME_LC)
+  AC_SUBST(APP_NAME_INSTALL_LC)
   AC_SUBST(APP_NAME_UC)
   AC_SUBST(APP_NAME_DISPLAY)
+  AC_SUBST(APP_NAME_INSTALL)
   AC_SUBST(APP_PACKAGE)
   AC_SUBST(APP_VERSION)
   AC_SUBST(APP_VERSION_MAJOR)
