@@ -261,7 +261,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
-    System.loadLibrary("@APP_NAME_LC@");
+    System.loadLibrary("@APP_NAME_INSTALL_LC@");
 
     super.onCreate(savedInstanceState);
 
