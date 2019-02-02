@@ -27,7 +27,7 @@ public class Service extends android.app.Service
   @Override
   public void onCreate()
   {
-    System.loadLibrary("@APP_NAME_LC@");
+    System.loadLibrary("@APP_NAME_INSTALL_LC@");
     super.onCreate();
 
     BluetoothAdapter btDevice = BluetoothAdapter.getDefaultAdapter();
