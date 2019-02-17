@@ -1076,12 +1076,8 @@ bool CApplication::Initialize()
   g_curlInterface.Load();
   g_curlInterface.Unload();
 
-  // StartDatabase spins out a job that
-  // uses event, create it here so it
-  // lives longer.
-  CEvent event(true);
-  StartDatabase(event);
-
+  // do not move StartDatabase
+  StartDatabase();
   StartServices();
 
   // Init DPMS, before creating the corresponding setting control.
@@ -5316,7 +5312,7 @@ void CApplication::PlaySplash()
 */
 }
 
-void CApplication::StartDatabase(CEvent &event)
+void CApplication::StartDatabase()
 {
   // check if we have set internal MYSQL settings and load
   const CSetting *mysqlSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_MYSQL_ENABLED);
@@ -5327,6 +5323,7 @@ void CApplication::StartDatabase(CEvent &event)
 
   DisableScreensaver(true);
   // initialize (and update as needed) our databases
+  CEvent event;
   event.Reset();
   CJobManager::GetInstance().Submit([&event]() {
     CDatabaseManager::GetInstance().Initialize();
@@ -5335,11 +5332,7 @@ void CApplication::StartDatabase(CEvent &event)
 
   std::string localizedStr = g_localizeStrings.Get(24094);
   int iDots = 1;
-  // wait up to 10 sec, we are racing job getting started
-  // by JobManager, then db getting checked for update.
-  // A long wait time here just means we do not exit prematurely.
-  // That is, before the job is running.
-  while (!event.WaitMSec(10 * 1000))
+  while (!event.WaitMSec(1000))
   {
     if (CDatabaseManager::GetInstance().m_bIsUpgrading)
       CSplash::GetInstance().Show(std::string(iDots, ' ') + localizedStr + std::string(iDots, '.'));
