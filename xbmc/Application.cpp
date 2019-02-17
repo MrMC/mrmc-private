@@ -5327,6 +5327,7 @@ void CApplication::StartDatabase(CEvent &event)
 
   DisableScreensaver(true);
   // initialize (and update as needed) our databases
+  event.Reset();
   CJobManager::GetInstance().Submit([&event]() {
     CDatabaseManager::GetInstance().Initialize();
     event.Set();
@@ -5334,7 +5335,11 @@ void CApplication::StartDatabase(CEvent &event)
 
   std::string localizedStr = g_localizeStrings.Get(24094);
   int iDots = 1;
-  while (!event.WaitMSec(1000))
+  // wait up to 10 sec, we are racing job getting started
+  // by JobManager, then db getting checked for update.
+  // A long wait time here just means we do not exit prematurely.
+  // That is, before the job is running.
+  while (!event.WaitMSec(10 * 1000))
   {
     if (CDatabaseManager::GetInstance().m_bIsUpgrading)
       CSplash::GetInstance().Show(std::string(iDots, ' ') + localizedStr + std::string(iDots, '.'));
