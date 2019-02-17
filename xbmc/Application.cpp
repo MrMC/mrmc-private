@@ -1076,7 +1076,11 @@ bool CApplication::Initialize()
   g_curlInterface.Load();
   g_curlInterface.Unload();
 
-  StartDatabase();
+  // StartDatabase spins out a job that
+  // uses event, create it here so it
+  // lives longer.
+  CEvent event(true);
+  StartDatabase(event);
 
   StartServices();
 
@@ -5312,7 +5316,7 @@ void CApplication::PlaySplash()
 */
 }
 
-void CApplication::StartDatabase()
+void CApplication::StartDatabase(CEvent &event)
 {
   // check if we have set internal MYSQL settings and load
   const CSetting *mysqlSetting = CSettings::GetInstance().GetSetting(CSettings::SETTING_MYSQL_ENABLED);
@@ -5323,7 +5327,6 @@ void CApplication::StartDatabase()
 
   DisableScreensaver(true);
   // initialize (and update as needed) our databases
-  CEvent event(true);
   CJobManager::GetInstance().Submit([&event]() {
     CDatabaseManager::GetInstance().Initialize();
     event.Set();
