@@ -29,7 +29,7 @@
 #include "system_gl.h"
 
 #include <locale.h>
-#include <xbmc/cores/dvdplayer/DVDClock.h>
+#include "cores/dvdplayer/DVDClock.h"
 #include "guilib/MatrixGLES.h"
 #include "LinuxRendererGLES.h"
 #include "utils/MathUtils.h"
