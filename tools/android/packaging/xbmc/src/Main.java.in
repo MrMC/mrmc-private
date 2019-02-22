@@ -3,7 +3,6 @@ package @APP_PACKAGE@;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.UiModeManager;
-import android.bluetooth.BluetoothAdapter;
 import android.content.ActivityNotFoundException;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -68,7 +67,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   private MediaProjection mMediaProjection;
   private int mProjectionIntentId = 0;
 
-  public String mDeviceName = Build.MODEL;
   public int mExitCode = XBMC_EXITCODE_UNINITIALIZED;
   native void _onNewIntent(Intent intent);
   native void _onActivityResult(int requestCode, int resultCode, Intent resultData);
@@ -268,10 +266,6 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
     super.onCreate(savedInstanceState);
 
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
-
-    BluetoothAdapter btDevice = BluetoothAdapter.getDefaultAdapter();
-    if (btDevice != null)
-      mDeviceName = btDevice.getName();
 
     mSettingsContentObserver = new XBMCSettingsContentObserver(this, handler);
     getApplicationContext().getContentResolver().registerContentObserver(android.provider.Settings.System.CONTENT_URI, true, mSettingsContentObserver );
