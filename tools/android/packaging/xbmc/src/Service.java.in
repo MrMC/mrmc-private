@@ -1,6 +1,8 @@
 package @APP_PACKAGE@;
 
 import android.app.Notification;
+import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +11,8 @@ import android.os.IBinder;
 public class Service extends android.app.Service
 {
   native boolean _launchApplication();
+
+  public String mDeviceName = Build.MODEL;
 
   static private Boolean m_isStarted = false;
   public static Boolean isStarted()
@@ -25,6 +29,10 @@ public class Service extends android.app.Service
   {
     System.loadLibrary("@APP_NAME_LC@");
     super.onCreate();
+
+    BluetoothAdapter btDevice = BluetoothAdapter.getDefaultAdapter();
+    if (btDevice != null)
+      mDeviceName = btDevice.getName();
   }
 
   @Override

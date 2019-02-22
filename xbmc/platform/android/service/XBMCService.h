@@ -39,6 +39,8 @@ public:
   static jboolean _launchApplication(JNIEnv*, jobject thiz);
   int android_printf(const char* format...);
 
+  std::string getDeviceName() const;
+
   void Deinitialize();
 
   /*!

@@ -32,6 +32,7 @@
 #include <androidjni/Build.h>
 #include <androidjni/Environment.h>
 #include <androidjni/StatFs.h>
+#include <androidjni/jutils-details.hpp>
 
 #include "Application.h"
 #include "CompileInfo.h"
@@ -272,4 +273,11 @@ jboolean CXBMCService::_launchApplication(JNIEnv*, jobject thiz)
   m_xbmcserviceinstance = new CXBMCService(o);
   m_xbmcserviceinstance->StartApplication();
   return g_application.IsInitialized();
+}
+
+std::string CXBMCService::getDeviceName() const
+{
+  if (!m_object)
+    return "";
+  return jcast<std::string>(get_field<jhstring>(m_object, "mDeviceName"));
 }
