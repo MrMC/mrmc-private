@@ -1754,6 +1754,7 @@ bool CPlexUtils::ParsePlexSeries(CFileItemList &items, const CURL &url, const CV
 
     GetVideoDetails(*plexItem, item);
     SetPlexItemProperties(*plexItem);
+    plexItem->SetProperty("SkipLocalArt", true);
     items.Add(plexItem);
   }
   items.SetProperty("library.filter", "true");
@@ -1842,6 +1843,7 @@ bool CPlexUtils::ParsePlexSeasons(CFileItemList &items, const CURL &url, const C
       plexItem->SetOverlayImage(CGUIListItem::ICON_OVERLAY_UNWATCHED, watchedEpisodes >= plexItem->GetVideoInfoTag()->m_iEpisode);
 
       SetPlexItemProperties(*plexItem);
+      
       items.Add(plexItem);
     }
   }
