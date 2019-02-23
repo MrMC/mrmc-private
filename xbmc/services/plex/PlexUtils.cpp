@@ -161,6 +161,7 @@ void CPlexUtils::SetPlexItemProperties(CFileItem &item, const CPlexClientPtr &cl
 {
   item.SetProperty("PlexItem", true);
   item.SetProperty("MediaServicesItem", true);
+  item.SetProperty("SkipLocalArt",true);
   if (!client)
     return;
   if (client->IsCloud())
@@ -712,7 +713,6 @@ bool CPlexUtils::GetPlexFilter(CFileItemList &items, std::string url, std::strin
           }
           pItem->SetPath(parentPath + Base64URL::Encode(plex.Get()));
           pItem->SetLabel(title);
-          pItem->SetProperty("SkipLocalArt", true);
           SetPlexItemProperties(*pItem);
           items.Add(pItem);
         }
@@ -769,7 +769,6 @@ bool CPlexUtils::GetPlexFilters(CFileItemList &items, std::string url, std::stri
             pItem->SetPath(parentPath + path + Base64URL::Encode(plex.Get()));
           }
           pItem->SetLabel(title);
-          pItem->SetProperty("SkipLocalArt", true);
           SetPlexItemProperties(*pItem);
           items.Add(pItem);
         }
@@ -844,7 +843,6 @@ bool CPlexUtils::GetPlexMusicFilters(CFileItemList &items, std::string url, std:
             pItem->SetPath(parentPath + path + Base64URL::Encode(plex.Get()));
           }
           pItem->SetLabel(title);
-          pItem->SetProperty("SkipLocalArt", true);
           SetPlexItemProperties(*pItem);
           items.Add(pItem);
         }
@@ -901,7 +899,6 @@ bool CPlexUtils::GetPlexMusicFilter(CFileItemList &items, std::string url, std::
           }
           pItem->SetPath(parentPath + Base64URL::Encode(plex.Get()));
           pItem->SetLabel(title);
-          pItem->SetProperty("SkipLocalArt", true);
           SetPlexItemProperties(*pItem);
           items.Add(pItem);
         }
