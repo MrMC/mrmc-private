@@ -2314,7 +2314,7 @@ int CUtil::GetRandomNumber(int min, int max)
 
 void CUtil::DumpSettingsFile()
 {
-  if (CLog::GetLogLevel() == LOGDEBUG)
+  //if (CLog::GetLogLevel() == LOGDEBUG)
   {
     CXBMCTinyXML advancedXML;
     const std::string file = CProfilesManager::GetInstance().GetUserDataItem("guisettings.xml");
@@ -2329,7 +2329,8 @@ void CUtil::DumpSettingsFile()
       while (pHide)
       {
         TiXmlNode *pDropboxtokenValue = pHide->FirstChild();
-        pDropboxtokenValue->SetValue("HIDDEN");
+        if (pDropboxtokenValue)
+          pDropboxtokenValue->SetValue("HIDDEN");
         pHide = pHide->NextSiblingElement();
       }
     }
