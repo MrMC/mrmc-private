@@ -2314,7 +2314,7 @@ int CUtil::GetRandomNumber(int min, int max)
 
 void CUtil::DumpSettingsFile()
 {
-  //if (CLog::GetLogLevel() == LOGDEBUG)
+  if (CLog::GetLogLevel() == LOGDEBUG)
   {
     CXBMCTinyXML advancedXML;
     const std::string file = CProfilesManager::GetInstance().GetUserDataItem("guisettings.xml");
