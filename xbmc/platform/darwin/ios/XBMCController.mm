@@ -832,7 +832,7 @@ XBMCController *g_xbmcController;
 //--------------------------------------------------------------
 - (void)enterBackground
 {
-  if (g_application.m_pPlayer->IsPlaying() && !g_application.m_pPlayer->IsPaused())
+  if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
   {
     m_isPlayingBeforeInactive = TRUE;
     CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_PAUSE_IF_PLAYING);
@@ -849,7 +849,7 @@ XBMCController *g_xbmcController;
     CApplicationMessenger::GetInstance().SendMsg(TMSG_MEDIA_UNPAUSE);
     m_isPlayingBeforeInactive = FALSE;
   }
-  CNetworkServices::GetInstance().StartPlexServices();
+//  CNetworkServices::GetInstance().StartPlexServices();
   CIOSPlayShared::GetInstance().RunPlayback();
 }
 
@@ -865,7 +865,7 @@ XBMCController *g_xbmcController;
   }
   // check whether we need disable network auto suspend.
   [self rescheduleNetworkAutoSuspend];
-  CNetworkServices::GetInstance().StopPlexServices();
+//  CNetworkServices::GetInstance().StopPlexServices();
 }
 
 //--------------------------------------------------------------
