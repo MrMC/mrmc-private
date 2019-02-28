@@ -23,6 +23,9 @@ EXCLUDED_ADDONS += $(PKG_EXCLUDED_ADDONS)
 ifeq ($(lite),yes)
   MEDIAROOT = media.lite
   SPLASHPNG = Splash.lite.png
+else ifeq ($(dev),yes)
+  MEDIAROOT = media.dev
+  SPLASHPNG = Splash.dev.png
 else
   MEDIAROOT = media
   SPLASHPNG = Splash.png
@@ -42,7 +45,7 @@ SIGN_KEYPASS_OPT=-keypass $(SIGN_KEYPASS)
 endif
 
 SRCLIBS = $(addprefix $(PREFIX)/lib/,$(OBJS)) $(addprefix $(PREFIX)/lib/$(SDK_PLATFORM)/,$(PLATFORM_OBJS))
-DSTLIBS = $(ABI)/lib/lib@APP_NAME_LC@.so $(addprefix $(ABI)/lib/,$(OBJS)) $(addprefix $(ABI)/lib/,$(PLATFORM_OBJS))
+DSTLIBS = $(ABI)/lib/lib@APP_NAME_INSTALL_LC@.so $(addprefix $(ABI)/lib/,$(OBJS)) $(addprefix $(ABI)/lib/,$(PLATFORM_OBJS))
 libs= $(DSTLIBS)
 
 ABI=$(ANDROID_ABI)
@@ -78,7 +81,7 @@ symbols: libs
 
 shared:
 	mkdir -p assets
-	cp -rfp $(PREFIX)/share/@APP_NAME_LC@/* ./assets
+	cp -rfp $(PREFIX)/share/@APP_NAME_INSTALL_LC@/* ./assets
 	# depends packaging of binary pvr hardcodes path to mrmc
 	cp -rfp $(PREFIX)/share/mrmc/addons/pvr.* ./assets/addons || true
 	# depends packaging of repo-resources hardcodes path to mrmc
@@ -128,9 +131,9 @@ libs:
 	cp -fp $(SRCLIBS) packaging/lib/$(ABI)/
 	# depends packaging of binary pvr hardcodes path to mrmc
 	find $(PREFIX)/lib/mrmc/addons/pvr* -name "*.so" -exec cp -fp {} packaging/lib/$(ABI)/ \; || true
-	find $(PREFIX)/lib/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} packaging/lib/$(ABI)/ \; || true
-	find $(PREFIX)/lib/@APP_NAME_LC@/system -name "*.so" -exec cp -fp {} packaging/lib/$(ABI)/ \; || true
-	find $(PREFIX)/share/@APP_NAME_LC@/addons -name "*.so" -exec cp -fp {} packaging/lib/$(ABI)/ \; || true
+	find $(PREFIX)/lib/@APP_NAME_INSTALL_LC@/addons -name "*.so" -exec cp -fp {} packaging/lib/$(ABI)/ \; || true
+	find $(PREFIX)/lib/@APP_NAME_INSTALL_LC@/system -name "*.so" -exec cp -fp {} packaging/lib/$(ABI)/ \; || true
+	find $(PREFIX)/share/@APP_NAME_INSTALL_LC@/addons -name "*.so" -exec cp -fp {} packaging/lib/$(ABI)/ \; || true
 	cd packaging/lib/$(ABI)/; find . -name "*.so" -not -name "lib*.so" | sed "s/\.\///" | xargs -I@ mv @ lib@
 	$(STRIP) --strip-unneeded packaging/lib/$(ABI)/*.so
 
@@ -164,7 +167,7 @@ apk-sign:
 	@echo "Signing..."
 	@jarsigner -sigalg SHA1withRSA -digestalg SHA1 -tsa http://timestamp.digicert.com -keystore $(SIGN_STORE) -storepass $(SIGN_STOREPASS) $(SIGN_KEYPASS_OPT) packaging/build/outputs/apk/$(BUILD_TYPE_LC)Unsigned/packaging-$(BUILD_TYPE_LC)Unsigned-unsigned.apk $(SIGN_KEY)
 	@$(ZIPALIGN) -f 4 packaging/build/outputs/apk/$(BUILD_TYPE_LC)Unsigned/packaging-$(BUILD_TYPE_LC)Unsigned-unsigned.apk $(XBMCROOT)/@APP_NAME@app-$(ABI)-$(BUILD_TYPE_LC).apk
-	@echo "$(XBMCROOT)/@APP_NAME_LC@app-$(ABI)-$(BUILD_TYPE_LC).apk created"
+	@echo "$(XBMCROOT)/@APP_NAME_INSTALL_LC@app-$(ABI)-$(BUILD_TYPE_LC).apk created"
 
 $(SRCLIBS):
 

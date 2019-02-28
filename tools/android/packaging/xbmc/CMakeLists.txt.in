@@ -42,7 +42,7 @@ set(DATA_FILES
 )
 
 add_library( # Specifies the name of the library.
-             @APP_NAME_LC@
+             @APP_NAME_INSTALL_LC@
              # Sets the library as a shared library.
              SHARED
 
@@ -52,12 +52,13 @@ add_library( # Specifies the name of the library.
              ${DATA_FILES}
              )
 
-# Include libraries needed for @APP_NAME_LC@ lib
-target_link_libraries(@APP_NAME_LC@
+# Include libraries needed for @APP_NAME_INSTALL_LC@ lib
+target_link_libraries(@APP_NAME_INSTALL_LC@
 
                         -Wl,--whole-archive
                         main
                         activity
+                        android_service
                         -Wl,--no-whole-archive
 
                         -Wl,--start-group

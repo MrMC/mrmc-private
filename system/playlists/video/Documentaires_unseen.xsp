@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<smartplaylist type="episodes">
+    <name>Documentaires non-vus</name>
+    <match>all</match>
+    <rule field="playlist" operator="is">Documentaires</rule>
+    <rule field="playcount" operator="is">0</rule>
+    <order direction="descending">dateadded</order>
+    <limit>50</limit>
+</smartplaylist>
