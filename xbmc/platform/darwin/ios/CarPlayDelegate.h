@@ -24,13 +24,6 @@
 #import "interfaces/AnnouncementManager.h"
 
 class CVariant;
-CFileItemList *m_RAAlbums;
-CFileItemList *m_MPSongs;
-CFileItemList *m_Playlists;
-CFileItemList *m_SelectedPlaylist;
-CFileItemList *m_Artists;
-CFileItemList *m_SelectedArtistAlbums;
-CFileItemList *m_SelectedArtistAlbumsSongs;
 @interface CarPlayDelegate : NSObject <MPPlayableContentDataSource, MPPlayableContentDelegate> {
 }
 - (MPMediaItemArtwork *) MakeMediaItemArtwork:(NSString *) imageStr;
@@ -46,7 +39,13 @@ public:
   void    DeInitialize();
 
   virtual void Announce(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, const char *message, const CVariant &data);
-
+  static CFileItemList *m_RAAlbums;
+  static CFileItemList *m_MPSongs;
+  static CFileItemList *m_Playlists;
+  static CFileItemList *m_SelectedPlaylist;
+  static CFileItemList *m_Artists;
+  static CFileItemList *m_SelectedArtistAlbums;
+  static CFileItemList *m_SelectedArtistAlbumsSongs;
 private:
   CCarPlayAnnounceReceiver() {};
   static CCarPlayAnnounceReceiver *m_instance;

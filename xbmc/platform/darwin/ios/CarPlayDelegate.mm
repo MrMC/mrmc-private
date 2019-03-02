@@ -36,6 +36,14 @@
 
 @implementation CarPlayDelegate
 
+CFileItemList *CCarPlayAnnounceReceiver::m_RAAlbums;
+CFileItemList *CCarPlayAnnounceReceiver::m_MPSongs;
+CFileItemList *CCarPlayAnnounceReceiver::m_Playlists;
+CFileItemList *CCarPlayAnnounceReceiver::m_SelectedPlaylist;
+CFileItemList *CCarPlayAnnounceReceiver::m_Artists;
+CFileItemList *CCarPlayAnnounceReceiver::m_SelectedArtistAlbums;
+CFileItemList *CCarPlayAnnounceReceiver::m_SelectedArtistAlbumsSongs;
+
 #pragma mark - CarPlay Helpers
 
 - (MPMediaItemArtwork *) MakeMediaItemArtwork:(NSString *) imageStr
@@ -118,7 +126,7 @@
     if (tabIndex == 0)
     {
 //      CVariant album = albums[itemIndex];
-      CFileItemPtr itemPtr = m_RAAlbums->Get(itemIndex);
+      CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_RAAlbums->Get(itemIndex);
       contentItem = [[MPContentItem alloc] initWithIdentifier:[NSString stringWithFormat:@"recentlyaddedItem %lu", itemIndex]];
       contentItem.title = [NSString stringWithCString:itemPtr->GetLabel().c_str()
                                              encoding:[NSString defaultCStringEncoding]];
@@ -129,9 +137,9 @@
     }
     else if (tabIndex == 1) // List All Most Played
     {
-      if (m_MPSongs->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_MPSongs->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_MPSongs->Get(itemIndex);
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_MPSongs->Get(itemIndex);
         contentItem = [[MPContentItem alloc] initWithIdentifier:[NSString stringWithFormat:@"MostPlayedItem %lu", itemIndex]];
         contentItem.title = [NSString stringWithCString:itemPtr->GetLabel().c_str()
                                                encoding:[NSString defaultCStringEncoding]];
@@ -143,9 +151,9 @@
     }
     else if (tabIndex == 2) // List All Playlists
     {
-      if (m_Playlists->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_Playlists->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_Playlists->Get(itemIndex);
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_Playlists->Get(itemIndex);
         contentItem = [[MPContentItem alloc] initWithIdentifier:[NSString stringWithFormat:@"AllPlaylistsItem %lu", itemIndex]];
         contentItem.title = [NSString stringWithCString:itemPtr->GetLabel().c_str()
                                                encoding:[NSString defaultCStringEncoding]];
@@ -157,9 +165,9 @@
     }
     else if (tabIndex == 3) // List All Artists
     {
-      if (m_Artists->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_Artists->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_Artists->Get(itemIndex);
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_Artists->Get(itemIndex);
         contentItem = [[MPContentItem alloc] initWithIdentifier:[NSString stringWithFormat:@"ArtistItem %lu", itemIndex]];
         contentItem.title = [NSString stringWithCString:itemPtr->GetLabel().c_str()
                                                encoding:[NSString defaultCStringEncoding]];
@@ -178,9 +186,9 @@
     if (tabIndex == 2)
     {
       // Playlist listing
-      if (m_SelectedPlaylist->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_SelectedPlaylist->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_SelectedPlaylist->Get(itemIndex2);
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_SelectedPlaylist->Get(itemIndex2);
         contentItem = [[MPContentItem alloc] initWithIdentifier:[NSString stringWithFormat:@"PlaylistItem %lu", itemIndex2]];
         contentItem.title = [NSString stringWithCString:itemPtr->GetLabel().c_str()
                                                encoding:[NSString defaultCStringEncoding]];
@@ -193,9 +201,9 @@
     else if (tabIndex == 3)
     {
       // List Artist albums
-      if (m_SelectedArtistAlbums->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_SelectedArtistAlbums->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_SelectedArtistAlbums->Get(itemIndex2);
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_SelectedArtistAlbums->Get(itemIndex2);
         contentItem = [[MPContentItem alloc] initWithIdentifier:[NSString stringWithFormat:@"ArtistAlbumsItem %lu", itemIndex2]];
         contentItem.title = [NSString stringWithCString:itemPtr->GetLabel().c_str()
                                                encoding:[NSString defaultCStringEncoding]];
@@ -215,9 +223,9 @@
     if (tabIndex == 3)
     {
       // Artist/Album/Songs listing
-      if (m_SelectedArtistAlbumsSongs->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_SelectedArtistAlbumsSongs->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_SelectedArtistAlbumsSongs->Get(itemIndex3);
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_SelectedArtistAlbumsSongs->Get(itemIndex3);
         contentItem = [[MPContentItem alloc] initWithIdentifier:[NSString stringWithFormat:@"PlaylistItem %lu", itemIndex3]];
         contentItem.title = [NSString stringWithCString:itemPtr->GetLabel().c_str()
                                                encoding:[NSString defaultCStringEncoding]];
@@ -243,23 +251,23 @@
   {
     if (tabIndex == 0)
     {
-      m_RAAlbums = CarPlayUtils::GetRecentlyAddedAlbums();
-      return m_RAAlbums->Size(); // Length recently added
+      CCarPlayAnnounceReceiver::m_RAAlbums = CarPlayUtils::GetRecentlyAddedAlbums();
+      return CCarPlayAnnounceReceiver::m_RAAlbums->Size(); // Length recently added
     }
     else if (tabIndex == 1)
     {
-      m_MPSongs  = CarPlayUtils::GetMostPlayedSongs();
-      return m_MPSongs->Size(); // Length most played
+      CCarPlayAnnounceReceiver::m_MPSongs  = CarPlayUtils::GetMostPlayedSongs();
+      return CCarPlayAnnounceReceiver::m_MPSongs->Size(); // Length most played
     }
     else if (tabIndex == 2)
     {
-      m_Playlists= CarPlayUtils::GetPlaylists();
-      return m_Playlists->Size(); // Length playlists
+      CCarPlayAnnounceReceiver::m_Playlists= CarPlayUtils::GetPlaylists();
+      return CCarPlayAnnounceReceiver::m_Playlists->Size(); // Length playlists
     }
     else if (tabIndex == 3)
     {
-      m_Artists = CarPlayUtils::GetArtists();
-      return m_Artists->Size(); // Length Artists
+      CCarPlayAnnounceReceiver::m_Artists = CarPlayUtils::GetArtists();
+      return CCarPlayAnnounceReceiver::m_Artists->Size(); // Length Artists
     }
   }
   else if (indexPath.length == 2)
@@ -267,22 +275,22 @@
     auto tabIndex1 = [indexPath indexAtPosition:1];
     if (tabIndex == 2)
     {
-      if (m_Playlists->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_Playlists->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_Playlists->Get(tabIndex1);
-        m_SelectedPlaylist->ClearItems();
-        m_SelectedPlaylist = CarPlayUtils::GetPlaylistItems(itemPtr->GetPath());
-        return m_SelectedPlaylist->Size(); // Length of selected Playlist
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_Playlists->Get(tabIndex1);
+        CCarPlayAnnounceReceiver::m_SelectedPlaylist->ClearItems();
+        CCarPlayAnnounceReceiver::m_SelectedPlaylist = CarPlayUtils::GetPlaylistItems(itemPtr->GetPath());
+        return CCarPlayAnnounceReceiver::m_SelectedPlaylist->Size(); // Length of selected Playlist
       }
     }
     if (tabIndex == 3)
     {
-      if (m_Artists->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_Artists->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_Artists->Get(tabIndex1);
-        m_SelectedArtistAlbums->ClearItems();
-        m_SelectedArtistAlbums = CarPlayUtils::GetArtistAlbum(itemPtr->GetPath());
-        return m_SelectedArtistAlbums->Size(); // Length of selected Artist Albums
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_Artists->Get(tabIndex1);
+        CCarPlayAnnounceReceiver::m_SelectedArtistAlbums->ClearItems();
+        CCarPlayAnnounceReceiver::m_SelectedArtistAlbums = CarPlayUtils::GetArtistAlbum(itemPtr->GetPath());
+        return CCarPlayAnnounceReceiver::m_SelectedArtistAlbums->Size(); // Length of selected Artist Albums
       }
     }
   }
@@ -291,13 +299,13 @@
     auto tabIndex2 = [indexPath indexAtPosition:2];
     if (tabIndex == 3)
     {
-      if (m_SelectedArtistAlbums->Size() > 0)
+      if (CCarPlayAnnounceReceiver::m_SelectedArtistAlbums->Size() > 0)
       {
-        CFileItemPtr itemPtr = m_SelectedArtistAlbums->Get(tabIndex2);
-        m_SelectedArtistAlbumsSongs->ClearItems();
-        CarPlayUtils::GetAlbumSongs(itemPtr, *m_SelectedArtistAlbumsSongs);
+        CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_SelectedArtistAlbums->Get(tabIndex2);
+        CCarPlayAnnounceReceiver::m_SelectedArtistAlbumsSongs->ClearItems();
+        CarPlayUtils::GetAlbumSongs(itemPtr, *CCarPlayAnnounceReceiver::m_SelectedArtistAlbumsSongs);
   //      m_SelectedArtistAlbumsSongs = CarPlayUtils::GetAlbumSongs(CFileItemPtr itemPtr, CFileItemList &items)
-        return m_SelectedArtistAlbumsSongs->Size(); // Length Selected Artist songs in Album
+        return CCarPlayAnnounceReceiver::m_SelectedArtistAlbumsSongs->Size(); // Length Selected Artist songs in Album
       }
     }
   }
@@ -317,7 +325,7 @@ initiatePlaybackOfContentItemAtIndexPath:(NSIndexPath *)indexPath
     if (tabIndex == 0)
     {
       // Play RA Albums
-      CFileItemPtr itemPtr = m_RAAlbums->Get(tabIndex1);
+      CFileItemPtr itemPtr = CCarPlayAnnounceReceiver::m_RAAlbums->Get(tabIndex1);
       CarPlayUtils::GetAlbumSongs(itemPtr, items);
     }
     else if (tabIndex == 1)
@@ -326,7 +334,7 @@ initiatePlaybackOfContentItemAtIndexPath:(NSIndexPath *)indexPath
       // we still send all 25 songs to playback
       // but start playback from the selected one
       playOffset = tabIndex1;
-      items.Assign(*m_MPSongs);
+      items.Assign(*CCarPlayAnnounceReceiver::m_MPSongs);
     }
   }
   else if (indexPath.length == 3)
@@ -336,7 +344,7 @@ initiatePlaybackOfContentItemAtIndexPath:(NSIndexPath *)indexPath
     {
       // Play Playlist items
       playOffset = tabIndex2;
-      items.Assign(*m_SelectedPlaylist);
+      items.Assign(*CCarPlayAnnounceReceiver::m_SelectedPlaylist);
     }
   }
   else if (indexPath.length == 4)
@@ -346,7 +354,7 @@ initiatePlaybackOfContentItemAtIndexPath:(NSIndexPath *)indexPath
     {
       // Play Playlist items
       playOffset = tabIndex3;
-      items.Assign(*m_SelectedArtistAlbumsSongs);
+      items.Assign(*CCarPlayAnnounceReceiver::m_SelectedArtistAlbumsSongs);
     }
   }
   g_playlistPlayer.Reset();
