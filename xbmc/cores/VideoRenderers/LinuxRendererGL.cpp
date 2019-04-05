@@ -240,8 +240,8 @@ bool CLinuxRendererGL::ValidateRenderTarget()
 {
   if (!m_bValidated)
   {
-    if ((m_format == RENDER_FMT_CVBREF) ||
-        (!glewIsSupported("GL_ARB_texture_non_power_of_two") && glewIsSupported("GL_ARB_texture_rectangle")))
+    if (!g_Windowing.IsExtSupported("GL_ARB_texture_non_power_of_two") &&
+         g_Windowing.IsExtSupported("GL_ARB_texture_rectangle"))
     {
       CLog::Log(LOGNOTICE,"Using GL_TEXTURE_RECTANGLE_ARB");
       m_textureTarget = GL_TEXTURE_RECTANGLE_ARB;
@@ -304,7 +304,7 @@ bool CLinuxRendererGL::Configure(unsigned int width, unsigned int height, unsign
   m_nonLinStretchGui = false;
   m_pixelRatio       = 1.0;
 
-  m_pboSupported = glewIsSupported("GL_ARB_pixel_buffer_object");
+  m_pboSupported = g_Windowing.IsExtSupported("GL_ARB_pixel_buffer_object");
 
 #ifdef TARGET_DARWIN_OSX
   // on osx 10.9 mavericks and > we get a strange ripple
@@ -974,7 +974,7 @@ void CLinuxRendererGL::LoadShaders(int field)
       }
       case RENDER_METHOD_ARB:
       // Try ARB shaders if supported and user requested it or GLSL shaders failed.
-      if (glewIsSupported("GL_ARB_fragment_program"))
+      if (g_Windowing.IsExtSupported("GL_ARB_fragment_program"))
       {
         CLog::Log(LOGNOTICE, "GL: ARB shaders support detected");
         m_renderMethod = RENDER_ARB ;
@@ -1011,9 +1011,9 @@ void CLinuxRendererGL::LoadShaders(int field)
   }
 
   // determine whether GPU supports NPOT textures
-  if (!glewIsSupported("GL_ARB_texture_non_power_of_two"))
+  if (!g_Windowing.IsExtSupported("GL_ARB_texture_non_power_of_two"))
   {
-    if (!glewIsSupported("GL_ARB_texture_rectangle"))
+    if (!g_Windowing.IsExtSupported("GL_ARB_texture_rectangle"))
     {
       CLog::Log(LOGNOTICE, "GL: GL_ARB_texture_rectangle not supported and OpenGL version is not 2.x");
       CLog::Log(LOGNOTICE, "GL: Reverting to POT textures");
@@ -3128,7 +3128,7 @@ bool CLinuxRendererGL::UploadRGBTexture(int source)
   if (imaging==-1)
   {
     imaging = 0;
-    if (glewIsSupported("GL_ARB_imaging"))
+    if (g_Windowing.IsExtSupported("GL_ARB_imaging"))
     {
       CLog::Log(LOGINFO, "GL: ARB Imaging extension supported");
       imaging = 1;
@@ -3248,7 +3248,7 @@ bool CLinuxRendererGL::Supports(ERENDERFEATURE feature)
 
     return (m_renderMethod & RENDER_GLSL)
         || (m_renderMethod & RENDER_ARB)
-        || ((m_renderMethod & RENDER_SW) && glewIsSupported("GL_ARB_imaging") == GL_TRUE);
+        || ((m_renderMethod & RENDER_SW) && g_Windowing.IsExtSupported("GL_ARB_imaging") == GL_TRUE);
   }
   
   if(feature == RENDERFEATURE_CONTRAST)
@@ -3261,7 +3261,7 @@ bool CLinuxRendererGL::Supports(ERENDERFEATURE feature)
 
     return (m_renderMethod & RENDER_GLSL)
         || (m_renderMethod & RENDER_ARB)
-        || ((m_renderMethod & RENDER_SW) && glewIsSupported("GL_ARB_imaging") == GL_TRUE);
+        || ((m_renderMethod & RENDER_SW) && g_Windowing.IsExtSupported("GL_ARB_imaging") == GL_TRUE);
   }
 
   if(feature == RENDERFEATURE_GAMMA)
@@ -3299,7 +3299,7 @@ bool CLinuxRendererGL::Supports(ERENDERFEATURE feature)
 
 bool CLinuxRendererGL::SupportsMultiPassRendering()
 {
-  return glewIsSupported("GL_EXT_framebuffer_object") && glCreateProgram;
+  return g_Windowing.IsExtSupported("GL_EXT_framebuffer_object") && glCreateProgram;
 }
 
 bool CLinuxRendererGL::Supports(EDEINTERLACEMODE mode)
@@ -3392,8 +3392,7 @@ bool CLinuxRendererGL::Supports(ESCALINGMETHOD method)
     if (scaleX < minScale && scaleY < minScale)
       return false;
 
-    if ((glewIsSupported("GL_EXT_framebuffer_object") && (m_renderMethod & RENDER_GLSL)) ||
-        (m_renderMethod & RENDER_VDPAU) || (m_renderMethod & RENDER_VAAPI))
+    if (g_Windowing.IsExtSupported("GL_EXT_framebuffer_object") && (m_renderMethod & RENDER_GLSL))
     {
       // spline36 and lanczos3 are only allowed through advancedsettings.xml
       if(method != VS_SCALINGMETHOD_SPLINE36

@@ -23,11 +23,8 @@
 
 #include "system.h"
 
-#if defined(TARGET_LINUX)   && defined(HAS_EGL)   && defined(HAVE_X11)
-#include "X11/WinSystemX11GLES.h"
-
-#elif defined(TARGET_LINUX)   && defined(HAS_GL)   && defined(HAVE_X11)
-#include "X11/WinSystemX11GL.h"
+#if defined(TARGET_LINUX)   && defined(HAVE_X11)
+#include "X11/WinSystemX11GLContext.h"
 
 #elif defined(TARGET_ANDROID)   && defined(HAS_GLES) && defined(HAS_EGL) && !defined(HAVE_X11)
 #include "android/WinSystemAndroidEGL.h"

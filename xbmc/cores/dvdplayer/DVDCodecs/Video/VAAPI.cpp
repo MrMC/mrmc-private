@@ -1360,6 +1360,7 @@ bool CVaapiRenderPicture::GLMapSurface()
         CLog::Log(LOGERROR, "failed to import VA buffer BGRA into EGL image: %d", err);
         return false;
       }
+<<<<<<< HEAD
 
       glGenTextures(1, &texture);
       glEnable(glInterop.textureTarget);
@@ -1374,6 +1375,22 @@ bool CVaapiRenderPicture::GLMapSurface()
       glBindTexture(glInterop.textureTarget, 0);
       glDisable(glInterop.textureTarget);
 
+=======
+
+      glGenTextures(1, &texture);
+      glEnable(glInterop.textureTarget);
+      glBindTexture(glInterop.textureTarget, texture);
+      glTexParameteri(glInterop.textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(glInterop.textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(glInterop.textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(glInterop.textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+      glInterop.glEGLImageTargetTexture2DOES(glInterop.textureTarget, glInterop.eglImage);
+
+      glBindTexture(glInterop.textureTarget, 0);
+      glDisable(glInterop.textureTarget);
+
+>>>>>>> 0ac305f7cf... X11: add EGL
       break;
     }
     default:
@@ -2473,7 +2490,11 @@ bool COutput::DestroyEGLContext()
   if (m_eglContext)
   {
     glFinish();
+<<<<<<< HEAD
     //eglMakeCurrent(m_eglContext, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+=======
+    eglMakeCurrent(m_eglContext, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+>>>>>>> 0ac305f7cf... X11: add EGL
     eglDestroyContext(m_eglDisplay, m_eglContext);
   }
   m_eglContext = EGL_NO_CONTEXT;

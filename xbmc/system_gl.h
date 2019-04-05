@@ -28,11 +28,10 @@
     #define GL_GLEXT_PROTOTYPES
   #endif
   #if defined(TARGET_LINUX)
-    #include <GL/glew.h>
     #include <GL/gl.h>
+    #include <GL/glu.h>
     #include <GL/glext.h>
   #elif defined(TARGET_FREEBSD)
-    #include <GL/glew.h>
     #include <GL/gl.h>
   #elif defined(TARGET_DARWIN)
     #include <GL/glew.h>

@@ -170,9 +170,13 @@ struct CVaapiGLSurface
   EGLDisplay eglDisplay;
   PFNEGLCREATEIMAGEKHRPROC eglCreateImageKHR;
   PFNEGLDESTROYIMAGEKHRPROC eglDestroyImageKHR;
+<<<<<<< HEAD
 #ifdef PFNGLEGLIMAGETARGETTEXTURE2DOESPROC
   PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES;
 #endif
+=======
+  PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES;
+>>>>>>> 0ac305f7cf... X11: add EGL
   bool mapped;
 };
 
@@ -319,9 +323,13 @@ protected:
   bool CheckSuccess(VAStatus status);
   PFNEGLCREATEIMAGEKHRPROC eglCreateImageKHR;
   PFNEGLDESTROYIMAGEKHRPROC eglDestroyImageKHR;
+<<<<<<< HEAD
 #ifdef PFNGLEGLIMAGETARGETTEXTURE2DOESPROC
   PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES;
 #endif
+=======
+  PFNGLEGLIMAGETARGETTEXTURE2DOESPROC glEGLImageTargetTexture2DOES;
+>>>>>>> 0ac305f7cf... X11: add EGL
   CEvent m_outMsgEvent;
   CEvent *m_inMsgEvent;
   int m_state;
