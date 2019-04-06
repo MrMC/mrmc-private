@@ -947,7 +947,7 @@ void CLinuxRendererGL::LoadShaders(int field)
       
       case RENDER_METHOD_GLSL:
       // Try GLSL shaders if supported and user requested auto or GLSL.
-      if (glCreateProgram && tryGlsl)
+      if (&glCreateProgram && tryGlsl)
       {
         // create regular progressive scan shader
         m_pYUVShader = new YUV2RGBProgressiveShader(m_textureTarget==GL_TEXTURE_RECTANGLE_ARB, m_iFlags, m_format,
@@ -3299,7 +3299,7 @@ bool CLinuxRendererGL::Supports(ERENDERFEATURE feature)
 
 bool CLinuxRendererGL::SupportsMultiPassRendering()
 {
-  return g_Windowing.IsExtSupported("GL_EXT_framebuffer_object") && glCreateProgram;
+  return g_Windowing.IsExtSupported("GL_EXT_framebuffer_object") && &glCreateProgram;
 }
 
 bool CLinuxRendererGL::Supports(EDEINTERLACEMODE mode)
