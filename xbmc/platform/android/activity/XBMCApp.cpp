@@ -133,6 +133,7 @@ std::unique_ptr<CJNIXBMCMainView> CXBMCApp::m_mainView;
 ANativeActivity *CXBMCApp::m_activity = NULL;
 CJNIWakeLock *CXBMCApp::m_wakeLock = NULL;
 ANativeWindow* CXBMCApp::m_window = NULL;
+ANativeWindow* CXBMCApp::m_pausedWindow = NULL;
 int CXBMCApp::m_batteryLevel = 0;
 bool CXBMCApp::m_hasFocus = false;
 bool CXBMCApp::m_hasResumed = false;
@@ -405,23 +406,14 @@ void CXBMCApp::onResume()
     m_applications.clear();
   }
 
-/*
-  if (m_wasPlayingVideoWhenPaused)
+  if ((m_playback_state & PLAYBACK_STATE_VIDEO)  // Video ongoing (assumed paused)
+      && (m_window == nullptr || m_window != m_pausedWindow))   // Was the surface destroyed?
   {
-    m_wasPlayingVideoWhenPaused = false;
-    if (!g_application.LastProgressTrackingItem().GetPath().empty())
-    {
-      CFileItem *fileitem = new CFileItem(g_application.LastProgressTrackingItem());
-      if (!fileitem->IsLiveTV())
-      {
-        // m_lStartOffset always gets multiplied by 75, magic numbers :)
-        fileitem->m_lStartOffset = m_wasPlayingVideoWhenPausedTime * 75;
-      }
-      CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_PLAY, 0, 0, static_cast<void*>(fileitem));
-      //CLog::Log(LOGDEBUG, "CXBMCApp::onResume - m_wasPlayingVideoWhenPausedTime [%f], fileitem [%s]", m_wasPlayingVideoWhenPausedTime, fileitem->GetPath().c_str());
-    }
+    //HACK: Seek to be sure we have a picture when coming back
+    g_application.SeekTime(g_application.GetTime());
   }
-*/
+
+  m_pausedWindow = nullptr;
   m_hasResumed = true;
   CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_SETUP);
 
@@ -431,33 +423,7 @@ void CXBMCApp::onPause()
 {
   CLog::Log(LOGDEBUG, "%s: ", __PRETTY_FUNCTION__);
 
-    /*
-  if (g_application.m_pPlayer->IsPlaying())
-  {
-    if (g_application.m_pPlayer->IsPlayingVideo())
-    {
-      m_wasPlayingVideoWhenPaused = true;
-      // get the current playing time but backup a little, it looks better
-      m_wasPlayingVideoWhenPausedTime = g_application.GetTime() - 1.50;
-      CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
-    }
-    else
-      registerMediaButtonEventReceiver();
-  }
-    */
-
-  EnableWakeLock(false);
-  m_hasResumed = false;
-
-  // If we have exited XBMC, it no longer exists.
-  if (!m_exiting)
-    CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_CLEANUP);
-}
-
-void CXBMCApp::onStop()
-{
-  CLog::Log(LOGDEBUG, "%s: ", __PRETTY_FUNCTION__);
-
+  m_pausedWindow = m_window;
   if ((m_playback_state & PLAYBACK_STATE_PLAYING) && (m_playback_state & PLAYBACK_STATE_VIDEO))
   {
     if (m_playback_state & PLAYBACK_STATE_CANNOT_PAUSE)
@@ -465,6 +431,19 @@ void CXBMCApp::onStop()
     else
       CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_PAUSE)));
   }
+
+  EnableWakeLock(false);
+  m_hasResumed = false;
+
+}
+
+void CXBMCApp::onStop()
+{
+  CLog::Log(LOGDEBUG, "%s: ", __PRETTY_FUNCTION__);
+  
+  // If we have exited XBMC, it no longer exists.
+  if (!m_exiting)
+    CApplicationMessenger::GetInstance().PostMsg(TMSG_DISPLAY_CLEANUP);
 }
 
 void CXBMCApp::onDestroy()

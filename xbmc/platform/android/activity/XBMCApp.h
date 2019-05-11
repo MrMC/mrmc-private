@@ -274,6 +274,7 @@ private:
   static std::queue<jni::CJNIImage> m_captureQueue;
 
   static ANativeWindow* m_window;
+  static ANativeWindow* m_pausedWindow;
   static CJNIAudioDeviceInfos m_audiodevices;
 
   static std::atomic<uint64_t> m_vsynctime;
