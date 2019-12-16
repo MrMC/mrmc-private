@@ -472,9 +472,7 @@ AC_ARG_WITH([bundle_extension],
   [AS_HELP_STRING([--with-bundle_extension=file],
   [specify a bundle extension (darwin only, if required)])],
   [bundle_extension=$withval])
-if test "x$bundle_extension" = "xlite"; then
-  AC_DEFINE(APP_PACKAGE_LITE, [1], [Define if building a lite version])
-fi
+
 if test "x$bundle_extension" = "xdev"; then
   AC_DEFINE(APP_PACKAGE_DEV, [1], [Define if building a dev version])
 fi
@@ -486,12 +484,7 @@ APP_NAME=${APP_NAME-$(${AWK} '/APP_NAME/ {print $2}' version.txt)}
 APP_NAME_DISPLAY=${APP_NAME}
 URL_SCHEME="mrmc"
 APP_SUFFIX=""
-if test "x$bundle_extension" = "xlite"; then
-  APP_NAME_DISPLAY="${APP_NAME} Lite"
-  APP_NAME="${APP_NAME}Lite"
-  URL_SCHEME="${URL_SCHEME}lite"
-  APP_SUFFIX=".lite"
-fi
+
 if test "x$bundle_extension" = "xdev"; then
   APP_NAME_DISPLAY="${APP_NAME} (dev)"
   APP_NAME="${APP_NAME}Dev"
@@ -514,7 +507,6 @@ APP_VERSION_BUNDLE_VERSION=$(date -u +%y%m%d.%H%M)
 APP_VERSION_ANDROID_VERSION=$(date -u +%y%m%d%H)
 APP_WEBSITE=${APP_WEBSITE-$(${AWK} '/WEBSITE/ {print $2}' version.txt)}
 APP_COMPANY_NAME=${APP_COMPANY_NAME-$(${AWK} '/COMPANY_NAME/ {print $2}' version.txt)}
-TOPSHELF_BUNDLE_IDENTIFIER=$APP_PACKAGE.ts
 APP_ADDON_API=${APP_ADDON_API-$(${AWK} '/ADDON_API/ {print $2}' version.txt)}
 if test "$APP_NAME" != "" && test "$APP_VERSION_MAJOR" != "" && test "$APP_VERSION_MINOR" != "" \
 && test "$APP_VERSION_CODE" != "" && test "$APP_ADDON_API" != ""; then
@@ -539,10 +531,8 @@ if test "$APP_NAME" != "" && test "$APP_VERSION_MAJOR" != "" && test "$APP_VERSI
   AC_SUBST(APP_VERSION_ANDROID_VERSION)
   AC_SUBST(APP_WEBSITE)
   AC_SUBST(APP_COMPANY_NAME)
-  AC_SUBST(TOPSHELF_BUNDLE_IDENTIFIER)
   AC_SUBST(URL_SCHEME)
   AC_SUBST(APP_ADDON_API)
-  AC_SUBST(APP_SUFFIX)
 
   dashes="------------------------"
   final_message="\n  ${APP_NAME} Configuration:"

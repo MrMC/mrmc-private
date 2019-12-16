@@ -98,6 +98,7 @@
 #include "utils/CPUInfo.h"
 #include "utils/SeekHandler.h"
 #include "utils/Environment.h"
+#include "utils/purchases/InAppPurchase.h"
 
 #include "input/KeyboardLayoutManager.h"
 
@@ -442,8 +443,11 @@ bool CApplication::Create()
 
 #if defined(TARGET_DARWIN_OSX)
   CDateTime dieDate;
-  std::string strDieDate = "2019-12-02T15:13:30+04:00";
+  std::string strDieDate = CDarwinUtils::GetBuildDate();
+  // add 60 days to dieDate from the build date
+  const CDateTimeSpan interval(60, 0, 0, 0);
   dieDate.SetFromW3CDateTime(strDieDate);
+  dieDate = dieDate + interval;
   CDateTime now = CDateTime::GetCurrentDateTime();
   CLog::Log(LOGNOTICE, "App dieDate is %s", dieDate.GetAsLocalizedDateTime().c_str());
   if (now > dieDate )
@@ -706,9 +710,7 @@ bool CApplication::Create()
   m_lastFrameTime = XbmcThreads::SystemClockMillis();
   m_lastRenderTime = m_lastFrameTime;
 
-#if defined(TARGET_DARWIN_IOS) && !defined(TARGET_DARWIN_TVOS)
-  CDarwinUtils::SetMrMCTouchFlag();
-#endif
+  CInAppPurchase::GetInstance();
 
   CAnnouncementManager::GetInstance().Announce(GUI, "xbmc", "OnCreated");
   return true;
@@ -1553,9 +1555,16 @@ bool CApplication::Load(const TiXmlNode *settings)
   const TiXmlElement *audioElement = settings->FirstChildElement("audio");
   if (audioElement != NULL)
   {
+#if defined(TARGET_DARWIN_TVOS)
+    // Volume cant be muted or anything else other than maximum on tvOS
+    m_volumeLevel = VOLUME_MAXIMUM;
+    m_muted = false;
+#else
     XMLUtils::GetBoolean(audioElement, "mute", m_muted);
     if (!XMLUtils::GetFloat(audioElement, "fvolumelevel", m_volumeLevel, VOLUME_MINIMUM, VOLUME_MAXIMUM))
       m_volumeLevel = VOLUME_MAXIMUM;
+#endif
+
   }
 
   return true;

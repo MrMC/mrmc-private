@@ -104,9 +104,10 @@ void CVideoDatabase::CreateTables()
   m_pDS->exec("CREATE TABLE settings ( idFile integer, Deinterlace bool,"
               "ViewMode integer,ZoomAmount float, PixelRatio float, VerticalShift float, AudioStream integer, SubtitleStream integer,"
               "SubtitleDelay float, SubtitlesOn bool, Brightness float, Contrast float, Gamma float,"
-              "VolumeAmplification float, AudioDelay float, OutputToAllSpeakers bool, ResumeTime integer,"
+              "VolumeAmplification float, AudioDelay float, ResumeTime integer,"
               "Sharpness float, NoiseReduction float, NonLinStretch bool, PostProcess bool,"
-              "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool, VideoStream integer)\n");
+              "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool, VideoStream integer,"
+              "TonemapMethod integer, TonemapParam float, Orientation integer, CenterMixLevel integer)\n");
 
   CLog::Log(LOGINFO, "create stacktimes table");
   m_pDS->exec("CREATE TABLE stacktimes (idFile integer, times text)\n");
@@ -406,8 +407,22 @@ void CVideoDatabase::CreateViews()
                                        "        episode.idShow=tvshow.idShow"
                                        "      LEFT JOIN files ON"
                                        "        files.idFile=episode.idFile "
-                                       "    GROUP BY tvshow.idShow");
+                                       "GROUP BY tvshow.idShow");
   m_pDS->exec(tvshowcounts);
+
+  CLog::Log(LOGINFO, "create tvshowlinkpath_minview");
+  // This view only exists to workaround a limitation in MySQL <5.7 which is not able to
+  // perform subqueries in joins.
+  // Also, the correct solution is to remove the path information altogether, since a
+  // TV series can always have multiple paths. It is used in the GUI at the moment, but
+  // such usage should be removed together with this view and the path columns in tvshow_view.
+  //!@todo Remove the hacky selection of a semi-random path for tvshows from the queries and UI
+  std::string tvshowlinkpathview = PrepareSQL("CREATE VIEW tvshowlinkpath_minview AS SELECT "
+                                             "  idShow, "
+                                             "  min(idPath) AS idPath "
+                                             "FROM tvshowlinkpath "
+                                             "GROUP BY idShow");
+  m_pDS->exec(tvshowlinkpathview);
 
   CLog::Log(LOGINFO, "create tvshow_view");
   std::string tvshowview = PrepareSQL("CREATE VIEW tvshow_view AS SELECT "
@@ -422,22 +437,25 @@ void CVideoDatabase::CreateViews()
                                      "  uniqueid.value AS uniqueid_value, "
                                      "  uniqueid.type AS uniqueid_type "
                                      "FROM tvshow"
-                                     "  LEFT JOIN tvshowlinkpath ON"
-                                     "    tvshowlinkpath.idShow=tvshow.idShow"
+                                     "  LEFT JOIN tvshowlinkpath_minview ON "
+                                     "    tvshowlinkpath_minview.idShow=tvshow.idShow"
                                      "  LEFT JOIN path ON"
-                                     "    path.idPath=tvshowlinkpath.idPath"
+                                     "    path.idPath=tvshowlinkpath_minview.idPath"
                                      "  INNER JOIN tvshowcounts ON"
                                      "    tvshow.idShow = tvshowcounts.idShow "
                                      "  LEFT JOIN rating ON"
                                      "    rating.rating_id=tvshow.c%02d "
                                      "  LEFT JOIN uniqueid ON"
-                                     "    uniqueid.uniqueid_id=tvshow.c%02d "
-                                     "GROUP BY tvshow.idShow",
+                                     "    uniqueid.uniqueid_id=tvshow.c%02d ",
                                      VIDEODB_ID_TV_RATING_ID, VIDEODB_ID_TV_IDENT_ID);
   m_pDS->exec(tvshowview);
   CLog::Log(LOGINFO, "create season_view");
   std::string seasonview = PrepareSQL("CREATE VIEW season_view AS SELECT "
-                                     "  seasons.*, "
+                                     "  seasons.idSeason AS idSeason,"
+                                     "  seasons.idShow AS idShow,"
+                                     "  seasons.season AS season,"
+                                     "  seasons.name AS name,"
+                                     "  seasons.userrating AS userrating,"
                                      "  tvshow_view.strPath AS strPath,"
                                      "  tvshow_view.c%02d AS showTitle,"
                                      "  tvshow_view.c%02d AS plot,"
@@ -455,10 +473,23 @@ void CVideoDatabase::CreateViews()
                                      "    episode.idShow = seasons.idShow AND episode.c%02d = seasons.season"
                                      "  JOIN files ON"
                                      "    files.idFile = episode.idFile "
-                                     "GROUP BY seasons.idSeason",
+                                     "GROUP BY seasons.idSeason,"
+                                     "         seasons.idShow,"
+                                     "         seasons.season,"
+                                     "         seasons.name,"
+                                     "         seasons.userrating,"
+                                     "         tvshow_view.strPath,"
+                                     "         tvshow_view.c%02d,"
+                                     "         tvshow_view.c%02d,"
+                                     "         tvshow_view.c%02d,"
+                                     "         tvshow_view.c%02d,"
+                                     "         tvshow_view.c%02d,"
+                                     "         tvshow_view.c%02d ",
                                      VIDEODB_ID_TV_TITLE, VIDEODB_ID_TV_PLOT, VIDEODB_ID_TV_PREMIERED,
                                      VIDEODB_ID_TV_GENRE, VIDEODB_ID_TV_STUDIOS, VIDEODB_ID_TV_MPAA,
-                                     VIDEODB_ID_EPISODE_AIRED, VIDEODB_ID_EPISODE_SEASON);
+                                     VIDEODB_ID_EPISODE_AIRED, VIDEODB_ID_EPISODE_SEASON,
+                                     VIDEODB_ID_TV_TITLE, VIDEODB_ID_TV_PLOT, VIDEODB_ID_TV_PREMIERED,
+                                     VIDEODB_ID_TV_GENRE, VIDEODB_ID_TV_STUDIOS, VIDEODB_ID_TV_MPAA);
   m_pDS->exec(seasonview);
 
   CLog::Log(LOGINFO, "create musicvideo_view");
@@ -3511,7 +3542,7 @@ int CVideoDatabase::GetDbId(const std::string &query)
 
 void CVideoDatabase::DeleteStreamDetails(int idFile)
 {
-    m_pDS->exec(PrepareSQL("delete from streamdetails where idFile=%i", idFile));
+  m_pDS->exec(PrepareSQL("DELETE FROM streamdetails WHERE idFile = %i", idFile));
 }
 
 void CVideoDatabase::DeleteSet(int idSet)
@@ -4029,6 +4060,9 @@ CVideoInfoTag CVideoDatabase::GetDetailsForMusicVideo(const dbiplus::sql_record*
 {
   CVideoInfoTag details;
 
+  if (record == nullptr)
+    return details;
+
   unsigned int time = XbmcThreads::SystemClockMillis();
   int idMVideo = record->at(0).get_asInt();
 
@@ -4232,13 +4266,22 @@ bool CVideoDatabase::GetVideoSettings(int idFile, CVideoSettings &settings)
       settings.m_ResumeTime = m_pDS->fv("ResumeTime").get_asInt();
       settings.m_InterlaceMethod = (EINTERLACEMETHOD)m_pDS->fv("Deinterlace").get_asInt();
       settings.m_VolumeAmplification = m_pDS->fv("VolumeAmplification").get_asFloat();
-      settings.m_OutputToAllSpeakers = m_pDS->fv("OutputToAllSpeakers").get_asBool();
       settings.m_ScalingMethod = (ESCALINGMETHOD)m_pDS->fv("ScalingMethod").get_asInt();
       settings.m_StereoMode = m_pDS->fv("StereoMode").get_asInt();
       settings.m_StereoInvert = m_pDS->fv("StereoInvert").get_asBool();
       settings.m_SubtitleCached = false;
       settings.m_VideoStream = m_pDS->fv("VideoStream").get_asInt();
+      settings.m_ToneMapMethod = m_pDS->fv("TonemapMethod").get_asInt();
+      settings.m_ToneMapParam = m_pDS->fv("TonemapParam").get_asFloat();
+      settings.m_Orientation = m_pDS->fv("Orientation").get_asInt();
+      settings.m_CenterMixLevel = m_pDS->fv("CenterMixLevel").get_asInt();
       m_pDS->close();
+
+      if (settings.m_ToneMapParam == 0.0)
+      {
+        settings.m_ToneMapMethod = VS_TONEMAPMETHOD_REINHARD;
+        settings.m_ToneMapParam = 1.0;
+      }
       return true;
     }
     m_pDS->close();
@@ -4268,14 +4311,16 @@ void CVideoDatabase::SetVideoSettings(const std::string& strFilenameAndPath, con
       // update the item
       strSQL=PrepareSQL("update settings set Deinterlace=%i,ViewMode=%i,ZoomAmount=%f,PixelRatio=%f,VerticalShift=%f,"
                        "AudioStream=%i,SubtitleStream=%i,SubtitleDelay=%f,SubtitlesOn=%i,Brightness=%f,Contrast=%f,Gamma=%f,"
-                       "VolumeAmplification=%f,AudioDelay=%f,OutputToAllSpeakers=%i,Sharpness=%f,NoiseReduction=%f,NonLinStretch=%i,PostProcess=%i,ScalingMethod=%i,",
+                       "VolumeAmplification=%f,AudioDelay=%f,Sharpness=%f,NoiseReduction=%f,NonLinStretch=%i,PostProcess=%i,ScalingMethod=%i,",
                        setting.m_InterlaceMethod, setting.m_ViewMode, setting.m_CustomZoomAmount, setting.m_CustomPixelRatio, setting.m_CustomVerticalShift,
                        setting.m_AudioStream, setting.m_SubtitleStream, setting.m_SubtitleDelay, setting.m_SubtitleOn,
                        setting.m_Brightness, setting.m_Contrast, setting.m_Gamma, setting.m_VolumeAmplification, setting.m_AudioDelay,
-                       setting.m_OutputToAllSpeakers,setting.m_Sharpness,setting.m_NoiseReduction,setting.m_CustomNonLinStretch,setting.m_PostProcess,setting.m_ScalingMethod);
+                       setting.m_Sharpness,setting.m_NoiseReduction,setting.m_CustomNonLinStretch,setting.m_PostProcess,setting.m_ScalingMethod);
       std::string strSQL2;
-      strSQL2=PrepareSQL("ResumeTime=%i,StereoMode=%i,StereoInvert=%i, VideoStream=%i where idFile=%i\n", setting.m_ResumeTime, setting.m_StereoMode,
-                        setting.m_StereoInvert, setting.m_VideoStream, idFile);
+
+      strSQL2=PrepareSQL("ResumeTime=%i,StereoMode=%i,StereoInvert=%i,VideoStream=%i,TonemapMethod=%i,TonemapParam=%f where idFile=%i\n",
+                         setting.m_ResumeTime, setting.m_StereoMode, setting.m_StereoInvert, setting.m_VideoStream,
+                         setting.m_ToneMapMethod, setting.m_ToneMapParam, idFile);
       strSQL += strSQL2;
       m_pDS->exec(strSQL);
       return ;
@@ -4285,17 +4330,17 @@ void CVideoDatabase::SetVideoSettings(const std::string& strFilenameAndPath, con
       m_pDS->close();
       strSQL= "INSERT INTO settings (idFile,Deinterlace,ViewMode,ZoomAmount,PixelRatio, VerticalShift, "
                 "AudioStream,SubtitleStream,SubtitleDelay,SubtitlesOn,Brightness,"
-                "Contrast,Gamma,VolumeAmplification,AudioDelay,OutputToAllSpeakers,"
+                "Contrast,Gamma,VolumeAmplification,AudioDelay,"
                 "ResumeTime,"
-                "Sharpness,NoiseReduction,NonLinStretch,PostProcess,ScalingMethod,StereoMode,StereoInvert,VideoStream) "
+                "Sharpness,NoiseReduction,NonLinStretch,PostProcess,ScalingMethod,StereoMode,StereoInvert,VideoStream,TonemapMethod,TonemapParam,Orientation,CenterMixLevel) "
               "VALUES ";
-      strSQL += PrepareSQL("(%i,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%f,%f,%f,%f,%i,%i,%f,%f,%i,%i,%i,%i,%i,%i)",
+      strSQL += PrepareSQL("(%i,%i,%i,%f,%f,%f,%i,%i,%f,%i,%f,%f,%f,%f,%f,%i,%f,%f,%i,%i,%i,%i,%i,%i,%i,%f,%i,%i)",
                            idFile, setting.m_InterlaceMethod, setting.m_ViewMode, setting.m_CustomZoomAmount, setting.m_CustomPixelRatio, setting.m_CustomVerticalShift,
                            setting.m_AudioStream, setting.m_SubtitleStream, setting.m_SubtitleDelay, setting.m_SubtitleOn, setting.m_Brightness,
-                           setting.m_Contrast, setting.m_Gamma, setting.m_VolumeAmplification, setting.m_AudioDelay, setting.m_OutputToAllSpeakers,
+                           setting.m_Contrast, setting.m_Gamma, setting.m_VolumeAmplification, setting.m_AudioDelay,
                            setting.m_ResumeTime,
                            setting.m_Sharpness, setting.m_NoiseReduction, setting.m_CustomNonLinStretch, setting.m_PostProcess, setting.m_ScalingMethod,
-                           setting.m_StereoMode, setting.m_StereoInvert, setting.m_VideoStream);
+                           setting.m_StereoMode, setting.m_StereoInvert, setting.m_VideoStream, setting.m_ToneMapMethod, setting.m_ToneMapParam, setting.m_Orientation,setting.m_CenterMixLevel);
       m_pDS->exec(strSQL);
     }
   }
@@ -4718,6 +4763,8 @@ public:
 
 void CVideoDatabase::UpdateTables(int iVersion)
 {
+  // Important: DO NOT use CREATE TABLE [...] AS SELECT [...] - it does not work on MySQL with GTID consistency enforced
+
   if (iVersion < 76)
   {
     m_pDS->exec("ALTER TABLE settings ADD StereoMode integer");
@@ -5196,11 +5243,81 @@ void CVideoDatabase::UpdateTables(int iVersion)
       pDS->close();
     }
   }
+
+  if (iVersion < 109)
+  {
+    m_pDS->exec("ALTER TABLE settings RENAME TO settingsold");
+    m_pDS->exec("CREATE TABLE settings ( idFile integer, Deinterlace bool,"
+                "ViewMode integer,ZoomAmount float, PixelRatio float, VerticalShift float, AudioStream integer, SubtitleStream integer,"
+                "SubtitleDelay float, SubtitlesOn bool, Brightness float, Contrast float, Gamma float,"
+                "VolumeAmplification float, AudioDelay float, ResumeTime integer,"
+                "Sharpness float, NoiseReduction float, NonLinStretch bool, PostProcess bool,"
+                "ScalingMethod integer, DeinterlaceMode integer, StereoMode integer, StereoInvert bool, VideoStream integer)");
+    m_pDS->exec("INSERT INTO settings SELECT idFile, Deinterlace, ViewMode, ZoomAmount, PixelRatio, VerticalShift, AudioStream, SubtitleStream, SubtitleDelay, SubtitlesOn, Brightness, Contrast, Gamma, VolumeAmplification, AudioDelay, ResumeTime, Sharpness, NoiseReduction, NonLinStretch, PostProcess, ScalingMethod, DeinterlaceMode, StereoMode, StereoInvert, VideoStream FROM settingsold");
+    m_pDS->exec("DROP TABLE settingsold");
+  }
+
+  if (iVersion < 110)
+  {
+    m_pDS->exec("ALTER TABLE settings ADD TonemapMethod integer");
+    m_pDS->exec("ALTER TABLE settings ADD TonemapParam float");
+  }
+
+  if (iVersion < 111)
+    m_pDS->exec("ALTER TABLE settings ADD Orientation integer");
+
+  if (iVersion < 112)
+    m_pDS->exec("ALTER TABLE settings ADD CenterMixLevel integer");
+
+  if (iVersion < 113)
+  {
+    // fb9c25f5 and e5f6d204 changed the behavior of path splitting for plugin URIs (previously it would only use the root)
+    // Re-split paths for plugin files in order to maintain watched state etc.
+    m_pDS->query("SELECT files.idFile, files.strFilename, path.strPath FROM files LEFT JOIN path ON files.idPath = path.idPath WHERE files.strFilename LIKE 'plugin://%'");
+    while (!m_pDS->eof())
+    {
+      std::string path, fn;
+      SplitPath(m_pDS->fv(1).get_asString(), path, fn);
+      if (path != m_pDS->fv(2).get_asString())
+      {
+        int pathid = -1;
+        m_pDS2->query(PrepareSQL("SELECT idPath FROM path WHERE strPath='%s'", path.c_str()));
+        if (!m_pDS2->eof())
+          pathid = m_pDS2->fv(0).get_asInt();
+        m_pDS2->close();
+        if (pathid < 0)
+        {
+          std::string parent = URIUtils::GetParentPath(path);
+          int parentid = -1;
+          m_pDS2->query(PrepareSQL("SELECT idPath FROM path WHERE strPath='%s'", parent.c_str()));
+          if (!m_pDS2->eof())
+            parentid = m_pDS2->fv(0).get_asInt();
+          m_pDS2->close();
+          if (parentid < 0)
+          {
+            m_pDS2->exec(PrepareSQL("INSERT INTO path (strPath) VALUES ('%s')", parent.c_str()));
+            parentid = (int)m_pDS2->lastinsertid();
+          }
+          m_pDS2->exec(PrepareSQL("INSERT INTO path (strPath, idParentPath) VALUES ('%s', %i)", path.c_str(), parentid));
+          pathid = (int)m_pDS2->lastinsertid();
+        }
+        m_pDS2->query(PrepareSQL("SELECT idFile FROM files WHERE strFileName='%s' AND idPath=%i", fn.c_str(), pathid));
+        bool exists = !m_pDS2->eof();
+        m_pDS2->close();
+        if (exists)
+          m_pDS2->exec(PrepareSQL("DELETE FROM files WHERE idFile=%i", m_pDS->fv(0).get_asInt()));
+        else
+          m_pDS2->exec(PrepareSQL("UPDATE files SET idPath=%i WHERE idFile=%i", pathid, m_pDS->fv(0).get_asInt()));
+      }
+      m_pDS->next();
+    }
+    m_pDS->close();
+  }
 }
 
 int CVideoDatabase::GetSchemaVersion() const
 {
-  return 107;
+  return 116;
 }
 
 bool CVideoDatabase::LookupByFolders(const std::string &path, bool shows)
@@ -6244,7 +6361,8 @@ bool CVideoDatabase::GetYearsNav(const std::string& strBaseDir, CFileItemList& i
         {
           CDateTime time;
           time.SetFromDateString(dateString);
-          lYear = time.GetYear();
+          if (time.IsValid())
+            lYear = time.GetYear();
         }
         auto it = mapYears.find(lYear);
         if (it == mapYears.end())
@@ -6292,8 +6410,11 @@ bool CVideoDatabase::GetYearsNav(const std::string& strBaseDir, CFileItemList& i
         {
           CDateTime time;
           time.SetFromDateString(strLabel);
-          lYear = time.GetYear();
-          strLabel = StringUtils::Format("%i", lYear);
+          if (time.IsValid())
+          {
+            lYear = time.GetYear();
+            strLabel = StringUtils::Format("%i", lYear);
+          }
         }
         if (lYear == 0)
         {

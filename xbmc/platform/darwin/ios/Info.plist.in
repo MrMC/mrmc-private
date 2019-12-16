@@ -91,7 +91,7 @@
 		</dict>
 	</dict>
 	<key>CFBundleIdentifier</key>
-	<string>@APP_PACKAGE@</string>
+	<string>tv.mrmc.mrmc.tvos</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

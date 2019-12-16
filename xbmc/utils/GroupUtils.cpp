@@ -29,6 +29,7 @@
 #include "utils/URIUtils.h"
 #include "video/VideoDbUrl.h"
 #include "video/VideoInfoTag.h"
+#include "video/VideoThumbLoader.h"
 
 using SetMap = std::map<int, std::set<CFileItemPtr> >;
 
@@ -106,6 +107,7 @@ bool GroupUtils::Group(GroupBy groupBy, const std::string &baseDir, const CFileI
       for (std::set<CFileItemPtr>::const_iterator movie = set->second.begin(); movie != set->second.end(); ++movie)
       {
         CVideoInfoTag* movieInfo = (*movie)->GetVideoInfoTag();
+
         // handle rating
         if (movieInfo->GetRating().rating > 0.0f)
         {

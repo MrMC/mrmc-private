@@ -75,6 +75,7 @@
 #if __TVOS_11_2
   #import <AVFoundation/AVDisplayCriteria.h>
   #import <AVKit/AVDisplayManager.h>
+  #import <AVKit/AVRoutePickerView.h>
   #import <AVKit/UIWindow.h>
 
   @interface AVDisplayCriteria()
@@ -136,6 +137,7 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 #pragma mark - MainController interface
 @interface MainController ()
+@property (nonatomic, nullable) AVRoutePickerView *routePickerView;
 @property (strong, nonatomic) NSTimer *pressAutoRepeatTimer;
 @property (nonatomic, strong) CADisplayLink *displayLink;
 @property (nonatomic, assign) float displayRate;
@@ -277,6 +279,8 @@ MainController *g_xbmcController;
   [self.focusView addSubview:self.focusViewLeft];
   [self.focusView addSubview:self.focusViewRight];
   [self.focusView addSubview:self.focusViewBottom];
+
+  self.routePickerView =  nullptr;
 }
 //--------------------------------------------------------------
 - (void)viewDidLoad
@@ -470,9 +474,10 @@ MainController *g_xbmcController;
     if (g_application.m_pPlayer->IsPlayingVideo() && !g_application.m_pPlayer->IsPaused())
       return inActive;
 
+    if (g_application.m_pPlayer->IsPlayingVideo() && self.routePickerView)
+      return inActive;
+
     NSURL *url = [NSURL URLWithString:@"mrmc://wakeup"];
-    if (CLiteUtils::IsLite())
-      url = [NSURL URLWithString:@"mrmclite://wakeup"];
     [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
   }
 
@@ -552,7 +557,7 @@ MainController *g_xbmcController;
   // wait for AE to wake
     XbmcThreads::EndTime timer(2000);
     while (CAEFactory::IsSuspended() && !timer.IsTimePast())
-      usleep(250*1000);
+      usleep(50*1000);
   }
 
   // handles a push into foreground by a topshelf item select/play
@@ -583,6 +588,7 @@ MainController *g_xbmcController;
         break;
     }
   }
+  // test logging of HDRMode
   int intHDRMode = 0;
   if (@available(tvOS 11.2, *)) {
     AVPlayerHDRMode HDRMode = AVPlayer.availableHDRModes;
@@ -595,13 +601,30 @@ MainController *g_xbmcController;
 - (void)becomeActive
 {
   PRINT_SIGNATURE();
+  bool waitBecomeActive = true;
+  // check is audio route picker was up
+  // it will force this controller to inactive
+  if (self.routePickerView)
+  {
+    waitBecomeActive = false;
+    // audio route picker was up, remove/delete it
+    [self.routePickerView removeFromSuperview];
+    self.routePickerView = nullptr;
+  }
   // stop background task (if running)
   [self disableBackGroundTask];
 
-  SEL singleParamSelector = @selector(enterActiveDelayed:);
-  [g_xbmcController performSelector:singleParamSelector withObject:nil afterDelay:2.0];
-    [self performSelectorOnMainThread:@selector(updateFocusLayer) withObject:nil  waitUntilDone:NO];
-  
+  if (waitBecomeActive)
+  {
+    SEL singleParamSelector = @selector(enterActiveDelayed:);
+    [self performSelector:singleParamSelector withObject:nil afterDelay:2.0];
+  }
+  else
+  {
+    [self enterActiveDelayed:nil];
+  }
+  [self performSelectorOnMainThread:@selector(updateFocusLayer) withObject:nil  waitUntilDone:NO];
+
   ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::GUI, "xbmc", "OnScreensaverDeactivated");
 }
 //--------------------------------------------------------------
@@ -684,6 +707,30 @@ MainController *g_xbmcController;
 //--------------------------------------------------------------
 #pragma mark - helper methods/routines
 //--------------------------------------------------------------
+//--------------------------------------------------------------
+- (void) showAudioRoutePicker;
+{
+  if (!self.routePickerView)
+  {
+    // popup tvOS audio route picker UIView,
+    // this will deactivate this controller as routePickerView
+    // takes over. When routePickerView closes, we activate
+    // so in becomeActive, delete routePickerView.
+    dispatch_async(dispatch_get_main_queue(),^{
+      // check again in async dispatch, there can be only one.
+      if (!self.routePickerView)
+      {
+        self.routePickerView = [[AVRoutePickerView alloc] initWithFrame:CGRectMake(0.0f, 30.0f, 30.0f, 30.0f)];
+        self.routePickerView.activeTintColor = [UIColor clearColor];
+        self.routePickerView.hidden = YES;
+        self.routePickerView.userInteractionEnabled = YES;
+        [self.view addSubview:self.routePickerView];
+        UIButton *routePickerButton = self.routePickerView.subviews.firstObject;
+        [routePickerButton sendActionsForControlEvents: UIControlEventTouchUpInside];
+      }
+    });
+  }
+}
 //--------------------------------------------------------------
 - (void)audioRouteChanged
 {
@@ -1251,7 +1298,6 @@ MainController *g_xbmcController;
   longSelectRecognizer.minimumPressDuration = 0.001;
   longSelectRecognizer.delegate = self;
   [self.focusView addGestureRecognizer: longSelectRecognizer];
-
   auto selectRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget: self action: @selector(SiriLongSelectHandler:)];
   selectRecognizer.allowedPressTypes = @[[NSNumber numberWithInteger:UIPressTypeSelect]];
@@ -1878,6 +1924,7 @@ static CGPoint panTouchAbsStart;
 //--------------------------------------------------------------
 - (void)SiriPlayPauseHandler:(UITapGestureRecognizer *) sender
 {
+  PRINT_SIGNATURE();
   switch (sender.state)
   {
     case UIGestureRecognizerStateEnded:
@@ -1922,6 +1969,8 @@ TOUCH_POSITION touchPositionAtStateBegan = TOUCH_CENTER;
           [self sendButtonPressed:SiriRemote_IR_FastForward];
           [self sendButtonPressed:SiriRemote_IR_FastForward];
           break;
+        case TOUCH_CENTER:
+          [self showAudioRoutePicker];
         default:
           break;
       }
@@ -2356,6 +2405,7 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
   #endif
   if (receivedEvent.type == UIEventTypeRemoteControl)
   {
+    PRINT_SIGNATURE();
     switch (receivedEvent.subtype)
     {
       case UIEventSubtypeRemoteControlPlay:
@@ -3229,7 +3279,13 @@ CGRect debugView2;
   // enable play button
   commandCenter.playCommand.enabled = YES;
   [commandCenter.playCommand addTarget:self action:@selector(onCCPlay:)];
-   
+  // enable pause button
+  commandCenter.pauseCommand.enabled = YES;
+  [commandCenter.pauseCommand addTarget:self action:@selector(onCCPlay:)];
+  // enable play/pause button
+  commandCenter.togglePlayPauseCommand.enabled = YES;
+  [commandCenter.togglePlayPauseCommand addTarget:self action:@selector(onCCPlay:)];
+
   // enable seek
   MPRemoteCommand *seekBackwardIntervalCommand = [commandCenter seekForwardCommand];
   [seekBackwardIntervalCommand setEnabled:YES];
@@ -3270,7 +3326,7 @@ CGRect debugView2;
 }
 - (MPRemoteCommandHandlerStatus)onCCPlay:(MPRemoteCommandEvent*)event
 {
-  //PRINT_SIGNATURE();
+  PRINT_SIGNATURE();
   return MPRemoteCommandHandlerStatusSuccess;
 }
 - (MPRemoteCommandHandlerStatus)onCCStop:(MPRemoteCommandEvent*)event

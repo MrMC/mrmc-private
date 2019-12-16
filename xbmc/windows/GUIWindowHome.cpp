@@ -204,6 +204,13 @@ void CGUIWindowHome::Announce(AnnouncementFlag flag, const char *sender, const c
     }
   }
 
+  // trigger RA update after library update is done
+  if (strcmp(message, "OnScanFinished") == 0)
+  {
+    if (!data.isMember("uuid"))
+      m_triggerRA = true;
+  }
+
   int ra_flag = 0;
 
   if (m_triggerRA)
@@ -743,6 +750,7 @@ void CGUIWindowHome::SetupServices()
 
   CSingleLock lock(m_critsection);
   m_buttonSections->ClearItems();
+  bool setupStatic = true;
   std::string strLabel;
   std::string strThumb;
   std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
@@ -769,10 +777,11 @@ void CGUIWindowHome::SetupServices()
             data["uuid"] = plexClient->GetUuid();
             ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded",data);
             ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded",data);
+            setupStatic = false;
           }
         }
       }
-      if (plexClient)
+      if (plexClient && setupStatic)
       {
         AddPlexSection(plexClient);
         SET_CONTROL_LABEL_THREAD_SAFE(CONTROL_SERVER_BUTTON , plexClient->GetServerName());
@@ -804,10 +813,11 @@ void CGUIWindowHome::SetupServices()
             data["uuid"] = embyClient->GetUuid();
             ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded",data);
             ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded",data);
+            setupStatic = false;
           }
         }
       }
-      if (embyClient)
+      if (embyClient && setupStatic)
       {
         AddEmbySection(embyClient);
         SET_CONTROL_LABEL_THREAD_SAFE(CONTROL_SERVER_BUTTON , embyClient->GetServerName());
@@ -820,14 +830,17 @@ void CGUIWindowHome::SetupServices()
     SetupMrMCHomeButtons();
   }
 
-  SetupStaticHomeButtons();
-  CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_HOME_LIST);
-  OnMessage(msg);
+  if (setupStatic)
+  {
+    SetupStaticHomeButtons();
+    CGUIMessage msg(GUI_MSG_ITEM_SELECTED, GetID(), CONTROL_HOME_LIST);
+    OnMessage(msg);
 
-  int item = msg.GetParam1();
+    int item = msg.GetParam1();
 
-  CGUIMessage message(GUI_MSG_LABEL_BIND, GetID(), CONTROL_HOME_LIST, item, 0, m_buttonSections);
-  g_windowManager.SendThreadMessage(message);
+    CGUIMessage message(GUI_MSG_LABEL_BIND, GetID(), CONTROL_HOME_LIST, item, 0, m_buttonSections);
+    g_windowManager.SendThreadMessage(message);
+  }
 }
 
 void CGUIWindowHome::SetupStaticHomeButtons()

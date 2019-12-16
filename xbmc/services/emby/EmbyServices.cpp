@@ -511,16 +511,32 @@ void CEmbyServices::Process()
       CLog::Log(LOGDEBUG, "CEmbyServices::Process has gateway1");
       break;
     }
-    if (signInByPin && g_application.getNetwork().IsConnected())
+    if (g_application.getNetwork().IsConnected())
     {
-      std::string ip;
-      if (CDNSNameCache::Lookup("connect.mediabrowser.tv", ip))
+      if (signInByPin)
       {
-        in_addr_t embydotcom = inet_addr(ip.c_str());
-        if (g_application.getNetwork().PingHost(embydotcom, 0, 1000))
+        std::string ip;
+        if (CDNSNameCache::Lookup("connect.emby.media", ip))
         {
-          CLog::Log(LOGDEBUG, "CEmbyServices::Process has gateway2");
-          break;
+          in_addr_t embydotcom = inet_addr(ip.c_str());
+          if (g_application.getNetwork().PingHost(embydotcom, 0, 1000))
+          {
+            CLog::Log(LOGDEBUG, "CEmbyServices::Process has gateway2");
+            break;
+          }
+        }
+      }
+      else if (signInByManual)
+      {
+        std::string ip;
+        if (CDNSNameCache::Lookup(m_serverURL, ip))
+        {
+          in_addr_t localembydotcom = inet_addr(ip.c_str());
+          if (g_application.getNetwork().PingHost(localembydotcom, 0, 1000))
+          {
+            CLog::Log(LOGDEBUG, "CEmbyServices::Process has network, manual signin");
+            break;
+          }
         }
       }
     }
@@ -705,7 +721,6 @@ EmbyServerInfo CEmbyServices::GetEmbyLocalServerInfo(const std::string url)
       !responseObj.isMember(ServerPropertyId) ||
       !responseObj.isMember(ServerPropertyName) ||
       !responseObj.isMember(ServerPropertyVersion) ||
-//      !responseObj.isMember(ServerPropertyWanAddress) ||
       !responseObj.isMember(ServerPropertyLocalAddress))
     return serverInfo;
 
@@ -716,7 +731,9 @@ EmbyServerInfo CEmbyServices::GetEmbyLocalServerInfo(const std::string url)
   serverInfo.ServerId = responseObj[ServerPropertyId].asString();
   serverInfo.ServerURL = curl.GetWithoutFilename();
   serverInfo.ServerName = responseObj[ServerPropertyName].asString();
-  serverInfo.WanAddress = responseObj[ServerPropertyWanAddress].asString();
+  // jellyfin does use WanAddress and it might be missing
+  if (responseObj.isMember(ServerPropertyWanAddress))
+    serverInfo.WanAddress = responseObj[ServerPropertyWanAddress].asString();
   serverInfo.LocalAddress = responseObj[ServerPropertyLocalAddress].asString();
   return serverInfo;
 }
@@ -759,7 +776,7 @@ bool CEmbyServices::PostSignInPinCode()
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
 
-  CURL curl("https://connect.mediabrowser.tv");
+  CURL curl("https://connect.emby.media");
   curl.SetFileName("service/pin");
   curl.SetOption("format", "json");
 
@@ -862,7 +879,7 @@ bool CEmbyServices::GetSignInByPinReply()
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
 
-  CURL curl("https://connect.mediabrowser.tv");
+  CURL curl("https://connect.emby.media");
   curl.SetFileName("service/pin");
   curl.SetOption("format", "json");
   curl.SetOption("pin", m_signInByPinCode);
@@ -905,7 +922,7 @@ bool CEmbyServices::AuthenticatePinReply(const std::string &deviceId, const std:
   curlfile.SetRequestHeader("Cache-Control", "no-cache");
   curlfile.SetRequestHeader("Content-Type", "application/json");
 
-  CURL curl("https://connect.mediabrowser.tv");
+  CURL curl("https://connect.emby.media");
   curl.SetFileName("service/pin/authenticate");
   curl.SetOption("format", "json");
 
@@ -990,9 +1007,17 @@ EmbyServerInfoVector CEmbyServices::GetConnectServerList(const std::string &conn
         serverInfo.WanAddress= server["Url"].asString();
         serverInfo.LocalAddress= server["LocalAddress"].asString();
         if (IsInSubNet(CURL(serverInfo.LocalAddress)))
+        {
           serverInfo.ServerURL= serverInfo.LocalAddress;
+        }
         else
-          serverInfo.ServerURL= serverInfo.WanAddress;
+        {
+          // jellyfin does use WanAddress and it might be missing
+          if (!serverInfo.WanAddress.empty())
+            serverInfo.ServerURL= serverInfo.WanAddress;
+          else
+            serverInfo.ServerURL= serverInfo.LocalAddress;
+        }
         if (ExchangeAccessKeyForAccessToken(serverInfo))
           servers.push_back(serverInfo);
       }
@@ -1084,7 +1109,7 @@ bool CEmbyServices::AddClient(CEmbyClientPtr foundClient)
   if (foundClient->GetPresence())
   {
     std::string uuid = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
-    if (uuid == foundClient->GetUuid() || (g_SkinInfo && !g_SkinInfo->IsDynamicHomeCompatible()))
+    if (uuid.empty() || uuid == foundClient->GetUuid() || (g_SkinInfo && !g_SkinInfo->IsDynamicHomeCompatible()))
       foundClient->FetchViews();
     m_clients.push_back(foundClient);
     m_hasClients = !m_clients.empty();

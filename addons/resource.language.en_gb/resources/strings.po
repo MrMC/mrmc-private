@@ -10767,7 +10767,11 @@ msgctxt "#19294"
 msgid "Delete this recording permanently?"
 msgstr ""
 
-#empty strings from id 19295 to 19498
+msgctxt "#19295"
+msgid "Speaker"
+msgstr ""
+
+#empty strings from id 19296 to 19498
 
 #: xbmc/epg/Epg.cpp
 msgctxt "#19499"
@@ -16140,6 +16144,16 @@ msgstr ""
 #: xbmc/network/NetworkServices.cpp
 msgctxt "#33103"
 msgid "Remote communication server"
+msgstr ""
+
+#: AppStore
+msgctxt "#33105"
+msgid "Purchase Subscription"
+msgstr ""
+
+#: AppStore
+msgctxt "#33106"
+msgid "Restore Subscription"
 msgstr ""
 
 #empty strings from id 33104 to 33199

@@ -73,6 +73,7 @@ public:
   static void        GetAppMemory(int64_t &free, int64_t &delta);
   static bool        IsDarkInterface();
   static bool        CanHaveDarkInterface();
+  static void        ShowAudioRoutePicker();
   static void        CloneSystemFonts(const std::string &strPath);
   static void        ClearIOSInbox();
   static void        SetMrMCTouchFlag();
@@ -84,6 +85,7 @@ public:
   static bool        BackupUserFolder();
   static bool        RestoreUserFolder();
   static void        CleariCloudBackup();
+  static std::string GetBuildDate();
 
   virtual void OnSettingAction(const CSetting *setting) override;
 };

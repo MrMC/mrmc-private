@@ -30,6 +30,7 @@
 #include "utils/StringUtils.h"
 #include <ifaddrs.h>
 #include <arpa/inet.h>
+#include <net/if.h>
 #include "filesystem/SpecialProtocol.h"
 
 #include "CompileInfo.h"
@@ -132,12 +133,15 @@ enum iosPlatform
   iPhone7,
   iPhone8,
   iPhoneXR,
+  iPhone11,
   iPadAir2Wifi,
   iPadAir2Cellular,
   iPadPro9_7InchWifi,
   iPadPro9_7InchCellular,
   iPad6thGeneration9_7InchWifi,
   iPad6thGeneration9_7InchCellular,
+  iPad7thGeneration10_2InchWifi,
+  iPad7thGeneration10_2InchCellular,
   iPadPro12_9InchWifi,
   iPadPro12_9InchCellular,
   iPadPro2_12_9InchWifi,
@@ -159,6 +163,8 @@ enum iosPlatform
   iPhoneX,
   iPhoneXS,
   iPhoneXSMax,
+  iPhone11Pro,
+  iPhone11ProMax,
 };
 
 CDarwinUtils& CDarwinUtils::GetInstance()
@@ -242,8 +248,10 @@ enum iosPlatform getIosPlatform()
       case "iPhone10,5"_mkhash: eDev = iPhone8Plus; break;
       case "iPhone10,6"_mkhash: eDev = iPhoneX; break;
       case "iPhone11,2"_mkhash: eDev = iPhoneXS; break;
-      case "iPhone11,6"_mkhash: eDev = iPhoneXSMax; break;
       case "iPhone11,8"_mkhash: eDev = iPhoneXR; break;
+      case "iPhone12,1"_mkhash: eDev = iPhone11; break;
+      case "iPhone12,3"_mkhash: eDev = iPhoneXSMax; break;
+      case "iPhone12,5"_mkhash: eDev = iPhone11ProMax; break;
       case "iPod1,1"_mkhash: eDev = iPodTouch1G; break;
       case "iPod2,1"_mkhash: eDev = iPodTouch2G; break;
       case "iPod3,1"_mkhash: eDev = iPodTouch3G; break;
@@ -292,6 +300,8 @@ enum iosPlatform getIosPlatform()
       case "iPad7,6"_mkhash: eDev = iPad6thGeneration9_7InchCellular; break;
       case "iPad8,1"_mkhash: eDev = iPadPro11InchWifi; break;
       case "iPad8,2"_mkhash: eDev = iPadPro11InchWifi; break;
+      case "iPad7,11"_mkhash: eDev = iPad7thGeneration10_2InchWifi; break;
+      case "iPad7,12"_mkhash: eDev = iPad7thGeneration10_2InchCellular; break;
       case "iPad8,3"_mkhash: eDev = iPadPro11InchCellular; break;
       case "iPad8,4"_mkhash: eDev = iPadPro11InchCellular; break;
       case "iPad8,5"_mkhash: eDev = iPadPro3_12_9InchWifi; break;
@@ -1290,6 +1300,13 @@ bool CDarwinUtils::CanHaveDarkInterface()
   return ret;
 }
 
+void CDarwinUtils::ShowAudioRoutePicker()
+{
+#if defined(TARGET_DARWIN_TVOS)
+  [g_xbmcController showAudioRoutePicker];
+#endif
+}
+
 void CDarwinUtils::ClearIOSInbox()
 {
 #if defined(TARGET_DARWIN_IOS) && !defined(TARGET_DARWIN_TVOS)
@@ -1352,26 +1369,49 @@ std::string CDarwinUtils::GetIPAddress()
   {
     // Loop through linked list of interfaces
     temp_addr = interfaces;
-    while(temp_addr != NULL)
+    for (temp_addr = interfaces; temp_addr; temp_addr = temp_addr->ifa_next)
     {
+      if (!(temp_addr->ifa_flags & IFF_UP) || (temp_addr->ifa_flags & IFF_LOOPBACK))
+        // Ignore interfaces that aren't up and loopback interfaces.
+        continue;
+
+      if (!temp_addr->ifa_addr)
+        continue;
+
       sa_family_t sa_type = temp_addr->ifa_addr->sa_family;
       if(sa_type == AF_INET || sa_type == AF_INET6)
       {
+        NSString *address = nil;
         NSString *name = [NSString stringWithUTF8String:temp_addr->ifa_name];
-        NSString *addr = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_addr)->sin_addr)]; // pdp_ip0
+        char addrBuf[ MAX(INET_ADDRSTRLEN, INET6_ADDRSTRLEN) ];
+        if(sa_type == AF_INET)
+        {
+          const struct sockaddr_in *temp_4 = (const struct sockaddr_in*)temp_addr->ifa_addr;
+          if(inet_ntop(AF_INET, &temp_4->sin_addr, addrBuf, INET_ADDRSTRLEN))
+          {
+            address = [NSString stringWithUTF8String:addrBuf];
+          }
+        }
+        else
+        {
+          const struct sockaddr_in6 *addr6 = (const struct sockaddr_in6*)temp_addr->ifa_addr;
+          if(inet_ntop(AF_INET6, &addr6->sin6_addr, addrBuf, INET6_ADDRSTRLEN))
+          {
+            address = [NSString stringWithUTF8String:addrBuf];
+          }
+        }
 
         if([name isEqualToString:@"en0"])
         {
           // Interface is the wifi connection on the iPhone
-          wifiAddress = addr;
+          wifiAddress = address;
         }
         else if([name isEqualToString:@"pdp_ip0"])
         {
-            // Interface is the cell connection on the iPhone
-            cellAddress = addr;
+          // Interface is the cell connection on the iPhone
+          cellAddress = address;
         }
       }
-      temp_addr = temp_addr->ifa_next;
     }
     // Free memory
     freeifaddrs(interfaces);
@@ -1395,26 +1435,45 @@ std::string CDarwinUtils::GetNetmask()
   {
     // Loop through linked list of interfaces
     temp_addr = interfaces;
-    while(temp_addr != NULL)
+    for (temp_addr = interfaces; temp_addr; temp_addr = temp_addr->ifa_next)
     {
+      if (!(temp_addr->ifa_flags & IFF_UP) || (temp_addr->ifa_flags & IFF_LOOPBACK))
+        // Ignore interfaces that aren't up and loopback interfaces.
+        continue;
+
+      if (!temp_addr->ifa_addr)
+        continue;
+
       sa_family_t sa_type = temp_addr->ifa_addr->sa_family;
       if(sa_type == AF_INET || sa_type == AF_INET6)
       {
+        NSString *address = nil;
         NSString *name = [NSString stringWithUTF8String:temp_addr->ifa_name];
-        NSString *addr = [NSString stringWithUTF8String:inet_ntoa(((struct sockaddr_in *)temp_addr->ifa_netmask)->sin_addr)]; // pdp_ip0
+        char addrBuf[ MAX(INET_ADDRSTRLEN, INET6_ADDRSTRLEN) ];
+        if(sa_type == AF_INET)
+        {
+          const struct sockaddr_in *temp_4 = (const struct sockaddr_in*)temp_addr->ifa_netmask;
+          if(inet_ntop(AF_INET, &temp_4->sin_addr, addrBuf, INET_ADDRSTRLEN))
+          {
+            address = [NSString stringWithUTF8String:addrBuf];
+          }
+        }
+        else
+          // who the fuck understands how ipv6 works?
+          // does it need netmask? dunno...
+          address = @"0.0.0.0";
 
         if([name isEqualToString:@"en0"])
         {
           // Interface is the wifi connection on the iPhone
-          wifiAddress = addr;
+          wifiAddress = address;
         }
         else if([name isEqualToString:@"pdp_ip0"])
         {
           // Interface is the cell connection on the iPhone
-          cellAddress = addr;
+          cellAddress = address;
         }
       }
-      temp_addr = temp_addr->ifa_next;
     }
     // Free memory
     freeifaddrs(interfaces);
@@ -1712,6 +1771,27 @@ void CDarwinUtils::OnSettingAction(const CSetting *setting)
     RestoreUserFolder();
   else if (settingId == CSettings::SETTING_SERVICES_ICLOUDREMOVE)
     CleariCloudBackup();
+#endif
+}
+
+std::string CDarwinUtils::GetBuildDate()
+{
+#if defined(TARGET_DARWIN)
+    NSString *buildDate;
+
+    // Get build date and time, format to 'yyMMddHHmm'
+    NSString *dateStr = [NSString stringWithFormat:@"%@ %@", [NSString stringWithUTF8String:__DATE__], [NSString stringWithUTF8String:__TIME__]];
+
+    // Convert to date
+    NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+    [dateFormat setDateFormat:@"LLL d yyyy HH:mm:ss"];
+    NSDate *date = [dateFormat dateFromString:dateStr];
+
+    // Set output format and convert to string "2019-12-02T15:13:30+04:00"
+    [dateFormat setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss"];
+    buildDate = [dateFormat stringFromDate:date];
+
+    return [buildDate UTF8String];
 #endif
 }
 

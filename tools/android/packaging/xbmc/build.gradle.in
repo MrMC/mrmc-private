@@ -40,12 +40,12 @@ def getNDKapi() {
 }
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
     buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "@APP_PACKAGE@"
         minSdkVersion 21
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode @APP_VERSION_ANDROID_VERSION@
         versionName "@APP_VERSION@"
 
@@ -58,7 +58,8 @@ android {
                             "-DANDROID_ARM_NEON=TRUE",
                             "-DANDROID_ALLOW_UNDEFINED_SYMBOLS=FALSE",
                             "-DANDROID_CPP_FEATURES=rtti exceptions",
-                            "-DDEPENDS_DIR="+getDependsDir();
+                            "-DDEPENDS_DIR="+getDependsDir(),
+                            "-DCMAKE_EXPORT_COMPILE_COMMANDS=1";
             }
         }
 

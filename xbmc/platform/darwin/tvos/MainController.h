@@ -135,6 +135,8 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void) deactivateKeyboard:(UIView *)view;
 - (void) nativeKeyboardActive:(bool)active;
 
+- (void) showAudioRoutePicker;
+
 - (void) enableBackGroundTask;
 - (void) disableBackGroundTask;
 
