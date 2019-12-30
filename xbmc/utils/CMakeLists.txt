@@ -59,6 +59,7 @@ set (my_SOURCES
   Mime.cpp
   Observer.cpp
   posix/PosixInterfaceForCLog.cpp
+  purchases/InAppPurchase.cpp
   POUtils.cpp
   ProgressJob.cpp
   HomeShelfJob.cpp

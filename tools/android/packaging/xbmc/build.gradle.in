@@ -42,6 +42,7 @@ def getNDKapi() {
 android {
     compileSdkVersion 28
     buildToolsVersion "26.0.2"
+    aaptOptions.cruncherEnabled = false
     defaultConfig {
         applicationId "@APP_PACKAGE@"
         minSdkVersion 21
@@ -122,6 +123,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.0'
     // For youtube Url Extractor
     implementation 'com.github.HaarigerHarald:android-youtubeExtractor:v1.8.0'
+    // For billing
+    implementation 'com.android.billingclient:billing:2.1.0'
 }
 
 // https://developer.android.com/studio/build/configure-apk-splits

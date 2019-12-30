@@ -31,7 +31,9 @@
 #include <androidjni/System.h>
 #include <androidjni/Build.h>
 #include <androidjni/Environment.h>
+#include <androidjni/List.h>
 #include <androidjni/StatFs.h>
+#include <androidjni/SkuDetails.h>
 #include <androidjni/jutils-details.hpp>
 
 #include "Application.h"
@@ -281,3 +283,65 @@ std::string CXBMCService::getDeviceName() const
     return "";
   return jcast<std::string>(get_field<jhstring>(m_object, "mDeviceName"));
 }
+
+ProductList CXBMCService::getSubscriptionsList() const
+{
+  if (!m_object)
+    return ProductList();
+
+  CJNIList<CJNISkuDetails> products = call_method<jhobject>(m_object, "getSubsciptions", "()Ljava/util/List;");
+
+  ProductList ret;
+  for (int i=0; i< products.size(); i++)
+  {
+    Product p;
+    p.id = products.get(i).getSku();
+    p.title = products.get(i).getTitle();
+    p.price = products.get(i).getPrice();
+    ret.push_back(p);
+  }
+
+  return ret;
+}
+
+ProductList CXBMCService::getProductList() const
+{
+  if (!m_object)
+    return ProductList();
+  
+  CJNIList<CJNISkuDetails> products = get_field<jhobject>(m_object, "mSkuDetailsList", "Ljava/util/List;");
+
+  ProductList ret;
+  for (int i=0; i< products.size(); i++)
+  {
+    Product p;
+    p.id = products.get(i).getSku();
+    p.title = products.get(i).getTitle();
+    p.price = products.get(i).getPrice();
+    ret.push_back(p);
+  }
+
+  return ret;
+}
+
+void CXBMCService::purchaseSKU(std::string sku)
+{
+    call_method<void>(m_object,
+                    "purchaseSKU", "(Ljava/lang/String;)V", jcast<jhstring>(sku));
+}
+
+bool CXBMCService::hasFull() const
+{
+  if (!m_object)
+    return false;
+  return get_field<jboolean>(m_object, "has_full");
+}
+
+bool CXBMCService::hasDivx() const
+{
+  if (!m_object)
+    return false;
+  return get_field<jboolean>(m_object, "has_divx");
+}
+
+

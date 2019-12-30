@@ -10,12 +10,41 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.IBinder;
+import android.util.Log;
 
-public class Service extends android.app.Service
+import com.android.billingclient.api.AcknowledgePurchaseParams;
+import com.android.billingclient.api.AcknowledgePurchaseResponseListener;
+import com.android.billingclient.api.BillingClient;
+import com.android.billingclient.api.BillingClientStateListener;
+import com.android.billingclient.api.BillingFlowParams;
+import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.Purchase;
+import com.android.billingclient.api.PurchasesUpdatedListener;
+import com.android.billingclient.api.SkuDetails;
+import com.android.billingclient.api.SkuDetailsParams;
+import com.android.billingclient.api.SkuDetailsResponseListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class Service extends android.app.Service implements PurchasesUpdatedListener, BillingClientStateListener, SkuDetailsResponseListener
 {
+  public static Service MainService = null;
+
   native boolean _launchApplication();
 
+  private static final String TAG = "@APP_NAME_UC@Service";
+  private static final String SKU_FULL = "sku_full";
+  private static final String SKU_DIVX = "sku_divx";
+
   public String mDeviceName = Build.MODEL;
+
+  private BillingClient mBillingClient;
+  private List<SkuDetails> mSkuDetailsList;
+  private List<Purchase> mPurchasesList;
+  private boolean mPurchaseCheckComplete = false;
+  private boolean has_full = false;
+  private boolean has_divx = false;
 
   static private Boolean m_isStarted = false;
   public static Boolean isStarted()
@@ -25,6 +54,8 @@ public class Service extends android.app.Service
 
   public Service()
   {
+    super();
+    MainService = this;
   }
 
   @Override
@@ -36,6 +67,12 @@ public class Service extends android.app.Service
     BluetoothAdapter btDevice = BluetoothAdapter.getDefaultAdapter();
     if (btDevice != null)
       mDeviceName = btDevice.getName();
+
+    mBillingClient = BillingClient.newBuilder(this)
+        .setListener(this)
+        .enablePendingPurchases()
+        .build();
+    mBillingClient.startConnection(this);
   }
 
   @Override
@@ -55,7 +92,7 @@ public class Service extends android.app.Service
     {
       NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-      String id = "mrmc_channel_svc";
+      String id = "@APP_NAME_LC@_channel_svc";
       CharSequence name = getString(R.string.notif_channel_name);
 
       // The user-visible description of the channel.
@@ -100,4 +137,163 @@ public class Service extends android.app.Service
     // TODO: Return the communication channel to the service.
     throw new UnsupportedOperationException("Not implemented");
   }
+
+  @Override
+  public void onPurchasesUpdated(BillingResult billingResult, List<Purchase> purchases)
+  {
+    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
+      onPurchasesUpdated(purchases);
+    else
+      Log.w(TAG, "onPurchasesUpdated: purchase incomplete: " + billingResult.getResponseCode() + " (" + billingResult.getDebugMessage() + ")");
+  }
+
+  public void onPurchasesUpdated(List<Purchase> purchases)
+  {
+    mPurchaseCheckComplete = true;
+    mPurchasesList = purchases;
+
+    if (mPurchasesList == null)
+      return;
+
+    for (Purchase purchase : mPurchasesList)
+    {
+      Log.i(TAG, "onPurchasesUpdated: SKU has been purchased: " + purchase.getSku());
+      if (purchase.getSku().equals(SKU_FULL))
+        has_full = true;
+      else if (purchase.getSku().equals(SKU_DIVX))
+        has_divx = true;
+
+      // Acknowledge the purchase if it hasn't already been acknowledged.
+      if (!purchase.isAcknowledged())
+      {
+        AcknowledgePurchaseParams acknowledgePurchaseParams =
+            AcknowledgePurchaseParams.newBuilder()
+                .setPurchaseToken(purchase.getPurchaseToken())
+                .build();
+        mBillingClient.acknowledgePurchase(acknowledgePurchaseParams,
+            new AcknowledgePurchaseResponseListener() {
+              @Override
+              public void onAcknowledgePurchaseResponse(BillingResult billingResult)
+              {
+                  if (billingResult.getResponseCode() != BillingClient.BillingResponseCode.OK)
+                  {
+                    Log.e(TAG, "onAcknowledgePurchaseResponse: error during acknoledgment: " + billingResult.getResponseCode());
+                  }
+              }
+            });
+      }
+    }
+
+    Log.d(TAG, "Query purchases was successful.");
+  }
+
+  @Override
+  public void onBillingSetupFinished(BillingResult billingResult)
+  {
+    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK)
+    {
+      Purchase.PurchasesResult purchasesResult = mBillingClient.queryPurchases(BillingClient.SkuType.INAPP);
+      // Have we been disposed of in the meantime? If so, or bad result code, then quit
+      if (mBillingClient == null || purchasesResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+        Log.w(TAG, "Billing client was null or result code (" + purchasesResult.getResponseCode()
+            + ") was bad - quitting");
+        return;
+      }
+      onPurchasesUpdated(purchasesResult.getPurchasesList());
+
+      // Start querying for in-app SKUs
+      List<String> skuList = new ArrayList<>();
+      skuList.add(SKU_FULL);
+      skuList.add(SKU_DIVX);
+
+      SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder();
+      params.setSkusList(skuList).setType(BillingClient.SkuType.INAPP);
+
+      mBillingClient.querySkuDetailsAsync(params.build(), this);
+
+      Log.d(TAG, "Query inventory was successful.");
+    }
+  }
+
+  @Override
+  public void onBillingServiceDisconnected()
+  {
+    // Try to restart the connection on the next request to
+    // Google Play by calling the startConnection() method.
+  }
+
+  @Override
+  public void onSkuDetailsResponse(BillingResult billingResult, List<SkuDetails> skuDetailsList)
+  {
+    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK )
+    {
+      for (SkuDetails sku : skuDetailsList)
+      {
+        Log.d(TAG, "-- " + sku.getSku());
+      }
+
+      mSkuDetailsList = skuDetailsList;
+    }
+  }
+
+  public List<SkuDetails> getSubsciptions()
+  {
+    List<SkuDetails> ret = new ArrayList<SkuDetails>();
+
+    if (mPurchasesList == null || mSkuDetailsList == null)
+      return ret;
+
+    for (Purchase purchase : mPurchasesList)
+    {
+      for (SkuDetails skud : mSkuDetailsList)
+      {
+        if (skud.getSku().equals(purchase.getSku()))
+        {
+          ret.add(skud);
+          break;
+        }
+      }
+    }
+    return ret;
+  }
+
+  public void purchaseSKU(String sku)
+  {
+    if (!mBillingClient.isReady())
+    {
+      Log.e(TAG, "purchaseSKU: billing client not ready");
+      return;
+    }
+
+    SkuDetails theSkuToPurchase = null;
+    for (SkuDetails skud : mSkuDetailsList)
+    {
+      if (skud.getSku().equals(sku))
+      {
+        theSkuToPurchase = skud;
+        break;
+      }
+    }
+
+    if (theSkuToPurchase == null)
+    {
+      Log.e(TAG, "purchaseSKU: SKU not found: " + sku);
+      return;
+    }
+
+    final SkuDetails theSku = theSkuToPurchase;
+    Main.MainActivity.runOnUiThread(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        // Retrieve a value for "skuDetails" by calling querySkuDetailsAsync().
+        BillingFlowParams flowParams = BillingFlowParams.newBuilder()
+            .setSkuDetails(theSku)
+            .build();
+        BillingResult responseCode = mBillingClient.launchBillingFlow(Main.MainActivity, flowParams);
+      }
+    });
+  }
+
 }

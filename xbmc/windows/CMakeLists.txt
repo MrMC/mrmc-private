@@ -5,6 +5,7 @@ include ( ${rtdir}/includes.cmake )
 
 set (my_SOURCES
   GUIMediaWindow.cpp
+  GUIWindowAppStore.cpp
   GUIWindowDebugInfo.cpp
   GUIWindowFileManager.cpp
   GUIWindowHome.cpp

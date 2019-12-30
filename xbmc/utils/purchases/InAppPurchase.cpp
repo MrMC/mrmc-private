@@ -21,6 +21,9 @@
 #include "InAppPurchase.h"
 #include "interfaces/AnnouncementManager.h"
 #include "utils/log.h"
+#ifdef TARGET_ANDROID
+#include "platform/android/service/XBMCService.h"
+#endif
 
 using namespace ANNOUNCEMENT;
 
@@ -75,7 +78,8 @@ void CInAppPurchase::VerifyPurchase()
   SetActivated(CAppleInAppPurchase::GetInstance().IsActivated());
   SetDivxActivated(CAppleInAppPurchase::GetInstance().IsDivxActivated());
 #elif defined(TARGET_ANDROID)
-
+  SetActivated(CXBMCService::get()->hasFull());
+  SetDivxActivated(CXBMCService::get()->hasDivx());
 #endif
 }
 
@@ -85,7 +89,7 @@ ProductList CInAppPurchase::GetSubscriptions()
 #if defined(TARGET_DARWIN_IOS)
   list = CAppleInAppPurchase::GetInstance().GetSubscriptions();
 #elif defined(TARGET_ANDROID)
-
+  list = CXBMCService::get()->getSubscriptionsList();
 #else
   Product fake;
   fake.id = "test.subscription";
@@ -95,13 +99,14 @@ ProductList CInAppPurchase::GetSubscriptions()
 #endif
   return list;
 }
+
 ProductList CInAppPurchase::GetProducts()
 {
   ProductList list;
 #if defined(TARGET_DARWIN_IOS)
   list = CAppleInAppPurchase::GetInstance().GetProducts();
 #elif defined(TARGET_ANDROID)
-
+  list = CXBMCService::get()->getProductList();
 #else
   Product fake;
   fake.id = "test.product";
@@ -126,7 +131,7 @@ void CInAppPurchase::PurchaseProduct(std::string product)
 #if defined(TARGET_DARWIN_IOS)
   CAppleInAppPurchase::GetInstance().PurchaseProduct(product);
 #elif defined(TARGET_ANDROID)
-
+  CXBMCService::get()->purchaseSKU(product); 
 #endif
   CLog::Log(LOGINFO, "CInAppPurchase::PurchaseProduct() - %s", product.c_str());
 }

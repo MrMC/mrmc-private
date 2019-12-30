@@ -215,7 +215,6 @@
 #include <androidjni/System.h>
 #include "platform/android/activity/XBMCApp.h"
 #include "platform/android/service/XBMCService.h"
-#include "platform/android/service/XBMCService.h"
 #include "platform/android/activity/AndroidFeatures.h"
 #endif
 

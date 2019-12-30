@@ -26,6 +26,7 @@
 
 #include "threads/Event.h"
 #include "threads/SharedSection.h"
+#include "utils/purchases/InAppPurchase.h"
 
 class CXBMCService
     : public CJNIService
@@ -40,6 +41,13 @@ public:
   static int android_printf(const char* format...);
 
   std::string getDeviceName() const;
+  ProductList getSubscriptionsList() const;
+  ProductList getProductList() const;
+
+  void purchaseSKU(std::string sku);
+
+  bool hasFull() const;
+  bool hasDivx() const;
 
   void Deinitialize();
 
