@@ -134,6 +134,8 @@ using namespace KODI::MESSAGING;
 
 MainController *g_xbmcController;
 
+NSString *SoundFocusIdentifierNavigation = @"Navigation";
+
 //--------------------------------------------------------------
 #pragma mark - MainController interface
 @interface MainController ()
@@ -281,6 +283,10 @@ MainController *g_xbmcController;
   [self.focusView addSubview:self.focusViewBottom];
 
   self.routePickerView =  nullptr;
+
+  NSURL *url = [[NSBundle mainBundle] URLForResource:@"Navigate" withExtension:@"wav"];
+  if (url)
+    [UIFocusSystem registerURL:url forSoundIdentifier:SoundFocusIdentifierNavigation];
 }
 //--------------------------------------------------------------
 - (void)viewDidLoad
@@ -2509,10 +2515,12 @@ static CFAbsoluteTime keyPressTimerStartSeconds;
     else
       return nil;
   }
+  // disable focus engine sound effect
   if (@available(tvOS 11.0, *))
   {
-    if (CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SOUNDSKIN) == "resource.uisounds.tvos")
-      return UIFocusSoundIdentifierDefault;
+    UIFocusHeading direction = context.focusHeading;
+    if (direction > UIFocusHeadingNone && direction < UIFocusHeadingNext)
+      return SoundFocusIdentifierNavigation;
     else
       return UIFocusSoundIdentifierNone;
   }

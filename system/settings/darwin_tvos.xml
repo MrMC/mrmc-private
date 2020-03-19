@@ -5,7 +5,8 @@
       <group id="1">
         <setting id="lookandfeel.soundskin" type="addon" label="15108" help="36110">
           <level>0</level>
-          <default>resource.uisounds.tvos</default>
+          <default></default>
+          <visible>false</visible>
           <constraints>
             <addontype>kodi.resource.uisounds</addontype>
             <allowempty>true</allowempty>

@@ -193,7 +193,6 @@ static constexpr const char* systemAddonWhiteList[] = {
   "resource.language.zh_tw",
   "resource.uisounds.amber",
   "resource.uisounds.mrmc",
-  "resource.uisounds.tvos",
   "screensaver.xbmc.builtin.black",
   "screensaver.xbmc.builtin.dim",
   "screensaver.xbmc.builtin.slideshow",

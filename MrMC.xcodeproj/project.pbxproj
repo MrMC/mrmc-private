@@ -27,6 +27,7 @@
 		18690DCE1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18690DCC1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp */; };
 		18690DCF1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18690DCC1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp */; };
 		18700F671C4A724B000A0007 /* TVOSTopShelf.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18700F651C4A724B000A0007 /* TVOSTopShelf.mm */; };
+		187F70FF2423799C0079CF55 /* Navigate.wav in Resources */ = {isa = PBXBuildFile; fileRef = 187F70FE2423799C0079CF55 /* Navigate.wav */; };
 		1883CAEC2081D620004C7F52 /* IOSPlayShared.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1883CAEA2081D61F004C7F52 /* IOSPlayShared.mm */; };
 		1886EB7E20C70EB1001E8E46 /* DirectoryNodeInProgressMovies.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1886EB7D20C70EB0001E8E46 /* DirectoryNodeInProgressMovies.cpp */; };
 		1886EB7F20C70EB1001E8E46 /* DirectoryNodeInProgressMovies.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1886EB7D20C70EB0001E8E46 /* DirectoryNodeInProgressMovies.cpp */; };
@@ -3548,6 +3549,7 @@
 		18690DCD1B94DA6200E762C1 /* OpenSubtitlesSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenSubtitlesSearch.h; sourceTree = "<group>"; };
 		18700F641C4A724B000A0007 /* TVOSTopShelf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVOSTopShelf.h; sourceTree = "<group>"; };
 		18700F651C4A724B000A0007 /* TVOSTopShelf.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TVOSTopShelf.mm; sourceTree = "<group>"; };
+		187F70FE2423799C0079CF55 /* Navigate.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Navigate.wav; sourceTree = "<group>"; };
 		1883CAEA2081D61F004C7F52 /* IOSPlayShared.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSPlayShared.mm; sourceTree = "<group>"; };
 		1883CAEB2081D61F004C7F52 /* IOSPlayShared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOSPlayShared.h; sourceTree = "<group>"; };
 		1886EB7C20C70EB0001E8E46 /* DirectoryNodeInProgressMovies.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DirectoryNodeInProgressMovies.h; sourceTree = "<group>"; };
@@ -8528,6 +8530,7 @@
 		DFFA43D219104BFA00C3923B /* ios */ = {
 			isa = PBXGroup;
 			children = (
+				187F70FE2423799C0079CF55 /* Navigate.wav */,
 				183CB23A1C0B4C5A004218C2 /* Images.xcassets */,
 				F55F0CFD21E1570A005DC95F /* point1sec.mp3 */,
 			);
@@ -10889,6 +10892,7 @@
 				F55F0CFF21E1570A005DC95F /* point1sec.mp3 in Resources */,
 				F5D142B01BAF31FB0075A95C /* InfoPlist.strings in Resources */,
 				F5D142AB1BAF31FB0075A95C /* Assets.xcassets in Resources */,
+				187F70FF2423799C0079CF55 /* Navigate.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
