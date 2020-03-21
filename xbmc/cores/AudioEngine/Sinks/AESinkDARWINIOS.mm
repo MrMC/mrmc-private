@@ -33,19 +33,21 @@
 
 enum CAChannelIndex {
   CAChannel_PCM_2CHAN = 0,
-  CAChannel_PCM_5CHAN = 1,
-  CAChannel_PCM_6CHAN = 2,
-  CAChannel_PCM_8CHAN = 3,
-  CAChannel_PCM_DD5_0 = 4,
-  CAChannel_PCM_DD5_1 = 5,
+  CAChannel_PCM_3CHAN = 1,
+  CAChannel_PCM_5CHAN = 2,
+  CAChannel_PCM_6CHAN = 3,
+  CAChannel_PCM_8CHAN = 4,
+  CAChannel_PCM_DD5_0 = 5,
+  CAChannel_PCM_DD5_1 = 6,
 };
 
 // Stereo (L R) (Stereo eanbled)
 // 5.1 (L C R Ls Rs LFE) (DD5.1 enabled)
 // 5.1 (L R LFE C Ls Rs) (DD5.1 disabled
 // 7.1 (L R LFE C Ls Rs Rls Rrs) (auto)
-static enum AEChannel CAChannelMap[6][9] = {
+static enum AEChannel CAChannelMap[7][9] = {
   { AE_CH_FL , AE_CH_FR , AE_CH_NULL },
+  { AE_CH_FL , AE_CH_FR , AE_CH_LFE, AE_CH_NULL },
   { AE_CH_FL,  AE_CH_FR,  AE_CH_FC , AE_CH_BL , AE_CH_BR , AE_CH_NULL },
   { AE_CH_FL , AE_CH_FR , AE_CH_LFE, AE_CH_FC , AE_CH_BL , AE_CH_BR , AE_CH_NULL },
   { AE_CH_FL , AE_CH_FR , AE_CH_LFE, AE_CH_FC , AE_CH_SL , AE_CH_SR , AE_CH_BL , AE_CH_BR , AE_CH_NULL },
@@ -906,7 +908,7 @@ bool CAESinkDARWINIOS::Initialize(AEAudioFormat &format, std::string &device)
 
     CAChannelIndex channel_index = CAChannel_PCM_6CHAN;
 #if defined(TARGET_DARWIN_TVOS)
-    if (outputChannels == 2 && format.m_channelLayout.Count() > 2)
+    if (outputChannels == 2 && format.m_channelLayout.Count() >= 2)
     {
       // if 2, then audio is set to 2 channel PCM
       // aimed at handling airplay
@@ -931,6 +933,12 @@ bool CAESinkDARWINIOS::Initialize(AEAudioFormat &format, std::string &device)
         channel_index = CAChannel_PCM_5CHAN;
       if (outputChannels > 5)
         outputChannels = 5;
+    }
+    else if (format.m_channelLayout.Count() == 3)
+    {
+      channel_index = CAChannel_PCM_3CHAN;
+      if (outputChannels > 3)
+        outputChannels = 3;
     }
     else
 #endif
