@@ -295,6 +295,12 @@ void CGUIDialogNetworkSetup::UpdateButtons()
                                                                               m_protocol == NET_PROTOCOL_DAVS ||
                                                                               m_protocol == NET_PROTOCOL_RSS ||
                                                                               m_protocol == NET_PROTOCOL_SFTP));
+
+  if (m_protocol == NET_PROTOCOL_EMBY || m_protocol == NET_PROTOCOL_EMBYS)
+  {
+    SET_CONTROL_HIDDEN(CONTROL_SERVER_BROWSE);
+    SET_CONTROL_HIDDEN(CONTROL_REMOTE_PATH);
+  }
 }
 
 std::string CGUIDialogNetworkSetup::ConstructPath() const
