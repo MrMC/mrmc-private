@@ -90,6 +90,7 @@
 #include "services/lighteffects/LightEffectServices.h"
 #include "services/hue/HueServices.h"
 #include "services/emby/EmbyServices.h"
+#include "services/jellyfin/JellyfinServices.h"
 #include "services/plex/PlexServices.h"
 #include "services/trakt/TraktServices.h"
 
@@ -548,6 +549,12 @@ const std::string CSettings::SETTING_SERVICES_EMBYSERVERURL = "emby.serverurl";
 const std::string CSettings::SETTING_SERVICES_EMBYSAVEDSOURCES = "emby.savedsources";
 const std::string CSettings::SETTING_SERVICES_EMBYACESSTOKEN = "emby.accesstoken";
 const std::string CSettings::SETTING_SERVICES_EMBYLIMITHOMETO  = "emby.limithometo";
+
+// jellyfin services
+const std::string CSettings::SETTING_SERVICES_JELLYFINSIGNIN = "jellyfin.signin";
+const std::string CSettings::SETTING_SERVICES_JELLYFINUSERID = "jellyfin.userid";
+const std::string CSettings::SETTING_SERVICES_JELLYFINSERVERURL = "jellyfin.serverurl";
+const std::string CSettings::SETTING_SERVICES_JELLYFINACESSTOKEN = "jellyfin.accesstoken";
 
 const std::string CSettings::SETTING_SERVICES_TRAKTSIGNINPIN = "trakt.signinpin";
 const std::string CSettings::SETTING_SERVICES_TRAKTACTIONAFTERLIBRARYUPDATE = "trakt.actionafterlibraryupdate";
@@ -1497,6 +1504,13 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_SERVICES_EMBYACESSTOKEN);
   settingSet.insert(CSettings::SETTING_SERVICES_EMBYSAVEDSOURCES);
   m_settingsManager->RegisterCallback(&CEmbyServices::GetInstance(), settingSet);
+
+  settingSet.clear();
+  settingSet.insert(CSettings::SETTING_SERVICES_JELLYFINSIGNIN);
+  settingSet.insert(CSettings::SETTING_SERVICES_JELLYFINUSERID);
+  settingSet.insert(CSettings::SETTING_SERVICES_JELLYFINSERVERURL);
+  settingSet.insert(CSettings::SETTING_SERVICES_JELLYFINACESSTOKEN);
+  m_settingsManager->RegisterCallback(&CJellyfinServices::GetInstance(), settingSet);
 
   settingSet.clear();
   settingSet.insert(CSettings::SETTING_SERVICES_TRAKTSIGNINPIN);

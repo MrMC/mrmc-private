@@ -31,6 +31,8 @@ public:
                       NET_PROTOCOL_CLOUD,
                       NET_PROTOCOL_EMBY,
                       NET_PROTOCOL_EMBYS,
+                      NET_PROTOCOL_JELLYFIN,
+                      NET_PROTOCOL_JELLYFINS,
                       NET_PROTOCOL_FTP,
                       NET_PROTOCOL_HTTP,
                       NET_PROTOCOL_HTTPS,

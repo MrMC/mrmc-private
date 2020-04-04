@@ -535,6 +535,20 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
         counter++;
       }
 
+      // Add all Jellyfin server buttons
+      std::vector<CJellyfinClientPtr>  jellyfinClients;
+      CJellyfinServices::GetInstance().GetClients(jellyfinClients);
+      for (const auto &client : jellyfinClients)
+      {
+        CFileItem item("Jellyfin - " + client->GetServerName());
+        item.SetProperty("type", "jellyfin");
+        item.SetProperty("uuid", client->GetUuid());
+        selectDialog->Add(item);
+        if (selectedUuid == client->GetUuid())
+          selected = counter;
+        counter++;
+      }
+
       selectDialog->SetSelected(selected);
       selectDialog->EnableButton(false, 0);
       selectDialog->Open();
@@ -554,6 +568,8 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
           CPlexServices::GetInstance().ParseCurrentServerSections();
         else if (type == "emby")
           CEmbyServices::GetInstance().ParseCurrentServerSections();
+        else if (type == "jellyfin")
+          CJellyfinServices::GetInstance().ParseCurrentServerSections();
         SetupServices();
         CVariant data(CVariant::VariantTypeObject);
         data["uuid"] = uuid;
@@ -567,7 +583,7 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
     {
       std::string uuid = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
       std::string type = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
-      if (type == "mrmc" || type == "emby" || type.empty())
+      if (type == "mrmc" || type == "emby" || type == "jellyfin" || type.empty())
       {
         g_windowManager.ActivateWindow(WINDOW_LOGIN_SCREEN);
         std::string strLabel = CProfilesManager::GetInstance().GetCurrentProfile().getName();
@@ -821,6 +837,38 @@ void CGUIWindowHome::SetupServices()
       {
         AddEmbySection(embyClient);
         SET_CONTROL_LABEL_THREAD_SAFE(CONTROL_SERVER_BUTTON , embyClient->GetServerName());
+      }
+    }
+    SET_CONTROL_VISIBLE(CONTROL_PROFILES_BUTTON);
+  }
+  else if (serverType == "jellyfin")
+  {
+    if (CJellyfinServices::GetInstance().HasClients())
+    {
+      CJellyfinClientPtr JellyfinClient = CJellyfinServices::GetInstance().GetClient(serverUUID);
+      if (serverUUID.empty())
+      {
+        if (JellyfinClient == nullptr)
+        {
+          // this is only triggered when we first sign in emby as the server has not been selected yet, we pick the first one
+          JellyfinClient = CJellyfinServices::GetInstance().GetFirstClient();
+          if (JellyfinClient)
+          {
+            CSettings::GetInstance().SetString(CSettings::SETTING_GENERAL_SERVER_UUID,JellyfinClient->GetUuid());
+            CSettings::GetInstance().Save();
+            // announce that we have a emby client and that recently added should be updated
+            CVariant data(CVariant::VariantTypeObject);
+            data["uuid"] = JellyfinClient->GetUuid();
+            ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded",data);
+            ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded",data);
+            setupStatic = false;
+          }
+        }
+      }
+      if (JellyfinClient && setupStatic)
+      {
+        AddJellyfinSection(JellyfinClient);
+        SET_CONTROL_LABEL_THREAD_SAFE(CONTROL_SERVER_BUTTON , JellyfinClient->GetServerName());
       }
     }
     SET_CONTROL_VISIBLE(CONTROL_PROFILES_BUTTON);
@@ -1473,6 +1521,59 @@ void CGUIWindowHome::AddEmbySection(CEmbyClientPtr client)
     m_buttonSections->AddFront(item,0);
   }
 }
+
+void CGUIWindowHome::AddJellyfinSection(CJellyfinClientPtr client)
+{
+  std::vector<JellyfinViewInfo> contents = client->GetJellyfinSections();
+  for (const auto &content : contents)
+  {
+    CFileItemPtr item(new CFileItem());
+    item->SetLabel(content.name);
+    item->SetLabel2("Jellyfin-" + client->GetServerName());
+    CURL curl(client->GetUrl());
+    curl.SetProtocol(client->GetProtocol());
+    curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, content.prefix, false));
+    item->SetProperty("service",true);
+    item->SetProperty("servicetype","jellyfin");
+    item->SetProperty("base64url",Base64URL::Encode(curl.Get()));
+    std::string strAction;
+    std::string filename;
+    std::string videoFilters;
+    std::string musicFilters;
+    if (!CSettings::GetInstance().GetBool(CSettings::SETTING_MYVIDEOS_FLATTEN))
+    {
+      videoFilters = "filters/";
+    }
+    if (!CSettings::GetInstance().GetBool(CSettings::SETTING_MYMUSIC_FLATTEN))
+    {
+      musicFilters = "filters/";
+    }
+    if (content.mediaType == "movies")
+    {
+      strAction = "jellyfin://movies/titles/" + videoFilters + Base64URL::Encode(curl.Get());
+      item->SetPath("ActivateWindow(Videos," + strAction +  ",return)");
+      item->SetProperty("type","Movies");
+      item->SetProperty("submenu",CSettings::GetInstance().GetBool(CSettings::SETTING_MYVIDEOS_FLATTEN));
+    }
+    else if (content.mediaType == "tvshows")
+    {
+      strAction = "jellyfin://tvshows/titles/" + videoFilters + Base64URL::Encode(curl.Get());
+      item->SetPath("ActivateWindow(Videos," + strAction +  ",return)");
+      item->SetProperty("type","TvShows");
+      item->SetProperty("submenu",CSettings::GetInstance().GetBool(CSettings::SETTING_MYVIDEOS_FLATTEN));
+    }
+    else if (content.mediaType == "music")
+    {
+      strAction = "jellyfin://music/root/" + Base64URL::Encode(curl.Get());
+      item->SetProperty("type","Music");
+      item->SetPath("ActivateWindow(Music," + strAction +  ",return)");
+      item->SetProperty("submenu",false);
+    }
+    item->SetProperty("base64url",Base64URL::Encode(curl.Get()));
+    m_buttonSections->AddFront(item,0);
+  }
+}
+
 
 void CGUIWindowHome::SetContextMenuItems(int iControl)
 {

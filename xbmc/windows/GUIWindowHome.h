@@ -30,6 +30,10 @@
 #include "services/emby/EmbyUtils.h"
 #include "services/emby/EmbyViewCache.h"
 #include "services/emby/EmbyClient.h"
+#include "services/jellyfin/JellyfinServices.h"
+#include "services/jellyfin/JellyfinUtils.h"
+#include "services/jellyfin/JellyfinViewCache.h"
+#include "services/jellyfin/JellyfinClient.h"
 
 typedef struct
 {
@@ -92,6 +96,8 @@ private:
   void  AddPlexSection(CPlexClientPtr client);
   // emby service
   void AddEmbySection(CEmbyClientPtr client);
+  // emby service
+  void AddJellyfinSection(CJellyfinClientPtr client);
 
   bool        m_triggerRA;
   void SetContextMenuItems(int iControl);

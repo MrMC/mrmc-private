@@ -868,7 +868,13 @@ void CGUIWindowVideoNav::OnDeleteItem(CFileItemPtr pItem)
   if (pItem->IsMediaServiceBased())
   {
     CGUIDialogYesNo* pDialog = (CGUIDialogYesNo*)g_windowManager.GetWindow(WINDOW_DIALOG_YES_NO);
-    std::string strServer = pItem->HasProperty("PlexItem")? "Plex":"Emby";
+    std::string strServer;
+    if (pItem->HasProperty("PlexItem"))
+      strServer = "Plex";
+    else if (pItem->HasProperty("EmbyItem"))
+      strServer = "Emby";
+    else if (pItem->HasProperty("JellyfinItem"))
+      strServer = "Jellyfin";
     std::string strHeader = StringUtils::Format(g_localizeStrings.Get(471).c_str(),
                                                 pItem->GetVideoInfoTag()->m_type == MediaTypeMovie ? g_localizeStrings.Get(36900).c_str() : g_localizeStrings.Get(36906).c_str(),
                                                 strServer.c_str());

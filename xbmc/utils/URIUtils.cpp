@@ -1079,6 +1079,11 @@ bool URIUtils::IsEmby(const std::string& strFile)
   return IsProtocol(strFile, "emby");
 }
 
+bool URIUtils::IsJellyfin(const std::string& strFile)
+{
+  return IsProtocol(strFile, "jellyfin");
+}
+
 bool URIUtils::IsServices(const std::string& strFile)
 {
   return IsProtocol(strFile, "services");

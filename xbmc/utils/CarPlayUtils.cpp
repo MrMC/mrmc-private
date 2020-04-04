@@ -50,6 +50,8 @@
 #include "services/plex/PlexServices.h"
 #include "services/emby/EmbyServices.h"
 #include "services/emby/EmbyViewCache.h"
+#include "services/jellyfin/JellyfinServices.h"
+#include "services/jellyfin/JellyfinViewCache.h"
 #include "services/ServicesManager.h"
 
 CFileItemList *CarPlayUtils::GetRecentlyAddedAlbums()
@@ -57,7 +59,7 @@ CFileItemList *CarPlayUtils::GetRecentlyAddedAlbums()
   std::string serverUUID = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
   std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
   CFileItemList *itemListData = new CFileItemList;
-  if (serverType == "plex" || serverType == "emby")
+  if (serverType == "plex" || serverType == "emby" || serverType == "jellyfin")
   {
     CServicesManager::GetInstance().GetRecentlyAddedAlbums(*itemListData, 25, serverType, serverUUID);
   }
@@ -78,7 +80,7 @@ CFileItemList *CarPlayUtils::GetMostPlayedSongs()
   std::string serverUUID = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
   std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
   CFileItemList *itemListData = new CFileItemList;
-  if (serverType == "plex" || serverType == "emby")
+  if (serverType == "plex" || serverType == "emby" || serverType == "jellyfin")
   {
     CServicesManager::GetInstance().GetMostPlayedSongs(*itemListData, 25, serverType, serverUUID);
   }
@@ -124,6 +126,10 @@ CFileItemList *CarPlayUtils::GetPlaylists()
   {
 
   }
+  else if (serverType == "jellyfin")
+  {
+
+  }
   else if (serverType == "mrmc")
   {
     CFileItemList list;
@@ -146,6 +152,10 @@ CFileItemList *CarPlayUtils::GetPlaylistItems(std::string url)
   {
 
   }
+  else if (serverType == "jellyfin")
+  {
+
+  }
   else if (serverType == "mrmc")
   {
 
@@ -158,7 +168,7 @@ CFileItemList *CarPlayUtils::GetArtists()
   std::string serverUUID = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_UUID);
   std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
   CFileItemList *itemListData = new CFileItemList;
-  if (serverType == "plex" || serverType == "emby")
+  if (serverType == "plex" || serverType == "emby" || serverType == "jellyfin")
   {
     CServicesManager::GetInstance().GetAllAlbums(*itemListData, serverType, serverUUID);
   }
@@ -180,6 +190,10 @@ CFileItemList *CarPlayUtils::GetArtistAlbum(std::string url)
     CPlexUtils::GetPlexArtistsOrAlbum(*itemListData, Base64URL::Decode(section),true);
   }
   else if (serverType == "emby")
+  {
+
+  }
+  else if (serverType == "jellyfin")
   {
 
   }

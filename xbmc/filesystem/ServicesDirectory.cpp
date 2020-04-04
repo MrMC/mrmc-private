@@ -105,6 +105,12 @@ bool CServicesDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         url2.SetProtocol("emby");
         CDirectory::GetDirectory(url2, items, m_strFileMask, m_flags, true);
       }
+      // check for jellyfin
+      if(CServicesManager::GetInstance().HasJellyfinServices())
+      {
+        url2.SetProtocol("jellyfin");
+        CDirectory::GetDirectory(url2, items, m_strFileMask, m_flags, true);
+      }
       items.SetPath(url.Get());
       items.SetLabel("Libraries");
     }
@@ -152,6 +158,12 @@ bool CServicesDirectory::GetDirectory(const CURL& url, CFileItemList &items)
         url2.SetProtocol("emby");
         CDirectory::GetDirectory(url2, items, m_strFileMask, m_flags, true);
       }
+      // check for jellyfin
+      if(CServicesManager::GetInstance().HasJellyfinServices())
+      {
+        url2.SetProtocol("jellyfin");
+        CDirectory::GetDirectory(url2, items, m_strFileMask, m_flags, true);
+      }
       items.SetPath(url.Get());
       items.SetLabel("Libraries");
     }
@@ -192,6 +204,12 @@ bool CServicesDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       if(CServicesManager::GetInstance().HasEmbyServices())
       {
         url2.SetProtocol("emby");
+        CDirectory::GetDirectory(url2, items, m_strFileMask, m_flags, true);
+      }
+      // check for jellyfin
+      if(CServicesManager::GetInstance().HasJellyfinServices())
+      {
+        url2.SetProtocol("jellyfin");
         CDirectory::GetDirectory(url2, items, m_strFileMask, m_flags, true);
       }
       items.SetPath(url.Get());

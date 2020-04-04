@@ -12161,7 +12161,37 @@ msgctxt "#20222"
 msgid "Look for external subtitles"
 msgstr ""
 
-#empty strings from id 20223 to 20239
+#: xbmc/network/GUIDialogNetworkSetup.cpp
+msgctxt "#20223"
+msgid "Jellyfin server (http)"
+msgstr ""
+
+#: xbmc/network/GUIDialogNetworkSetup.cpp
+msgctxt "#20224"
+msgid "Jellyfin server (https)"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#20225"
+msgid "Jellyfin client"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#20226"
+msgid "Enable Jellyfin server sign-in"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#20227"
+msgid "Jellyfin Manual Sign-in (local)"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#20228"
+msgid "Jellyfin Manual Sign-in (via local broadcast)"
+msgstr ""
+
+#empty strings from id 20225 to 20239
 
 #: xbmc/dialogs/GUIDialogMediaSource.cpp
 msgctxt "#20240"

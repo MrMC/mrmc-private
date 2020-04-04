@@ -109,6 +109,7 @@
 #endif
 #include "ResourceDirectory.h"
 #include "EmbyDirectory.h"
+#include "JellyfinDirectory.h"
 #include "MediaDirectory.h"
 #include "PlexDirectory.h"
 #include "ServicesDirectory.h"
@@ -208,6 +209,7 @@ IDirectory* CDirectoryFactory::Create(const CURL& url)
     if (url.IsProtocol("dav") || url.IsProtocol("davs")) return new CDAVDirectory();
     if (url.IsProtocol("plex")) return new CPlexDirectory();
     if (url.IsProtocol("emby")) return new CEmbyDirectory();
+    if (url.IsProtocol("jellyfin")) return new CJellyfinDirectory();
     if (url.IsProtocol("cloud")) return new CCloudDirectory();
 #ifdef HAS_FILESYSTEM_SFTP
     if (url.IsProtocol("sftp") || url.IsProtocol("ssh")) return new CSFTPDirectory();

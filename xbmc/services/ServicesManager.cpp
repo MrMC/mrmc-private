@@ -31,10 +31,12 @@
 #include "video/VideoInfoTag.h"
 #include "services/plex/PlexUtils.h"
 #include "services/emby/EmbyUtils.h"
+#include "services/jellyfin/JellyfinUtils.h"
 #include "services/plex/PlexServices.h"
 #include "services/emby/EmbyServices.h"
 #include "services/emby/EmbyViewCache.h"
-
+#include "services/jellyfin/JellyfinServices.h"
+#include "services/jellyfin/JellyfinViewCache.h"
 
 using namespace ANNOUNCEMENT;
 
@@ -72,6 +74,15 @@ public:
         break;
       case "EmbySetProgress"_mkhash:
         CEmbyUtils::ReportProgress(m_item, m_currentTime);
+        break;
+      case "JellyfinSetWatched"_mkhash:
+        CJellyfinUtils::SetWatched(m_item);
+        break;
+      case "JellyfinSetUnWatched"_mkhash:
+        CJellyfinUtils::SetUnWatched(m_item);
+        break;
+      case "JellyfinSetProgress"_mkhash:
+        CJellyfinUtils::ReportProgress(m_item, m_currentTime);
         break;
       default:
         return false;
@@ -123,6 +134,7 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
     {
      bool isPlex = g_application.CurrentFileItem().HasProperty("PlexItem");
      bool isEmby = g_application.CurrentFileItem().HasProperty("EmbyItem");
+     bool isJellyfin = g_application.CurrentFileItem().HasProperty("JellyfinItem");
 
      switch(mkhash(message))
       {
@@ -131,12 +143,16 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
             CPlexUtils::SetPlayState(MediaServicesPlayerState::playing);
           else if (isEmby)
             CEmbyUtils::SetPlayState(MediaServicesPlayerState::playing);
+          else if (isJellyfin)
+            CJellyfinUtils::SetPlayState(MediaServicesPlayerState::playing);
           break;
         case "OnPause"_mkhash:
           if (isPlex)
             CPlexUtils::SetPlayState(MediaServicesPlayerState::paused);
           else if (isEmby)
             CEmbyUtils::SetPlayState(MediaServicesPlayerState::paused);
+          else if (isJellyfin)
+            CJellyfinUtils::SetPlayState(MediaServicesPlayerState::paused);
           break;
         case "OnStop"_mkhash:
         {
@@ -150,6 +166,11 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
           {
             msg = "EmbySetProgress";
             CEmbyUtils::SetPlayState(MediaServicesPlayerState::stopped);
+          }
+          else if (isJellyfin)
+          {
+            msg = "JellyfinSetProgress";
+            CJellyfinUtils::SetPlayState(MediaServicesPlayerState::stopped);
           }
           if (!msg.empty())
           {
@@ -175,7 +196,8 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
 bool CServicesManager::HasServices()
 {
   bool rtn = CPlexUtils::HasClients() ||
-             CEmbyUtils::HasClients();
+             CEmbyUtils::HasClients() ||
+             CJellyfinUtils::HasClients();
   return rtn;
 }
 
@@ -187,6 +209,11 @@ bool CServicesManager::HasPlexServices()
 bool CServicesManager::HasEmbyServices()
 {
   return CEmbyUtils::HasClients();
+}
+
+bool CServicesManager::HasJellyfinServices()
+{
+  return CJellyfinUtils::HasClients();
 }
 
 bool CServicesManager::IsMediaServicesItem(const CFileItem &item)
@@ -214,6 +241,8 @@ bool CServicesManager::UpdateMediaServicesLibraries(const CFileItem &item)
       ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Other, "plex", "UpdateLibrary", data);
     if (item.HasProperty("EmbyItem"))
       ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Other, "emby", "UpdateLibrary", data);
+    if (item.HasProperty("JellyfinItem"))
+      ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Other, "jellyfin", "UpdateLibrary", data);
   }
   return true;
 }
@@ -232,6 +261,8 @@ bool CServicesManager::ReloadProfiles()
     ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Other, "plex", "ReloadProfiles");
   if (CEmbyUtils::HasClients())
     ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Other, "emby", "ReloadProfiles");
+  if (CJellyfinUtils::HasClients())
+    ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::Other, "jellyfin", "ReloadProfiles");
   return true;
 }
 
@@ -241,6 +272,8 @@ void CServicesManager::SetItemWatched(CFileItem &item)
     AddJob(new CServicesManagerJob(item, 0, "PlexSetWatched"));
   else if (item.HasProperty("EmbyItem"))
     AddJob(new CServicesManagerJob(item, 0, "EmbySetWatched"));
+  else if (item.HasProperty("JellyfinItem"))
+    AddJob(new CServicesManagerJob(item, 0, "JellyfinSetWatched"));
 }
 
 void CServicesManager::SetItemUnWatched(CFileItem &item)
@@ -249,6 +282,8 @@ void CServicesManager::SetItemUnWatched(CFileItem &item)
     AddJob(new CServicesManagerJob(item, 0, "PlexSetUnWatched"));
   else if (item.HasProperty("EmbyItem"))
     AddJob(new CServicesManagerJob(item, 0, "EmbySetUnWatched"));
+  else if (item.HasProperty("JellyfinItem"))
+    AddJob(new CServicesManagerJob(item, 0, "JellyfinItemSetUnWatched"));
 }
 
 void CServicesManager::UpdateItemState(CFileItem &item, double currentTime)
@@ -257,6 +292,8 @@ void CServicesManager::UpdateItemState(CFileItem &item, double currentTime)
     AddJob(new CServicesManagerJob(item, currentTime, "PlexSetProgress"));
   else if (item.HasProperty("EmbyItem"))
     AddJob(new CServicesManagerJob(item, currentTime, "EmbySetProgress"));
+  else if (item.HasProperty("JellyfinItem"))
+    AddJob(new CServicesManagerJob(item, currentTime, "JellyfinSetProgress"));
 }
 
 void CServicesManager::ShowMusicInfo(CFileItem item)
@@ -265,6 +302,8 @@ void CServicesManager::ShowMusicInfo(CFileItem item)
     CPlexUtils::ShowMusicInfo(item);
   else if (item.HasProperty("EmbyItem"))
     CEmbyUtils::ShowMusicInfo(item);
+  else if (item.HasProperty("JellyfinItem"))
+    CJellyfinUtils::ShowMusicInfo(item);
 }
 
 void CServicesManager::GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, int itemLimit, bool watched)
@@ -273,6 +312,8 @@ void CServicesManager::GetAllRecentlyAddedMovies(CFileItemList &recentlyAdded, i
     CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(recentlyAdded, false, watched);
   if (CEmbyUtils::HasClients())
     CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(recentlyAdded, false);
+  if (CJellyfinUtils::HasClients())
+    CJellyfinUtils::GetAllJellyfinRecentlyAddedMoviesAndShows(recentlyAdded, false);
 
   if (recentlyAdded.Size() > 0)
   {
@@ -297,6 +338,8 @@ void CServicesManager::GetAllRecentlyAddedShows(CFileItemList &recentlyAdded, in
     CPlexUtils::GetAllPlexRecentlyAddedMoviesAndShows(recentlyAdded, true, watched);
   if (CEmbyUtils::HasClients())
     CEmbyUtils::GetAllEmbyRecentlyAddedMoviesAndShows(recentlyAdded, true);
+  if (CJellyfinUtils::HasClients())
+    CJellyfinUtils::GetAllJellyfinRecentlyAddedMoviesAndShows(recentlyAdded, true);
 
   if (recentlyAdded.Size() > 0)
   {
@@ -321,6 +364,8 @@ void CServicesManager::GetAllRecentlyAddedAlbums(CFileItemList &recentlyAdded, i
     CPlexUtils::GetAllPlexRecentlyAddedAlbums(recentlyAdded, itemLimit);
   if (CEmbyUtils::HasClients())
     CEmbyUtils::GetAllEmbyRecentlyAddedAlbums(recentlyAdded, itemLimit);
+  if (CJellyfinUtils::HasClients())
+    CJellyfinUtils::GetAllJellyfinRecentlyAddedAlbums(recentlyAdded, itemLimit);
 
   if (recentlyAdded.Size() > 0)
   {
@@ -345,6 +390,8 @@ void CServicesManager::GetAllInProgressShows(CFileItemList &inProgress, int item
     CPlexUtils::GetAllPlexInProgress(inProgress, true);
   if (CEmbyUtils::HasClients())
     CEmbyUtils::GetAllEmbyInProgress(inProgress, true);
+  if (CJellyfinUtils::HasClients())
+    CJellyfinUtils::GetAllJellyfinInProgress(inProgress, true);
 
   if (inProgress.Size() > 0)
   {
@@ -371,6 +418,8 @@ void CServicesManager::GetAllInProgressMovies(CFileItemList &inProgress, int ite
     CPlexUtils::GetAllPlexInProgress(inProgress, false);
   if (CEmbyUtils::HasClients())
     CEmbyUtils::GetAllEmbyInProgress(inProgress, false);
+  if (CJellyfinUtils::HasClients())
+    CJellyfinUtils::GetAllJellyfinInProgress(inProgress, false);
 
   if (inProgress.Size() > 0)
   {
@@ -436,6 +485,30 @@ void CServicesManager::GetRecentlyAddedMovies(CFileItemList &recentlyAdded, int 
       }
       recentlyAdded.Append(embyItems);
       embyItems.ClearItems();
+    }
+  }
+  else if (type == "jellyfin" && CJellyfinUtils::HasClients())
+  {
+    CJellyfinClientPtr jellyfinClient = CJellyfinServices::GetInstance().GetClient(uuid);
+    if (!jellyfinClient)
+      return;
+    std::vector<JellyfinViewInfo> viewinfos = jellyfinClient->GetViewInfoForMovieContent();
+    for (const auto &viewinfo : viewinfos)
+    {
+      CFileItemList jellyfinItems;
+      std::string userId = jellyfinClient->GetUserID();
+      CURL curl(jellyfinClient->GetUrl());
+      curl.SetProtocol(jellyfinClient->GetProtocol());
+      curl.SetOption("ParentId", viewinfo.id);
+      curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/") + userId + "/Items"); //"Users/"
+      CJellyfinUtils::GetJellyfinRecentlyAddedMovies(jellyfinItems, curl.Get(), itemLimit);
+      for (int item = 0; item < jellyfinItems.Size(); ++item)
+      {
+        CJellyfinUtils::SetJellyfinItemProperties(*jellyfinItems[item], "movies", jellyfinClient);
+        jellyfinItems[item]->SetProperty("ItemType", g_localizeStrings.Get(681));
+      }
+      recentlyAdded.Append(jellyfinItems);
+      jellyfinItems.ClearItems();
     }
   }
 }
@@ -515,6 +588,30 @@ void CServicesManager::GetRecentlyAddedShows(CFileItemList &recentlyAdded, int i
       embyItems.ClearItems();
     }
   }
+  else if (type == "jellyfin" && CJellyfinUtils::HasClients())
+  {
+    CJellyfinClientPtr jellyfinClient = CJellyfinServices::GetInstance().GetClient(uuid);
+    if (!jellyfinClient)
+      return;
+    std::vector<JellyfinViewInfo> viewinfos = jellyfinClient->GetViewInfoForTVShowContent();
+    for (const auto &viewinfo : viewinfos)
+    {
+      CFileItemList jellyfinItems;
+      std::string userId = jellyfinClient->GetUserID();
+      CURL curl(jellyfinClient->GetUrl());
+      curl.SetProtocol(jellyfinClient->GetProtocol());
+      curl.SetOption("ParentId", viewinfo.id);
+      curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/") + userId + "/Items"); //"Users/"
+      CJellyfinUtils::GetJellyfinRecentlyAddedEpisodes(jellyfinItems, curl.Get(), itemLimit);
+      for (int item = 0; item < jellyfinItems.Size(); ++item)
+      {
+        CJellyfinUtils::SetJellyfinItemProperties(*jellyfinItems[item], "tvshows", jellyfinClient);
+        jellyfinItems[item]->SetProperty("ItemType", g_localizeStrings.Get(681));
+      }
+      recentlyAdded.Append(jellyfinItems);
+      jellyfinItems.ClearItems();
+    }
+  }
 }
 void CServicesManager::GetRecentlyAddedAlbums(CFileItemList &recentlyAdded, int itemLimit, std::string type, std::string uuid)
 {
@@ -573,6 +670,31 @@ void CServicesManager::GetRecentlyAddedAlbums(CFileItemList &recentlyAdded, int 
       embyItems.ClearItems();
     }
   }
+  else if (type == "jellyfin" && CJellyfinUtils::HasClients())
+  {
+    CJellyfinClientPtr jellyfinClient = CJellyfinServices::GetInstance().GetClient(uuid);
+    if (!jellyfinClient)
+      return;
+    std::vector<JellyfinViewInfo> viewinfos;
+    viewinfos = jellyfinClient->GetViewInfoForMusicContent();
+    for (const auto &viewinfo : viewinfos)
+    {
+      CFileItemList jellyfinItems;
+      std::string userId = jellyfinClient->GetUserID();
+      CURL curl(jellyfinClient->GetUrl());
+      curl.SetProtocol(jellyfinClient->GetProtocol());
+      curl.SetOption("ParentId", viewinfo.id);
+      curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/") + userId + "/Items/Latest"); //"emby/Users/"
+      CJellyfinUtils::GetJellyfinAlbum(jellyfinItems, curl.Get(), 10);
+      for (int item = 0; item < jellyfinItems.Size(); ++item)
+      {
+        CJellyfinUtils::SetJellyfinItemProperties(*jellyfinItems[item], "music", jellyfinClient);
+        jellyfinItems[item]->SetProperty("ItemType", g_localizeStrings.Get(681));
+      }
+      recentlyAdded.Append(jellyfinItems);
+      jellyfinItems.ClearItems();
+    }
+  }
 }
 void CServicesManager::GetInProgressShows(CFileItemList &inProgress, int itemLimit, std::string type, std::string uuid)
 {
@@ -617,6 +739,27 @@ void CServicesManager::GetInProgressShows(CFileItemList &inProgress, int itemLim
     }
     inProgress.Append(embyItems);
     embyItems.ClearItems();
+  }
+  else if (type == "jellyfin" && CJellyfinUtils::HasClients())
+  {
+    CJellyfinClientPtr jellyfinClient = CJellyfinServices::GetInstance().GetClient(uuid);
+    if (!jellyfinClient)
+      return;
+    CFileItemList jellyfinItems;
+    std::string userId = jellyfinClient->GetUserID();
+    CURL curl(jellyfinClient->GetUrl());
+    curl.SetProtocol(jellyfinClient->GetProtocol());
+    curl.SetOption("UserId", userId);
+    curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Shows/NextUp",false)); //"/Shows/NextUp"
+    curl.SetOption("Limit", StringUtils::Format("%i",itemLimit));
+    CJellyfinUtils::GetJellyfinNextUp(jellyfinItems, curl.Get());
+    for (int item = 0; item < jellyfinItems.Size(); ++item)
+    {
+      CJellyfinUtils::SetJellyfinItemProperties(*jellyfinItems[item], "tvshows", jellyfinClient);
+      jellyfinItems[item]->SetProperty("ItemType", g_localizeStrings.Get(13601));
+    }
+    inProgress.Append(jellyfinItems);
+    jellyfinItems.ClearItems();
   }
 }
 void CServicesManager::GetInProgressMovies(CFileItemList &inProgress, int itemLimit, std::string type, std::string uuid)
@@ -666,6 +809,30 @@ void CServicesManager::GetInProgressMovies(CFileItemList &inProgress, int itemLi
       embyItems.ClearItems();
     }
   }
+  else if (type == "jellyfin" && CJellyfinUtils::HasClients())
+  {
+    CJellyfinClientPtr jellyfinClient = CJellyfinServices::GetInstance().GetClient(uuid);
+    if (!jellyfinClient)
+      return;
+    std::vector<JellyfinViewInfo> viewinfos = jellyfinClient->GetViewInfoForMovieContent();
+    for (const auto &viewinfo : viewinfos)
+    {
+      CFileItemList jellyfinItems;
+      std::string userId = jellyfinClient->GetUserID();
+      CURL curl(jellyfinClient->GetUrl());
+      curl.SetProtocol(jellyfinClient->GetProtocol());
+      curl.SetOption("ParentId", viewinfo.id);
+      curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/",false) + userId + "/Items"); //Users/
+      CJellyfinUtils::GetJellyfinInProgressMovies(jellyfinItems, curl.Get(), itemLimit);
+      for (int item = 0; item < jellyfinItems.Size(); ++item)
+      {
+        CJellyfinUtils::SetJellyfinItemProperties(*jellyfinItems[item], "movies", jellyfinClient);
+        jellyfinItems[item]->SetProperty("ItemType", g_localizeStrings.Get(682));
+      }
+      inProgress.Append(jellyfinItems);
+      jellyfinItems.ClearItems();
+    }
+  }
 }
 
 void CServicesManager::GetMostPlayedSongs(CFileItemList &songs, int itemLimit, std::string type, std::string uuid)
@@ -701,6 +868,9 @@ void CServicesManager::GetMostPlayedSongs(CFileItemList &songs, int itemLimit, s
   else if (type == "emby" && CEmbyUtils::HasClients())
   {
   }
+  else if (type == "jellyfin" && CJellyfinUtils::HasClients())
+  {
+  }
 }
 
 void CServicesManager::GetAllAlbums(CFileItemList &albums, std::string type, std::string uuid)
@@ -723,7 +893,9 @@ void CServicesManager::GetAllAlbums(CFileItemList &albums, std::string type, std
   }
   else if (type == "emby" && CEmbyUtils::HasClients())
   {
-
+  }
+  else if (type == "jellyfin" && CJellyfinUtils::HasClients())
+  {
   }
 }
 
@@ -735,6 +907,8 @@ void CServicesManager::GetSubtitles(CFileItem &item)
     CPlexUtils::GetItemSubtiles(item);
   else if (item.HasProperty("EmbyItem"))
     CEmbyUtils::GetItemSubtiles(item);
+  else if (item.HasProperty("JellyfinItem"))
+    CJellyfinUtils::GetItemSubtiles(item);
 }
 
 void CServicesManager::GetMoreInfo(CFileItem &item)
@@ -743,6 +917,8 @@ void CServicesManager::GetMoreInfo(CFileItem &item)
     CPlexUtils::GetMoreItemInfo(item);
   else if (item.HasProperty("EmbyItem"))
     CEmbyUtils::GetMoreItemInfo(item);
+  else if (item.HasProperty("JellyfinItem"))
+    CJellyfinUtils::GetMoreItemInfo(item);
 }
 
 bool CServicesManager::GetResolutions(CFileItem &item)
@@ -751,6 +927,8 @@ bool CServicesManager::GetResolutions(CFileItem &item)
     return CPlexUtils::GetMoreResolutions(item);
   else if (item.HasProperty("EmbyItem"))
     return CEmbyUtils::GetMoreResolutions(item);
+  else if (item.HasProperty("JellyfinItem"))
+    return CJellyfinUtils::GetMoreResolutions(item);
   return false;
 }
 
@@ -760,6 +938,8 @@ bool CServicesManager::GetURL(CFileItem &item)
     return CPlexUtils::GetURL(item);
   else if (item.HasProperty("EmbyItem"))
     return CEmbyUtils::GetURL(item);
+  else if (item.HasProperty("JellyfinItem"))
+    return CJellyfinUtils::GetURL(item);
   return false;
 }
 
@@ -769,6 +949,8 @@ void CServicesManager::SearchService(CFileItemList &items, std::string strSearch
     CPlexUtils::SearchPlex(items, strSearchString);
   if (CEmbyUtils::HasClients())
     CEmbyUtils::SearchEmby(items, strSearchString);
+  if (CJellyfinUtils::HasClients())
+    CJellyfinUtils::SearchJellyfin(items, strSearchString);
 }
 
 bool CServicesManager::GetAlbumSongs(CFileItem item, CFileItemList &items)
@@ -777,6 +959,8 @@ bool CServicesManager::GetAlbumSongs(CFileItem item, CFileItemList &items)
     return CPlexUtils::GetPlexAlbumSongs(item, items);
   else if (item.HasProperty("EmbyItem"))
     return CEmbyUtils::GetEmbyAlbumSongs(item, items);
+  else if (item.HasProperty("JellyfinItem"))
+    return CJellyfinUtils::GetJellyfinAlbumSongs(item, items);
   return false;
 }
 
@@ -790,6 +974,8 @@ bool CServicesManager::GetMediaTotals(MediaServicesMediaCount &totals)
       rtn |= CPlexUtils::GetPlexMediaTotals(totals);
     if (CEmbyUtils::HasClients())
       rtn |= CEmbyUtils::GetEmbyMediaTotals(totals);
+    if (CJellyfinUtils::HasClients())
+      rtn |= CJellyfinUtils::GetJellyfinMediaTotals(totals);
   }
   return rtn;
 }
@@ -803,6 +989,8 @@ bool CServicesManager::DeleteMediaItem(CFileItem item)
       rtn = CPlexUtils::DeletePlexMedia(item);
     else if (CEmbyUtils::HasClients() && item.HasProperty("EmbyItem"))
       rtn = CEmbyUtils::DeleteEmbyMedia(item);
+    else if (CJellyfinUtils::HasClients() && item.HasProperty("JellyfinItem"))
+      rtn = CJellyfinUtils::DeleteJellyfinMedia(item);
   }
   return rtn;
 }

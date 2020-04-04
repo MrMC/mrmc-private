@@ -43,6 +43,7 @@
 #include "services/ServicesManager.h"
 #include "services/plex/PlexServices.h"
 #include "services/emby/EmbyServices.h"
+#include "services/jellyfin/JellyfinServices.h"
 #include "input/Key.h"
 #include "guilib/LocalizeStrings.h"
 #include "utils/log.h"
@@ -217,6 +218,18 @@ bool CGUIWindowMediaSources::GetDirectory(const std::string &strDirectory, CFile
     embyItem->SetLabel(text);
     embyItem->SetSpecialSort(SortSpecialOnBottom);
     items.Add(embyItem);
+
+    if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_JELLYFINSIGNIN) == strSignIn)
+      text = StringUtils::Format("%s %s %s", strSignIn.c_str() , "Jellyfin", g_localizeStrings.Get(706).c_str());
+    else
+    text = StringUtils::Format("%s %s %s", strSignOut.c_str() , "Jellyfin", g_localizeStrings.Get(706).c_str());
+    CFileItemPtr JellyfinItem(new CFileItem("Jellyfin"));
+    JellyfinItem->m_bIsFolder = true;
+    JellyfinItem->m_bIsShareOrDrive = false;
+    JellyfinItem->SetPath("mediasources://jellyfin/");
+    JellyfinItem->SetLabel(text);
+    JellyfinItem->SetSpecialSort(SortSpecialOnBottom);
+    items.Add(JellyfinItem);
 
     items.SetPath("mediasources://");
     items.SetLabel("");
@@ -453,6 +466,24 @@ bool CGUIWindowMediaSources::GetDirectory(const std::string &strDirectory, CFile
           !VerifyLogout("Emby"))
         return false;
       CEmbyServices::GetInstance().InitiateSignIn();
+      g_windowManager.ActivateWindow(WINDOW_MEDIA_SOURCES, params);
+    }
+    else if (StringUtils::StartsWithNoCase(strDirectory, "mediasources://jellyfin/"))
+    {
+      std::string strParentPath;
+      URIUtils::GetParentPath(strDirectory, strParentPath);
+      SetHistoryForPath(strParentPath);
+      std::vector<std::string> params;
+      params.push_back("mediasources://");
+      params.push_back("return");
+      // going to ".." will put us
+      // at 'sources://' and we want to go back here.
+      params.push_back("parent_redirect=" + strParentPath);
+      std::string strSignOut = g_localizeStrings.Get(1241);
+      if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_JELLYFINSIGNIN) == strSignOut &&
+          !VerifyLogout("Jellyfin"))
+        return false;
+      CJellyfinServices::GetInstance().InitiateSignIn();
       g_windowManager.ActivateWindow(WINDOW_MEDIA_SOURCES, params);
     }
     else if (StringUtils::StartsWithNoCase(strDirectory, "mediasources://pvr/"))

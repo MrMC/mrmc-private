@@ -103,6 +103,10 @@ public:
   bool IsEmbyServicesRunning();
   bool StopEmbyServices();
 
+  bool StartJellyfinServices();
+  bool IsJellyfinServicesRunning();
+  bool StopJellyfinServices();
+
   bool StartZeroconf();
   bool IsZeroconfRunning();
   bool StopZeroconf();

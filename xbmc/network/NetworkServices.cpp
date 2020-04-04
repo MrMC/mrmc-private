@@ -32,6 +32,7 @@
 #include "services/lighteffects/LightEffectServices.h"
 #include "services/hue/HueServices.h"
 #include "services/emby/EmbyServices.h"
+#include "services/jellyfin/JellyfinServices.h"
 #include "services/plex/PlexServices.h"
 #include "settings/AdvancedSettings.h"
 #include "settings/lib/Setting.h"
@@ -498,6 +499,9 @@ void CNetworkServices::Start()
   if (!StartEmbyServices())
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
 
+  if (!StartJellyfinServices())
+    CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Warning, g_localizeStrings.Get(33102), g_localizeStrings.Get(33100));
+
   // note - airtunesserver has to start before airplay server (ios7 client detection bug)
   StartAirTunesServer();
   StartAirPlayServer();
@@ -516,6 +520,7 @@ void CNetworkServices::Stop(bool bWait)
     StopHueService();
     StopPlexServices();
     StopEmbyServices();
+    StopJellyfinServices();
   }
 
   StopEventServer(bWait, false);
@@ -1118,6 +1123,32 @@ bool CNetworkServices::IsEmbyServicesRunning()
 bool CNetworkServices::StopEmbyServices()
 {
   if (!IsEmbyServicesRunning())
+    return true;
+
+  CEmbyServices::GetInstance().Stop();
+  return true;
+}
+
+bool CNetworkServices::StartJellyfinServices()
+{
+  if(!CJellyfinServices::GetInstance().IsEnabled())
+    return true;
+
+  if (IsJellyfinServicesRunning())
+    return true;
+
+  CJellyfinServices::GetInstance().Start();
+  return true;
+}
+
+bool CNetworkServices::IsJellyfinServicesRunning()
+{
+  return CJellyfinServices::GetInstance().IsActive();
+}
+
+bool CNetworkServices::StopJellyfinServices()
+{
+  if (!IsJellyfinServicesRunning())
     return true;
 
   CEmbyServices::GetInstance().Stop();

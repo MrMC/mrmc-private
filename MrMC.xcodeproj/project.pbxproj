@@ -27,6 +27,24 @@
 		18690DCE1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18690DCC1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp */; };
 		18690DCF1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18690DCC1B94DA6200E762C1 /* OpenSubtitlesSearch.cpp */; };
 		18700F671C4A724B000A0007 /* TVOSTopShelf.mm in Sources */ = {isa = PBXBuildFile; fileRef = 18700F651C4A724B000A0007 /* TVOSTopShelf.mm */; };
+		187D8B4C24348723000C0FC7 /* JellyfinClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4224348723000C0FC7 /* JellyfinClientSync.cpp */; };
+		187D8B4D24348723000C0FC7 /* JellyfinClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4224348723000C0FC7 /* JellyfinClientSync.cpp */; };
+		187D8B4E24348723000C0FC7 /* JellyfinClientSync.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4224348723000C0FC7 /* JellyfinClientSync.cpp */; };
+		187D8B4F24348723000C0FC7 /* JellyfinViewCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4524348723000C0FC7 /* JellyfinViewCache.cpp */; };
+		187D8B5024348723000C0FC7 /* JellyfinViewCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4524348723000C0FC7 /* JellyfinViewCache.cpp */; };
+		187D8B5124348723000C0FC7 /* JellyfinViewCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4524348723000C0FC7 /* JellyfinViewCache.cpp */; };
+		187D8B5224348723000C0FC7 /* JellyfinClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4724348723000C0FC7 /* JellyfinClient.cpp */; };
+		187D8B5324348723000C0FC7 /* JellyfinClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4724348723000C0FC7 /* JellyfinClient.cpp */; };
+		187D8B5424348723000C0FC7 /* JellyfinClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4724348723000C0FC7 /* JellyfinClient.cpp */; };
+		187D8B5524348723000C0FC7 /* JellyfinServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4824348723000C0FC7 /* JellyfinServices.cpp */; };
+		187D8B5624348723000C0FC7 /* JellyfinServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4824348723000C0FC7 /* JellyfinServices.cpp */; };
+		187D8B5724348723000C0FC7 /* JellyfinServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4824348723000C0FC7 /* JellyfinServices.cpp */; };
+		187D8B5824348723000C0FC7 /* JellyfinUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4B24348723000C0FC7 /* JellyfinUtils.cpp */; };
+		187D8B5924348723000C0FC7 /* JellyfinUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4B24348723000C0FC7 /* JellyfinUtils.cpp */; };
+		187D8B5A24348723000C0FC7 /* JellyfinUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B4B24348723000C0FC7 /* JellyfinUtils.cpp */; };
+		187D8B5D24349D92000C0FC7 /* JellyfinDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B5B24349D90000C0FC7 /* JellyfinDirectory.cpp */; };
+		187D8B5E24349D92000C0FC7 /* JellyfinDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B5B24349D90000C0FC7 /* JellyfinDirectory.cpp */; };
+		187D8B5F24349D92000C0FC7 /* JellyfinDirectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 187D8B5B24349D90000C0FC7 /* JellyfinDirectory.cpp */; };
 		187F70FF2423799C0079CF55 /* Navigate.wav in Resources */ = {isa = PBXBuildFile; fileRef = 187F70FE2423799C0079CF55 /* Navigate.wav */; };
 		1883CAEC2081D620004C7F52 /* IOSPlayShared.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1883CAEA2081D61F004C7F52 /* IOSPlayShared.mm */; };
 		1886EB7E20C70EB1001E8E46 /* DirectoryNodeInProgressMovies.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1886EB7D20C70EB0001E8E46 /* DirectoryNodeInProgressMovies.cpp */; };
@@ -3549,6 +3567,18 @@
 		18690DCD1B94DA6200E762C1 /* OpenSubtitlesSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenSubtitlesSearch.h; sourceTree = "<group>"; };
 		18700F641C4A724B000A0007 /* TVOSTopShelf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TVOSTopShelf.h; sourceTree = "<group>"; };
 		18700F651C4A724B000A0007 /* TVOSTopShelf.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = TVOSTopShelf.mm; sourceTree = "<group>"; };
+		187D8B4224348723000C0FC7 /* JellyfinClientSync.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JellyfinClientSync.cpp; sourceTree = "<group>"; };
+		187D8B4324348723000C0FC7 /* JellyfinClientSync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JellyfinClientSync.h; sourceTree = "<group>"; };
+		187D8B4424348723000C0FC7 /* JellyfinServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JellyfinServices.h; sourceTree = "<group>"; };
+		187D8B4524348723000C0FC7 /* JellyfinViewCache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JellyfinViewCache.cpp; sourceTree = "<group>"; };
+		187D8B4624348723000C0FC7 /* JellyfinClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JellyfinClient.h; sourceTree = "<group>"; };
+		187D8B4724348723000C0FC7 /* JellyfinClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JellyfinClient.cpp; sourceTree = "<group>"; };
+		187D8B4824348723000C0FC7 /* JellyfinServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JellyfinServices.cpp; sourceTree = "<group>"; };
+		187D8B4924348723000C0FC7 /* JellyfinUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JellyfinUtils.h; sourceTree = "<group>"; };
+		187D8B4A24348723000C0FC7 /* JellyfinViewCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JellyfinViewCache.h; sourceTree = "<group>"; };
+		187D8B4B24348723000C0FC7 /* JellyfinUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JellyfinUtils.cpp; sourceTree = "<group>"; };
+		187D8B5B24349D90000C0FC7 /* JellyfinDirectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = JellyfinDirectory.cpp; sourceTree = "<group>"; };
+		187D8B5C24349D91000C0FC7 /* JellyfinDirectory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JellyfinDirectory.h; sourceTree = "<group>"; };
 		187F70FE2423799C0079CF55 /* Navigate.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Navigate.wav; sourceTree = "<group>"; };
 		1883CAEA2081D61F004C7F52 /* IOSPlayShared.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = IOSPlayShared.mm; sourceTree = "<group>"; };
 		1883CAEB2081D61F004C7F52 /* IOSPlayShared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOSPlayShared.h; sourceTree = "<group>"; };
@@ -6457,6 +6487,23 @@
 			path = subtitles;
 			sourceTree = "<group>";
 		};
+		187D8B4124348723000C0FC7 /* jellyfin */ = {
+			isa = PBXGroup;
+			children = (
+				187D8B4224348723000C0FC7 /* JellyfinClientSync.cpp */,
+				187D8B4324348723000C0FC7 /* JellyfinClientSync.h */,
+				187D8B4424348723000C0FC7 /* JellyfinServices.h */,
+				187D8B4524348723000C0FC7 /* JellyfinViewCache.cpp */,
+				187D8B4624348723000C0FC7 /* JellyfinClient.h */,
+				187D8B4724348723000C0FC7 /* JellyfinClient.cpp */,
+				187D8B4824348723000C0FC7 /* JellyfinServices.cpp */,
+				187D8B4924348723000C0FC7 /* JellyfinUtils.h */,
+				187D8B4A24348723000C0FC7 /* JellyfinViewCache.h */,
+				187D8B4B24348723000C0FC7 /* JellyfinUtils.cpp */,
+			);
+			path = jellyfin;
+			sourceTree = "<group>";
+		};
 		189DFAAC1E96747800002CA4 /* trakt */ = {
 			isa = PBXGroup;
 			children = (
@@ -9087,6 +9134,8 @@
 				F5B723951C7C9B50006432AE /* ISO9660Directory.h */,
 				F5B723961C7C9B50006432AE /* ISOFile.cpp */,
 				F5B723971C7C9B50006432AE /* ISOFile.h */,
+				187D8B5B24349D90000C0FC7 /* JellyfinDirectory.cpp */,
+				187D8B5C24349D91000C0FC7 /* JellyfinDirectory.h */,
 				7C1F6EB913ECCFA7001726AB /* LibraryDirectory.cpp */,
 				7C1F6EBA13ECCFA7001726AB /* LibraryDirectory.h */,
 				182600F51EC0E87F0004447E /* MediaDirectory.cpp */,
@@ -9947,6 +9996,7 @@
 				F55BD3191D22423D0072FE3A /* ServicesManager.h */,
 				F5471B1B1E8562C100570A53 /* emby */,
 				F5AC304B20B9A0F800A7A1ED /* hue */,
+				187D8B4124348723000C0FC7 /* jellyfin */,
 				F55BD2FF1D0A14ED0072FE3A /* plex */,
 				F58BF96E1CD83FAF005BB003 /* lighteffects */,
 				189DFAAC1E96747800002CA4 /* trakt */,
@@ -11299,6 +11349,7 @@
 				F5B724E51C7E150C006432AE /* rar.cpp in Sources */,
 				E38E207C0D25F9FD00618676 /* GUIDialogBusy.cpp in Sources */,
 				E38E207D0D25F9FD00618676 /* GUIDialogButtonMenu.cpp in Sources */,
+				187D8B5824348723000C0FC7 /* JellyfinUtils.cpp in Sources */,
 				E38E207F0D25F9FD00618676 /* GUIDialogContextMenu.cpp in Sources */,
 				E38E20800D25F9FD00618676 /* GUIDialogFavourites.cpp in Sources */,
 				F5FA25F820545C080078DF4B /* WsgiErrorStream.cpp in Sources */,
@@ -11339,6 +11390,7 @@
 				E38E20AE0D25F9FD00618676 /* GUIWindowFileManager.cpp in Sources */,
 				E38E20AF0D25F9FD00618676 /* GUIWindowFullScreen.cpp in Sources */,
 				E38E20B10D25F9FD00618676 /* GUIWindowHome.cpp in Sources */,
+				187D8B5224348723000C0FC7 /* JellyfinClient.cpp in Sources */,
 				E38E20B20D25F9FD00618676 /* GUIWindowLoginScreen.cpp in Sources */,
 				E38E20B30D25F9FD00618676 /* GUIWindowMusicBase.cpp in Sources */,
 				E38E20B40D25F9FD00618676 /* GUIDialogMusicInfo.cpp in Sources */,
@@ -11784,6 +11836,7 @@
 				DF0DF15C13A3ADA7008ED511 /* NFSDirectory.cpp in Sources */,
 				F5022F171E2D41D5001BBF75 /* hdhomerun_channels.c in Sources */,
 				7C89619213B6A16F003631FE /* GUIWindowScreensaverDim.cpp in Sources */,
+				187D8B4F24348723000C0FC7 /* JellyfinViewCache.cpp in Sources */,
 				18ECC96213CF178D00A9ED6C /* StreamUtils.cpp in Sources */,
 				F5CEE60913D3C89700225F72 /* DVDOverlayCodecTX3G.cpp in Sources */,
 				38F4E57013CCCB3B00664821 /* Implementation.cpp in Sources */,
@@ -11844,6 +11897,7 @@
 				DF93D6A01444A8B1007C6459 /* FileDirectoryFactory.cpp in Sources */,
 				F5FA266820545C290078DF4B /* AddonModuleXbmcwsgi.cpp in Sources */,
 				F5AFC1DF1EDF551000AD2149 /* darwinICMPPing.m in Sources */,
+				187D8B5524348723000C0FC7 /* JellyfinServices.cpp in Sources */,
 				F50F8E951EFD859F00C8F93B /* LiteUtils.cpp in Sources */,
 				DF2401261B41A26F001E02DA /* ImageResource.cpp in Sources */,
 				DF93D6A11444A8B1007C6459 /* FileReaderFile.cpp in Sources */,
@@ -12012,6 +12066,7 @@
 				F5B723E71C7C9FBD006432AE /* Visualisation.cpp in Sources */,
 				DFAF6A4F16EBAE3800D6AE12 /* RssManager.cpp in Sources */,
 				DF89901C1709BB2D00B35C21 /* MediaSettings.cpp in Sources */,
+				187D8B5D24349D92000C0FC7 /* JellyfinDirectory.cpp in Sources */,
 				DF32466219E931A8005E8CFB /* ActiveAEResampleFFMPEG.cpp in Sources */,
 				DF89901D1709BB2D00B35C21 /* MediaSourceSettings.cpp in Sources */,
 				DF89901E1709BB2D00B35C21 /* SkinSettings.cpp in Sources */,
@@ -12209,6 +12264,7 @@
 				7CCDA7D0192756250074CF51 /* NptHttp.cpp in Sources */,
 				7CCDA7D9192756250074CF51 /* NptJson.cpp in Sources */,
 				7CCDA7DC192756250074CF51 /* NptList.cpp in Sources */,
+				187D8B4C24348723000C0FC7 /* JellyfinClientSync.cpp in Sources */,
 				7CCDA7E5192756250074CF51 /* NptLogging.cpp in Sources */,
 				7CCDA7E8192756250074CF51 /* NptMessaging.cpp in Sources */,
 				7CCDA7F1192756250074CF51 /* NptNetwork.cpp in Sources */,
@@ -12383,6 +12439,7 @@
 				E49911F7174E5D4500741B6D /* DVDDemuxSPU.cpp in Sources */,
 				E49911F8174E5D4500741B6D /* DVDFileInfo.cpp in Sources */,
 				E49911F9174E5D4500741B6D /* DVDMessage.cpp in Sources */,
+				187D8B5E24349D92000C0FC7 /* JellyfinDirectory.cpp in Sources */,
 				E49911FA174E5D4500741B6D /* DVDMessageQueue.cpp in Sources */,
 				F55BD3031D0A14ED0072FE3A /* PlexServices.cpp in Sources */,
 				F59045741BA372A600DB589A /* XBMCApplication.mm in Sources */,
@@ -13115,6 +13172,7 @@
 				5EE4F9181A9FF36F002E20F8 /* CueInfoLoader.cpp in Sources */,
 				E4991487174E606500741B6D /* GUIDialogVideoBookmarks.cpp in Sources */,
 				E4991488174E606500741B6D /* GUIDialogVideoInfo.cpp in Sources */,
+				187D8B5924348723000C0FC7 /* JellyfinUtils.cpp in Sources */,
 				F5B723261C7C9561006432AE /* MusicInfoTagLoaderFFmpeg.cpp in Sources */,
 				E4991489174E606500741B6D /* GUIDialogVideoOSD.cpp in Sources */,
 				E499148B174E606500741B6D /* GUIDialogVideoSettings.cpp in Sources */,
@@ -13188,9 +13246,11 @@
 				E499154C174E642900741B6D /* XBDateTime.cpp in Sources */,
 				E499154F174E64F200741B6D /* MouseStat.cpp in Sources */,
 				E499156A174E65AB00741B6D /* ButtonTranslator.cpp in Sources */,
+				187D8B5324348723000C0FC7 /* JellyfinClient.cpp in Sources */,
 				E499156B174E65AB00741B6D /* InertialScrollingHandler.cpp in Sources */,
 				F5A0E2571E3A63190086B1D1 /* BitstreamWriter.cpp in Sources */,
 				E499156D174E65AB00741B6D /* KeyboardStat.cpp in Sources */,
+				187D8B4D24348723000C0FC7 /* JellyfinClientSync.cpp in Sources */,
 				4260D5C81B67BB8F003F6F2D /* GUIWindowSplash.cpp in Sources */,
 				E499156E174E65AB00741B6D /* SDLJoystick.cpp in Sources */,
 				E499156F174E65AC00741B6D /* XBMC_keytable.cpp in Sources */,
@@ -13231,6 +13291,7 @@
 				7C2612721825B6340086E04D /* DatabaseQuery.cpp in Sources */,
 				7C920CFA181669FF00DA1477 /* TextureOperations.cpp in Sources */,
 				DFEF0BAD180ADE6400AEAED1 /* FileItemListModification.cpp in Sources */,
+				187D8B5624348723000C0FC7 /* JellyfinServices.cpp in Sources */,
 				DFEF0BC2180ADEDA00AEAED1 /* SmartPlaylistFileItemListModifier.cpp in Sources */,
 				7CC82C9418284F9F0010DF30 /* CharsetDetection.cpp in Sources */,
 				F5B724FF1C7E150C006432AE /* rijndael.cpp in Sources */,
@@ -13272,6 +13333,7 @@
 				F5CC2303181500B1006B5E91 /* EndianSwap.cpp in Sources */,
 				F5CC230C18150118006B5E91 /* AESinkFactory.cpp in Sources */,
 				F5CC234718150277006B5E91 /* AESinkNULL.cpp in Sources */,
+				187D8B5024348723000C0FC7 /* JellyfinViewCache.cpp in Sources */,
 				DF374B2418AC2BA20076B514 /* CoreAudioHelpers.cpp in Sources */,
 				7CF0504C190A1D7200222135 /* FFmpeg.cpp in Sources */,
 				7CF05057191195DA00222135 /* MediaType.cpp in Sources */,
@@ -13434,6 +13496,7 @@
 				F5D13ECF1BAF0B6D0075A95C /* AddonCallbacksPVR.cpp in Sources */,
 				F5D13ED01BAF0B6D0075A95C /* AddonDatabase.cpp in Sources */,
 				F5D13ED21BAF0B6D0075A95C /* AddonInstaller.cpp in Sources */,
+				187D8B5424348723000C0FC7 /* JellyfinClient.cpp in Sources */,
 				F5D13ED31BAF0B6D0075A95C /* AddonManager.cpp in Sources */,
 				F5FA261B20545C080078DF4B /* AddonUtils.cpp in Sources */,
 				F5FA267320545C290078DF4B /* AddonModuleXbmcvfs.cpp in Sources */,
@@ -13622,6 +13685,7 @@
 				F5D13F5D1BAF0B6D0075A95C /* GUIDialogNumeric.cpp in Sources */,
 				F5D13F5E1BAF0B6D0075A95C /* GUIDialogOK.cpp in Sources */,
 				F5B724CD1C7E150C006432AE /* int64.cpp in Sources */,
+				187D8B5A24348723000C0FC7 /* JellyfinUtils.cpp in Sources */,
 				F55BD3181D1DB4F00072FE3A /* PlexDirectory.cpp in Sources */,
 				F5D13F5F1BAF0B6D0075A95C /* GUIDialogPlayEject.cpp in Sources */,
 				F5D13F601BAF0B6D0075A95C /* GUIDialogPlayerControls.cpp in Sources */,
@@ -13734,6 +13798,7 @@
 				F5B725381C7E150C006432AE /* volume.cpp in Sources */,
 				F5D13FB61BAF0B6D0075A95C /* SmartPlaylistDirectory.cpp in Sources */,
 				F5D13FB71BAF0B6D0075A95C /* SMBDirectory.cpp in Sources */,
+				187D8B5124348723000C0FC7 /* JellyfinViewCache.cpp in Sources */,
 				F5D13FB81BAF0B6D0075A95C /* SMBFile.cpp in Sources */,
 				F5D13FB91BAF0B6D0075A95C /* SourcesDirectory.cpp in Sources */,
 				F5D13FBA1BAF0B6D0075A95C /* GifIO.cpp in Sources */,
@@ -13773,6 +13838,7 @@
 				F5D13FD61BAF0B6D0075A95C /* PictureScalingAlgorithm.cpp in Sources */,
 				F5D13FD71BAF0B6D0075A95C /* DirectoryNodeTitleTvShows.cpp in Sources */,
 				F5D13FD81BAF0B6D0075A95C /* DirectoryNodeTvShowsOverview.cpp in Sources */,
+				187D8B4E24348723000C0FC7 /* JellyfinClientSync.cpp in Sources */,
 				F5D13FD91BAF0B6D0075A95C /* QueryParams.cpp in Sources */,
 				F5D13FDA1BAF0B6D0075A95C /* VideoDatabaseDirectory.cpp in Sources */,
 				F5FA267E20545C290078DF4B /* CallbackHandler.cpp in Sources */,
@@ -13899,6 +13965,7 @@
 				F5D1403C1BAF0B6D0075A95C /* SkinVariable.cpp in Sources */,
 				F5D1403D1BAF0B6D0075A95C /* AddonsOperations.cpp in Sources */,
 				F5D1403E1BAF0B6D0075A95C /* ApplicationOperations.cpp in Sources */,
+				187D8B5724348723000C0FC7 /* JellyfinServices.cpp in Sources */,
 				F5D1403F1BAF0B6D0075A95C /* AudioLibrary.cpp in Sources */,
 				F557CD9A1CFDE37000DC3D50 /* TCPClient.cpp in Sources */,
 				F5D140411BAF0B6D0075A95C /* FavouritesOperations.cpp in Sources */,
@@ -14263,6 +14330,7 @@
 				F5D141571BAF0B6D0075A95C /* VideoInfoDownloader.cpp in Sources */,
 				F5B722021C52962F006432AE /* NSData+GZIP.m in Sources */,
 				F5D141581BAF0B6D0075A95C /* VideoInfoScanner.cpp in Sources */,
+				187D8B5F24349D92000C0FC7 /* JellyfinDirectory.cpp in Sources */,
 				F5D141591BAF0B6D0075A95C /* VideoInfoTag.cpp in Sources */,
 				F5D1415A1BAF0B6D0075A95C /* VideoReferenceClock.cpp in Sources */,
 				F51D17291E29950600A03C93 /* vmcmd.c in Sources */,

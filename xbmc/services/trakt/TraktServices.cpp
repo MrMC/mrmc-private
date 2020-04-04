@@ -47,6 +47,9 @@
 #include "services/emby/EmbyClient.h"
 #include "services/emby/EmbyServices.h"
 
+#include "services/jellyfin/JellyfinClient.h"
+#include "services/jellyfin/JellyfinServices.h"
+
 static char chars[] = "'/!()";
 void removeCharsFromString( std::string &str)
 {
@@ -596,6 +599,26 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched, bool setLa
         {
           CVariant paramsseries;
           std::string seriesId = item.GetProperty("EmbySeriesID").asString();
+          paramsseries = client->FetchItemById(seriesId);
+          CVariant paramsProvID = paramsseries["Items"][0]["ProviderIds"];
+          if (paramsProvID.isObject())
+          {
+            for (auto it = paramsProvID.begin_map(); it != paramsProvID.end_map(); ++it)
+            {
+              std::string strFirst = it->first;
+              StringUtils::ToLower(strFirst);
+              showItem.GetVideoInfoTag()->SetUniqueID(it->second.asString(),strFirst);
+            }
+          }
+        }
+      }
+      else if (item.HasProperty("JellyfinItem"))
+      {
+        CJellyfinClientPtr client = CJellyfinServices::GetInstance().FindClient(item.GetPath());
+        if (client && client->GetPresence())
+        {
+          CVariant paramsseries;
+          std::string seriesId = item.GetProperty("JellyfinSeriesID").asString();
           paramsseries = client->FetchItemById(seriesId);
           CVariant paramsProvID = paramsseries["Items"][0]["ProviderIds"];
           if (paramsProvID.isObject())

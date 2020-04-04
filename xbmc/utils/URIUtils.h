@@ -169,6 +169,7 @@ public:
   static bool IsUsingFastSwitch(const std::string& strFile);
   static bool IsPlex(const std::string& strFile);
   static bool IsEmby(const std::string& strFile);
+  static bool IsJellyfin(const std::string& strFile);
   static bool IsServices(const std::string& strFile);
   static bool IsCloud(const std::string& strFile);
 

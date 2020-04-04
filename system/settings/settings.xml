@@ -2593,6 +2593,42 @@
         </setting>
       </group>
     </category>
+    <category id="jellyfin" label="20225" help="20226">
+      <group id="1">
+        <setting id="jellyfin.signin" type="string" label="20227" help="20228">
+          <level>0</level>
+          <default>Sign-in</default>
+          <control type="button" format="action"/>
+        </setting>
+        <setting id="jellyfin.userid" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="jellyfin.serverurl" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+        <setting id="jellyfin.accesstoken" type="string" label="" help="">
+          <level>0</level>
+          <default></default>
+          <constraints>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="edit" format="string" />
+          <visible>false</visible>
+        </setting>
+      </group>
+    </category>
     <category id="mysql" label="1261" help="1262">
       <group id="1">
         <setting id="mysql.enabled" type="boolean" label="24022" help="1263">

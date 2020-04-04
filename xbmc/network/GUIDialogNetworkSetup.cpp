@@ -121,6 +121,13 @@ void CGUIDialogNetworkSetup::OnInitWindow()
     labels.push_back(make_pair(g_localizeStrings.Get(20174), NET_PROTOCOL_EMBY));
     labels.push_back(make_pair(g_localizeStrings.Get(20184), NET_PROTOCOL_EMBYS));
   }
+  else if (m_protocol == NET_PROTOCOL_JELLYFIN || m_protocol == NET_PROTOCOL_JELLYFINS)
+  {
+    // only enable jellyfin/jellyfins if m_protocol was setup
+    //  at ShowAndGetNetworkAddress function call
+    labels.push_back(make_pair(g_localizeStrings.Get(20223), NET_PROTOCOL_JELLYFIN));
+    labels.push_back(make_pair(g_localizeStrings.Get(20224), NET_PROTOCOL_JELLYFINS));
+  }
   else
   {
   #if defined(HAS_FILESYSTEM_SMB) || defined(HAS_FILESYSTEM_SMB2) || defined(HAS_FILESYSTEM_DSM)
@@ -218,6 +225,10 @@ void CGUIDialogNetworkSetup::OnProtocolChange()
     m_port = "8096";
   else if (m_protocol == NET_PROTOCOL_EMBYS)
     m_port = "8920";
+  else if (m_protocol == NET_PROTOCOL_JELLYFIN)
+    m_port = "8096";
+  else if (m_protocol == NET_PROTOCOL_JELLYFINS)
+    m_port = "8920";
   else
     m_port = "0";
 
@@ -271,6 +282,8 @@ void CGUIDialogNetworkSetup::UpdateButtons()
   CONTROL_ENABLE_ON_CONDITION(CONTROL_PORT_NUMBER, m_protocol == NET_PROTOCOL_FTP ||
                                                    m_protocol == NET_PROTOCOL_EMBY ||
                                                    m_protocol == NET_PROTOCOL_EMBYS ||
+                                                   m_protocol == NET_PROTOCOL_JELLYFIN ||
+                                                   m_protocol == NET_PROTOCOL_JELLYFINS ||
                                                    m_protocol == NET_PROTOCOL_HTTP ||
                                                    m_protocol == NET_PROTOCOL_HTTPS ||
                                                    m_protocol == NET_PROTOCOL_DAV ||
@@ -301,6 +314,12 @@ void CGUIDialogNetworkSetup::UpdateButtons()
     SET_CONTROL_HIDDEN(CONTROL_SERVER_BROWSE);
     SET_CONTROL_HIDDEN(CONTROL_REMOTE_PATH);
   }
+
+  if (m_protocol == NET_PROTOCOL_JELLYFIN || m_protocol == NET_PROTOCOL_JELLYFINS)
+  {
+    SET_CONTROL_HIDDEN(CONTROL_SERVER_BROWSE);
+    SET_CONTROL_VISIBLE(CONTROL_REMOTE_PATH);
+  }
 }
 
 std::string CGUIDialogNetworkSetup::ConstructPath() const
@@ -312,6 +331,10 @@ std::string CGUIDialogNetworkSetup::ConstructPath() const
     url.SetProtocol("emby");
   else if (m_protocol == NET_PROTOCOL_EMBYS)
     url.SetProtocol("embys");
+  else if (m_protocol == NET_PROTOCOL_JELLYFIN)
+    url.SetProtocol("jellyfin");
+  else if (m_protocol == NET_PROTOCOL_JELLYFINS)
+    url.SetProtocol("jellyfins");
   else if (m_protocol == NET_PROTOCOL_FTP)
     url.SetProtocol("ftp");
   else if (m_protocol == NET_PROTOCOL_HTTP)
@@ -348,6 +371,8 @@ std::string CGUIDialogNetworkSetup::ConstructPath() const
        (m_protocol == NET_PROTOCOL_SFTP) ||
        (m_protocol == NET_PROTOCOL_EMBY) ||
        (m_protocol == NET_PROTOCOL_EMBYS) ||
+       (m_protocol == NET_PROTOCOL_JELLYFIN) ||
+       (m_protocol == NET_PROTOCOL_JELLYFINS) ||
        (m_protocol == NET_PROTOCOL_NFS))
       && !m_port.empty() && atoi(m_port.c_str()) > 0)
   {
@@ -370,6 +395,18 @@ void CGUIDialogNetworkSetup::SetPath(const std::string &path)
   else if (url.IsProtocol("embys"))
   {
     m_protocol = NET_PROTOCOL_EMBYS;
+    if (!url.HasPort())
+      url.SetPort(8920);
+  }
+  else if (url.IsProtocol("jellyfin"))
+  {
+    m_protocol = NET_PROTOCOL_JELLYFIN;
+    if (!url.HasPort())
+      url.SetPort(8096);
+  }
+  else if (url.IsProtocol("jellyfins"))
+  {
+    m_protocol = NET_PROTOCOL_JELLYFINS;
     if (!url.HasPort())
       url.SetPort(8920);
   }

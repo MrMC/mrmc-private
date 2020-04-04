@@ -88,6 +88,7 @@ public:
   bool HasServices();
   bool HasPlexServices();
   bool HasEmbyServices();
+  bool HasJellyfinServices();
   bool IsMediaServicesItem(const CFileItem &item);
   bool IsMediaServicesCloudItem(const CFileItem &item);
   bool UpdateMediaServicesLibraries(const CFileItem &item);

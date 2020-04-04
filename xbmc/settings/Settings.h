@@ -509,6 +509,13 @@ public:
   static const std::string SETTING_SERVICES_EMBYACESSTOKEN;
   static const std::string SETTING_SERVICES_EMBYSAVEDSOURCES;
   static const std::string SETTING_SERVICES_EMBYLIMITHOMETO;
+
+  // jellyfin services
+  static const std::string SETTING_SERVICES_JELLYFINSIGNIN;
+  static const std::string SETTING_SERVICES_JELLYFINUSERID;
+  static const std::string SETTING_SERVICES_JELLYFINSERVERURL;
+  static const std::string SETTING_SERVICES_JELLYFINACESSTOKEN;
+
   // trakt
   static const std::string SETTING_SERVICES_TRAKTSIGNINPIN;
   static const std::string SETTING_SERVICES_TRAKTACTIONAFTERLIBRARYUPDATE;
