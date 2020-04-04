@@ -816,37 +816,48 @@ bool CAESinkDARWINIOS::Initialize(AEAudioFormat &format, std::string &device)
   }
 
   // need to see if ios/tvos can support the requested number of channels
+  // ios/tvos supports up to 2, 6 or 8 channels of pcm, or atmos.
+  // clamp number of channels to what iOS/tvOS can support.
   int channels = format.m_channelLayout.Count();
+  CLog::Log(LOGDEBUG, "CAESinkDARWINIOS::Initialize: asked for %d channels", channels);
+  switch(channels)
+  {
+    case 2:
+    case 3:
+      channels = 2;
+      break;
+    default:
+      {
+        if (channels < 6)
+          channels = 6;
+        else if (channels > 6)
+          channels = 8;
+      }
+      break;
+  }
   [[AVAudioSession sharedInstance] setPreferredOutputNumberOfChannels: channels error: NULL];
-  int outputChannels = [[AVAudioSession sharedInstance] outputNumberOfChannels];
+  int outputChannels = [[AVAudioSession sharedInstance] preferredOutputNumberOfChannels];
   UInt32 portChannelCount =  CDarwinUtils::GetAudioSessionOutputChannels();
 
   // warning: getNativeAudioSettings can change
   // depending on if outputNumberOfChannels was successful.
   NativeAudioSettings nativeAudioSettings = getNativeAudioSettings();
-  // ios/tvos supports up to 2, 6 or 8 channels of pcm, or atmos.
-  // clamp number of channels to what iOS/tvOS reports.
   // getNativeAudioSettings will figure out the ios/tvOS settings.
   // use that to setup the sink.
-  audioFormat.mChannelsPerFrame = 2;
   if (nativeAudioSettings == kAudioStereo)
   {
     audioFormat.mChannelsPerFrame = 2;
   }
-  if (nativeAudioSettings == kAudioDD5_1)
+  else if (nativeAudioSettings == kAudioDD5_1)
   {
-    // if tvOS audio is set to Digial Dolby 5.1
-    if (format.m_channelLayout.Count() < 6)
-      audioFormat.mChannelsPerFrame = 2;
-    else
-      audioFormat.mChannelsPerFrame = 6;
+    audioFormat.mChannelsPerFrame = 6;
   }
   else
   {
-    if (format.m_channelLayout.Count() < 6)
-      audioFormat.mChannelsPerFrame = 2;
+    if (format.m_channelLayout.Count() <= 6)
+      audioFormat.mChannelsPerFrame = 6;
     else
-      audioFormat.mChannelsPerFrame = format.m_channelLayout.Count();
+      audioFormat.mChannelsPerFrame = 8;
   }
 
   if (passthrough)
@@ -930,8 +941,8 @@ bool CAESinkDARWINIOS::Initialize(AEAudioFormat &format, std::string &device)
     }
     else if (audioFormat.mChannelsPerFrame == 6)
     {
-      // if audio is set to Digial Dolby 5.1, need to use DD mapping
       outputChannels = 6;
+      // if audio is set to Digial Dolby 5.1, need to use DD mapping
       if (nativeAudioSettings == kAudioDD5_1)
         channel_index = CAChannel_PCM_DD5_1;
       else
@@ -939,22 +950,16 @@ bool CAESinkDARWINIOS::Initialize(AEAudioFormat &format, std::string &device)
     }
     else
     {
-      if (audioFormat.mChannelsPerFrame > 6)
-      {
-        outputChannels = 8;
-        channel_index = CAChannel_PCM_8CHAN;
-      }
+      outputChannels = 8;
+      channel_index = CAChannel_PCM_8CHAN;
     }
     int maxChannels = [[AVAudioSession sharedInstance] maximumOutputNumberOfChannels];
     CLog::Log(LOGNOTICE, "CAESinkDARWINIOS::Initialize: channel_index %d, maxChannels %d, outputChannels %d, portChannelCount %d",
       channel_index, maxChannels, outputChannels, portChannelCount);
 
     CAEChannelInfo channel_info;
-    for (size_t chan = 0; chan < format.m_channelLayout.Count(); ++chan)
-    {
-      if (chan < (size_t)outputChannels)
-        channel_info += CAChannelMap[channel_index][chan];
-    }
+    for (int chan = 0; chan < outputChannels; ++chan)
+      channel_info += CAChannelMap[channel_index][chan];
     format.m_channelLayout = channel_info;
   }
   format.m_frameSize = format.m_channelLayout.Count() * (CAEUtil::DataFormatToBits(format.m_dataFormat) >> 3);
