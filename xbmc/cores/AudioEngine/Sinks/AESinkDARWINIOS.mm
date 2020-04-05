@@ -603,8 +603,8 @@ bool CAAudioUnitSink::setupAudio()
   m_inputLatency  = [mySession inputLatency];
   m_outputLatency  = [mySession outputLatency];
   m_bufferDuration = [mySession IOBufferDuration];
-  //m_totalLatency   = (m_inputLatency + m_bufferDuration) + (m_outputLatency + m_bufferDuration);
-  m_totalLatency   = m_outputLatency + m_bufferDuration;
+  m_totalLatency   = (m_inputLatency + m_bufferDuration) + (m_outputLatency + m_bufferDuration);
+  //m_totalLatency   = m_outputLatency + m_bufferDuration;
   CLog::Log(LOGNOTICE, "CAAudioUnitSink::setupAudio:total latency = %f", m_totalLatency);
 
   m_setup = true;
@@ -960,6 +960,7 @@ bool CAESinkDARWINIOS::Initialize(AEAudioFormat &format, std::string &device)
     CAEChannelInfo channel_info;
     for (int chan = 0; chan < outputChannels; ++chan)
       channel_info += CAChannelMap[channel_index][chan];
+    format.m_channelLayout.Reset();
     format.m_channelLayout = channel_info;
   }
   format.m_frameSize = format.m_channelLayout.Count() * (CAEUtil::DataFormatToBits(format.m_dataFormat) >> 3);
