@@ -3,10 +3,10 @@ DEPS= ../../Makefile.include Makefile
 
 # lib name, version
 LIBNAME=libsmb2
-VERSION=1.0.0_3
+VERSION=1.0.0_4
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
-REALARCHIVE=mrmc-1.0.0-3.tar.gz
+REALARCHIVE=mrmc-1.0.0-4.tar.gz
 BASE_URL=https://github.com/MrMC/libsmb2/archive
 
 CONFIGURE= cp -f $(CONFIG_SUB) $(CONFIG_GUESS) .; \
