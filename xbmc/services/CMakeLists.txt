@@ -10,6 +10,11 @@ set (my_SOURCES
   emby/EmbyClientSync.cpp
   emby/EmbyViewCache.cpp
   emby/EmbyServices.cpp
+  jellyfin/JellyfinClient.cpp
+  jellyfin/JellyfinClientSync.cpp
+  jellyfin/JellyfinServices.cpp
+  jellyfin/JellyfinUtils.cpp
+  jellyfin/JellyfinViewCache.cpp
   plex/PlexUtils.cpp
   plex/PlexClient.cpp
   plex/PlexClientSync.cpp

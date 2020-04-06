@@ -54,6 +54,7 @@ set (my_SOURCES
   iso9660.cpp
   ISO9660Directory.cpp
   ISOFile.cpp
+  JellyfinDirectory.cpp
   LibraryDirectory.cpp
   MediaDirectory.cpp
   MemBufferCache.cpp
