@@ -1508,14 +1508,13 @@ namespace VIDEO
       {
         m_nfoReader.GetDetails(*item.GetVideoInfoTag());
         // override with episode and season number from file if available
-        if (item.GetVideoInfoTag()->m_iEpisode == -1 && file->iEpisode > -1)
+        if (file->iEpisode > -1)
         {
           item.GetVideoInfoTag()->m_iEpisode = file->iEpisode;
           item.GetVideoInfoTag()->m_iSeason = file->iSeason;
         }
-        if (m_database.GetEpisodeId(file->strPath, item.GetVideoInfoTag()->m_iEpisode, item.GetVideoInfoTag()->m_iSeason) < 0)
-          if (AddVideo(&item, CONTENT_TVSHOWS, file->isFolder, true, &showInfo) < 0)
-            return INFO_ERROR;
+        if (AddVideo(&item, CONTENT_TVSHOWS, file->isFolder, true, &showInfo) < 0)
+          return INFO_ERROR;
         continue;
       }
 
