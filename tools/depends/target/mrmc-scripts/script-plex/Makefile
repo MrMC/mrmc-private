@@ -3,10 +3,10 @@ DEPS= ../../../Makefile.include Makefile
 
 # lib name
 LIBNAME=script.plex
-VERSION=1.6.0
+VERSION=1.8.0
 SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
-REALARCHIVE=mrmc-master.tar.gz
+REALARCHIVE=mrmc-master-018.tar.gz
 BASE_URL=https://github.com/MrMC/plex-for-kodi/archive
 
 CLEAN_FILES=$(ARCHIVE) $(PLATFORM)
