@@ -700,7 +700,7 @@ bool CGUIWindowVideoBase::OnFileAction(int iItem, int action)
   // if there is no NFO file found it will bring up the search window but there is no option to play,
   // since the action is "INFO" ... and there is no info.... and we go around in circles ... :)
   // fallback to SELECT_ACTION_CHOOSE and there is a context meny for them to.. well... choose
-  if (action == SELECT_ACTION_INFO && (!item->IsVideoDb() || !item->IsMusicDb()))
+  if (action == SELECT_ACTION_INFO && (!item->IsVideoDb() && !item->IsMusicDb()))
     action = SELECT_ACTION_CHOOSE;
 
   // Reset the current start offset. The actual resume
