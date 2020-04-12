@@ -1188,7 +1188,10 @@ bool CJellyfinUtils::ParseJellyfinSeasons(CFileItemList &items, const CURL &url,
     newItem->SetMediaServiceId(itemId);
     newItem->SetMediaServiceFile(item["Path"].asString());
 
-    curl.SetFileName(ConstructFileName(curl, "Items/") + itemId + "/Images/Primary");
+    if (item.isMember("ImageTags") && item["ImageTags"].isMember("Primary"))
+      curl.SetFileName(ConstructFileName(curl, "Items/") + itemId + "/Images/Primary");
+    else
+      curl.SetFileName(ConstructFileName(curl, "Items/") + seriesId + "/Images/Primary");
     imagePath = curl.Get();
     newItem->SetArt("thumb", imagePath);
     newItem->SetIconImage(imagePath);

@@ -1184,7 +1184,10 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
     newItem->SetMediaServiceId(itemId);
     newItem->SetMediaServiceFile(item["Path"].asString());
 
-    curl.SetFileName("Items/" + itemId + "/Images/Primary");
+    if (item.isMember("ImageTags") && item["ImageTags"].isMember("Primary"))
+      curl.SetFileName("Items/" + itemId + "/Images/Primary");
+    else
+      curl.SetFileName("Items/" + seriesId + "/Images/Primary");
     imagePath = curl.Get();
     newItem->SetArt("thumb", imagePath);
     newItem->SetIconImage(imagePath);
