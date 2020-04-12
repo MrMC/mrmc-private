@@ -695,6 +695,14 @@ bool CGUIWindowVideoBase::OnFileAction(int iItem, int action)
 
   CFileItemPtr item = m_vecItems->Get(iItem);
 
+  // below is to cover the corner case when user has SELECT_ACTION_INFO in settings but
+  // tries to play video file that was not scanned into library. Local NFO setting in source -> Movie.
+  // if there is no NFO file found it will bring up the search window but there is no option to play,
+  // since the action is "INFO" ... and there is no info.... and we go around in circles ... :)
+  // fallback to SELECT_ACTION_CHOOSE and there is a context meny for them to.. well... choose
+  if (action == SELECT_ACTION_INFO && (!item->IsVideoDb() || !item->IsMusicDb()))
+    action = SELECT_ACTION_CHOOSE;
+
   // Reset the current start offset. The actual resume
   // option is set in the switch, based on the action passed.
   item->m_lStartOffset = 0;
