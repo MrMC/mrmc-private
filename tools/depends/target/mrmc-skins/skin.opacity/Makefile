@@ -3,7 +3,7 @@ DEPS= ../../../Makefile.include Makefile
 
 # lib name
 SKINNAME=skin.opacity
-VERSION=1.0.0
+VERSION=0.9.3
 SOURCE=$(SKINNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
 REALARCHIVE=master.tar.gz
