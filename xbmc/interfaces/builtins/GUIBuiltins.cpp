@@ -262,6 +262,29 @@ static int CloseDialog(const std::vector<std::string>& params)
   return 0;
 }
 
+/*! \brief Auto Close Dialog.
+ *  \param params The parameters.
+ *  \details params[0] = dialog name or dialog ID.
+ *           params[1] = timeout in miliseconds, 0 to disable
+*/
+
+static int SetDialogAutoClose(const std::vector<std::string>& params)
+{
+  if (params.size() < 2)
+    return -1;
+  int id = CButtonTranslator::TranslateWindow(params[0]);
+  CGUIWindow *window = (CGUIWindow *)g_windowManager.GetWindow(id);
+  if (window && window->IsDialog())
+  {
+    int timeout = std::stoi(params[1]);
+    if (timeout > 0)
+      ((CGUIDialog *)window)->SetAutoClose(timeout);
+    else
+      ((CGUIDialog *)window)->DisableAutoClose();
+  }
+  return 0;
+}
+
 /*! \brief Send a notification.
  *  \param params The parameters.
  *  \details params[0] = Notification title.
@@ -434,6 +457,7 @@ CBuiltins::CommandMap CGUIBuiltins::GetOperations() const
            {"activatewindowandfocus",         {"Activate the specified window and sets focus to the specified id", 1, ActivateAndFocus<false>}},
            {"clearproperty",                  {"Clears a window property for the current focused window/dialog (key,value)", 1, ClearProperty}},
            {"dialog.close",                   {"Close a dialog", 1, CloseDialog}},
+           {"dialog.setautoclose",            {"Set OSD auto close", 1, SetDialogAutoClose}},
            {"notification",                   {"Shows a notification on screen, specify header, then message, and optionally time in milliseconds and a icon.", 2, Notification}},
            {"refreshrss",                     {"Reload RSS feeds", 0, RefreshRSS}},
            {"replacewindow",                  {"Replaces the current window with the new one and sets focus to the specified id", 1, ActivateWindow<true>}},
