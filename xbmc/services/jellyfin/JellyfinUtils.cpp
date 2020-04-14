@@ -481,8 +481,7 @@ bool CJellyfinUtils::GetJellyfinRecentlyAddedEpisodes(CFileItemList &items, cons
 {
   CURL url2(url);
 
-  url2.SetFileName(ConstructFileName(url2, "Latest")); //url2.GetFileName() + "/Latest"
-  
+  url2.SetFileName(url2.GetFileName() + "/Latest");
   url2.SetOption("IncludeItemTypes", JellyfinTypeEpisode);
   url2.SetOption("Limit", StringUtils::Format("%i",limit));
   url2.SetOption("GroupItems", "False");
@@ -517,8 +516,7 @@ bool CJellyfinUtils::GetJellyfinInProgressShows(CFileItemList &items, const std:
 bool CJellyfinUtils::GetJellyfinRecentlyAddedMovies(CFileItemList &items, const std::string url, int limit)
 {
   CURL url2(url);
-  url2.SetFileName(ConstructFileName(url2, "Latest")); //url2.GetFileName() + "/Latest");
-
+  url2.SetFileName(url2.GetFileName() + "/Latest");
   url2.SetOption("IncludeItemTypes", JellyfinTypeMovie);
   url2.SetOption("Limit", StringUtils::Format("%i",limit));
   url2.SetOption("GroupItems", "False");

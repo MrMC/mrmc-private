@@ -500,7 +500,7 @@ void CServicesManager::GetRecentlyAddedMovies(CFileItemList &recentlyAdded, int 
       CURL curl(jellyfinClient->GetUrl());
       curl.SetProtocol(jellyfinClient->GetProtocol());
       curl.SetOption("ParentId", viewinfo.id);
-      curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/") + userId + "/Items"); //"Users/"
+      curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/", false) + userId + "/Items"); //"Users/"
       CJellyfinUtils::GetJellyfinRecentlyAddedMovies(jellyfinItems, curl.Get(), itemLimit);
       for (int item = 0; item < jellyfinItems.Size(); ++item)
       {
@@ -601,7 +601,7 @@ void CServicesManager::GetRecentlyAddedShows(CFileItemList &recentlyAdded, int i
       CURL curl(jellyfinClient->GetUrl());
       curl.SetProtocol(jellyfinClient->GetProtocol());
       curl.SetOption("ParentId", viewinfo.id);
-      curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/") + userId + "/Items"); //"Users/"
+      curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/", false) + userId + "/Items"); //"Users/"
       CJellyfinUtils::GetJellyfinRecentlyAddedEpisodes(jellyfinItems, curl.Get(), itemLimit);
       for (int item = 0; item < jellyfinItems.Size(); ++item)
       {
