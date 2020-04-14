@@ -434,7 +434,7 @@ NSString *SoundFocusIdentifierNavigation = @"Navigation";
 //--------------------------------------------------------------
 - (void)disableScreenSaver
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if ([NSThread currentThread] != [NSThread mainThread])
   {
     dispatch_async(dispatch_get_main_queue(),^{
@@ -451,7 +451,7 @@ NSString *SoundFocusIdentifierNavigation = @"Navigation";
 //--------------------------------------------------------------
 - (void)enableScreenSaver
 {
-  PRINT_SIGNATURE();
+  //PRINT_SIGNATURE();
   if ([NSThread currentThread] != [NSThread mainThread])
   {
     dispatch_async(dispatch_get_main_queue(),^{
