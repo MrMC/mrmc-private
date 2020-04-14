@@ -179,7 +179,7 @@ void CGUIWindowHome::Announce(AnnouncementFlag flag, const char *sender, const c
     return;
   }
   // we are only interested in library changes
-  if ((flag & (VideoLibrary | AudioLibrary)) == 0)
+  if ((flag & (VideoLibrary | AudioLibrary | Player)) == 0)
     return;
 
   if (data.isMember("transaction") && data["transaction"].asBoolean())
@@ -192,7 +192,7 @@ void CGUIWindowHome::Announce(AnnouncementFlag flag, const char *sender, const c
 
   CLog::Log(LOGDEBUG, "CGUIWindowHome::Announce, type: %i, from %s, message %s",(int)flag, sender, message);
 
-  if (strcmp(message, "UpdateRecentlyAdded") == 0)
+  if (strcmp(message, "UpdateRecentlyAdded") == 0 || strcmp(message, "OnStop") == 0)
   {
     if (!data.isMember("uuid"))
       m_triggerRA = true;
