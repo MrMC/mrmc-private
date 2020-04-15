@@ -126,6 +126,7 @@ private:
     virtual ~CLargeTexture();
 
     void AddRef();
+    unsigned int GetRef() {return m_refCount; };
     bool DecrRef(bool deleteImmediately);
     bool DeleteIfRequired(bool deleteImmediately = false);
     void SetTexture(CBaseTexture* texture);

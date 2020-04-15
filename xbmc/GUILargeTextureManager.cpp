@@ -234,7 +234,7 @@ void CGUILargeTextureManager::ReleaseImage(const std::string &path, bool immedia
     CLargeTexture *image = *it;
     if (image->GetPath() == path)
     {
-      if (image->DecrRef(immediately) && immediately)
+      if (image->GetRef() == 0 || (image->DecrRef(immediately) && immediately))
         m_allocated.erase(it);
       return;
     }
@@ -283,14 +283,23 @@ void CGUILargeTextureManager::OnJobComplete(unsigned int jobID, bool success, CJ
   for (queueIterator it = m_queued.begin(); it != m_queued.end(); ++it)
   {
     if (it->first == jobID)
-    { // found our job
+    {
       CImageLoader *loader = (CImageLoader *)job;
       CLargeTexture *image = it->second;
-      image->SetTexture(loader->m_texture);
-      loader->m_texture = NULL; // we want to keep the texture, and jobs are auto-deleted.
       m_queued.erase(it);
-      m_allocated.push_back(image);
+      if (success)
+      { // found our job
+        image->SetTexture(loader->m_texture);
+        loader->m_texture = NULL; // we want to keep the texture, and jobs are auto-deleted.
+        m_allocated.push_back(image);
+      }
+      else
+      {
+        // requeue
+        QueueImage(image->GetPath(), true);
+      }
       return;
     }
+
   }
 }
