@@ -2768,11 +2768,11 @@ msgid "All songs of"
 msgstr ""
 
 msgctxt "#626"
-msgid "In progress TV shows"
+msgid "In Progress TV Shows"
 msgstr ""
 
 msgctxt "#627"
-msgid "In progress Movies"
+msgid "In Progress Movies"
 msgstr ""
 
 msgctxt "#629"
@@ -11685,7 +11685,7 @@ msgid "Profile name"
 msgstr ""
 
 msgctxt "#20094"
-msgid "Media sources"
+msgid "Media Sources"
 msgstr ""
 
 msgctxt "#20095"
@@ -12470,7 +12470,7 @@ msgstr ""
 #: xbmc/dialogs/GUIDialogSmartPlaylistEditor.cpp
 #: xbmc/filesystem/VideoDatabaseDirectory/DirectoryNodeOverview.cpp
 msgctxt "#20343"
-msgid "TV shows"
+msgid "TV Shows"
 msgstr ""
 
 msgctxt "#20344"
@@ -12668,12 +12668,12 @@ msgstr ""
 
 #: xbmc/filesystem/VideoDatabaseDirectory/DirectoryNodeOverview.cpp
 msgctxt "#20386"
-msgid "Recently added movies"
+msgid "Recently Added Movies"
 msgstr ""
 
 #: xbmc/filesystem/VideoDatabaseDirectory/DirectoryNodeOverview.cpp
 msgctxt "#20387"
-msgid "Recently added episodes"
+msgid "Recently Added Episodes"
 msgstr ""
 
 #: xbmc/filesystem/VideoDatabaseDirectory/DirectoryNodeMoviesOverview.cpp
