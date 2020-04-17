@@ -243,7 +243,7 @@ void CJellyfinServices::InitiateSignIn()
   if (CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_JELLYFINSIGNIN) == strSignIn)
   {
     CURL curl(m_serverURL);
-    curl.SetProtocol("jellyfins");
+    curl.SetProtocol("jellyfin");
     std::string path = curl.Get();
     if (CGUIDialogNetworkSetup::ShowAndGetNetworkAddress(path))
     {
