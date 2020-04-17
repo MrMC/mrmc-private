@@ -686,7 +686,7 @@ bool CJellyfinUtils::GetJellyfinRecentlyAddedAlbums(CFileItemList &items, const 
       
       items.Append(jellyfinItems);
 //      items.Sort(SortByDateAdded, SortOrderDescending);
-      items.SetProperty("library.filter", "true");
+//      items.SetProperty("library.filter", "true");
       items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
       jellyfinItems.ClearItems();
     }
@@ -1020,7 +1020,7 @@ bool CJellyfinUtils::ParseJellyfinVideos(CFileItemList &items, CURL url, const C
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
   items.SetLabel(variantItems[0]["SeasonName"].asString());
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   if (type == MediaTypeTvShow)
     SetJellyfinItemProperties(items, "episodes");
   else
@@ -1137,7 +1137,7 @@ bool CJellyfinUtils::ParseJellyfinSeries(CFileItemList &items, const CURL &url, 
     }
     // this is needed to display movies/episodes properly ... dont ask
     // good thing it didnt take 2 days to figure it out
-    items.SetProperty("library.filter", "true");
+//    items.SetProperty("library.filter", "true");
     items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
     SetJellyfinItemProperties(items, "tvshows");
   }
@@ -1282,7 +1282,7 @@ bool CJellyfinUtils::ParseJellyfinSeasons(CFileItemList &items, const CURL &url,
     }
   }
   items.SetLabel(seriesName);
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
 
   return rtn;
@@ -1346,7 +1346,7 @@ bool CJellyfinUtils::ParseJellyfinAudio(CFileItemList &items, const CURL &url, c
     SetJellyfinItemProperties(*jellyfinItem, MediaTypeSong);
     items.Add(jellyfinItem);
   }
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeSong;
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetJellyfinItemProperties(items, MediaTypeSong);
@@ -1419,7 +1419,7 @@ bool CJellyfinUtils::ParseJellyfinAlbum(CFileItemList &items, const CURL &url, c
     SetJellyfinItemProperties(*jellyfinItem, MediaTypeAlbum);
     items.Add(jellyfinItem);
   }
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetJellyfinItemProperties(items, MediaTypeAlbum);
@@ -1489,7 +1489,7 @@ bool CJellyfinUtils::ParseJellyfinArtists(CFileItemList &items, const CURL &url,
     SetJellyfinItemProperties(*jellyfinItem, MediaTypeArtist);
     items.Add(jellyfinItem);
   }
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeArtist;
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetJellyfinItemProperties(items, MediaTypeArtist);
