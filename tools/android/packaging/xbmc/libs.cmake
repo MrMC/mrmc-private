@@ -49,10 +49,6 @@ add_library(lzo2 STATIC IMPORTED)
 set_target_properties(lzo2 PROPERTIES IMPORTED_LOCATION
     ${DEPENDS_DIR}/lib/liblzo2.a)
 
-add_library(ulxmlrpcpp STATIC IMPORTED)
-set_target_properties(ulxmlrpcpp PROPERTIES IMPORTED_LOCATION
-    ${DEPENDS_DIR}/lib/libulxmlrpcpp.a)
-
 add_library(expat STATIC IMPORTED)
 set_target_properties(expat PROPERTIES IMPORTED_LOCATION
     ${DEPENDS_DIR}/lib/libexpat.a)

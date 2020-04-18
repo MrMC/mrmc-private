@@ -202,7 +202,6 @@ target_link_libraries(@APP_NAME_LC@
                         ssl
                         crypto
                         lzo2
-                        ulxmlrpcpp
                         expat
                         jpeg
                         gif
