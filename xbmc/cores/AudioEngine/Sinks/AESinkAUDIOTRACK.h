@@ -88,9 +88,13 @@ private:
 
   // sink buffer filled handling
   double                m_writeSeconds;
-  uint64_t              m_playbackHead;
-  int64_t               m_playbackHeadOffset;
-  double                m_lastdelay;
+  uint64_t              m_headPos;
+  uint64_t              m_timestampPos = 0;
+  CJNIAudioTimestamp    m_timestamp;
+  XbmcThreads::EndTime  m_stampTimer;
+  double                m_delay = 0.0;
+  double                m_hw_delay = 0.0;
+
 
   // We maintain our linear weighted average delay counter in here
   // The n-th value (timely oldest value) is weighted with 1/n

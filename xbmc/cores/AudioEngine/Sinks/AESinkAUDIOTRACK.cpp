@@ -247,9 +247,6 @@ CAESinkAUDIOTRACK::CAESinkAUDIOTRACK()
 , m_sink_sleepOnWriteStall(0)
 , m_sink_bufferBytesPerSecond(0)
 , m_writeSeconds(0.0)
-, m_playbackHead(0)
-, m_playbackHeadOffset(-1)
-, m_lastdelay(0.0)
 {
 }
 
@@ -271,10 +268,8 @@ bool CAESinkAUDIOTRACK::Initialize(AEAudioFormat &format, std::string &device)
   m_format = format;
   m_volume = -1;
   m_writeSeconds = 0.0;
-  m_playbackHead = 0;
-  m_playbackHeadOffset = -1;
-  m_lastdelay = 0.0;
   m_linearmovingaverage.clear();
+  m_timestampPos = 0;
 
   CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::Initialize requested: sampleRate %u; format: %s; type: %s; channels: %d",
     format.m_sampleRate,
@@ -528,10 +523,13 @@ void CAESinkAUDIOTRACK::Deinitialize()
   }
 
   m_writeSeconds = 0.0;
-  m_playbackHead = 0;
-  m_playbackHeadOffset = -1;
-  m_lastdelay = 0.0;
   m_linearmovingaverage.clear();
+
+  m_headPos = 0;
+  m_stampTimer.SetExpired();
+  m_delay = 0.0;
+  m_hw_delay = 0.0;
+  m_timestampPos = 0;
 }
 
 bool CAESinkAUDIOTRACK::IsInitialized()
@@ -542,66 +540,125 @@ bool CAESinkAUDIOTRACK::IsInitialized()
 void CAESinkAUDIOTRACK::GetDelay(AEDelayStatus& status)
 {
   if (!m_at_jni)
-    return status.SetDelay(0);
-
-  uint64_t head_pos = 0;
-  double frameDiffSec = 0;
-
-  if (CJNIBuild::SDK_INT >= 23)
   {
-    CJNIAudioTimestamp ts;
-    int64_t systime = CJNISystem::nanoTime();
-    if (m_at_jni->getTimestamp(ts))
-    {
-      head_pos = ts.get_framePosition();
-      frameDiffSec = (systime - ts.get_nanoTime()) / 1000000000.0;
+    status.SetDelay(0);
+    return;
+  }
 
-      if (g_advancedSettings.CanLogComponent(LOGAUDIO))
-        CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay timestamp: pos(%lld) time(%lld) diff(%f)", ts.get_framePosition(), ts.get_nanoTime(), frameDiffSec);
+  bool usesAdvancedLogging = g_advancedSettings.CanLogComponent(LOGAUDIO);
+  // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
+  // return a 32bit "int" that you should "interpret as unsigned."  As such,
+  // for wrap safety, we need to do all ops on it in 32bit integer math.
+
+  uint32_t head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
+
+  // Wraparound
+  if ((uint32_t)(m_headPos & UINT64_LOWER_BYTES) > head_pos) // need to compute wraparound
+    m_headPos += (1ULL << 32); // add wraparound, e.g. 0x0000 FFFF FFFF -> 0x0001 FFFF FFFF
+  // clear lower 32 bit values, e.g. 0x0001 FFFF FFFF -> 0x0001 0000 0000
+  // and add head_pos which wrapped around, e.g. 0x0001 0000 0000 -> 0x0001 0000 0004
+  m_headPos = (m_headPos & UINT64_UPPER_BYTES) | (uint64_t)head_pos;
+
+  double gone = static_cast<double>(m_headPos) / m_sink_sampleRate;
+
+  // if sink is run dry without buffer time written anymore
+  if (gone > m_writeSeconds)
+    gone = m_writeSeconds;
+
+  double delay = m_writeSeconds - gone;
+/*   if (m_pause_ms > 0.0)
+    delay = m_sink_bufferSeconds;
+ */
+  if (m_stampTimer.IsTimePast())
+  {
+    if (!m_at_jni->getTimestamp(m_timestamp))
+    {
+      CLog::Log(LOGDEBUG, "Could not acquire timestamp");
+      m_stampTimer.Set(100);
+    }
+    else
+    {
+      // check if frameposition is valid and nano timer less than 50 ms outdated
+      if (m_timestamp.get_framePosition() > 0 &&
+          (CurrentHostCounter() - m_timestamp.get_nanoTime()) < 50 * 1000 * 1000)
+        m_stampTimer.Set(1000);
+      else
+        m_stampTimer.Set(100);
     }
   }
-  if (!head_pos)
+  // check if last value was received less than 2 seconds ago
+  if (m_timestamp.get_framePosition() > 0 &&
+      (CurrentHostCounter() - m_timestamp.get_nanoTime()) < 2 * 1000 * 1000 * 1000)
   {
-    // In their infinite wisdom, Google decided to make getPlaybackHeadPosition
-    // return a 32bit "int" that you should "interpret as unsigned."  As such,
-    // for wrap saftey, we need to do all ops on it in 32bit integer math.
-    head_pos = (uint32_t)m_at_jni->getPlaybackHeadPosition();
-    while (m_playbackHead > head_pos)
-      head_pos += (1 << 31);
+    if (usesAdvancedLogging)
+    {
+      CLog::Log(LOGNOTICE, "Framecounter: %" PRIu64 " Time: %" PRIu64 " Current-Time: %" PRId64 ,
+                (m_timestamp.get_framePosition() & UINT64_LOWER_BYTES), m_timestamp.get_nanoTime(),
+                CurrentHostCounter());
+    }
+    uint64_t delta = static_cast<uint64_t>(CurrentHostCounter() - m_timestamp.get_nanoTime());
+    uint64_t stamphead =
+        static_cast<uint64_t>(m_timestamp.get_framePosition() & UINT64_LOWER_BYTES) +
+        delta * m_sink_sampleRate / 1000000000.0;
+    // wrap around
+    // e.g. 0xFFFFFFFFFFFF0123 -> 0x0000000000002478
+    // because we only query each second the simple smaller comparison won't suffice
+    // as delay can fluctuate minimally
+    if (stamphead < m_timestampPos && (m_timestampPos - stamphead) > 0x7FFFFFFFFFFFFFFFULL)
+    {
+      uint64_t stamp = m_timestampPos;
+      stamp += (1ULL << 32);
+      stamphead = (stamp & UINT64_UPPER_BYTES) | stamphead;
+      CLog::Log(LOGDEBUG, "Wraparound happend old: %" PRIu64 " new: %" PRIu64, m_timestampPos, stamphead);
+    }
+    m_timestampPos = stamphead;
 
-    if (g_advancedSettings.CanLogComponent(LOGAUDIO))
-      CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay head position: pos(%lld)", head_pos);
+    double playtime = m_timestampPos / static_cast<double>(m_sink_sampleRate);
+
+    if (usesAdvancedLogging)
+    {
+      CLog::Log(LOGNOTICE,
+                "Delay - Timestamp: %f (ms) delta: %f (ms) playtime: %f (ms) Duration: %f ms",
+                1000.0 * (m_writeSeconds - playtime), delta / 1000000.0, playtime * 1000,
+                m_writeSeconds * 1000);
+      CLog::Log(LOGNOTICE, "Head-Position %" PRIu64 " Timestamp Position %" PRIu64 " Delay-Offset: %f ms", m_headPos,
+                m_timestampPos, 1000.0 * (m_headPos - m_timestampPos) / m_sink_sampleRate);
+    }
+    double hw_delay = m_writeSeconds - playtime;
+    // correct by subtracting above measured delay, if lower delay gets automatically reduced
+    hw_delay -= delay;
+    // sometimes at the beginning of the stream m_timestampPos is more accurate and ahead of
+    // m_headPos - don't use the computed value then and wait
+    if (hw_delay > -1.0 && hw_delay < 1.0)
+      m_hw_delay = hw_delay;
+    else
+      m_hw_delay = 0.0;
+    if (usesAdvancedLogging)
+    {
+      CLog::Log(LOGNOTICE, "HW-Delay (1): %f ms", hw_delay * 1000);
+    }
   }
-  m_playbackHead = head_pos;
-  if (m_playbackHeadOffset == -1)
-    m_playbackHeadOffset = head_pos;
-  else
-    m_playbackHead -= m_playbackHeadOffset;
 
-  double headSeconds = ((double)m_playbackHead / m_sink_sampleRate);
-  double delay = m_writeSeconds - headSeconds;
-
-  if (g_advancedSettings.CanLogComponent(LOGAUDIO))
-    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay "
-      "headSeconds=%f, writeSeconds=%f, delay=%f",
-       headSeconds, m_writeSeconds, delay);
-
-  if (delay < -0.001)  // Pesky double comparisons
+  delay += m_hw_delay;
+  if (usesAdvancedLogging)
   {
-    // this should never happend, head should always
-    // be less than or equal to what we have written.
-    // possible de-sync
-    CLog::Log(LOGERROR, "AESinkAUDIOTRACK::GetDelay over-write error, "
-                        "frameSize=%d, headSeconds=%f, m_writeSeconds=%f", m_sink_frameSize, headSeconds, m_writeSeconds);
-    m_writeSeconds = headSeconds + m_lastdelay;
-    delay = m_lastdelay;
-
+    CLog::Log(LOGNOTICE, "Combined Delay: %f ms", delay * 1000);
   }
+  if (delay < 0.0)
+    delay = 0.0;
 
   const double d = GetMovingAverageDelay(delay);
-  m_lastdelay = d;
-  if (g_advancedSettings.CanLogComponent(LOGAUDIO))
-    CLog::Log(LOGDEBUG, "CAESinkAUDIOTRACK::GetDelay frameSize=%d, maveraged=%f, d=%f", m_sink_frameSize, d, delay);
+
+  // Audiotrack is caching more than we though it would
+  if (d > m_sink_bufferSeconds)
+    m_sink_bufferSeconds = d;
+
+  // track delay in local member
+  m_delay = d;
+  if (usesAdvancedLogging)
+  {
+    CLog::Log(LOGNOTICE, "Delay Current: %lf ms", d * 1000);
+  }
   status.SetDelay(d);
 }
 
@@ -745,10 +802,11 @@ void CAESinkAUDIOTRACK::Drain()
   //m_at_jni->stop();
 
   m_writeSeconds = 0.0;
-  m_playbackHead = 0;
-  m_playbackHeadOffset = -1;
-  m_lastdelay = 0.0;
   m_linearmovingaverage.clear();
+
+  m_headPos = 0;
+  m_stampTimer.SetExpired();
+  m_timestampPos = 0;
 }
 
 bool CAESinkAUDIOTRACK::FormatNeedsIECPacked(const AEAudioFormat &format)
