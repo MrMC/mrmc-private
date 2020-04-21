@@ -270,17 +270,28 @@ static int CloseDialog(const std::vector<std::string>& params)
 
 static int SetDialogAutoClose(const std::vector<std::string>& params)
 {
-  if (params.size() < 2)
+  if (params.size() < 1)
     return -1;
   int id = CButtonTranslator::TranslateWindow(params[0]);
   CGUIWindow *window = (CGUIWindow *)g_windowManager.GetWindow(id);
   if (window && window->IsDialog())
   {
-    int timeout = std::stoi(params[1]);
-    if (timeout > 0)
-      ((CGUIDialog *)window)->SetAutoClose(timeout);
+    if (params.size() > 1)
+    {
+      int timeout = std::stoi(params[1]);
+      if (timeout > 0)
+        ((CGUIDialog *)window)->SetAutoClose(timeout);
+      else
+        ((CGUIDialog *)window)->DisableAutoClose();
+    }
     else
-      ((CGUIDialog *)window)->DisableAutoClose();
+    {
+      int iSec = CSettings::GetInstance().GetInt(CSettings::SETTING_LOOKANDFEEL_AUTOHIDEOSD);
+      if (iSec > 0)
+        ((CGUIDialog *)window)->SetAutoClose(iSec * 1000);
+      else
+        ((CGUIDialog *)window)->DisableAutoClose();
+    }
   }
   return 0;
 }
