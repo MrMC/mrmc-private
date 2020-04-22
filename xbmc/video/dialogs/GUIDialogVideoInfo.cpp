@@ -236,8 +236,16 @@ void CGUIDialogVideoInfo::OnInitWindow()
   m_bViewReview = true;
   m_bPlayRequested = 0;
 
-  CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_REFRESH, (CProfilesManager::GetInstance().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !StringUtils::StartsWithNoCase(m_movieItem->GetVideoInfoTag()->GetUniqueID(), "xx") && !m_movieItem->IsMediaServiceBased());
-  CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_GET_THUMB, (CProfilesManager::GetInstance().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !StringUtils::StartsWithNoCase(m_movieItem->GetVideoInfoTag()->GetUniqueID().c_str() + 2, "plugin") && !m_movieItem->IsMediaServiceBased());
+  if ((CProfilesManager::GetInstance().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !StringUtils::StartsWithNoCase(m_movieItem->GetVideoInfoTag()->GetUniqueID(), "xx") && !m_movieItem->IsMediaServiceBased())
+    SET_CONTROL_VISIBLE(CONTROL_BTN_REFRESH);
+  else
+    SET_CONTROL_HIDDEN(CONTROL_BTN_REFRESH);
+
+  if ((CProfilesManager::GetInstance().GetCurrentProfile().canWriteDatabases() || g_passwordManager.bMasterUser) && !StringUtils::StartsWithNoCase(m_movieItem->GetVideoInfoTag()->GetUniqueID().c_str() + 2, "plugin") && !m_movieItem->IsMediaServiceBased())
+    SET_CONTROL_VISIBLE(CONTROL_BTN_GET_THUMB);
+  else
+    SET_CONTROL_HIDDEN(CONTROL_BTN_GET_THUMB);
+
   // Disable video user rating button for plugins as they don't have tables to save this
   CONTROL_ENABLE_ON_CONDITION(CONTROL_BTN_USERRATING, !m_movieItem->IsPlugin());
 
