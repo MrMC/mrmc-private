@@ -56,19 +56,19 @@ CriticRating,OfficialRating,CommunityRating,PremiereDate,ProductionYear,DisplayO
 */
 
 static const std::string StandardFields = {
-  "DateCreated,PremiereDate,ProductionYear,Genres,MediaStreams,Overview,MediaSources,Path,ImageTags,BackdropImageTags"
+  "DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,Genres,MediaStreams,Overview,MediaSources,Path,ImageTags,BackdropImageTags"
 };
 
 static const std::string MoviesFields = {
-  "DateCreated,PremiereDate,ProductionYear,Genres,MediaStreams,MediaSources,Overview,ShortOverview,Path,ImageTags,BackdropImageTags,RecursiveItemCount,ProviderIds"
+  "DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,Genres,MediaStreams,MediaSources,Overview,ShortOverview,Path,ImageTags,BackdropImageTags,RecursiveItemCount,ProviderIds"
 };
 
 static const std::string TVShowsFields = {
-  "DateCreated,PremiereDate,ProductionYear,Genres,MediaStreams,MediaSources,Overview,ShortOverview,Path,ImageTags,BackdropImageTags,RecursiveItemCount"
+  "DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,Genres,MediaStreams,MediaSources,Overview,ShortOverview,Path,ImageTags,BackdropImageTags,RecursiveItemCount"
 };
 
 static const std::string MoviesSetFields = {
-  "DateCreated,PremiereDate,ProductionYear,Genres,MediaStreams,MediaSources,Overview,ShortOverview,Path,ImageTags,BackdropImageTags,RecursiveItemCount,ProviderIds,ItemCounts,ParentId"
+  "DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,Genres,MediaStreams,MediaSources,Overview,ShortOverview,Path,ImageTags,BackdropImageTags,RecursiveItemCount,ProviderIds,ItemCounts,ParentId"
 };
 
 static int g_progressSec = 0;
@@ -728,7 +728,7 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
   
   CURL url2(url);
   url2.SetOption("IncludeItemTypes", EmbyTypeSeasons);
-  url2.SetOption("Fields", "Etag,DateCreated,PremiereDate,ProductionYear,ImageTags,RecursiveItemCount");
+  url2.SetOption("Fields", "Etag,DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,ImageTags,RecursiveItemCount");
   std::string parentId = url2.GetOption("ParentId");
   url2.SetOptions("");
   url2.SetOption("ParentId", parentId);
@@ -741,7 +741,7 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
     std::string seriesID = url3.GetOption("ParentId");
     url3.SetOptions("");
     url3.SetOption("Ids", seriesID);
-    url3.SetOption("Fields", "Overview,Genres,DateCreated,PremiereDate,ProductionYear");
+    url3.SetOption("Fields", "Overview,Genres,DateCreated,CriticRating,OfficialRating,CommunityRating,PremiereDate,ProductionYear");
     const CVariant seriesObject = CEmbyUtils::GetEmbyCVariant(url3.Get());
     
     rtn = ParseEmbySeasons(items, url2, seriesObject, variant);
@@ -801,7 +801,7 @@ bool CEmbyUtils::GetEmbyArtistAlbum(CFileItemList &items, std::string url)
   
   curl.SetOptions("");
   curl.SetOption("Recursive", "true");
-  curl.SetOption("Fields", "Etag,Genres,DateCreated,PremiereDate,ProductionYear,");
+  curl.SetOption("Fields", "Etag,Genres,DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,");
   curl.SetOption("IncludeItemTypes", EmbyTypeMusicAlbum);
   curl.SetOption("ArtistIds", curl.GetProtocolOption("ArtistIds"));
   curl.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
@@ -819,7 +819,7 @@ bool CEmbyUtils::GetEmbySongs(CFileItemList &items, std::string url)
 bool CEmbyUtils::GetEmbyAlbumSongs(CFileItemList &items, std::string url)
 {
   CURL curl(url);
-  curl.SetOption("Fields", "Etag,DateCreated,PremiereDate,ProductionYear,MediaStreams,ItemCounts,Genres");
+  curl.SetOption("Fields", "Etag,DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,MediaStreams,ItemCounts,Genres");
   const CVariant variant = GetEmbyCVariant(curl.Get());
 
   bool rtn = ParseEmbyAudio(items, curl, variant);
@@ -923,7 +923,7 @@ CFileItemPtr CEmbyUtils::ToFileItemPtr(CEmbyClient *client, const CVariant &vari
       std::string seriesID = variantItem["ParentId"].asString();
       url3.SetOptions("");
       url3.SetOption("Ids", seriesID);
-      url3.SetOption("Fields", "Overview,Genres,DateCreated,PremiereDate,ProductionYear");
+      url3.SetOption("Fields", "Overview,Genres,DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear");
       const CVariant seriesObject = CEmbyUtils::GetEmbyCVariant(url3.Get());
       ParseEmbySeasons(items, url2, seriesObject, variant);
     }
@@ -1523,7 +1523,7 @@ bool CEmbyUtils::ParseEmbyMoviesFilter(CFileItemList &items, CURL url, const CVa
     newItem->m_bIsShareOrDrive = false;
 
     CURL curl1(url);
-    curl1.SetOption("Fields", "DateCreated,PremiereDate,ProductionYear,Genres,MediaStreams,Overview,Path,ProviderIds");
+    curl1.SetOption("Fields", "DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,Genres,MediaStreams,Overview,Path,ProviderIds");
     if (filter == "Genres")
       curl1.SetOption("Genres", itemName);
     else if (filter == "Years")
