@@ -486,6 +486,8 @@ void CServicesManager::GetRecentlyAddedMovies(CFileItemList &recentlyAdded, int 
       recentlyAdded.Append(embyItems);
       embyItems.ClearItems();
     }
+    recentlyAdded.ClearSortState();
+    recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
   }
   else if (type == "jellyfin" && CJellyfinUtils::HasClients())
   {
@@ -510,6 +512,8 @@ void CServicesManager::GetRecentlyAddedMovies(CFileItemList &recentlyAdded, int 
       recentlyAdded.Append(jellyfinItems);
       jellyfinItems.ClearItems();
     }
+    recentlyAdded.ClearSortState();
+    recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
   }
 }
 
@@ -587,6 +591,8 @@ void CServicesManager::GetRecentlyAddedShows(CFileItemList &recentlyAdded, int i
       recentlyAdded.Append(embyItems);
       embyItems.ClearItems();
     }
+    recentlyAdded.ClearSortState();
+    recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
   }
   else if (type == "jellyfin" && CJellyfinUtils::HasClients())
   {
@@ -611,6 +617,8 @@ void CServicesManager::GetRecentlyAddedShows(CFileItemList &recentlyAdded, int i
       recentlyAdded.Append(jellyfinItems);
       jellyfinItems.ClearItems();
     }
+    recentlyAdded.ClearSortState();
+    recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
   }
 }
 void CServicesManager::GetRecentlyAddedAlbums(CFileItemList &recentlyAdded, int itemLimit, std::string type, std::string uuid)
@@ -669,6 +677,8 @@ void CServicesManager::GetRecentlyAddedAlbums(CFileItemList &recentlyAdded, int 
       recentlyAdded.Append(embyItems);
       embyItems.ClearItems();
     }
+    recentlyAdded.ClearSortState();
+    recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
   }
   else if (type == "jellyfin" && CJellyfinUtils::HasClients())
   {
@@ -694,6 +704,8 @@ void CServicesManager::GetRecentlyAddedAlbums(CFileItemList &recentlyAdded, int 
       recentlyAdded.Append(jellyfinItems);
       jellyfinItems.ClearItems();
     }
+    recentlyAdded.ClearSortState();
+    recentlyAdded.Sort(SortByDateAdded, SortOrderDescending);
   }
 }
 void CServicesManager::GetInProgressShows(CFileItemList &inProgress, int itemLimit, std::string type, std::string uuid)
@@ -808,6 +820,8 @@ void CServicesManager::GetInProgressMovies(CFileItemList &inProgress, int itemLi
       inProgress.Append(embyItems);
       embyItems.ClearItems();
     }
+    inProgress.ClearSortState();
+    inProgress.Sort(SortByLastPlayed, SortOrderDescending);
   }
   else if (type == "jellyfin" && CJellyfinUtils::HasClients())
   {
@@ -832,6 +846,8 @@ void CServicesManager::GetInProgressMovies(CFileItemList &inProgress, int itemLi
       inProgress.Append(jellyfinItems);
       jellyfinItems.ClearItems();
     }
+    inProgress.ClearSortState();
+    inProgress.Sort(SortByLastPlayed, SortOrderDescending);
   }
 }
 
