@@ -130,6 +130,7 @@ private:
     bool DecrRef(bool deleteImmediately);
     bool DeleteIfRequired(bool deleteImmediately = false);
     void SetTexture(CBaseTexture* texture);
+    bool CanRetryFetch() {return --m_retry >= 0; };
 
     const std::string &GetPath() const { return m_path; };
     const CTextureArray &GetTexture() const { return m_texture; };
@@ -141,6 +142,7 @@ private:
     std::string m_path;
     CTextureArray m_texture;
     unsigned int m_timeToDelete;
+    int m_retry = 10;
   };
 
   void QueueImage(const std::string &path, bool useCache = true);

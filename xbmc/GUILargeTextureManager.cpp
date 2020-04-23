@@ -284,22 +284,32 @@ void CGUILargeTextureManager::OnJobComplete(unsigned int jobID, bool success, CJ
   {
     if (it->first == jobID)
     {
-      CImageLoader *loader = (CImageLoader *)job;
       CLargeTexture *image = it->second;
+      // remove m_queued reference
       m_queued.erase(it);
       if (success)
       { // found our job
+        CImageLoader *loader = (CImageLoader*)job;
         image->SetTexture(loader->m_texture);
         loader->m_texture = NULL; // we want to keep the texture, and jobs are auto-deleted.
+        // transfer CLargeTexture to m_allocated queue
         m_allocated.push_back(image);
       }
       else
       {
-        // requeue
-        QueueImage(image->GetPath(), true);
+        if (image->CanRetryFetch())
+        {
+          // requeue this CLargeTexture
+          unsigned int jobID = CJobManager::GetInstance().AddJob(
+            new CImageLoader(image->GetPath(), true), this, CJob::PRIORITY_NORMAL);
+          m_queued.push_back(std::make_pair(jobID, image));
+        }
+        else
+        {
+          image->DeleteIfRequired(true);
+        }
       }
       return;
     }
-
   }
 }
