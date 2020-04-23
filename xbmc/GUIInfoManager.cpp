@@ -3572,7 +3572,8 @@ std::string CGUIInfoManager::GetMultiInfoLabel(const GUIInfo &info, int contextW
     std::string duration;
     CEpgInfoTagPtr epgTag;
     CPVRChannelPtr tag(m_currentFile->GetPVRChannelInfoTag());
-    epgTag = tag->GetEPGNext();
+    if (tag)
+      epgTag = tag->GetEPGNext();
     if (epgTag && epgTag->GetDuration() > 0)
       duration = StringUtils::SecondsToTimeString(epgTag->GetDuration(),(TIME_FORMAT)info.GetData1());
     return duration;
