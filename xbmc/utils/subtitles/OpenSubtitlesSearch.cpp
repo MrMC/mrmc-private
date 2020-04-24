@@ -66,7 +66,7 @@ static ulxr::MethodResponse ServerChat(ulxr::MethodCall methodcall)
     ulxr::HttpProtocol    protocol(connection.get());
     ulxr::Requester       client(&protocol);
     response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
-    CLog::Log(LOGDEBUG, "%s - finished -  %s", __PRETTY_FUNCTION__, method.c_str());
+    CLog::Log(LOGDEBUG, "%s - finished - %s - on port 443", __PRETTY_FUNCTION__, method.c_str());
   }
   catch(...)
   {
@@ -76,7 +76,7 @@ static ulxr::MethodResponse ServerChat(ulxr::MethodCall methodcall)
       ulxr::HttpProtocol    protocol(connection.get());
       ulxr::Requester       client(&protocol);
       response = client.call(methodcall, ULXR_PCHAR("/xml-rpc"));
-      CLog::Log(LOGDEBUG, "%s - finished -  %s", __PRETTY_FUNCTION__, method.c_str());
+      CLog::Log(LOGDEBUG, "%s - finished -  %s - on port 80", __PRETTY_FUNCTION__, method.c_str());
     }
     catch(...)
     {
