@@ -3379,6 +3379,10 @@ msgctxt "#767"
 msgid "Grey"
 msgstr ""
 
+msgctxt "#768"
+msgid "Dark grey"
+msgstr ""
+
 #empty strings from id 768 to 769
 #strings 768 and 769 reserved for more subtitle colours
 

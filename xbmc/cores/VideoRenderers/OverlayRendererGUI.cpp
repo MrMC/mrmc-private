@@ -35,7 +35,7 @@
 
 using namespace OVERLAY;
 
-static UTILS::Color colors[8] = {
+static UTILS::Color colors[9] = {
   UTILS::COLOR::YELLOW,
   UTILS::COLOR::WHITE,
   UTILS::COLOR::BLUE,
@@ -43,7 +43,8 @@ static UTILS::Color colors[8] = {
   UTILS::COLOR::YELLOWGREEN,
   UTILS::COLOR::CYAN,
   UTILS::COLOR::LIGHTGREY,
-  UTILS::COLOR::GREY
+  UTILS::COLOR::GREY,
+  UTILS::COLOR::DARKGREY
 };
 
 static UTILS::Color bgcolors[5] = {
