@@ -51,7 +51,8 @@ public:
   CGUITextLayout* m_layout;
   std::string     m_text;
   int             m_subalign;
-  UTILS::Color m_bgcolor = UTILS::COLOR::NONE;
+  UTILS::Color    m_bgcolor = UTILS::COLOR::NONE;
+  UTILS::Color    m_bordercolor = UTILS::COLOR::BLACK;
 };
 
 }

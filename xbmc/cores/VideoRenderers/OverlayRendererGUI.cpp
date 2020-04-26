@@ -64,18 +64,32 @@ static CGUITextLayout* GetFontLayout()
     if (!XFILE::CFile::Exists(font_path))
       font_path = URIUtils::AddFileToFolder("special://xbmc/media/Fonts/", font_file);
 
+    // Apply opacity to the color
+    UTILS::Color fgcolor = colors[CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_COLOR)];
+    UTILS::Color bordercolor = UTILS::COLOR::BLACK;
+    int opacity = CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_OPACITY);
+    if (opacity > 0 && opacity < 100)
+    {
+      fgcolor = ColorUtils::ChangeOpacity(fgcolor, opacity / 100.0f);
+      bordercolor = ColorUtils::ChangeOpacity(bordercolor, opacity / 100.0f);
+    }
+    else if (opacity == 0)
+    {
+      fgcolor = bordercolor = UTILS::COLOR::NONE;
+    }
+
     // We scale based on PAL4x3 - this at least ensures all sizing is constant across resolutions.
     RESOLUTION_INFO pal(720, 576, 0);
     CGUIFont *subtitle_font = g_fontManager.LoadTTF("__subtitle__"
                                                     , font_path
-                                                    , colors[CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_COLOR)]
+                                                    , fgcolor
                                                     , 0
                                                     , CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_HEIGHT)
                                                     , CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_STYLE)
                                                     , false, 1.0f, 1.0f, &pal, true);
     CGUIFont *border_font   = g_fontManager.LoadTTF("__subtitleborder__"
                                                     , font_path
-                                                    , 0xFF000000
+                                                    , bordercolor
                                                     , 0
                                                     , CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_HEIGHT)
                                                     , CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_STYLE)
@@ -172,6 +186,7 @@ void COverlayText::PrepareRender()
   m_layout->Update(m_text, width_max * 0.9f, false, true); // true to force LTR reading order (most Hebrew subs are this format)
   m_layout->GetTextExtent(m_width, m_height);
 
+  int opacity = CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_OPACITY);
   // Compute the color to be used for the overlay background (depending on the opacity)
   UTILS::Color bgcolor = bgcolors[CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_BGCOLOR)];
   int bgopacity = CSettings::GetInstance().GetInt(CSettings::SETTING_SUBTITLES_BGOPACITY);
@@ -183,6 +198,7 @@ void COverlayText::PrepareRender()
   {
     m_bgcolor = UTILS::COLOR::NONE;
   }
+  m_bordercolor = ColorUtils::ChangeOpacity(UTILS::COLOR::BLACK, opacity / 100.0f);
 }
 
 void COverlayText::Render(OVERLAY::SRenderState &state)
@@ -227,6 +243,6 @@ void COverlayText::Render(OVERLAY::SRenderState &state)
     CRect backgroundbox(x - m_layout->GetTextWidth() * 0.52f, y, x + m_layout->GetTextWidth() * 0.52f, y + m_layout->GetTextHeight());
     CGUITexture::DrawQuad(backgroundbox, m_bgcolor);
   }
-  m_layout->RenderOutline(x, y, 0, 0xFF000000, XBFONT_CENTER_X, width_max);
+  m_layout->RenderOutline(x, y, 0, m_bordercolor, XBFONT_CENTER_X, width_max);
   g_graphicsContext.RemoveTransform();
 }

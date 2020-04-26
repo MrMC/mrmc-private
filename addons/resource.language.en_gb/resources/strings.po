@@ -3323,7 +3323,11 @@ msgctxt "#751"
 msgid "Removing source"
 msgstr ""
 
-#empty strings from id 752 to 753
+msgctxt "#752"
+msgid "Opacity"
+msgstr ""
+
+#empty string with id 753
 
 msgctxt "#754"
 msgid "Add program link"
@@ -17958,7 +17962,13 @@ msgctxt "#36294"
 msgid "Set the the subtitle background opacity."
 msgstr ""
 
-#empty strings from id 36295 to 36300
+#. Description of setting with label #752 "Opacity"
+#: system/settings/settings.xml
+msgctxt "#36295"
+msgid "Set the the subtitle opacity."
+msgstr ""
+
+#empty strings from id 36296 to 36300
 
 #: system/settings/settings.xml
 msgctxt "#36301"
