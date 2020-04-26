@@ -567,7 +567,7 @@ msgid "Search"
 msgstr ""
 
 msgctxt "#138"
-msgid "System information"
+msgid "System Information"
 msgstr ""
 
 msgctxt "#139"
@@ -5313,7 +5313,7 @@ msgstr ""
 
 #: xbmc/guilib/WindowIDs.h
 msgctxt "#10003"
-msgid "File manager"
+msgid "File Manager"
 msgstr ""
 
 #: xbmc/addons/GUIDialogAddonSettings.cpp
