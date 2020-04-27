@@ -1778,6 +1778,7 @@ bool CPlexUtils::ParsePlexSeries(CFileItemList &items, const CURL &url, const CV
     value = item["art"].asString();
     removeLeadingSlash(value);
     curl.SetFileName(value);
+    curl.RemoveOption("url");
     plexItem->SetArt("fanart", curl.Get());
 
     plexItem->GetVideoInfoTag()->SetYear(item["year"].asInteger());
