@@ -547,8 +547,7 @@ JellyfinServerInfo CJellyfinServices::GetJellyfinLocalServerInfo(const std::stri
   if (!responseObj.isObject() ||
       !responseObj.isMember(ServerPropertyId) ||
       !responseObj.isMember(ServerPropertyName) ||
-      !responseObj.isMember(ServerPropertyVersion) ||
-      !responseObj.isMember(ServerPropertyLocalAddress))
+      !responseObj.isMember(ServerPropertyVersion))
     return serverInfo;
 
   serverInfo.UserId = m_userId;
@@ -564,7 +563,10 @@ JellyfinServerInfo CJellyfinServices::GetJellyfinLocalServerInfo(const std::stri
   // jellyfin does use WanAddress and it might be missing
   if (responseObj.isMember(ServerPropertyWanAddress))
     serverInfo.WanAddress = responseObj[ServerPropertyWanAddress].asString();
-  serverInfo.LocalAddress = responseObj[ServerPropertyLocalAddress].asString();
+  if (responseObj.isMember(ServerPropertyLocalAddress))
+    serverInfo.LocalAddress = responseObj[ServerPropertyLocalAddress].asString();
+  else
+    serverInfo.LocalAddress = curl.GetHostName();
   return serverInfo;
 }
 
