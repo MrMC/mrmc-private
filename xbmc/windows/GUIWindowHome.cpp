@@ -628,6 +628,16 @@ bool CGUIWindowHome::OnMessage(CGUIMessage& message)
 
 bool CGUIWindowHome::OnClickHomeShelfItem(CFileItem itemPtr, int action)
 {
+  if (itemPtr.IsMediaServiceBased() &&
+      (itemPtr.GetVideoInfoTag()->m_type == MediaTypeTvShow || itemPtr.GetVideoInfoTag()->m_type == MediaTypeSeason))
+  {
+    std::vector<std::string> params;
+    if (!itemPtr.GetPath().empty())
+      params.push_back(itemPtr.GetPath());
+    params.push_back("return");
+    g_windowManager.ActivateWindow(WINDOW_VIDEO_NAV,params, true );
+    return true;
+  }
   switch (action)
   {
     case SELECT_ACTION_CHOOSE:
