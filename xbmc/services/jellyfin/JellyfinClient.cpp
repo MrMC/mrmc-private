@@ -1023,7 +1023,7 @@ const CVariant CJellyfinClient::FetchItemByIds(const std::vector<std::string> &I
   };
 
   CURL curl(m_url);
-  curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/") + GetUserID() + "/Items/");
+  curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "Users/", false) + GetUserID() + "/Items/");
   curl.SetOptions("");
   curl.SetOption("Ids", StringUtils::Join(Ids, ","));
   curl.SetOption("Fields", Fields);

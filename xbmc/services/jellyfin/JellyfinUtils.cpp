@@ -151,7 +151,7 @@ std::string CJellyfinUtils::ConstructFileName(const CURL url, const std::string 
   if (!urlFilename.empty())
     fileName = urlFilename;
 
-  if (useEmbyInPath)
+  if (useEmbyInPath && !(urlFilename == "emby" && StringUtils::StartsWith(url.GetFileName(), "emby")))
     fileName = fileName + (fileName.empty() ? "emby":"/emby");
 
 
@@ -331,7 +331,7 @@ bool CJellyfinUtils::GetMoreItemInfo(CFileItem &item)
   else
     itemId = item.GetMediaServiceId();
   
-  url2.SetFileName(ConstructFileName(url2, "Users/") + client->GetUserID() + "/Items");
+  url2.SetFileName(ConstructFileName(url2, "Users/", false) + client->GetUserID() + "/Items");
   url2.SetOptions("");
   url2.SetOption("Fields", "Genres,People");
   url2.SetOption("IDs", itemId);
@@ -366,7 +366,7 @@ bool CJellyfinUtils::GetMoreResolutions(CFileItem &item)
   CJellyfinClientPtr client = CJellyfinServices::GetInstance().FindClient(url);
   CURL curl(client->GetUrl());
   curl.SetProtocol(client->GetProtocol());
-  curl.SetFileName(ConstructFileName(curl, "Users/") + client->GetUserID() + "/Items/" + id);
+  curl.SetFileName(ConstructFileName(curl, "Users/", false) + client->GetUserID() + "/Items/" + id);
 
 
   CContextButtons choices;
