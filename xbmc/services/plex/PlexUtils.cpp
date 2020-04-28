@@ -1643,6 +1643,8 @@ bool CPlexUtils::ParsePlexVideos(CFileItemList &items, CURL url, const CVariant 
       imagePath = url.Get();
       plexItem->SetArt("tvshow.poster", imagePath);
       plexItem->SetArt("tvshow.thumb", imagePath);
+      plexItem->SetArtFallback("tvshow.poster", "season.poster");
+      plexItem->SetArtFallback("tvshow.thumb", "season.poster");
 
       plexItem->SetIconImage(imagePath);
 
