@@ -684,7 +684,7 @@ bool CEmbyUtils::GetEmbyRecentlyAddedAlbums(CFileItemList &items, const std::str
       
       items.Append(embyItems);
 //      items.Sort(SortByDateAdded, SortOrderDescending);
-      items.SetProperty("library.filter", "true");
+//      items.SetProperty("library.filter", "true");
       items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
       embyItems.ClearItems();
     }
@@ -1018,7 +1018,7 @@ bool CEmbyUtils::ParseEmbyVideos(CFileItemList &items, CURL url, const CVariant 
   // this is needed to display movies/episodes properly ... dont ask
   // good thing it didnt take 2 days to figure it out
   items.SetLabel(variantItems[0]["SeasonName"].asString());
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   if (type == MediaTypeTvShow)
     SetEmbyItemProperties(items, "episodes");
   else
@@ -1135,7 +1135,7 @@ bool CEmbyUtils::ParseEmbySeries(CFileItemList &items, const CURL &url, const CV
     }
     // this is needed to display movies/episodes properly ... dont ask
     // good thing it didnt take 2 days to figure it out
-    items.SetProperty("library.filter", "true");
+//    items.SetProperty("library.filter", "true");
     items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
     SetEmbyItemProperties(items, "tvshows");
   }
@@ -1280,7 +1280,7 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
     }
   }
   items.SetLabel(seriesName);
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
 
   return rtn;
@@ -1344,7 +1344,7 @@ bool CEmbyUtils::ParseEmbyAudio(CFileItemList &items, const CURL &url, const CVa
     SetEmbyItemProperties(*embyItem, MediaTypeSong);
     items.Add(embyItem);
   }
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeSong;
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetEmbyItemProperties(items, MediaTypeSong);
@@ -1417,7 +1417,7 @@ bool CEmbyUtils::ParseEmbyAlbum(CFileItemList &items, const CURL &url, const CVa
     SetEmbyItemProperties(*embyItem, MediaTypeAlbum);
     items.Add(embyItem);
   }
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeAlbum;
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetEmbyItemProperties(items, MediaTypeAlbum);
@@ -1487,7 +1487,7 @@ bool CEmbyUtils::ParseEmbyArtists(CFileItemList &items, const CURL &url, const C
     SetEmbyItemProperties(*embyItem, MediaTypeArtist);
     items.Add(embyItem);
   }
-  items.SetProperty("library.filter", "true");
+//  items.SetProperty("library.filter", "true");
   items.GetMusicInfoTag()->m_type = MediaTypeArtist;
   items.SetCacheToDisc(CFileItemList::CACHE_NEVER);
   SetEmbyItemProperties(items, MediaTypeArtist);
