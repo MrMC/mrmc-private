@@ -537,7 +537,7 @@ bool CPlexUtils::GetPlexRecentlyAddedEpisodes(CFileItemList &items, const std::s
         const auto item = *variantIt;
         if (item["type"].asString() == "season")
         {
-          ParsePlexSeasons(items, curl, item, item);
+          ParsePlexSeasons(items, curl, item, item, false);
         }
         else
         {
@@ -1814,12 +1814,13 @@ bool CPlexUtils::ParsePlexSeries(CFileItemList &items, const CURL &url, const CV
     items.Add(plexItem);
   }
 //  items.SetProperty("library.filter", "true");
+  SetPlexItemProperties(items);
   items.GetVideoInfoTag()->m_type = MediaTypeTvShow;
 
   return rtn;
 }
 
-bool CPlexUtils::ParsePlexSeasons(CFileItemList &items, const CURL &url, const CVariant &mediacontainer, const CVariant &directory)
+bool CPlexUtils::ParsePlexSeasons(CFileItemList &items, const CURL &url, const CVariant &mediacontainer, const CVariant &directory, bool shouldFlatten)
 {
   if (mediacontainer.isNull() || !mediacontainer.isObject() || directory.isNull())
   {
@@ -1900,7 +1901,7 @@ bool CPlexUtils::ParsePlexSeasons(CFileItemList &items, const CURL &url, const C
   }
   items.SetLabel(mediacontainer["title2"].asString());
 
-  if (!items.IsEmpty())
+  if (shouldFlatten && !items.IsEmpty())
   {
     int iFlatten = CSettings::GetInstance().GetInt(CSettings::SETTING_VIDEOLIBRARY_FLATTENTVSHOWS);
     int itemsSize = items.GetObjectCount();

@@ -102,7 +102,7 @@ public:
   // Plex parsers
   static bool ParsePlexVideos(CFileItemList &items, CURL url, const CVariant &video, std::string type, bool formatLabel, int season = -1);
   static bool ParsePlexSeries(CFileItemList &items, const CURL &url, const CVariant &directory);
-  static bool ParsePlexSeasons(CFileItemList &items, const CURL &url, const CVariant &mediacontainer, const CVariant &directory);
+  static bool ParsePlexSeasons(CFileItemList &items, const CURL &url, const CVariant &mediacontainer, const CVariant &directory, bool shouldFlatten = true);
   static bool ParsePlexSongs(CFileItemList &items, const CURL &url, const CVariant &track);
   static bool ParsePlexArtistsAlbum(CFileItemList &items, const CURL &url, const CVariant &directory, bool album);
   static bool ParsePlexMoviesFilter(CFileItemList  &items, const CURL url, const TiXmlElement* node, const std::string &filter);
