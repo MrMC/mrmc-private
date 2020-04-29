@@ -31,6 +31,7 @@
 #include "guilib/WindowIDs.h"
 #include "view/ViewStateSettings.h"
 #include "utils/SortUtils.h"
+#include "services/ServicesManager.h"
 
 using namespace XFILE;
 using namespace VIDEODATABASEDIRECTORY;
@@ -111,11 +112,19 @@ CGUIViewStateWindowVideoNav::CGUIViewStateWindowVideoNav(const CFileItemList& it
 
     SetSortOrder(SortOrderNone);
   }
-  else if (items.IsVideoDb())
+  else if (items.IsVideoDb() || items.IsMediaServiceBased())
   {
-    NODE_TYPE NodeType=CVideoDatabaseDirectory::GetDirectoryChildType(items.GetPath());
+
+    NODE_TYPE NodeType;
     CQueryParams params;
-    CVideoDatabaseDirectory::GetQueryParams(items.GetPath(),params);
+    if (items.IsMediaServiceBased())
+      NodeType = CServicesManager::GetInstance().GetVideoViewNode(items.GetPath(),items.GetContent());
+    else
+    {
+      NodeType = CVideoDatabaseDirectory::GetDirectoryChildType(items.GetPath());
+      CVideoDatabaseDirectory::GetQueryParams(items.GetPath(),params);
+    }
+
 
     switch (NodeType)
     {

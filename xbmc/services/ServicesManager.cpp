@@ -39,6 +39,7 @@
 #include "services/jellyfin/JellyfinViewCache.h"
 
 using namespace ANNOUNCEMENT;
+using namespace XFILE::VIDEODATABASEDIRECTORY;
 
 class CServicesManagerJob: public CJob
 {
@@ -1009,6 +1010,36 @@ bool CServicesManager::DeleteMediaItem(CFileItem item)
       rtn = CJellyfinUtils::DeleteJellyfinMedia(item);
   }
   return rtn;
+}
+
+NODE_TYPE CServicesManager::GetVideoViewNode(std::string path, std::string content)
+{
+  NODE_TYPE node = NODE_TYPE_NONE;
+  if (StringUtils::FindWords(path.c_str(), "titles") != std::string::npos)
+  {
+    if (content == "tvshows")
+      node = NODE_TYPE_TITLE_TVSHOWS;
+    else
+      node = NODE_TYPE_TITLE_MOVIES;
+  }
+  else if (StringUtils::FindWords(path.c_str(), "recentlyaddedmovies") != std::string::npos)
+    node = NODE_TYPE_RECENTLY_ADDED_MOVIES;
+  else if (StringUtils::FindWords(path.c_str(), "inprogressmovies") != std::string::npos)
+    node = NODE_TYPE_INPROGRESS_MOVIES;
+  else if (StringUtils::FindWords(path.c_str(), "/shows/") != std::string::npos)
+  {
+    if (content == "tvshows" || content == "seasons")
+      node = NODE_TYPE_SEASONS;
+    else
+      node = NODE_TYPE_EPISODES;
+  }
+  else if (StringUtils::FindWords(path.c_str(), "seasons") != std::string::npos)
+    node = NODE_TYPE_EPISODES;
+  else if (StringUtils::FindWords(path.c_str(), "recentlyaddedepisodes") != std::string::npos)
+    node = NODE_TYPE_RECENTLY_ADDED_EPISODES;
+  else if (StringUtils::FindWords(path.c_str(), "inprogressshows") != std::string::npos)
+    node = NODE_TYPE_INPROGRESS_TVSHOWS;
+  return node;
 }
 
 void CServicesManager::RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler)

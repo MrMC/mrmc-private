@@ -25,6 +25,7 @@
 #include "threads/SharedSection.h"
 #include "filesystem/IDirectory.h"
 #include "interfaces/IAnnouncer.h"
+#include "filesystem/VideoDatabaseDirectory/DirectoryNode.h"
 
 class CURL;
 class CFileItem;
@@ -122,6 +123,7 @@ public:
   XFILE::DIR_CACHE_TYPE GetCacheType(const CURL& url);
   bool GetMediaTotals(MediaServicesMediaCount &totals);
   bool DeleteMediaItem(CFileItem item);
+  XFILE::VIDEODATABASEDIRECTORY::NODE_TYPE GetVideoViewNode(std::string path, std::string content);
   
   void RegisterMediaServicesHandler(IMediaServicesHandler *mediaServicesHandler);
   void UnregisterSettingsHandler(IMediaServicesHandler *mediaServicesHandler);
