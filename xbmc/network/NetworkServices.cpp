@@ -518,9 +518,9 @@ void CNetworkServices::Stop(bool bWait)
     StopRss();
     StopLightEffectServices();
     StopHueService();
-    StopPlexServices();
-    StopEmbyServices();
-    StopJellyfinServices();
+//    StopPlexServices();
+//    StopEmbyServices();
+//    StopJellyfinServices();
   }
 
   StopEventServer(bWait, false);
