@@ -195,6 +195,8 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
           videodatabase.Open();
           seasonThumb = videodatabase.GetArtForItem(item->GetVideoInfoTag()->m_iIdSeason, MediaTypeSeason, "poster");
 
+          if (seasonThumb.empty())
+            seasonThumb = videodatabase.GetArtForItem(item->GetVideoInfoTag()->m_iIdShow, MediaTypeTvShow, "poster");
           videodatabase.Close();
         }
         fileName = std::to_string(item->GetVideoInfoTag()->m_iDbId) + URIUtils::GetFileName(seasonThumb);
@@ -306,7 +308,10 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
           CVideoDatabase videodatabase;
           videodatabase.Open();
           seasonThumb = videodatabase.GetArtForItem(item->GetVideoInfoTag()->m_iIdSeason, MediaTypeSeason, "poster");
-          
+
+          if (seasonThumb.empty())
+            seasonThumb = videodatabase.GetArtForItem(item->GetVideoInfoTag()->m_iIdShow, MediaTypeTvShow, "poster");
+
           videodatabase.Close();
         }
         fileName = std::to_string(item->GetVideoInfoTag()->m_iDbId) + URIUtils::GetFileName(seasonThumb);
