@@ -604,6 +604,9 @@ NSString *SoundFocusIdentifierNavigation = @"Navigation";
   }
   CLog::Log(LOGDEBUG, "enterActiveDelayed: AVPlayerHDRMode = %d", intHDRMode);
   m_controllerState = MC_ACTIVE;
+  // tell home window to update recently added
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::VideoLibrary, "xbmc", "UpdateRecentlyAdded");
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::AudioLibrary, "xbmc", "UpdateRecentlyAdded");
 }
 
 - (void)becomeActive
