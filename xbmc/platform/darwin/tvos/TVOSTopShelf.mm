@@ -171,7 +171,16 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
       std::string seasonThumb;
       CFileItemPtr item = m_HomeShelfTVRA->Get(i);
       NSMutableDictionary * tvDictRA = [[NSMutableDictionary alloc] init];
-      std::string title = StringUtils::Format("%s s%02de%02d",
+      // below is to hande cases wehn we send season or full show item to TopShelf
+      std::string title;
+      if (item->GetVideoInfoTag()->m_type == MediaTypeTvShow)
+        title = item->GetVideoInfoTag()->m_strShowTitle;
+
+      else if (item->GetVideoInfoTag()->m_type == MediaTypeSeason)
+        title = StringUtils::Format("%s %s", item->GetVideoInfoTag()->m_strShowTitle.c_str(),
+                                    item->GetLabel().c_str());
+      else
+        title = StringUtils::Format("%s s%02de%02d",
                                               item->GetVideoInfoTag()->m_strShowTitle.c_str(),
                                               item->GetVideoInfoTag()->m_iSeason,
                                               item->GetVideoInfoTag()->m_iEpisode);
@@ -179,6 +188,9 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
       if (item->IsMediaServiceBased())
       {
         seasonThumb = item->GetArt("tvshow.poster");
+        // if its season or show listing, "thumb" is the one we want
+        if (seasonThumb.empty())
+          seasonThumb = item->GetArt("thumb");
         CURL curl(seasonThumb);
         if (curl.HasOption("url"))
           fileName = URIUtils::GetFileName(curl.GetOption("url"));
@@ -366,6 +378,17 @@ bool CTVOSTopShelf::RunTopShelf()
       itemPtr = m_HomeShelfTVRA->Get(item);
     else
       itemPtr = m_HomeShelfTVPR->Get(item);
+
+    if (itemPtr->IsMediaServiceBased() &&
+        (itemPtr->GetVideoInfoTag()->m_type == MediaTypeTvShow || itemPtr->GetVideoInfoTag()->m_type == MediaTypeSeason))
+    {
+      std::vector<std::string> params;
+      if (!itemPtr->GetPath().empty())
+        params.push_back(itemPtr->GetPath());
+      params.push_back("return");
+      KODI::MESSAGING::CApplicationMessenger::GetInstance().SendMsg(TMSG_GUI_ACTIVATE_WINDOW, WINDOW_VIDEO_NAV, 0, nullptr, "", params);
+      return true;
+    }
 
     if (split[2] == "display")
     {
