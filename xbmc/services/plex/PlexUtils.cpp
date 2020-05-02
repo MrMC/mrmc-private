@@ -1859,7 +1859,8 @@ bool CPlexUtils::ParsePlexSeasons(CFileItemList &items, const CURL &url, const C
       plexItem->GetVideoInfoTag()->m_strShowTitle = mediacontainer["parentTitle"].asString();
       plexItem->GetVideoInfoTag()->SetPlotOutline(mediacontainer["tagline"].asString());
       plexItem->GetVideoInfoTag()->SetPlot(mediacontainer["summary"].asString());
-      plexItem->GetVideoInfoTag()->SetYear(mediacontainer["parentYear"].asInteger());
+      // hide year below as its the show start year and not the season one
+//      plexItem->GetVideoInfoTag()->SetYear(mediacontainer["parentYear"].asInteger());
       plexItem->SetProperty("PlexShowKey", mediacontainer["key"].asString());
 
       value = mediacontainer["art"].asString();
