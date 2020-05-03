@@ -155,6 +155,16 @@ extern "C" {
                                              PVR_WEEKDAY_THURSDAY | PVR_WEEKDAY_FRIDAY  | PVR_WEEKDAY_SATURDAY  |
                                              PVR_WEEKDAY_SUNDAY;
 
+/*!
+  * @brief timeframe value for use with SetEPGTimeFrame function to indicate "no timeframe".
+  */
+ const int EPG_TIMEFRAME_UNLIMITED = -1;
+
+ /*!
+  * @brief special PVR_TIMER.iClientChannelUid and PVR_RECORDING.iChannelUid value to indicate that no channel uid is available.
+  */
+ const int PVR_CHANNEL_INVALID_UID = -1; /*!< @brief denotes that no channel uid is avaliable. */
+
   /*!
    * @brief PVR add-on error codes
    */
