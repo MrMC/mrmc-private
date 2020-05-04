@@ -306,11 +306,7 @@ bool CPlexDirectory::GetDirectory(const CURL& url, CFileItemList &items)
       else if (path == "shows")
       {
         CPlexUtils::GetPlexSeasons(items,Base64URL::Decode(section));
-        if(items.Size() > 1 && items[1]->GetVideoInfoTag()->m_type == MediaTypeSeason)
-          items.SetContent("tvshows");
-        else
-          items.SetContent("episodes");
-//        items.ClearSortState();
+        items.SetContent("seasons");
         items.Sort(SortByLabel, SortOrderAscending);
       }
       else if (path == "seasons")
