@@ -174,7 +174,7 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
       // below is to hande cases wehn we send season or full show item to TopShelf
       std::string title;
       if (item->GetVideoInfoTag()->m_type == MediaTypeTvShow)
-        title = item->GetVideoInfoTag()->m_strShowTitle;
+        title = item->GetVideoInfoTag()->m_strTitle;
 
       else if (item->GetVideoInfoTag()->m_type == MediaTypeSeason)
         title = StringUtils::Format("%s %s", item->GetVideoInfoTag()->m_strShowTitle.c_str(),
@@ -187,8 +187,10 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
       
       if (item->IsMediaServiceBased())
       {
-        seasonThumb = item->GetArt("tvshow.poster");
-        // if its season or show listing, "thumb" is the one we want
+        if (item->GetVideoInfoTag()->m_type == MediaTypeTvShow)
+          seasonThumb = item->GetArt("tvshow.poster");
+        else if (item->GetVideoInfoTag()->m_type == MediaTypeSeason || item->GetVideoInfoTag()->m_type == MediaTypeEpisode)
+          seasonThumb = item->GetArt("season.poster");
         if (seasonThumb.empty())
           seasonThumb = item->GetArt("thumb");
         CURL curl(seasonThumb);
