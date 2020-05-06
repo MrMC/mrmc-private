@@ -562,10 +562,14 @@ NSString *SoundFocusIdentifierNavigation = @"Navigation";
 
   if (!CAEFactory::UsingExternalDevice())
   {
-  // wait for AE to wake
-    XbmcThreads::EndTime timer(2000);
-    while (CAEFactory::IsSuspended() && !timer.IsTimePast())
-      usleep(50*1000);
+    // wait for AE to wake
+    if (CAEFactory::IsSuspended())
+    {
+      CLog::Log(LOGDEBUG, "enterActiveDelayed: waiting for AE to wake");
+      XbmcThreads::EndTime timer(2000);
+      while (CAEFactory::IsSuspended() && !timer.IsTimePast())
+        usleep(50*1000);
+    }
   }
 
   // handles a push into foreground by a topshelf item select/play
