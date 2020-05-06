@@ -694,39 +694,59 @@ void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, 
       if  (!itemData.isNull() && itemUrl == item.GetVideoInfoTag()->m_strPath)
       {
         data["episode"] = itemData;
-        data["progress"] = percentage;
-        data["app_version"] = CSysInfo::GetVersion();
-        data["app_date"] = CSysInfo::GetBuildDate();
         CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = from known episode");
       }
       else
       {
-        /// https://api.trakt.tv/shows/top-gear/seasons/24
-        // to get a list of episodes, there we will find what we need
-        std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
-        removeCharsFromString(showName);
-        StringUtils::Replace(showName, " ", "-");
-        std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",
-          showName.c_str(), item.GetVideoInfoTag()->m_iSeason);
-        CVariant episodes = GetTraktCVariant(episodesUrl);
-
-        if (episodes.isArray())
+        std::string showName;
+        if (!item.IsMediaServiceBased())
         {
-          for (auto it = episodes.begin_array(); it != episodes.end_array(); ++it)
+          CVideoDatabase videodatabase;
+          CFileItem showItem;
+          if (videodatabase.Open())
           {
-            CVariant &episodeItem = *it;
-            if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
+            std::string basePath = StringUtils::Format("videodb://tvshows/titles/%i/%i/%i",item.GetVideoInfoTag()->m_iIdShow, item.GetVideoInfoTag()->m_iSeason, item.GetVideoInfoTag()->m_iDbId);
+            videodatabase.GetTvShowInfo(basePath, *showItem.GetVideoInfoTag(), item.GetVideoInfoTag()->m_iIdShow);
+            videodatabase.Close();
+            std::map<std::string, std::string> Ids = showItem.GetVideoInfoTag()->GetUniqueIDs();
+            for (std::map<std::string, std::string>::const_iterator i = Ids.begin(); i != Ids.end(); ++i)
             {
-              data["episode"] = episodeItem;
-              itemData = episodeItem;
-              itemUrl = item.GetVideoInfoTag()->m_strPath;
-              CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = from unknown episode");
-              break;
+              if (i->first == "unknown")
+              {
+                std::string id = i->second;
+                if (StringUtils::StartsWithNoCase(id, "tt"))
+                  showName = id;
+              }
+              else if (i->first == "imdb")
+              {
+                showName = i->second;
+              }
             }
+            CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = get IMDB from db %s", showName.c_str());
           }
-          data["progress"] = percentage;
-          data["app_version"] = CSysInfo::GetVersion();
-          data["app_date"] = CSysInfo::GetBuildDate();
+        }
+
+        if (showName.empty())
+        {
+
+          showName = item.GetVideoInfoTag()->m_strShowTitle;
+          removeCharsFromString(showName);
+          StringUtils::Replace(showName, " ", "-");
+        }
+        /// https://api.trakt.tv/shows/top-gear/seasons/24/episodes/3
+        // to get an episode details
+        std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i/episodes/%i",
+                                                      showName.c_str(),
+                                                      item.GetVideoInfoTag()->m_iSeason,
+                                                      item.GetVideoInfoTag()->m_iEpisode);
+        CVariant episode = GetTraktCVariant(episodesUrl);
+
+        if (!episode.isNull())
+        {
+          itemData = episode;
+          itemUrl = item.GetVideoInfoTag()->m_strPath;
+          data["episode"] = episode;
+          CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = from unknown episode");
         }
       }
     }
@@ -735,9 +755,6 @@ void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, 
       data["movie"]["title"] = item.GetVideoInfoTag()->m_strTitle;
       data["movie"]["year"] = item.GetVideoInfoTag()->GetYear();
       data["movie"]["ids"] = ParseIds(item.GetVideoInfoTag()->GetUniqueIDs(), item.GetVideoInfoTag()->m_type);
-      data["progress"] = percentage;
-      data["app_version"] = CSysInfo::GetVersion();
-      data["app_date"] = CSysInfo::GetBuildDate();
     }
 
     if (!data.isNull())
@@ -745,6 +762,9 @@ void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, 
       // now that we have "data" talk to trakt server
       // If the progress is above 80%, the video will be scrobbled
       // and we will get a 409 on stop. Ignore it :)
+      data["progress"] = percentage;
+      data["app_version"] = CSysInfo::GetVersion();
+      data["app_date"] = CSysInfo::GetBuildDate();
       ServerChat("https://api.trakt.tv/scrobble/" + status, data);
     }
   }
