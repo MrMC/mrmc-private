@@ -87,18 +87,18 @@ public:
     switch(mkhash(m_function.c_str()))
     {
       case "OnPlay"_mkhash:
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPlay currentTime = %f", m_currentTime);
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPlay current percentage = %f", m_percentage);
         CTraktServices::ReportProgress(m_item, "start", m_percentage);
         break;
       case "OnSeek"_mkhash:
         // Trakt API only as start/pause/stop. It is unclear what
         // to do about if you are seeking, others seem to just do
         // start again. We can too.
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnSeek currentTime = %f", m_currentTime);
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnSeek current percentage = %f", m_percentage);
         CTraktServices::ReportProgress(m_item, "start", m_percentage);
         break;
       case "OnPause"_mkhash:
-        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPause currentTime = %f", m_currentTime);
+        CLog::Log(LOGDEBUG, "CTraktServiceJob::OnPause current percentage = %f", m_percentage);
         CTraktServices::ReportProgress(m_item, "pause", m_percentage);
         break;
       case "TraktSetStopped"_mkhash:
@@ -138,7 +138,6 @@ private:
   CFileItem   m_item;
   std::string m_function;
   double      m_percentage;
-  double      m_currentTime;
 };
 
 CTraktServices::CTraktServices()
