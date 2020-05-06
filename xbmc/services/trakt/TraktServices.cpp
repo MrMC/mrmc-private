@@ -651,7 +651,7 @@ void CTraktServices::SetItemWatchedJob(CFileItem &item, bool watched, bool setLa
       {
         CVariant episode;
         episode["watched_at"] = now.GetAsW3CDateTime(true);
-        episode["number"]        = item.GetVideoInfoTag()->m_iEpisode;
+        episode["number"]     = item.GetVideoInfoTag()->m_iEpisode;
         season["episodes"].push_back(episode);
       }
       else
@@ -678,6 +678,10 @@ void CTraktServices::SetItemUnWatched(CFileItem &item)
 
 void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, double percentage)
 {
+  // keep the item url and item ID saved so we dont hit Trakt servers
+  // every time to get the episode info for it
+  static std::string  itemUrl;
+  static CVariant     itemData;
   // if we are music, do not report
   if (item.IsAudio() || item.IsPVR())
     return;
@@ -688,30 +692,43 @@ void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, 
     CVariant data;
     if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
     {
-      /// https://api.trakt.tv/shows/top-gear/seasons/24
-      // to get a list of episodes, there we will find what we need
-
-      std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
-      removeCharsFromString(showName);
-      StringUtils::Replace(showName, " ", "-");
-      std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",
-        showName.c_str(), item.GetVideoInfoTag()->m_iSeason);
-      CVariant episodes = GetTraktCVariant(episodesUrl);
-
-      if (episodes.isArray())
+      if  (!itemData.isNull() && itemUrl == item.GetVideoInfoTag()->m_strPath)
       {
-        for (auto it = episodes.begin_array(); it != episodes.end_array(); ++it)
-        {
-          CVariant &episodeItem = *it;
-          if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
-          {
-            data["episode"] = episodeItem;
-            break;
-          }
-        }
+        data["episode"] = itemData;
         data["progress"] = percentage;
         data["app_version"] = CSysInfo::GetVersion();
         data["app_date"] = CSysInfo::GetBuildDate();
+        CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = from known episode");
+      }
+      else
+      {
+        /// https://api.trakt.tv/shows/top-gear/seasons/24
+        // to get a list of episodes, there we will find what we need
+        std::string showName = item.GetVideoInfoTag()->m_strShowTitle;
+        removeCharsFromString(showName);
+        StringUtils::Replace(showName, " ", "-");
+        std::string episodesUrl = StringUtils::Format("https://api.trakt.tv/shows/%s/seasons/%i",
+          showName.c_str(), item.GetVideoInfoTag()->m_iSeason);
+        CVariant episodes = GetTraktCVariant(episodesUrl);
+
+        if (episodes.isArray())
+        {
+          for (auto it = episodes.begin_array(); it != episodes.end_array(); ++it)
+          {
+            CVariant &episodeItem = *it;
+            if (episodeItem["number"].asInteger() == item.GetVideoInfoTag()->m_iEpisode)
+            {
+              data["episode"] = episodeItem;
+              itemData = episodeItem;
+              itemUrl = item.GetVideoInfoTag()->m_strPath;
+              CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = from unknown episode");
+              break;
+            }
+          }
+          data["progress"] = percentage;
+          data["app_version"] = CSysInfo::GetVersion();
+          data["app_date"] = CSysInfo::GetBuildDate();
+        }
       }
     }
     else if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeMovie)
