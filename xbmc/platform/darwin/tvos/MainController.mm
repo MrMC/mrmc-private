@@ -581,7 +581,6 @@ NSString *SoundFocusIdentifierNavigation = @"Navigation";
     {
       default:
       case MC_INACTIVE:
-        CAEFactory::DeviceChange();
         break;
       case MC_INACTIVE_WASPAUSED:
         CApplicationMessenger::GetInstance().PostMsg(TMSG_MEDIA_UNPAUSE);
