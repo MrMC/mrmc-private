@@ -1674,7 +1674,10 @@ CFileItemPtr CJellyfinUtils::ToVideoFileItemPtr(CURL url, const CVariant &varian
     item->SetProperty("JellyfinSeriesID", seriesId);
     std::string seasonEpisode = StringUtils::Format("S%02iE%02i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
     item->SetProperty("SeasonEpisode", seasonEpisode);
-    url2.SetFileName(CJellyfinUtils::ConstructFileName(url, "Items/", false) + variant["SeasonId"].asString() + "/Images/Primary");//"Items/"
+    if (variant.isMember("ParentThumbItemId"))
+      url2.SetFileName(CJellyfinUtils::ConstructFileName(url, "Items/", false) + variant["ParentThumbItemId"].asString() + "/Images/Primary");
+    else
+      url2.SetFileName(CJellyfinUtils::ConstructFileName(url, "Items/", false) + variant["SeasonId"].asString() + "/Images/Primary");
     item->SetArt("tvshow.thumb", url2.Get());
     item->SetArt("tvshow.poster", url2.Get());
   }
