@@ -146,6 +146,8 @@ const std::string CSettings::SETTING_WINDOW_WIDTH = "window.width";
 const std::string CSettings::SETTING_WINDOW_HEIGHT = "window.height";
 const std::string CSettings::SETTING_VIDEOLIBRARY_SHOWUNWATCHEDPLOTS = "videolibrary.showunwatchedplots";
 const std::string CSettings::SETTING_VIDEOLIBRARY_WATCHEDHOMESHELFITEMS = "videolibrary.watchedhomescreen";
+const std::string CSettings::SETTING_VIDEOLIBRARY_TOPSHELF_ACTION = "videolibrary.topshelfaction";
+const std::string CSettings::SETTING_VIDEOLIBRARY_TOPSHELF_ITEMS = "videolibrary.topshelfitems";
 const std::string CSettings::SETTING_VIDEOLIBRARY_ACTORTHUMBS = "videolibrary.actorthumbs";
 const std::string CSettings::SETTING_MYVIDEOS_FLATTEN = "myvideos.flatten";
 const std::string CSettings::SETTING_VIDEOLIBRARY_FLATTENTVSHOWS = "videolibrary.flattentvshows";
@@ -1426,6 +1428,7 @@ void CSettings::InitializeISettingCallbacks()
   settingSet.insert(CSettings::SETTING_INPUT_APPLESIRIEXPERTMODE);
   settingSet.insert(CSettings::SETTING_INPUT_APPLESIRIDISABLEOSD);
   settingSet.insert(CSettings::SETTING_INPUT_APPLESIRIBACK);
+  settingSet.insert(CSettings::SETTING_VIDEOLIBRARY_TOPSHELF_ACTION);
   m_settingsManager->RegisterCallback(&CTVOSInputSettings::GetInstance(), settingSet);
 #endif
 

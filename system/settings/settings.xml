@@ -523,6 +523,23 @@
           <default>true</default>
           <control type="toggle" />
         </setting>
+        <setting id="videolibrary.topshelfaction" type="action" label="36645" help="36646">
+          <level>0</level>
+          <control type="button" format="action" />
+          <visible>false</visible>
+        </setting>
+        <setting id="videolibrary.topshelfitems" type="list[string]" label="" help="">
+          <level>0</level>
+          <default>MRA,TVRA,MIP,TVIP</default>
+          <constraints>
+            <delimiter>,</delimiter>
+            <allowempty>true</allowempty>
+          </constraints>
+          <control type="list" format="string">
+            <multiselect>true</multiselect>
+          </control>
+          <visible>false</visible>
+        </setting>
         <setting id="videolibrary.actorthumbs" type="boolean" label="20402" help="36143">
           <level>1</level>
           <default>true</default>

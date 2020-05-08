@@ -30,6 +30,10 @@
 #include "settings/AdvancedSettings.h"
 #include "utils/StringUtils.h"
 #include "utils/Variant.h"
+#include "dialogs/GUIDialogSelect.h"
+#include "guilib/GUIWindowManager.h"
+#include "FileItem.h"
+#include "LocalizeStrings.h"
 
 static std::atomic<long> sg_singleton_lock_variable {0};
 CTVOSInputSettings* CTVOSInputSettings::m_instance = nullptr;
@@ -98,6 +102,63 @@ void CTVOSInputSettings::OnSettingChanged(const CSetting *setting)
       [nsstrings addObject:nsstr];
     }
     [g_xbmcController disableOSDExtensions:nsstrings];
+  }
+}
+
+void CTVOSInputSettings::OnSettingAction(const CSetting *setting)
+{
+  if (setting == NULL)
+    return;
+
+  const std::string &settingId = setting->GetId();
+  if (settingId == CSettings::SETTING_VIDEOLIBRARY_TOPSHELF_ACTION)
+  {
+    // MRA, TVRA, MIP, TVIP
+    std::map<std::string,std::string> settingItems;
+    settingItems["MRA"] = g_localizeStrings.Get(20386);
+    settingItems["TVRA"] = g_localizeStrings.Get(20387);
+    settingItems["MIP"] = g_localizeStrings.Get(627);
+    settingItems["TVIP"] = g_localizeStrings.Get(626);
+
+    std::vector<CVariant> tsItems = CSettings::GetInstance().GetList(CSettings::SETTING_VIDEOLIBRARY_TOPSHELF_ITEMS);
+
+    CGUIDialogSelect* pDialog = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
+    pDialog->Reset();
+    pDialog->SetHeading(CVariant{36645});
+    // we first add existing items from the settings
+    for (auto &tsItem : tsItems)
+    {
+      CFileItem item(settingItems[tsItem.asString()]);
+      item.SetLabel2(tsItem.asString());
+      pDialog->Add(item);
+      pDialog->SetSelected(settingItems[tsItem.asString()]);
+      // remove it from the full list so that the balance can be added later below
+      settingItems.erase(tsItem.asString());
+    }
+    std::map<std::string,std::string>::iterator it;
+    for (it = settingItems.begin(); it!=settingItems.end(); ++it)
+    {
+      // add the balance of standard, but not selected items
+      CFileItem item(it->second);
+      item.SetLabel2(it->first);
+      pDialog->Add(item);
+    }
+    pDialog->SetMultiSelection(true);
+    // enable move button
+    pDialog->EnableMove(true);
+    pDialog->Open();
+    if (pDialog->IsConfirmed())
+    {
+      tsItems.clear();
+      const CFileItemList* selItems = pDialog->GetSelectedItemsList();
+      for (int i = 0 ; i < selItems->Size() ; i++)
+      {
+        CFileItemPtr item = selItems->Get(i);
+        tsItems.push_back(CVariant{item->GetLabel2()});
+      }
+      CSettings::GetInstance().SetList(CSettings::SETTING_VIDEOLIBRARY_TOPSHELF_ITEMS,tsItems);
+      CSettings::GetInstance().Save();
+    }
   }
 }
 

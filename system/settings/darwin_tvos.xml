@@ -54,6 +54,15 @@
         </setting>
       </group>
     </category>
+    <category id="videolibrary" label="14022" help="36139">
+      <group id="1">
+        <setting id="videolibrary.topshelfaction" type="action" label="36645" help="36646">
+          <level>0</level>
+          <control type="button" format="action" />
+          <visible>true</visible>
+        </setting>
+      </group>
+    </category>  
   </section>
   <section id="music">
     <category id="audiocds">

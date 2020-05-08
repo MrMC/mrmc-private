@@ -30,6 +30,7 @@ class CTVOSInputSettings : public ISettingCallback
   void Initialize();
 
   virtual void OnSettingChanged(const CSetting *setting) override;
+  virtual void OnSettingAction(const CSetting *setting) override;
   static void SettingOptionsDisableSiriOSD(const CSetting *setting, std::vector< std::pair<std::string, std::string> > &list, std::string &current, void *data);
 
 private:

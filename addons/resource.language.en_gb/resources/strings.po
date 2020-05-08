@@ -19340,7 +19340,17 @@ msgctxt "#36644"
 msgid "Allow surface decoding of Standard Definition video. Prevent use of HQ scalers."
 msgstr ""
 
-#empty strings from id 36645 to 36899
+#: system/settings/settings.xml
+msgctxt "#36645"
+msgid "TopShelf items"
+msgstr ""
+
+#: system/settings/settings.xml
+msgctxt "#36646"
+msgid "Select items and order for TopShelf listing"
+msgstr ""
+
+#empty strings from id 36647 to 36899
 
 #: xbmc/media/MediaType.cpp
 msgctxt "#36900"
