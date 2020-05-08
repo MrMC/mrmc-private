@@ -44,7 +44,9 @@ public:
   const CFileItemPtr GetSelectedFileItem() const;
   int GetSelectedItem() const;
   const std::vector<int>& GetSelectedItems() const;
+  const CFileItemList* GetSelectedItemsList() const;
   void EnableButton(bool enable, int string);
+  void EnableMove(bool enable);
   bool IsButtonPressed();
   void Sort(bool bSortOrder = true);
   void SetSelected(int iSelected);
@@ -67,8 +69,10 @@ protected:
   CFileItemPtr m_selectedItem;
   bool m_useDetails;
   bool m_multiSelection;
+  bool m_orderSelection;
 
   std::vector<int> m_selectedItems;
   CFileItemList* m_vecList;
+  CFileItemList*  m_itemList;
   CGUIViewControl m_viewControl;
 };

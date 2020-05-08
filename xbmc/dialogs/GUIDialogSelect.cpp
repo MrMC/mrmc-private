@@ -29,6 +29,7 @@
 #define CONTROL_NUMBEROFFILES 2
 #define CONTROL_BUTTON        5
 #define CONTROL_DETAILS       6
+#define CONTROL_MOVE_BUTTON   15
 
 CGUIDialogSelect::CGUIDialogSelect(void)
     : CGUIDialogBoxBase(WINDOW_DIALOG_SELECT, "DialogSelect.xml")
@@ -39,7 +40,9 @@ CGUIDialogSelect::CGUIDialogSelect(void)
   m_buttonString = -1;
   m_useDetails = false;
   m_vecList = new CFileItemList;
+  m_itemList = new CFileItemList;
   m_multiSelection = false;
+  m_orderSelection = false;
   m_selectedItem = nullptr;
   m_loadType = KEEP_IN_MEMORY;
 }
@@ -62,6 +65,7 @@ bool CGUIDialogSelect::OnMessage(CGUIMessage& message)
       m_multiSelection = false;
 
       // construct selected items list
+      m_itemList->Clear();
       m_selectedItems.clear();
       m_selectedItem = nullptr;
       for (int i = 0 ; i < m_vecList->Size() ; i++)
@@ -70,6 +74,7 @@ bool CGUIDialogSelect::OnMessage(CGUIMessage& message)
         if (item->IsSelected())
         {
           m_selectedItems.push_back(i);
+          m_itemList->Add(item);
           if (!m_selectedItem)
             m_selectedItem = item;
         }
@@ -126,6 +131,23 @@ bool CGUIDialogSelect::OnMessage(CGUIMessage& message)
           m_bConfirmed = true;
         Close();
       }
+      else if (CONTROL_MOVE_BUTTON  == iControl)
+      {
+        int iSelected = m_viewControl.GetSelectedItem();
+        if (iSelected == 0)
+        {
+          CFileItemPtr item(m_vecList->Get(iSelected));
+          m_vecList->Remove(iSelected);
+          m_vecList->Add(item);
+          m_viewControl.SetSelectedItem(m_vecList->Size()-1);
+        }
+        else
+        {
+          m_vecList->Swap(iSelected, iSelected - 1);
+          m_viewControl.SetSelectedItem(iSelected - 1);
+        }
+        m_viewControl.SetItems(*m_vecList);
+      }
     }
     break;
   case GUI_MSG_SETFOCUS:
@@ -165,6 +187,7 @@ void CGUIDialogSelect::Reset()
   m_bButtonPressed = false;
   m_useDetails = false;
   m_multiSelection = false;
+  m_orderSelection = false;
   m_selectedItem = nullptr;
   m_vecList->Clear();
   m_selectedItems.clear();
@@ -217,6 +240,11 @@ const std::vector<int>& CGUIDialogSelect::GetSelectedItems() const
   return m_selectedItems;
 }
 
+const CFileItemList* CGUIDialogSelect::GetSelectedItemsList() const
+{
+  return m_itemList;
+}
+
 void CGUIDialogSelect::EnableButton(bool enable, int string)
 {
   m_bButtonEnabled = enable;
@@ -224,6 +252,11 @@ void CGUIDialogSelect::EnableButton(bool enable, int string)
 
   if (IsActive())
     SetupButton();
+}
+
+void CGUIDialogSelect::EnableMove(bool enable)
+{
+  m_orderSelection = enable;
 }
 
 bool CGUIDialogSelect::IsButtonPressed()
@@ -363,4 +396,12 @@ void CGUIDialogSelect::SetupButton()
   }
   else
     SET_CONTROL_HIDDEN(CONTROL_BUTTON);
+
+  if (m_orderSelection)
+  {
+    SET_CONTROL_LABEL(CONTROL_MOVE_BUTTON, g_localizeStrings.Get(116));
+     SET_CONTROL_VISIBLE(CONTROL_MOVE_BUTTON);
+  }
+  else
+    SET_CONTROL_HIDDEN(CONTROL_MOVE_BUTTON);
 }
