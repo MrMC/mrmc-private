@@ -46,7 +46,7 @@
   #include "platform/darwin/tvos/TVOSTopShelf.h"
 #endif
 
-#define NUM_ITEMS 10
+#define NUM_ITEMS 20
 
 
 CHomeButtonJob::CHomeButtonJob()
@@ -221,21 +221,21 @@ bool CHomeShelfJob::UpdateVideo()
     if (!m_compatibleSkin)
     {
       // get InProgress TVSHOWS and MOVIES from any enabled service
-      CServicesManager::GetInstance().GetAllInProgressShows(*m_HomeShelfTVPR, NUM_ITEMS);
-      CServicesManager::GetInstance().GetAllInProgressMovies(*m_HomeShelfMoviesPR, NUM_ITEMS);
+      CServicesManager::GetInstance().GetAllInProgressShows(*m_HomeShelfTVPR, NUM_ITEMS/2);
+      CServicesManager::GetInstance().GetAllInProgressMovies(*m_HomeShelfMoviesPR, NUM_ITEMS/2);
       // get recently added TVSHOWS and MOVIES from any enabled service
-      CServicesManager::GetInstance().GetAllRecentlyAddedShows(*m_HomeShelfTVRA, NUM_ITEMS, homeScreenWatched);
-      CServicesManager::GetInstance().GetAllRecentlyAddedMovies(*m_HomeShelfMoviesRA, NUM_ITEMS, homeScreenWatched);
+      CServicesManager::GetInstance().GetAllRecentlyAddedShows(*m_HomeShelfTVRA, NUM_ITEMS/2, homeScreenWatched);
+      CServicesManager::GetInstance().GetAllRecentlyAddedMovies(*m_HomeShelfMoviesRA, NUM_ITEMS/2, homeScreenWatched);
     }
     videodatabase.Close();
   }
   else
   {
     // get recently added TVSHOWS and MOVIES for chosen server in Home Screen, get 20 items as its not as slow as it was before
-    CServicesManager::GetInstance().GetRecentlyAddedShows(*m_HomeShelfTVRA, NUM_ITEMS*2, true, serverType, serverUUID);
-    CServicesManager::GetInstance().GetRecentlyAddedMovies(*m_HomeShelfMoviesRA, NUM_ITEMS*2, true, serverType, serverUUID);
-    CServicesManager::GetInstance().GetInProgressShows(*m_HomeShelfTVPR, NUM_ITEMS*2, serverType, serverUUID);
-    CServicesManager::GetInstance().GetInProgressMovies(*m_HomeShelfMoviesPR, NUM_ITEMS*2, serverType, serverUUID);
+    CServicesManager::GetInstance().GetRecentlyAddedShows(*m_HomeShelfTVRA, NUM_ITEMS, true, serverType, serverUUID);
+    CServicesManager::GetInstance().GetRecentlyAddedMovies(*m_HomeShelfMoviesRA, NUM_ITEMS, true, serverType, serverUUID);
+    CServicesManager::GetInstance().GetInProgressShows(*m_HomeShelfTVPR, NUM_ITEMS, serverType, serverUUID);
+    CServicesManager::GetInstance().GetInProgressMovies(*m_HomeShelfMoviesPR, NUM_ITEMS, serverType, serverUUID);
     CServicesManager::GetInstance().GetContinueWatching(*m_HomeShelfContinueWatching, serverType, serverUUID);
   }
 
