@@ -1069,6 +1069,11 @@ bool URIUtils::IsDOSPath(const std::string &path)
   return false;
 }
 
+bool URIUtils::IsServicesBased(const std::string& strFile)
+{
+  return IsPlex(strFile) || IsEmby(strFile) || IsJellyfin(strFile);
+}
+
 bool URIUtils::IsPlex(const std::string& strFile)
 {
   return IsProtocol(strFile, "plex");

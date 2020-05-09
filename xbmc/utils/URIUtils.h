@@ -167,6 +167,7 @@ public:
   static bool IsPVRChannel(const std::string& strFile);
   static bool IsPVRGuideItem(const std::string& strFile);
   static bool IsUsingFastSwitch(const std::string& strFile);
+  static bool IsServicesBased(const std::string& strFile);
   static bool IsPlex(const std::string& strFile);
   static bool IsEmby(const std::string& strFile);
   static bool IsJellyfin(const std::string& strFile);
