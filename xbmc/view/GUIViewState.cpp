@@ -44,6 +44,7 @@
 #include "FileItem.h"
 #include "filesystem/AddonsDirectory.h"
 #include "guilib/TextureManager.h"
+#include "utils/Base64URL.h"
 
 #if defined(TARGET_ANDROID)
 #include "filesystem/AndroidAppDirectory.h"
@@ -514,9 +515,17 @@ void CGUIViewState::LoadViewState(const std::string &path, int windowID)
   if (!db.Open())
     return;
 
+  std::string cleanPath = path;
+  if (URIUtils::IsServicesBased(path))
+  {
+    cleanPath = URIUtils::GetFileName(cleanPath);
+    CURL curl(Base64URL::Decode(cleanPath));
+    cleanPath = curl.GetWithoutOptions();
+  }
+
   CViewState state;
-  if (db.GetViewState(path, windowID, state, CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN)) ||
-      db.GetViewState(path, windowID, state, ""))
+  if (db.GetViewState(cleanPath, windowID, state, CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN)) ||
+      db.GetViewState(cleanPath, windowID, state, ""))
   {
     SetViewAsControl(state.m_viewMode);
     SetSortMethod(state.m_sortDescription);
@@ -529,12 +538,19 @@ void CGUIViewState::SaveViewToDb(const std::string &path, int windowID, CViewSta
   if (!db.Open())
     return;
 
+  std::string cleanPath = path;
+  if (URIUtils::IsServicesBased(path))
+  {
+    cleanPath = URIUtils::GetFileName(cleanPath);
+    CURL curl(Base64URL::Decode(cleanPath));
+    cleanPath = curl.GetWithoutOptions();
+  }
   SortDescription sorting = GetSortMethod();
   CViewState state(m_currentViewAsControl, sorting.sortBy, sorting.sortOrder, sorting.sortAttributes);
   if (viewState != NULL)
     *viewState = state;
 
-  db.SetViewState(path, windowID, state, CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN));
+  db.SetViewState(cleanPath, windowID, state, CSettings::GetInstance().GetString(CSettings::SETTING_LOOKANDFEEL_SKIN));
   db.Close();
 
   if (viewState != NULL)
