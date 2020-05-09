@@ -400,8 +400,7 @@ bool CVideoThumbLoader::LoadItemLookup(CFileItem* pItem)
           valid = true;
         // Plex Item art is set to transcode, it will return image so no need to keep checking
         // as the only way is to get the image
-        else if (pItem->IsMediaServiceBased() &&
-                 StringUtils::StartsWith(URIUtils::GetFileName(url),"transcode"))
+        else if (pItem->IsMediaServiceBased())
           valid = true;
         else
         {
