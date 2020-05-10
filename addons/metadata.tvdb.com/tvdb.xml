@@ -265,7 +265,7 @@
 	<GetPremieredFromFirstEp dest="3" clearbuffers="no">
 		<RegExp input="$$4" output="&lt;details&gt;\1&lt;/details&gt;" dest="3">
 			<RegExp input="$$1" output="&lt;premiered&gt;\1&lt;/premiered&gt;" dest="4">
-				<expression>"firstAired":\s*?"([^"]+)"</expression>
+				<expression clear="yes">"firstAired":\s*?"([^"]+)"</expression>
 			</RegExp>
 			<expression noclean="1"/>
 		</RegExp>
