@@ -1410,8 +1410,10 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
         {
           if (strcmp(m_pFormatContext->iformat->name, "mpegts") == 0)
           {
-            if (pStream->id == 0x1015)
+            if (iId != 0 && pStream->id == 0x1015)
             {
+              // might have two video streams, the 2nd might be
+              // a dolby vision stream that we do not handle.
               CLog::Log(LOGDEBUG, "CDVDDemuxFFmpeg::AddStream - discarding suspect dolby vision stream");
               stream->SetDiscard(AVDISCARD_ALL);
               pStream->discard = AVDISCARD_ALL;
