@@ -210,6 +210,7 @@ void CJellyfinUtils::SetUnWatched(CFileItem &item)
 
 void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
 {
+  static double trackingCurrentSecconds = 0.0;
   // if we are Jellyfin music, do not report
   if (item.IsAudio())
     return;
@@ -261,6 +262,7 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
       CURL curl(item.GetPath());
       if (status == "playing" || status == "paused")
       {
+        trackingCurrentSecconds = currentSeconds;
         if (g_progressSec < 0)
           // playback started
           curl.SetFileName(ConstructFileName(curl, "Sessions/Playing"));
@@ -268,7 +270,12 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
           curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Progress"));
       }
       else if (status == "stopped")
+      {
         curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Stopped"));
+        currentSeconds = trackingCurrentSecconds;
+      }
+      else
+        trackingCurrentSecconds = 0.0;
 
       std::string id = item.GetMediaServiceId();
       curl.SetOptions("");

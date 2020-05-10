@@ -194,6 +194,7 @@ void CEmbyUtils::SetUnWatched(CFileItem &item)
 
 void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
 {
+  static double trackingCurrentSecconds = 0.0;
   // if we are Emby music, do not report
   if (item.IsAudio())
     return;
@@ -245,6 +246,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
       CURL curl(item.GetPath());
       if (status == "playing" || status == "paused")
       {
+        trackingCurrentSecconds = currentSeconds;
         if (g_progressSec < 0)
           // playback started
           curl.SetFileName("emby/Sessions/Playing");
@@ -252,7 +254,12 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
           curl.SetFileName("emby/Sessions/Playing/Progress");
       }
       else if (status == "stopped")
+      {
         curl.SetFileName("emby/Sessions/Playing/Stopped");
+        currentSeconds = trackingCurrentSecconds;
+      }
+      else
+        trackingCurrentSecconds = 0.0;
 
       std::string id = item.GetMediaServiceId();
       curl.SetOptions("");
