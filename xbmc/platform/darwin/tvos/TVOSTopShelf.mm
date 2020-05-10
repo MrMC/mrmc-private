@@ -223,6 +223,8 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
               fileName = URIUtils::GetFileName(curl.GetOption("url"));
             else
               fileName = URIUtils::GetFileName(seasonThumb);
+
+            fileName = item->GetMediaServiceId() + fileName;
           }
           else
           {
@@ -329,6 +331,8 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
               fileName = URIUtils::GetFileName(curl.GetOption("url"));
             else
               fileName = URIUtils::GetFileName(seasonThumb);
+            
+            fileName = item->GetMediaServiceId() + fileName;
           }
           else
           {
