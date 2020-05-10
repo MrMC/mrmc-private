@@ -1673,12 +1673,25 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
     std::string seasonEpisode = StringUtils::Format("S%02i:E%02i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
     item->SetProperty("SeasonEpisode", seasonEpisode);
     if (variant.isMember("ParentThumbItemId"))
+    {
       url2.SetFileName("Items/" + variant["ParentThumbItemId"].asString() + "/Images/Primary");
+      item->SetArt("tvshow.thumb", url2.Get());
+      item->SetArt("tvshow.poster", url2.Get());
+    }
     else
+    {
+      url2.SetFileName("Items/" + variant["SeriesId"].asString() + "/Images/Primary");
+      item->SetArt("tvshow.thumb", url2.Get());
+      item->SetArt("tvshow.poster", url2.Get());
+    }
+    if (variant.isMember("SeasonId"))
+    {
       url2.SetFileName("Items/" + variant["SeasonId"].asString() + "/Images/Primary");
+      item->SetArt("season.poster", url2.Get());
+    }
 
-    item->SetArt("tvshow.thumb", url2.Get());
-    item->SetArt("tvshow.poster", url2.Get());
+    item->SetArtFallback("tvshow.poster", "season.poster");
+    item->SetArtFallback("tvshow.thumb", "season.poster");
   }
   else
   {
