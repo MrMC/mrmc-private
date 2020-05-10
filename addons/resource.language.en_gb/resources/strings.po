@@ -12869,7 +12869,9 @@ msgctxt "#20426"
 msgid "Export to a single file or separate files per entry?"
 msgstr ""
 
-#empty string with id 20427
+msgctxt "#20427"
+msgid "Recently Added TV Shows"
+msgstr ""
 
 msgctxt "#20428"
 msgid "Single file"
@@ -19342,12 +19344,12 @@ msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#36645"
-msgid "TopShelf items"
+msgid "Top Shelf items"
 msgstr ""
 
 #: system/settings/settings.xml
 msgctxt "#36646"
-msgid "Select items and order for TopShelf listing"
+msgid "Select items and order for Top Shelf listing"
 msgstr ""
 
 #empty strings from id 36647 to 36899

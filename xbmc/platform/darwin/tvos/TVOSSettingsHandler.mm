@@ -116,7 +116,7 @@ void CTVOSInputSettings::OnSettingAction(const CSetting *setting)
     // MRA, TVRA, MIP, TVIP
     std::map<std::string,std::string> settingItems;
     settingItems["MRA"] = g_localizeStrings.Get(20386);
-    settingItems["TVRA"] = g_localizeStrings.Get(20387);
+    settingItems["TVRA"] = g_localizeStrings.Get(20427);
     settingItems["MIP"] = g_localizeStrings.Get(627);
     settingItems["TVIP"] = g_localizeStrings.Get(626);
 

@@ -205,7 +205,7 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
             title = StringUtils::Format("%s %s", item->GetVideoInfoTag()->m_strShowTitle.c_str(),
                                         item->GetLabel().c_str());
           else
-            title = StringUtils::Format("%s s%02de%02d",
+            title = StringUtils::Format("%s S%02d:E%02d",
                                                   item->GetVideoInfoTag()->m_strShowTitle.c_str(),
                                                   item->GetVideoInfoTag()->m_iSeason,
                                                   item->GetVideoInfoTag()->m_iEpisode);
@@ -255,7 +255,7 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
           [tvArrayRA addObject:tvDictRA];
         }
         [shared setObject:tvArrayRA forKey:keyName];
-        [shared setObject:[NSString stringWithUTF8String:g_localizeStrings.Get(20387).c_str()] forKey:keyTitleName];
+        [shared setObject:[NSString stringWithUTF8String:g_localizeStrings.Get(20427).c_str()] forKey:keyTitleName];
       }
     }
     else if (tsItemName == "MIP")
@@ -316,7 +316,7 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
           std::string seasonThumb;
           CFileItemPtr item = m_HomeShelfTVPR->Get(i);
           NSMutableDictionary * tvDictPR = [[NSMutableDictionary alloc] init];
-          std::string title = StringUtils::Format("%s s%02de%02d",
+          std::string title = StringUtils::Format("%s S%02d:E%02d",
                                                   item->GetVideoInfoTag()->m_strShowTitle.c_str(),
                                                   item->GetVideoInfoTag()->m_iSeason,
                                                   item->GetVideoInfoTag()->m_iEpisode);
