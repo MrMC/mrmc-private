@@ -1679,21 +1679,15 @@ CFileItemPtr CJellyfinUtils::ToVideoFileItemPtr(CURL url, const CVariant &varian
       url2.SetFileName("Items/" + variant["ParentThumbItemId"].asString() + "/Images/Primary");
       item->SetArt("tvshow.thumb", url2.Get());
       item->SetArt("tvshow.poster", url2.Get());
+      item->SetArt("season.poster", url2.Get());
     }
-    else
+    else if(variant.isMember("SeriesPrimaryImageTag"))
     {
       url2.SetFileName("Items/" + variant["SeriesId"].asString() + "/Images/Primary");
       item->SetArt("tvshow.thumb", url2.Get());
       item->SetArt("tvshow.poster", url2.Get());
-    }
-    if (variant.isMember("SeasonId"))
-    {
-      url2.SetFileName("Items/" + variant["SeasonId"].asString() + "/Images/Primary");
       item->SetArt("season.poster", url2.Get());
     }
-
-    item->SetArtFallback("tvshow.poster", "season.poster");
-    item->SetArtFallback("tvshow.thumb", "season.poster");
   }
   else
   {
