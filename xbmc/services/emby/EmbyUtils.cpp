@@ -1682,17 +1682,16 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
     if (variant.isMember("ParentThumbItemId"))
     {
       url2.SetFileName("Items/" + variant["ParentThumbItemId"].asString() + "/Images/Primary");
-      item->SetArt("tvshow.thumb", url2.Get());
-      item->SetArt("tvshow.poster", url2.Get());
       item->SetArt("season.poster", url2.Get());
     }
-    else if(variant.isMember("SeriesPrimaryImageTag"))
+    if(variant.isMember("SeriesPrimaryImageTag"))
     {
       url2.SetFileName("Items/" + variant["SeriesId"].asString() + "/Images/Primary");
       item->SetArt("tvshow.thumb", url2.Get());
       item->SetArt("tvshow.poster", url2.Get());
-      item->SetArt("season.poster", url2.Get());
     }
+    item->SetArtFallback("tvshow.poster", "season.poster");
+    item->SetArtFallback("tvshow.thumb", "season.poster");
   }
   else
   {
