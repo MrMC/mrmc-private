@@ -1677,7 +1677,7 @@ CFileItemPtr CEmbyUtils::ToVideoFileItemPtr(CURL url, const CVariant &variant, s
     item->GetVideoInfoTag()->m_iEpisode = variant["IndexNumber"].asInteger();
     item->SetLabel(variant["SeasonName"].asString());
     item->SetProperty("EmbySeriesID", seriesId);
-    std::string seasonEpisode = StringUtils::Format("S%02i:E%02i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
+    std::string seasonEpisode = StringUtils::Format("S%i E%i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
     item->SetProperty("SeasonEpisode", seasonEpisode);
     if (variant.isMember("ParentThumbItemId"))
     {

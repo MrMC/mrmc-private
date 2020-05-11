@@ -154,7 +154,7 @@ bool CHomeShelfJob::UpdateVideo()
       for (int i = 0; i < homeShelfTVPR.Size() && i < NUM_ITEMS; i++)
       {
         CFileItemPtr item = homeShelfTVPR.Get(i);
-        std::string seasonEpisode = StringUtils::Format("S%02i:E%02i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
+        std::string seasonEpisode = StringUtils::Format("S%i E%i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
         item->SetProperty("SeasonEpisode", seasonEpisode);
         item->SetProperty("ItemType", g_localizeStrings.Get(682));
         if (!item->HasArt("thumb"))
@@ -204,7 +204,7 @@ bool CHomeShelfJob::UpdateVideo()
       for (int i = 0; i < homeShelfTVRA.Size(); i++)
       {
         CFileItemPtr item = homeShelfTVRA.Get(i);
-        std::string seasonEpisode = StringUtils::Format("S%02i:E%02i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
+        std::string seasonEpisode = StringUtils::Format("S%i E%i", item->GetVideoInfoTag()->m_iSeason, item->GetVideoInfoTag()->m_iEpisode);
         item->SetProperty("SeasonEpisode", seasonEpisode);
         item->SetProperty("ItemType", g_localizeStrings.Get(681));
         if (!item->HasArt("thumb"))

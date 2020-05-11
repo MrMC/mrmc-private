@@ -205,7 +205,7 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
             title = StringUtils::Format("%s %s", item->GetVideoInfoTag()->m_strShowTitle.c_str(),
                                         item->GetLabel().c_str());
           else
-            title = StringUtils::Format("%s S%02d:E%02d",
+            title = StringUtils::Format("%s S%d E%d",
                                                   item->GetVideoInfoTag()->m_strShowTitle.c_str(),
                                                   item->GetVideoInfoTag()->m_iSeason,
                                                   item->GetVideoInfoTag()->m_iEpisode);
@@ -318,7 +318,7 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
           std::string seasonThumb;
           CFileItemPtr item = m_HomeShelfTVPR->Get(i);
           NSMutableDictionary * tvDictPR = [[NSMutableDictionary alloc] init];
-          std::string title = StringUtils::Format("%s S%02d:E%02d",
+          std::string title = StringUtils::Format("%s S%d E%d",
                                                   item->GetVideoInfoTag()->m_strShowTitle.c_str(),
                                                   item->GetVideoInfoTag()->m_iSeason,
                                                   item->GetVideoInfoTag()->m_iEpisode);

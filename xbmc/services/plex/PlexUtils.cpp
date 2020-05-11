@@ -1648,7 +1648,7 @@ bool CPlexUtils::ParsePlexVideos(CFileItemList &items, CURL url, const CVariant 
 
       plexItem->SetIconImage(imagePath);
 
-      std::string seasonEpisode = StringUtils::Format("S%02i:E%02i", plexItem->GetVideoInfoTag()->m_iSeason, plexItem->GetVideoInfoTag()->m_iEpisode);
+      std::string seasonEpisode = StringUtils::Format("S%i E%i", plexItem->GetVideoInfoTag()->m_iSeason, plexItem->GetVideoInfoTag()->m_iEpisode);
       plexItem->SetProperty("SeasonEpisode", seasonEpisode);
     }
     else
