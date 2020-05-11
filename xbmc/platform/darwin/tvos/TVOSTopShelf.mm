@@ -115,14 +115,36 @@ void CTVOSTopShelf::SetTopShelfItems(CFileItemList& moviesRA, CFileItemList& tvR
   //std::vector<std::string> settingItems = {"MRA", "TVRA", "MIP", "TVIP"};
   std::vector<CVariant> tsItems = CSettings::GetInstance().GetList(CSettings::SETTING_VIDEOLIBRARY_TOPSHELF_ITEMS);
 
+  // clear the old keys
+  BOOL removeOldKeys = YES;
   // clear the shared group objects
   NSDictionary * dict = [shared dictionaryRepresentation];
   for (NSString *key in dict)
   {
     // remove all mrmc_ keys
     if ([key hasPrefix:@"mrmc_"])
+    {
       [shared removeObjectForKey:key];
+      // if we have any "mrmc_*" keys then this is not
+      // the first time we are here and old keys have been removed already
+      removeOldKeys = NO;
+    }
     [shared synchronize];
+  }
+
+  if (removeOldKeys)
+  {
+    // clean our old keys, to prevent poluting the defaults
+    // we should remeove this in the next versions
+    [shared removeObjectForKey:@"moviesRA"];
+    [shared removeObjectForKey:@"moviesTitleRA"];
+    [shared removeObjectForKey:@"tvRA"];
+    [shared removeObjectForKey:@"tvTitleRA"];
+    [shared removeObjectForKey:@"moviesPR"];
+    [shared removeObjectForKey:@"moviesTitlePR"];
+    [shared removeObjectForKey:@"tvPR"];
+    [shared removeObjectForKey:@"tvTitlePR"];
+    // -------------------------------------------------- //
   }
 
   NSMutableArray *itemOrder = [NSMutableArray array];
