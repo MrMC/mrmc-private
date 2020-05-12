@@ -6131,7 +6131,19 @@ msgctxt "#12398"
 msgid "Auto updates: Never"
 msgstr ""
 
-#empty strings from id 12399 to 12599
+#: represents hour in SecondsToTimeString
+#: StringUtils
+msgctxt "#12399"
+msgid "h"
+msgstr ""
+
+#: represents minute in SecondsToTimeString
+#: StringUtils
+msgctxt "#12400"
+msgid "min"
+msgstr ""
+
+#empty strings from id 12401 to 12599
 
 #: xbmc/guilib/WindowIDs.h
 msgctxt "#12600"

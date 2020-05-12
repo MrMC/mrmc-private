@@ -36,6 +36,7 @@
 #include "utils/log.h"
 #include "Util.h"
 #include "LangInfo.h"
+#include "guilib/LocalizeStrings.h"
 #include <locale>
 #include <functional>
 
@@ -948,6 +949,16 @@ std::string StringUtils::SecondsToTimeString(long lSeconds, TIME_FORMAT format)
   lSeconds = lSeconds % 3600;
   int mm = lSeconds / 60;
   int ss = lSeconds % 60;
+
+  if ((format & TIME_FORMAT_hh_mm) == TIME_FORMAT_hh_mm)
+  {
+    std::string formatedStrHMS;
+    if (hh >= 1)
+      formatedStrHMS = StringUtils::Format("%i%s", hh, g_localizeStrings.Get(12399).c_str());
+    formatedStrHMS += StringUtils::Format(formatedStrHMS.empty() ? "%i%s" : " %i%s",
+                                  mm, g_localizeStrings.Get(12400).c_str());
+    return formatedStrHMS;
+  }
 
   if (format == TIME_FORMAT_GUESS)
     format = (hh >= 1) ? TIME_FORMAT_HH_MM_SS : TIME_FORMAT_MM_SS;

@@ -43,7 +43,8 @@ enum TIME_FORMAT { TIME_FORMAT_GUESS       =  0,
                    TIME_FORMAT_H           = 16,
                    TIME_FORMAT_H_MM_SS     = 19,
                    TIME_FORMAT_H_MM_SS_XX  = 27,
-                   TIME_FORMAT_M           = 32};
+                   TIME_FORMAT_M           = 32,
+                   TIME_FORMAT_hh_mm       = 33}; // this will create localized 3h 21min or 21min string if hour is 0
 
 class CDateTime;
 

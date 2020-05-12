@@ -514,6 +514,7 @@ const infomap listitem_labels[]= {{ "thumb",            LISTITEM_THUMB },
                                   { "votes",            LISTITEM_VOTES },
                                   { "programcount",     LISTITEM_PROGRAM_COUNT },
                                   { "duration",         LISTITEM_DURATION },
+                                  { "formatedduration", LISTITEM_FORMATED_DURATION },
                                   { "isselected",       LISTITEM_ISSELECTED },
                                   { "isplaying",        LISTITEM_ISPLAYING },
                                   { "plot",             LISTITEM_PLOT },
@@ -5358,6 +5359,7 @@ std::string CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::
       return StringUtils::Format("%i", item->m_iprogramCount);
     }
   case LISTITEM_DURATION:
+  case LISTITEM_FORMATED_DURATION:
     {
       std::string duration;
       if (item->HasPVRChannelInfoTag())
@@ -5384,7 +5386,12 @@ std::string CGUIInfoManager::GetItemLabel(const CFileItem *item, int info, std::
       else if (item->HasVideoInfoTag())
       {
         if (item->GetVideoInfoTag()->GetDuration() > 0)
-          duration = StringUtils::Format("%d", item->GetVideoInfoTag()->GetDuration() / 60);
+        {
+          if (info == LISTITEM_DURATION)
+            duration = StringUtils::Format("%d", item->GetVideoInfoTag()->GetDuration() / 60);
+          else
+            duration = StringUtils::SecondsToTimeString(item->GetVideoInfoTag()->GetDuration(), TIME_FORMAT_hh_mm);
+        }
       }
       else if (item->HasMusicInfoTag())
       {
