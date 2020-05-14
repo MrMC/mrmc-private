@@ -337,13 +337,12 @@ bool CJellyfinUtils::GetMoreItemInfo(CFileItem &item)
   else
     itemId = item.GetMediaServiceId();
   
-  url2.SetFileName(ConstructFileName(url2, "Users/", false) + client->GetUserID() + "/Items");
+  url2.SetFileName(ConstructFileName(url2, "Users/", false) + client->GetUserID() + "/Items/" + itemId);
   url2.SetOptions("");
-  url2.SetOption("Fields", "Genres,People");
-  url2.SetOption("IDs", itemId);
   const CVariant variant = GetJellyfinCVariant(url2.Get());
   
-  GetVideoDetails(item, variant["Items"][0]);
+  GetMediaDetals(item, variant, itemId);
+  GetVideoDetails(item, variant);
   
   if (item.HasProperty("JellyfinMovieTrailer") && !item.GetProperty("JellyfinMovieTrailer").asString().empty())
   {
@@ -1204,6 +1203,7 @@ bool CJellyfinUtils::ParseJellyfinSeasons(CFileItemList &items, const CURL &url,
     imagePath = curl.Get();
     newItem->SetArt("banner", imagePath);
     curl.SetFileName(ConstructFileName(curl, "Items/") + seriesId + "/Images/Backdrop");
+    imagePath = curl.Get();
     newItem->SetArt("fanart", imagePath);
 
     newItem->GetVideoInfoTag()->m_type = MediaTypeSeason;

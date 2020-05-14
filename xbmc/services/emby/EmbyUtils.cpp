@@ -321,13 +321,12 @@ bool CEmbyUtils::GetMoreItemInfo(CFileItem &item)
   else
     itemId = item.GetMediaServiceId();
   
-  url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items");
+  url2.SetFileName("emby/Users/" + client->GetUserID() + "/Items/" + itemId);
   url2.SetOptions("");
-  url2.SetOption("Fields", "Genres,People");
-  url2.SetOption("IDs", itemId);
   const CVariant variant = GetEmbyCVariant(url2.Get());
-  
-  GetVideoDetails(item, variant["Items"][0]);
+
+  GetMediaDetals(item, variant, itemId);
+  GetVideoDetails(item, variant);
   
   if (item.HasProperty("EmbyMovieTrailer") && !item.GetProperty("EmbyMovieTrailer").asString().empty())
   {
@@ -1202,6 +1201,7 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
     imagePath = curl.Get();
     newItem->SetArt("banner", imagePath);
     curl.SetFileName("Items/" + seriesId + "/Images/Backdrop");
+    imagePath = curl.Get();
     newItem->SetArt("fanart", imagePath);
 
     newItem->GetVideoInfoTag()->m_type = MediaTypeSeason;
