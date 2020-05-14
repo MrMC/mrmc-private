@@ -76,7 +76,7 @@ static CFileItem m_curItem;
 // one tick is 0.1 microseconds
 static const uint64_t TicksToSecondsFactor = 10000000;
 
-static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::stopped;
+static MediaServicesPlayerState g_playbackState = MediaServicesPlayerState::unknown;
 
 bool CEmbyUtils::HasClients()
 {
@@ -200,7 +200,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
     return;
 
   // we get called from Application.cpp every 500ms
-  if ((g_playbackState == MediaServicesPlayerState::stopped || g_progressSec <= 0 || g_progressSec > 30))
+  if ((g_playbackState != MediaServicesPlayerState::unknown && g_progressSec <= 0) || g_progressSec > 20)
   {
     g_progressSec = 0;
     
@@ -257,9 +257,8 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
       {
         curl.SetFileName("emby/Sessions/Playing/Stopped");
         currentSeconds = trackingCurrentSecconds;
+        SetPlayState(MediaServicesPlayerState::unknown);
       }
-      else
-        trackingCurrentSecconds = 0.0;
 
       std::string id = item.GetMediaServiceId();
       curl.SetOptions("");

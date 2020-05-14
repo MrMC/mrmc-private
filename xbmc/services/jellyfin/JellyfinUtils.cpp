@@ -216,7 +216,7 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
     return;
 
   // we get called from Application.cpp every 500ms
-  if ((g_playbackState == MediaServicesPlayerState::stopped || g_progressSec <= 0 || g_progressSec > 30))
+  if ((g_playbackState != MediaServicesPlayerState::unknown && g_progressSec <= 0) || g_progressSec > 20)
   {
     g_progressSec = 0;
     
@@ -273,9 +273,8 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
       {
         curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Stopped"));
         currentSeconds = trackingCurrentSecconds;
+        SetPlayState(MediaServicesPlayerState::unknown);
       }
-      else
-        trackingCurrentSecconds = 0.0;
 
       std::string id = item.GetMediaServiceId();
       curl.SetOptions("");

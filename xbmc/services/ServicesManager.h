@@ -33,6 +33,7 @@ class CFileItemList;
 
 enum class MediaServicesPlayerState
 {
+  unknown = 0,
   paused = 1,
   playing = 2,
   stopped = 3,
