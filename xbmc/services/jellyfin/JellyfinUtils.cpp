@@ -734,10 +734,10 @@ bool CJellyfinUtils::GetJellyfinSeasons(CFileItemList &items, const std::string 
   bool rtn = false;
   
   CURL url2(url);
-  url2.SetOption("IncludeItemTypes", JellyfinTypeSeasons);
-  url2.SetOption("Fields", "Etag,DateCreated,PremiereDate,ProductionYear,ImageTags,RecursiveItemCount");
   std::string parentId = url2.GetOption("ParentId");
   url2.SetOptions("");
+  url2.SetOption("IncludeItemTypes", JellyfinTypeSeasons);
+  url2.SetOption("Fields", "Etag,DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,ImageTags,RecursiveItemCount,ChildCount,RecursiveItemCount");
   url2.SetOption("ParentId", parentId);
   
   const CVariant variant = GetJellyfinCVariant(url2.Get());
@@ -748,7 +748,7 @@ bool CJellyfinUtils::GetJellyfinSeasons(CFileItemList &items, const std::string 
     std::string seriesID = url3.GetOption("ParentId");
     url3.SetOptions("");
     url3.SetOption("Ids", seriesID);
-    url3.SetOption("Fields", "Overview,Genres,DateCreated,PremiereDate,ProductionYear");
+    url3.SetOption("Fields", "Overview,Genres,DateCreated,CriticRating,OfficialRating,CommunityRating,PremiereDate,ProductionYear");
     const CVariant seriesObject = CJellyfinUtils::GetJellyfinCVariant(url3.Get());
     
     rtn = ParseJellyfinSeasons(items, url2, seriesObject, variant);
@@ -1213,7 +1213,7 @@ bool CJellyfinUtils::ParseJellyfinSeasons(CFileItemList &items, const CURL &url,
     newItem->GetVideoInfoTag()->m_strShowTitle = seriesName;
     newItem->GetVideoInfoTag()->SetPlotOutline(seriesItem["Overview"].asString());
     newItem->GetVideoInfoTag()->SetPlot(seriesItem["Overview"].asString());
-    newItem->GetVideoInfoTag()->SetYear(seriesItem["ProductionYear"].asInteger());
+//    newItem->GetVideoInfoTag()->SetYear(seriesItem["ProductionYear"].asInteger());
     std::vector<std::string> genres;
     const auto& streams = seriesItem["Genres"];
     for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)

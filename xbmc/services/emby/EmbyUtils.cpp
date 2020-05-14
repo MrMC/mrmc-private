@@ -732,10 +732,10 @@ bool CEmbyUtils::GetEmbySeasons(CFileItemList &items, const std::string url)
   bool rtn = false;
   
   CURL url2(url);
-  url2.SetOption("IncludeItemTypes", EmbyTypeSeasons);
-  url2.SetOption("Fields", "Etag,DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,ImageTags,RecursiveItemCount");
   std::string parentId = url2.GetOption("ParentId");
   url2.SetOptions("");
+  url2.SetOption("IncludeItemTypes", EmbyTypeSeasons);
+  url2.SetOption("Fields", "Etag,DateCreated,PremiereDate,CriticRating,OfficialRating,CommunityRating,ProductionYear,ImageTags,RecursiveItemCount,ChildCount,RecursiveItemCount");
   url2.SetOption("ParentId", parentId);
   
   const CVariant variant = GetEmbyCVariant(url2.Get());
@@ -1211,7 +1211,7 @@ bool CEmbyUtils::ParseEmbySeasons(CFileItemList &items, const CURL &url, const C
     newItem->GetVideoInfoTag()->m_strShowTitle = seriesName;
     newItem->GetVideoInfoTag()->SetPlotOutline(seriesItem["Overview"].asString());
     newItem->GetVideoInfoTag()->SetPlot(seriesItem["Overview"].asString());
-    newItem->GetVideoInfoTag()->SetYear(seriesItem["ProductionYear"].asInteger());
+//    newItem->GetVideoInfoTag()->SetYear(seriesItem["ProductionYear"].asInteger());
     std::vector<std::string> genres;
     const auto& streams = seriesItem["Genres"];
     for (auto streamIt = streams.begin_array(); streamIt != streams.end_array(); ++streamIt)
