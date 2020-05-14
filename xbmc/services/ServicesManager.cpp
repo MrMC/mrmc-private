@@ -140,6 +140,7 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
      switch(mkhash(message))
       {
         case "OnPlay"_mkhash:
+        case "OnSeek"_mkhash:
           if (isPlex)
             CPlexUtils::SetPlayState(MediaServicesPlayerState::playing);
           else if (isEmby)
