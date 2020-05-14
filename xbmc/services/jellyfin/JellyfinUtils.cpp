@@ -262,7 +262,14 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
       CURL curl(item.GetPath());
       if (status == "playing" || status == "paused")
       {
-        trackingCurrentSecconds = currentSeconds;
+        // we dont want to set tracking seconds to 0
+        // if the playback is stopped in the first 10 seconds, we will report it
+        // to JF as 0 seconds when we send "emby/Sessions/Playing/Stopped"
+        // that will mark the item played
+        if (currentSeconds < 1)
+          trackingCurrentSecconds = 1;
+        else
+          trackingCurrentSecconds = currentSeconds;
         if (g_progressSec < 0)
           // playback started
           curl.SetFileName(ConstructFileName(curl, "Sessions/Playing"));

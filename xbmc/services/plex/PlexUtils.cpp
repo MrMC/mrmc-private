@@ -253,12 +253,14 @@ void CPlexUtils::SetUnWatched(CFileItem &item)
 
 void CPlexUtils::ReportProgress(CFileItem &item, double currentSeconds)
 {
+  static double trackingCurrentSecconds = 0.0;
+
   // if we are Plex music, do not report
   if (item.IsAudio())
     return;
   
   // we get called from Application.cpp every 500ms
-  if ((g_playbackState == MediaServicesPlayerState::stopped || g_progressSec == 0 || g_progressSec > 120))
+  if ((g_playbackState != MediaServicesPlayerState::unknown && g_progressSec <= 0) || g_progressSec > 120)
   {
     g_progressSec = 0;
 
@@ -289,6 +291,21 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentSeconds)
       std::string id    = item.GetMediaServiceId();
       int totalSeconds  = item.GetVideoInfoTag()->m_resumePoint.totalTimeInSeconds;
 
+
+
+      if (status == "stopped")
+      {
+        currentSeconds = trackingCurrentSecconds;
+        SetPlayState(MediaServicesPlayerState::unknown);
+      }
+      else
+      {
+        if (currentSeconds < 1)
+          trackingCurrentSecconds = 1;
+        else
+          trackingCurrentSecconds = currentSeconds;
+      }
+
       std::string filename = StringUtils::Format(":/timeline?ratingKey=%s&",id.c_str());
       filename = filename + "key=%2Flibrary%2Fmetadata%2F" +
         StringUtils::Format("%s&state=%s&time=%i&duration=%i", id.c_str(), status.c_str(),
@@ -297,8 +314,7 @@ void CPlexUtils::ReportProgress(CFileItem &item, double currentSeconds)
       ReportToServer(url, filename);
       //CLog::Log(LOGDEBUG, "CPlexUtils::ReportProgress %s", filename.c_str());
     }
-    if (g_playbackState == MediaServicesPlayerState::stopped &&
-        item.GetProperty("PlexTranscoder").asBoolean())
+    if (status == "stopped" && item.GetProperty("PlexTranscoder").asBoolean())
     {
       StopTranscode(item);
     }
