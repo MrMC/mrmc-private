@@ -1726,12 +1726,6 @@ bool CPlexUtils::ParsePlexVideos(CFileItemList &items, CURL url, const CVariant 
     const CVariant media = makeVariantArrayIfSingleItem(item["Media"]);
     GetMediaDetals(*plexItem, url, media[0]);
 
-    if (formatLabel)
-    {
-      CLabelFormatter formatter("%H. %T", "");
-      formatter.FormatLabel(plexItem.get());
-      plexItem->SetLabelPreformated(true);
-    }
     SetPlexItemProperties(*plexItem);
     items.Add(plexItem);
   }

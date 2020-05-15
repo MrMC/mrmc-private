@@ -235,15 +235,15 @@ CGUIViewStateWindowVideoNav::CGUIViewStateWindowVideoNav(const CFileItemList& it
       {
         if (params.GetSeason() > -1)
         {
-          AddSortMethod(SortByEpisodeNumber, 20359, LABEL_MASKS("%E. %T","%R"));  // Episode. Title, Rating | empty, empty
-          AddSortMethod(SortByRating, 563, LABEL_MASKS("%E. %T", "%R"));  // Episode. Title, Rating | empty, empty
-          AddSortMethod(SortByUserRating, 38018, LABEL_MASKS("%E. %T", "%r"));  // Episode. Title, Userrating | empty, empty
-          AddSortMethod(SortByMPAA, 20074, LABEL_MASKS("%E. %T", "%O"));  // Episode. Title, MPAA | empty, empty
-          AddSortMethod(SortByProductionCode, 20368, LABEL_MASKS("%E. %T","%P", "%E. %T","%P"));  // Episode. Title, ProductionCode | Episode. Title, ProductionCode
-          AddSortMethod(SortByDate, 552, LABEL_MASKS("%E. %T","%J","%E. %T","%J"));  // Episode. Title, Date | Episode. Title, Date
+          AddSortMethod(SortByEpisodeNumber, 20359, LABEL_MASKS("%H. %T","%R"));  // Episode. Title, Rating | empty, empty
+          AddSortMethod(SortByRating, 563, LABEL_MASKS("%H. %T", "%R"));  // Episode. Title, Rating | empty, empty
+          AddSortMethod(SortByUserRating, 38018, LABEL_MASKS("%H. %T", "%r"));  // Episode. Title, Userrating | empty, empty
+          AddSortMethod(SortByMPAA, 20074, LABEL_MASKS("%H. %T", "%O"));  // Episode. Title, MPAA | empty, empty
+          AddSortMethod(SortByProductionCode, 20368, LABEL_MASKS("%H. %T","%P", "%E. %T","%P"));  // Episode. Title, ProductionCode | Episode. Title, ProductionCode
+          AddSortMethod(SortByDate, 552, LABEL_MASKS("%H. %T","%J","%E. %T","%J"));  // Episode. Title, Date | Episode. Title, Date
 
           if (CMediaSettings::GetInstance().GetWatchedMode(items.GetContent()) == WatchedModeAll)
-            AddSortMethod(SortByPlaycount, 567, LABEL_MASKS("%E. %T", "%V"));  // Episode. Title, Playcount | empty, empty
+            AddSortMethod(SortByPlaycount, 567, LABEL_MASKS("%H. %T", "%V"));  // Episode. Title, Playcount | empty, empty
         }
         else
         {

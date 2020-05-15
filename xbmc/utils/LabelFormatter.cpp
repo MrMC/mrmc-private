@@ -286,7 +286,7 @@ std::string CLabelFormatter::GetMaskContent(const CMaskString &mask, const CFile
       if (movie->m_iSeason == 0)
         value = StringUtils::Format("S%02.2i", movie->m_iEpisode);
       else
-        value = StringUtils::Format("%ix%02.2i", movie->m_iSeason,movie->m_iEpisode);
+        value = StringUtils::Format("S%i:E%i", movie->m_iSeason,movie->m_iEpisode);
     }
     break;
   case 'O':
