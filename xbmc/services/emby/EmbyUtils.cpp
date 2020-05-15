@@ -196,6 +196,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
 {
   static double trackingCurrentSecconds = 0.0;
   static bool isPaused = false;
+  static bool playBackFirstStart = true;
   // if we are Emby music, do not report
   if (item.IsAudio())
     return;
@@ -203,7 +204,15 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
   // we get called from Application.cpp every 500ms
   if ((g_playbackState != MediaServicesPlayerState::unknown && g_progressSec <= 0) || g_progressSec > 20)
   {
-    g_progressSec = 0;
+    if (g_progressSec == -1 &&
+        g_playbackState != MediaServicesPlayerState::stopped)
+    {
+      // hack hack.. "currentSeconds" is all over the place when the
+      // player state changes , onPlay, onSeek, onStop .. so delay reporting by 500ms(one cycle)
+      // to get the righ time
+      g_progressSec = 0;
+      return;
+    }
     
     std::string status;
     if (g_playbackState == MediaServicesPlayerState::playing )
@@ -212,8 +221,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
       status = "paused";
     else if (g_playbackState == MediaServicesPlayerState::stopped)
       status = "stopped";
-    else if (g_playbackState == MediaServicesPlayerState::seek)
-      status = "seek";
+
 
     if (!status.empty())
     {
@@ -255,13 +263,16 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
         // to emby as 0 seconds when we send "emby/Sessions/Playing/Stopped"
         // that will mark the item played
         if (currentSeconds < 1)
+          currentSeconds = 1;
+
+        if (playBackFirstStart)
         {
-          trackingCurrentSecconds = 1;
           curl.SetFileName("emby/Sessions/Playing");
+          playBackFirstStart = false;
         }
         else
         {
-          if (isPaused)
+          if (isPaused && !g_application.m_pPlayer->IsPaused())
           {
             curl.SetOption("EventName", "Unpause");
             isPaused = false;
@@ -270,19 +281,15 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
             curl.SetOption("EventName", "TimeUpdate");
 
           curl.SetFileName("emby/Sessions/Playing/Progress");
-          trackingCurrentSecconds = currentSeconds;
         }
+        trackingCurrentSecconds = currentSeconds;
       }
       else if (status == "paused")
       {
         curl.SetOption("EventName", "Pause");
         curl.SetFileName("emby/Sessions/Playing/Progress");
+        trackingCurrentSecconds = currentSeconds;
         isPaused = true;
-      }
-      else if (status == "seek")
-      {
-        curl.SetOption("EventName", "TimeUpdate");
-        curl.SetFileName("emby/Sessions/Playing/Progress");
       }
       else if (status == "stopped")
       {
@@ -290,6 +297,7 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
         currentSeconds = trackingCurrentSecconds;
         SetPlayState(MediaServicesPlayerState::unknown);
         isPaused = false;
+        playBackFirstStart = true;
       }
 
       curl.SetOption("QueueableMediaTypes", "Video");
