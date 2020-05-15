@@ -691,7 +691,7 @@ void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, 
     CVariant data;
     if (item.HasVideoInfoTag() && item.GetVideoInfoTag()->m_type == MediaTypeEpisode)
     {
-      if  (!itemData.isNull() && itemUrl == item.GetVideoInfoTag()->m_strPath)
+      if  (!itemData.isNull() && itemUrl == item.GetPath())
       {
         data["episode"] = itemData;
         CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = from known episode");
@@ -744,7 +744,7 @@ void CTraktServices::ReportProgress(CFileItem &item, const std::string &status, 
         if (!episode.isNull())
         {
           itemData = episode;
-          itemUrl = item.GetVideoInfoTag()->m_strPath;
+          itemUrl = item.GetPath();
           data["episode"] = episode;
           CLog::Log(LOGDEBUG, "CTraktServices::ReportProgress status = from unknown episode");
         }
