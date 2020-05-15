@@ -1698,8 +1698,8 @@ CFileItemPtr CJellyfinUtils::ToVideoFileItemPtr(CURL url, const CVariant &varian
     url2.SetFileName(CJellyfinUtils::ConstructFileName(url, "Items/", false) + itemId + "/Images/Primary");
     item->SetArt("thumb", url2.Get());
     item->SetIconImage(url2.Get());
-    CVariant fanarts = variant["BackdropImageTags"];
-    url2.SetFileName(CJellyfinUtils::ConstructFileName(url, "Items/", false) + itemId + "/Images/Backdrop");
+    CVariant fanarts = variant["ParentBackdropImageTags"];
+    url2.SetFileName(CJellyfinUtils::ConstructFileName(url, "Items/", false) + variant["ParentBackdropItemId"].asString() + "/Images/Backdrop");
     fanart = url2.Get();
     if (fanarts.size() > 0)
       item->SetArt("fanart", fanart);
