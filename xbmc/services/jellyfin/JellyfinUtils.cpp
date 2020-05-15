@@ -211,6 +211,7 @@ void CJellyfinUtils::SetUnWatched(CFileItem &item)
 void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
 {
   static double trackingCurrentSecconds = 0.0;
+  static bool isPaused = false;
   // if we are Jellyfin music, do not report
   if (item.IsAudio())
     return;
@@ -227,6 +228,8 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
       status = "paused";
     else if (g_playbackState == MediaServicesPlayerState::stopped)
       status = "stopped";
+    else if (g_playbackState == MediaServicesPlayerState::seek)
+      status = "seek";
 
     if (!status.empty())
     {
@@ -260,31 +263,52 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
       */
 
       CURL curl(item.GetPath());
-      if (status == "playing" || status == "paused")
+      curl.SetOptions("");
+      std::string id = item.GetMediaServiceId();
+      if (status == "playing")
       {
         // we dont want to set tracking seconds to 0
         // if the playback is stopped in the first 10 seconds, we will report it
         // to JF as 0 seconds when we send "emby/Sessions/Playing/Stopped"
         // that will mark the item played
         if (currentSeconds < 1)
+        {
           trackingCurrentSecconds = 1;
-        else
-          trackingCurrentSecconds = currentSeconds;
-        if (g_progressSec < 0)
-          // playback started
           curl.SetFileName(ConstructFileName(curl, "Sessions/Playing"));
+        }
         else
+        {
+          if (isPaused)
+          {
+            curl.SetOption("EventName", "Unpause");
+            isPaused = false;
+          }
+          else
+            curl.SetOption("EventName", "TimeUpdate");
+
           curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Progress"));
+          trackingCurrentSecconds = currentSeconds;
+        }
+      }
+      else if (status == "paused")
+      {
+        curl.SetOption("EventName", "Pause");
+        curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Progress"));
+        isPaused = true;
+      }
+      else if (status == "seek")
+      {
+        curl.SetOption("EventName", "TimeUpdate");
+        curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Progress"));
       }
       else if (status == "stopped")
       {
         curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Stopped"));
         currentSeconds = trackingCurrentSecconds;
         SetPlayState(MediaServicesPlayerState::unknown);
+        isPaused = false;
       }
 
-      std::string id = item.GetMediaServiceId();
-      curl.SetOptions("");
       curl.SetOption("QueueableMediaTypes", "Video");
       curl.SetOption("CanSeek", "True");
       curl.SetOption("ItemId", id);
@@ -292,7 +316,7 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
       curl.SetOption("PlayMethod", "DirectPlay");
       curl.SetOption("PositionTicks", StringUtils::Format("%llu", SecondsToTicks(currentSeconds)));
       curl.SetOption("IsMuted", "False");
-      curl.SetOption("IsPaused", status == "paused" ? "True" : "False");
+      curl.SetOption("IsPaused", isPaused ? "True" : "False");
 
       std::string data;
       std::string response;

@@ -140,13 +140,18 @@ void CServicesManager::Announce(AnnouncementFlag flag, const char *sender, const
      switch(mkhash(message))
       {
         case "OnPlay"_mkhash:
-        case "OnSeek"_mkhash:
           if (isPlex)
             CPlexUtils::SetPlayState(MediaServicesPlayerState::playing);
           else if (isEmby)
             CEmbyUtils::SetPlayState(MediaServicesPlayerState::playing);
           else if (isJellyfin)
             CJellyfinUtils::SetPlayState(MediaServicesPlayerState::playing);
+          break;
+        case "OnSeek"_mkhash:
+          if (isEmby)
+            CEmbyUtils::SetPlayState(MediaServicesPlayerState::seek);
+          else if (isJellyfin)
+            CJellyfinUtils::SetPlayState(MediaServicesPlayerState::seek);
           break;
         case "OnPause"_mkhash:
           if (isPlex)

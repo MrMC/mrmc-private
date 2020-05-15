@@ -37,6 +37,7 @@ enum class MediaServicesPlayerState
   paused = 1,
   playing = 2,
   stopped = 3,
+  seek = 4,
 };
 
 typedef struct MediaServicesMediaCount
