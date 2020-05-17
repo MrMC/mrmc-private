@@ -213,7 +213,9 @@ void CEmbyUtils::ReportProgress(CFileItem &item, double currentSeconds)
       g_progressSec = 0;
       return;
     }
-    
+
+    g_progressSec = 0;
+
     std::string status;
     if (g_playbackState == MediaServicesPlayerState::playing )
       status = "playing";
