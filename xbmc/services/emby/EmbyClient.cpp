@@ -938,8 +938,26 @@ bool CEmbyClient::FetchViewItems(CEmbyViewCachePtr &view, const CURL &url, const
     CLog::Log(LOGDEBUG, "CEmbyClient::FetchViewItems unknown type: %s", type.c_str());
     //return false;
   }
+  curl.SetOption("StartIndex", "0");
+  curl.SetOption("Limit", "1000");
   std::string path = curl.Get();
   CVariant variant = CEmbyUtils::GetEmbyCVariant(path);
+  int totalItems = variant["TotalRecordCount"].asInteger();
+  // if we have > 1000, check how many times we should hit the server for it
+  if (totalItems > 1000)
+  {
+    int iter = (int)(totalItems/1000) + 1;
+    for ( int i = 1; i < iter; i++ )
+    {
+      curl.SetOption("StartIndex", StringUtils::Format("%i",1000*i));
+      path = curl.Get();
+      CVariant fetch = CEmbyUtils::GetEmbyCVariant(path);
+      for ( unsigned int i = 0; i < fetch["Items"].size(); i++ )
+      {
+        variant["Items"].append(fetch["Items"][i]);
+      }
+    }
+  }
   if (variant.isNull())
   {
     CLog::Log(LOGERROR, "CEmbyClient::FetchViewItems: invalid response for views items from %s", CURL::GetRedacted(path).c_str());
