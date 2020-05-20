@@ -955,7 +955,8 @@ std::string StringUtils::SecondsToTimeString(long lSeconds, TIME_FORMAT format)
     std::string formatedStrHMS;
     if (hh >= 1)
       formatedStrHMS = StringUtils::Format("%i%s", hh, g_localizeStrings.Get(12399).c_str());
-    formatedStrHMS += StringUtils::Format(formatedStrHMS.empty() ? "%i%s" : " %i%s",
+    if (mm > 0)
+      formatedStrHMS += StringUtils::Format(formatedStrHMS.empty() ? "%i%s" : " %i%s",
                                   mm, g_localizeStrings.Get(12400).c_str());
     return formatedStrHMS;
   }
