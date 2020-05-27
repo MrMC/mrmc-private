@@ -734,7 +734,10 @@ EmbyServerInfo CEmbyServices::GetEmbyLocalServerInfo(const std::string url)
   // jellyfin does use WanAddress and it might be missing
   if (responseObj.isMember(ServerPropertyWanAddress))
     serverInfo.WanAddress = responseObj[ServerPropertyWanAddress].asString();
-  serverInfo.LocalAddress = responseObj[ServerPropertyLocalAddress].asString();
+  if (responseObj.isMember(ServerPropertyLocalAddress))
+    serverInfo.LocalAddress = responseObj[ServerPropertyLocalAddress].asString();
+  else
+    serverInfo.LocalAddress = curl.GetWithoutFilename();
   return serverInfo;
 }
 

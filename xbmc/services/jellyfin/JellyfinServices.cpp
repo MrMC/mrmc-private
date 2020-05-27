@@ -566,7 +566,7 @@ JellyfinServerInfo CJellyfinServices::GetJellyfinLocalServerInfo(const std::stri
   if (responseObj.isMember(ServerPropertyLocalAddress))
     serverInfo.LocalAddress = responseObj[ServerPropertyLocalAddress].asString();
   else
-    serverInfo.LocalAddress = curl.GetHostName();
+    serverInfo.LocalAddress = curl.GetWithoutFilename();
   return serverInfo;
 }
 
