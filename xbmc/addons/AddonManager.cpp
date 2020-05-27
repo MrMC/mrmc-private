@@ -216,6 +216,7 @@ static constexpr const char* systemAddonWhiteList[] = {
   "xbmc.pvr",
   "xbmc.python",
   "xbmc.webinterface",
+  "repository.mrmc.tv",
 };
 
 // these are the extended addons, they can be enabled/disabled.

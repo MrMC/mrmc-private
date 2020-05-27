@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="repository.mrmc.tv"
+		name="MrMC Add-on repository"
+		version="1.0.0"
+		provider-name="Team MrMC">
+  <requires>
+    <import addon="xbmc.addon" version="12.0.0"/>
+  </requires>
+	<extension point="xbmc.addon.repository">
+		<info compressed="true">https://mrmc.tv/mrmc/addons/addons.xml.gz</info>
+		<checksum>https://mrmc.tv/mrmc/addons/addons.xml.gz.md5</checksum>
+		<datadir zip="true">https://mrmc.tv/mrmc/addons</datadir>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="af_ZA">Installeer Byvoegsels vanaf MrMC.tv</summary>
+		<summary lang="am_ET">ከ MrMC.tv ተጨማ-ሪዎች መግጠሚያ </summary>
+		<summary lang="ar_SA">ثبت إضافات من موقع MrMC.tv الرسمي</summary>
+		<summary lang="be_BY">Усталяваць дадатак з MrMC.tv</summary>
+		<summary lang="bg_BG">Инсталира добавки от MrMC.tv</summary>
+		<summary lang="ca_ES">Instal·la complements des de MrMC.tv</summary>
+		<summary lang="cs_CZ">Instalovat doplňky z MrMC.tv</summary>
+		<summary lang="cy_GB">Gosod Ychwanegion o MrMC.tv</summary>
+		<summary lang="da_DK">Installer Add-ons fra MrMC.tv</summary>
+		<summary lang="de_DE">Installiere Addons von MrMC.tv</summary>
+		<summary lang="el_GR">Εγκατάσταση Προσθέτων από το MrMC.tv</summary>
+		<summary lang="en_AU">Install Add-ons from MrMC.tv</summary>
+		<summary lang="en_GB">Install Add-ons from MrMC.tv</summary>
+		<summary lang="en_NZ">Install Add-ons from MrMC.tv</summary>
+		<summary lang="en_US">Install Add-ons from MrMC.tv</summary>
+		<summary lang="es_AR">Instalar Add-ons de MrMC.tv</summary>
+		<summary lang="es_ES">Instalar Add-ons de MrMC.tv</summary>
+		<summary lang="es_MX">Installar Add-ons de MrMC.tv</summary>
+		<summary lang="et_EE">Paigalda lisasid MrMC.tv lehelt</summary>
+		<summary lang="eu_ES">Instalatu MrMC.tv-eko gehigarriak</summary>
+		<summary lang="fa_IR">‫نصف افزونه‌ها از MrMC.tv</summary>
+		<summary lang="fi_FI">Asenna lisäosia MrMC.tv -sivustolta</summary>
+		<summary lang="fr_CA">Installer des addiciels depuis MrMC.tv</summary>
+		<summary lang="fr_FR">Installer des extensions depuis MrMC.tv</summary>
+		<summary lang="gl_ES">Instalar complementos dende MrMC.tv</summary>
+		<summary lang="he_IL">התקנת הרחבות מ־MrMC.tv</summary>
+		<summary lang="hr_HR">Instaliraj dodatke s MrMC.tv</summary>
+		<summary lang="hu_HU">Kiegészítők letöltése az MrMC.tv-ról</summary>
+		<summary lang="id_ID">Pasang Pengaya dari MrMC.tv</summary>
+		<summary lang="is_IS">Setja inn viðbætur frá MrMC.tv</summary>
+		<summary lang="it_IT">Installa addon da MrMC.tv</summary>
+		<summary lang="ja_JP">MrMC.tv からアドオンをインストール</summary>
+		<summary lang="ko_KR">MrMC.tv에서 애드온 설치</summary>
+		<summary lang="lt_LT">Įdiegti priedus iš MrMC.tv</summary>
+		<summary lang="lv_LV">Instalēt pielikumus no MrMC.tv</summary>
+		<summary lang="mk_MK">Инсталирај Додатоци од MrMC.tv</summary>
+		<summary lang="ms_MY">Pasang tambahan daripada MrMC.tv</summary>
+		<summary lang="mt_MT">Installa Add-ons minn MrMC.tv</summary>
+		<summary lang="my_MM">MrMC.tv မှ Add-on များကိုသွင်းမည်</summary>
+		<summary lang="nb_NO">Installer utvidelser fra MrMC.tv</summary>
+		<summary lang="nl_NL">Add-ons van MrMC.tv installeren</summary>
+		<summary lang="pl_PL">Instaluj dodatki z MrMC.tv</summary>
+		<summary lang="pt_BR">Instale Add-ons do MrMC.tv</summary>
+		<summary lang="pt_PT">Instalar Add-ons a partir de MrMC.tv</summary>
+		<summary lang="ro_RO">Instalați suplimente de la MrMC.tv</summary>
+		<summary lang="ru_RU">Установить дополнения с сайта MrMC.tv</summary>
+		<summary lang="sk_SK">Inštalovať doplnky z MrMC.tv</summary>
+		<summary lang="sl_SI">Namestite dodatke s MrMC.tv</summary>
+		<summary lang="sr_RS">Инсталирај додатне програме са MrMC.tv</summary>
+		<summary lang="sr_RS@latin">Instaliraj dodatne programe sa MrMC.tv</summary>
+		<summary lang="sv_SE">Installera tillägg från MrMC.tv</summary>
+		<summary lang="szl">Insztaluj przidŏwki ze MrMC.tv</summary>
+		<summary lang="tg_TJ">Насб кардани барномаҳои иловагӣ аз MrMC.tv</summary>
+		<summary lang="th_TH">ติดตั้งส่วนเสริมจาก MrMC.tv</summary>
+		<summary lang="tr_TR">MrMC.tv sitesinden eklentileri yükle</summary>
+		<summary lang="uk_UA">Встановити додатки з MrMC.tv</summary>
+		<summary lang="vi_VN">Cài đặt Add-on từ MrMC.tv</summary>
+		<summary lang="zh_CN">从 MrMC.tv 安装插件</summary>
+		<summary lang="zh_TW">從 MrMC.tv 安裝附加元件</summary>
+		<platform>all</platform>
+	</extension>
+</addon>

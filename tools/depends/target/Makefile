@@ -93,6 +93,7 @@ endif
 DEPENDS += mrmc-skins
 DEPENDS += mrmc-scripts
 DEPENDS += mrmc-repo-resources
+DEPENDS += mrmc-addons
 
 DEPENDS := $(filter-out $(EXCLUDED_DEPENDS),$(DEPENDS))
 
