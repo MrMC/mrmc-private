@@ -203,6 +203,8 @@ MainController* m_xbmcController;
   [store synchronize];
   CLog::Log(LOGDEBUG, "updateKVStoreItems:(NSNotification *)notification");
 
+  [m_xbmcController didFinishLaunching];
+
 }
 
 - (BOOL)application:(UIApplication *)app

@@ -195,6 +195,7 @@
 		18F123CC2017AD7500C82783 /* GUIDialogOSDSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18F123CA2017AD7400C82783 /* GUIDialogOSDSettings.cpp */; };
 		18F123CD2017AD7500C82783 /* GUIDialogOSDSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18F123CA2017AD7400C82783 /* GUIDialogOSDSettings.cpp */; };
 		18F123CE2017AD7500C82783 /* GUIDialogOSDSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18F123CA2017AD7400C82783 /* GUIDialogOSDSettings.cpp */; };
+		18FB46F3245EA24C009F314E /* BackgroundTasks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18FB46F2245EA24C009F314E /* BackgroundTasks.framework */; };
 		18FCB0AC20DD3BE10027327A /* RMStoreKeychainPersistence.m in Sources */ = {isa = PBXBuildFile; fileRef = 18FCB09020DD3BE00027327A /* RMStoreKeychainPersistence.m */; };
 		18FCB0B220DD3BE10027327A /* RMStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 18FCB09420DD3BE00027327A /* RMStore.m */; };
 		18FCB0BA20DD3FFC0027327A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18FCB0B920DD3FFB0027327A /* Security.framework */; };
@@ -3867,6 +3868,7 @@
 		18ED6183228626C3002FD568 /* ZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipArchive.h; sourceTree = "<group>"; };
 		18F123CA2017AD7400C82783 /* GUIDialogOSDSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogOSDSettings.cpp; sourceTree = "<group>"; };
 		18F123CB2017AD7400C82783 /* GUIDialogOSDSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogOSDSettings.h; sourceTree = "<group>"; };
+		18FB46F2245EA24C009F314E /* BackgroundTasks.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BackgroundTasks.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS13.2.sdk/System/Library/Frameworks/BackgroundTasks.framework; sourceTree = DEVELOPER_DIR; };
 		18FCB03320DD3BE00027327A /* RMStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMStore.h; sourceTree = "<group>"; };
 		18FCB03720DD3BE00027327A /* RMStoreKeychainPersistence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMStoreKeychainPersistence.h; sourceTree = "<group>"; };
 		18FCB09020DD3BE00027327A /* RMStoreKeychainPersistence.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMStoreKeychainPersistence.m; sourceTree = "<group>"; };
@@ -6425,6 +6427,7 @@
 				F5D142DE1BAF882F0075A95C /* OpenGLES.framework in Frameworks */,
 				F5408E04231D6A0600EA453D /* CFNetwork.framework in Frameworks */,
 				F5D142401BAF0B6D0075A95C /* ImageIO.framework in Frameworks */,
+				18FB46F3245EA24C009F314E /* BackgroundTasks.framework in Frameworks */,
 				F5D142E41BAF88880075A95C /* MediaPlayer.framework in Frameworks */,
 				F5D142441BAF0B6D0075A95C /* QuartzCore.framework in Frameworks */,
 				F5D142E01BAF88630075A95C /* UIKit.framework in Frameworks */,
@@ -6516,6 +6519,7 @@
 		18AC31EE1C49445D00AE9433 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				18FB46F2245EA24C009F314E /* BackgroundTasks.framework */,
 				18ED6067228618A8002FD568 /* libiconv.tbd */,
 				18ED60652286179C002FD568 /* libz.tbd */,
 				18ED606122861550002FD568 /* Security.framework */,

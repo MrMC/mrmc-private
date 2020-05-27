@@ -22,13 +22,14 @@
 
 #include <string>
 #include "settings/lib/ISettingCallback.h"
+#include "utils/Job.h"
 
 // We forward declare CFStringRef in order to avoid
 // pulling in tons of Objective-C headers.
 struct __CFString;
 typedef const struct __CFString * CFStringRef;
 
-class CDarwinUtils : public ISettingCallback
+class CDarwinUtils : public ISettingCallback, public IJobCallback
 {
 public:
   static CDarwinUtils &GetInstance();
@@ -87,8 +88,11 @@ public:
   static bool        RestoreUserFolder();
   static void        CleariCloudBackup();
   static std::string GetBuildDate();
+  void               RunBackgroundProcess();
+  void               OnScanFinished();
 
   virtual void OnSettingAction(const CSetting *setting) override;
+  virtual void OnJobComplete(unsigned int jobID, bool success, CJob *job) override;
 };
 
 #endif
