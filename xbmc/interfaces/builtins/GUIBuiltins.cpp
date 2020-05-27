@@ -449,13 +449,13 @@ static int ToggleDirty(const std::vector<std::string>&)
   return 0;
 }
 
+#if defined(TARGET_DARWIN_TVOS)
 static int AudioRouteSelector(const std::vector<std::string>&)
 {
-#if defined(TARGET_DARWIN_TVOS)
   CDarwinUtils::ShowAudioRoutePicker();
-#endif
   return 0;
 }
+#endif
 
 
 CBuiltins::CommandMap CGUIBuiltins::GetOperations() const
