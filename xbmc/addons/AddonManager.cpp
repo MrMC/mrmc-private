@@ -245,12 +245,15 @@ std::map<TYPE, IAddonMgrCallback*> CAddonMgr::m_managers;
 
 AddonPtr CAddonMgr::Factory(const cp_extension_t *props)
 {
-  // for ios/tvos/android only allow extensions in app package
+  // for ios/tvos/android only allow scraper/metadata extensions from user folder
   // we need to be able to run skins and other extensions from "special://home/addons" on OSX for testing
 #if !defined(TARGET_DARWIN_OSX)
   const std::string systemAddonsPath = CSpecialProtocol::TranslatePath("special://xbmc/addons");
   if (!StringUtils::StartsWith(props->plugin->plugin_path, systemAddonsPath))
-    return AddonPtr();
+  {
+    if (!StringUtils::StartsWith(props->ext_point_id, "xbmc.metadata.scraper"))
+      return AddonPtr();
+  }
 #endif
   // only allow addons in the whitelist
   if (!IsSystemAddon(props->plugin->identifier))
