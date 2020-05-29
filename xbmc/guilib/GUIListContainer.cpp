@@ -127,7 +127,7 @@ bool CGUIListContainer::MoveUp(bool wrapAround)
 {
   if (GetCursor() > 0 || (GetCursor() == 0 && GetOffset()))
   {
-    if (GetCursor() == 1 && GetOffset())
+    if (GetCursor() == 0 && GetOffset())
     {
       ScrollToOffset(GetOffset() - 1);
     }
