@@ -178,6 +178,9 @@ tools/android/packaging/packaging/
 /tools/depends/target/ffmpeg/ffmpeg-install/
 /tools/depends/target/Toolchain_binaddons.cmake
 /tools/depends/target/config-binaddons.site
+tools/depends/target/*/*android*/
+tools/depends/target/mrmc-scripts/*/*android*/
+tools/depends/target/mrmc-skins/*/*android*/
 
 # /tools/EventClients/
 /tools/EventClients/*.pyc
