@@ -543,12 +543,15 @@ bool CXBMCApp::EnableWakeLock(bool on)
   CLog::Log(LOGDEBUG, "%s: %s", __PRETTY_FUNCTION__, on ? "true" : "false");
   if (!m_wakeLock)
   {
+    if (!on)
+      return true;
+      
     std::string appName = CCompileInfo::GetAppName();
     StringUtils::ToLower(appName);
     std::string className = CCompileInfo::GetPackage();
     StringUtils::ToLower(className);
     // SCREEN_BRIGHT_WAKE_LOCK is marked as deprecated but there is no real alternatives for now
-    m_wakeLock = new CJNIWakeLock(CJNIPowerManager(getSystemService("power")).newWakeLock(CJNIPowerManager::SCREEN_BRIGHT_WAKE_LOCK | CJNIPowerManager::ACQUIRE_CAUSES_WAKEUP, className.c_str()));
+    m_wakeLock = new CJNIWakeLock(CJNIPowerManager(getSystemService("power")).newWakeLock(CJNIPowerManager::SCREEN_BRIGHT_WAKE_LOCK, className.c_str()));
     if (m_wakeLock)
       m_wakeLock->setReferenceCounted(false);
     else
@@ -571,7 +574,7 @@ bool CXBMCApp::EnableWakeLock(bool on)
 
 bool CXBMCApp::ResetSystemIdleTimer()
 {
-  if (!m_wakeLock->isHeld())
+  if (m_wakeLock && !m_wakeLock->isHeld())
   {
     m_wakeLock->acquire();
     return true;
@@ -1158,6 +1161,8 @@ void CXBMCApp::onReceive(CJNIIntent intent)
   }
   else if (action == "android.intent.action.SCREEN_OFF")
   {
+    g_application.ActivateScreenSaver();
+
     if (m_playback_state & PLAYBACK_STATE_VIDEO)
       CApplicationMessenger::GetInstance().PostMsg(TMSG_GUI_ACTION, WINDOW_INVALID, -1, static_cast<void*>(new CAction(ACTION_STOP)));
   }
