@@ -214,42 +214,50 @@ public class SyncProgramsJobService extends JobService
 
         if (media instanceof Movie && media.getVideoUrl() != null)
         {
-          new YouTubeExtractor(getApplicationContext())
-          {
-            @Override
-            public void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta vMeta)
+          try {
+            new YouTubeExtractor(getApplicationContext())
             {
-              if (ytFiles != null)
+              @Override
+              public void onExtractionComplete(SparseArray<YtFile> ytFiles, VideoMeta vMeta)
               {
-                int itag = -1;
-/*
-                if (ytFiles.indexOfKey(22) >= 0) // 720p h264
-                  itag = 22;
-                else if (ytFiles.indexOfKey(45) >= 0) // 720p webm
-                  itag = 45;
-*/
-                if (ytFiles.indexOfKey(35) >= 0) // 480p h264
-                  itag = 18;
-                else if (ytFiles.indexOfKey(44) >= 0) // 480p webm
-                  itag = 44;
-                else if (ytFiles.indexOfKey(18) >= 0) // 360p h264
-                  itag = 18;
-                else if (ytFiles.indexOfKey(43) >= 0) // 360p webm
-                  itag = 43;
-
-                if (itag > 0)
+                if (ytFiles != null)
                 {
-                  String downloadUrl = ytFiles.get(itag).getUrl();
+                  int itag = -1;
+  /*
+                  if (ytFiles.indexOfKey(22) >= 0) // 720p h264
+                    itag = 22;
+                  else if (ytFiles.indexOfKey(45) >= 0) // 720p webm
+                    itag = 45;
+  */
+                  if (ytFiles.indexOfKey(35) >= 0) // 480p h264
+                    itag = 18;
+                  else if (ytFiles.indexOfKey(44) >= 0) // 480p webm
+                    itag = 44;
+                  else if (ytFiles.indexOfKey(18) >= 0) // 360p h264
+                    itag = 18;
+                  else if (ytFiles.indexOfKey(43) >= 0) // 360p webm
+                    itag = 43;
 
-                  PreviewProgram updatedProgram = new PreviewProgram.Builder(previewProgram)
-                      .setPreviewVideoUri(Uri.parse(downloadUrl))
-                      .build();
-                  getContentResolver().update(TvContractCompat.buildPreviewProgramUri(programId),
-                      updatedProgram.toContentValues(), null, null);
+                  if (itag > 0)
+                  {
+                    String downloadUrl = ytFiles.get(itag).getUrl();
+
+                    PreviewProgram updatedProgram = new PreviewProgram.Builder(previewProgram)
+                        .setPreviewVideoUri(Uri.parse(downloadUrl))
+                        .build();
+                    getContentResolver().update(TvContractCompat.buildPreviewProgramUri(programId),
+                        updatedProgram.toContentValues(), null, null);
+                  }
                 }
               }
-            }
-          }.extract(media.getVideoUrl(), false, true);
+            }.extract(media.getVideoUrl(), false, true);
+          } catch (Exception e) {
+            PreviewProgram updatedProgram = new PreviewProgram.Builder(previewProgram)
+              .setPreviewVideoUri(Uri.parse(media.getVideoUrl()))
+              .build();
+            getContentResolver().update(TvContractCompat.buildPreviewProgramUri(programId),
+              updatedProgram.toContentValues(), null, null);
+          }
         }
 
         mediasAdded.add(media);

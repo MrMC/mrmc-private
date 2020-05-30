@@ -1250,6 +1250,7 @@ public class XBMCJsonRPC
         String trailer_url = details.get("trailer").getAsString();
         if (trailer_url.startsWith("plugin://plugin.video.youtube"))
         {
+          /*
           Uri u = Uri.parse(trailer_url);
           String videoid = u.getQueryParameter("videoid");
           String yturl = Uri.parse("https://www.youtube.com/watch")
@@ -1258,6 +1259,7 @@ public class XBMCJsonRPC
                   .build()
                   .toString();
           med.setVideoUrl(yturl);
+          */
         }
         else
           med.setVideoUrl(trailer_url);
