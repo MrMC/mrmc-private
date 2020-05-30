@@ -315,9 +315,6 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
     }
   }
   g_application.SetVolume(100, true);
-  if (@available(tvOS 10.0, *)) {
-    [self setIsDarkMode:self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark];
-  }
 }
 //--------------------------------------------------------------
 - (void)viewWillAppear:(BOOL)animated
@@ -476,10 +473,11 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
 }
 
 //--------------------------------------------------------------
-- (void)setIsDarkMode:(BOOL)enable;
+- (void)setIsDarkMode
 {
-  CLog::Log(LOGDEBUG, "setIsDarkMode %d", enable);
-  m_isDarkMode = enable;
+  BOOL isDark = self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark;
+  CLog::Log(LOGDEBUG, "tvOS userInterfaceStyle set to %s", isDark? "Dark":"Light");
+  m_isDarkMode = isDark;
 }
 
 //--------------------------------------------------------------
@@ -633,6 +631,8 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
   [self performSelectorOnMainThread:@selector(updateFocusLayer) withObject:nil  waitUntilDone:NO];
 
   ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::GUI, "xbmc", "OnScreensaverDeactivated");
+
+  [self setIsDarkMode];
 }
 //--------------------------------------------------------------
 - (void)becomeInactive
@@ -1029,11 +1029,7 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
 {
   // system calls this method when the tvOS interface environment changes
   [super traitCollectionDidChange: previousTraitCollection];
-  if (self.traitCollection.userInterfaceStyle != previousTraitCollection.userInterfaceStyle)
-  {
-    CLog::Log(LOGDEBUG, "tvOS userInterfaceStyle set to %s", self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark? "Dark":"Light");
-    [self setIsDarkMode:self.traitCollection.userInterfaceStyle == UIUserInterfaceStyleDark];
-  }
+  [self setIsDarkMode];
 }
 
 - (float)getDisplayRate

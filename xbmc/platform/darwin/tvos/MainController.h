@@ -166,7 +166,7 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void)  displayRateSwitch:(float)refreshRate withDynamicRange:(int)dynamicRange;
 - (void)  displayRateReset;
 - (bool) getIsDarkMode;
-- (void) setIsDarkMode:(BOOL)enable;
+- (void) setIsDarkMode;
 @end
 
 extern MainController *g_xbmcController;
