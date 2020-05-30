@@ -282,7 +282,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
       getIntent().setData(null);
     }
 
-    if (getPackageManager().hasSystemFeature("android.software.leanback"))
+    if (!Build.BRAND.equalsIgnoreCase("amazon") && getPackageManager().hasSystemFeature("android.software.leanback"))
     {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         TvUtil.scheduleSyncingChannel(this, true);
@@ -353,7 +353,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   {
     super.onPause();
 
-    if (getPackageManager().hasSystemFeature("android.software.leanback"))
+    if (!Build.BRAND.equalsIgnoreCase("amazon") && getPackageManager().hasSystemFeature("android.software.leanback"))
     {
       // Leanback
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
@@ -389,7 +389,7 @@ public class Main extends NativeActivity implements Choreographer.FrameCallback
   @Override
   public void onDestroy()
   {
-    if (getPackageManager().hasSystemFeature("android.software.leanback"))
+    if (!Build.BRAND.equalsIgnoreCase("amazon") && getPackageManager().hasSystemFeature("android.software.leanback"))
     {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         TvUtil.cancelAllJobs(this);
