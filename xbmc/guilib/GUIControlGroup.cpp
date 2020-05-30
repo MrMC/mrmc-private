@@ -24,6 +24,7 @@
 #include <cassert>
 #include <utility>
 
+#include "Application.h"
 #include "guiinfo/GUIInfoLabels.h"
 
 CGUIControlGroup::CGUIControlGroup()
@@ -403,6 +404,9 @@ bool CGUIControlGroup::IsAnimating(ANIMATION_TYPE animType)
 
 bool CGUIControlGroup::HasAnimation(ANIMATION_TYPE animType)
 {
+  if(!g_application.GetRenderGUI())
+    return false;
+
   if (CGUIControl::HasAnimation(animType))
     return true;
 
