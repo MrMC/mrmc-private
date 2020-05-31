@@ -1694,7 +1694,7 @@ CGPoint touchAbsPosition;
     else if(xValue == 0 && yValue == 0)
       weakSelf.m_touchPosition = TOUCH_CENTER;
 
-#if 1
+#if 0
     switch(weakSelf.m_touchPosition)
     {
       case TOUCH_UP:
