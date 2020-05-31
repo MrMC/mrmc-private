@@ -1645,66 +1645,76 @@ CGPoint touchAbsPosition;
 //--------------------------------------------------------------
 - (void)initGameController
 {
-  [[NSNotificationCenter defaultCenter] addObserverForName:GCControllerDidConnectNotification
-    object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification * _Nonnull note)
-  {
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controllerWasConnected:) name:GCControllerDidConnectNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controllerWasDisconnected:) name:GCControllerDidDisconnectNotification object:nil];
+  for (GCController *controller in [GCController controllers]) {
+      [self setupController:controller];
+  }
+}
+
+- (void)controllerWasConnected:(NSNotification *)notification {
+    // a controller was connected
+    GCController *controller = (GCController *)notification.object;
+    CLog::Log(LOGDEBUG, "controllerWasConnected: %s", [controller.vendorName UTF8String]);
+    [self setupController:controller];
+}
+
+- (void)controllerWasDisconnected:(NSNotification *)notification {
+    // a controller was disconnected
+    GCController *controller = (GCController *)notification.object;
+    CLog::Log(LOGDEBUG, "controllerWasDisconnected: %s", [controller.vendorName UTF8String]);
+}
+
+- (void)setupController:(GCController *)controller {
     // Capturing 'self' strongly in this block is likely to lead to a retain cycle
     // so creating a weak reference to self for access inside the block
     __weak MainController *weakSelf = self;
+    GCMicroGamepad *gamepad = controller.microGamepad;
+    gamepad.reportsAbsoluteDpadValues = YES;
+    gamepad.dpad.valueChangedHandler = ^(GCControllerDirectionPad *dpad, float xValue, float yValue) {
+    // dpad axis values ranges from -1.0 to 1.0
+    // where -1, -1 is bottom, left on trackpad.
+    // referenced from center (0, 0) of touchpad.
+    CGPoint startPoint = CGPointMake(
+      xValue, yValue);
+    touchAbsPosition = startPoint;
+    // translate to (0,0) in top, left, (2,2) bottom, right
+    // do this so we can use CGRectContainsPoint and bounding rects
+    startPoint.x += 1.0;
+    startPoint.y  = 1.0 - startPoint.y;
 
-    self.gcController = note.object;
-    self.gcController.microGamepad.reportsAbsoluteDpadValues = YES;
-    self.gcController.microGamepad.valueChangedHandler = ^(GCMicroGamepad *gamepad, GCControllerElement *element)
-    {
-      // dpad axis values ranges from -1.0 to 1.0
-      // where -1, -1 is bottom, left on trackpad.
-      // referenced from center (0, 0) of touchpad.
-      CGPoint startPoint = CGPointMake(
-        gamepad.dpad.xAxis.value, gamepad.dpad.yAxis.value);
-      touchAbsPosition = startPoint;
-      // translate to (0,0) in top, left, (2,2) bottom, right
-      // do this so we can use CGRectContainsPoint and bounding rects
-      startPoint.x += 1.0;
-      startPoint.y  = 1.0 - startPoint.y;
-
+    if (CGRectContainsPoint(selectUpBounds, startPoint))
+      weakSelf.m_touchPosition = TOUCH_UP;
+    else if (CGRectContainsPoint(selectDownBounds, startPoint))
+      weakSelf.m_touchPosition = TOUCH_DOWN;
+    else if (CGRectContainsPoint(selectLeftBounds, startPoint))
+      weakSelf.m_touchPosition = TOUCH_LEFT;
+    else if (CGRectContainsPoint(selectRightBounds, startPoint))
+      weakSelf.m_touchPosition = TOUCH_RIGHT;
+    else if(xValue == 0 && yValue == 0)
       weakSelf.m_touchPosition = TOUCH_CENTER;
-      if (CGRectContainsPoint(selectUpBounds, startPoint))
-        weakSelf.m_touchPosition = TOUCH_UP;
-      else if (CGRectContainsPoint(selectDownBounds, startPoint))
-        weakSelf.m_touchPosition = TOUCH_DOWN;
-      else if (CGRectContainsPoint(selectLeftBounds, startPoint))
-        weakSelf.m_touchPosition = TOUCH_LEFT;
-      else if (CGRectContainsPoint(selectRightBounds, startPoint))
-        weakSelf.m_touchPosition = TOUCH_RIGHT;
-#if 0
-      NSLog(@"microGamepad: A(%d), U(%d), D(%d), L(%d), R(%d), point %@",
-        gamepad.buttonA.pressed,
-        gamepad.dpad.up.pressed,
-        gamepad.dpad.down.pressed,
-        gamepad.dpad.left.pressed,
-        gamepad.dpad.right.pressed,
-        NSStringFromCGPoint(startPoint));
-      switch(weakSelf.m_touchPosition)
-      {
-        case TOUCH_UP:
-          NSLog(@"microGamepad: TOUCH_UP");
-          break;
-        case TOUCH_DOWN:
-          NSLog(@"microGamepad: TOUCH_DOWN");
-          break;
-        case TOUCH_LEFT:
-          NSLog(@"microGamepad: TOUCH_LEFT");
-          break;
-        case TOUCH_RIGHT:
-          NSLog(@"microGamepad: TOUCH_RIGHT");
-          break;
-        case TOUCH_CENTER:
-          NSLog(@"microGamepad: TOUCH_CENTER");
-          break;
-      }
+
+#if 1
+    switch(weakSelf.m_touchPosition)
+    {
+      case TOUCH_UP:
+        NSLog(@"microGamepad: TOUCH_UP");
+        break;
+      case TOUCH_DOWN:
+        NSLog(@"microGamepad: TOUCH_DOWN");
+        break;
+      case TOUCH_LEFT:
+        NSLog(@"microGamepad: TOUCH_LEFT");
+        break;
+      case TOUCH_RIGHT:
+        NSLog(@"microGamepad: TOUCH_RIGHT");
+        break;
+      case TOUCH_CENTER:
+        NSLog(@"microGamepad: TOUCH_CENTER");
+        break;
+    }
 #endif
-    };
-  }];
+  };
 }
 
 //--------------------------------------------------------------
