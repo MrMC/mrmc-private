@@ -690,6 +690,7 @@ bool CGUIWindowVideoBase::OnSelect(int iItem)
 
 bool CGUIWindowVideoBase::OnFileAction(int iItem, int action)
 {
+  static bool beenHere = false;
   if (iItem < 0 || iItem >= m_vecItems->Size())
     return true;
 
@@ -700,8 +701,11 @@ bool CGUIWindowVideoBase::OnFileAction(int iItem, int action)
   // if there is no NFO file found it will bring up the search window but there is no option to play,
   // since the action is "INFO" ... and there is no info.... and we go around in circles ... :)
   // fallback to SELECT_ACTION_CHOOSE and there is a context meny for them to.. well... choose
-  if (action == SELECT_ACTION_INFO && (!item->IsVideoDb() && !item->IsMusicDb() && !item->IsMediaServiceBased()))
+  if (!beenHere && action == SELECT_ACTION_INFO && (!item->IsVideoDb() && !item->IsMusicDb() && !item->IsMediaServiceBased()))
+  {
+    beenHere = true;
     action = SELECT_ACTION_CHOOSE;
+  }
 
   // Reset the current start offset. The actual resume
   // option is set in the switch, based on the action passed.
@@ -734,7 +738,10 @@ bool CGUIWindowVideoBase::OnFileAction(int iItem, int action)
       choices.Add(SELECT_ACTION_MORE, 22082); // More
       int value = CGUIDialogContextMenu::ShowAndGetChoice(choices);
       if (value < 0)
+      {
+        beenHere = false;
         return true;
+      }
 
       return OnFileAction(iItem, value);
     }
@@ -742,10 +749,13 @@ bool CGUIWindowVideoBase::OnFileAction(int iItem, int action)
   case SELECT_ACTION_PLAY_OR_RESUME:
     return OnResumeItem(iItem);
   case SELECT_ACTION_INFO:
-    if (OnItemInfo(iItem))
-      return true;
-    else
-      return OnResumeItem(iItem);
+    {
+      beenHere = false;
+      if (OnItemInfo(iItem))
+        return true;
+      else
+        return OnResumeItem(iItem);
+    }
     break;
   case SELECT_ACTION_MORE:
     OnPopupMenu(iItem);
