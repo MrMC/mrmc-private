@@ -42,8 +42,10 @@ void CGUIWindowSplash::OnInitWindow()
   if (!m_image)
   {
     std::string splashName = "Splash.png";
+#if !defined(TARGET_DARWIN_IOS)
     if (CLiteUtils::IsLite())
       splashName = "Splash.lite.png";
+#endif
     std::string splashImage = "special://home/media/Splash.png";
     if (!XFILE::CFile::Exists(splashImage))
       splashImage = "special://xbmc/media/" + splashName;

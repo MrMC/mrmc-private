@@ -14,7 +14,7 @@ if ! [ -z "${CODE_SIGN_IDENTITY}" ] && [ "${CODE_SIGN_IDENTITY}" != "Don't Code 
   # todo: pull from xxx.app/Info.plist
   BUNDLEID="tv.mrmc.mrmc.osx"
   if [ "${PLATFORM_NAME}" == "iphoneos" ]; then
-    BUNDLEID="tv.mrmc.mrmc.ios"
+    BUNDLEID="tv.mrmc.mrmc.tvos"
   elif [ "${PLATFORM_NAME}" == "appletvos" ]; then
     BUNDLEID="tv.mrmc.mrmc.tvos"
   fi

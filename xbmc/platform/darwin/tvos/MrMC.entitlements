@@ -8,8 +8,11 @@
 	<string>$(TeamIdentifierPrefix)MrMC</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.tv.mrmc.lite.shared</string>
 		<string>group.tv.mrmc.shared</string>
+	</array>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)MrMC4.0</string>
 	</array>
 </dict>
 </plist>

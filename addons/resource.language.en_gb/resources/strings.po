@@ -16207,6 +16207,21 @@ msgctxt "#33103"
 msgid "Remote communication server"
 msgstr ""
 
+#: AppStore
+msgctxt "#33105"
+msgid "Purchase Subscription"
+msgstr ""
+
+#: AppStore
+msgctxt "#33106"
+msgid "Restore Subscription"
+msgstr ""
+
+#: AppStore
+msgctxt "#33107"
+msgid "App Store"
+msgstr ""
+
 #empty strings from id 33104 to 33199
 
 #: xbmc/network/eventclient.cpp

@@ -1034,13 +1034,14 @@ bool CSettings::InitializeDefinitions()
     CLog::Log(LOGFATAL, "Unable to load ios-specific settings definitions");
 #endif
 #endif
+#if !defined(TARGET_DARWIN_IOS)
   if (CLiteUtils::IsLite())
   {
     if (CFile::Exists(SETTINGS_XML_FOLDER "settings.lite.xml") &&
         !Initialize(SETTINGS_XML_FOLDER "settings.lite.xml"))
       CLog::Log(LOGFATAL, "Unable to load Lite specific settings definitions");
   }
-
+#endif
   // load any custom visibility and default values before loading the special
   // appliance.xml so that appliances are able to overwrite even those values
   InitializeVisibility();

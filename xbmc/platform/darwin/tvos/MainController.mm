@@ -458,8 +458,7 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
       return inActive;
 
     NSURL *url = [NSURL URLWithString:@"mrmc://wakeup"];
-    if (CLiteUtils::IsLite())
-      url = [NSURL URLWithString:@"mrmclite://wakeup"];
+
     [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
   }
 

@@ -320,6 +320,7 @@ const infomap system_labels[] =  {{ "hasnetwork",       SYSTEM_ETHERNET_LINK_ACT
                                   { "stereoscopicmode", SYSTEM_STEREOSCOPIC_MODE },
                                   { "hasappletvslider", SYSTEM_HAS_APPLETV_SLIDER },
                                   { "isdarkinterface",  SYSTEM_IS_DARK_INTERFACE },
+                                  { "hasappstore" ,     SYSTEM_HAS_APP_STORE},
                                   { "hasextensions",    SYSTEM_HAS_EXTENSIONS }};
 
 const infomap system_param[] =   {{ "hasalarm",         SYSTEM_HAS_ALARM },
@@ -2623,6 +2624,14 @@ bool CGUIInfoManager::GetBool(int condition1, int contextWindow, const CGUIListI
         // Dark
         else if (appearance == 2)
           bReturn = true;
+      }
+      break;
+    case SYSTEM_HAS_APP_STORE:
+      {
+        bReturn = false;
+#if defined(TARGET_DARWIN_IOS)
+        bReturn = true;
+#endif
       }
       break;
     case SYSTEM_HAS_EXTENSIONS:

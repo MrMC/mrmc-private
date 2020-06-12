@@ -68,6 +68,7 @@
 #include "windows/GUIWindowSplash.h"
 #include "windows/GUIWindowStartup.h"
 #include "windows/GUIWindowMediaSources.h"
+#include "windows/GUIWindowAppStore.h"
 #include "video/windows/GUIWindowFullScreen.h"
 #include "video/dialogs/GUIDialogVideoOSD.h"
 
@@ -287,6 +288,9 @@ void CGUIWindowManager::CreateWindows()
   Add(new CGUIWindowWeather);
   Add(new CGUIWindowStartup);
   Add(new CGUIWindowSplash);
+#if defined(TARGET_DARWIN)
+  Add(new CGUIWindowAppStore);
+#endif
 
   Add(new CGUIWindowEventLog);
 }
@@ -411,6 +415,7 @@ bool CGUIWindowManager::DestroyWindows()
     Remove(WINDOW_DIALOG_VOLUME_BAR);
 
     Delete(WINDOW_EVENT_LOG);
+    Delete(WINDOW_SETTINGS_APPSTORE);
   }
   catch (...)
   {

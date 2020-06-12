@@ -63,8 +63,10 @@ void CSplash::Show(const std::string& message)
   if (!m_image)
   {
     std::string splashName = "Splash.png";
+#if !defined(TARGET_DARWIN_IOS)
     if (CLiteUtils::IsLite())
       splashName = "Splash.lite.png";
+#endif
     std::string splashImage = "special://xbmc/media/" + splashName;
 
     m_image = new CGUIImage(0, 0, 0, 0, g_graphicsContext.GetWidth(), g_graphicsContext.GetHeight(), CTextureInfo(splashImage));

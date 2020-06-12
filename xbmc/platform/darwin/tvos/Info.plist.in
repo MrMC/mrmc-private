@@ -65,5 +65,7 @@
 	</array>
 	<key>UIUserInterfaceStyle</key>
 	<string>Automatic</string>
+	<key>KeychainGroup</key>
+		<string>$(AppIdentifierPrefix)MrMC4.0</string>
 </dict>
 </plist>

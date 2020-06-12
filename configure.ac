@@ -502,7 +502,7 @@ APP_NAME_LC=$(echo $APP_NAME | ${AWK} '{print tolower($0)}')
 APP_NAME_UC=$(echo $APP_NAME | ${AWK} '{print toupper($0)}')
 APP_PACKAGE=${APP_PACKAGE-$(${AWK} '/APP_PACKAGE/ {print $2}' version.txt)}
 if test "$bundle_extension" != ""; then
-  APP_PACKAGE="$APP_PACKAGE.$bundle_extension"
+  APP_PACKAGE="$APP_PACKAGE.tvos"
 fi
 APP_VERSION_MAJOR=${APP_VERSION_MAJOR-$(${AWK} '/VERSION_MAJOR/ {print $2}' version.txt)}
 APP_VERSION_MINOR=${APP_VERSION_MINOR-$(${AWK} '/VERSION_MINOR/ {print $2}' version.txt)}
@@ -514,7 +514,6 @@ APP_VERSION_BUNDLE_VERSION=$(date -u +%y%m%d.%H%M)
 APP_VERSION_ANDROID_VERSION=$(date -u +%y%m%d%H)
 APP_WEBSITE=${APP_WEBSITE-$(${AWK} '/WEBSITE/ {print $2}' version.txt)}
 APP_COMPANY_NAME=${APP_COMPANY_NAME-$(${AWK} '/COMPANY_NAME/ {print $2}' version.txt)}
-TOPSHELF_BUNDLE_IDENTIFIER=$APP_PACKAGE.ts
 APP_ADDON_API=${APP_ADDON_API-$(${AWK} '/ADDON_API/ {print $2}' version.txt)}
 if test "$APP_NAME" != "" && test "$APP_VERSION_MAJOR" != "" && test "$APP_VERSION_MINOR" != "" \
 && test "$APP_VERSION_CODE" != "" && test "$APP_ADDON_API" != ""; then
@@ -539,10 +538,8 @@ if test "$APP_NAME" != "" && test "$APP_VERSION_MAJOR" != "" && test "$APP_VERSI
   AC_SUBST(APP_VERSION_ANDROID_VERSION)
   AC_SUBST(APP_WEBSITE)
   AC_SUBST(APP_COMPANY_NAME)
-  AC_SUBST(TOPSHELF_BUNDLE_IDENTIFIER)
   AC_SUBST(URL_SCHEME)
   AC_SUBST(APP_ADDON_API)
-  AC_SUBST(APP_SUFFIX)
 
   dashes="------------------------"
   final_message="\n  ${APP_NAME} Configuration:"

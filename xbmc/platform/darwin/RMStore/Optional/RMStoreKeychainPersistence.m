@@ -34,12 +34,15 @@ NSMutableDictionary* RMKeychainGetSearchDictionary(NSString *key)
     
     dictionary[(__bridge id)kSecAttrGeneric] = encodedIdentifier;
     dictionary[(__bridge id)kSecAttrAccount] = encodedIdentifier;
-    
+
+//    NSString *serviceName = [NSBundle mainBundle].bundleIdentifier;
+//    dictionary[(__bridge id)kSecAttrService] = serviceName;
     dictionary[(__bridge id)kSecAttrService] = RMStoreTransactionsKeychainKey;
+
     NSString *KeychainGroup = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"KeychainGroup"];
     if ([KeychainGroup length] > 0)
-        dictionary[(__bridge id)kSecAttrAccessGroup] = KeychainGroup;
-    
+      dictionary[(__bridge id)kSecAttrAccessGroup] = KeychainGroup;
+
     return dictionary;
 }
 

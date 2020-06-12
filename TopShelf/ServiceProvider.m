@@ -48,13 +48,8 @@
 
 - (NSArray *)topShelfItems
 {
-#if defined(APP_PACKAGE_LITE)
-      NSString* groupid = [NSString stringWithUTF8String:"group.tv.mrmc.lite.shared"];
-      NSString* groupURL = [NSString stringWithUTF8String:"mrmclite"];
-#else
-      NSString* groupid = [NSString stringWithUTF8String:"group.tv.mrmc.shared"];
-      NSString* groupURL = [NSString stringWithUTF8String:"mrmc"];
-#endif
+    NSString* groupid = [NSString stringWithUTF8String:"group.tv.mrmc.shared"];
+    NSString* groupURL = [NSString stringWithUTF8String:"mrmc"];
     NSLog(@"TopShelf ID: %@", groupid);
     NSMutableArray *topShelfItems = [[NSMutableArray alloc] init];;
     NSUserDefaults *shared = [[NSUserDefaults alloc] initWithSuiteName:groupid];

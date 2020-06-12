@@ -85,8 +85,6 @@ const CGFloat timeFadeSecs                    = 2.0;
 
     //load the splash image
     std::string splashName = "Splash.png";
-    if (CLiteUtils::IsLite())
-      splashName = "Splash.lite.png";
     std::string strUserSplash = CSpecialProtocol::TranslatePath("special://xbmc/media/" + splashName);
     xbmcLogo = [UIImage imageWithContentsOfFile:[NSString stringWithUTF8String:strUserSplash.c_str()]];
     
