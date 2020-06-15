@@ -1291,7 +1291,11 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
     case AVMEDIA_TYPE_VIDEO:
       {
 #if !defined(HAS_DIVX_LICENSE)
-        if (CLiteUtils::IsLite() || !CInAppPurchase::GetInstance().IsDivxActivated())
+  #if defined(TARGET_ANDROID)
+        if (CLiteUtils::IsLite())
+  #else
+        if (!CInAppPurchase::GetInstance().IsDivxActivated())
+  #endif
         {
           if (pStream->codec->codec_id == AV_CODEC_ID_MPEG4)
           {
@@ -1446,7 +1450,11 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
     case AVMEDIA_TYPE_SUBTITLE:
       {
 #if !defined(HAS_DIVX_LICENSE)
-        if (CLiteUtils::IsLite() || !CInAppPurchase::GetInstance().IsDivxActivated())
+  #if defined(TARGET_ANDROID)
+        if (CLiteUtils::IsLite())
+  #else
+        if (!CInAppPurchase::GetInstance().IsDivxActivated())
+  #endif
         {
           // use of subtitles in an avi requires a DivX license
           if (strcmp(m_pFormatContext->iformat->name, "avi") == 0)

@@ -34,7 +34,6 @@
 #define LIFETIME_DIVX_PURCHASE "tv.mrmc.mrmc.tvos.divx"         // real ID for a lifetime divx subscription
 #define TVOS_FAKE_PURCHASE     "tv.mrmc.mrmc.tvos.tvosfake"     // fake id to write it in keychain for an easy check
 #define IOS_UPGRADE_PURCHASE   "tv.mrmc.mrmc.tvos.iosupgrade"   // this ID will be saved by MrMC Touch ver 3.*
-
 #define MRMC_ACTIVATED         "isMrMCActivated"                // we write this into defaults so its easy to pull up without pinging the store
 #define MRMC_DIVX_ACTIVATED    "isMrMCdivxActivated"            // we write this into defaults so its easy to pull up without pinging the store
 #define MRMC_SUBSCRIBED        "isMrMCSubscribed"               // we write this into defaults so its easy to pull up without pinging the store
@@ -42,6 +41,8 @@
 id<RMStoreReceiptVerifier> _receiptVerifier;
 RMStoreKeychainPersistence *_persistence;
 
+// lastFullAppStoreVersion is the 3.9.7 tvOS MrMC
+const float lastFullAppStoreVersion = 200526.1603;
 
 CAppleInAppPurchase::CAppleInAppPurchase()
 {
@@ -253,37 +254,34 @@ void CAppleInAppPurchase::VerifyPurchase()
 
   // Check if we have purchase receipt, that means user purchased before 4.0.0
   RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
-  CLog::Log(LOGDEBUG, "Path is: %s", [[[[NSBundle mainBundle] appStoreReceiptURL] path] UTF8String]);
-
   if (!appReceipt)
   {
     [[RMStore defaultStore] refreshReceiptOnSuccess:^
      {
        RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
-
-       if ([[appReceipt originalAppVersion] floatValue] < 4.0)
+       if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
        {
+         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Receipt verified");
          RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
          [persistence persistTransactionProductID:@TVOS_FAKE_PURCHASE];
-         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - TVOS_FAKE_PURCHASE - Receipt verified");
          SetActivated(true);
          SetDivxActivated(true);
          return;
        }
      }failure:^(NSError *error)
      {
-       CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() Did not complete");
+       CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Did not complete");
        SetActivated(false);
        SetDivxActivated(false);
      }];
   }
   else
   {
-    if ([[appReceipt originalAppVersion] floatValue] < 4.0)
+    if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
     {
+      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Receipt verified");
       RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
       [persistence persistTransactionProductID:@TVOS_FAKE_PURCHASE];
-      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - TVOS_FAKE_PURCHASE - Receipt verified");
       SetActivated(true);
       SetDivxActivated(true);
       return;
@@ -322,11 +320,11 @@ ProductList CAppleInAppPurchase::GetSubscriptions()
   for (int k = 0; k < count_out; k++)
   {
     Product sub;
-    if ([subscriptions[k]  isEqual: @"tv.mrmc.mrmc.tvos.tvosfake"])
+    if ([subscriptions[k]  isEqual: @TVOS_FAKE_PURCHASE])
     {
       sub.title = [@"Lifetime upgrade from past purchase" UTF8String];
       sub.price = [@"Free" UTF8String];
-      sub.id    = [@"tv.mrmc.mrmc.tvos.tvosfake" UTF8String];
+      sub.id    = [@TVOS_FAKE_PURCHASE UTF8String];
       CLog::Log(LOGDEBUG, "CAppleInAppPurchase::GetSubscriptions(): - add : %s", "tv.mrmc.mrmc.tvos.tvosfake");
       ret.push_back(sub);
       continue;
@@ -347,9 +345,12 @@ ProductList CAppleInAppPurchase::GetSubscriptions()
         [dateFormat setDateFormat:@"EEE, dd MMM yyyy HH:mm"];
         [dateFormat setLocale:[NSLocale currentLocale]];
         NSString *expiryDate = [dateFormat stringFromDate:expiry];
-        sub.expires = [expiryDate UTF8String];
-        if ([expiry compare:[NSDate date]] == NSOrderedDescending)
-          ret.push_back(sub);
+        if (expiryDate)
+        {
+          sub.expires = [expiryDate UTF8String];
+          if ([expiry compare:[NSDate date]] == NSOrderedDescending)
+            ret.push_back(sub);
+        }
       }
     }
     else
