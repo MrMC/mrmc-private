@@ -720,8 +720,7 @@ EmbyServerInfo CEmbyServices::GetEmbyLocalServerInfo(const std::string url)
   if (!responseObj.isObject() ||
       !responseObj.isMember(ServerPropertyId) ||
       !responseObj.isMember(ServerPropertyName) ||
-      !responseObj.isMember(ServerPropertyVersion) ||
-      !responseObj.isMember(ServerPropertyLocalAddress))
+      !responseObj.isMember(ServerPropertyVersion))
     return serverInfo;
 
   serverInfo.UserId = m_userId;
