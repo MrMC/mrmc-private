@@ -150,6 +150,7 @@ void CAppleInAppPurchase::RemoveTransactions()
 
 void CAppleInAppPurchase::RestoreTransactions()
 {
+  RemoveTransactions();
   [[RMStore defaultStore] restoreTransactionsOnSuccess:^(NSArray *transactions)
   {
     VerifyPurchase();
@@ -178,13 +179,13 @@ void CAppleInAppPurchase::VerifyPurchase()
   RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
 
   // dump all purchased products, just so we can debug if needed
-  NSSet* purchasedProducts = [persistence purchasedProductIdentifiers];
-  for (id product in purchasedProducts)
-  {
-    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - purchasedProductIdentifiers - %s", [[product description] UTF8String]);
-  }
-
-  [persistence dumpProducts];
+//  NSSet* purchasedProducts = [persistence purchasedProductIdentifiers];
+//  for (id product in purchasedProducts)
+//  {
+//    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - purchasedProductIdentifiers - %s", [[product description] UTF8String]);
+//  }
+//
+//  [persistence dumpProducts];
 
   // Check if we have a FREE lifetime subscription, for users that purchased before 4.0.0
   if ([persistence isPurchasedProductOfIdentifier:@FREE_LIFETIME_PURCHASE])
@@ -206,13 +207,27 @@ void CAppleInAppPurchase::VerifyPurchase()
   if ([persistence isPurchasedProductOfIdentifier:@YEAR_PURCHASE])
   {
     RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
-    bool isActive = false;
-    if (appReceipt)
+    if (!appReceipt)
     {
-      isActive =  [appReceipt containsActiveAutoRenewableSubscriptionOfProductIdentifier:@YEAR_PURCHASE forDate:[NSDate date]];
-      SetSubscribed(isActive);
+      [[RMStore defaultStore] refreshReceiptOnSuccess:^
+       {
+         RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
+         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - YEAR_PURCHASE");
+         bool isActive = [appReceipt containsActiveAutoRenewableSubscriptionOfProductIdentifier:@YEAR_PURCHASE forDate:[NSDate date]];
+         SetSubscribed(isActive);
+         return;
+       }failure:^(NSError *error)
+       {
+         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase()  - YEAR_PURCHASE - Did not complete");
+         SetActivated(false);
+       }];
     }
-    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - YEAR_PURCHASE");
+    else
+    {
+      bool isActive = [appReceipt containsActiveAutoRenewableSubscriptionOfProductIdentifier:@YEAR_PURCHASE forDate:[NSDate date]];
+      SetSubscribed(isActive);
+      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - YEAR_PURCHASE");
+    }
   }
 
   // Check if we have a fake subscription, thats for the users that migrated from 3.*
@@ -364,24 +379,24 @@ ProductList CAppleInAppPurchase::GetSubscriptions()
 bool CAppleInAppPurchase::checkUserDefaults(std::string product)
 {
   NSString* strID = [NSString stringWithUTF8String:product.c_str()];
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSUbiquitousKeyValueStore* kVStore = [NSUbiquitousKeyValueStore defaultStore];
   CLog::Log(LOGDEBUG, "CAppleInAppPurchase::checkUserDefaults(): - %s", product.c_str());
-  if ([defaults objectForKey:strID])
-    return [defaults boolForKey:strID];
+  if ([kVStore objectForKey:strID])
+    return [kVStore boolForKey:strID];
   return false;
 }
 
 void CAppleInAppPurchase::setUserDefaults(std::string product, bool set)
 {
   NSString* strID = [NSString stringWithUTF8String:product.c_str()];
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSUbiquitousKeyValueStore* kVStore = [NSUbiquitousKeyValueStore defaultStore];
   if (set)
-    [defaults setBool:YES forKey:strID];
+    [kVStore setBool:YES forKey:strID];
   else
   {
-    if ([defaults objectForKey:strID])
-      [defaults removeObjectForKey:strID];
+    if ([kVStore objectForKey:strID])
+      [kVStore removeObjectForKey:strID];
   }
-  [defaults synchronize];
+  [kVStore synchronize];
   CLog::Log(LOGDEBUG, "CAppleInAppPurchase::setUserDefaults(): - %s (%s)", product.c_str(), set ? "true":"false");
 }
