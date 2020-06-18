@@ -1232,6 +1232,7 @@ bool CApplication::Initialize()
   m_bInitializing = false;
 
   // reset our screensaver (starts timers etc.)
+  DisableScreensaver(false);
   ResetScreenSaver();
 
 #ifdef HAS_SDL_JOYSTICK
