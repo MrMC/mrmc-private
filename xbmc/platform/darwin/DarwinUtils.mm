@@ -1868,4 +1868,10 @@ void CDarwinUtils::OnJobComplete(unsigned int jobID, bool success, CJob *job)
     [g_xbmcController completeBGTask:success];
 #endif
 }
+
+void CDarwinUtils::SetSiriTouchDirection(std::string direction)
+{
+  m_siriTouchDirection = direction;
+}
+
 #endif
