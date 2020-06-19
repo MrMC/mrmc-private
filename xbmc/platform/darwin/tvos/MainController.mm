@@ -1341,16 +1341,6 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
 //--------------------------------------------------------------
 - (void)createSiriTapGestureRecognizers
 {
-  auto singletap = [[UITapGestureRecognizer alloc]
-    initWithTarget:self action:@selector(SiriSingleTapHandler:)];
-  singletap.numberOfTapsRequired = 1;
-  // The default press type is select, when this property is set to an empty array,
-  // the gesture recognizer will respond to taps like a touch pad like surface
-  singletap.allowedPressTypes = @[];
-  singletap.allowedTouchTypes = @[@(UITouchTypeIndirect)];
-  singletap.delegate = self;
-  [self.focusView addGestureRecognizer:singletap];
-
   self.doubleTapRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget:self action:@selector(SiriDoubleTapHandler:)];
   self.doubleTapRecognizer.numberOfTapsRequired = 2;
@@ -1366,7 +1356,6 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
   self.tripleTapRecognizer.delegate = self;
   [self.focusView addGestureRecognizer:self.tripleTapRecognizer];
 
-  [singletap requireGestureRecognizerToFail:self.doubleTapRecognizer];
   [self.doubleTapRecognizer requireGestureRecognizerToFail:self.tripleTapRecognizer];
 }
 //--------------------------------------------------------------
@@ -1690,8 +1679,12 @@ CGPoint touchAbsPosition;
       weakSelf.m_touchPosition = TOUCH_LEFT;
     else if (CGRectContainsPoint(selectRightBounds, startPoint))
       weakSelf.m_touchPosition = TOUCH_RIGHT;
-    else if(xValue == 0 && yValue == 0)
+    else
+        weakSelf.m_touchPosition = TOUCH_CENTER;
+    if(xValue == 0 && yValue == 0)
       weakSelf.m_touchPosition = TOUCH_CENTER;
+
+    [weakSelf touchReceived];
 
 #if 0
     switch(weakSelf.m_touchPosition)
@@ -1714,6 +1707,36 @@ CGPoint touchAbsPosition;
     }
 #endif
   };
+}
+
+-(void)touchReceived
+{
+  std::string direction = "";
+  if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo() &&
+     !g_application.m_pPlayer->IsPaused())
+  {
+    g_infoManager.SetDisplayAfterSeek(2500);
+  }
+
+  switch(m_touchPosition)
+  {
+    case TOUCH_UP:
+      direction = "up";
+      break;
+    case TOUCH_DOWN:
+      direction = "down";
+      break;
+    case TOUCH_LEFT:
+      direction = "left";
+      break;
+    case TOUCH_RIGHT:
+      direction = "right";
+      break;
+    case TOUCH_CENTER:
+      direction = "";
+      break;
+  }
+  CDarwinUtils::GetInstance().SetSiriTouchDirection(direction);
 }
 
 //--------------------------------------------------------------
@@ -1914,34 +1937,7 @@ static CGPoint panTouchAbsStart;
     }
   }
 }
-//--------------------------------------------------------------
-- (void)SiriSingleTapHandler:(UITapGestureRecognizer *)sender
-{
-  if (m_appAlive == YES)
-  {
-    switch (sender.state)
-    {
-      case UIGestureRecognizerStateEnded:
-        {
-          if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo() &&
-             !g_application.m_pPlayer->IsPaused())
-          {
-            #if logfocus
-            CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
-            #endif
-            //show (2.5sec auto hide)/hide normal progress bar
-            if (g_infoManager.GetDisplayAfterSeek())
-              g_infoManager.SetDisplayAfterSeek(0);
-            else
-              g_infoManager.SetDisplayAfterSeek(2500);
-          }
-        }
-        break;
-      default:
-        break;
-    }
-  }
-}
+
 //--------------------------------------------------------------
 - (void)SiriDoubleTapHandler:(UITapGestureRecognizer *)sender
 {
@@ -2130,6 +2126,20 @@ TOUCH_POSITION touchPositionAtStateBegan = TOUCH_CENTER;
       {
         // hold timer never fired,
         // this is a normal press/release cycle
+
+        // if its here from UITapGestureRecognizer, there is no UIGestureRecognizerStateBegan
+        // and touchPositionAtStateBegan is from a failed UILongPressGestureRecognizer
+        if ([sender isKindOfClass:[UITapGestureRecognizer class]])
+          touchPositionAtStateBegan = m_touchPosition;
+
+        // and select state is also default .. SELECT_NAVIGATION
+        if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo())
+        {
+          selectState = SELECT_VIDEOPLAY;
+          if (g_application.m_pPlayer->IsPaused())
+            selectState = SELECT_VIDEOPAUSED;
+        }
+
         switch(selectState)
         {
           case SELECT_NAVIGATION:

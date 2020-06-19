@@ -113,6 +113,10 @@
 #include "platform/android/activity/AndroidFeatures.h"
 #endif
 
+#if defined(TARGET_DARWIN_TVOS)
+#include "platform/darwin/DarwinUtils.h"
+#endif
+
 static CLinuxResourceCounter m_resourceCounter;
 
 #define SYSHEATUPDATEINTERVAL 60000
@@ -215,6 +219,7 @@ const infomap player_labels[] =  {{ "hasmedia",         PLAYER_HAS_MEDIA },     
                                   { "muted",            PLAYER_MUTED },
                                   { "hasduration",      PLAYER_HASDURATION },
                                   { "passthrough",      PLAYER_PASSTHROUGH },
+                                  { "siritouch",        PLAYER_SIRITOUCH },
                                   { "cachelevel",       PLAYER_CACHELEVEL },          // labels from here
                                   { "progress",         PLAYER_PROGRESS },
                                   { "progresscache",    PLAYER_PROGRESS_CACHE },
@@ -1686,6 +1691,14 @@ std::string CGUIInfoManager::GetLabel(int info, int contextWindow, std::string *
         if (!g_application.m_pPlayer->GetPlayingTitle().empty())
           return g_application.m_pPlayer->GetPlayingTitle();
       }
+    }
+    break;
+  case PLAYER_SIRITOUCH:
+    {
+      strLabel = "";
+#if defined(TARGET_DARWIN_TVOS)
+      strLabel = CDarwinUtils::GetInstance().GetSiriTouchDirection();
+#endif
     }
     break;
   case MUSICPLAYER_TITLE:

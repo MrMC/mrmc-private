@@ -90,9 +90,13 @@ public:
   static std::string GetBuildDate();
   void               RunBackgroundProcess();
   void               OnScanFinished();
+  std::string        GetSiriTouchDirection() {return m_siriTouchDirection;};
+  void               SetSiriTouchDirection(std::string direction);
 
   virtual void OnSettingAction(const CSetting *setting) override;
   virtual void OnJobComplete(unsigned int jobID, bool success, CJob *job) override;
+
+  std::string m_siriTouchDirection;
 };
 
 #endif
