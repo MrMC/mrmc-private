@@ -148,8 +148,6 @@ bool CGUIWindowAppStore::OnMessage(CGUIMessage& message)
       else if (iControl == CONTROL_RESTORE_PURCHASE)
       {
         CInAppPurchase::GetInstance().RestorePurchases();
-        // focus "info" tab to refresh subscriptions
-        SET_CONTROL_FOCUS(CONTROL_SUB_INFO, 0);
         return true;
       }
     }

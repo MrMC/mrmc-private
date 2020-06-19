@@ -46,7 +46,7 @@ public:
   void RefreshReceipt();
   void RemoveTransactions();
   void RestoreTransactions();
-  void VerifyPurchase();
+  void VerifyPurchase(bool checkSavedUserDefaults = true);
   bool PurchaseProduct(std::string product);
   ProductList GetProducts();
   ProductList GetSubscriptions();

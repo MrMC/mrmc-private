@@ -109,27 +109,32 @@ void CAppleInAppPurchase::SetSubscribed(bool subscribed)
 {
   m_bIsActivated = subscribed;
   CInAppPurchase::GetInstance().SetActivated(m_bIsActivated);
+  NSUbiquitousKeyValueStore* kVStore = [NSUbiquitousKeyValueStore defaultStore];
   if (subscribed)
   {
     RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
     if (appReceipt)
     {
       NSDate *expiry = [appReceipt activeAutoRenewableSubscriptionOfProductIdentifierExpiry:@YEAR_PURCHASE];
-      NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-      [defaults setObject:expiry forKey:@MRMC_SUBSCRIBED];
-      [defaults synchronize];
+      [kVStore setObject:expiry forKey:@MRMC_SUBSCRIBED];
       CLog::Log(LOGDEBUG, "CAppleInAppPurchase::SetSubscribed(): (%s)", subscribed ? "true":"false");
     }
   }
+  else
+  {
+    if ([kVStore objectForKey:@MRMC_SUBSCRIBED])
+      [kVStore removeObjectForKey:@MRMC_SUBSCRIBED];
+  }
+  [kVStore synchronize];
 }
 
 bool CAppleInAppPurchase::GetSubscribed()
 {
   CLog::Log(LOGDEBUG, "CAppleInAppPurchase::GetSubscribed()");
-  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-  if ([defaults objectForKey:@MRMC_SUBSCRIBED])
+  NSUbiquitousKeyValueStore* kVStore = [NSUbiquitousKeyValueStore defaultStore];
+  if ([kVStore objectForKey:@MRMC_SUBSCRIBED])
   {
-    NSDate *expiry = [defaults objectForKey:@MRMC_SUBSCRIBED];
+    NSDate *expiry = [kVStore objectForKey:@MRMC_SUBSCRIBED];
     if ([expiry compare:[NSDate date]] == NSOrderedDescending)
       return true;
   }
@@ -153,24 +158,28 @@ void CAppleInAppPurchase::RestoreTransactions()
   RemoveTransactions();
   [[RMStore defaultStore] restoreTransactionsOnSuccess:^(NSArray *transactions)
   {
-    VerifyPurchase();
+    VerifyPurchase(false);
   } failure:^(NSError *error)
   {
     CLog::Log(LOGDEBUG, "CAppleInAppPurchase::RestoreTransactions() - failed");
   }];
 }
 
-void CAppleInAppPurchase::VerifyPurchase()
+void CAppleInAppPurchase::VerifyPurchase(bool checkSavedUserDefaults /*true*/)
 {
 
   // quick check if app has been activated on this device
   // much quicker than going through receipts every time
-  if (GetSubscribed() || checkUserDefaults(MRMC_ACTIVATED))
+  // if checkSavedUserDefaults is false, we want to go over receipts ans save the new information
+  if (checkSavedUserDefaults)
   {
-    SetActivated(true);
-    if (checkUserDefaults(MRMC_DIVX_ACTIVATED))
-      SetDivxActivated(true);
-    return;
+    if (GetSubscribed() || checkUserDefaults(MRMC_ACTIVATED))
+    {
+      SetActivated(true);
+      if (checkUserDefaults(MRMC_DIVX_ACTIVATED))
+        SetDivxActivated(true);
+      return;
+    }
   }
 
   if (![RMStore canMakePayments])
@@ -179,14 +188,29 @@ void CAppleInAppPurchase::VerifyPurchase()
   RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
 
   // dump all purchased products, just so we can debug if needed
-//  NSSet* purchasedProducts = [persistence purchasedProductIdentifiers];
-//  for (id product in purchasedProducts)
-//  {
-//    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - purchasedProductIdentifiers - %s", [[product description] UTF8String]);
-//  }
-//
-//  [persistence dumpProducts];
+  NSSet* purchasedProducts = [persistence purchasedProductIdentifiers];
+  for (id product in purchasedProducts)
+  {
+    NSString *expiryDate = nil;
+    if ([[product description] isEqual:@YEAR_PURCHASE])
+    {
+      RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
+      if (appReceipt)
+      {
+        NSDate *expiry = [appReceipt activeAutoRenewableSubscriptionOfProductIdentifierExpiry:@YEAR_PURCHASE];
+        NSDateFormatter *dateFormat = [[NSDateFormatter alloc] init];
+        [dateFormat setDateFormat:@"EEE, dd MMM yyyy HH:mm"];
+        [dateFormat setLocale:[NSLocale currentLocale]];
+        expiryDate = [dateFormat stringFromDate:expiry];
+      }
+    }
+    if (expiryDate)
+      CLog::Log(LOGDEBUG, "CAppleInAppPurchase::VerifyPurchase() - purchasedProductIdentifiers - %s - Expires: %s", [[product description] UTF8String], [expiryDate UTF8String]);
+    else
+      CLog::Log(LOGDEBUG, "CAppleInAppPurchase::VerifyPurchase() - purchasedProductIdentifiers - %s", [[product description] UTF8String]);
+  }
 
+  // --- Below transfer and fake purchases --- //
   // Check if we have a FREE lifetime subscription, for users that purchased before 4.0.0
   if ([persistence isPurchasedProductOfIdentifier:@FREE_LIFETIME_PURCHASE])
   {
@@ -194,40 +218,6 @@ void CAppleInAppPurchase::VerifyPurchase()
     SetDivxActivated(true);
     CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - LIFETIME_PURCHASE");
     return;
-  }
-
-  // Check if we have a lifetime subscription
-  if ([persistence isPurchasedProductOfIdentifier:@LIFETIME_PURCHASE])
-  {
-    SetActivated(true);
-    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - LIFETIME_PURCHASE");
-  }
-
-  // Check if we have a yearly subscription
-  if ([persistence isPurchasedProductOfIdentifier:@YEAR_PURCHASE])
-  {
-    RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
-    if (!appReceipt)
-    {
-      [[RMStore defaultStore] refreshReceiptOnSuccess:^
-       {
-         RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
-         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - YEAR_PURCHASE");
-         bool isActive = [appReceipt containsActiveAutoRenewableSubscriptionOfProductIdentifier:@YEAR_PURCHASE forDate:[NSDate date]];
-         SetSubscribed(isActive);
-         return;
-       }failure:^(NSError *error)
-       {
-         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase()  - YEAR_PURCHASE - Did not complete");
-         SetActivated(false);
-       }];
-    }
-    else
-    {
-      bool isActive = [appReceipt containsActiveAutoRenewableSubscriptionOfProductIdentifier:@YEAR_PURCHASE forDate:[NSDate date]];
-      SetSubscribed(isActive);
-      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - YEAR_PURCHASE");
-    }
   }
 
   // Check if we have a fake subscription, thats for the users that migrated from 3.*
@@ -258,13 +248,6 @@ void CAppleInAppPurchase::VerifyPurchase()
      {
        CLog::Log(LOGNOTICE, "FREE_LIFETIME_PURCHASE Did not complete");
      }];
-  }
-
-  // Check if we have a divx subscription
-  if ([persistence isPurchasedProductOfIdentifier:@LIFETIME_DIVX_PURCHASE])
-  {
-    SetDivxActivated(true);
-    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - LIFETIME_DIVX_PURCHASE");
   }
 
   // Check if we have purchase receipt, that means user purchased before 4.0.0
@@ -302,6 +285,49 @@ void CAppleInAppPurchase::VerifyPurchase()
       return;
     }
   }
+  // --- End transfer and fake purchases --- //
+
+  // --- Below real purchases --- //
+  // Check if we have a lifetime subscription
+  if ([persistence isPurchasedProductOfIdentifier:@LIFETIME_PURCHASE])
+  {
+    SetActivated(true);
+    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - LIFETIME_PURCHASE");
+  }
+
+  // Check if we have a yearly subscription
+  if ([persistence isPurchasedProductOfIdentifier:@YEAR_PURCHASE])
+  {
+    RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
+    if (!appReceipt)
+    {
+      [[RMStore defaultStore] refreshReceiptOnSuccess:^
+       {
+         RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
+         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - YEAR_PURCHASE");
+         bool isActive = [appReceipt containsActiveAutoRenewableSubscriptionOfProductIdentifier:@YEAR_PURCHASE forDate:[NSDate date]];
+         SetSubscribed(isActive);
+       }failure:^(NSError *error)
+       {
+         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase()  - YEAR_PURCHASE - Did not complete");
+         SetSubscribed(false);
+       }];
+    }
+    else
+    {
+      bool isActive = [appReceipt containsActiveAutoRenewableSubscriptionOfProductIdentifier:@YEAR_PURCHASE forDate:[NSDate date]];
+      SetSubscribed(isActive);
+      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - YEAR_PURCHASE");
+    }
+  }
+
+  // Check if we have a divx subscription
+  if ([persistence isPurchasedProductOfIdentifier:@LIFETIME_DIVX_PURCHASE])
+  {
+    SetDivxActivated(true);
+    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - LIFETIME_DIVX_PURCHASE");
+  }
+  // --- End real purchases --- //
 }
 
 bool CAppleInAppPurchase::PurchaseProduct(std::string product)
@@ -310,12 +336,12 @@ bool CAppleInAppPurchase::PurchaseProduct(std::string product)
   [[RMStore defaultStore] addPayment:productID success:^(SKPaymentTransaction *transaction)
    {
      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::PurchaseProduct() - Completed %s", [productID UTF8String]);
-     VerifyPurchase();
+     VerifyPurchase(false);
      return;
    } failure:^(SKPaymentTransaction *transaction, NSError *error)
    {
      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::PurchaseProduct() - Did not complete");
-     VerifyPurchase();
+     VerifyPurchase(false);
    }];
   return false;
 }
