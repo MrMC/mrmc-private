@@ -143,7 +143,14 @@ bool CAppleInAppPurchase::GetSubscribed()
 
 void CAppleInAppPurchase::RefreshReceipt()
 {
-  [[RMStore defaultStore] refreshReceipt];
+  [[RMStore defaultStore] refreshReceiptOnSuccess:^
+   {
+     VerifyPurchase(false);
+     CLog::Log(LOGNOTICE, "CAppleInAppPurchase::RestoreTransactions()  - refresh - complete");
+   }failure:^(NSError *error)
+   {
+     CLog::Log(LOGNOTICE, "CAppleInAppPurchase::RestoreTransactions()  - refresh - Did not complete");
+   }];
 }
 
 void CAppleInAppPurchase::RemoveTransactions()
@@ -158,11 +165,24 @@ void CAppleInAppPurchase::RestoreTransactions()
   RemoveTransactions();
   [[RMStore defaultStore] restoreTransactionsOnSuccess:^(NSArray *transactions)
   {
+    if ([SKPaymentQueue defaultQueue].transactions.count > 0)
+    {
+       for (SKPaymentTransaction *transaction in transactions)
+       {
+         if (transaction.transactionState == SKPaymentTransactionStateRestored)
+         {
+           RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
+           [persistence persistTransactionProductID:transaction.payment.productIdentifier];
+           CLog::Log(LOGNOTICE, "CAppleInAppPurchase::RestoreTransactions() - SKPaymentTransactionStateRestored for %s", [transaction.payment.productIdentifier UTF8String]);
+         }
+       }
+    }
     VerifyPurchase(false);
   } failure:^(NSError *error)
   {
     CLog::Log(LOGDEBUG, "CAppleInAppPurchase::RestoreTransactions() - failed");
   }];
+  CLog::Log(LOGNOTICE, "CAppleInAppPurchase::RestoreTransactions()  - refresh - complete");
 }
 
 void CAppleInAppPurchase::VerifyPurchase(bool checkSavedUserDefaults /*true*/)
@@ -170,7 +190,7 @@ void CAppleInAppPurchase::VerifyPurchase(bool checkSavedUserDefaults /*true*/)
 
   // quick check if app has been activated on this device
   // much quicker than going through receipts every time
-  // if checkSavedUserDefaults is false, we want to go over receipts ans save the new information
+  // if checkSavedUserDefaults is false, we want to go over receipts and save the new information
   if (checkSavedUserDefaults)
   {
     if (GetSubscribed() || checkUserDefaults(MRMC_ACTIVATED))
@@ -209,84 +229,6 @@ void CAppleInAppPurchase::VerifyPurchase(bool checkSavedUserDefaults /*true*/)
     else
       CLog::Log(LOGDEBUG, "CAppleInAppPurchase::VerifyPurchase() - purchasedProductIdentifiers - %s", [[product description] UTF8String]);
   }
-
-  // --- Below transfer and fake purchases --- //
-  // Check if we have a FREE lifetime subscription, for users that purchased before 4.0.0
-  if ([persistence isPurchasedProductOfIdentifier:@FREE_LIFETIME_PURCHASE])
-  {
-    SetActivated(true);
-    SetDivxActivated(true);
-    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - LIFETIME_PURCHASE");
-    return;
-  }
-
-  // Check if we have a fake subscription, thats for the users that migrated from 3.*
-  // if this is false, it could be the first 4.* app run and we will write it in a keychain below
-  if ([persistence isPurchasedProductOfIdentifier:@TVOS_FAKE_PURCHASE])
-  {
-    SetActivated(true);
-    SetDivxActivated(true);
-    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - TVOS_FAKE_PURCHASE");
-    return;
-  }
-
-  // Check if we have a IOS_UPGRADE_PURCHASE set, this will only be set by MrMC Touch v 3.* just before we release 4.0
-  // this allows users of MrMC Touch to migrate to MrMC universal app for free
-  NSUbiquitousKeyValueStore* kVStore = [NSUbiquitousKeyValueStore defaultStore];
-  if ([kVStore boolForKey:@IOS_UPGRADE_PURCHASE] ||
-      [persistence isPurchasedProductOfIdentifier:@IOS_UPGRADE_PURCHASE])
-  {
-
-    [[RMStore defaultStore] addPayment:@FREE_LIFETIME_PURCHASE success:^(SKPaymentTransaction *transaction)
-     {
-       [persistence removeProductOfIdentifier:@IOS_UPGRADE_PURCHASE];
-       CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - FREE_LIFETIME_PURCHASE");
-       SetActivated(true);
-       SetDivxActivated(true);
-       return;
-     } failure:^(SKPaymentTransaction *transaction, NSError *error)
-     {
-       CLog::Log(LOGNOTICE, "FREE_LIFETIME_PURCHASE Did not complete");
-     }];
-  }
-
-  // Check if we have purchase receipt, that means user purchased before 4.0.0
-  RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
-  if (!appReceipt)
-  {
-    [[RMStore defaultStore] refreshReceiptOnSuccess:^
-     {
-       RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
-       if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
-       {
-         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Receipt verified");
-         RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
-         [persistence persistTransactionProductID:@TVOS_FAKE_PURCHASE];
-         SetActivated(true);
-         SetDivxActivated(true);
-         return;
-       }
-     }failure:^(NSError *error)
-     {
-       CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Did not complete");
-       SetActivated(false);
-       SetDivxActivated(false);
-     }];
-  }
-  else
-  {
-    if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
-    {
-      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Receipt verified");
-      RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
-      [persistence persistTransactionProductID:@TVOS_FAKE_PURCHASE];
-      SetActivated(true);
-      SetDivxActivated(true);
-      return;
-    }
-  }
-  // --- End transfer and fake purchases --- //
-
   // --- Below real purchases --- //
   // Check if we have a lifetime subscription
   if ([persistence isPurchasedProductOfIdentifier:@LIFETIME_PURCHASE])
@@ -328,6 +270,81 @@ void CAppleInAppPurchase::VerifyPurchase(bool checkSavedUserDefaults /*true*/)
     CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - LIFETIME_DIVX_PURCHASE");
   }
   // --- End real purchases --- //
+
+  // --- Below transfer and fake purchases --- //
+  // Check if we have a FREE lifetime subscription, for users that purchased before 4.0.0
+  if ([persistence isPurchasedProductOfIdentifier:@FREE_LIFETIME_PURCHASE])
+  {
+    SetActivated(true);
+    SetDivxActivated(true);
+    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - LIFETIME_PURCHASE");
+    return;
+  }
+
+  // Check if we have a fake subscription, thats for the users that migrated from 3.*
+  // if this is false, it could be the first 4.* app run and we will write it in a keychain below
+  if ([persistence isPurchasedProductOfIdentifier:@TVOS_FAKE_PURCHASE])
+  {
+    SetActivated(true);
+    SetDivxActivated(true);
+    CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - TVOS_FAKE_PURCHASE");
+    return;
+  }
+
+  // Check if we have a IOS_UPGRADE_PURCHASE set, this will only be set by MrMC Touch v 3.* just before we release 4.0
+  // this allows users of MrMC Touch to migrate to MrMC universal app for free
+  NSUbiquitousKeyValueStore* kVStore = [NSUbiquitousKeyValueStore defaultStore];
+  [kVStore synchronize];
+  NSDictionary *kvd = [kVStore dictionaryRepresentation];
+  NSArray *arr = [kvd allKeys];
+  for (NSUInteger i=0; i < arr.count; i++)
+  {
+    NSString *key = [arr objectAtIndex:i];
+    CLog::Log(LOGDEBUG, "CAppleInAppPurchase::VerifyPurchase() - TouchTransfer - %s", [[key description] UTF8String]);
+  }
+  if (([kVStore boolForKey:@IOS_UPGRADE_PURCHASE] ||
+      [persistence isPurchasedProductOfIdentifier:@IOS_UPGRADE_PURCHASE]) &&
+      ![persistence isPurchasedProductOfIdentifier:@FREE_LIFETIME_PURCHASE])
+  {
+    PurchaseProduct(FREE_LIFETIME_PURCHASE);
+  }
+
+  // Check if we have purchase receipt, that means user purchased before 4.0.0
+  RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
+  if (!appReceipt)
+  {
+    [[RMStore defaultStore] refreshReceiptOnSuccess:^
+     {
+       RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
+       if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
+       {
+         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Receipt verified");
+         RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
+         [persistence persistTransactionProductID:@TVOS_FAKE_PURCHASE];
+         SetActivated(true);
+         SetDivxActivated(true);
+         return;
+       }
+     }failure:^(NSError *error)
+     {
+       CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Did not complete");
+       SetActivated(false);
+       SetDivxActivated(false);
+     }];
+  }
+  else
+  {
+    if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
+    {
+      CLog::Log(LOGNOTICE, "CAppleInAppPurchase::VerifyPurchase() - Receipt verified");
+      RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
+      [persistence persistTransactionProductID:@TVOS_FAKE_PURCHASE];
+      SetActivated(true);
+      SetDivxActivated(true);
+      return;
+    }
+  }
+  // --- End transfer and fake purchases --- //
 }
 
 bool CAppleInAppPurchase::PurchaseProduct(std::string product)
@@ -340,7 +357,17 @@ bool CAppleInAppPurchase::PurchaseProduct(std::string product)
      return;
    } failure:^(SKPaymentTransaction *transaction, NSError *error)
    {
-     CLog::Log(LOGNOTICE, "CAppleInAppPurchase::PurchaseProduct() - Did not complete");
+     if (transaction.transactionState == SKPaymentTransactionStateRestored ||
+         transaction.transactionState == SKPaymentTransactionStatePurchased)
+     {
+       if ([transaction.payment.productIdentifier isEqualToString:productID])
+       {
+         RMStoreKeychainPersistence *persistence = [RMStore defaultStore].transactionPersistor;
+         [persistence persistTransactionProductID:productID];
+         CLog::Log(LOGNOTICE, "CAppleInAppPurchase::PurchaseProduct() - SKPaymentTransactionStateRestored for %s", [productID UTF8String]);
+       }
+     }
+     CLog::Log(LOGNOTICE, "CAppleInAppPurchase::PurchaseProduct() - Failure");
      VerifyPurchase(false);
    }];
   return false;
@@ -406,6 +433,7 @@ bool CAppleInAppPurchase::checkUserDefaults(std::string product)
 {
   NSString* strID = [NSString stringWithUTF8String:product.c_str()];
   NSUbiquitousKeyValueStore* kVStore = [NSUbiquitousKeyValueStore defaultStore];
+  [kVStore synchronize];
   CLog::Log(LOGDEBUG, "CAppleInAppPurchase::checkUserDefaults(): - %s", product.c_str());
   if ([kVStore objectForKey:strID])
     return [kVStore boolForKey:strID];
