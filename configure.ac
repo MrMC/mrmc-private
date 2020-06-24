@@ -502,7 +502,7 @@ APP_NAME_LC=$(echo $APP_NAME | ${AWK} '{print tolower($0)}')
 APP_NAME_UC=$(echo $APP_NAME | ${AWK} '{print toupper($0)}')
 APP_PACKAGE=${APP_PACKAGE-$(${AWK} '/APP_PACKAGE/ {print $2}' version.txt)}
 if test "$bundle_extension" != ""; then
-  APP_PACKAGE="$APP_PACKAGE.tvos"
+  APP_PACKAGE="$APP_PACKAGE.$bundle_extension"
 fi
 APP_VERSION_MAJOR=${APP_VERSION_MAJOR-$(${AWK} '/VERSION_MAJOR/ {print $2}' version.txt)}
 APP_VERSION_MINOR=${APP_VERSION_MINOR-$(${AWK} '/VERSION_MINOR/ {print $2}' version.txt)}

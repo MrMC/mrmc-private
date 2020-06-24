@@ -29,11 +29,7 @@ else
       CONFIGURE += --enable-gles
     endif
   else ifeq ($(OS),ios)
-    ifeq ($(TARGET_PLATFORM),tvos)
-      CONFIGURE += --with-bundle_extension=tvos
-    else
-      CONFIGURE += --with-bundle_extension=ios
-    endif
+    CONFIGURE += --with-bundle_extension=tvos
   endif
 endif
 
