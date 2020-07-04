@@ -66,6 +66,7 @@
 #import "utils/URIUtils.h"
 #import "utils/Variant.h"
 #import "utils/log.h"
+#import "utils/LangCodeExpander.h"
 
 #import <MediaPlayer/MPMediaItem.h>
 #import <MediaPlayer/MediaPlayer.h>
@@ -303,7 +304,6 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
   [self createSiriSwipeGestureRecognizers];
   [self createSiriPanGestureRecognizers];
   [self createSiriTapGestureRecognizers];
-  [self createCustomControlCenter];
   [self initGameController];
 
   if (__builtin_available(tvOS 11.2, *))
@@ -327,7 +327,6 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
 {
   [super viewDidAppear:animated];
   [self becomeFirstResponder];
-  [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
 }
 //--------------------------------------------------------------
 - (void)viewWillDisappear:(BOOL)animated
@@ -347,7 +346,7 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
 //--------------------------------------------------------------
 - (void)viewDidUnload
 {
-  [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
+  [self killCustomControlCenter];
   [self resignFirstResponder];
   [super viewDidUnload];
 }
@@ -3249,6 +3248,9 @@ CGRect debugView2;
 
 - (void)onPlay:(NSDictionary *)item
 {
+
+  [self createCustomControlCenter];
+
   //PRINT_SIGNATURE();
   NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
 
@@ -3296,6 +3298,11 @@ CGRect debugView2;
     if (total)
       [dict setObject:total forKey:MPNowPlayingInfoPropertyPlaybackQueueCount];
   }
+
+  if (g_application.m_pPlayer->IsPlayingVideo())
+    [dict setObject:@(MPMediaTypeAnyVideo) forKey:MPMediaItemPropertyMediaType];
+  else
+    [dict setObject:@(MPMediaTypeAnyAudio) forKey:MPMediaItemPropertyMediaType];
   /*
    other properities can be set:
    MPMediaItemPropertyAlbumTrackCount
@@ -3309,7 +3316,14 @@ CGRect debugView2;
    MPNowPlayingInfoPropertyChapterCount;
    */
 
-  [self setIOSNowPlayingInfo:dict];
+
+  [self ComandCenterLanguageOptions:dict];
+
+  MPNowPlayingInfoCenter *nowPlayingInfoCenter = [MPNowPlayingInfoCenter defaultCenter];
+  if (@available(tvOS 13.0, *))
+  {
+    nowPlayingInfoCenter.playbackState = MPNowPlayingPlaybackStatePlaying;
+  }
 
   if (![[[NSBundle mainBundle] bundleIdentifier] hasPrefix:[NSString stringWithUTF8String:CCompileInfo::GetPackage()]])
       CApplicationMessenger::GetInstance().PostMsg(TMSG_QUIT);
@@ -3328,7 +3342,7 @@ CGRect debugView2;
     if (speed)
       [info setObject:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
 
-    [self setIOSNowPlayingInfo:info];
+    [self ComandCenterLanguageOptions:info];
   }
 }
 
@@ -3346,9 +3360,9 @@ CGRect debugView2;
     [info setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
   NSNumber *speed = [NSNumber numberWithDouble:1.0f];
   if (speed)
-    [info setObject:speed forKey:MPNowPlayingInfoPropertyDefaultPlaybackRate];
+    [info setObject:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
 
-  [self setIOSNowPlayingInfo:info];
+  [self ComandCenterLanguageOptions:info];
 }
 
 - (void)onSeekPlaying
@@ -3363,73 +3377,147 @@ CGRect debugView2;
   if (NSClassFromString(@"MPNowPlayingInfoCenter"))
   {
     NSMutableDictionary *info = [self.m_nowPlayingInfo mutableCopy];
-    NSNumber *speed = [NSNumber numberWithDouble:0.000001f];
+    NSNumber *speed = [NSNumber numberWithDouble:0.0f];
     if (speed)
-      [info setObject:speed forKey:MPNowPlayingInfoPropertyDefaultPlaybackRate];
+      [info setObject:speed forKey:MPNowPlayingInfoPropertyPlaybackRate];
     NSNumber *elapsed = [NSNumber numberWithDouble:g_application.GetTime()];
     if (elapsed)
       [info setObject:elapsed forKey:MPNowPlayingInfoPropertyElapsedPlaybackTime];
-    [self setIOSNowPlayingInfo:info];
+    [self ComandCenterLanguageOptions:info];
+    if (@available(tvOS 13.0, *))
+    {
+      MPNowPlayingInfoCenter *nowPlayingInfoCenter = [MPNowPlayingInfoCenter defaultCenter];
+      nowPlayingInfoCenter.playbackState = MPNowPlayingPlaybackStatePaused;
+    }
+    AVAudioSession *mySession = [AVAudioSession sharedInstance];
+    [mySession setActive:false error:nil];
   }
 }
 //--------------------------------------------------------------
 - (void)onStopPlaying:(NSDictionary *)item
 {
   PRINT_SIGNATURE();
+  if (@available(tvOS 13.0, *))
+  {
+    MPNowPlayingInfoCenter *nowPlayingInfoCenter = [MPNowPlayingInfoCenter defaultCenter];
+    nowPlayingInfoCenter.playbackState = MPNowPlayingPlaybackStateStopped;
+  }
+
   [self setIOSNowPlayingInfo:nil];
+
+  AVAudioSession *mySession = [AVAudioSession sharedInstance];
+  [mySession setActive:false error:nil];
+
+  [self killCustomControlCenter];
 }
 
 #pragma mark - control center
 - (void)createCustomControlCenter
 {
   //PRINT_SIGNATURE();
-  MPRemoteCommandCenter *commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+  MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
+  [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onCCPlay:) enabled:true];
+  [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onCCPlay:) enabled:true];
+  [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onCCPlaybackPossition:) enabled:true];
+  [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onCCStop:) enabled:false];
+  [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onCCPlay:) enabled:true];
+  [self toggleHandler:remoteCenter.enableLanguageOptionCommand withSelector:@selector(onCCLanguage:) enabled:true];
+  [self toggleHandler:remoteCenter.disableLanguageOptionCommand withSelector:@selector(onCCLanguageDisable:) enabled:true];
+  [self toggleHandler:remoteCenter.nextTrackCommand withSelector:@selector(onCCNext:) enabled:false];
+  [self toggleHandler:remoteCenter.previousTrackCommand withSelector:@selector(onCCPrev:) enabled:false];
 
-  // disable stop button
-  commandCenter.stopCommand.enabled = NO;
-  [commandCenter.stopCommand addTarget:self action:@selector(onCCStop:)];
-  // enable play button
-  commandCenter.playCommand.enabled = YES;
-  [commandCenter.playCommand addTarget:self action:@selector(onCCPlay:)];
-  // enable pause button
-  commandCenter.pauseCommand.enabled = YES;
-  [commandCenter.pauseCommand addTarget:self action:@selector(onCCPlay:)];
-  // enable play/pause button
-  commandCenter.togglePlayPauseCommand.enabled = YES;
-  [commandCenter.togglePlayPauseCommand addTarget:self action:@selector(onCCPlay:)];
+  SeekType seekType = g_application.m_pPlayer->IsPlayingVideo() ? SEEK_TYPE_VIDEO:SEEK_TYPE_MUSIC;
+  int stepBack = abs(CSeekHandler::GetInstance().GetSeekStepSize(seekType, -1));
+  int stepForward = CSeekHandler::GetInstance().GetSeekStepSize(seekType, 1);
 
-  // enable seek
-  MPRemoteCommand *seekBackwardIntervalCommand = [commandCenter seekForwardCommand];
-  [seekBackwardIntervalCommand setEnabled:YES];
-  [seekBackwardIntervalCommand addTarget:self action:@selector(onCCFF:)];
-  
-  MPRemoteCommand *seekForwardIntervalCommand = [commandCenter seekBackwardCommand];
-  [seekForwardIntervalCommand setEnabled:YES];
-  [seekForwardIntervalCommand addTarget:self action:@selector(onCCREW:)];
-  
-  // enable next/previous
-  MPRemoteCommand *previousTrackIntervalCommand = [commandCenter previousTrackCommand];
-  [previousTrackIntervalCommand setEnabled:YES];
-  [previousTrackIntervalCommand addTarget:self action:@selector(onCCPrev:)];
-  
-  MPRemoteCommand *nextTrackIntervalCommand = [commandCenter nextTrackCommand];
-  [nextTrackIntervalCommand setEnabled:YES];
-  [nextTrackIntervalCommand addTarget:self action:@selector(onCCNext:)];
-  
-  // disable skip but set selector
-  MPSkipIntervalCommand *skipBackwardIntervalCommand = [commandCenter skipBackwardCommand];
-  [skipBackwardIntervalCommand setEnabled:NO];
-  [skipBackwardIntervalCommand addTarget:self action:@selector(onCCSkipPrev:)];
-  skipBackwardIntervalCommand.preferredIntervals = @[@(42)];  // Set your own interval
-  
-  MPSkipIntervalCommand *skipForwardIntervalCommand = [commandCenter skipForwardCommand];
-  skipForwardIntervalCommand.preferredIntervals = @[@(42)];  // Max 99
-  [skipForwardIntervalCommand setEnabled:NO];
-  [skipForwardIntervalCommand addTarget:self action:@selector(onCCSkipNext:)];
-  
-  // seek bar
-  [commandCenter.changePlaybackPositionCommand addTarget:self action:@selector(onCCPlaybackPossition:)];
-  
+  if (stepBack != 0 && stepForward != 0 )
+  {
+    // if forward and bask steps are defined
+    // disable ff/rew
+    [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onCCFF:) enabled:false];
+    [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onCCREW:) enabled:false];
+
+    // set the steps in Remote Center
+    [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onCCSkipPrev:) enabled:true];
+    remoteCenter.skipBackwardCommand.preferredIntervals = @[[NSNumber numberWithInt:stepBack]];
+    [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onCCSkipNext:) enabled:true];
+    remoteCenter.skipForwardCommand.preferredIntervals = @[[NSNumber numberWithInt:stepForward]];
+  }
+  else
+  {
+    // if not, add ff/rew controlls
+    [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onCCFF:) enabled:true];
+    [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onCCREW:) enabled:true];
+  }
+
+  [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
+}
+
+- (void)killCustomControlCenter
+{
+  MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
+  [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onCCPlay:) enabled:false];
+  [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onCCPlay:) enabled:false];
+  [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onCCPlaybackPossition:) enabled:false];
+  [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onCCStop:) enabled:false];
+  [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onCCPlay:) enabled:false];
+  [self toggleHandler:remoteCenter.enableLanguageOptionCommand withSelector:@selector(onCCLanguage:) enabled:false];
+  [self toggleHandler:remoteCenter.disableLanguageOptionCommand withSelector:@selector(onCCLanguageDisable:) enabled:false];
+  [self toggleHandler:remoteCenter.nextTrackCommand withSelector:@selector(onCCNext:) enabled:false];
+  [self toggleHandler:remoteCenter.previousTrackCommand withSelector:@selector(onCCPrev:) enabled:false];
+  [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onCCFF:) enabled:false];
+  [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onCCREW:) enabled:false];
+  [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onCCSkipPrev:) enabled:false];
+  [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onCCSkipNext:) enabled:false];
+
+  [[UIApplication sharedApplication] endReceivingRemoteControlEvents];
+}
+
+- (void) toggleHandler:(MPRemoteCommand *) command withSelector:(SEL) selector enabled:(BOOL) enabled
+{
+  [command removeTarget:self action:selector];
+  if(enabled)
+    [command addTarget:self action:selector];
+  command.enabled = enabled;
+}
+
+- (MPRemoteCommandHandlerStatus)onCCLanguage:(MPChangeLanguageOptionCommandEvent*)event
+{
+  PRINT_SIGNATURE();
+  MPNowPlayingInfoLanguageOption *languageOption = event.languageOption;
+  int iLang = [languageOption.identifier intValue];
+  if (languageOption.languageOptionType == MPNowPlayingInfoLanguageOptionTypeLegible)
+  {
+    // subtitle switch
+    if (g_application.m_pPlayer->GetSubtitle() != iLang - 1)
+      g_application.m_pPlayer->SetSubtitle(iLang-1);
+    g_application.m_pPlayer->SetSubtitleVisible(true);
+    // this is tricky, we need to wait a bit to refresh ComandCenter
+    [g_xbmcController performSelector:@selector(ComandCenterLanguageOptions:) withObject:[self.m_nowPlayingInfo mutableCopy] afterDelay:2];
+  }
+  else
+  {
+    // audio switch
+    if (g_application.m_pPlayer->GetAudioStream() != iLang)
+    {
+      g_application.m_pPlayer->SetAudioStream(iLang);
+      [self ComandCenterLanguageOptions:[self.m_nowPlayingInfo mutableCopy]];
+    }
+  }
+
+  return MPRemoteCommandHandlerStatusSuccess;
+}
+- (MPRemoteCommandHandlerStatus)onCCLanguageDisable:(MPChangeLanguageOptionCommandEvent*)event
+{
+  PRINT_SIGNATURE();
+  MPNowPlayingInfoLanguageOption *languageOption = event.languageOption;
+  if (languageOption.languageOptionType == MPNowPlayingInfoLanguageOptionTypeLegible)
+  {
+    g_application.m_pPlayer->SetSubtitleVisible(false);
+  }
+  // this is tricky, we need to wait a bit to refresh ComandCenter
+  [g_xbmcController performSelector:@selector(ComandCenterLanguageOptions:) withObject:[self.m_nowPlayingInfo mutableCopy] afterDelay:2];
+  return MPRemoteCommandHandlerStatusSuccess;
 }
 - (MPRemoteCommandHandlerStatus)onCCPlaybackPossition:(MPChangePlaybackPositionCommandEvent*) event
 {
@@ -3481,4 +3569,95 @@ CGRect debugView2;
   return MPRemoteCommandHandlerStatusSuccess;
 }
 
+- (void) ComandCenterLanguageOptions:(NSMutableDictionary*)dict
+{
+  NSMutableArray<MPNowPlayingInfoLanguageOption *> *currentLanguageOptions = [NSMutableArray array];
+  NSMutableArray<MPNowPlayingInfoLanguageOption *> *languageOptionAudio = [NSMutableArray array];
+  NSMutableArray<MPNowPlayingInfoLanguageOption *> *languageOptionSubtitles = [NSMutableArray array];
+  NSMutableArray<MPNowPlayingInfoLanguageOptionGroup *> *languageOptionGroups = [NSMutableArray array];
+
+  // audio
+  int selAudio = g_application.m_pPlayer->GetAudioStream();
+  int audioCount = g_application.m_pPlayer->GetAudioStreamCount();
+  if (audioCount > 1)
+  {
+    for (int iStream=0; iStream < audioCount; iStream++)
+    {
+      SPlayerAudioStreamInfo info;
+      g_application.m_pPlayer->GetAudioStreamInfo(iStream, info);
+
+      std::string lang;
+      std::string lang6391;
+      if (info.language.length() > 0)
+      {
+        g_LangCodeExpander.Lookup(info.language, lang);
+        g_LangCodeExpander.ConvertToISO6391(lang, lang6391);
+        lang = lang + " - " + info.name;
+      }
+      else
+        lang = info.name;
+
+      MPNowPlayingInfoLanguageOption *langOption = [[MPNowPlayingInfoLanguageOption alloc]
+                                              initWithType:MPNowPlayingInfoLanguageOptionTypeAudible
+                                              languageTag:[NSString stringWithUTF8String:lang6391.c_str()]
+                                              characteristics:@[]
+                                              displayName:[NSString stringWithUTF8String:lang.c_str()]
+                                              identifier:[NSString stringWithFormat:@"%i",iStream]
+                                                    ];
+      [languageOptionAudio addObject:langOption];
+
+      if (selAudio == iStream)
+        [currentLanguageOptions addObject:langOption];
+    }
+    MPNowPlayingInfoLanguageOptionGroup *languageOptionAudioGroups = [[MPNowPlayingInfoLanguageOptionGroup alloc] initWithLanguageOptions:languageOptionAudio.copy defaultLanguageOption:nil allowEmptySelection:NO];
+    [languageOptionGroups addObject:languageOptionAudioGroups];
+  }
+
+  // subtitles
+  int selSub = g_application.m_pPlayer->GetSubtitle();
+  int subtitleCount = g_application.m_pPlayer->GetSubtitleCount();
+  bool subsEnabled = g_application.m_pPlayer->GetSubtitleVisible();
+
+  for (int iStream=0; iStream < subtitleCount; iStream++)
+  {
+    SPlayerSubtitleStreamInfo info;
+    g_application.m_pPlayer->GetSubtitleStreamInfo(iStream, info);
+
+    std::string lang;
+    std::string lang6391;
+    if (info.language.length() > 0)
+      g_LangCodeExpander.Lookup(info.language, lang);
+    else
+      lang = info.name;
+
+    g_LangCodeExpander.ConvertToISO6391(lang, lang6391);
+
+    if (info.forced)
+      lang = lang + " (forced)";
+    if (lang.empty())
+      lang = g_localizeStrings.Get(1446);
+    MPNowPlayingInfoLanguageOption *subSelectOption = [[MPNowPlayingInfoLanguageOption alloc]
+                                            initWithType:MPNowPlayingInfoLanguageOptionTypeLegible
+                                            languageTag:[NSString stringWithUTF8String:lang6391.c_str()]
+                                            characteristics:@[]
+                                            displayName:[NSString stringWithUTF8String:lang.c_str()]
+                                            identifier:[NSString stringWithFormat:@"%i",iStream + 1]];
+    if (selSub == iStream && subsEnabled)
+      [currentLanguageOptions addObject:subSelectOption];
+
+    [languageOptionSubtitles addObject:subSelectOption];
+  }
+  MPNowPlayingInfoLanguageOptionGroup *languageOptionSubtitleGroups =
+                                             [[MPNowPlayingInfoLanguageOptionGroup alloc]
+                                              initWithLanguageOptions:languageOptionSubtitles
+                                              defaultLanguageOption:nil
+                                              allowEmptySelection:YES];
+
+  [languageOptionGroups addObject:languageOptionSubtitleGroups];
+
+  [dict setObject:languageOptionGroups.copy forKey:MPNowPlayingInfoPropertyAvailableLanguageOptions];
+  [dict setObject:currentLanguageOptions.copy forKey:MPNowPlayingInfoPropertyCurrentLanguageOptions];
+
+  [self setIOSNowPlayingInfo:dict];
+}
 @end
