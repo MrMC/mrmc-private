@@ -54,6 +54,8 @@ public:
   int GetSeekSize() const;
   bool InProgress() const;
 
+  int GetSeekStepSize(SeekType type, int step);
+
 protected:
   CSeekHandler();
   CSeekHandler(const CSeekHandler&);
@@ -62,8 +64,7 @@ protected:
 
 private:
   static const int analogSeekDelay = 500;
-  
-  int GetSeekStepSize(SeekType type, int step);
+
   int m_seekDelay;
   std::map<SeekType, int > m_seekDelays;
   bool m_requireSeek;
