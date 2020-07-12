@@ -417,6 +417,11 @@ bool CTVOSTopShelf::RunTopShelf()
     else
       itemPtr = m_HomeShelfTVPR->Get(item);
 
+    // few crashes reported somewhere here,
+    // if itemPtr is nil it might crash on below checks
+    if (!itemPtr)
+      return false;
+
     if (itemPtr->IsMediaServiceBased() &&
         (itemPtr->GetVideoInfoTag()->m_type == MediaTypeTvShow || itemPtr->GetVideoInfoTag()->m_type == MediaTypeSeason))
     {
