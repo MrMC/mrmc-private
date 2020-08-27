@@ -213,7 +213,7 @@ bool CLinuxRendererGLES::Configure(unsigned int width, unsigned int height, unsi
       dynamicRange = 1;
       break;
     case CONF_FLAGS_DYNAMIC_RANGE_HDR10:
-      dynamicRange = 3;
+      dynamicRange = 2;
       break;
     case CONF_FLAGS_DYNAMIC_RANGE_DOLBYVISION:
       dynamicRange = 4;
