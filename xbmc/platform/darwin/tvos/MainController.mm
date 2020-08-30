@@ -1712,11 +1712,6 @@ CGPoint touchAbsPosition;
 -(void)touchReceived
 {
   std::string direction = "";
-  if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo() &&
-     !g_application.m_pPlayer->IsPaused())
-  {
-    g_infoManager.SetDisplayAfterSeek(2500);
-  }
 
   switch(m_touchPosition)
   {
@@ -1736,6 +1731,14 @@ CGPoint touchAbsPosition;
       direction = "";
       break;
   }
+
+  if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo() &&
+     !g_application.m_pPlayer->IsPaused() &&
+     !direction.empty())
+  {
+    g_infoManager.SetDisplayAfterSeek(2500);
+  }
+
   CDarwinUtils::GetInstance().SetSiriTouchDirection(direction);
 }
 
