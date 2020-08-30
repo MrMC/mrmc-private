@@ -1910,7 +1910,6 @@ static CGPoint panTouchAbsStart;
           #endif
           FocusLayerView *parentView = [self findParentView:_focusLayer.infocus.view];
           swipeStartingParentViewRect = parentView.bounds;
-          swipeStartingParentViewRect = parentView.bounds;
           #if logfocus
           CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan: %f, %f, %f, %f",
             swipeStartingParentViewRect.origin.x,
