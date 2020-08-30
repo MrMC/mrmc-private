@@ -1341,6 +1341,16 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
 //--------------------------------------------------------------
 - (void)createSiriTapGestureRecognizers
 {
+  auto singletap = [[UITapGestureRecognizer alloc]
+    initWithTarget:self action:@selector(SiriSingleTapHandler:)];
+  singletap.numberOfTapsRequired = 1;
+  // The default press type is select, when this property is set to an empty array,
+  // the gesture recognizer will respond to taps like a touch pad like surface
+  singletap.allowedPressTypes = @[];
+  singletap.allowedTouchTypes = @[@(UITouchTypeIndirect)];
+  singletap.delegate = self;
+  [self.focusView addGestureRecognizer:singletap];
+
   self.doubleTapRecognizer = [[UITapGestureRecognizer alloc]
     initWithTarget:self action:@selector(SiriDoubleTapHandler:)];
   self.doubleTapRecognizer.numberOfTapsRequired = 2;
@@ -1356,6 +1366,7 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
   self.tripleTapRecognizer.delegate = self;
   [self.focusView addGestureRecognizer:self.tripleTapRecognizer];
 
+  [singletap requireGestureRecognizerToFail:self.doubleTapRecognizer];
   [self.doubleTapRecognizer requireGestureRecognizerToFail:self.tripleTapRecognizer];
 }
 //--------------------------------------------------------------
@@ -1936,6 +1947,35 @@ static CGPoint panTouchAbsStart;
         #if logfocus
         CLog::Log(LOGDEBUG, "SiriPanHandler:StateRecognized:other %ld", sender.state);
         #endif
+        break;
+    }
+  }
+}
+
+//--------------------------------------------------------------
+- (void)SiriSingleTapHandler:(UITapGestureRecognizer *)sender
+{
+  if (m_appAlive == YES)
+  {
+    switch (sender.state)
+    {
+      case UIGestureRecognizerStateEnded:
+        {
+          if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo() &&
+             !g_application.m_pPlayer->IsPaused())
+          {
+            #if logfocus
+            CLog::Log(LOGDEBUG, "SiriSingleTapHandler:StateEnded");
+            #endif
+            //show (2.5sec auto hide)/hide normal progress bar
+            if (g_infoManager.GetDisplayAfterSeek())
+              g_infoManager.SetDisplayAfterSeek(0);
+            else
+              g_infoManager.SetDisplayAfterSeek(2500);
+          }
+        }
+        break;
+      default:
         break;
     }
   }
