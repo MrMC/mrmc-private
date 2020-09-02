@@ -21,7 +21,7 @@ $(PLATFORM): $(DEPS)
 
 .installed-$(PLATFORM): $(PLATFORM)
 # 	rm -rf $(PREFIX)/mrmc/repo-resources
-# 	mkdir -p $(PREFIX)/mrmc/repo-resources
+	mkdir -p $(PREFIX)/mrmc/addons
 	cp -rf $(PLATFORM)/* $(PREFIX)/mrmc/addons
 	touch $@
 
