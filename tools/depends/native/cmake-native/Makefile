@@ -14,7 +14,7 @@ SETENV=CC=$(CC_FOR_BUILD) CXX=$(CXX_FOR_BUILD) LD=$(LD_FOR_BUILD) CFLAGS=$(NATIV
 
 ifeq ($(NATIVE_OS), osx)
   SETENV=CC=$(CC_FOR_BUILD) CXX=$(CXX_FOR_BUILD) LD=$(LD_FOR_BUILD) CFLAGS="$(NATIVE_CFLAGS) -Werror=unguarded-availability-new" \
-        CXXFLAGS="$(NATIVE_CXXFLAGS) -Werror=unguarded-availability-new" LDFLAGS="$(NATIVE_LDFLAGS) -Wl,-no_weak_imports"
+        CXXFLAGS="$(NATIVE_CXXFLAGS) -Werror=unguarded-availability-new" LDFLAGS="$(NATIVE_LDFLAGS)"
   SETENV+=SDKROOT=$(shell xcrun --show-sdk-path)
 endif
 
