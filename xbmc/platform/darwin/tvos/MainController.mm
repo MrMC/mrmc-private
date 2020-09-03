@@ -1812,7 +1812,6 @@ CGPoint touchAbsPosition;
 #pragma mark - internal key press methods
 - (void)sendButtonPressed:(int)buttonId
 {
-  [self disableScreenSaver];
   // if native keyboard is up, we don't want to send any button presses to MrMC
   if (m_nativeKeyboardActive)
     return;
