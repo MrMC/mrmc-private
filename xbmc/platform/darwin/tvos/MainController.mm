@@ -1743,7 +1743,8 @@ CGPoint touchAbsPosition;
       break;
   }
 
-  if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo() &&
+  if (!g_application.CurrentFileItem().IsLiveTV() &&
+      CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo() &&
      !g_application.m_pPlayer->IsPaused() &&
      !direction.empty())
   {
