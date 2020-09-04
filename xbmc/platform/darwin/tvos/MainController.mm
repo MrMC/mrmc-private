@@ -67,6 +67,7 @@
 #import "utils/Variant.h"
 #import "utils/log.h"
 #import "utils/LangCodeExpander.h"
+#import "video/VideoInfoTag.h"
 
 #import <MediaPlayer/MPMediaItem.h>
 #import <MediaPlayer/MediaPlayer.h>
@@ -3342,7 +3343,14 @@ CGRect debugView2;
   }
 
   if (g_application.m_pPlayer->IsPlayingVideo())
-    [dict setObject:@(MPMediaTypeAnyVideo) forKey:MPMediaItemPropertyMediaType];
+  {
+    if (g_application.CurrentFileItem().GetVideoInfoTag()->m_type == MediaTypeMovie)
+      [dict setObject:@(MPMediaTypeMovie) forKey:MPMediaItemPropertyMediaType];
+    else if (g_application.CurrentFileItem().GetVideoInfoTag()->m_type == MediaTypeEpisode)
+      [dict setObject:@(MPMediaTypeTVShow) forKey:MPMediaItemPropertyMediaType];
+    else
+      [dict setObject:@(MPMediaTypeAnyVideo) forKey:MPMediaItemPropertyMediaType];
+  }
   else
     [dict setObject:@(MPMediaTypeAnyAudio) forKey:MPMediaItemPropertyMediaType];
   /*
