@@ -109,10 +109,8 @@ void AnnounceBridge(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, con
     [item setValue:[player valueForKey:@"speed"] forKey:@"speed"];
 //    std::string thumb = g_application.CurrentFileItem().GetArt("thumb");
     std::string thumb;
-    if (curItem.GetVideoInfoTag()->m_type == MediaTypeTvShow)
+    if (curItem.GetVideoInfoTag()->m_type == MediaTypeEpisode)
       thumb = curItem.GetArt("tvshow.poster");
-    else if (curItem.GetVideoInfoTag()->m_type == MediaTypeSeason || curItem.GetVideoInfoTag()->m_type == MediaTypeEpisode)
-      thumb = curItem.GetArt("season.poster");
     if (thumb.empty())
       thumb = curItem.GetArt("thumb");
 
