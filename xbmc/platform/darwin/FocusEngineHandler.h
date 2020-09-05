@@ -69,8 +69,8 @@ typedef struct
   float slideX = 0.0f;
   float slideY = 0.0f;
   // amx amount (screen pixels) that control slides
-  float maxScreenSlideX = 15.0f;
-  float maxScreenSlideY = 15.0f;
+  float maxScreenSlideX = 10.0f;
+  float maxScreenSlideY = 10.0f;
 } FocusEngineAnimate;
 
 class CFocusEngineHandler
@@ -117,5 +117,6 @@ private:
   CCriticalSection m_focusLock;
   ORIENTATION m_focusedOrientation;
   FocusEngineAnimate m_focusAnimate;
+  FocusEngineAnimate m_lastFocusAnimate;
   static CFocusEngineHandler* m_instance;
 };

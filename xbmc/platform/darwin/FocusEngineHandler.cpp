@@ -59,6 +59,7 @@ CFocusEngineHandler::CFocusEngineHandler()
 , m_state(FocusEngineState::Idle)
 , m_focusedOrientation(UNDEFINED)
 {
+  m_lastFocusAnimate = FocusEngineAnimate();
 }
 
 void CFocusEngineHandler::Process()
@@ -94,16 +95,17 @@ void CFocusEngineHandler::Process()
 //        m_focus.itemFocus->ClearDynamicAnimations();
         std::vector<CAnimation> animations;
         CRect rect = focus.itemFocus->GetSelectionRenderRect();
-        FocusEngineAnimate focusAnimate = m_focusAnimate;
-        float screenDX =   focusAnimate.slideX  * focusAnimate.maxScreenSlideX;
-        float screenDY = (-focusAnimate.slideY) * focusAnimate.maxScreenSlideY;
+//        FocusEngineAnimate focusAnimate = m_focusAnimate;
+        float screenDX =   m_lastFocusAnimate.slideX  * m_lastFocusAnimate.maxScreenSlideX;
+        float screenDY = (-m_lastFocusAnimate.slideY) * m_lastFocusAnimate.maxScreenSlideY;
         TiXmlElement node("animation");
         node.SetAttribute("reversible", "false");
         node.SetAttribute("effect", "slide");
         std::string temp = StringUtils::Format("%f, %f", screenDX, screenDY);
         node.SetAttribute("start", temp);
         node.SetAttribute("end", "0, 0");
-        node.SetAttribute("time", "200");
+        node.SetAttribute("time", "250");
+        node.SetAttribute("delay", "100");
         node.SetAttribute("condition", "true");
         TiXmlText text("dynamic");
         node.InsertEndChild(text);
@@ -115,6 +117,7 @@ void CFocusEngineHandler::Process()
         m_focus.itemFocus->ResetAnimation(ANIM_TYPE_DYNAMIC);
         m_focus.itemFocus->SetDynamicAnimations(animations);
         m_focusAnimate = FocusEngineAnimate();
+        m_lastFocusAnimate = FocusEngineAnimate();
         m_state = FocusEngineState::Idle;
         break;
       }
@@ -123,6 +126,7 @@ void CFocusEngineHandler::Process()
           CRect rect = focus.itemFocus->GetSelectionRenderRect();
           if (!rect.IsEmpty())
           {
+            m_lastFocusAnimate = m_focusAnimate;
             FocusEngineAnimate focusAnimate = m_focusAnimate;
             std::vector<CAnimation> animations;
             // handle control slide
