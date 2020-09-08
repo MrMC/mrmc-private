@@ -1670,7 +1670,7 @@ CGPoint touchAbsPosition;
     // so creating a weak reference to self for access inside the block
     __weak MainController *weakSelf = self;
     GCMicroGamepad *gamepad = controller.microGamepad;
-    gamepad.reportsAbsoluteDpadValues = NO;
+    gamepad.reportsAbsoluteDpadValues = YES;
     gamepad.dpad.valueChangedHandler = ^(GCControllerDirectionPad *dpad, float xValue, float yValue) {
     // dpad axis values ranges from -1.0 to 1.0
     // where -1, -1 is bottom, left on trackpad.
