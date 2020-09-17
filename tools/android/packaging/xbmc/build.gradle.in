@@ -40,12 +40,12 @@ def getNDKapi() {
 }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "@APP_PACKAGE@"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode @APP_VERSION_ANDROID_VERSION@
         versionName "@APP_VERSION@"
 
