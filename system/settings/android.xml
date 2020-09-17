@@ -161,6 +161,9 @@
       <group id="3">
         <setting id="audiooutput.passthroughiecpacked" type="boolean">
           <visible>true</visible>
+          <dependencies>
+            <dependency type="visible" setting="audiooutput.passthrough" operator="is">true</dependency>
+          </dependencies>
         </setting>
         <setting id="audiooutput.passthroughdevice" type="string">
           <default>Default</default>
