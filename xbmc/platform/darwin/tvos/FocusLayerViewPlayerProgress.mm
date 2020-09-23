@@ -266,7 +266,13 @@ static double gScrubbedSeekTimeSecondsForRestore = -1;
 #endif
 
   // draw the vertical tick mark in the bar to show current position
-  CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] CGColor]);
+  color_t systemFocusColor = g_colorManager.GetColor("systemfocus");
+  UIColor *tickMark = [UIColor
+    colorWithRed:(float)GET_R(systemFocusColor)/255
+    green:(float)GET_G(systemFocusColor)/255
+    blue:(float)GET_B(systemFocusColor)/255
+    alpha:1.0];
+  CGContextSetStrokeColorWithColor(ctx, [tickMark CGColor]);
   CGContextSetLineWidth(ctx, 2.0);
   CGPoint thumbPointerBGN = CGPointMake(CGRectGetMidX(thumbRect), CGRectGetMinY(thumbRect));
   CGPoint thumbPointerEND = CGPointMake(thumbPointerBGN.x, CGRectGetMaxY(thumbRect));
