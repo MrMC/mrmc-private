@@ -1512,8 +1512,8 @@ ORIENTATION swipeStartingFocusedOrientation;
       self.tripleTapRecognizer.enabled = YES;
     // disable pan recognizer so we can
     // seek/ff/rw while keep a finger on touchpad
-    if (self.self.panRecognizer.enabled)
-      self.self.panRecognizer.enabled = NO;
+    if (self.panRecognizer.enabled)
+      self.panRecognizer.enabled = NO;
   }
   else
   {
@@ -1522,8 +1522,8 @@ ORIENTATION swipeStartingFocusedOrientation;
     if (self.tripleTapRecognizer.enabled)
       self.tripleTapRecognizer.enabled = NO;
     // enable pan recognizer for navigation
-    if (!self.self.panRecognizer.enabled)
-      self.self.panRecognizer.enabled = YES;
+    if (!self.panRecognizer.enabled)
+      self.panRecognizer.enabled = YES;
   }
 
   // important, this gestureRecognizer gets called before any other tap/pas/swipe handler
