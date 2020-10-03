@@ -117,6 +117,5 @@ private:
   CCriticalSection m_focusLock;
   ORIENTATION m_focusedOrientation;
   FocusEngineAnimate m_focusAnimate;
-  FocusEngineAnimate m_lastFocusAnimate;
   static CFocusEngineHandler* m_instance;
 };
