@@ -304,6 +304,7 @@ case $host in
             11.4);;
             12.*);;
             13.*);;
+            14.*);;
             *)
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
           esac
@@ -322,6 +323,7 @@ case $host in
             11.4);;
             12.*);;
             13.*);;
+            14.*);;
            *)
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
           esac
@@ -397,6 +399,7 @@ case $host in
           11.*);;
           12.*);;
           13.*);;
+          14.*);;
             *)
               AC_MSG_ERROR(error in configure of --with-sdk=$use_sdk)
             ;;
