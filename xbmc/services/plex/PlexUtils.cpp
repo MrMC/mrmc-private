@@ -1197,7 +1197,8 @@ bool CPlexUtils::GetPlexTvshows(CFileItemList &items, std::string url)
     CURL curl(url);
     std::string token = curl.GetProtocolOption("X-Plex-Token");
     curl.SetProtocolOptions("");
-    curl.SetProtocolOption("X-Plex-Token",token);
+    if (!token.empty())
+      curl.SetProtocolOption("X-Plex-Token",token);
     rtn = ParsePlexSeries(items, curl, variant["MediaContainer"]["Directory"]);
   }
 
@@ -1383,7 +1384,8 @@ bool CPlexUtils::GetURL(CFileItem &item)
     curl.SetOption("X-Plex-Client-Capabilities","protocols=http-live-streaming,http-mp4-streaming,http-mp4-video,http-mp4-video-720p,http-mp4-video-1080p,http-streaming-video,http-streaming-video-720p,http-streaming-video-1080p;videoDecoders=mpeg4,h264{profile:high&resolution:1080&level:51};audioDecoders=aac");
     curl.SetOption("X-Plex-Client-Profile-Extra", "append-transcode-target-audio-codec(type=videoProfile&context=streaming&protocol=hls&container=mpegts&audioCodec=aac)");
   }
-  curl.SetProtocolOption("X-Plex-Token", url.GetProtocolOption("X-Plex-Token"));
+  if (!url.GetProtocolOption("X-Plex-Token").empty())
+    curl.SetProtocolOption("X-Plex-Token", url.GetProtocolOption("X-Plex-Token"));
   curl.SetProtocolOption("X-Plex-Platform", "MrMC");
   curl.SetProtocolOption("X-Plex-Device","Plex Home Theater");
   curl.SetProtocolOption("X-Plex-Client-Identifier", uuidStr);
@@ -1404,7 +1406,8 @@ void CPlexUtils::StopTranscode(CFileItem &item)
   CURL url1(item.GetPath());
   CURL url2(URIUtils::GetParentPath(cleanUrl));
   CURL url3(url2.GetWithoutFilename());
-  url3.SetProtocolOption("X-Plex-Token",url1.GetProtocolOption("X-Plex-Token"));
+  if (!url1.GetProtocolOption("X-Plex-Token").empty())
+    url3.SetProtocolOption("X-Plex-Token",url1.GetProtocolOption("X-Plex-Token"));
   cleanUrl = url3.Get();
 
   if (StringUtils::StartsWithNoCase(cleanUrl, "plex://"))
@@ -1425,7 +1428,8 @@ void CPlexUtils::PingTranscoder(CFileItem &item)
   CURL url1(item.GetPath());
   CURL url2(URIUtils::GetParentPath(cleanUrl));
   CURL url3(url2.GetWithoutFilename());
-  url3.SetProtocolOption("X-Plex-Token",url1.GetProtocolOption("X-Plex-Token"));
+  if (!url.GetProtocolOption("X-Plex-Token").empty())
+    url3.SetProtocolOption("X-Plex-Token",url1.GetProtocolOption("X-Plex-Token"));
   cleanUrl = url3.Get();
 
   if (StringUtils::StartsWithNoCase(cleanUrl, "plex://"))

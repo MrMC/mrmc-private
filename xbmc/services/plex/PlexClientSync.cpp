@@ -138,7 +138,10 @@ void CPlexClientSync::ProcessSyncByWebSockets()
     curl.SetProtocol("ws");
   else if (curl.GetProtocol() == "https")
     curl.SetProtocol("wss");
-  curl.SetFileName(":/websockets/notifications?X-Plex-Token=" + m_accessToken);
+  if (!m_accessToken.empty())
+    curl.SetFileName(":/websockets/notifications?X-Plex-Token=" + m_accessToken);
+  else
+    curl.SetFileName(":/websockets/notifications");
 
   static const int WebSocketTimeoutMs = 100;
 

@@ -135,7 +135,8 @@ bool CPlexClient::Init(const PlexServerInfo &serverInfo)
         url = url1;
       }
 
-      url.SetProtocolOption("X-Plex-Token", m_accessToken);
+      if (!m_accessToken.empty())
+        url.SetProtocolOption("X-Plex-Token", m_accessToken);
       int timeout = connection.external ? 7 : 3;
       if (CPlexUtils::GetIdentity(url, timeout))
       {
