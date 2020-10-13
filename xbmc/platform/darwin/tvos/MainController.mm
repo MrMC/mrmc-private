@@ -3471,17 +3471,6 @@ CGRect debugView2;
 {
   //PRINT_SIGNATURE();
   MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
-  if (!g_application.CurrentFileItem().IsPVRChannel())
-  {
-    [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onCCPlay:) enabled:true];
-    [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onCCPlay:) enabled:true];
-    [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onCCPlaybackPossition:) enabled:true];
-    [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onCCPlay:) enabled:true];
-  }
-  else
-  {
-    [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onCCStop:) enabled:true];
-  }
   [self toggleHandler:remoteCenter.enableLanguageOptionCommand withSelector:@selector(onCCLanguage:) enabled:true];
   [self toggleHandler:remoteCenter.disableLanguageOptionCommand withSelector:@selector(onCCLanguageDisable:) enabled:true];
   [self toggleHandler:remoteCenter.nextTrackCommand withSelector:@selector(onCCNext:) enabled:false];
@@ -3489,6 +3478,10 @@ CGRect debugView2;
 
   if (g_application.m_pPlayer->CanSeek())
   {
+    [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onCCPlay:) enabled:true];
+    [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onCCPlay:) enabled:true];
+    [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onCCPlaybackPossition:) enabled:true];
+    [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onCCPlay:) enabled:true];
     SeekType seekType = g_application.m_pPlayer->IsPlayingVideo() ? SEEK_TYPE_VIDEO:SEEK_TYPE_MUSIC;
     int stepBack = abs(CSeekHandler::GetInstance().GetSeekStepSize(seekType, -1));
     int stepForward = CSeekHandler::GetInstance().GetSeekStepSize(seekType, 1);
@@ -3512,6 +3505,10 @@ CGRect debugView2;
       [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onCCFF:) enabled:true];
       [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onCCREW:) enabled:true];
     }
+  }
+  else
+  {
+    [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onCCStop:) enabled:true];
   }
 
   [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
