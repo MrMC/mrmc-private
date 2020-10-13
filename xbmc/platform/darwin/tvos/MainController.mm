@@ -3353,6 +3353,11 @@ CGRect debugView2;
   }
   else
     [dict setObject:@(MPMediaTypeAnyAudio) forKey:MPMediaItemPropertyMediaType];
+
+  if (!g_application.m_pPlayer->CanSeek())
+    [dict setObject:@(YES) forKey:MPNowPlayingInfoPropertyIsLiveStream];
+  else
+    [dict setObject:@(NO) forKey:MPNowPlayingInfoPropertyIsLiveStream];
   /*
    other properities can be set:
    MPMediaItemPropertyAlbumTrackCount
@@ -3466,38 +3471,47 @@ CGRect debugView2;
 {
   //PRINT_SIGNATURE();
   MPRemoteCommandCenter *remoteCenter = [MPRemoteCommandCenter sharedCommandCenter];
-  [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onCCPlay:) enabled:true];
-  [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onCCPlay:) enabled:true];
-  [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onCCPlaybackPossition:) enabled:true];
-  [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onCCStop:) enabled:false];
-  [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onCCPlay:) enabled:true];
+  if (!g_application.CurrentFileItem().IsPVRChannel())
+  {
+    [self toggleHandler:remoteCenter.pauseCommand withSelector:@selector(onCCPlay:) enabled:true];
+    [self toggleHandler:remoteCenter.playCommand withSelector:@selector(onCCPlay:) enabled:true];
+    [self toggleHandler:remoteCenter.changePlaybackPositionCommand withSelector:@selector(onCCPlaybackPossition:) enabled:true];
+    [self toggleHandler:remoteCenter.togglePlayPauseCommand withSelector:@selector(onCCPlay:) enabled:true];
+  }
+  else
+  {
+    [self toggleHandler:remoteCenter.stopCommand withSelector:@selector(onCCStop:) enabled:true];
+  }
   [self toggleHandler:remoteCenter.enableLanguageOptionCommand withSelector:@selector(onCCLanguage:) enabled:true];
   [self toggleHandler:remoteCenter.disableLanguageOptionCommand withSelector:@selector(onCCLanguageDisable:) enabled:true];
   [self toggleHandler:remoteCenter.nextTrackCommand withSelector:@selector(onCCNext:) enabled:false];
   [self toggleHandler:remoteCenter.previousTrackCommand withSelector:@selector(onCCPrev:) enabled:false];
 
-  SeekType seekType = g_application.m_pPlayer->IsPlayingVideo() ? SEEK_TYPE_VIDEO:SEEK_TYPE_MUSIC;
-  int stepBack = abs(CSeekHandler::GetInstance().GetSeekStepSize(seekType, -1));
-  int stepForward = CSeekHandler::GetInstance().GetSeekStepSize(seekType, 1);
-
-  if (stepBack != 0 && stepForward != 0 )
+  if (g_application.m_pPlayer->CanSeek())
   {
-    // if forward and bask steps are defined
-    // disable ff/rew
-    [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onCCFF:) enabled:false];
-    [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onCCREW:) enabled:false];
+    SeekType seekType = g_application.m_pPlayer->IsPlayingVideo() ? SEEK_TYPE_VIDEO:SEEK_TYPE_MUSIC;
+    int stepBack = abs(CSeekHandler::GetInstance().GetSeekStepSize(seekType, -1));
+    int stepForward = CSeekHandler::GetInstance().GetSeekStepSize(seekType, 1);
 
-    // set the steps in Remote Center
-    [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onCCSkipPrev:) enabled:true];
-    remoteCenter.skipBackwardCommand.preferredIntervals = @[[NSNumber numberWithInt:stepBack]];
-    [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onCCSkipNext:) enabled:true];
-    remoteCenter.skipForwardCommand.preferredIntervals = @[[NSNumber numberWithInt:stepForward]];
-  }
-  else
-  {
-    // if not, add ff/rew controlls
-    [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onCCFF:) enabled:true];
-    [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onCCREW:) enabled:true];
+    if (stepBack != 0 && stepForward != 0 )
+    {
+      // if forward and bask steps are defined
+      // disable ff/rew
+      [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onCCFF:) enabled:false];
+      [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onCCREW:) enabled:false];
+
+      // set the steps in Remote Center
+      [self toggleHandler:remoteCenter.skipBackwardCommand withSelector:@selector(onCCSkipPrev:) enabled:true];
+      remoteCenter.skipBackwardCommand.preferredIntervals = @[[NSNumber numberWithInt:stepBack]];
+      [self toggleHandler:remoteCenter.skipForwardCommand withSelector:@selector(onCCSkipNext:) enabled:true];
+      remoteCenter.skipForwardCommand.preferredIntervals = @[[NSNumber numberWithInt:stepForward]];
+    }
+    else
+    {
+      // if not, add ff/rew controlls
+      [self toggleHandler:remoteCenter.seekForwardCommand withSelector:@selector(onCCFF:) enabled:true];
+      [self toggleHandler:remoteCenter.seekBackwardCommand withSelector:@selector(onCCREW:) enabled:true];
+    }
   }
 
   [[UIApplication sharedApplication] beginReceivingRemoteControlEvents];
