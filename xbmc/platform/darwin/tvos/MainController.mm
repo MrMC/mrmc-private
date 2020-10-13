@@ -3159,7 +3159,7 @@ CGRect debugView2;
   preferredItem.core = CFocusEngineHandler::GetInstance().GetFocusControl();
   if (preferredItem.core)
   {
-    if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo())
+    if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo() && g_application.m_pPlayer->IsPlayingVideo())
     {
       if (g_windowManager.IsWindowVisible(WINDOW_DIALOG_SEEK_BAR))
       {
