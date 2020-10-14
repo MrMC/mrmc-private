@@ -272,11 +272,11 @@ bool CLightEffectServices::InitConnection()
   m_lighteffect = new CLightEffectClient();
   
   // boblightd server IP address and port
-  const char *IP = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_LIGHTEFFECTSIP).c_str();
+  std::string IP = CSettings::GetInstance().GetString(CSettings::SETTING_SERVICES_LIGHTEFFECTSIP);
   int port = CSettings::GetInstance().GetInt(CSettings::SETTING_SERVICES_LIGHTEFFECTSPORT);
 
   // timeout is in microseconds, so 5 seconds.
-  if (!m_lighteffect->Connect(IP, port, 5000000))
+  if (!m_lighteffect->Connect(IP.c_str(), port, 5000000))
   {
     m_turnStaticON = false;
     CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info,
