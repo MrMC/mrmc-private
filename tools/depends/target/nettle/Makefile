@@ -1,5 +1,5 @@
 include ../../Makefile.include
-DEPS= ../../Makefile.include Makefile
+DEPS= ../../Makefile.include Makefile 01-disable_testsuite.patch 02-conftest_exit.patch
 
 # lib name, version
 LIBNAME=nettle
@@ -8,12 +8,7 @@ SOURCE=$(LIBNAME)-$(VERSION)
 ARCHIVE=$(SOURCE).tar.gz
 
 ifeq ($(OS),ios)
-  ifneq (,$(findstring 3.,$(XCODE_VERSION)))
-    CONFIGURE_FLAGS=-disable-assembler
-  endif
- ifeq ($(CPU),arm64)
-    CONFIGURE_FLAGS=-disable-assembler
-  endif
+  CONFIGURE_FLAGS=-disable-assembler
 endif
 
 # configuration settings
@@ -32,8 +27,10 @@ $(TARBALLS_LOCATION)/$(ARCHIVE):
 $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM)/*; mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
-	cd $(PLATFORM); patch -p0 < ../01-disable_testsuite.patch
-	cd $(PLATFORM); patch -p0 < ../02-honor_prefix_in_configure.patch
+	cd $(PLATFORM); patch -p0 -i ../01-disable_testsuite.patch
+	cd $(PLATFORM); patch -p0 -i ../02-honor_prefix_in_configure.patch
+	cd $(PLATFORM); patch -p1 -i ../02-conftest_exit.patch
+	cd $(PLATFORM); $(AUTORECONF)
 	cd $(PLATFORM); $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)
