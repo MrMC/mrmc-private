@@ -5,13 +5,14 @@ DEPS= ../../Makefile.include.in Makefile
 
 # lib name, version
 LIBNAME=lzo
-VERSION=2.03
+VERSION=2.06
 SOURCE=$(LIBNAME)-$(VERSION)
+BASE_URL := http://mirrors.kodi.tv/build-deps/sources
 ARCHIVE=$(SOURCE).tar.gz
 
 # configuration settings
 CONFIGURE=cp -f $(CONFIG_SUB) $(CONFIG_GUESS) autoconf/; \
-          ./configure --prefix=$(PREFIX) --enable-shared CFLAGS='-std=c90 -fPIC'
+          ./configure --prefix=$(PREFIX) --enable-shared
 
 LIBDYLIB=$(PLATFORM)/src/.libs/lib$(LIBNAME)2.a
 
@@ -25,6 +26,7 @@ $(TARBALLS_LOCATION)/$(ARCHIVE):
 $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)
 	rm -rf $(PLATFORM)/*; mkdir -p $(PLATFORM)
 	cd $(PLATFORM); $(ARCHIVE_TOOL) $(ARCHIVE_TOOL_FLAGS) $(TARBALLS_LOCATION)/$(ARCHIVE)
+	cd $(PLATFORM); $(AUTORECONF) -vif
 	cd $(PLATFORM); $(CONFIGURE)
 
 $(LIBDYLIB): $(PLATFORM)

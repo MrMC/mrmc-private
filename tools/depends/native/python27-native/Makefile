@@ -4,8 +4,9 @@ DEPS= ../../Makefile.include.in Makefile
 
 # lib name, version
 LIBNAME=Python
-VERSION=2.7.12
+VERSION=2.7.13
 SOURCE=$(LIBNAME)-$(VERSION)
+BASE_URL := http://mirrors.kodi.tv/build-deps/sources
 ARCHIVE=$(SOURCE).tar.xz
 CWD=$(shell pwd)
 HOSTPYTHONDIR=$(CWD)/$(PLATFORM)/hostpython
