@@ -1478,6 +1478,7 @@ typedef enum FocusActionTypes
 // default action is FocusActionTap, gestureRecognizers will
 // set the correct type before shouldUpdateFocusInContext is hit
 int focusActionType = FocusActionTap;
+bool focusPanIsActive = false;
 
 int swipeCounter = 0;
 bool swipeOrPanNoMore = false;
@@ -1906,6 +1907,7 @@ static CGPoint panTouchAbsStart;
           swipeCounter = 0;
           swipeOrPanNoMore = false;
           focusActionType = FocusActionPan;
+          focusPanIsActive = true;
           #if logfocus
           CLog::Log(LOGDEBUG, "SiriPanHandler:StateBegan:FocusActionPan");
           #endif
@@ -1943,6 +1945,7 @@ static CGPoint panTouchAbsStart;
         }
         break;
       default:
+        focusPanIsActive = false;
         CFocusEngineHandler::GetInstance().ClearAnimation();
         #if logfocus
         CLog::Log(LOGDEBUG, "SiriPanHandler:StateRecognized:other %ld", sender.state);
@@ -3247,7 +3250,8 @@ CGRect debugView2;
     // has to match in order and content.
     std::vector<FocusLayerControl> focusViews;
     [self initFocusLayerViews:focusViews withCoreViews:coreViews];
-    if (FocusLayerViewsAreEqual(focusViews, _focusLayer.views))
+    // panning is special case, core view rect will change for item that is wiggling.
+    if (focusPanIsActive || FocusLayerViewsAreEqual(focusViews, _focusLayer.views))
     {
       needUpdate = [self updateFocusLayerInFocus];
     }
