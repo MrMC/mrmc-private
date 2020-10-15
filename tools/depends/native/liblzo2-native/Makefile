@@ -7,7 +7,6 @@ DEPS= ../../Makefile.include.in Makefile
 LIBNAME=lzo
 VERSION=2.06
 SOURCE=$(LIBNAME)-$(VERSION)
-BASE_URL := http://mirrors.kodi.tv/build-deps/sources
 ARCHIVE=$(SOURCE).tar.gz
 
 # configuration settings

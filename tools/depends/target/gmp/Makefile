@@ -5,7 +5,6 @@ DEPS= ../../Makefile.include Makefile
 LIBNAME=gmp
 VERSION=6.1.2
 SOURCE=$(LIBNAME)-$(VERSION)
-BASE_URL := http://mirrors.kodi.tv/build-deps/sources
 ARCHIVE=$(SOURCE).tar.bz2
 
 # ABI selection
