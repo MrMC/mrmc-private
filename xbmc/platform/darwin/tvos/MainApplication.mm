@@ -22,6 +22,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
+#import "Application.h"
 #import "platform/darwin/tvos/MainApplication.h"
 
 #import "platform/darwin/DarwinUtils.h"
@@ -41,9 +42,8 @@ MainController* m_xbmcController;
 {
   PRINT_SIGNATURE();
 
-  [[UIApplication sharedApplication] ignoreSnapshotOnNextApplicationLaunch];
-  [m_xbmcController pauseAnimation];
-  [m_xbmcController becomeInactive];
+  if (g_application.m_pPlayer->IsPaused())
+    [m_xbmcController pauseAnimation];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -56,6 +56,9 @@ MainController* m_xbmcController;
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
+  [m_xbmcController pauseAnimation];
+  [m_xbmcController becomeInactive];
+  
   PRINT_SIGNATURE();
 
   if (application.applicationState == UIApplicationStateBackground)
