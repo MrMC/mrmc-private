@@ -76,9 +76,9 @@ CDVDSubtitlesLibass::CDVDSubtitlesLibass()
     return;
 
   //Setting default font to the Arial in \media\fonts (used if FontConfig fails)
-  strPath = URIUtils::AddFileToFolder("special://home/media/fonts/", CSettings::GetInstance().GetString(CSettings::SETTING_SUBTITLES_FONT));
+  strPath = URIUtils::AddFileToFolder("special://home/media/Fonts/", CSettings::GetInstance().GetString(CSettings::SETTING_SUBTITLES_FONT));
   if (!XFILE::CFile::Exists(strPath))
-    strPath = URIUtils::AddFileToFolder("special://xbmc/media/fonts/", CSettings::GetInstance().GetString(CSettings::SETTING_SUBTITLES_FONT));
+    strPath = URIUtils::AddFileToFolder("special://xbmc/media/Fonts/", CSettings::GetInstance().GetString(CSettings::SETTING_SUBTITLES_FONT));
   int fc = !CSettings::GetInstance().GetBool(CSettings::SETTING_SUBTITLES_OVERRIDEASSFONTS);
 
   m_dll.ass_set_margins(m_renderer, 0, 0, 0, 0);
