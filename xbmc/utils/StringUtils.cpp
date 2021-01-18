@@ -428,6 +428,27 @@ int StringUtils::CompareNoCase(const char *s1, const char *s2)
   return 0;
 }
 
+int StringUtils::CompareNoCase(const std::string& str1, const std::string& str2, size_t n /* = 0 */)
+{
+  return CompareNoCase(str1.c_str(), str2.c_str(), n);
+}
+
+int StringUtils::CompareNoCase(const char* s1, const char* s2, size_t n /* = 0 */)
+{
+  char c2; // we need only one char outside the loop
+  size_t index = 0;
+  do
+  {
+    const char c1 = *s1++; // const local variable should help compiler to optimize
+    c2 = *s2++;
+    index++;
+    if (c1 != c2 && ::tolower(c1) != ::tolower(c2)) // This includes the possibility that one of the characters is the null-terminator, which implies a string mismatch.
+      return ::tolower(c1) - ::tolower(c2);
+  } while (c2 != '\0' &&
+           index != n); // At this point, we know c1 == c2, so there's no need to test them both.
+  return 0;
+}
+
 std::string StringUtils::Left(const std::string &str, size_t count)
 {
   count = std::max((size_t)0, std::min(count, str.size()));

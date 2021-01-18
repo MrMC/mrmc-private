@@ -26,6 +26,7 @@
 #include "utils/Base64.h"
 #include "utils/HttpParser.h"
 #include "utils/HttpResponse.h"
+#include "utils/StringUtils.h"
 #include "utils/log.h"
 #include "utils/StringUtils.h"
 
@@ -94,7 +95,8 @@ bool CWebSocketV13::Handshake(const char* data, size_t length, std::string &resp
 
   // There must be a "Upgrade" header with the value "websocket"
   value = header.getValue(WS_HEADER_UPGRADE_LC);
-  if (value == NULL || strnicmp(value, WS_HEADER_UPGRADE_VALUE, strlen(WS_HEADER_UPGRADE_VALUE)) != 0)
+  if (value == NULL || StringUtils::CompareNoCase(value, WS_HEADER_UPGRADE_VALUE,
+                                                  strlen(WS_HEADER_UPGRADE_VALUE)) != 0)
   {
     CLog::Log(LOGINFO, "WebSocket [RFC6455]: invalid \"%s\" received", WS_HEADER_UPGRADE);
     return true;
