@@ -1048,6 +1048,31 @@ bool CPlexUtils::GetMoreItemInfo(CFileItem &item)
   return true;
 }
 
+bool CPlexUtils::GetSkipIntroInfo(CFileItem &item)
+{
+  std::string url = URIUtils::GetParentPath(item.GetPath());
+  if (StringUtils::StartsWithNoCase(url, "plex://"))
+    url = Base64URL::Decode(URIUtils::GetFileName(item.GetPath()));
+
+  std::string id = item.GetMediaServiceId();
+  std::string filename = StringUtils::Format("library/metadata/%s", id.c_str());
+
+  CURL curl(url);
+  curl.SetFileName(filename);
+  curl.SetProtocolOption("includeMarkers", "1");
+  CVariant variant = GetPlexCVariant(curl.Get());
+  if (!variant.isNull() && variant.isObject() && variant.isMember("MediaContainer"))
+  {
+    const CVariant marker(variant["MediaContainer"]["Video"]["Marker"]);
+    if (!marker.isNull())
+    {
+      item.SetProperty("introStart", marker["startTimeOffset"].asInteger());
+      item.SetProperty("introFinish", marker["endTimeOffset"].asInteger());
+    }
+  }
+  return true;
+}
+
 bool CPlexUtils::GetMoreResolutions(CFileItem &item)
 {
   std::string id = item.GetMediaServiceId();

@@ -86,6 +86,7 @@ public:
   static bool GetPlexMusicFilters(CFileItemList &items, std::string url, std::string parentPath);
   static bool GetItemSubtiles(CFileItem &item);
   static bool GetMoreItemInfo(CFileItem &item);
+  static bool GetSkipIntroInfo(CFileItem &item);
   static bool GetMoreResolutions(CFileItem &item);
   static bool GetURL(CFileItem &item);
   static void StopTranscode(CFileItem &item);

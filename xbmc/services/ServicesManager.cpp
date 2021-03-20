@@ -939,6 +939,12 @@ void CServicesManager::GetMoreInfo(CFileItem &item)
     CJellyfinUtils::GetMoreItemInfo(item);
 }
 
+void CServicesManager::GetSkipIntroInfo(CFileItem &item)
+{
+  if (item.HasProperty("PlexItem"))
+    CPlexUtils::GetSkipIntroInfo(item);
+}
+
 bool CServicesManager::GetResolutions(CFileItem &item)
 {
   if (item.HasProperty("PlexItem"))

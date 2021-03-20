@@ -116,6 +116,7 @@ public:
   void GetAllAlbums(CFileItemList &albums, std::string type, std::string uuid);
   void GetSubtitles(CFileItem &item);
   void GetMoreInfo(CFileItem &item);
+  void GetSkipIntroInfo(CFileItem &item);
   bool GetResolutions(CFileItem &item);
   bool GetURL(CFileItem &item);
   void SearchService(CFileItemList &items, std::string strSearchString);
