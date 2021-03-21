@@ -3312,6 +3312,7 @@ PlayBackRet CApplication::PlayFile(const CFileItem& item, bool bRestart)
     if (!CServicesManager::GetInstance().GetResolutions(const_cast<CFileItem&>(item)))
       return PLAYBACK_CANCELED;
     CServicesManager::GetInstance().GetURL(const_cast<CFileItem&>(item));
+    CServicesManager::GetInstance().GetSkipIntroInfo(const_cast<CFileItem&>(item));
   }
 
   if (!bRestart)
@@ -3901,6 +3902,7 @@ void CApplication::SaveFileState(bool bForeground /* = false */)
 
 void CApplication::UpdateFileState()
 {
+  static bool checkSkipIntroButton = true;
   // Did the file change?
   if (!m_progressTrackingItem->GetPath().empty() && m_progressTrackingItem->GetPath() != CurrentFile())
   {
@@ -3915,6 +3917,7 @@ void CApplication::UpdateFileState()
 
     // Reset tracking item
     m_progressTrackingItem->Reset();
+    checkSkipIntroButton = true;
   }
   else
   {
@@ -3977,6 +3980,26 @@ void CApplication::UpdateFileState()
 
         if (m_progressTrackingItem->IsMediaServiceBased())
           CServicesManager::GetInstance().UpdateItemState(*m_progressTrackingItem.get(), GetTime());
+
+        if (checkSkipIntroButton && m_progressTrackingItem->HasProperty("PlexItem"))
+        {
+          if (m_progressTrackingItem->HasProperty("introStart") &&
+              m_progressTrackingItem->HasProperty("introFinish"))
+          {
+            int currentTimeMS = g_application.m_pPlayer->GetTime();
+            int introStart = m_progressTrackingItem->GetProperty("introStart").asInteger();
+            int introFinish = m_progressTrackingItem->GetProperty("introFinish").asInteger();
+            if (checkSkipIntroButton && currentTimeMS > introStart && currentTimeMS < introFinish)
+            {
+              // notified once, thats enough
+              checkSkipIntroButton = false;
+              CApplicationMessenger::GetInstance().PostMsg(
+                TMSG_GUI_ACTION, WINDOW_FULLSCREEN_VIDEO, -1, static_cast<void*>(new CAction(ACTION_SHOW_SKIP_INTRO)));
+            }
+          }
+          else
+            checkSkipIntroButton = false;
+        }
       }
     }
   }

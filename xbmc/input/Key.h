@@ -346,6 +346,8 @@
 #define ACTION_VOLUME_SET             245
 #define ACTION_TOGGLE_COMMSKIP        246
 #define ACTION_SHOW_OSD_SETTINGS      247
+#define ACTION_SHOW_SKIP_INTRO        248
+#define ACTION_HIDE_SKIP_INTRO        249
 
 // Voice actions
 #define ACTION_VOICE_RECOGNIZE        300

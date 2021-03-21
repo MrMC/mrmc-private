@@ -163,6 +163,8 @@
 
 #define GUI_MSG_SEND_HOME_UPDATE 50
 
+#define GUI_MSG_SHOW_SKIP_INTRO 51
+
 #define GUI_MSG_USER         1000
 
 /*!

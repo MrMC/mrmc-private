@@ -67,6 +67,7 @@ private:
 
   bool m_timeCodeShow;
   unsigned int m_timeCodeTimeout;
+  unsigned int m_SkipIntroTimer;
   int m_timeCodeStamp[6];
   int m_timeCodePosition;
 };

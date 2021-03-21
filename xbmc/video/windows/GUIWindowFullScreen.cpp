@@ -47,6 +47,7 @@
 #include "windowing/WindowingFactory.h"
 #include "cores/IPlayer.h"
 #include "guiinfo/GUIInfoLabels.h"
+#include "utils/Variant.h"
 
 #include <stdio.h>
 #include <algorithm>
@@ -62,6 +63,7 @@ using namespace KODI::MESSAGING;
 #define LABEL_ROW1                       10
 #define LABEL_ROW2                       11
 #define LABEL_ROW3                       12
+#define SKIP_INTRO_BUTTON                17
 
 //Displays current position, visible after seek or when forced
 //Alt, use conditional visibility Player.DisplayAfterSeek
@@ -254,6 +256,18 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
     }
     return true;
     break;
+  case ACTION_SHOW_SKIP_INTRO:
+    {
+      SET_CONTROL_VISIBLE(SKIP_INTRO_BUTTON);
+      SET_CONTROL_FOCUS(SKIP_INTRO_BUTTON, 0);
+      m_SkipIntroTimer = XbmcThreads::SystemClockMillis();
+    }
+    return true;
+    break;
+  case ACTION_HIDE_SKIP_INTRO:
+      SET_CONTROL_HIDDEN(SKIP_INTRO_BUTTON);
+    return true;
+    break;
   default:
       break;
   }
@@ -336,6 +350,7 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
 
       m_bShowViewModeInfo = false;
 
+      SET_CONTROL_HIDDEN(SKIP_INTRO_BUTTON);
       return true;
     }
   case GUI_MSG_WINDOW_DEINIT:
@@ -362,6 +377,22 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
   case GUI_MSG_LOSTFOCUS:
     if (message.GetSenderId() != WINDOW_FULLSCREEN_VIDEO) return true;
     break;
+  case GUI_MSG_CLICKED:
+    {
+      int iControl = message.GetSenderId();
+      if (iControl == SKIP_INTRO_BUTTON)
+      {
+        CFileItem item(g_application.CurrentFileItem());
+        if (item.HasProperty("PlexItem") && item.HasProperty("introFinish"))
+        {
+          g_application.SeekTime(item.GetProperty("introFinish").asInteger() * 0.001f);
+          g_infoManager.SetDisplayAfterSeek(0);
+          SET_CONTROL_HIDDEN(SKIP_INTRO_BUTTON);
+        }
+        return true;
+      }
+      break;
+    }
   }
 
   return CGUIWindow::OnMessage(message);
@@ -574,6 +605,9 @@ void CGUIWindowFullScreen::FrameMove()
 
 void CGUIWindowFullScreen::Process(unsigned int currentTime, CDirtyRegionList &dirtyregion)
 {
+  // hide skip intro button after 5 seconds
+  if ((XbmcThreads::SystemClockMillis() - m_SkipIntroTimer) > 5000)
+    SET_CONTROL_HIDDEN(SKIP_INTRO_BUTTON);
   if (g_renderManager.IsGuiLayer() || g_renderManager.HasFrame())
     MarkDirtyRegion();
 
