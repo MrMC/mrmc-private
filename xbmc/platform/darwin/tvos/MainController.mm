@@ -1822,16 +1822,10 @@ CGPoint touchAbsPosition;
   // Translate using custom controller translator.
   CKey key(buttonId, (unsigned int)0);
   CAction action = CButtonTranslator::GetInstance().GetAction(CFocusEngineHandler::GetInstance().GetFocusWindowID(), key);
-  if (CFocusEngineHandler::GetInstance().IsWindowFullScreenVideo())
-  {
-    // if we are in full scgreen and "Skip Intro" (ID = 17) is visible, send select action
-    CGUIWindow *pWindow = (CGUIWindow*)g_windowManager.GetWindow(WINDOW_FULLSCREEN_VIDEO);
-    CGUIControl * test = pWindow->GetControl(17);
-    if (test->IsVisible())
-    {
-      action = CAction(ACTION_SELECT_ITEM);
-    }
-  }
+  
+  // if we are in full screen and "Skip Intro" (ID = 17) is visible, send select action
+  if (CFocusEngineHandler::GetInstance().IsSkipButtonFocused())
+    action = CAction(ACTION_SELECT_ITEM);
   CInputManager::GetInstance().QueueAction(action);
 }
 

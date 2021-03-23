@@ -225,6 +225,7 @@ public:
   bool WakeUpScreenSaverAndDPMS(bool bPowerOffKeyPressed = false);
   bool WakeUpScreenSaver(bool bPowerOffKeyPressed = false);
   void DisableScreensaver(bool disable);
+  void KeepCheckingSkipIntroButton(bool check);
   /*!
    \brief Returns the total time in fractional seconds of the currently playing media
 
@@ -513,6 +514,7 @@ protected:
   std::vector<IActionListener *> m_actionListeners;
 
   bool m_fallbackLanguageLoaded;
+  bool m_bKeepCheckingSkipIntroButton;
   
 private:
   void InitEnvironment();

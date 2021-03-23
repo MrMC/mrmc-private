@@ -76,6 +76,8 @@ using namespace KODI::MESSAGING;
 //Progressbar used for buffering status and after seeking
 #define CONTROL_PROGRESS                 23
 
+#define SKIP_BUTTON_TIMEOUT              10000 //ms
+
 #if defined(TARGET_DARWIN)
 static CLinuxResourceCounter m_resourceCounter;
 #endif
@@ -85,6 +87,7 @@ CGUIWindowFullScreen::CGUIWindowFullScreen(void)
 {
   m_timeCodeStamp[0] = 0;
   m_timeCodePosition = 0;
+  m_SkipIntroTimer = 0;
   m_timeCodeShow = false;
   m_timeCodeTimeout = 0;
   m_bShowViewModeInfo = false;
@@ -258,14 +261,35 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
     break;
   case ACTION_SHOW_SKIP_INTRO:
     {
-      SET_CONTROL_VISIBLE(SKIP_INTRO_BUTTON);
-      SET_CONTROL_FOCUS(SKIP_INTRO_BUTTON, 0);
-      m_SkipIntroTimer = XbmcThreads::SystemClockMillis();
+      CSingleLock lock (g_graphicsContext);
+      CGUIDialog *pOSD = (CGUIDialog*)g_windowManager.GetWindow(WINDOW_DIALOG_OSD_SETTINGS);
+      CGUIDialog *pSeek = (CGUIDialog*)g_windowManager.GetWindow(WINDOW_DIALOG_SEEK_BAR);
+      if (pOSD && pSeek)
+      {
+        if (!pOSD->IsDialogRunning() && !pSeek->IsDialogRunning())
+        {
+          CFileItem item(g_application.CurrentFileItem());
+          if (item.HasProperty("PlexItem") && item.HasProperty("introFinish"))
+          {
+            SetProperty("EnableSkip", "true");
+            int introFinish = item.GetProperty("introFinish").asInteger(); //ms
+            int curTime = g_application.m_pPlayer->GetTime();              // ms
+            // logic here is to not have the button showing for longer than introFinish (ms)
+            if ((curTime + SKIP_BUTTON_TIMEOUT) > introFinish)
+              m_SkipIntroTimer = XbmcThreads::SystemClockMillis() + (introFinish - curTime);
+            else
+              m_SkipIntroTimer = XbmcThreads::SystemClockMillis() + SKIP_BUTTON_TIMEOUT;
+            g_application.KeepCheckingSkipIntroButton(false);
+            SET_CONTROL_FOCUS(SKIP_INTRO_BUTTON, 0);
+          }
+        }
+      }
+      lock.Leave();
     }
     return true;
     break;
   case ACTION_HIDE_SKIP_INTRO:
-      SET_CONTROL_HIDDEN(SKIP_INTRO_BUTTON);
+      SetProperty("EnableSkip", "");
     return true;
     break;
   default:
@@ -350,7 +374,6 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
 
       m_bShowViewModeInfo = false;
 
-      SET_CONTROL_HIDDEN(SKIP_INTRO_BUTTON);
       return true;
     }
   case GUI_MSG_WINDOW_DEINIT:
@@ -387,7 +410,7 @@ bool CGUIWindowFullScreen::OnMessage(CGUIMessage& message)
         {
           g_application.SeekTime(item.GetProperty("introFinish").asInteger() * 0.001f);
           g_infoManager.SetDisplayAfterSeek(0);
-          SET_CONTROL_HIDDEN(SKIP_INTRO_BUTTON);
+          SetProperty("EnableSkip", "");
         }
         return true;
       }
@@ -605,9 +628,17 @@ void CGUIWindowFullScreen::FrameMove()
 
 void CGUIWindowFullScreen::Process(unsigned int currentTime, CDirtyRegionList &dirtyregion)
 {
-  // hide skip intro button after 5 seconds
-  if ((XbmcThreads::SystemClockMillis() - m_SkipIntroTimer) > 5000)
-    SET_CONTROL_HIDDEN(SKIP_INTRO_BUTTON);
+  if (m_SkipIntroTimer > 0)
+  {
+    SET_CONTROL_FOCUS(SKIP_INTRO_BUTTON, 0);
+
+    // hide skip intro button after 10 seconds
+    if (currentTime > m_SkipIntroTimer)
+    {
+      m_SkipIntroTimer = 0;
+      SetProperty("EnableSkip", "");
+    }
+  }
   if (g_renderManager.IsGuiLayer() || g_renderManager.HasFrame())
     MarkDirtyRegion();
 

@@ -87,6 +87,7 @@ class CFocusEngineHandler
   const int     GetFocusWindowID();
   const bool    IsBusy();
   const bool    IsWindowFullScreenVideo();
+  const bool    IsSkipButtonFocused();
   const bool    IsWindowPVR();
   const bool    NeedToHideViews();
   const CRect   GetFocusRect();

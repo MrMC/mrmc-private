@@ -254,6 +254,22 @@ CFocusEngineHandler::IsWindowFullScreenVideo()
 }
 
 const bool
+CFocusEngineHandler::IsSkipButtonFocused()
+{
+  CSingleLock lock(m_focusLock);
+  if (m_focus.window)
+  {
+    if (m_focus.window->GetID() == WINDOW_FULLSCREEN_VIDEO)
+    {
+      // if we are in full screen and "Skip Intro" (ID = 17) is visible
+      if (m_focus.itemFocus)
+        return m_focus.itemFocus->GetID() == 17;
+    }
+  }
+  return false;
+}
+
+const bool
 CFocusEngineHandler::IsWindowPVR()
 {
   CSingleLock lock(m_focusLock);

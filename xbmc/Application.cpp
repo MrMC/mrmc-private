@@ -282,6 +282,7 @@ CApplication::CApplication(void)
   m_bPlaybackStarting = false;
   m_ePlayState = PLAY_STATE_NONE;
   m_skinReverting = false;
+  m_bKeepCheckingSkipIntroButton = true;
 
 #ifdef HAS_GLX
   XInitThreads();
@@ -3795,6 +3796,7 @@ void CApplication::OnPlayBackStopped()
     CGUIMessage msgSplash(GUI_MSG_NOTIFY_ALL, 0, 0, GUI_MSG_UI_READY);
     g_windowManager.SendThreadMessage(msgSplash);
   }
+  KeepCheckingSkipIntroButton(true);
 }
 
 void CApplication::OnPlayBackPaused()
@@ -3902,7 +3904,6 @@ void CApplication::SaveFileState(bool bForeground /* = false */)
 
 void CApplication::UpdateFileState()
 {
-  static bool checkSkipIntroButton = true;
   // Did the file change?
   if (!m_progressTrackingItem->GetPath().empty() && m_progressTrackingItem->GetPath() != CurrentFile())
   {
@@ -3917,7 +3918,7 @@ void CApplication::UpdateFileState()
 
     // Reset tracking item
     m_progressTrackingItem->Reset();
-    checkSkipIntroButton = true;
+    KeepCheckingSkipIntroButton(true);
   }
   else
   {
@@ -3981,7 +3982,7 @@ void CApplication::UpdateFileState()
         if (m_progressTrackingItem->IsMediaServiceBased())
           CServicesManager::GetInstance().UpdateItemState(*m_progressTrackingItem.get(), GetTime());
 
-        if (checkSkipIntroButton && m_progressTrackingItem->HasProperty("PlexItem"))
+        if (m_bKeepCheckingSkipIntroButton && m_progressTrackingItem->HasProperty("PlexItem"))
         {
           if (m_progressTrackingItem->HasProperty("introStart") &&
               m_progressTrackingItem->HasProperty("introFinish"))
@@ -3989,20 +3990,26 @@ void CApplication::UpdateFileState()
             int currentTimeMS = g_application.m_pPlayer->GetTime();
             int introStart = m_progressTrackingItem->GetProperty("introStart").asInteger();
             int introFinish = m_progressTrackingItem->GetProperty("introFinish").asInteger();
-            if (checkSkipIntroButton && currentTimeMS > introStart && currentTimeMS < introFinish)
+            if (m_bKeepCheckingSkipIntroButton && currentTimeMS > introStart && currentTimeMS < introFinish)
             {
               // notified once, thats enough
-              checkSkipIntroButton = false;
               CApplicationMessenger::GetInstance().PostMsg(
                 TMSG_GUI_ACTION, WINDOW_FULLSCREEN_VIDEO, -1, static_cast<void*>(new CAction(ACTION_SHOW_SKIP_INTRO)));
+              CLog::Log(LOGDEBUG, "Skip Intro Button enabled");
             }
           }
           else
-            checkSkipIntroButton = false;
+            KeepCheckingSkipIntroButton(false);
         }
       }
     }
   }
+}
+
+void CApplication::KeepCheckingSkipIntroButton(bool check)
+{
+  CSingleLock lock(m_critSection);
+  m_bKeepCheckingSkipIntroButton = check;
 }
 
 void CApplication::LoadVideoSettings(const CFileItem& item)
