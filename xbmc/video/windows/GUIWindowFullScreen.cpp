@@ -276,9 +276,9 @@ bool CGUIWindowFullScreen::OnAction(const CAction &action)
             int curTime = g_application.m_pPlayer->GetTime();              // ms
             // logic here is to not have the button showing for longer than introFinish (ms)
             if ((curTime + SKIP_BUTTON_TIMEOUT) > introFinish)
-              m_SkipIntroTimer = XbmcThreads::SystemClockMillis() + (introFinish - curTime);
+              SetSkipTimer(XbmcThreads::SystemClockMillis() + (introFinish - curTime));
             else
-              m_SkipIntroTimer = XbmcThreads::SystemClockMillis() + SKIP_BUTTON_TIMEOUT;
+              SetSkipTimer(XbmcThreads::SystemClockMillis() + SKIP_BUTTON_TIMEOUT);
             g_application.KeepCheckingSkipIntroButton(false);
             SET_CONTROL_FOCUS(SKIP_INTRO_BUTTON, 0);
           }
@@ -635,7 +635,7 @@ void CGUIWindowFullScreen::Process(unsigned int currentTime, CDirtyRegionList &d
     // hide skip intro button after 10 seconds
     if (currentTime > m_SkipIntroTimer)
     {
-      m_SkipIntroTimer = 0;
+      SetSkipTimer(0);
       SetProperty("EnableSkip", "");
     }
   }
@@ -764,4 +764,11 @@ void CGUIWindowFullScreen::ToggleOSDSettings()
       pOSD->Open();
   }
   MarkDirtyRegion();
+}
+
+void CGUIWindowFullScreen::SetSkipTimer(unsigned int time)
+{
+  CSingleLock lock (g_graphicsContext);
+  m_SkipIntroTimer = time;
+  lock.Leave();
 }
