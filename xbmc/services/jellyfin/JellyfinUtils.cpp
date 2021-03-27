@@ -34,6 +34,7 @@
 #include "utils/StringUtils.h"
 #include "utils/SystemInfo.h"
 #include "utils/JSONVariantParser.h"
+#include "utils/JSONVariantWriter.h"
 #include "utils/URIUtils.h"
 #include "filesystem/File.h"
 #include "filesystem/CurlFile.h"
@@ -273,6 +274,7 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
 
       CURL curl(item.GetPath());
       curl.SetOptions("");
+      CVariant body;
       std::string id = item.GetMediaServiceId();
       if (status == "playing")
       {
@@ -292,11 +294,11 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
         {
           if (isPaused && !g_application.m_pPlayer->IsPaused())
           {
-            curl.SetOption("EventName", "Unpause");
+            body["EventName"] = "Unpause";
             isPaused = false;
           }
           else
-            curl.SetOption("EventName", "TimeUpdate");
+            body["EventName"] = "TimeUpdate";
 
           curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Progress"));
         }
@@ -304,7 +306,7 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
       }
       else if (status == "paused")
       {
-        curl.SetOption("EventName", "Pause");
+        body["EventName"] = "Pause";
         curl.SetFileName(ConstructFileName(curl, "Sessions/Playing/Progress"));
         trackingCurrentSecconds = currentSeconds;
         isPaused = true;
@@ -318,19 +320,21 @@ void CJellyfinUtils::ReportProgress(CFileItem &item, double currentSeconds)
         playBackFirstStart = true;
       }
 
-      curl.SetOption("QueueableMediaTypes", "Video");
-      curl.SetOption("CanSeek", "True");
-      curl.SetOption("ItemId", id);
-      curl.SetOption("MediaSourceId", id);
-      curl.SetOption("PlayMethod", "DirectPlay");
-      curl.SetOption("PositionTicks", StringUtils::Format("%llu", SecondsToTicks(currentSeconds)));
-      curl.SetOption("IsMuted", "False");
-      curl.SetOption("IsPaused", isPaused ? "True" : "False");
+      body["IsMuted"] = false;
+      body["IsPaused"] = isPaused;
+      body["PositionTicks"] = StringUtils::Format("%llu", SecondsToTicks(currentSeconds));
+      body["PlayMethod"] = "DirectPlay";
+      body["PlaySessionId"] = "";
+      body["MediaSourceId"] = id;
+      body["ItemId"] = id;
+      body["CanSeek"] = true;
 
       std::string data;
       std::string response;
+      CJSONVariantWriter::Write(body, data, true);
       // execute the POST request
       XFILE::CCurlFile curlfile;
+      curlfile.SetMimeType("application/json");
       if (curlfile.Post(curl.Get(), data, response))
       {
 #if defined(JELLYFIN_DEBUG_VERBOSE)
