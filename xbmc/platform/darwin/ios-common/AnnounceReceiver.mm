@@ -116,9 +116,12 @@ void AnnounceBridge(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, con
 
     if (!thumb.empty())
     {
-      bool needsRecaching;
+      bool needsRecaching = false;
       std::string cachedThumb(CTextureCache::GetInstance().CheckCachedImage(thumb, needsRecaching));
       //LOG("thumb: %s, %s", thumb.c_str(), cachedThumb.c_str());
+      if (cachedThumb.empty())
+        cachedThumb = CTextureCache::GetInstance().CacheImage(thumb);
+
       if (!cachedThumb.empty())
       {
         std::string thumbRealPath = CSpecialProtocol::TranslatePath(cachedThumb);
