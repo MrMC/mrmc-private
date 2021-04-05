@@ -714,6 +714,11 @@ bool CApplication::Create()
   CDarwinUtils::SetMrMCTouchFlag();
 #endif
 
+#if defined(TARGET_DARWIN)
+  bool isDivixEnabled = CDarwinUtils::isDIVXenabled();
+  CLog::Log(LOGDEBUG, "CApplication - isDivixEnabled = %s", isDivixEnabled ? "true" : "false");
+#endif
+
   CAnnouncementManager::GetInstance().Announce(GUI, "xbmc", "OnCreated");
   return true;
 }

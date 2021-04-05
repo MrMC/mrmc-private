@@ -56,6 +56,12 @@
 		189448B51CD905B70036E391 /* LightEffectClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B21CD905B70036E391 /* LightEffectClient.cpp */; };
 		189448B61CD905B70036E391 /* LightEffectClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189448B21CD905B70036E391 /* LightEffectClient.cpp */; };
 		18968DC814155D7C005BA742 /* ApplicationOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18968DC614155D7C005BA742 /* ApplicationOperations.cpp */; };
+		189D2B49261A5AC400592AF3 /* RMStoreTransaction.m in Sources */ = {isa = PBXBuildFile; fileRef = 189D2B48261A5AC400592AF3 /* RMStoreTransaction.m */; };
+		189D2B4A261A5AC400592AF3 /* RMStoreTransaction.m in Sources */ = {isa = PBXBuildFile; fileRef = 189D2B48261A5AC400592AF3 /* RMStoreTransaction.m */; };
+		189D2B4B261A5AC400592AF3 /* RMStoreTransaction.m in Sources */ = {isa = PBXBuildFile; fileRef = 189D2B48261A5AC400592AF3 /* RMStoreTransaction.m */; };
+		189D2B52261A5CC500592AF3 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 189D2B51261A5CC400592AF3 /* StoreKit.framework */; };
+		189D2B58261B6A8B00592AF3 /* RMStoreKeychainPersistence.m in Sources */ = {isa = PBXBuildFile; fileRef = 18FCB09020DD3BE00027327A /* RMStoreKeychainPersistence.m */; };
+		189D2B5E261B6A9C00592AF3 /* RMStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 18FCB09420DD3BE00027327A /* RMStore.m */; };
 		189DFAB41E96760C00002CA4 /* TraktServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189DFAB21E96760C00002CA4 /* TraktServices.cpp */; };
 		189DFAB51E96760C00002CA4 /* TraktServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189DFAB21E96760C00002CA4 /* TraktServices.cpp */; };
 		189DFAB61E96760C00002CA4 /* TraktServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 189DFAB21E96760C00002CA4 /* TraktServices.cpp */; };
@@ -195,6 +201,14 @@
 		18F123CC2017AD7500C82783 /* GUIDialogOSDSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18F123CA2017AD7400C82783 /* GUIDialogOSDSettings.cpp */; };
 		18F123CD2017AD7500C82783 /* GUIDialogOSDSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18F123CA2017AD7400C82783 /* GUIDialogOSDSettings.cpp */; };
 		18F123CE2017AD7500C82783 /* GUIDialogOSDSettings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 18F123CA2017AD7400C82783 /* GUIDialogOSDSettings.cpp */; };
+		18F51D9B261A534500AEE007 /* AppleIncRootCertificate.cer in Resources */ = {isa = PBXBuildFile; fileRef = 18F51D96261A534200AEE007 /* AppleIncRootCertificate.cer */; };
+		18F51D9C261A534500AEE007 /* AppleIncRootCertificate.cer in Resources */ = {isa = PBXBuildFile; fileRef = 18F51D96261A534200AEE007 /* AppleIncRootCertificate.cer */; };
+		18F51D9D261A534500AEE007 /* RMStoreAppReceiptVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F51D98261A534300AEE007 /* RMStoreAppReceiptVerifier.m */; };
+		18F51D9E261A534500AEE007 /* RMStoreAppReceiptVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F51D98261A534300AEE007 /* RMStoreAppReceiptVerifier.m */; };
+		18F51D9F261A534500AEE007 /* RMStoreAppReceiptVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F51D98261A534300AEE007 /* RMStoreAppReceiptVerifier.m */; };
+		18F51DA0261A534500AEE007 /* RMAppReceipt.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F51D9A261A534500AEE007 /* RMAppReceipt.m */; };
+		18F51DA1261A534500AEE007 /* RMAppReceipt.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F51D9A261A534500AEE007 /* RMAppReceipt.m */; };
+		18F51DA2261A534500AEE007 /* RMAppReceipt.m in Sources */ = {isa = PBXBuildFile; fileRef = 18F51D9A261A534500AEE007 /* RMAppReceipt.m */; };
 		18FB46F3245EA24C009F314E /* BackgroundTasks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 18FB46F2245EA24C009F314E /* BackgroundTasks.framework */; };
 		18FCB0AC20DD3BE10027327A /* RMStoreKeychainPersistence.m in Sources */ = {isa = PBXBuildFile; fileRef = 18FCB09020DD3BE00027327A /* RMStoreKeychainPersistence.m */; };
 		18FCB0B220DD3BE10027327A /* RMStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 18FCB09420DD3BE00027327A /* RMStore.m */; };
@@ -3595,6 +3609,9 @@
 		189448B31CD905B70036E391 /* LightEffectClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightEffectClient.h; sourceTree = "<group>"; };
 		18968DC614155D7C005BA742 /* ApplicationOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ApplicationOperations.cpp; sourceTree = "<group>"; };
 		18968DC714155D7C005BA742 /* ApplicationOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApplicationOperations.h; sourceTree = "<group>"; };
+		189D2B47261A5AC300592AF3 /* RMStoreTransaction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMStoreTransaction.h; sourceTree = "<group>"; };
+		189D2B48261A5AC400592AF3 /* RMStoreTransaction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMStoreTransaction.m; sourceTree = "<group>"; };
+		189D2B51261A5CC400592AF3 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS14.3.sdk/System/Library/Frameworks/StoreKit.framework; sourceTree = DEVELOPER_DIR; };
 		189DFAB21E96760C00002CA4 /* TraktServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TraktServices.cpp; sourceTree = "<group>"; };
 		189DFAB31E96760C00002CA4 /* TraktServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TraktServices.h; sourceTree = "<group>"; };
 		18AC31ED1C49445D00AE9433 /* TopShelf.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TopShelf.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -3868,6 +3885,11 @@
 		18ED6183228626C3002FD568 /* ZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZipArchive.h; sourceTree = "<group>"; };
 		18F123CA2017AD7400C82783 /* GUIDialogOSDSettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIDialogOSDSettings.cpp; sourceTree = "<group>"; };
 		18F123CB2017AD7400C82783 /* GUIDialogOSDSettings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIDialogOSDSettings.h; sourceTree = "<group>"; };
+		18F51D96261A534200AEE007 /* AppleIncRootCertificate.cer */ = {isa = PBXFileReference; lastKnownFileType = file; path = AppleIncRootCertificate.cer; sourceTree = "<group>"; };
+		18F51D97261A534200AEE007 /* RMStoreAppReceiptVerifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMStoreAppReceiptVerifier.h; sourceTree = "<group>"; };
+		18F51D98261A534300AEE007 /* RMStoreAppReceiptVerifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMStoreAppReceiptVerifier.m; sourceTree = "<group>"; };
+		18F51D99261A534400AEE007 /* RMAppReceipt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMAppReceipt.h; sourceTree = "<group>"; };
+		18F51D9A261A534500AEE007 /* RMAppReceipt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RMAppReceipt.m; sourceTree = "<group>"; };
 		18FB46F2245EA24C009F314E /* BackgroundTasks.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BackgroundTasks.framework; path = Platforms/AppleTVOS.platform/Developer/SDKs/AppleTVOS13.2.sdk/System/Library/Frameworks/BackgroundTasks.framework; sourceTree = DEVELOPER_DIR; };
 		18FCB03320DD3BE00027327A /* RMStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMStore.h; sourceTree = "<group>"; };
 		18FCB03720DD3BE00027327A /* RMStoreKeychainPersistence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RMStoreKeychainPersistence.h; sourceTree = "<group>"; };
@@ -6434,6 +6456,7 @@
 				F5408E07231D6A3200EA453D /* CoreAudio.framework in Frameworks */,
 				F5408DFB231D692000EA453D /* AudioToolbox.framework in Frameworks */,
 				F5408E0E231D6A9900EA453D /* CoreVideo.framework in Frameworks */,
+				189D2B52261A5CC500592AF3 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6519,6 +6542,7 @@
 		18AC31EE1C49445D00AE9433 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				189D2B51261A5CC400592AF3 /* StoreKit.framework */,
 				18FB46F2245EA24C009F314E /* BackgroundTasks.framework */,
 				18ED6067228618A8002FD568 /* libiconv.tbd */,
 				18ED60652286179C002FD568 /* libz.tbd */,
@@ -6977,6 +7001,13 @@
 		18FCB03420DD3BE00027327A /* Optional */ = {
 			isa = PBXGroup;
 			children = (
+				189D2B47261A5AC300592AF3 /* RMStoreTransaction.h */,
+				189D2B48261A5AC400592AF3 /* RMStoreTransaction.m */,
+				18F51D96261A534200AEE007 /* AppleIncRootCertificate.cer */,
+				18F51D99261A534400AEE007 /* RMAppReceipt.h */,
+				18F51D9A261A534500AEE007 /* RMAppReceipt.m */,
+				18F51D97261A534200AEE007 /* RMStoreAppReceiptVerifier.h */,
+				18F51D98261A534300AEE007 /* RMStoreAppReceiptVerifier.m */,
 				18FCB09020DD3BE00027327A /* RMStoreKeychainPersistence.m */,
 				18FCB03720DD3BE00027327A /* RMStoreKeychainPersistence.h */,
 			);
@@ -10930,6 +10961,7 @@
 				F59045661BA372A600DB589A /* Default-Landscape-736h@3x.png in Resources */,
 				F5C28F131FC9014700F63834 /* Default-Landscape-812h@3x.png in Resources */,
 				F59045641BA372A600DB589A /* Default-667h@2x.png in Resources */,
+				18F51D9B261A534500AEE007 /* AppleIncRootCertificate.cer in Resources */,
 				183CB23B1C0B4C5A004218C2 /* Images.xcassets in Resources */,
 				F59045671BA372A600DB589A /* InfoPlist.strings in Resources */,
 				F55F0CFE21E1570A005DC95F /* point1sec.mp3 in Resources */,
@@ -10946,6 +10978,7 @@
 				F55F0CFF21E1570A005DC95F /* point1sec.mp3 in Resources */,
 				F5D142B01BAF31FB0075A95C /* InfoPlist.strings in Resources */,
 				F5D142AB1BAF31FB0075A95C /* Assets.xcassets in Resources */,
+				18F51D9C261A534500AEE007 /* AppleIncRootCertificate.cer in Resources */,
 				187F70FF2423799C0079CF55 /* Navigate.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -11603,6 +11636,7 @@
 				7C779E3F104A57E500F444C4 /* WinSystemOSXGL.mm in Sources */,
 				F5B7249F1C7E150C006432AE /* crc.cpp in Sources */,
 				7C779E54104A58F900F444C4 /* GUIWindowTestPatternGL.cpp in Sources */,
+				18F51DA0261A534500AEE007 /* RMAppReceipt.m in Sources */,
 				7C62F24210505BC7002AD2C1 /* Bookmark.cpp in Sources */,
 				7C62F45E1057A62D002AD2C1 /* DirectoryNodeSingles.cpp in Sources */,
 				7CCF7FC9106A0DF500992676 /* TimeUtils.cpp in Sources */,
@@ -11824,6 +11858,7 @@
 				C84BF7341349BB74006D6FC9 /* JSONServiceDescription.cpp in Sources */,
 				384718D81325BA04000486D6 /* XBDateTime.cpp in Sources */,
 				18ACF84313596C9B00B67371 /* HomeShelfJob.cpp in Sources */,
+				189D2B49261A5AC400592AF3 /* RMStoreTransaction.m in Sources */,
 				F51D170F1E29950600A03C93 /* nav_print.c in Sources */,
 				F51D171B1E29950600A03C93 /* decoder.c in Sources */,
 				C807114D135DB5CC002F601B /* InputOperations.cpp in Sources */,
@@ -12262,6 +12297,7 @@
 				7CCDA7BB192756250074CF51 /* NptDynamicLibraries.cpp in Sources */,
 				7CCDA7BE192756250074CF51 /* NptFile.cpp in Sources */,
 				F5B723361C7C9681006432AE /* ContextMenuItem.cpp in Sources */,
+				18F51D9D261A534500AEE007 /* RMStoreAppReceiptVerifier.m in Sources */,
 				7CCDA7C7192756250074CF51 /* NptHash.cpp in Sources */,
 				F5471B321E85647800570A53 /* PlexClientSync.cpp in Sources */,
 				DF1D2DED1B6E85EE002BB9DB /* XbtDirectory.cpp in Sources */,
@@ -12401,6 +12437,7 @@
 				E49911D0174E5D2500741B6D /* DVDVideoCodecVDA.cpp in Sources */,
 				E49911D1174E5D2500741B6D /* DVDVideoPPFFmpeg.cpp in Sources */,
 				F5B725291C7E150C006432AE /* unpack.cpp in Sources */,
+				189D2B4A261A5AC400592AF3 /* RMStoreTransaction.m in Sources */,
 				E49911D2174E5D2E00741B6D /* DVDDemux.cpp in Sources */,
 				E49911D3174E5D2E00741B6D /* DVDDemuxBXA.cpp in Sources */,
 				F590456C1BA372A600DB589A /* IOSExternalTouchController.mm in Sources */,
@@ -12572,6 +12609,7 @@
 				F5471B331E85647800570A53 /* PlexClientSync.cpp in Sources */,
 				F5FA262320545C080078DF4B /* Addon.cpp in Sources */,
 				E4991266174E5D8F00741B6D /* FileFactory.cpp in Sources */,
+				18F51DA1261A534500AEE007 /* RMAppReceipt.m in Sources */,
 				DF29BCEC1B5D911800904347 /* AddonManagementEvent.cpp in Sources */,
 				F5B722FE1C7C894F006432AE /* GUIBuiltins.cpp in Sources */,
 				E4991267174E5D8F00741B6D /* FileReaderFile.cpp in Sources */,
@@ -12708,6 +12746,7 @@
 				E49912D8174E5DA000741B6D /* ZipFile.cpp in Sources */,
 				E49912D9174E5DA000741B6D /* ZipManager.cpp in Sources */,
 				E49912DD174E5DAD00741B6D /* DDSImage.cpp in Sources */,
+				18F51D9E261A534500AEE007 /* RMStoreAppReceiptVerifier.m in Sources */,
 				E49912DE174E5DAD00741B6D /* DirectXGraphics.cpp in Sources */,
 				F5B724C91C7E150C006432AE /* global.cpp in Sources */,
 				E49912DF174E5DAD00741B6D /* DirtyRegionSolvers.cpp in Sources */,
@@ -13646,6 +13685,7 @@
 				F5D142B51BAF31FB0075A95C /* MainEAGLView.mm in Sources */,
 				F5D13F401BAF0B6D0075A95C /* RenderCapture.cpp in Sources */,
 				F5D13F411BAF0B6D0075A95C /* RenderManager.cpp in Sources */,
+				18F51D9F261A534500AEE007 /* RMStoreAppReceiptVerifier.m in Sources */,
 				F5D13F421BAF0B6D0075A95C /* DummyVideoPlayer.cpp in Sources */,
 				F5D13F431BAF0B6D0075A95C /* Database.cpp in Sources */,
 				F5FA266D20545C290078DF4B /* AddonModuleXbmc.cpp in Sources */,
@@ -13961,6 +14001,7 @@
 				F5D140341BAF0B6D0075A95C /* TextureBundleXPR.cpp in Sources */,
 				F5D140351BAF0B6D0075A95C /* TextureGL.cpp in Sources */,
 				F5D140361BAF0B6D0075A95C /* TextureManager.cpp in Sources */,
+				189D2B5E261B6A9C00592AF3 /* RMStore.m in Sources */,
 				F5D140371BAF0B6D0075A95C /* VisibleEffect.cpp in Sources */,
 				F5D140381BAF0B6D0075A95C /* XBTF.cpp in Sources */,
 				F5D140391BAF0B6D0075A95C /* XBTFReader.cpp in Sources */,
@@ -14145,6 +14186,7 @@
 				F5D140C61BAF0B6D0075A95C /* GUIViewStatePrograms.cpp in Sources */,
 				F5D140C71BAF0B6D0075A95C /* GUIWindowPrograms.cpp in Sources */,
 				F5D140C81BAF0B6D0075A95C /* PVRClient.cpp in Sources */,
+				189D2B58261B6A8B00592AF3 /* RMStoreKeychainPersistence.m in Sources */,
 				F5D140C91BAF0B6D0075A95C /* PVRClients.cpp in Sources */,
 				F5022F191E2D41D5001BBF75 /* hdhomerun_channels.c in Sources */,
 				F5B724951C7E150C006432AE /* arcread.cpp in Sources */,
@@ -14278,6 +14320,7 @@
 				F5D1412D1BAF0B6D0075A95C /* ScraperParser.cpp in Sources */,
 				F5B7235E1C7C99E3006432AE /* PVRRadioRDSInfoTag.cpp in Sources */,
 				F5D1412E1BAF0B6D0075A95C /* ScraperUrl.cpp in Sources */,
+				18F51DA2261A534500AEE007 /* RMAppReceipt.m in Sources */,
 				18FD1CAB1BC8E62600027005 /* PodnapisiSearch.cpp in Sources */,
 				F5D1412F1BAF0B6D0075A95C /* Screenshot.cpp in Sources */,
 				F5D141301BAF0B6D0075A95C /* SeekHandler.cpp in Sources */,
@@ -14557,6 +14600,7 @@
 				F5D142081BAF0B6D0075A95C /* NptDataBuffer.cpp in Sources */,
 				F5D142091BAF0B6D0075A95C /* NptDebug.cpp in Sources */,
 				F5D1420A1BAF0B6D0075A95C /* NptDigest.cpp in Sources */,
+				189D2B4B261A5AC400592AF3 /* RMStoreTransaction.m in Sources */,
 				F5D1420B1BAF0B6D0075A95C /* NptDynamicLibraries.cpp in Sources */,
 				F5D1420C1BAF0B6D0075A95C /* NptFile.cpp in Sources */,
 				F5D1420D1BAF0B6D0075A95C /* NptHash.cpp in Sources */,

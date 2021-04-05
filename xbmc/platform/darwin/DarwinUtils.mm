@@ -44,6 +44,9 @@
   #import <UIKit/UIKit.h>
   #import <mach/mach_host.h>
   #import <sys/sysctl.h>
+  #include "platform/darwin/RMStore/RMStore.h"
+  #include "platform/darwin/RMStore/Optional/RMStoreKeychainPersistence.h"
+  #include "platform/darwin/RMStore/Optional/RMAppReceipt.h"
   #if defined(TARGET_DARWIN_TVOS)
     #include "platform/darwin/DarwinNSUserDefaults.h"
     #include "settings/MediaSourceSettings.h"
@@ -58,7 +61,6 @@
     #include "utils/JobManager.h"
     #include "utils/HomeShelfJob.h"
   #else
-    #import "platform/darwin/RMStore/Optional/RMStoreKeychainPersistence.h"
     #import "platform/darwin/ios/XBMCController.h"
   #endif
 #else
@@ -84,6 +86,13 @@
 #endif
 
 static bool triggerHomeShelfUpdate = false;
+
+static int hasDIVX = -1;
+
+// lastFullAppStoreVersion is the 3.9.10 (201017.1051) tvOS and (201105.1852) iOS
+const float lastFullAppStoreVersion = 201105.1852;
+
+#define MRMC_DIVX_ACTIVATED    "isDivxActivated"   // we write this into defaults so its easy to pull up without pinging the store
 
 enum iosPlatform
 {
@@ -1388,6 +1397,65 @@ void CDarwinUtils::SetMrMCTouchFlag()
   }
   [store synchronize];
 #endif
+}
+
+void CDarwinUtils::CheckWasPurchasedWithDIVX()
+{
+  hasDIVX = 0;
+//  RMStoreKeychainPersistence *persistence = [[RMStoreKeychainPersistence alloc] init];
+//  if ([persistence isPurchasedProductOfIdentifier:@"tv.mrmc.mrmc.tvos.iosupgrade"])
+//  {
+//    CLog::Log(LOGDEBUG, "CDarwinUtils::CheckWasPurchasedWithDIVX() - persistTransaction for MrMC Touch");
+//    hasDIVX = 1;
+//    return; // no need to check the receipt, we have it from iOS purchase
+//  }
+
+  // Check if we have purchase receipt, that means user purchased before 3.9.10
+  RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
+  if (!appReceipt)
+  {
+    [[RMStore defaultStore] refreshReceiptOnSuccess:^{
+       RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
+       if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
+       {
+         CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - Receipt verified");
+         hasDIVX = 1;
+       }
+     }failure: ^(NSError *error) {
+       CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - Did not complete");
+     }];
+  }
+  else
+  {
+    if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
+    {
+      CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - Receipt verified");
+      hasDIVX = 1;
+    }
+  }
+}
+
+bool CDarwinUtils::isDIVXenabled()
+{
+  // hasDIVX is set to -1 on init, so only check defaultStore or app receipt once
+  if (hasDIVX < 0)
+  {
+    // check if we have it saved in defaultStore
+    NSUbiquitousKeyValueStore* store = [NSUbiquitousKeyValueStore defaultStore];
+    if (![store boolForKey:@MRMC_DIVX_ACTIVATED])
+    {
+      CLog::Log(LOGDEBUG, "CDarwinUtils::isDIVXenabled() - NSUbiquitousKeyValueStore key for MrMC divx = false");
+      CheckWasPurchasedWithDIVX();
+      [store setBool:hasDIVX > 0 forKey:@MRMC_DIVX_ACTIVATED];
+    }
+    else
+    {
+      hasDIVX = 1;
+      CLog::Log(LOGDEBUG, "CDarwinUtils::isDIVXenabled() - NSUbiquitousKeyValueStore key for MrMC divx = true");
+    }
+    [store synchronize];
+  }
+  return hasDIVX > 0;
 }
 
 std::string CDarwinUtils::GetIPAddress()

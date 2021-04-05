@@ -25,6 +25,7 @@
 #include "CompileInfo.h"
 #include "Util.h"
 #include "dialogs/GUIDialogYesNo.h"
+#include "dialogs/GUIDialogKaiToast.h"
 #include "guilib/GUIWindowManager.h"
 #include "guilib/GUIMessage.h"
 #include "guilib/LocalizeStrings.h"
@@ -109,4 +110,23 @@ bool CLiteUtils::IsLite()
   res = true;
 #endif
   return res;
+}
+
+bool CLiteUtils::IsDivxEnabled(bool notification)
+{
+  // false on android
+  bool ret = false;
+#if defined(TARGET_DARWIN)
+  #if defined(TARGET_DARWIN_OSX)
+    ret = true;
+  #endif
+    #if !defined(APP_PACKAGE_LITE)
+      ret = CDarwinUtils::isDIVXenabled();
+    #endif
+#endif
+  if (notification && !ret)
+  {
+    CGUIDialogKaiToast::QueueNotification("No DivX codec found", "MrMC does not support DivX files, please convert it to H264/H265 or similar");
+  }
+  return ret;
 }

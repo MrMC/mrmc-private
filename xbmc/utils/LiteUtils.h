@@ -27,6 +27,7 @@ public:
   static int  GetItemSizeLimit();
   static void ShowIsLiteDialog(int preTruncateSize);
   static bool IsLite();
+  static bool IsDivxEnabled(bool notification = false);
 
 private:
   static int nextReminderTrigger;
