@@ -1410,13 +1410,15 @@ void CDarwinUtils::CheckWasPurchasedWithDIVX()
 //    return; // no need to check the receipt, we have it from iOS purchase
 //  }
 
-  // Check if we have purchase receipt, that means user purchased before 3.9.10
+  // Check if we have purchase receipt and version is <= lastFullAppStoreVersion , that means user purchased before 3.9.10
   RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
   if (!appReceipt)
   {
     [[RMStore defaultStore] refreshReceiptOnSuccess:^{
        RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
-       if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
+       float originalVersion = [[appReceipt originalAppVersion] floatValue];
+       CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - refreshReceiptOnSuccess - originalVersion = %f", originalVersion);
+       if (originalVersion <= lastFullAppStoreVersion)
        {
          CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - Receipt verified");
          hasDIVX = 1;
@@ -1427,9 +1429,11 @@ void CDarwinUtils::CheckWasPurchasedWithDIVX()
   }
   else
   {
-    if ([[appReceipt originalAppVersion] floatValue] <= lastFullAppStoreVersion)
+    float originalVersion = [[appReceipt originalAppVersion] floatValue];
+    CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - originalVersion = %f", originalVersion);
+    if (originalVersion <= lastFullAppStoreVersion)
     {
-      CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - Receipt verified");
+      CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() existing receipt - Receipt verified");
       hasDIVX = 1;
     }
   }

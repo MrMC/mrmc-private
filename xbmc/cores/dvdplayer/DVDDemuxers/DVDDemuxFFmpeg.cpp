@@ -1286,15 +1286,14 @@ CDemuxStream* CDVDDemuxFFmpeg::AddStream(int iId)
       }
     case AVMEDIA_TYPE_VIDEO:
       {
-        if (pStream->codec->codec_id == AV_CODEC_ID_MPEG4 && !CLiteUtils::IsDivxEnabled(true))
+        if (pStream->codec->codec_id == AV_CODEC_ID_MPEG4)
         {
           // DivX formats 0.4 and 0.5 requires a DivX license.
-          if (pStream->codec->codec_tag == MKTAG('D','X','4','0'))
-            return NULL;
-          if (pStream->codec->codec_tag == MKTAG('D','X','5','0'))
-            return NULL;
-          if (pStream->codec->codec_tag == MKTAG('D','I','V','X'))
-            return NULL;
+          if (pStream->codec->codec_tag == MKTAG('D','X','4','0') ||
+              pStream->codec->codec_tag == MKTAG('D','X','5','0') ||
+              pStream->codec->codec_tag == MKTAG('D','I','V','X'))
+            if (!CLiteUtils::IsDivxEnabled())
+              return NULL;
         }
         // missing in ffmpeg for DolbyVison (dvhe)
         if (pStream->codec->codec_id == AV_CODEC_ID_NONE)

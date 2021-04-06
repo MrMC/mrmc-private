@@ -112,7 +112,7 @@ bool CLiteUtils::IsLite()
   return res;
 }
 
-bool CLiteUtils::IsDivxEnabled(bool notification)
+bool CLiteUtils::IsDivxEnabled()
 {
   // false on android
   bool ret = false;
@@ -124,9 +124,5 @@ bool CLiteUtils::IsDivxEnabled(bool notification)
       ret = CDarwinUtils::isDIVXenabled();
     #endif
 #endif
-  if (notification && !ret)
-  {
-    CGUIDialogKaiToast::QueueNotification("No DivX codec found", "MrMC does not support DivX files, please convert it to H264/H265 or similar");
-  }
   return ret;
 }

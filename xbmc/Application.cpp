@@ -98,6 +98,7 @@
 #include "utils/CPUInfo.h"
 #include "utils/SeekHandler.h"
 #include "utils/Environment.h"
+#include "utils/LiteUtils.h"
 
 #include "input/KeyboardLayoutManager.h"
 
@@ -715,7 +716,7 @@ bool CApplication::Create()
 #endif
 
 #if defined(TARGET_DARWIN)
-  bool isDivixEnabled = CDarwinUtils::isDIVXenabled();
+  bool isDivixEnabled = CLiteUtils::IsDivxEnabled();
   CLog::Log(LOGDEBUG, "CApplication - isDivixEnabled = %s", isDivixEnabled ? "true" : "false");
 #endif
 
