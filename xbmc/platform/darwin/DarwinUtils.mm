@@ -87,7 +87,7 @@
 
 static bool triggerHomeShelfUpdate = false;
 
-static int hasDIVX = -1;
+static int wasPurchasedFull = -1;
 
 // lastFullAppStoreVersion is the 3.9.10 (201017.1051) tvOS and (201105.1852) iOS
 const float lastFullAppStoreVersion = 201105.1852;
@@ -1399,14 +1399,14 @@ void CDarwinUtils::SetMrMCTouchFlag()
 #endif
 }
 
-void CDarwinUtils::CheckWasPurchasedWithDIVX()
+void CDarwinUtils::CheckWasPurchasedFull()
 {
-  hasDIVX = 0;
+  wasPurchasedFull = 0;
 //  RMStoreKeychainPersistence *persistence = [[RMStoreKeychainPersistence alloc] init];
 //  if ([persistence isPurchasedProductOfIdentifier:@"tv.mrmc.mrmc.tvos.iosupgrade"])
 //  {
 //    CLog::Log(LOGDEBUG, "CDarwinUtils::CheckWasPurchasedWithDIVX() - persistTransaction for MrMC Touch");
-//    hasDIVX = 1;
+//    wasPurchasedFull = 1;
 //    return; // no need to check the receipt, we have it from iOS purchase
 //  }
 
@@ -1417,49 +1417,49 @@ void CDarwinUtils::CheckWasPurchasedWithDIVX()
     [[RMStore defaultStore] refreshReceiptOnSuccess:^{
        RMAppReceipt *appReceipt = [RMAppReceipt bundleReceipt];
        float originalVersion = [[appReceipt originalAppVersion] floatValue];
-       CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - refreshReceiptOnSuccess - originalVersion = %f", originalVersion);
+       CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedFull() - refreshReceiptOnSuccess - originalVersion = %f", originalVersion);
        if (originalVersion <= lastFullAppStoreVersion)
        {
-         CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - Receipt verified");
-         hasDIVX = 1;
+         CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedFull() - Receipt verified");
+         wasPurchasedFull = 1;
        }
      }failure: ^(NSError *error) {
-       CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - Did not complete");
+       CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedFull() - Did not complete");
      }];
   }
   else
   {
     float originalVersion = [[appReceipt originalAppVersion] floatValue];
-    CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() - originalVersion = %f", originalVersion);
+    CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedFull() - originalVersion = %f", originalVersion);
     if (originalVersion <= lastFullAppStoreVersion)
     {
-      CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedWithDIVX() existing receipt - Receipt verified");
-      hasDIVX = 1;
+      CLog::Log(LOGNOTICE, "CDarwinUtils::CheckWasPurchasedFull() existing receipt - Receipt verified");
+      wasPurchasedFull = 1;
     }
   }
 }
 
 bool CDarwinUtils::isDIVXenabled()
 {
-  // hasDIVX is set to -1 on init, so only check defaultStore or app receipt once
-  if (hasDIVX < 0)
+  // wasPurchasedFull is set to -1 on init, so only check defaultStore or app receipt once
+  if (wasPurchasedFull < 0)
   {
     // check if we have it saved in defaultStore
     NSUbiquitousKeyValueStore* store = [NSUbiquitousKeyValueStore defaultStore];
     if (![store boolForKey:@MRMC_DIVX_ACTIVATED])
     {
       CLog::Log(LOGDEBUG, "CDarwinUtils::isDIVXenabled() - NSUbiquitousKeyValueStore key for MrMC divx = false");
-      CheckWasPurchasedWithDIVX();
-      [store setBool:hasDIVX > 0 forKey:@MRMC_DIVX_ACTIVATED];
+      CheckWasPurchasedFull();
+      [store setBool:wasPurchasedFull > 0 forKey:@MRMC_DIVX_ACTIVATED];
     }
     else
     {
-      hasDIVX = 1;
+      wasPurchasedFull = 1;
       CLog::Log(LOGDEBUG, "CDarwinUtils::isDIVXenabled() - NSUbiquitousKeyValueStore key for MrMC divx = true");
     }
     [store synchronize];
   }
-  return hasDIVX > 0;
+  return wasPurchasedFull > 0;
 }
 
 std::string CDarwinUtils::GetIPAddress()
