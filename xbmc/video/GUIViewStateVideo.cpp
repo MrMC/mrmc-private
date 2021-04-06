@@ -366,11 +366,18 @@ CGUIViewStateWindowVideoNav::CGUIViewStateWindowVideoNav(const CFileItemList& it
 
 void CGUIViewStateWindowVideoNav::SaveViewState()
 {
-  if (m_items.IsVideoDb())
+  if (m_items.IsVideoDb() || m_items.IsMediaServiceBased())
   {
-    NODE_TYPE NodeType = CVideoDatabaseDirectory::GetDirectoryChildType(m_items.GetPath());
+    NODE_TYPE NodeType;
     CQueryParams params;
-    CVideoDatabaseDirectory::GetQueryParams(m_items.GetPath(),params);
+    if (m_items.IsMediaServiceBased())
+      NodeType = CServicesManager::GetInstance().GetVideoViewNode(m_items.GetPath(),m_items.GetContent());
+    else
+    {
+      NodeType = CVideoDatabaseDirectory::GetDirectoryChildType(m_items.GetPath());
+      CVideoDatabaseDirectory::GetQueryParams(m_items.GetPath(),params);
+    }
+
     switch (NodeType)
     {
     case NODE_TYPE_ACTOR:
