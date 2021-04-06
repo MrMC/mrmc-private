@@ -120,9 +120,7 @@ bool CLiteUtils::IsDivxEnabled()
   #if defined(TARGET_DARWIN_OSX)
     ret = true;
   #endif
-    #if !defined(APP_PACKAGE_LITE)
-      ret = CDarwinUtils::isDIVXenabled();
-    #endif
+    ret = !CLiteUtils::IsLite() && CDarwinUtils::isDIVXenabled();
 #endif
   return ret;
 }
