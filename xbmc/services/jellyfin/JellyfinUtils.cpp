@@ -158,6 +158,7 @@ std::string CJellyfinUtils::ConstructFileName(const CURL url, const std::string 
 
   fileName = fileName + (fileName.empty() ? "":"/") + fileNamePath;
 
+  StringUtils::Replace(fileName, "//","/");
   return fileName;
 }
 
@@ -1626,6 +1627,8 @@ bool CJellyfinUtils::ParseJellyfinTVShowsFilter(CFileItemList &items, const CURL
       curl1.SetOption("Years", itemName);
     else if (filter == "Collections")
       curl1.SetOption("ParentId", itemId);
+    else if (filter == "Studios")
+      curl1.SetOption("StudioIds", itemId);
 
     newItem->SetPath("jellyfin://tvshows/filter/" + Base64URL::Encode(curl1.Get()));
     newItem->SetLabel(itemName);

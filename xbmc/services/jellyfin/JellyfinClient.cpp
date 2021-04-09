@@ -470,8 +470,8 @@ bool CJellyfinClient::GetTVShowFilters(CFileItemList &items, std::string url)
   // hardcode filter options, why Jellyfin removed that is unknown
   CVariant variant;
   variant["Genres"] = 1;
-  variant["Years"] = 1;
-//  variant["Collections"] = 1;
+//  variant["Upcoming"] = 1;
+  variant["Studios"] = 1;
 
   for (auto variantItemIt = variant.begin_map(); variantItemIt != variant.end_map(); ++variantItemIt)
   {
@@ -984,6 +984,7 @@ bool CJellyfinClient::FetchFilterItems(CJellyfinViewCachePtr &view, const CURL &
     {
       curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "/") + filter);
       curl.SetOption("IncludeItemTypes", JellyfinTypeMovie);
+      curl.SetOption("userId", GetUserID());
     }
     else
     {
@@ -996,9 +997,11 @@ bool CJellyfinClient::FetchFilterItems(CJellyfinViewCachePtr &view, const CURL &
   }
   else if (type == JellyfinTypeSeries)
   {
+    // Genres and Studios
     curl.SetFileName(CJellyfinUtils::ConstructFileName(curl, "/") + filter);
     curl.SetOption("IncludeItemTypes", JellyfinTypeSeries);
     curl.SetOption("Fields", "Etag,DateCreated,PremiereDate,ProductionYear,ImageTags");
+    curl.SetOption("userId", GetUserID());
   }
   else
   {
