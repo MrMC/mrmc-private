@@ -59,6 +59,11 @@
 #include "filesystem/VideoDatabaseDirectory/QueryParams.h"
 #include "utils/FileUtils.h"
 #include "utils/Variant.h"
+#include "filesystem/ZipFile.h"
+#include "utils/JSONVariantParser.h"
+#include "filesystem/File.h"
+#include "filesystem/CurlFile.h"
+#include "dialogs/GUIDialogKaiToast.h"
 #if defined(TARGET_DARWIN)
 #include "platform/darwin/DarwinUtils.h"
 #endif
@@ -952,11 +957,11 @@ void CGUIDialogVideoInfo::OnSetUserrating()
 void CGUIDialogVideoInfo::PlayTrailer()
 {
   std::string path = m_movieItem->GetVideoInfoTag()->m_strTrailer;
-#if defined(TARGET_DARWIN) || defined(TARGET_ANDROID)
+#if (defined(TARGET_DARWIN_IOS) && !defined(TARGET_DARWIN_TVOS)) || defined(TARGET_ANDROID)
   if (StringUtils::StartsWith(path, "plugin://plugin.video.youtube"))
   {
     std::string videoID = StringUtils::Split(path,"videoid=")[1];
-    #if defined(TARGET_DARWIN)
+    #if defined(TARGET_DARWIN_IOS)
       std::string ytPath = "http://youtube.com/watch?v=" + videoID;
       CDarwinUtils::OpenAppWithOpenURL(ytPath);
     #else
@@ -964,6 +969,62 @@ void CGUIDialogVideoInfo::PlayTrailer()
     #endif
 
     return;
+  }
+#elif defined(TARGET_DARWIN_TVOS)
+  if (path.empty() || StringUtils::StartsWith(path, "plugin://plugin.video.youtube"))
+  {
+    XFILE::CCurlFile trailer;
+    trailer.SetRequestHeader("Content-Type", "application/json");
+    trailer.SetRequestHeader("Accept-Encoding", "gzip");
+
+    CURL curl("https://itunes.apple.com/search");
+
+    std::string strSearch = m_movieItem->GetVideoInfoTag()->m_strTitle;
+    StringUtils::Replace(strSearch, " ", "+");
+    StringUtils::Replace(strSearch, "'", "");
+    curl.SetOption("media", "movie");
+    curl.SetOptions(curl.GetOptions() + "&term=" + strSearch);
+    std::string response;
+
+    if (trailer.Get(curl.Get(), response))
+    {
+      if (trailer.GetContentEncoding() == "gzip")
+      {
+        std::string buffer;
+        if (XFILE::CZipFile::DecompressGzip(response, buffer))
+          response = std::move(buffer);
+      }
+      CVariant resultObject;
+      if (CJSONVariantParser::Parse(response, resultObject))
+      {
+        if (resultObject["resultCount"].asInteger() == 0)
+        {
+          CGUIDialogKaiToast::QueueNotification(CGUIDialogKaiToast::Info, "Trailer not found", "", 3000, false);
+          return;
+        }
+        else if (resultObject["resultCount"].asInteger() == 1)
+        {
+          path = resultObject["results"][0]["previewUrl"].asString();
+        }
+        else if (resultObject["resultCount"].asInteger() > 1)
+        {
+          CGUIDialogSelect *pDlg = (CGUIDialogSelect*)g_windowManager.GetWindow(WINDOW_DIALOG_SELECT);
+          if (pDlg)
+          {
+            pDlg->SetHeading("Select Trailer");
+            pDlg->Reset();
+            for (unsigned int i = 0; i < resultObject["results"].size(); i++)
+              pDlg->Add(resultObject["results"][i]["trackName"].asString());
+            pDlg->Open();
+            int iSelected = pDlg->GetSelectedLabel();
+            if (iSelected >= 0)
+              path = resultObject["results"][iSelected]["previewUrl"].asString();
+            else
+              return;
+          }
+        }
+      }
+    }
   }
 #endif
   CFileItem item;
