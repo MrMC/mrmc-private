@@ -224,13 +224,13 @@ MainController* m_xbmcController;
   return YES;
 }
 
--(BOOL)application:(UIApplication *)application shouldRestoreApplicationState:(NSCoder *)coder
+-(BOOL)application:(UIApplication *)application shouldRestoreSecureApplicationState:(NSCoder *)coder
 {
   PRINT_SIGNATURE();
   return YES;
 }
 
--(BOOL)application:(UIApplication *)application shouldSaveApplicationState:(NSCoder *)coder
+-(BOOL)application:(UIApplication *)application shouldSaveSecureApplicationState:(NSCoder *)coder
 {
   PRINT_SIGNATURE();
   return YES;
