@@ -689,7 +689,7 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
   {
     // if we are not playing/pause when going to background
     // close out network shares as we can get fully suspended.
-//    g_application.CloseNetworkShares();
+    g_application.CloseNetworkShares();
     [self disableBackGroundTask];
   }
 
@@ -773,21 +773,27 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
 - (void) handleBGTask:(BGProcessingTask *)appRefreshTask  API_AVAILABLE(ios(13.0))
 {
   // e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"tv.mrmc.fetch"]
-  [self scheduleBGTask];
+  [self endBGTask];
   appRefreshTask.expirationHandler = ^{
       if (g_application.IsVideoScanning())
         g_application.StopVideoScan();
       [self completeBGTask:NO];
   };
   m_appRefreshTask = appRefreshTask;
+  CNetworkServices::GetInstance().Start();
+  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::System, "xbmc", "OnWake");
   CDarwinUtils::GetInstance().RunBackgroundProcess();
   CLog::Log(LOGDEBUG, "handleBGTask:(BGProcessingTask *)appRefreshTask");
+  [self scheduleBGTask];
 }
 //--------------------------------------------------------------
 - (void) completeBGTask:(BOOL)succes API_AVAILABLE(ios(13.0))
 {
   // e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"tv.mrmc.fetch"]
   [m_appRefreshTask setTaskCompletedWithSuccess:succes];
+  CNetworkServices::GetInstance().Stop(false);
+  CNetworkServices::GetInstance().Stop(true); // wait for network services to stop
+  g_application.CloseNetworkShares();
   CLog::Log(LOGDEBUG, "completeBGTask:(BOOL)succes");
 }
 //--------------------------------------------------------------
