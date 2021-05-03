@@ -223,7 +223,7 @@ case $host in
       prefix=/Users/Shared/xbmc-depends
     fi
     use_tarballs="${use_tarballs:-$prefix/tarballs}"
-    native_platform_min_version=-mmacosx-version-min=`sw_vers | grep ProductVersion | sed -E "s/.*:.*(10\..*)\.?.*/\1/"`
+    native_platform_min_version=-mmacosx-version-min=`sw_vers | grep ProductVersion | awk '{ print $2}'`
     use_xcodepath=`xcode-select -print-path`
     use_xcodebuild=$use_xcodepath/usr/bin/xcodebuild
     use_xcode=[`$use_xcodebuild -version | grep Xcode | awk '{ print $2}'`]
