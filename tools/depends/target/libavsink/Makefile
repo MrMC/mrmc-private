@@ -21,7 +21,7 @@ all: .installed-$(PLATFORM)
 
 $(TARBALLS_LOCATION)/$(ARCHIVE):
 	rm -rf $(PLATFORM); mkdir -p $(PLATFORM)
-	git clone git@github.com:MrMC/libavaudiosink.git $(PLATFORM)
+	git clone https://github.com/MrMC/libavaudiosink.git $(PLATFORM)
 	#$(RETRIEVE_TOOL) -Ls --create-dirs -f $(BASE_URL)/$(REALARCHIVE) -o $(TARBALLS_LOCATION)/$(ARCHIVE)
 
 $(PLATFORM): $(TARBALLS_LOCATION)/$(ARCHIVE) $(DEPS)

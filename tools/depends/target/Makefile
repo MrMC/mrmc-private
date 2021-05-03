@@ -42,7 +42,7 @@ DEPENDS += libplist
 DEPENDS += libcec
 DEPENDS += libbluray
 DEPENDS += tinyxml
-DEPENDS += dummy-libxbmc
+# DEPENDS += dummy-libxbmc
 DEPENDS += libamplayer
 DEPENDS += libssh
 DEPENDS += taglib
@@ -88,6 +88,10 @@ ifeq ($(OS),android)
   CROSSGUID_DEPS = libuuid
   EXCLUDED_DEPENDS += libcec
   EXCLUDED_DEPENDS += libusb
+endif
+
+ifeq ($(findstring tvos, $(TARGET_PLATFORM)), tvos)
+  DEPENDS += libavsink
 endif
 
 DEPENDS += mrmc-skins
