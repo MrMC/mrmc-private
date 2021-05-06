@@ -434,7 +434,7 @@ case $host in
       platform_ldflags+=" -Wl,-bitcode_verify -Wl,-bitcode_hide_symbols -Wl,-bitcode_symbol_map,$prefix/$deps_dir/bcsymbolmaps"
     fi
     platform_cxxflags+=" -arch $use_cpu -m$platform_min_version -std=c++11 -stdlib=libc++"
-    platform_includes="-isysroot $use_sdk_path"
+    platform_includes="-arch $use_cpu -m$platform_min_version -isysroot $use_sdk_path"
 
     tool_dir=buildtools-native;
   ;;
@@ -528,8 +528,16 @@ AC_PATH_PROG([OBJDUMP_FOR_BUILD], [objdump], objdump, $PATH_FOR_BUILD)
 AC_PATH_PROG([CC_FOR_BUILD],[gcc llvm-gcc $platform_cc], gcc, $PATH_FOR_BUILD)
 AC_PATH_PROG([CXX_FOR_BUILD],[g++ llvm-g++ $platform_cxx], g++, $PATH_FOR_BUILD)
 
-AC_CHECK_LIB([z],   [main], has_zlib=1, AC_MSG_WARN("No zlib support in toolchain. Will build libz."); has_zlib=0)
-AC_SEARCH_LIBS([iconv_open],iconv, link_iconv=$ac_cv_search_iconv_open, link_iconv=-liconv; AC_MSG_WARN("No iconv support in toolchain. Will build libiconv."); need_libiconv=1)
+if test "$platform_os" == "android"; then
+  AC_CHECK_LIB([z],   [main], has_zlib=1, AC_MSG_WARN("No zlib support in toolchain. Will build libz."); has_zlib=0)
+  AC_SEARCH_LIBS([iconv_open],iconv, link_iconv=$ac_cv_search_iconv_open, link_iconv=-liconv; AC_MSG_WARN("No iconv support in toolchain. Will build libiconv."); need_libiconv=1)
+else
+    # MacOS 11 requires explicit isysroot for autoconf link tests
+    # However we do not want to pollute LDFLAGS once lib link tests are complete
+    LDFLAGS="$platform_includes"
+    AC_CHECK_LIB([z], [main], has_zlib=1, AC_MSG_WARN("No zlib support in toolchain. Will build libz."); has_zlib=0)
+    AC_CHECK_LIB([iconv], [iconv_open], link_iconv=$ac_cv_search_iconv_open, link_iconv=-liconv; AC_MSG_WARN("No iconv support in toolchain. Will build libiconv."); need_libiconv=1)
+fi  
 AC_TRY_LINK([#include <locale.h>],[struct lconv* test=localeconv();], has_localeconv=yes, AC_MSG_WARN("No localeconv support in toolchain. Using replacement."); has_localeconv=no)
 AC_CHECK_LIB([crystax],   [main], has_libcrystax=1, has_libcrystax=0)
 
