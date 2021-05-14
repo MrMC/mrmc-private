@@ -23,7 +23,6 @@
  */
 
 #import <UIKit/UIKit.h>
-#import <BackgroundTasks/BackgroundTasks.h>
 #import "guilib/Geometry.h"
 
 #define SHOW_FOCUS_FRAMES 1
@@ -87,7 +86,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
   TOUCH_POSITION              m_touchPosition;
   NSArray                     *m_disableOSDExtensions;
   BOOL                        m_isDarkMode;
-  BGProcessingTask            *m_appRefreshTask API_AVAILABLE(ios(13.0));
 }
 
 // why are these properties ?
@@ -120,7 +118,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void) startAnimation;
 - (void) stopAnimation;
 
-- (void) didFinishLaunching;
 - (void) enterForeground;
 - (void) becomeActive;
 - (void) becomeInactive;
@@ -137,8 +134,6 @@ typedef NS_ENUM(NSUInteger, UIPanGestureRecognizerDirection)
 - (void) activateKeyboard:(UIView *)view;
 - (void) deactivateKeyboard:(UIView *)view;
 - (void) nativeKeyboardActive:(bool)active;
-
-- (void) completeBGTask:(BOOL)succes API_AVAILABLE(ios(13.0));
 
 - (void) showAudioRoutePicker;
 

@@ -203,8 +203,6 @@ void AnnounceBridge(ANNOUNCEMENT::AnnouncementFlag flag, const char *sender, con
     if (CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_ICLOUDENABLED) &&
         CSettings::GetInstance().GetBool(CSettings::SETTING_SERVICES_ICLOUDAUTOBACKUP))
       CDarwinUtils::BackupUserFolder();
-
-    CDarwinUtils::GetInstance().OnScanFinished();
   }
 #endif
 }

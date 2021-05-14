@@ -172,8 +172,6 @@ NSString *SoundFocusIdentifierNavigation = @"Navigation";
 @synthesize m_disableOSDExtensions;
 @synthesize m_isDarkMode;
 
-static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
-
 //--------------------------------------------------------------
 //--------------------------------------------------------------
 #pragma mark - MainController methods
@@ -394,7 +392,6 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
   [super didReceiveMemoryWarning];
   // Release any cached data, images, etc. that aren't in use.
 }
-
 //--------------------------------------------------------------
 - (void)disableSystemSleep
 {
@@ -503,20 +500,9 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
   return true;
 }
 //--------------------------------------------------------------
-- (void) didFinishLaunching
-{
-  PRINT_SIGNATURE();
-
-  if (@available(tvOS 13.0, *))
-    [self initBGTask];
-}
-//--------------------------------------------------------------
 - (void)enterForeground
 {
   PRINT_SIGNATURE();
-  if (@available(tvOS 13.0, *))
-    [self endBGTask];
-
 }
 //--------------------------------------------------------------
 - (void)enterActiveDelayed:(id)arg
@@ -708,10 +694,6 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
   if (m_controllerState != MC_INACTIVE)
     [self enableBackGroundTask];
   [NSThread detachNewThreadSelector:@selector(enterBackgroundDetached:) toTarget:self withObject:nil];
-
-  if (@available(tvOS 13.0, *))
-    [self scheduleBGTask];
-
 }
 
 //--------------------------------------------------------------
@@ -744,65 +726,6 @@ static NSString *const BACKGROUND_REFRESH_TASK_ID   = @"tv.mrmc.fetch";
     m_bgTask = UIBackgroundTaskInvalid;
   }
 }
-//--------------------------------------------------------------
-- (void) initBGTask API_AVAILABLE(ios(13.0))
-{
-  [[BGTaskScheduler sharedScheduler] registerForTaskWithIdentifier:BACKGROUND_REFRESH_TASK_ID usingQueue:nil launchHandler:^(__kindof BGTask * _Nonnull task) {
-    [self handleBGTask:task];
-  }];
-  CLog::Log(LOGDEBUG, "initBGTask");
-}
-//--------------------------------------------------------------
-- (void) scheduleBGTask API_AVAILABLE(ios(13.0))
-{
-  BGProcessingTaskRequest *request = [[BGProcessingTaskRequest alloc] initWithIdentifier:BACKGROUND_REFRESH_TASK_ID];
-  // minimum run time 5 minutes
-  request.earliestBeginDate = [NSDate dateWithTimeIntervalSinceNow:5 * 60];
-  request.requiresNetworkConnectivity = YES;
-  NSError *error = nil;
-  [[BGTaskScheduler sharedScheduler] submitTaskRequest:request error:&error];
-  if (error)
-  {
-    std::string errorStr = [[error localizedDescription] UTF8String];
-    CLog::Log(LOGDEBUG, "scheduleBGTask: error - %s", errorStr.c_str());
-  }
-  else
-    CLog::Log(LOGDEBUG, "scheduleBGTask: completed");
-}
-//--------------------------------------------------------------
-- (void) handleBGTask:(BGProcessingTask *)appRefreshTask  API_AVAILABLE(ios(13.0))
-{
-  // e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateLaunchForTaskWithIdentifier:@"tv.mrmc.fetch"]
-  [self endBGTask];
-  appRefreshTask.expirationHandler = ^{
-      if (g_application.IsVideoScanning())
-        g_application.StopVideoScan();
-      [self completeBGTask:NO];
-  };
-  m_appRefreshTask = appRefreshTask;
-  CNetworkServices::GetInstance().Start();
-  ANNOUNCEMENT::CAnnouncementManager::GetInstance().Announce(ANNOUNCEMENT::System, "xbmc", "OnWake");
-  CDarwinUtils::GetInstance().RunBackgroundProcess();
-  CLog::Log(LOGDEBUG, "handleBGTask:(BGProcessingTask *)appRefreshTask");
-  [self scheduleBGTask];
-}
-//--------------------------------------------------------------
-- (void) completeBGTask:(BOOL)succes API_AVAILABLE(ios(13.0))
-{
-  // e -l objc -- (void)[[BGTaskScheduler sharedScheduler] _simulateExpirationForTaskWithIdentifier:@"tv.mrmc.fetch"]
-  [m_appRefreshTask setTaskCompletedWithSuccess:succes];
-  CNetworkServices::GetInstance().Stop(false);
-  CNetworkServices::GetInstance().Stop(true); // wait for network services to stop
-  g_application.CloseNetworkShares();
-  CLog::Log(LOGDEBUG, "completeBGTask:(BOOL)succes");
-}
-//--------------------------------------------------------------
-- (void) endBGTask API_AVAILABLE(ios(13.0))
-{
-  [[BGTaskScheduler sharedScheduler] cancelTaskRequestWithIdentifier:BACKGROUND_REFRESH_TASK_ID];
-  CLog::Log(LOGDEBUG, "endBGTask");
-}
-//--------------------------------------------------------------
 //--------------------------------------------------------------
 #pragma mark - helper methods/routines
 //--------------------------------------------------------------

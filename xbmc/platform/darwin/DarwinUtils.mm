@@ -58,8 +58,6 @@
     #include "messaging/ApplicationMessenger.h"
     #include "interfaces/AnnouncementManager.h"
     #import "platform/darwin/tvos/MainController.h"
-    #include "utils/JobManager.h"
-    #include "utils/HomeShelfJob.h"
   #else
     #import "platform/darwin/ios/XBMCController.h"
   #endif
@@ -85,7 +83,6 @@
 #define NSAppKitVersionNumber10_9 1265
 #endif
 
-static bool triggerHomeShelfUpdate = false;
 
 static int wasPurchasedFull = -1;
 
@@ -1897,47 +1894,6 @@ std::string CDarwinUtils::GetBuildDate()
     buildDate = [dateFormat stringFromDate:date];
 
     return [buildDate UTF8String];
-#endif
-}
-
-void CDarwinUtils::RunBackgroundProcess()
-{
-#if defined(TARGET_DARWIN_TVOS)
-  triggerHomeShelfUpdate = true;
-  std::string serverType = CSettings::GetInstance().GetString(CSettings::SETTING_GENERAL_SERVER_TYPE);
-  // if server is "mrmc" we run the library video scan AnnounceReceiver will trigger
-  // CDarwinUtils::OnScanFinished() after the scan is done only if triggerHomeShelfUpdate is true,
-  // we dont want the regular library update to trigger it
-  //
-  // if server is plex/emby/JF, we just trigger the recently added job and fill in the Top Shelf items
-  if (serverType == "mrmc")
-    g_application.StartVideoScan("", false);
-  else
-    OnScanFinished();
-  CLog::Log(LOGDEBUG, "CDarwinUtils::RunBackgroundProcess()");
-#endif
-}
-
-void CDarwinUtils::OnScanFinished()
-{
-#if defined(TARGET_DARWIN_TVOS)
-  if (triggerHomeShelfUpdate)
-  {
-    triggerHomeShelfUpdate = false;
-    // trigger Recently added job, it will fill Top Shelf items
-    int flag = Video;
-    CJobManager::GetInstance().AddJob(new CHomeShelfJob(flag), this);
-  }
-#endif
-}
-
-void CDarwinUtils::OnJobComplete(unsigned int jobID, bool success, CJob *job)
-{
-#if defined(TARGET_DARWIN_TVOS)
-  // We have to complete the BGTask, otherwise tvOS will kill us
-  CLog::Log(LOGDEBUG, "CDarwinUtils::OnJobComplete()");
-  if (@available(tvOS 13.0, *))
-    [g_xbmcController completeBGTask:success];
 #endif
 }
 

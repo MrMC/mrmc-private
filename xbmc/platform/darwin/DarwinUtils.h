@@ -22,14 +22,13 @@
 
 #include <string>
 #include "settings/lib/ISettingCallback.h"
-#include "utils/Job.h"
 
 // We forward declare CFStringRef in order to avoid
 // pulling in tons of Objective-C headers.
 struct __CFString;
 typedef const struct __CFString * CFStringRef;
 
-class CDarwinUtils : public ISettingCallback, public IJobCallback
+class CDarwinUtils : public ISettingCallback
 {
 public:
   static CDarwinUtils &GetInstance();
@@ -96,7 +95,6 @@ public:
   void               SetSiriTouchDirection(std::string direction);
 
   virtual void OnSettingAction(const CSetting *setting) override;
-  virtual void OnJobComplete(unsigned int jobID, bool success, CJob *job) override;
 
   std::string m_siriTouchDirection;
 };
