@@ -124,7 +124,23 @@
 	<true/>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-    <key>KeychainGroup</key>
-    <string>$(AppIdentifierPrefix)MrMC4.0</string>
+  <key>KeychainGroup</key>
+  <string>$(AppIdentifierPrefix)MrMC4.0</string>
+  <key>UIRequiresFullScreen</key>
+  <true/>
+  <key>UIRequiresPersistentWiFi</key>
+  <string>YES</string>
+  <key>UIStatusBarHidden</key>
+  <true/>
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
+  <key>UISupportedInterfaceOrientations~ipad</key>
+  <array>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
 </dict>
 </plist>

@@ -569,7 +569,7 @@ bool CSMB2Session::Rename(const CURL & url, const CURL & url2)
   std::string newpath = to_tree_path(url2);
 
   if (!IsValid())
-    return nullptr;
+    return false;
 
   m_lastAccess = XbmcThreads::SystemClockMillis();
 
@@ -582,7 +582,7 @@ bool CSMB2Session::Rename(const CURL & url, const CURL & url2)
   {
     m_lastError = ret;
     CLog::Log(LOGINFO, "SMB2: unable to rename file: '%s' error: '%s'", oldpath.c_str(), m_smb2lib->smb2_get_error(m_smb_context));
-    return nullptr;
+    return false;
   }
 
   return cb_data.status == 0;

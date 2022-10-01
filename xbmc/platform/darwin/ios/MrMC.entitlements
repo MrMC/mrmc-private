@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array/>
-	<key>com.apple.developer.playable-content</key>
+	<key>com.apple.developer.carplay-audio</key>
 	<true/>
 	<key>com.apple.developer.ubiquity-kvstore-identifier</key>
 	<string>$(TeamIdentifierPrefix)MrMC</string>
